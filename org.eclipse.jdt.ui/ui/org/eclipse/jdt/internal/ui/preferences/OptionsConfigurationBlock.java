@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -27,6 +28,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -90,6 +92,7 @@ public abstract class OptionsConfigurationBlock {
 	protected ArrayList fCheckBoxes;
 	protected ArrayList fComboBoxes;
 	protected ArrayList fTextBoxes;
+	protected HashMap fLabels;
 	
 	private SelectionListener fSelectionListener;
 	private ModifyListener fTextModifyListener;
@@ -107,7 +110,8 @@ public abstract class OptionsConfigurationBlock {
 		
 		fCheckBoxes= new ArrayList();
 		fComboBoxes= new ArrayList();
-		fTextBoxes= new ArrayList(2); 
+		fTextBoxes= new ArrayList(2);
+		fLabels= new HashMap();
 	}
 	
 	protected abstract String[] getAllKeys();
@@ -192,8 +196,43 @@ public abstract class OptionsConfigurationBlock {
 		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		comboBox.addSelectionListener(getSelectionListener());
 		
+		fLabels.put(comboBox, labelControl);
+		
 		Label placeHolder= new Label(parent, SWT.NONE);
 		placeHolder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		String currValue= (String)fWorkingValues.get(key);	
+		comboBox.select(data.getSelection(currValue));
+		
+		fComboBoxes.add(comboBox);
+	}
+	
+	protected void addInversedComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
+		ControlData data= new ControlData(key, values);
+		
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= indent;
+		gd.horizontalSpan= 3;
+		
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.numColumns= 2;
+		composite.setLayout(layout);
+		composite.setLayoutData(gd);
+		
+		Combo comboBox= new Combo(composite, SWT.READ_ONLY);
+		comboBox.setItems(valueLabels);
+		comboBox.setData(data);
+		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		comboBox.addSelectionListener(getSelectionListener());
+		
+		Label labelControl= new Label(composite, SWT.LEFT | SWT.WRAP);
+		labelControl.setText(label);
+		labelControl.setLayoutData(new GridData());
+		
+		fLabels.put(comboBox, labelControl);
 		
 		String currValue= (String)fWorkingValues.get(key);	
 		comboBox.select(data.getSelection(currValue));
@@ -209,6 +248,8 @@ public abstract class OptionsConfigurationBlock {
 		Text textBox= new Text(parent, SWT.BORDER | SWT.SINGLE);
 		textBox.setData(key);
 		textBox.setLayoutData(new GridData());
+		
+		fLabels.put(textBox, labelControl);
 		
 		String currValue= (String) fWorkingValues.get(key);	
 		textBox.setText(currValue);
@@ -412,6 +453,24 @@ public abstract class OptionsConfigurationBlock {
 			}
 		}
 		return null;		
+	}
+	
+	protected Combo getComboBox(String key) {
+		for (int i= fComboBoxes.size() - 1; i >= 0; i--) {
+			Combo curr= (Combo) fComboBoxes.get(i);
+			ControlData data= (ControlData) curr.getData();
+			if (key.equals(data.getKey())) {
+				return curr;
+			}
+		}
+		return null;		
+	}
+	
+	protected void setComboEnabled(String key, boolean enabled) {
+		Combo combo= getComboBox(key);
+		Label label= (Label) fLabels.get(combo);
+		combo.setEnabled(enabled);
+		label.setEnabled(enabled);
 	}
 	
 	

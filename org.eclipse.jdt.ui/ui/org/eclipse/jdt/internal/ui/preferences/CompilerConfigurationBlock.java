@@ -75,8 +75,18 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_INDIRECT_STATIC_ACCESS= JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS;
 	private static final String PREF_PB_SUPERFLUOUS_SEMICOLON= JavaCore.COMPILER_PB_SUPERFLUOUS_SEMICOLON;
 	private static final String PREF_PB_UNNECESSARY_TYPE_CHECK= JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK;
-	private static final String PREF_PB_INVALID_ANNOTATION= JavaCore.COMPILER_PB_INVALID_JAVADOC;
-	private static final String PREF_PB_MISSING_ANNOTATION= JavaCore.COMPILER_PB_MISSING_JAVADOC;
+	
+	private static final String PREF_PB_INVALID_JAVADOC= JavaCore.COMPILER_PB_INVALID_JAVADOC;
+	private static final String PREF_PB_INVALID_JAVADOC_TAGS= JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS;
+	private static final String PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY= JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS_VISIBILITY;
+
+	private static final String PREF_PB_MISSING_JAVADOC_TAGS= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS;
+	private static final String PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_VISIBILITY;
+	private static final String PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_OVERRIDING;
+
+	private static final String PREF_PB_MISSING_JAVADOC_COMMENTS= JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS;
+	private static final String PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY= JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY;
+	private static final String PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING= JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING;
 	
 	private static final String PREF_SOURCE_COMPATIBILITY= JavaCore.COMPILER_SOURCE;
 	private static final String PREF_COMPLIANCE= JavaCore.COMPILER_COMPLIANCE;
@@ -122,9 +132,14 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	private static final String ENABLED= JavaCore.ENABLED;
 	private static final String DISABLED= JavaCore.DISABLED;
-		
-	private static final String DEFAULT= "default"; //$NON-NLS-1$
-	private static final String USER= "user";	 //$NON-NLS-1$
+	
+	private static final String PUBLIC= JavaCore.PUBLIC;
+	private static final String PROTECTED= JavaCore.PROTECTED;
+	private static final String DEFAULT= JavaCore.DEFAULT;
+	private static final String PRIVATE= JavaCore.PRIVATE;
+	
+	private static final String DEFAULT_CONF= "default"; //$NON-NLS-1$
+	private static final String USER_CONF= "user";	 //$NON-NLS-1$
 
 	private ArrayList fComplianceControls;
 	private PixelConverter fPixelConverter;
@@ -155,8 +170,11 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_PB_INDIRECT_STATIC_ACCESS,
 		PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
 		PREF_PB_UNNECESSARY_TYPE_CHECK, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, PREF_PB_UNQUALIFIED_FIELD_ACCESS,
-		PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, PREF_PB_INVALID_ANNOTATION,
-		PREF_PB_MISSING_ANNOTATION
+		PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, 
+
+		PREF_PB_INVALID_JAVADOC, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY,
+		PREF_PB_MISSING_JAVADOC_TAGS, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING,
+		PREF_PB_MISSING_JAVADOC_COMMENTS, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING
 	};	
 	
 	protected String[] getAllKeys() {
@@ -190,6 +208,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		Composite commonComposite= createStyleTabContent(folder);
 		Composite unusedComposite= createUnusedCodeTabContent(folder);
 		Composite advancedComposite= createAdvancedTabContent(folder);
+		Composite javadocComposite= createJavadocTabContent(folder);
 		Composite complianceComposite= createComplianceTabContent(folder);
 		Composite othersComposite= createBuildPathTabContent(folder);
 
@@ -204,6 +223,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.unused.tabtitle")); //$NON-NLS-1$
 		item.setControl(unusedComposite);
+		
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.javadoc.tabtitle")); //$NON-NLS-1$
+		item.setControl(javadocComposite);
 	
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.compliance.tabtitle")); //$NON-NLS-1$
@@ -226,8 +249,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
 			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
 		};
-
-		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
 		
 		int nColumns= 3;
 		
@@ -271,12 +292,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_undocumented_empty_block.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_javadoc.label"); //$NON-NLS-1$
-		addComboBox(composite, label, PREF_PB_INVALID_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-		
-		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_javadoc.label"); //$NON-NLS-1$
-		addCheckBox(composite, label, PREF_PB_MISSING_ANNOTATION, enabledDisabled, indent);
 		
 		return composite;
 	}
@@ -369,29 +384,27 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
 		description.setLayoutData(gd);
 		
-		Composite combos= composite;
-		
 		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_local.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_parameter.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_signal_param_in_overriding.label"); //$NON-NLS-1$
-		addCheckBox(combos, label, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, enabledDisabled, indent);
+		addCheckBox(composite, label, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, enabledDisabled, indent);
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_signal_param_in_abstract.label"); //$NON-NLS-1$
-		addCheckBox(combos, label, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT, enabledDisabled, indent);		
+		addCheckBox(composite, label, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT, enabledDisabled, indent);		
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_imports.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_private.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
 		addCheckBox(composite, label, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, indent);		
@@ -407,6 +420,111 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		
 		return composite;
 	}
+	
+	private Composite createJavadocTabContent(TabFolder folder) {
+		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
+		
+		String[] errorWarningIgnoreLabels= new String[] {
+				PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
+		};
+		
+		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
+		
+		String[] visibilities= new String[] { PUBLIC, PROTECTED, DEFAULT, PRIVATE  };
+		
+		String[] visibilitiesLabels= new String[] {
+				PreferencesMessages.getString("CompilerConfigurationBlock.public"), //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.protected"), //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.default"), //$NON-NLS-1$
+				PreferencesMessages.getString("CompilerConfigurationBlock.private") //$NON-NLS-1$
+		};
+		int nColumns= 3;
+		
+		/*
+		 * COMPILER_PB_INVALID_JAVADOC: "ignore", "warning", "error"
+			  COMPILER_PB_INVALID_JAVADOC_TAGS: "enabled", "disabled"
+			  COMPILER_PB_INVALID_JAVADOC_TAGS_VISIBILITY: "public", "protected", "default", "private"
+			
+			COMPILER_PB_MISSING_JAVADOC_TAGS: "ignore", "warning", "error"
+			  COMPILER_PB_MISSING_JAVADOC_TAGS_VISIBILITY: "public", "protected", "default", "private"
+			  COMPILER_PB_MISSING_JAVADOC_TAGS_OVERRIDING: "enabled", "disabled"
+			
+			COMPILER_PB_MISSING_JAVADOC_COMMENTS: "ignore", "warning", "error"
+			  COMPILER_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY: "public", "protected", "default", "private"
+			  COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING: "enabled", "disabled"
+		 */
+		
+//		GridLayout layout = new GridLayout();
+//		layout.numColumns= nColumns;
+//		
+//		Composite composite= new Composite(folder, SWT.NULL);
+//		composite.setLayout(layout);
+//
+//		Label description= new Label(composite, SWT.WRAP);
+//		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.javadoc.description")); //$NON-NLS-1$
+//		GridData gd= new GridData();
+//		gd.horizontalSpan= nColumns;
+//		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
+//		description.setLayoutData(gd);
+		
+		GridLayout layout = new GridLayout();
+		layout.numColumns= nColumns;
+		
+		Composite composite= new Composite(folder, SWT.NULL);
+		composite.setLayout(layout);
+		
+		Label description= new Label(composite, SWT.WRAP);
+		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.javadoc.description")); //$NON-NLS-1$
+		GridData gd= new GridData();
+		gd.horizontalSpan= nColumns;
+		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
+		description.setLayoutData(gd);
+			
+		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
+		
+		String label = PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_comments.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label = PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_comments_visibility.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, visibilities, visibilitiesLabels, indent);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_comments_overriding.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING, enabledDisabled, indent);
+		
+		Label separator= new Label(composite, SWT.HORIZONTAL);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= nColumns;
+		separator.setLayoutData(gd);
+		
+		label = PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_javadoc.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label = PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_javadoc_tags_visibility.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, visibilities, visibilitiesLabels, indent);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_javadoc_tags_overriding.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING, enabledDisabled, indent);
+
+		separator= new Label(composite, SWT.HORIZONTAL);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= nColumns;
+		separator.setLayoutData(gd);
+		
+		label = PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_javadoc.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
+		label = PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_javadoc_tags_visibility.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, visibilities, visibilitiesLabels, indent);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_javadoc_tags.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS, enabledDisabled, indent);
+		
+		
+		return composite;
+	}
+	
 
 
 	private Composite createBuildPathTabContent(TabFolder folder) {
@@ -510,7 +628,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		addComboBox(group, label, PREF_COMPLIANCE, values34, values34Labels, 0);	
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.default_settings.label"); //$NON-NLS-1$
-		addCheckBox(group, label, INTR_DEFAULT_COMPLIANCE, new String[] { DEFAULT, USER }, 0);	
+		addCheckBox(group, label, INTR_DEFAULT_COMPLIANCE, new String[] { DEFAULT_CONF, USER_CONF }, 0);	
 
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 		Control[] otherChildren= group.getChildren();	
@@ -580,12 +698,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		if (changedKey != null) {
 			if (INTR_DEFAULT_COMPLIANCE.equals(changedKey)) {
 				updateComplianceEnableState();
-				if (DEFAULT.equals(newValue)) {
+				if (DEFAULT_CONF.equals(newValue)) {
 					updateComplianceDefaultSettings();
 				}
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_COMPLIANCE.equals(changedKey)) {
-				if (checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT)) {
+				if (checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF)) {
 					updateComplianceDefaultSettings();
 				}
 				fComplianceStatus= validateCompliance();
@@ -599,7 +717,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				fResourceFilterStatus= validateResourceFilters();
 			} else if (PREF_PB_UNUSED_PARAMETER.equals(changedKey) ||
 					PREF_PB_DEPRECATION.equals(changedKey) ||
-					PREF_PB_INVALID_ANNOTATION.equals(changedKey) ||
+					PREF_PB_INVALID_JAVADOC.equals(changedKey) ||
+					PREF_PB_MISSING_JAVADOC_TAGS.equals(changedKey) ||
+					PREF_PB_MISSING_JAVADOC_COMMENTS.equals(changedKey) ||
 					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey)) {				
 				updateEnableStates();
 			} else {
@@ -627,8 +747,17 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		boolean enableHiding= !checkValue(PREF_PB_LOCAL_VARIABLE_HIDING, IGNORE);
 		getCheckBox(PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD).setEnabled(enableHiding);
 
-		boolean enableJavadocErrors= !checkValue(PREF_PB_INVALID_ANNOTATION, IGNORE);
-		getCheckBox(PREF_PB_MISSING_ANNOTATION).setEnabled(enableJavadocErrors);
+		boolean enableInvalidTagsErrors= !checkValue(PREF_PB_INVALID_JAVADOC, IGNORE);
+		getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS).setEnabled(enableInvalidTagsErrors);
+		setComboEnabled(PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, enableInvalidTagsErrors);
+		
+		boolean enableMissingTagsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_TAGS, IGNORE);
+		getCheckBox(PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING).setEnabled(enableMissingTagsErrors);
+		setComboEnabled(PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, enableMissingTagsErrors);
+		
+		boolean enableMissingCommentsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_COMMENTS, IGNORE);
+		getCheckBox(PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING).setEnabled(enableMissingCommentsErrors);
+		setComboEnabled(PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, enableMissingCommentsErrors);
 	}
 
 	private IStatus validateCompliance() {
@@ -702,7 +831,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	 * Update the compliance controls' enable state
 	 */		
 	private void updateComplianceEnableState() {
-		boolean enabled= checkValue(INTR_DEFAULT_COMPLIANCE, USER);
+		boolean enabled= checkValue(INTR_DEFAULT_COMPLIANCE, USER_CONF);
 		for (int i= fComplianceControls.size() - 1; i >= 0; i--) {
 			Control curr= (Control) fComplianceControls.get(i);
 			curr.setEnabled(enabled);
@@ -739,9 +868,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				&& WARNING.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
 				&& VERSION_1_3.equals(map.get(PREF_SOURCE_COMPATIBILITY))
 				&& VERSION_1_2.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))) {
-			return DEFAULT;
+			return DEFAULT_CONF;
 		}
-		return USER;
+		return USER_CONF;
 	}
 	
 	
