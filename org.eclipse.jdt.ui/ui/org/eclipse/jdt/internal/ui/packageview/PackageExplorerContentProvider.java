@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Control;
 
@@ -25,6 +27,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -99,11 +102,25 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	}		
 
 	public Object[] getChildren(Object parentElement) {
+		try {
+			if (parentElement instanceof IJavaModel) 
+				return concatenate(getJavaProjects((IJavaModel)parentElement), getNonJavaProjects((IJavaModel)parentElement));
+
+			if (parentElement instanceof IProject) 
+				return ((IProject)parentElement).members();
+		} catch (CoreException e) {
+			return NO_CHILDREN;
+		}
+		
 		if (needsToDelegate(parentElement)) {
 			Object[] packageFragments= fPackageFragmentProvider.getChildren(parentElement);
 			return getWithParentsResources(packageFragments, parentElement);
 		} else
 			return super.getChildren(parentElement);
+	}
+
+	private Object[] getNonJavaProjects(IJavaModel model) throws JavaModelException {
+		return model.getNonJavaResources();
 	}
 
 	public Object getParent(Object child) {
@@ -181,7 +198,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT && !isOnClassPath((ICompilationUnit)element))
 			return;
 			 
-		// handle open and closing of a solution or project
+		// handle open and closing of a project
 		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {			
 			postRefresh(element);
 			return;
@@ -381,6 +398,8 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	 */
 	private boolean processResourceDelta(IResourceDelta delta, Object parent) {
 		int status= delta.getKind();
+		int flags= delta.getFlags();
+		
 		IResource resource= delta.getResource();
 		// filter out changes affecting the output folder
 		if (resource == null)
@@ -403,7 +422,11 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			} else
 				postAdd(parent, resource);
 		}
-		
+		// open/close state change of a project
+		if ((flags & IResourceDelta.OPEN) != 0) {
+			postRefresh(internalGetParent(parent));
+			return true;		
+		}
 		processResourceDeltas(delta.getAffectedChildren(), resource);
 		return false;
 	}
