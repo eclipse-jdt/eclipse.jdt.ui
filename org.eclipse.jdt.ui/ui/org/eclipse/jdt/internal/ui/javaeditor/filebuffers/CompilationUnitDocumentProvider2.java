@@ -368,6 +368,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			private List fPreviouslyOverlaid= null; 
 			private List fCurrentlyOverlaid= new ArrayList();
 			private CompilationUnitAnnotationModelEvent fCurrentEvent;
+			private boolean fIncludesProblemAnnotationChanges= false;
 
 			public CompilationUnitAnnotationModel(IResource resource) {
 				super(resource);
@@ -398,7 +399,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 	
 				super.update(markerDeltas);
 
-				if (markerDeltas != null && markerDeltas.length > 0) {
+				if (fIncludesProblemAnnotationChanges) {
 					try {
 						if (fCompilationUnit != null)
 							fCompilationUnit.reconcile(true, null);
@@ -555,6 +556,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			 */
 			protected void fireModelChanged() {
 				fireModelChanged(fCurrentEvent);
+				fIncludesProblemAnnotationChanges= fCurrentEvent.includesProblemMarkerAnnotationChanges();
 				fCurrentEvent= new CompilationUnitAnnotationModelEvent(this, getResource());
 			}
 			
