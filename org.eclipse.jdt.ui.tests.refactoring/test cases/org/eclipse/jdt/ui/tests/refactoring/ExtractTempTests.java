@@ -190,4 +190,8 @@ public class ExtractTempTests extends RefactoringTest {
 		failHelper1(5, 9, 5, 12, false, false, "temp");
 	}	
 	
+	public void testFail5() throws Exception{
+		failHelper1(3, 12, 3, 15, false, false, "temp");
+	}	
+	
 }

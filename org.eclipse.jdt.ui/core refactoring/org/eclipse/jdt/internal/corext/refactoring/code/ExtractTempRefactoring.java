@@ -116,6 +116,9 @@ public class ExtractTempRefactoring extends Refactoring {
 				return compileErrors;
 		}
 		
+		if (getSelectedMethodNode() == null)
+			return RefactoringStatus.createFatalErrorStatus("An expression used in a method must be selected to activate this refactoring.");
+			
 		if (analyzeSelection().getSelectedNodes() == null || analyzeSelection().getSelectedNodes().length != 1)
 			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
 			
