@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -111,7 +112,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	public void createControl(Composite parent) {
 		Control control= fBuildPathsBlock.createControl(parent);
 		setControl(control);
-		
+		Dialog.applyDialogFont(control);
 		WorkbenchHelp.setHelp(control, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
 	}
 		

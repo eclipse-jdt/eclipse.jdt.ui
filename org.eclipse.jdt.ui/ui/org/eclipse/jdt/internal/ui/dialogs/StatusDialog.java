@@ -138,7 +138,7 @@ public abstract class StatusDialog extends Dialog {
 		fStatusLine.setAlignment(SWT.LEFT);
 		fStatusLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fStatusLine.setErrorStatus(null); //$NON-NLS-1$
-
+		applyDialogFont(composite);
 		super.createButtonBar(composite);
 		return composite;
 	}

@@ -80,6 +80,7 @@ public class ProblemDialog extends ErrorDialog {
 		}
 		if (i < childCount && label != null)
 			label.setImage(fImage);
+		applyDialogFont(composite);		
 		return composite;
 	}
 

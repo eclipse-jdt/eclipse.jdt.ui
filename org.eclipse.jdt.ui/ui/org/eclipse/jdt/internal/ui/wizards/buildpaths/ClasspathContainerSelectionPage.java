@@ -15,6 +15,7 @@ import java.util.Arrays;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -101,6 +102,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		fListViewer.getList().select(selectionIndex);
 		validatePage();
 		setControl(fListViewer.getList());
+		Dialog.applyDialogFont(fListViewer.getList());
 	}
 
 	/**

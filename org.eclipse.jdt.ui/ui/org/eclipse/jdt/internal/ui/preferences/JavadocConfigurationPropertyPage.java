@@ -22,6 +22,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -80,6 +82,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		Control control= fJavadocConfigurationBlock.createContents(parent);
 		WorkbenchHelp.setHelp(control, IJavaHelpContextIds.JAVADOC_CONFIGURATION_PROPERTY_PAGE);
 
+		Dialog.applyDialogFont(control);
 		return control;
 	}
 

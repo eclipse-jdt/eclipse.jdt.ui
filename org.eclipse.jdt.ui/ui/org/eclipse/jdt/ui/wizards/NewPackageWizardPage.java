@@ -24,6 +24,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -141,6 +142,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		createPackageControls(composite, nColumns);
 		
 		setControl(composite);
+		Dialog.applyDialogFont(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_PACKAGE_WIZARD_PAGE);
 	}
 	

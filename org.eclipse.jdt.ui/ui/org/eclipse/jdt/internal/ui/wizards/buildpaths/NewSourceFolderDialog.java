@@ -121,6 +121,7 @@ public class NewSourceFolderDialog extends StatusDialog {
 		control.setLayoutData(data);	
 				
 		fContainerDialogField.postSetFocusOnDialogField(parent.getDisplay());
+		applyDialogFont(composite);		
 		return composite;
 	}
 

@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -80,6 +81,7 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 		gd.horizontalSpan= 2;
 		tableLabel.setLayoutData(gd);
 		
+		Dialog.applyDialogFont(result);
 		addMemberListComposite(result);
 	}
 

@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -298,6 +299,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 
 		setControl(result);
 
+		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(result, IJavaHelpContextIds.NLS_SEARCH_PAGE);	
 	}
 	/**

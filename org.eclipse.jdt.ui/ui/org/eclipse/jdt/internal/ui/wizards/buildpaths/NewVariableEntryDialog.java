@@ -169,6 +169,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		listData.grabExcessHorizontalSpace= true;
 		listData.heightHint= convertHeightInCharsToPixels(10);
 		
+		applyDialogFont(composite);		
 		return composite;
 	}
 	

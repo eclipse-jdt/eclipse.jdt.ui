@@ -127,6 +127,7 @@ public class OutputLocationDialog extends StatusDialog {
 		buttonData.heightHint= SWTUtil.getButtonHeigthHint(buttonControl);
 		buttonControl.setLayoutData(buttonData);
 		
+		applyDialogFont(composite);		
 		return composite;
 	}
 

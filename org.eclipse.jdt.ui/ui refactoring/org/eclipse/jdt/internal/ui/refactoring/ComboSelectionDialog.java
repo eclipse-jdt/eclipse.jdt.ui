@@ -79,6 +79,7 @@ class ComboSelectionDialog extends Dialog{
 				fSelection= combo.getItem(combo.getSelectionIndex());
 			}
 		});
+		applyDialogFont(composite);		
 		return composite;
 	}
 	

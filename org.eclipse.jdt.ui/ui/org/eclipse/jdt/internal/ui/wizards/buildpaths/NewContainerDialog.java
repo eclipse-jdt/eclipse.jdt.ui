@@ -88,6 +88,7 @@ public class NewContainerDialog extends StatusDialog {
 		LayoutUtil.setHorizontalGrabbing(fContainerDialogField.getTextControl(null));
 				
 		fContainerDialogField.postSetFocusOnDialogField(parent.getDisplay());
+		applyDialogFont(composite);		
 		return composite;
 	}
 

@@ -106,6 +106,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		
 		fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		
+		applyDialogFont(composite);		
 		return composite;
 	}
 	

@@ -77,6 +77,7 @@ class RefactoringStatusDialog extends Dialog {
 		RefactoringStatusViewer viewer= new RefactoringStatusViewer(result, SWT.NONE);
 		viewer.setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setStatus(fStatus);
+		applyDialogFont(result);
 		return result;
 	}
 	protected void buttonPressed(int buttonId) {

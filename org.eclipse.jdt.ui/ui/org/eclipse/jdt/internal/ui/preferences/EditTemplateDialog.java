@@ -309,6 +309,7 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 		initializeActions();
 
+		applyDialogFont(parent);		
 		return composite;
 	}
 	

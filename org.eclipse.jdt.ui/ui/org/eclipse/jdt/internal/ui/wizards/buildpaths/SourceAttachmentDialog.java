@@ -96,6 +96,7 @@ public class SourceAttachmentDialog extends StatusDialog {
 			
 		Control inner= createSourceAttachmentControls(composite);
 		inner.setLayoutData(new GridData(GridData.FILL_BOTH));			
+		applyDialogFont(composite);		
 		return composite;
 	}
 

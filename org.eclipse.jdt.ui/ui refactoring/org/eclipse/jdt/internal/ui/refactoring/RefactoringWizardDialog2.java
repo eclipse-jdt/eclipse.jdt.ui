@@ -510,6 +510,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 				
 		updateMessage();
 		updateButtons();
+		applyDialogFont(result);		
 		return result;
 	}
 	

@@ -78,6 +78,7 @@ public class ConfirmSaveModifiedResourcesDialog extends MessageDialog {
 		data.widthHint= convertWidthInCharsToPixels(20);
 		data.heightHint= convertHeightInCharsToPixels(5);
 		control.setLayoutData(data);
+		applyDialogFont(control);
 		return control;
 	}
 

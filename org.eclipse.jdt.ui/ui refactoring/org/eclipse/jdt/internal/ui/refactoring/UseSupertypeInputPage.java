@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -81,6 +82,7 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 		label.setLayoutData(new GridData());
 		
 		addTableComponent(composite);
+		Dialog.applyDialogFont(composite);
 	}
 
 	private void addTableComponent(Composite composite) {

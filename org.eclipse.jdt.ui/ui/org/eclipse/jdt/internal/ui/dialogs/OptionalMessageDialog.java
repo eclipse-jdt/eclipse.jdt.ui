@@ -78,6 +78,7 @@ public class OptionalMessageDialog extends MessageDialog {
 				setDialogEnabled(fId, !((Button)e.widget).getSelection());
 			}
 		});
+		applyDialogFont(fHideDialogCheckBox);
 		return fHideDialogCheckBox;
 	}
 

@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -126,6 +127,7 @@ public class CompilerPropertyPage extends PropertyPage {
 		fUseWorkspaceSettings.setSelection(!useProjectSettings);
 		
 		updateEnableState();
+		Dialog.applyDialogFont(composite);
 		return composite;
 	}
 	

@@ -361,6 +361,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 				}
 			});
 			getTableViewer().getTable().setFocus();
+			applyDialogFont(result);		
 			return result;
 		}
 		

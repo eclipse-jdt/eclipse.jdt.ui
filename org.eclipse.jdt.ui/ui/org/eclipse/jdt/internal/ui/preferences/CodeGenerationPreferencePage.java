@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
@@ -94,6 +95,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		item.setText(PreferencesMessages.getString("CodeGenerationPreferencePage.tab.templates.tabtitle")); //$NON-NLS-1$
 		item.setControl(templateControl);
 		
+		Dialog.applyDialogFont(composite);
 		return composite;
 	}
 

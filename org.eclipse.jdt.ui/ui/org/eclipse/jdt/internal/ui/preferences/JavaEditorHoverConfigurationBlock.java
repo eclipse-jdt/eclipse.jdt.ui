@@ -215,6 +215,7 @@ class JavaEditorHoverConfigurationBlock {
 
 		initialize();
 
+		Dialog.applyDialogFont(hoverComposite);
 		return hoverComposite;
 	}
 

@@ -24,6 +24,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.Flags;
@@ -111,6 +113,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		
 		getter.setFocus();
 		
+		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.SEF_WIZARD_PAGE);		
 	}
 

@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -366,6 +367,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 					
 		validateFolders();
 	
+		Dialog.applyDialogFont(result);
 		return result;
 	}
 	

@@ -131,6 +131,7 @@ public class TodoTaskInputDialog extends StatusDialog {
 		
 		fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		
+		applyDialogFont(composite);		
 		return composite;
 	}
 		

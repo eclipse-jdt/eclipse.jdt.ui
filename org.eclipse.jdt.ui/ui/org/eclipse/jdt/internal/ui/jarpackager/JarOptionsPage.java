@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -110,8 +111,8 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 		setControl(composite);
 		update();
 
+		Dialog.applyDialogFont(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAROPTIONS_WIZARD_PAGE);								
-		
 	}
 
 	/**

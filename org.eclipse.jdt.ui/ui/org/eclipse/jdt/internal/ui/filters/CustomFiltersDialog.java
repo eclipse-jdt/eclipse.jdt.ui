@@ -154,6 +154,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		if (fBuiltInFilters.length > 0)
 			createCheckBoxList(group);
 				
+		applyDialogFont(parent);		
 		return parent;
 	}
 

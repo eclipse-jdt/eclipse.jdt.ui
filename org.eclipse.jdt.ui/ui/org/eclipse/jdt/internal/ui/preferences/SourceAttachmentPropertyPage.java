@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
@@ -69,7 +70,9 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		try {
 			fRoot= getJARPackageFragmentRoot();
 			if (fRoot == null || fRoot.getKind() != IPackageFragmentRoot.K_BINARY) {
-				return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+				Control result= createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+				Dialog.applyDialogFont(result);		
+				return result;
 			}
 
 			IPath containerPath= null;
@@ -85,15 +88,21 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 					if (entry == null) {
 						IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 						String containerName= container != null ? container.getDescription() : containerPath.toString();
-						return createMessageContent(composite, PreferencesMessages.getFormattedString("SourceAttachmentPropertyPage.containerentry.message", containerName));  //$NON-NLS-1$
+						Control result= createMessageContent(composite, PreferencesMessages.getFormattedString("SourceAttachmentPropertyPage.containerentry.message", containerName));  //$NON-NLS-1$
+						Dialog.applyDialogFont(result);		
+						return result;
 					}
 				}
 			}
 			fSourceAttachmentBlock= new SourceAttachmentBlock(this, entry, containerPath, jproject);
-			return fSourceAttachmentBlock.createControl(composite);				
+			Control result= fSourceAttachmentBlock.createControl(composite);				
+			Dialog.applyDialogFont(result);
+			return result;		
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+			Control result= createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+			Dialog.applyDialogFont(result);
+			return result;		
 		}		
 	}
 	

@@ -14,11 +14,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.jdt.core.ISourceRange;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 class SourceContextViewer  extends SourceViewer implements IErrorContextViewer {
 
@@ -36,6 +39,7 @@ class SourceContextViewer  extends SourceViewer implements IErrorContextViewer {
 	SourceContextViewer(Composite parent) {
 		super(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
 		setEditable(false);
+		getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 	}
 
 	/* non Java-doc

@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -250,6 +251,7 @@ public class BuildPathsBlock {
 		});		
 
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.BUILD_PATH_BLOCK);				
+		Dialog.applyDialogFont(composite);
 		return composite;
 	}
 	

@@ -19,6 +19,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaModelException;
@@ -29,7 +31,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class ChangeSignatureInputPage extends UserInputWizardPage {
 
@@ -75,6 +76,7 @@ class ChangeSignatureInputPage extends UserInputWizardPage {
             update(false);
             
             setControl(composite);
+            Dialog.applyDialogFont(composite);
         } catch (JavaModelException e) {
         	ExceptionHandler.handle(e, RefactoringMessages.getString("ChangeSignatureInputPage.Change_Signature"), RefactoringMessages.getString("ChangeSignatureInputPage.Internal_Error")); //$NON-NLS-1$ //$NON-NLS-2$
         }

@@ -102,6 +102,7 @@ public class HistoryListAction extends Action {
 			LayoutUtil.setHeigthHint(fHistoryList.getListControl(null), convertHeightInCharsToPixels(12));
 			LayoutUtil.setHorizontalGrabbing(fHistoryList.getListControl(null));
 
+			applyDialogFont(composite);		
 			return composite;
 		}
 

@@ -19,9 +19,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class InlineConstantInputPage extends UserInputWizardPage {
 
@@ -98,6 +98,7 @@ class InlineConstantInputPage extends UserInputWizardPage {
 				fRefactoring.setReplaceAllReferences(false);
 			}
 		});		
+		Dialog.applyDialogFont(result);
 	}
 
 	/*

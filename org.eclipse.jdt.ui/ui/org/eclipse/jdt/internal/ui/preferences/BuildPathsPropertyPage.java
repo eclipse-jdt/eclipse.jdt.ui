@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -64,13 +65,16 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		noDefaultAndApplyButton();		
 		
 		IProject project= getProject();
+		Control result;
 		if (project == null || !isJavaProject(project)) {
-			return createWithoutJava(parent);
+			result= createWithoutJava(parent);
 		} else if (!project.isOpen()) {
-			return createForClosedProject(parent);
+			result= createForClosedProject(parent);
 		} else {
-			return createWithJava(parent, project);
+			result= createWithJava(parent, project);
 		}
+		Dialog.applyDialogFont(result);
+		return result;
 	}
 	
 	private IDialogSettings getSettings() {

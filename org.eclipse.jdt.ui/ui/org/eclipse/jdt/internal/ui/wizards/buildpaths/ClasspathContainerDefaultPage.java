@@ -30,6 +30,9 @@ import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
@@ -90,6 +93,7 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 		fEntryField.setFocus();
 		
 		setControl(composite);
+		Dialog.applyDialogFont(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.CLASSPATH_CONTAINER_DEFAULT_PAGE);
 	}
 

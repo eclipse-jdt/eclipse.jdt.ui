@@ -123,6 +123,7 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 		LayoutUtil.setHorizontalGrabbing(fExclusionPatternDialog.getTextControl(null));
 				
 		fExclusionPatternDialog.postSetFocusOnDialogField(parent.getDisplay());
+		applyDialogFont(composite);		
 		return composite;
 	}
 

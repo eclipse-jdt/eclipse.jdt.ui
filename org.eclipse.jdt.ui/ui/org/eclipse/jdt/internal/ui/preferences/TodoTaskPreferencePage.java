@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
@@ -64,7 +65,9 @@ public class TodoTaskPreferencePage extends PreferencePage implements IWorkbench
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		return fConfigurationBlock.createContents(parent);
+		Control result= fConfigurationBlock.createContents(parent);
+		Dialog.applyDialogFont(result);
+		return result;
 	}
 
 	/*

@@ -114,6 +114,7 @@ public class ParameterEditDialog extends StatusDialog {
 					}
 				});
 		}
+		applyDialogFont(result);		
 		return result;
 	}
 	

@@ -112,6 +112,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
 				
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK);
+		applyDialogFont(composite);		
 		return composite;
 	}
 

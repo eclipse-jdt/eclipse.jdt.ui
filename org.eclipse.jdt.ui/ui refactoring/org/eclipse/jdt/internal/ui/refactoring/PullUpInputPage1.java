@@ -318,6 +318,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		createStatusLine(composite);
 				
 		setControl(composite);
+		Dialog.applyDialogFont(composite);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
 	}
 	
@@ -418,6 +419,8 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		
 		fEditButton= new Button(composite, SWT.PUSH);
 		fEditButton.setText(RefactoringMessages.getString("PullUpInputPage1.Edit")); //$NON-NLS-1$
+		
+		GridData gd= new GridData();
 		fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fEditButton.setEnabled(false);
 		SWTUtil.setButtonDimensionHint(fEditButton);

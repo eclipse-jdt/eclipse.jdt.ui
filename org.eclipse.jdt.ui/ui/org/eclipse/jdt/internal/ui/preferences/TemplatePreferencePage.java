@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -320,6 +321,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.TEMPLATE_PREFERENCE_PAGE);
 		
+		Dialog.applyDialogFont(parent);		
 		return parent;
 	}
     

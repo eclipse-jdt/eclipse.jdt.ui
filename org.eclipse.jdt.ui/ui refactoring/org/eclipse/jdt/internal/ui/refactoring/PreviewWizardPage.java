@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -353,6 +354,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(80);
 		sashForm.setLayoutData(gd);
+		Dialog.applyDialogFont(result);
 		return result;
 	}
 	
@@ -365,6 +367,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		Label label= new Label(result, SWT.CENTER);
 		label.setText(RefactoringMessages.getString("PreviewWizardPage.no_source_code_change")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		Dialog.applyDialogFont(result);
 		return result;
 	}
 	

@@ -138,6 +138,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 		fExclusionPatternList.doFillIntoGrid(inner, 3);
 		LayoutUtil.setHorizontalSpan(fExclusionPatternList.getLabelControl(null), 2);
 		
+		applyDialogFont(composite);		
 		return composite;
 	}
 	

@@ -201,6 +201,7 @@ class PushDownInputPage extends UserInputWizardPage {
 		createStatusLine(composite);
 		
 		setControl(composite);
+		Dialog.applyDialogFont(composite);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PUSH_DOWN_WIZARD_PAGE);
 	}
 

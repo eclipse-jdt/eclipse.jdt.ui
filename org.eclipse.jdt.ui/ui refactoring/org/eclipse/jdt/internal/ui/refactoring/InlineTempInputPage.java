@@ -16,6 +16,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 public class InlineTempInputPage extends UserInputWizardPage {
@@ -50,5 +52,6 @@ public class InlineTempInputPage extends UserInputWizardPage {
 		}
 		
 		label.setText(message);
+		Dialog.applyDialogFont(result);
 	}
 }

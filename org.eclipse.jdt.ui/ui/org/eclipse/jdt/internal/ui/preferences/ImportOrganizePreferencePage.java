@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -228,6 +229,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		
 		fIgnoreLowerCaseTypesField.doFillIntoGrid(composite, 2);
 		
+		Dialog.applyDialogFont(composite);
 		return composite;
 	}
 	

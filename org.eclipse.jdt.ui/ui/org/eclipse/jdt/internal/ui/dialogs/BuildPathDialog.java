@@ -64,6 +64,7 @@ public class BuildPathDialog extends StatusDialog {
 		fBlock= new BuildPathsBlock(listener, 0);
 		fBlock.init(fProject, null, null);
 		fBlock.createControl(result).setLayoutData(new GridData(GridData.FILL_BOTH));
+		applyDialogFont(result);		
 		return result;
 	}
 

@@ -94,6 +94,7 @@ class CompareDialog extends ResizableDialog {
 		if (fInput != null)
 			fContentPane.setInput(fInput);
 			
+		applyDialogFont(parent);		
 		return parent;
 	}
 	

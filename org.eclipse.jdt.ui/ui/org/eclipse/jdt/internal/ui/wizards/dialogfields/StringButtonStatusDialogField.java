@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.swt.layout.GridData;
 
+import org.eclipse.jface.resource.JFaceResources;
+
 /**
  * Dialog field containing a label, text control, status label and a button control.
  * The status label can be either a image or text label, and can be usd to give
@@ -119,6 +121,7 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 		gd.horizontalIndent= 0;
 		if (fWidthHintString != null) {
 			GC gc= new GC(aControl);
+			gc.setFont(JFaceResources.getDialogFont());
 			gd.widthHint= gc.textExtent(fWidthHintString).x;
 			gc.dispose();
 		} else if (fWidthHint != -1) {

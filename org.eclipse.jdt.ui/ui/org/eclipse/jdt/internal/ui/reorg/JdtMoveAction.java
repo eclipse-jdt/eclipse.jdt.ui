@@ -316,6 +316,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 			Composite result= (Composite)super.createDialogArea(parent);
 			addUpdateReferenceComponent(result);
 			addUpdateQualifiedNameComponent(result, ((GridLayout)result.getLayout()).marginWidth);
+			applyDialogFont(result);		
 			return result;
 		}
 

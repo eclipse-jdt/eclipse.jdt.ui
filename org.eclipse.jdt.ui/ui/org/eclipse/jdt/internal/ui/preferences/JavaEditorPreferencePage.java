@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
@@ -1192,6 +1193,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		initialize();
 		
+		Dialog.applyDialogFont(folder);
 		return folder;
 	}
 	

@@ -82,6 +82,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		addOptionalUpdateCommentsAndStringCheckboxes(composite, layouter);
 		addOptionalUpdateQualifiedNameComponent(composite, layouter, layout.marginWidth);
 		
+		Dialog.applyDialogFont(superComposite);
 		WorkbenchHelp.setHelp(getControl(), fHelpContextID);
 	}
 	

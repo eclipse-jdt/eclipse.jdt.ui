@@ -60,6 +60,7 @@ class RenameInputDialog extends InputDialog{
 					ref.setUpdateReferences(checkBox.getSelection());
 				}
 		});		
+		applyDialogFont(composite);		
 		return composite;
 	}
 

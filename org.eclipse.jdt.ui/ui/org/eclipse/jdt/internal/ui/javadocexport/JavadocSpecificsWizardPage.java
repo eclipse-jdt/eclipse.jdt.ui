@@ -28,6 +28,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -92,6 +94,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		createAntGroup(fLowerComposite);
 
 		setControl(fLowerComposite);
+		Dialog.applyDialogFont(fLowerComposite);
 		WorkbenchHelp.setHelp(fLowerComposite, IJavaHelpContextIds.JAVADOC_SPECIFICS_PAGE);
 
 	} //end method createControl

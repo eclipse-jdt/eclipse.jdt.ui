@@ -23,6 +23,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -135,6 +136,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		composite.setLayoutData(data);
 
 		createSortOrderListDialogField(composite, 3);
+		Dialog.applyDialogFont(composite);
 		return composite;
 	}
 

@@ -448,6 +448,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				Composite result= (Composite)super.createDialogArea(parent);
 				addUpdateReferenceComponent(result);
 				addUpdateQualifiedNameComponent(result, ((GridLayout)result.getLayout()).marginWidth);
+				applyDialogFont(result);		
 				return result;
 			}
 			private void updateButtons() {

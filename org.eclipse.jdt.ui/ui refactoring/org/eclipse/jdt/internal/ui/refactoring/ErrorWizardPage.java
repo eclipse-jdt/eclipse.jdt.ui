@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -72,6 +73,7 @@ class ErrorWizardPage extends RefactoringWizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		setControl(fViewer= new RefactoringStatusViewer(parent, SWT.NONE));
+		Dialog.applyDialogFont(fViewer);
 		WorkbenchHelp.setHelp(getControl(), fHelpContextID);			
 	}
 	

@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -171,6 +172,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		disableClosedProjects();
 		validateInput();
 
+		Dialog.applyDialogFont(composite);
 		// Set help for the page 
 		JavaUIHelp.setHelp(fTree, IJavaHelpContextIds.JAVA_WORKING_SET_PAGE);
 	}

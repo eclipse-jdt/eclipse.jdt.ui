@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -53,7 +54,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class MoveInstanceMethodInputPage extends UserInputWizardPage {
 
@@ -137,6 +137,7 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 		createNewReceiverList(result);
 		createNewMethodNameField(result);
 		createOriginalReceiverParameterNameField(result);
+		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);		
 	}
 	

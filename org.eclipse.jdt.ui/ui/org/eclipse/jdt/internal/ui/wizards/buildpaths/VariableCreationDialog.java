@@ -147,6 +147,7 @@ public class VariableCreationDialog extends StatusDialog {
 		
 		DialogField focusField= (fElement == null) ? fNameField : fPathField;
 		focusField.postSetFocusOnDialogField(parent.getDisplay());
+		applyDialogFont(composite);		
 		return composite;
 	}
 

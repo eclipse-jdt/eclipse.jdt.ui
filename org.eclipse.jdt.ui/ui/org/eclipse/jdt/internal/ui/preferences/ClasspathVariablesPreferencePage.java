@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
@@ -47,7 +48,9 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	 */
 	protected Control createContents(Composite parent) {
 		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.CP_VARIABLES_PREFERENCE_PAGE);
-		return fVariableBlock.createContents(parent);
+		Control result= fVariableBlock.createContents(parent);
+		Dialog.applyDialogFont(result);
+		return result;
 	}
 	
 	/*

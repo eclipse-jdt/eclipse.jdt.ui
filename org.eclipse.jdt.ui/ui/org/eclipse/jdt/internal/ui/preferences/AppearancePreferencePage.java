@@ -17,6 +17,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -185,6 +186,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		
 		initFields();
 		
+		Dialog.applyDialogFont(result);
 		return result;
 	}
 	

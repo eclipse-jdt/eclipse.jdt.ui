@@ -97,6 +97,7 @@ public class RefactoringSaveHelper {
 						RefactoringPreferences.setSaveAllEditors(check.getSelection());
 					}
 				});
+				applyDialogFont(result);		
 				return result;
 			}
 		};

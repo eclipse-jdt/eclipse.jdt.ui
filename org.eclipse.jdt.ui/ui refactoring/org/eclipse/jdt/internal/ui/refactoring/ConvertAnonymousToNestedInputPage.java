@@ -22,11 +22,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
 
@@ -52,6 +53,7 @@ class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
 		
 		textField.setFocus();
 		setPageComplete(false);
+		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_WIZARD_PAGE);		
 	}
 

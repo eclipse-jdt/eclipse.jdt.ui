@@ -96,6 +96,7 @@ class MoveMembersInputPage extends UserInputWizardPage {
 		
 		setPageComplete(false);
 		setControl(composite);
+		Dialog.applyDialogFont(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
 	}
 

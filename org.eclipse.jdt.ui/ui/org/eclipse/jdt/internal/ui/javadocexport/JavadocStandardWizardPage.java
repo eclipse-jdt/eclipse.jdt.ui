@@ -38,6 +38,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -122,6 +124,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		createStyleSheetGroup(fUpperComposite);
 
 		setControl(fUpperComposite);
+		Dialog.applyDialogFont(fUpperComposite);
 		WorkbenchHelp.setHelp(fUpperComposite, IJavaHelpContextIds.JAVADOC_STANDARD_PAGE);
 	}
 	private void createBasicOptionsGroup(Composite composite) {
@@ -571,6 +574,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			Control inner= fJavadocConfigurationBlock.createContents(composite);
 			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
+			applyDialogFont(composite);		
 			return composite;
 		}
 

@@ -227,8 +227,10 @@ public class ChangeParametersControl extends Composite {
 		}	
 		
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
-		gd.heightHint= table.getHeaderHeight() + table.getGridLineWidth() * (ROW_COUNT + 1) + table.getItemHeight() * ROW_COUNT;
+		gd.heightHint= SWTUtil.getTableHeightHint(table, ROW_COUNT);
 		gd.widthHint= 40;
+		gd.verticalAlignment= GridData.BEGINNING;
+		gd.grabExcessVerticalSpace= true;
 		layouter.setLayoutData(gd);
 
 		fTableViewer= new TableViewer(table);

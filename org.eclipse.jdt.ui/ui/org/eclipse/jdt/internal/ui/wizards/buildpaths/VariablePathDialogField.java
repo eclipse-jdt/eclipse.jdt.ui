@@ -67,6 +67,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 			
 			fVariableBlock.addDoubleClickListener(this);
 			fVariableBlock.addSelectionChangedListener(this);
+			applyDialogFont(composite);		
 			return composite;
 		}
 

@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
@@ -126,6 +127,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 
 		initFields();
 
+		Dialog.applyDialogFont(fComposite);
 		return fComposite;
 	}
 

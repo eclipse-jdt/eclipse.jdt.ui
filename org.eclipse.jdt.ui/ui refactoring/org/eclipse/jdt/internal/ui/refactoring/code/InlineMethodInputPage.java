@@ -19,6 +19,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -98,6 +100,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 					changeRefactoring(InlineMethodRefactoring.INLINE_SINGLE);
 			}
 		});		
+		Dialog.applyDialogFont(result);
 	}
 	
 	private void changeRefactoring(int mode) {

@@ -34,8 +34,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
@@ -62,6 +64,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -73,7 +76,6 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class PullUpInputPage2 extends UserInputWizardPage {
 
@@ -242,14 +244,15 @@ class PullUpInputPage2 extends UserInputWizardPage {
    * @see IDialogPage#createControl(Composite)
    */
   public void createControl(Composite parent) {
-	  Composite composite= new Composite(parent, SWT.NONE);
-	  composite.setLayout(new GridLayout());
+  	Composite composite= new Composite(parent, SWT.NONE);
+	composite.setLayout(new GridLayout());
 		
-	  createTreeAndSourceViewer(composite);
-	  createButtonComposite(composite);
-	  setControl(composite);
+	createTreeAndSourceViewer(composite);
+	createButtonComposite(composite);
+	setControl(composite);
 		
-	  WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
+	Dialog.applyDialogFont(composite);
+	WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
   }
 
 	private void createButtonComposite(Composite superComposite) {
@@ -405,7 +408,8 @@ class PullUpInputPage2 extends UserInputWizardPage {
 		  fSourceViewer= new SourceViewer(c, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		  fSourceViewer.configure(new JavaSourceViewerConfiguration(getJavaTextTools(), null));
 		  fSourceViewer.setEditable(false);
-		  fSourceViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));			
+		  fSourceViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
+		  fSourceViewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));			
 	}
 	
 	private void createSourceViewerLabel(Composite c) {

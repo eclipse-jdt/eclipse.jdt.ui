@@ -20,6 +20,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -126,7 +128,7 @@ public class JavaElementInfoPage extends PropertyPage {
 			}
 		}
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAVA_ELEMENT_INFO_PAGE);		
-		
+		Dialog.applyDialogFont(composite);		
 		return composite;
 	}
 

@@ -751,6 +751,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			Control inner= fJavadocConfigurationBlock.createContents(composite);
 			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
+			applyDialogFont(composite);		
 			return composite;
 		}
 

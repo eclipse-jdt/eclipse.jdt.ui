@@ -120,6 +120,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		fCurrentPage= 0;
 		setPageData();
 		
+		applyDialogFont(contents);		
 		return contents;
 	}
 
@@ -157,7 +158,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		data.horizontalAlignment= GridData.END;
 		fPageInfoLabel.setLayoutData(data);
-		
+		applyDialogFont(messageLabel);
 		return messageLabel;
 	}
 	

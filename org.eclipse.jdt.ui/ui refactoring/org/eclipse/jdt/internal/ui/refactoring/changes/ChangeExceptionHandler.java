@@ -62,6 +62,7 @@ public class ChangeExceptionHandler implements IChangeExceptionHandler {
 			Label label= new Label(parent, SWT.NONE);
 			label.setText(RefactoringMessages.getString("ChangeExceptionHandler.button_explanation")); //$NON-NLS-1$
 			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			applyDialogFont(result);
 			return result;
 		}
 	}

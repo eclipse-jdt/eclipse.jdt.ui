@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -159,6 +160,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		fPreview.setLayoutData(gd);
 		
 		layouter.perform(label, fPreview, 1);
+		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_METHOD_WIZARD_PAGE);		
 	}	
 

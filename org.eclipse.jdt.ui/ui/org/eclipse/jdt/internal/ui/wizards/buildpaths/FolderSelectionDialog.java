@@ -67,6 +67,7 @@ public class FolderSelectionDialog extends ElementTreeSelectionDialog implements
 		button.setLayoutData(data);
 		fNewFolderButton= button;
 		
+		applyDialogFont(result);		
 		return result;
 	}
 

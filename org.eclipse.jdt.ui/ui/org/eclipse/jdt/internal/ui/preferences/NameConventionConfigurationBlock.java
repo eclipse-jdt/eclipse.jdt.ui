@@ -137,6 +137,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			
 			fPrefixField.postSetFocusOnDialogField(parent.getDisplay());
 			
+			applyDialogFont(composite);		
 			return composite;
 		}
 		

@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -32,7 +33,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class ExtractConstantInputPage extends TextInputWizardPage {
 
@@ -74,6 +74,7 @@ class ExtractConstantInputPage extends TextInputWizardPage {
 		
 		validateTextField(text.getText());
 		
+		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_CONSTANT_WIZARD_PAGE);		
 	}
 	

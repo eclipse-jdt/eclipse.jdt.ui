@@ -20,6 +20,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -76,6 +78,7 @@ class RenameFieldInputWizardPage extends RenameInputWizardPage {
 		});
 		
 		updateGetterSetterLabels();
+		Dialog.applyDialogFont(composite);
 	}
 	private void getGetterSetterRenamingEnablement() {
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable(){

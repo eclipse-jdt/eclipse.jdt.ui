@@ -23,6 +23,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -65,6 +67,7 @@ class PromoteTempInputPage extends UserInputWizardPage {
         addDeclareStaticCheckbox(result);
         addDeclareFinalCheckbox(result);
 				
+		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_WIZARD_PAGE);		
 	}
 
