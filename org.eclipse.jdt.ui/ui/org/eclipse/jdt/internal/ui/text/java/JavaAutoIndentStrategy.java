@@ -18,12 +18,12 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
 /**
@@ -265,7 +265,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 */
 	private static int calculateDisplayedWidth(String string) {
 
-		final int tabWidth= JavaPlugin.getDefault().getPreferenceStore().getInt(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH); 
+		final int tabWidth= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH); 
 		
 		int column= 0;
 		for (int i= 0; i < string.length(); i++)
@@ -346,8 +346,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 		StringBuffer buffer= new StringBuffer();
 
-		if (CodeFormatterPreferencePage.useSpaces()) {
-			int tabWidth= getPreferenceStore().getInt(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH);
+		if (useSpaces()) {
+			int tabWidth= getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
 			int width= level * tabWidth;
 			for (int i= 0; i != width; ++i)	
 				buffer.append(' ');
@@ -363,12 +363,12 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 		StringBuffer buffer= new StringBuffer();
 
-		if (CodeFormatterPreferencePage.useSpaces()) {
+		if (useSpaces()) {
 			for (int i= 0; i != displayedWidth; ++i)	
 				buffer.append(' ');
 
 		} else {
-			int tabWidth= getPreferenceStore().getInt(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH);
+			int tabWidth= getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
 			int div= displayedWidth / tabWidth;
 			int mod= displayedWidth % tabWidth;
 
@@ -488,7 +488,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			smartIndentAfterNewLine(d, c);
 		else if (c.text.length() == 1)
 			smartIndentAfterBlockDelimiter(d, c);
-		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(CompilationUnitEditor.SMART_PASTE))
-			smartPaste(d, c);
+		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
+			pasteText(d, c);
 	}
+	
+	private static boolean useSpaces() {
+		return JavaCore.SPACE.equals(JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_CHAR));
+	}	
 }

@@ -852,32 +852,32 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 	
 	/** Preference key for showing the line number ruler */
-	public final static String LINE_NUMBER_RULER= PreferenceConstants.EDITOR_LINE_NUMBER_RULER;
+	private final static String LINE_NUMBER_RULER= PreferenceConstants.EDITOR_LINE_NUMBER_RULER;
 	/** Preference key for the foreground color of the line numbers */
-	public final static String LINE_NUMBER_COLOR= PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR;
+	private final static String LINE_NUMBER_COLOR= PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR;
 	/** Preference key for the link color */
-	public final static String LINK_COLOR= "linkColor"; //$NON-NLS-1$
+	private final static String LINK_COLOR= PreferenceConstants.EDITOR_LINK_COLOR;
 
-	/** Preference key for the default hover */
-	public static final String DEFAULT_HOVER= "defaultHover"; //$NON-NLS-1$
-	/** Preference key for hover while no modifier is pressed */
-	public static final String NONE_HOVER= "noneHover"; //$NON-NLS-1$
-	/** Preference key for hover while Ctrl modifier is pressed */
-	public static final String CTRL_HOVER= "ctrlHover"; //$NON-NLS-1$
-	/** Preference key for hover while Shift modifier is pressed */
-	public static final String SHIFT_HOVER= "shiftHover"; //$NON-NLS-1$
-	/** Preference key for hover while Ctrl+Alt modifiers are pressed */
-	public static final String CTRL_ALT_HOVER= "ctrlAltHover"; //$NON-NLS-1$
-	/** Preference key for hover while Ctrl+Alt+Shift modifiers are pressed */
-	public static final String CTRL_ALT_SHIFT_HOVER= "ctrlAltShiftHover"; //$NON-NLS-1$
-	/** Preference key for hover while Ctrl+Shift modifiers are pressed */
-	public static final String CTRL_SHIFT_HOVER= "ctrlShiftHover"; //$NON-NLS-1$
-	/** Preference key for hover while Alt+Shift modifiers are pressed */
-	public static final String ALT_SHIFT_HOVER= "altShiftHover"; //$NON-NLS-1$
-	/** Id indicating no hover is configured */
-	public static final String NO_HOVER_CONFIGURED_ID= "noHoverConfiguredId"; //$NON-NLS-1$
-	/** Hover id indicating the default hover */
-	public static final String DEFAULT_HOVER_CONFIGURED_ID= "defaultHoverConfiguredId"; //$NON-NLS-1$
+//	/** Preference key for the default hover */
+//	private static final String DEFAULT_HOVER= PreferenceConstants.EDITOR_DEFAULT_HOVER;
+//	/** Preference key for hover while no modifier is pressed */
+//	private static final String NONE_HOVER= PreferenceConstants.EDITOR_NONE_HOVER;
+//	/** Preference key for hover while Ctrl modifier is pressed */
+//	private static final String CTRL_HOVER= PreferenceConstants.EDITOR_CTRL_HOVER;
+//	/** Preference key for hover while Shift modifier is pressed */
+//	private static final String SHIFT_HOVER= PreferenceConstants.EDITOR_SHIFT_HOVER;
+//	/** Preference key for hover while Ctrl+Alt modifiers are pressed */
+//	private static final String CTRL_ALT_HOVER= PreferenceConstants.EDITOR_CTRL_ALT_HOVER;
+//	/** Preference key for hover while Ctrl+Alt+Shift modifiers are pressed */
+//	private static final String CTRL_ALT_SHIFT_HOVER= PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER;
+//	/** Preference key for hover while Ctrl+Shift modifiers are pressed */
+//	private static final String CTRL_SHIFT_HOVER= PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER;
+//	/** Preference key for hover while Alt+Shift modifiers are pressed */
+//	private static final String ALT_SHIFT_HOVER= PreferenceConstants.EDITOR_ALT_SHIFT_HOVER;
+//	/** Id indicating no hover is configured */
+//	private static final String NO_HOVER_CONFIGURED_ID= PreferenceConstants.EDITOR_NO_HOVER_CONFIGURED_ID;
+//	/** Hover id indicating the default hover */
+//	private static final String DEFAULT_HOVER_CONFIGURED_ID= PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID;
 
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
@@ -1371,7 +1371,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				
 			String property= event.getProperty();	
 			
-			if (JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH.equals(property)) {
+			if (PreferenceConstants.EDITOR_TAB_WIDTH.equals(property)) {
 				Object value= event.getNewValue();
 				if (value instanceof Integer) {
 					sourceViewer.getTextWidget().setTabs(((Integer) value).intValue());
@@ -1411,14 +1411,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	}
 
 	private boolean isJavaEditorHoverProperty(String property) {
-		return	JavaEditor.DEFAULT_HOVER.equals(property)
-			|| JavaEditor.NONE_HOVER.equals(property)
-			|| JavaEditor.CTRL_HOVER.equals(property)
-			|| JavaEditor.SHIFT_HOVER.equals(property)
-			|| JavaEditor.CTRL_ALT_HOVER.equals(property)
-			|| JavaEditor.CTRL_SHIFT_HOVER.equals(property)
-			|| JavaEditor.CTRL_ALT_SHIFT_HOVER.equals(property)
-			|| JavaEditor.ALT_SHIFT_HOVER.equals(property);
+		return	PreferenceConstants.EDITOR_DEFAULT_HOVER.equals(property)
+			|| PreferenceConstants.EDITOR_NONE_HOVER.equals(property)
+			|| PreferenceConstants.EDITOR_CTRL_HOVER.equals(property)
+			|| PreferenceConstants.EDITOR_SHIFT_HOVER.equals(property)
+			|| PreferenceConstants.EDITOR_CTRL_ALT_HOVER.equals(property)
+			|| PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER.equals(property)
+			|| PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER.equals(property)
+			|| PreferenceConstants.EDITOR_ALT_SHIFT_HOVER.equals(property);
 	}
 	
 	/**
