@@ -276,8 +276,12 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		fireElementDeleted(input);
 	}
 	
-	private void fireInputChanged(IClassFileEditorInput input) {
-		for (Iterator i = fInputListeners.iterator(); i.hasNext();)
+	/**
+	 * Fires input changes to input change listeners.
+	 */
+	protected void fireInputChanged(IClassFileEditorInput input) {
+		List list= new ArrayList(fInputListeners);
+		for (Iterator i = list.iterator(); i.hasNext();)
 			((InputChangeListener) i.next()).inputChanged(input);			
 	}
 
