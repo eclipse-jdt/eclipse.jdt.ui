@@ -209,6 +209,15 @@ public class Checks {
 	public static boolean isTopLevelType(IMember member){
 		return  member.getElementType() == IJavaElement.TYPE && isTopLevel((IType) member);
 	}
+	
+	public static boolean isInsideLocalType(IType type) throws JavaModelException {
+		while (type != null) {
+			if (type.isLocal())
+				return true;
+			type= type.getDeclaringType();
+		}
+		return false;
+	}
 
 	public static boolean isAlreadyNamed(IJavaElement element, String name){
 		return name.equals(element.getElementName());

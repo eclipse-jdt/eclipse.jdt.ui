@@ -122,7 +122,7 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 public class MoveInnerToTopRefactoring extends Refactoring{
 	
 	private static final String THIS_KEYWORD= "this"; //$NON-NLS-1$
-	private final ImportRewriteManager fImportManager;
+	private ImportRewriteManager fImportManager;
 	private final CodeGenerationSettings fCodeGenerationSettings;
 	private IType fType;
 	private TextChangeManager fChangeManager;
@@ -132,24 +132,15 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private String fNewSourceOfInputType;
 	private String fNameForEnclosingInstanceConstructorParameter;
 	private CompilationUnit fDeclaringCuNode;
-	private final boolean fIsInstanceFieldCreationPossible;
-	private final boolean fIsInstanceFieldCreationMandatory;
+	private boolean fIsInstanceFieldCreationPossible;
+	private boolean fIsInstanceFieldCreationMandatory;
 	
 	private MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
 		Assert.isNotNull(type);
 		Assert.isNotNull(codeGenerationSettings);
 		fType= type;
 		fCodeGenerationSettings= codeGenerationSettings;
-		fImportManager= new ImportRewriteManager(codeGenerationSettings);
-		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fMarkInstanceFieldAsFinal= true; //default
-		//TODO:
-		//- fix bug 65137
-		//- move initialization to checkInitialConditions to ensure that exceptions are handled properly
-		fDeclaringCuNode= new RefactoringASTParser(AST.JLS2).parse(getDeclaringCu(), true);
-		fIsInstanceFieldCreationPossible= !JdtFlags.isStatic(type);
-		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
-		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
 	}
 
 	public static MoveInnerToTopRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
@@ -159,7 +150,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	public static boolean isAvailable(IType type) throws JavaModelException{
-		return Checks.isAvailable(type) && ! Checks.isTopLevel(type) && !type.isLocal();
+		return Checks.isAvailable(type) && ! Checks.isTopLevel(type) && ! Checks.isInsideLocalType(type);
 	}
 	
 	public boolean isInstanceFieldMarkedFinal(){
@@ -252,6 +243,13 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
+		fImportManager= new ImportRewriteManager(fCodeGenerationSettings);
+		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
+		fDeclaringCuNode= new RefactoringASTParser(AST.JLS2).parse(getDeclaringCu(), true, pm);
+		fIsInstanceFieldCreationPossible= !JdtFlags.isStatic(fType);
+		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
+		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
+
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fType);
 		if (orig == null || ! orig.exists()){
 			

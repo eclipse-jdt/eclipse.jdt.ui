@@ -29,12 +29,16 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	private static final Class clazz= MoveInnerToTopLevelTests.class;
 	private static final String REFACTORING_PATH= "MoveInnerToTopLevel/";
+	
+	private static final int NOT_AVAILABLE= 1001;
 
 	private Object fCompactPref;
 
@@ -84,6 +88,9 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		
 		assertTrue("should be enabled", MoveInnerToTopRefactoring.isAvailable(clas));
 		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
+		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
+		
 		assertEquals("reference creation possible", possible, ref.isCreatingInstanceFieldPossible());
 		assertEquals("reference creation mandatory", mandatory, ref.isCreatingInstanceFieldMandatory());
 		if (ref.isCreatingInstanceFieldPossible() && ! ref.isCreatingInstanceFieldMandatory())
@@ -97,8 +104,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		for (int i= 0; i < cuNames.length; i++) {
 			cus[i]= createCUfromTestFile(getPackage(packageNames[i]), cuNames[i]);			
 		}
-		assertEquals("precondition check was supposed to pass", null, performRefactoring(ref));
-
+		
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
+		performChange(ref, false);
+		
 		for (int i= 0; i < cus.length; i++) {
 			String actual= cus[i].getSource();
 			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
@@ -118,6 +128,12 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		IType clas= parentClas.getType(className);
 
 		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		if (expectedSeverity == NOT_AVAILABLE && ref == null)
+			return;
+		assertEquals("refactoring availability not as expected", expectedSeverity == NOT_AVAILABLE, ref == null);
+
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
+		
 		if (enclosingInstanceName != null){
 			ref.setEnclosingInstanceName(enclosingInstanceName);
 		}	
@@ -126,8 +142,12 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		for (int i= 0; i < cuNames.length; i++) {
 			cus[i]= createCUfromTestFile(getPackage(packageNames[i]), cuNames[i]);			
 		}
-		RefactoringStatus result= performRefactoring(ref);
-		assertNotNull("precondition check was supposed to fail", result);
+		
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		
+		RefactoringStatus result= new RefactoringStatus();
+		result.merge(preconditionResult);
+		result.merge(checkInputResult);
 		assertEquals("different severity expected", expectedSeverity, result.getSeverity());
 	}
 	private IPackageFragment getPackage(String name) throws JavaModelException {
@@ -405,5 +425,14 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	}
 	public void testFail_nonstatic_2() throws Exception{
 		validateFailingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", RefactoringStatus.ERROR);
+	}
+	
+	public void testFail_nonstatic_3() throws Exception{
+		IType parentClas= getClassFromTestFile(getPackageP(), "A");
+		int offset= TextRangeUtil.getOffset(parentClas.getCompilationUnit(), 5, 25);
+		IType nestedLocal= (IType) parentClas.getCompilationUnit().codeSelect(offset, 0)[0];
+	
+		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(nestedLocal, JavaPreferencesSettings.getCodeGenerationSettings());
+		assertNull("refactoring was not supposed to be available", ref);
 	}
 }
