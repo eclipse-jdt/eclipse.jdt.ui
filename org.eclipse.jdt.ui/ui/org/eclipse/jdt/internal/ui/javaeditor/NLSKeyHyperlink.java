@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector;
 
 
 /**
@@ -106,16 +107,40 @@ public class NLSKeyHyperlink implements IHyperlink {
 		// Reveal the key in the properties file
 		if (editor instanceof ITextEditor) {
 			IRegion region= null;
+			boolean found= false;
+			
 			// Find key in document
 			IDocument document= JavaPlugin.getDefault().getPropertiesFileDocumentProvider().getDocument(editor.getEditorInput());
 			if (document != null) {
 				FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
+				PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector((ITextEditor)editor);
+				int offset= document.getLength() - 1;
+				String keyName= fKeyStringLiteral.getLiteralValue();
 				try {
-					region= finder.find(document.getLength() - 1, fKeyStringLiteral.getLiteralValue(), false, true, false, false);
+					while (!found && offset >= 0) {
+						region= finder.find(offset, keyName, false, true, false, false);
+						if (region == null)
+							offset= -1;
+						else {
+							// test whether it's the key
+							IHyperlink[] hyperlinks= detector.detectHyperlinks(null, region, false);
+							if (hyperlinks != null) {
+								for (int i= 0; i < hyperlinks.length; i++) {
+									IRegion hyperlinkRegion= hyperlinks[i].getHyperlinkRegion();
+									found= keyName.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
+								}
+							}
+							// Prevent endless loop (panic code, shouldn't be needed)
+							if (offset == region.getOffset())
+								offset= -1;
+							else
+								offset= region.getOffset();
+						}
+					}
 				} catch (BadLocationException ex) {
 				}
 			}
-			if (region != null)
+			if (found)
 				EditorUtility.revealInEditor(editor, region);
 			else {
 				EditorUtility.revealInEditor(editor, 0, 0);
