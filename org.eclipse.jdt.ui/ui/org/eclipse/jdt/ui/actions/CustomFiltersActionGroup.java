@@ -96,6 +96,12 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 		/**
 		 * Constructor for FilterActionMenuContributionItem.
+		 * 
+		 * @param actionGroup 	the action group
+		 * @param filterId		the id of the filter
+		 * @param filterName	the name of the filter
+		 * @param state			the initial state of the filter
+		 * @param itemNumber	the menu item index
 		 */
 		public FilterActionMenuContributionItem(CustomFiltersActionGroup actionGroup, String filterId, String filterName, boolean state, int itemNumber) {
 			super(filterId);
@@ -129,8 +135,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			});
 		}
 	
-		/**
-		 * Overridden to always return true and force dynamic menu building.
+		/*
+		 * @see org.eclipse.jface.action.IContributionItem#isDynamic()
 		 */
 		public boolean isDynamic() {
 			return true;
@@ -203,7 +209,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	/**
 	 * Creates a new <code>CustomFiltersActionGroup</code>.
 	 * 
-	 * @param part		the view part that owns this action group
+	 * @param ownerId	the id of this action group's owner
 	 * @param viewer	the viewer to be filtered
 	 */
 	public CustomFiltersActionGroup(String ownerId, StructuredViewer viewer) {
@@ -266,16 +272,17 @@ public class CustomFiltersActionGroup extends ActionGroup {
     /**
 	 * Sets the enable state of the given filter.
 	 * 
-	 * @param filterDescriptor
-	 * @param state
+	 * @param filterId the id of the filter
+	 * @param state the filter state
 	 */
 	private void setFilter(String filterId, boolean state) {
 		// Renew filter id in LRU stack
 		fLRUFilterIdsStack.remove(filterId);
 		fLRUFilterIdsStack.add(0, filterId);
-		storeViewDefaults();
 		
 		fEnabledFilterIds.put(filterId, new Boolean(state));
+		storeViewDefaults();
+		
 		updateViewerFilters(true);
 	}
 	
@@ -311,6 +318,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	/**
 	 * Sets the recently changed filters.
 	 * 
+	 * @param changeHistory the change history
 	 * @since 3.0
 	 */
 	private void setRecentlyChangedFilters(Stack changeHistory) {
