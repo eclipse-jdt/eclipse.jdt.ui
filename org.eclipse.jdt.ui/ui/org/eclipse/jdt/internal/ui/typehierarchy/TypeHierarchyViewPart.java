@@ -82,7 +82,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		ToggleViewAction vajViewAction= new ToggleViewAction(this, 2, bundle, PREFIX_TOGGLE_VAJ);
 		vajViewAction.setImageDescriptors("lcl16", "hierarchy_co.gif");
 		
-		fViewActions= new ToggleViewAction[] { superViewAction, subViewAction, vajViewAction };
+		fViewActions= new ToggleViewAction[] { vajViewAction, superViewAction, subViewAction };
 		
 		superViewAction.setOthers(fViewActions);
 		subViewAction.setOthers(fViewActions);
