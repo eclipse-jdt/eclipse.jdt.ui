@@ -461,6 +461,13 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		if (JdtFlags.isPrivate(member))
 			return false;
 
+		if (member instanceof IMethod) {
+			final IMethod method= (IMethod) member;
+			final IMethod stub= targetType.getMethod(method.getElementName(), method.getParameterTypes());
+			if (stub.exists())
+				return true;
+		}
+
 		if (member.getDeclaringType() == null) {
 
 			if (!(member instanceof IType))
