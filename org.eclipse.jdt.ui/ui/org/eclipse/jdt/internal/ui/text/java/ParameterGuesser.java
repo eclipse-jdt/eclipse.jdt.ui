@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -249,7 +248,7 @@ public class ParameterGuesser {
 			int completionStart, int completionEnd, int relevance)
 		{
 			char[] triggers= new char[0];
-			addVariable(Variable.LOCAL, typePackageName, typeName, name, triggers, JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
+			addVariable(Variable.LOCAL, typePackageName, typeName, name, triggers, decorate(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE, modifiers));
 		}
 		
 		/*
@@ -265,36 +264,34 @@ public class ParameterGuesser {
 
 		protected ImageDescriptor getMemberDescriptor(int modifiers) {
 			ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(false, modifiers);
-
-			if (Flags.isDeprecated(modifiers))
-				desc= getDeprecatedDescriptor(desc);
-
-			if (Flags.isStatic(modifiers))
-				desc= getStaticDescriptor(desc);
-		
-			return desc;
+			return decorate(desc, modifiers);
 		}
 	
 		protected ImageDescriptor getFieldDescriptor(int modifiers) {
 			ImageDescriptor desc= JavaElementImageProvider.getFieldImageDescriptor(false, modifiers);
-
+			return decorate(desc, modifiers);
+		}
+		
+		private ImageDescriptor decorate(ImageDescriptor descriptor, int modifiers) {
+			int flags= 0;
+			
 			if (Flags.isDeprecated(modifiers))
-				desc= getDeprecatedDescriptor(desc);
+				flags |= JavaElementImageDescriptor.WARNING;
 		 	
 			if (Flags.isStatic(modifiers))
-				desc= getStaticDescriptor(desc);
+				flags |= JavaElementImageDescriptor.STATIC;
 		
-			return desc;
-		}	
-	
-		protected ImageDescriptor getDeprecatedDescriptor(ImageDescriptor descriptor) {
-			Point size= new Point(16, 16);
-			return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.WARNING, size);	    
-		}
-	
-		protected ImageDescriptor getStaticDescriptor(ImageDescriptor descriptor) {
-			Point size= new Point(16, 16);
-			return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, size);
+			if (Flags.isFinal(modifiers))
+				flags |= JavaElementImageDescriptor.FINAL;
+			
+			if (Flags.isSynchronized(modifiers))
+				flags |= JavaElementImageDescriptor.SYNCHRONIZED;
+			
+			if (Flags.isAbstract(modifiers))
+				flags |= JavaElementImageDescriptor.ABSTRACT;
+			
+			return new JavaElementImageDescriptor(descriptor, flags, JavaElementImageProvider.SMALL_SIZE);
+
 		}
 	}
 	
@@ -473,7 +470,7 @@ public class ParameterGuesser {
 		 * @return the score for <code>v</code>
 		 */
 		private int score(Variable v) {
-			int variableScore= 10 - v.variableType; // since these are increasing with distance
+			int variableScore= 100 - v.variableType; // since these are increasing with distance
 			int subStringScore= getLongestCommonSubstring(v.name, fParamName).length();
 			// substring scores under 60% are not considered
 			// this prevents marginal matches like a - ba and false - isBool that will
