@@ -100,9 +100,13 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 			IPackageFragmentRoot root= roots[i];
 			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 				if (root.getPath().equals(root.getJavaProject().getPath())) {
-					return getPackageFragments(root);
+					Object[] packageFragments= getPackageFragments(root);
+					for (int k= 0; k < packageFragments.length; k++) {
+						result.add(packageFragments[k]);
+					}
+				} else {
+					result.add(root);
 				}
-				result.add(root);
 			}
 		}
 		return result.toArray();
