@@ -260,7 +260,7 @@ public class ASTRewrite {
 		return node.getProperty(CHANGEKEY) instanceof ASTModify;
 	}
 	
-	public final String getDescription(ASTNode node) {
+	/* package */ final String getDescription(ASTNode node) {
 		Object info= node.getProperty(CHANGEKEY);
 		if (info instanceof ASTChange) {
 			return ((ASTChange) info).description;
@@ -268,7 +268,7 @@ public class ASTRewrite {
 		return null;
 	}
 	
-	public final ASTNode getModifiedNode(ASTNode node) {
+	/* package */ final ASTNode getModifiedNode(ASTNode node) {
 		Object info= node.getProperty(CHANGEKEY);
 		if (info instanceof ASTModify) {
 			return ((ASTModify) info).modifiedNode;
@@ -276,7 +276,7 @@ public class ASTRewrite {
 		return null;
 	}
 
-	public final ASTNode getReplacingNode(ASTNode node) {
+	/* package */ final ASTNode getReplacingNode(ASTNode node) {
 		Object info= node.getProperty(CHANGEKEY);
 		if (info instanceof ASTReplace) {
 			return ((ASTReplace) info).replacingNode;
@@ -284,13 +284,13 @@ public class ASTRewrite {
 		return null;
 	}
 	
-	public void clearMark(ASTNode node) {
+	/* package */ void clearMark(ASTNode node) {
 		node.setProperty(COPYSOURCEKEY, null);
 		node.setProperty(CHANGEKEY, null);
 	}
 	
 	
-	public final CopySourceEdit getCopySourceEdit(ASTNode node) {
+	/* package */ final CopySourceEdit getCopySourceEdit(ASTNode node) {
 		return (CopySourceEdit) node.getProperty(COPYSOURCEKEY);
 	}
 
