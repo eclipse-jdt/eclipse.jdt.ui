@@ -90,8 +90,13 @@ public class OpenTypeHierarchyUtil {
 	private static TypeHierarchyViewPart openInViewPart(IWorkbenchWindow window, IJavaElement input) {
 		IWorkbenchPage page= window.getActivePage();
 		try {
-			TypeHierarchyViewPart result= (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
+			TypeHierarchyViewPart result= (TypeHierarchyViewPart) page.findView(JavaUI.ID_TYPE_HIERARCHY);
+			if (result != null) {
+				result.clearNeededRefresh(); // avoid refresh of old hierarchy on 'becomes visible'
+			}
+			result= (TypeHierarchyViewPart) page.showView(JavaUI.ID_TYPE_HIERARCHY);
 			result.setInputElement(input);
+			
 			if (input instanceof IMember) {
 				result.selectMember((IMember) input);
 				openEditor(input, false);
@@ -119,7 +124,12 @@ public class OpenTypeHierarchyUtil {
 			}
 		}
 		IWorkbenchPage page= workbench.showPerspective(JavaUI.ID_HIERARCHYPERSPECTIVE, window, perspectiveInput);
-		TypeHierarchyViewPart part= (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
+		
+		TypeHierarchyViewPart part= (TypeHierarchyViewPart) page.findView(JavaUI.ID_TYPE_HIERARCHY);
+		if (part != null) {
+			part.clearNeededRefresh(); // avoid refresh of old hierarchy on 'becomes visible'
+		}		
+		part= (TypeHierarchyViewPart) page.showView(JavaUI.ID_TYPE_HIERARCHY);
 		part.setInputElement(perspectiveInput);
 		if (input instanceof IMember) {
 			openEditor(input, false);

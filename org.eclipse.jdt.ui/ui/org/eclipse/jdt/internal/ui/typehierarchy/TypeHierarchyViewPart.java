@@ -1386,7 +1386,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	protected void visibilityChanged(boolean isVisible) {
 		fIsVisible= isVisible;
 		if (isVisible && fNeedRefresh) {
-			doTypeHierarchyChanged(fHierarchyLifeCycle, null);
+			doTypeHierarchyChangedOnViewers(null);
 		}
 		fNeedRefresh= false;
 	}
@@ -1464,6 +1464,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				editorActivated(editor);
 			}
 		}
+	}
+	
+	public void clearNeededRefresh() {
+		fNeedRefresh= false;
 	}
 
 }
