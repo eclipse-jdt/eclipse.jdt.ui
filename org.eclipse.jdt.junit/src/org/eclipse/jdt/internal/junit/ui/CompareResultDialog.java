@@ -18,9 +18,7 @@ import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareViewerPane;
 import org.eclipse.compare.IEncodedStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
-import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
-import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.Dialog;
@@ -63,11 +61,6 @@ public class CompareResultDialog extends Dialog {
          private CompareResultMergeViewer(Composite parent, int style, CompareConfiguration configuration) {
              super(parent, style, configuration);
          }
-        protected ITokenComparator createTokenComparator(String s) {
-        	if (s.length() < 100)
-        		return new CharacterComparator(s);
-        	return super.createTokenComparator(s);
-        }
         protected void configureTextViewer(TextViewer textViewer) {
             if (textViewer instanceof SourceViewer) {
                 ((SourceViewer)textViewer).configure(new CompareResultViewerConfiguration());   
@@ -103,30 +96,7 @@ public class CompareResultDialog extends Dialog {
             return reconciler;
         }
     }
-    
-    private static class CharacterComparator implements ITokenComparator {
-        private String fSource;
-        CharacterComparator(String source) {
-            fSource= source;
-        }
-        public int getTokenStart(int index) {
-            return index;
-        }
-        public int getTokenLength(int index) {
-            return 1;
-        }
-        public int getRangeCount() {
-            return fSource.length();
-        }
-        public boolean rangesEqual(int thisIndex, IRangeComparator other, int otherIndex) {
-            CharacterComparator occ= (CharacterComparator) other;
-            return fSource.charAt(thisIndex) == occ.fSource.charAt(otherIndex);
-        }
-        public boolean skipRangeComparison(int length, int maxLength, IRangeComparator other) {
-            return false;
-        }
-    }
-    
+        
 	private static class CompareElement implements ITypedElement, IEncodedStreamContentAccessor {
 	    private String fContent;
 	    
