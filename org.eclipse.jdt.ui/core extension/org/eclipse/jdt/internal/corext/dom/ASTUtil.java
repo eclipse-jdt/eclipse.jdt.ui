@@ -66,4 +66,8 @@ public class ASTUtil {
 				return 1;
 		}
 	}
+	
+	public static int getEndPosition(ASTNode node){
+		return node.getStartPosition() + node.getLength();
+	}
 }
