@@ -1468,9 +1468,9 @@ JavaStructureDiffViewerCreator
 		<accelerator key="Ctrl+Shift+2" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" locale="zh_CN" />
 
 		<!-- source -->
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.comment" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
-		<accelerator key="Ctrl+O" id="org.eclipse.jdt.ui.edit.text.java.format" />
+		<accelerator key="Ctrl+/" id="org.eclipse.jdt.ui.edit.text.java.comment" />
+		<accelerator key="Ctrl+\\" id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
+		<accelerator key="Ctrl+Shift+F" id="org.eclipse.jdt.ui.edit.text.java.format" />
 		<accelerator key="Ctrl+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.add.import" />
 		<accelerator key="Ctrl+Shift+O" id="org.eclipse.jdt.ui.edit.text.java.organize.imports" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch" />
@@ -1538,9 +1538,9 @@ JavaStructureDiffViewerCreator
 		<accelerator key="Ctrl+Shift+2" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" locale="zh_CN" />
 
 		<!-- source -->
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.comment" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
-		<accelerator key="Ctrl+O" id="org.eclipse.jdt.ui.edit.text.java.format" />
+		<accelerator key="Ctrl+/" id="org.eclipse.jdt.ui.edit.text.java.comment" />
+		<accelerator key="Ctrl+\\" id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
+		<accelerator key="Ctrl+Shift+F" id="org.eclipse.jdt.ui.edit.text.java.format" />
 		<accelerator key="Ctrl+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.add.import" />
 		<accelerator key="Ctrl+Shift+O" id="org.eclipse.jdt.ui.edit.text.java.organize.imports" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch" />
