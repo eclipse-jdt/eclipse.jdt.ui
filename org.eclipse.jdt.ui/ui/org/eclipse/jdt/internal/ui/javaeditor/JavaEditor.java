@@ -232,8 +232,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			
 			IDocument document= sourceViewer.getDocument();
 			if (document != null)
-				document.addDocumentListener(this);			
-
+				document.addDocumentListener(this);
+			
 			text.addKeyListener(this);
 			text.addMouseListener(this);
 			text.addMouseMoveListener(this);
@@ -485,7 +485,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (fDefaultCursor == null)
 				fDefaultCursor= new Cursor(display, SWT.CURSOR_IBEAM);			
 			text.setCursor(fDefaultCursor);
-			
 			if (fCursor != null) {
 				fCursor.dispose();
 				fCursor= null;
@@ -506,7 +505,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				deactivate();
 				return;
 			}
-			
+
 			fActive= true;
 
 			ISourceViewer viewer= getSourceViewer();
@@ -516,9 +515,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			IRegion region= getCurrentTextRegion(viewer);
 			if (region == null)
 				return;
-			
-			highlightRegion(viewer, region);
-			activateCursor(viewer);												
+
+//			removed for #25871			
+//			highlightRegion(viewer, region);
+//			activateCursor(viewer);												
 		}
 
 		/*
@@ -541,7 +541,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		 * @see org.eclipse.swt.events.MouseListener#mouseDown(org.eclipse.swt.events.MouseEvent)
 		 */
 		public void mouseDown(MouseEvent event) {
-			
+
 			if (!fActive)
 				return;
 				
@@ -666,7 +666,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (oldInput == null)
 				return;
 			deactivate();
-			uninstall();
+			oldInput.removeDocumentListener(this);
 		}
 
 		/*
@@ -675,7 +675,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
 			if (newInput == null)
 				return;
-			install();
+			newInput.addDocumentListener(this);
 		}
 
 		/*
