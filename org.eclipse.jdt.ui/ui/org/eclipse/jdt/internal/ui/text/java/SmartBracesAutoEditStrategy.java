@@ -52,6 +52,17 @@ import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
  * An auto edit strategy which inserts the closing brace automatically if possible.
  */
 public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
+	
+	private static class CompilationUnitInfo {
+		
+		public char[] buffer;
+		public int delta;
+		
+		public CompilationUnitInfo(char[] buffer, int delta) {
+			this.buffer= buffer;
+			this.delta= delta;
+		}
+	};
 
 	/** The text viewer. */
 	private final ITextViewer fTextViewer;
@@ -79,6 +90,15 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 	private DocumentEvent fUndoEvent;
 
 
+	/**
+	 * Creates a <code>SmartBracesAutoEditStrategy</code>
+	 */
+	public SmartBracesAutoEditStrategy(ITextViewer textViewer) {
+		if (textViewer == null)
+			throw new IllegalArgumentException();
+		fTextViewer= textViewer;
+	}
+	
 	private void install(IRegion userRegion, DocumentEvent undoEvent) {
 
 		if (userRegion == null || undoEvent == null)
@@ -111,15 +131,6 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 			}
 		};
 		fTextViewer.addTextInputListener(fTextInputListener);
-	}
-
-	/**
-	 * Creates a <code>SmartBracesAutoEditStrategy</code>
-	 */
-	public SmartBracesAutoEditStrategy(ITextViewer textViewer) {
-		if (textViewer == null)
-			throw new IllegalArgumentException();
-		fTextViewer= textViewer;
 	}
 
 	private boolean isBackspace(DocumentCommand command) {
@@ -282,7 +293,12 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 			// statement on next line
 			case 1:
 				// statement is too far away, assume normal typing; add closing braces before statement
-				if (statementLineBegin - insertionLine >= 2) {
+				
+				
+				/* Changed due to http://dev.eclipse.org/bugs/show_bug.cgi?id=32082 */
+				
+//				if (statementLineBegin - insertionLine >= 2) {
+				if (true) {
 					makeBlock(document, command);
 					break;					
 				}			
@@ -346,15 +362,6 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 				return nextStatement;
 		}
 		return null;
-	}
-
-	private static class CompilationUnitInfo{
-		public CompilationUnitInfo(char[] buffer, int delta) {
-			this.buffer= buffer;
-			this.delta= delta;
-		}
-		public char[] buffer;
-		public int delta;
 	}
 
 	private static boolean areBlocksConsistent(IDocument document, int offset) {
