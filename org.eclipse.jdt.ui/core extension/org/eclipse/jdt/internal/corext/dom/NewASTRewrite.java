@@ -174,6 +174,7 @@ public class NewASTRewrite {
 			fEventStore.setEventEditGroup(nodeEvent, editGroup);
 		}
 	}
+	
 
 	
 	/**
@@ -210,8 +211,18 @@ public class NewASTRewrite {
 	 */
 	public ListRewriter getListRewrite(ASTNode parent, int childProperty) {
 		validateIsInsideAST(parent);
+		validateIsListProperty(childProperty);
+		
 		return new ListRewriter(this, parent, childProperty);
 	}
+	
+	private void validateIsListProperty(int property) {
+		if (!ASTNodeConstants.isListProperty(property)) {
+			String message= ASTNodeConstants.getPropertyName(property) + " is not a list property"; //$NON-NLS-1$
+			throw new IllegalArgumentException(message);
+		}
+	}
+
 	
 	/**
 	 * Marks a node as tracked. The edits added to the group editGroup can be used to get the

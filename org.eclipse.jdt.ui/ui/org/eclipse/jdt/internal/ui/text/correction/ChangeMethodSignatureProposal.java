@@ -34,9 +34,11 @@ import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 
 public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
@@ -111,11 +113,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	}
 	
 	private void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
-		List parameters= methodDecl.parameters();
-		// create a copy to not loose the indexes
-		SingleVariableDeclaration[] oldParameters= (SingleVariableDeclaration[]) parameters.toArray(new SingleVariableDeclaration[parameters.size()]);
 		AST ast= methodDecl.getAST();
-		int k= 0; // index over the oldParameters
+
 		ArrayList usedNames= new ArrayList();
 		boolean hasCreatedVariables= false;
 		
@@ -125,11 +124,17 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		}
 		
 		ImportRewrite imports= getImportRewrite();
+		ListRewriter listRewrite= rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS);
+		
+		List parameters= methodDecl.parameters(); // old parameters
+		int k= 0; // index over the oldParameters
 		
 		for (int i= 0; i < fParameterChanges.length; i++) {
 			ChangeDescription curr= fParameterChanges[i];
+			
 			if (curr == null) {
-				usedNames.add(oldParameters[k].getName().getIdentifier());
+				SingleVariableDeclaration oldParam= (SingleVariableDeclaration) parameters.get(k);
+				usedNames.add(oldParam.getName().getIdentifier());
 				k++;
 			} else if (curr instanceof InsertDescription) {
 				InsertDescription desc= (InsertDescription) curr;
@@ -141,11 +146,10 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				desc.resultingNode= newNode;
 				hasCreatedVariables= true;
 				
-				rewrite.markAsInserted(newNode);
-				parameters.add(i, newNode);
+				listRewrite.insertAt(newNode, i, null);
 					
 			} else if (curr instanceof RemoveDescription) {
-				rewrite.markAsRemoved(oldParameters[k]);
+				listRewrite.remove((ASTNode) parameters.get(k), null);
 				k++;
 			} else if (curr instanceof EditDescription) {
 				EditDescription desc= (EditDescription) curr;
@@ -158,12 +162,12 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				desc.resultingNode= newNode;
 				hasCreatedVariables= true;
 				
-				rewrite.markAsReplaced(oldParameters[k], newNode);
+				listRewrite.replace((ASTNode) parameters.get(k), newNode, null);
 				
 				k++;
 			} else if (curr instanceof SwapDescription) {
-				SingleVariableDeclaration decl1= oldParameters[k];
-				SingleVariableDeclaration decl2= oldParameters[((SwapDescription) curr).index];
+				SingleVariableDeclaration decl1= (SingleVariableDeclaration) parameters.get(k);
+				SingleVariableDeclaration decl2= (SingleVariableDeclaration) parameters.get(((SwapDescription) curr).index);
 				
 				rewrite.markAsReplaced(decl1, rewrite.createCopy(decl2));
 				rewrite.markAsReplaced(decl2, rewrite.createCopy(decl1));

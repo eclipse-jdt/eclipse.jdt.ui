@@ -193,9 +193,10 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			list= ASTNodes.getContainingList(statement);
 		}
 		if (list != null) {
-			list.add(list.indexOf(statement), newDecl);
-			rewrite.markAsInserted(newDecl);
-			return rewrite;					
+			ASTNode parent= statement.getParent();
+			int childProperty= ASTNodeConstants.getPropertyOfNode(statement);
+			rewrite.getListRewrite(parent, childProperty).insertBefore(newDecl, statement, null);
+			return rewrite;
 		}
 		return rewrite;
 	}

@@ -198,8 +198,8 @@ public class ModifierCorrectionSubProcessor {
 
 			if (hasNoBody) {
 				Block newBody= ast.newBlock();
-				rewrite.markAsInserted(newBody);
-				decl.setBody(newBody);
+				rewrite.markAsInsert(decl, ASTNodeConstants.BODY, newBody, null);
+				
 				Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
 				if (expr != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
@@ -260,8 +260,8 @@ public class ModifierCorrectionSubProcessor {
 			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 
 			Block newBody= ast.newBlock();
-			rewrite.markAsInserted(newBody);
-			decl.setBody(newBody);
+			rewrite.markAsInsert(decl, ASTNodeConstants.BODY, newBody, null);
+			
 			Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
 			if (expr != null) {
 				ReturnStatement returnStatement= ast.newReturnStatement();
@@ -320,8 +320,7 @@ public class ModifierCorrectionSubProcessor {
 		rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);		
 		
 		Block body= ast.newBlock();
-		decl.setBody(body);
-		rewrite.markAsInserted(body);
+		rewrite.markAsInsert(decl, ASTNodeConstants.BODY, body, null);
 		
 		Type returnType= decl.getReturnType();
 		if (!decl.isConstructor()) {

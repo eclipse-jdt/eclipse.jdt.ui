@@ -840,7 +840,9 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 					fSource.rewriter.markAsReplaced(fieldDecl, ASTNodeConstants.MODIFIERS, new Integer(psfModifiers), null);
 				}
 			}
-			fSource.rewriter.markAsTracked(declaration, new TextEditGroup("moved member declaration"));
+			TextEditGroup group= new TextEditGroup("moved member declaration");
+			fSource.rewriter.markAsTracked(declaration, group);
+			declaration.setProperty("group", group);
 			targetNeedsSourceImport |= analyzer.targetNeedsSourceImport();
 			status.merge(analyzer.getStatus()); 
 		}
@@ -867,7 +869,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	}
 	
 	private String getUpdatedMember(TextBuffer buffer, BodyDeclaration declaration) {
-		TextEditGroup groupDescription= fSource.rewriter.getTrackedNodeData(declaration);
+		TextEditGroup groupDescription= (TextEditGroup) declaration.getProperty("group"); //$NON-NLS-1$
 		IRegion textRange= groupDescription.getRegion();
 		String newSource= buffer.getContent(textRange.getOffset(), textRange.getLength());
 		return Strings.trimIndentation(newSource, fPreferences.tabWidth, false);

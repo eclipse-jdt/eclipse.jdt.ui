@@ -28,6 +28,7 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -90,8 +91,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		}
 		
 		MethodDeclaration newMethodDecl= createNewMethodDeclaration(ast, fSuperConstructor, rewrite, settings);
-		rewrite.markAsInserted(newMethodDecl);
-		fTypeNode.bodyDeclarations().add(0, newMethodDecl);
+		rewrite.getListRewrite(fTypeNode, ASTNodeConstants.BODY_DECLARATIONS).insertFirst(newMethodDecl, null);
 		
 		addLinkedRanges(rewrite, newMethodDecl);
 		

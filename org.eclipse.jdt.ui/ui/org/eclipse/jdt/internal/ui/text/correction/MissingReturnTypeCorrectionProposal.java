@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -56,8 +57,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 			
 			Expression expression= evaluateReturnExpressions(ast, returnBinding, fExistingReturn.getStartPosition());
 			if (expression != null) {
-				fExistingReturn.setExpression(expression);
-				rewrite.markAsInserted(expression);
+				rewrite.markAsInsert(fExistingReturn, ASTNodeConstants.EXPRESSION, expression, null);
 				
 				markAsLinked(rewrite, expression, true, RETURN_EXPRESSION_KEY);
 			}
@@ -96,9 +96,10 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 			}
 			ReturnStatement returnStatement= ast.newReturnStatement();
 			Expression expression= evaluateReturnExpressions(ast, returnBinding, offset);
+			
 			returnStatement.setExpression(expression);
-			statements.add(returnStatement);
-			rewrite.markAsInserted(returnStatement);
+
+			rewrite.getListRewrite(block, ASTNodeConstants.STATEMENTS).insertLast(returnStatement, null);
 			
 			markAsLinked(rewrite, returnStatement.getExpression(), true, RETURN_EXPRESSION_KEY);
 			return rewrite;

@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -302,7 +303,7 @@ public class LocalCorrectionsSubProcessor {
 			proposal.setImportRewrite(imports);
 			
 			AST ast= astRoot.getAST();
-			List catchClauses= surroundingTry.catchClauses();
+			ListRewriter clausesRewrite= rewrite.getListRewrite(surroundingTry, ASTNodeConstants.CATCH_CLAUSES);
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
 				ITypeBinding excBinding= uncaughtExceptions[i];
 				String varName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
@@ -318,8 +319,7 @@ public class LocalCorrectionsSubProcessor {
 					ASTNode node= rewrite.createPlaceholder(catchBody, NewASTRewrite.STATEMENT);
 					newClause.getBody().statements().add(node);
 				}
-				rewrite.markAsInserted(newClause);
-				catchClauses.add(newClause);
+				clausesRewrite.insertLast(newClause, null);
 				
 				String typeKey= "type" + i; //$NON-NLS-1$
 				String nameKey= "name" + i; //$NON-NLS-1$
@@ -343,11 +343,11 @@ public class LocalCorrectionsSubProcessor {
 			AST ast= astRoot.getAST();
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
 			List exceptions= methodDecl.thrownExceptions();
+			ListRewriter listRewrite= rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS);
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
 				String imp= imports.addImport(uncaughtExceptions[i]);
 				Name name= ASTNodeFactory.newName(ast, imp);
-				rewrite.markAsInserted(name);
-				exceptions.add(name);
+				listRewrite.insertLast(name, null);
 				String typeKey= "type" + i; //$NON-NLS-1$
 				proposal.markAsLinked(rewrite, name, false, typeKey); //$NON-NLS-1$
 				addExceptionTypeLinkProposals(proposal, uncaughtExceptions[i], typeKey);

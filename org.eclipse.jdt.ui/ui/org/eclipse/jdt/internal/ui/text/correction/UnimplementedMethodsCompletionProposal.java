@@ -40,10 +40,12 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -68,20 +70,21 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 	 */
 	protected ASTRewrite getRewrite() throws CoreException {
 		ITypeBinding binding;
-		List bodyDecls;
+		ASTRewrite rewrite= new ASTRewrite(fTypeNode);
+		ListRewriter listRewrite;
 		if (fTypeNode instanceof AnonymousClassDeclaration) {
 			AnonymousClassDeclaration decl= (AnonymousClassDeclaration) fTypeNode;
 			binding= decl.resolveBinding();
-			bodyDecls= decl.bodyDeclarations();
+			listRewrite= rewrite.getListRewrite(decl, ASTNodeConstants.BODY_DECLARATIONS);
 		} else {
 			TypeDeclaration decl= (TypeDeclaration) fTypeNode;
 			binding= decl.resolveBinding();
-			bodyDecls= decl.bodyDeclarations();
+			listRewrite= rewrite.getListRewrite(decl, ASTNodeConstants.BODY_DECLARATIONS);
 		}
 		IMethodBinding[] methods= evalUnimplementedMethods(binding);
 		fMethodsToOverride= methods;
 		
-		ASTRewrite rewrite= new ASTRewrite(fTypeNode);
+		
 		AST ast= fTypeNode.getAST();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (!settings.createComments || binding.isAnonymous()) {
@@ -90,8 +93,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		
 		for (int i= 0; i < methods.length; i++) {
 			MethodDeclaration newMethodDecl= createNewMethodDeclaration(ast, methods[i], rewrite, binding.getName(), settings);
-			rewrite.markAsInserted(newMethodDecl);
-			bodyDecls.add(newMethodDecl);
+			listRewrite.insertLast(newMethodDecl, null);
 		}
 		return rewrite;
 	}
