@@ -89,7 +89,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	}
 	
 	public void ensureNoModifications() throws CoreException {
-		if (fRewrite != null && fRewrite.hasInserts()) {
+		if (fRewrite != null && fRewrite.hasASTModifications()) {
 			getChange(); // force the rewriting
 		}
 	}
