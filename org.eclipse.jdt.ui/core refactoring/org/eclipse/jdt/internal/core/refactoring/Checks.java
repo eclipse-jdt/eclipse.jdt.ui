@@ -90,11 +90,15 @@ public class Checks {
 		return checkName(name, JavaConventions.validateCompilationUnitName(name));
 	}
 	
+	/**
+	 * Returns <code>null</code> if the new name is ok ie. no other file with that name exists.
+	 * @param newName just a simple name - no extension.
+	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) throws JavaModelException{
 		IPath newPath= RenameResourceChange.renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName);
 		if (resourceExists(newPath)){
 			RefactoringStatus result= new RefactoringStatus();	
-			result.addFatalError("Cannot rename a compilation unit to " + newName + ".java - name already used by another file in this directory");
+			result.addFatalError("Cannot rename a compilation unit to \"" + newName + ".java\" - name already used by another file in this directory");
 			return result;
 		} else
 			return null;

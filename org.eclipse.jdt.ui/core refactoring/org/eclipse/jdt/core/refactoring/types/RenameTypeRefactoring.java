@@ -123,7 +123,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			result.merge(checkImportedTypes());	
 			pm.worked(1);
 			if (mustRenameCU())
-				result.merge(Checks.checkCompilationUnitNewName(getType().getCompilationUnit(), fNewName + ".java"));
+				result.merge(Checks.checkCompilationUnitNewName(getType().getCompilationUnit(), fNewName));
 			pm.worked(1);	
 			if (isEnclosedInType(getType(), fNewName))	
 				result.addError("Type " + getType().getFullyQualifiedName() + " is enclosed in a type named " + fNewName);
@@ -385,12 +385,22 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	}
 	
 	//------------- Changes ---------------
-
+	
+	private boolean willRenameCU() throws JavaModelException{
+		if (mustRenameCU())
+			return true;
+		if (! Checks.isTopLevel(getType()))
+			return false;
+		if (! getType().getCompilationUnit().getElementName().equals(getType().getElementName() + ".java"))
+			return false;
+		return Checks.checkCompilationUnitNewName(getType().getCompilationUnit(), fNewName) == null;
+	}
+	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
 		CompositeChange builder= new CompositeChange();
 		pm.beginTask("creating change", fOccurrences.size() + 1);
 		addOccurrences(pm, builder);
-		if (mustRenameCU())
+		if (willRenameCU())
 			builder.addChange(new RenameResourceChange(getResource(getType()), fNewName));
 		pm.worked(1);	
 		pm.done();	

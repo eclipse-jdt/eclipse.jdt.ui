@@ -90,18 +90,13 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 	 * 
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {			
+	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		//renaming the file is taken care of in renameTypeRefactoring
+		if (fRenameTypeRefactoring != null)
+			return fRenameTypeRefactoring.createChange(pm);
+	
 		CompositeChange composite= new CompositeChange();
-		if (fRenameTypeRefactoring != null){
-			IChange renameTypeChange= fRenameTypeRefactoring.createChange(pm);
-			if (Flags.isPublic(fRenameTypeRefactoring.getType().getFlags()))
-				return renameTypeChange;
-			else 
-				composite.addChange(renameTypeChange);
-		}	
-
-		String name= removeFileNameExtension(fNewName);
-		composite.addChange(new RenameResourceChange(getResource(getCu()), name));
+		composite.addChange(new RenameResourceChange(getResource(getCu()), removeFileNameExtension(fNewName)));
 		return composite;	
 	}
 }
