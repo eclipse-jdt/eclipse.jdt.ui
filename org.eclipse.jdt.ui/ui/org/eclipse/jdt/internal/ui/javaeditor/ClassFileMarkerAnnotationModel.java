@@ -48,7 +48,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 		try {
 			return JavaCore.getJavaCore().isReferencedBy(fClassFile, marker);
 		} catch (CoreException x) {
-			handleCoreException(x, "ClassFileMarkerAnnotationModel.isAcceptable");
+			handleCoreException(x, JavaEditorMessages.getString("ClassFileMarkerAnnotationModel.error.isAcceptable")); //$NON-NLS-1$
 			return false;
 		}
 	}
@@ -57,7 +57,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 		try {
 			return JavaCore.getJavaCore().isReferencedBy(fClassFile, markerDelta);
 		} catch (CoreException x) {
-			handleCoreException(x, "ClassFileMarkerAnnotationModel.isAffected");
+			handleCoreException(x, JavaEditorMessages.getString("ClassFileMarkerAnnotationModel.error.isAffected")); //$NON-NLS-1$
 			return false;
 		}
 	}
@@ -145,7 +145,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 			}
 			
 		} catch (CoreException x) {
-			handleCoreException(x, "ClassFileMarkerAnnotationModel.resourceChanged");
+			handleCoreException(x, JavaEditorMessages.getString("ClassFileMarkerAnnotationModel.error.resourceChanged")); //$NON-NLS-1$
 		}
 	}
 }

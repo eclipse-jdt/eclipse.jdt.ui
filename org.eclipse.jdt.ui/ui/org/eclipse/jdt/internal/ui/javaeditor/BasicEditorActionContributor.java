@@ -38,8 +38,8 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		protected ITextOperationTarget fOperationTarget= null;
 		
 		
-		public SelectionAction(ResourceBundle bundle, String prefix, int operation) {
-			super(bundle, prefix, null);
+		public SelectionAction(String prefix, int operation) {
+			super(JavaEditorMessages.getResourceBundle(), prefix, null);
 			fOperationCode= operation;
 			setEnabled(false);
 		}
@@ -90,11 +90,9 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 	public BasicEditorActionContributor() {
 		super();
 		
-		ResourceBundle bundle= JavaPlugin.getResourceBundle();
-		
-		fContentAssist= new RetargetTextEditorAction(bundle, "Editor.ContentAssistProposal.");
-		fShiftRight= new SelectionAction(bundle, "Editor.ShiftRight.", ITextOperationTarget.SHIFT_RIGHT);		
-		fShiftLeft= new SelectionAction(bundle, "Editor.ShiftLeft.", ITextOperationTarget.SHIFT_LEFT);
+		fContentAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal."); //$NON-NLS-1$
+		fShiftRight= new SelectionAction("ShiftRight.", ITextOperationTarget.SHIFT_RIGHT);		 //$NON-NLS-1$
+		fShiftLeft= new SelectionAction("ShiftLeft.", ITextOperationTarget.SHIFT_LEFT); //$NON-NLS-1$
 		
 		fShiftRight.setImageDescriptor(JavaPluginImages.DESC_MENU_SHIFT_RIGHT);
 		fShiftLeft.setImageDescriptor(JavaPluginImages.DESC_MENU_SHIFT_LEFT);
@@ -136,7 +134,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor) part;
 			
-		fContentAssist.setAction(getAction(textEditor, "ContentAssistProposal"));
+		fContentAssist.setAction(getAction(textEditor, "ContentAssistProposal")); //$NON-NLS-1$
 		fShiftRight.setEditor(textEditor);
 		fShiftLeft.setEditor(textEditor);
 	}

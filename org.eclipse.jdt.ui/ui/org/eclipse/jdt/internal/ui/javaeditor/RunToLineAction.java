@@ -5,25 +5,55 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.util.ResourceBundle;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IMarker;import org.eclipse.core.runtime.IStatus;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.IStackFrame;import org.eclipse.debug.core.model.IThread;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.texteditor.ResourceAction;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.debug.core.JDIDebugTarget;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.model.IDebugElement;
+import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.debug.core.model.IStackFrame;
+import org.eclipse.debug.core.model.IThread;
+import org.eclipse.debug.ui.IDebugUIConstants;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.texteditor.IUpdate;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
+
+import org.eclipse.jdt.internal.debug.core.JDIDebugTarget;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Action to support run to line (i.e. where the cursor is)
  */
-public class RunToLineAction extends ResourceAction implements IUpdate {
-
-	protected static final String ERROR_RUN_TO_LINE= "error.run_to_line.";
+public class RunToLineAction extends Action implements IUpdate {
 
 	protected JavaEditor fEditor;
-
-	protected ResourceBundle fBundle;
-	protected String fPrefix;
-
-	public RunToLineAction(ResourceBundle bundle, String prefix, JavaEditor editor) {
-		super(bundle, prefix);
+	
+	
+	public RunToLineAction(JavaEditor editor) {
+		super();
+		
+		setText(JavaEditorMessages.getString("RunToLine.label")); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("RunToLine.tooltip")); //$NON-NLS-1$
+		setDescription(JavaEditorMessages.getString("RunToLine.description")); //$NON-NLS-1$
+		
 		fEditor= editor;
-		fBundle= bundle;
-		fPrefix= prefix;
 		
 		update();
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.RUN_TO_LINE_ACTION });					
@@ -165,11 +195,7 @@ public class RunToLineAction extends ResourceAction implements IUpdate {
 
 	protected void errorDialog(IStatus status) {
 		Shell shell= fEditor.getSite().getShell();
-		String key= fPrefix + ERROR_RUN_TO_LINE + "title";
-		String title= getString(fBundle, key, key);
-		key= fPrefix + ERROR_RUN_TO_LINE + "message";
-		String msg= getString(fBundle, key, key);
-		ErrorDialog.openError(shell, title, msg, status);
+		ErrorDialog.openError(shell, JavaEditorMessages.getString("RunToLine.error.title1"), JavaEditorMessages.getString("RunToLine.error.message1"), status); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**
@@ -199,6 +225,5 @@ public class RunToLineAction extends ResourceAction implements IUpdate {
 		}
 		return null;
 	}
-
 }
 

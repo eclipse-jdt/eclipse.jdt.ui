@@ -22,17 +22,16 @@ public class ToggleTextHoverAction extends TextEditorAction {
 	private String fToolTipChecked;
 	private String fToolTipUnchecked;
 	
-	
 	/**
 	 * Constructs and updates the action.
 	 */
-	public ToggleTextHoverAction(ResourceBundle bundle, String prefix) {
-		super(bundle, prefix, null);
+	public ToggleTextHoverAction() {
+		super(JavaEditorMessages.getResourceBundle(), "ToggleTextHover", null); //$NON-NLS-1$
 		
-		JavaPluginImages.setImageDescriptors(this, "tool16", "jdoc_hover_edit.gif");
+		JavaPluginImages.setImageDescriptors(this, "tool16", "jdoc_hover_edit.gif"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		fToolTipChecked= getString(bundle, prefix + "tooltip.checked", prefix + "tooltip.checked");
-		fToolTipUnchecked= getString(bundle, prefix + "tooltip.unchecked", prefix + "tooltip.unchecked");
+		fToolTipChecked= JavaEditorMessages.getString("ToggleTextHover.tooltip.checked"); //$NON-NLS-1$
+		fToolTipUnchecked= JavaEditorMessages.getString("ToggleTextHover.tooltip.unchecked"); //$NON-NLS-1$
 	
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION });	
 	}

@@ -90,7 +90,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 
 		setAction("RunInPackage", new RunInPackageAction(this));
 		setAction("ContentAssistProposal", new TextOperationAction(getResourceBundle(), "Editor.ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			
-		setAction("OpenOnSelection", new SnippetOpenOnSelectionAction(this, getResourceBundle(), "Editor.OpenOnSelection."));			
+		setAction("OpenOnSelection", new SnippetOpenOnSelectionAction(this));			
 	}
 	
 	/**

@@ -5,7 +5,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.util.Iterator;import java.util.ResourceBundle;import org.eclipse.core.runtime.CoreException;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.ui.IEditorActionBarContributor;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IPartService;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.ui.texteditor.DefaultRangeIndicator;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.views.contentoutline.IContentOutlinePage;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jdt.internal.debug.ui.display.InspectAction;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import java.util.Iterator;import java.util.ResourceBundle;import org.eclipse.core.runtime.CoreException;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.ui.IEditorActionBarContributor;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IPartService;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.ui.texteditor.DefaultRangeIndicator;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.views.contentoutline.IContentOutlinePage;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
 
 
@@ -52,15 +52,8 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	 *
 	 * @return the editor's resource bundle
 	 */
-	protected ResourceBundle getResourceBundle() {
-		return JavaPlugin.getDefault().getResourceBundle();
-	}
-	
-	/**
-	 * Convenience method for safely accessing resources.
-	 */
-	protected String getResourceString(String key) {
-		return JavaPlugin.getDefault().getResourceString(key);
+	protected ResourceBundle _getResourceBundle() {
+		return JavaEditorMessages.getResourceBundle();
 	}
 	
 	/**
@@ -82,9 +75,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		MenuManager search= new JavaSearchGroup().getMenuManagerForGroup(isTextSelectionEmpty());
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, search);
-		addAction(menu, "Inspect");
-		addAction(menu, "Display");
-		addAction(menu, "RunToLine");
+		addAction(menu, "Inspect"); //$NON-NLS-1$
+		addAction(menu, "Display"); //$NON-NLS-1$
+		addAction(menu, "RunToLine"); //$NON-NLS-1$
 
 	}			
 	
@@ -99,9 +92,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setOutlinePageInput(page, getEditorInput());
 		
 		// page.setAction("ShowTypeHierarchy", new ShowTypeHierarchyAction(page));
-		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page));
-		page.setAction("ShowInPackageView", new ShowInPackageViewAction(getSite(), page));
-		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page));
+		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page)); //$NON-NLS-1$
+		page.setAction("ShowInPackageView", new ShowInPackageViewAction(getSite(), page)); //$NON-NLS-1$
+		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page)); //$NON-NLS-1$
 	
 		return page;
 	}
@@ -262,9 +255,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	
 	protected void createActions() {
 		super.createActions();
-		setAction("Display", new EditorDisplayAction(getResourceBundle(), "Editor.Display.", this));
-		setAction("Inspect", new InspectAction(getResourceBundle(), "Editor.Inspect.", this));
-		setAction("RunToLine", new RunToLineAction(getResourceBundle(), "Editor.RunToLine.", this));
+		setAction("Display", new EditorDisplayAction(this)); //$NON-NLS-1$
+		setAction("Inspect", new InspectAction(this)); //$NON-NLS-1$
+		setAction("RunToLine", new RunToLineAction(this)); //$NON-NLS-1$
 	}
 	
 	private boolean isTextSelectionEmpty() {

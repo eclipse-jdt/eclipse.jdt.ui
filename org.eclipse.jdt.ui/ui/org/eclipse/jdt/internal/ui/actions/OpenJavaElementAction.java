@@ -4,13 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 
@@ -28,27 +30,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  * Provides the means to open a Java element in the specified editor. Subclasses must overwrite
  * IAction.actionPerformed and knit the methods together.
  */
-public abstract class OpenJavaElementAction extends JavaUIAction {
-
+public abstract class OpenJavaElementAction extends Action {
+	
 	/**
-	 * @deprecated Use OpenJavaElementAction(String, ImageDescriptor) or OpenJavaElementAction(String) instead
+	 * Creates a new action without label. Initializing is 
+	 * subclass responsibility.
 	 */
-	public OpenJavaElementAction(ResourceBundle bundle, String prefix) {
-		super(bundle, prefix);
-	}
-
-	/**
-	 * Creates a new action with the given label.
-	 */
-	public OpenJavaElementAction(String label) {
-		super(label);
-	}
-
-	/**
-	 * Creates a new action with the given label and image.
-	 */
-	public OpenJavaElementAction(String label, ImageDescriptor image) {
-		super(label, image);
+	protected OpenJavaElementAction() {
 	}
 	
 	/**
@@ -58,7 +46,7 @@ public abstract class OpenJavaElementAction extends JavaUIAction {
 		IEditorPart part= EditorUtility.openInEditor(sourceReference);
 		EditorUtility.revealInEditor(part, sourceReference);
 	}
-		
+	
 	/**
 	 * Filters out source references from the given code resolve results.
 	 * A utility method that can be called by subclassers. 

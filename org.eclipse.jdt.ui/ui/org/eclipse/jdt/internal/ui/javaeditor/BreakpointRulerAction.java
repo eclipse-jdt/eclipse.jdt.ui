@@ -5,7 +5,44 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.util.ArrayList;import java.util.Iterator;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.debug.core.IDebugConstants;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.IJavaDebugConstants;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.debug.ui.BreakpointLocationVerifier;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.IRegion;import org.eclipse.jface.text.source.IVerticalRuler;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.MarkerRulerAction;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IBreakpointManager;
+import org.eclipse.debug.core.IDebugConstants;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.source.IVerticalRuler;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.MarkerRulerAction;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.debug.core.IJavaDebugConstants;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
+
+import org.eclipse.jdt.internal.debug.ui.BreakpointLocationVerifier;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -13,8 +50,9 @@ import java.util.ArrayList;import java.util.Iterator;import java.util.List;im
  */
 public class BreakpointRulerAction extends MarkerRulerAction {	
 		
-	public BreakpointRulerAction(ResourceBundle bundle, String prefix, IVerticalRuler ruler, ITextEditor editor) {
-		super(bundle, prefix, ruler, editor, IDebugConstants.BREAKPOINT_MARKER, false);
+	
+	public BreakpointRulerAction(IVerticalRuler ruler, ITextEditor editor) {
+		super(JavaEditorMessages.getResourceBundle(), "ManageBreakpoints.", ruler, editor, IDebugConstants.BREAKPOINT_MARKER, false); //$NON-NLS-1$
 	}
 	
 	
@@ -58,7 +96,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 					}
 				}
 			} catch (CoreException x) {
-				JavaPlugin.logErrorStatus("BreakpointRulerAction.getMarker", x.getStatus());
+				JavaPlugin.logErrorStatus(JavaEditorMessages.getString("BreakpointRulerAction.error.retrieving.message"), x.getStatus()); //$NON-NLS-1$
 			}
 		}
 		return breakpoints;
@@ -105,19 +143,13 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 			}
 		} catch (DebugException e) {
 			Shell shell= getTextEditor().getSite().getShell();
-			String title= getString(getResourceBundle(), getResourceKeyPrefix() + "error.add.title", getResourceKeyPrefix() + "error.add.title");
-			String msg= getString(getResourceBundle(), getResourceKeyPrefix() + "error.add.message", getResourceKeyPrefix() + "error.add.message");
-			ErrorDialog.openError(shell, title, msg, e.getStatus());
+			ErrorDialog.openError(shell, JavaEditorMessages.getString("BreakpointRulerAction.error.adding.title1"), JavaEditorMessages.getString("BreakpointRulerAction.error.adding.message1"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		} catch (CoreException e) {
 			Shell shell= getTextEditor().getSite().getShell();
-			String title= getString(getResourceBundle(), getResourceKeyPrefix() + "error.add.title", getResourceKeyPrefix() + "error.add.title");
-			String msg= getString(getResourceBundle(), getResourceKeyPrefix() + "error.add.message", getResourceKeyPrefix() + "error.add.message");
-			ErrorDialog.openError(shell, title, msg, e.getStatus());
+			ErrorDialog.openError(shell, JavaEditorMessages.getString("BreakpointRulerAction.error.adding.title2"), JavaEditorMessages.getString("BreakpointRulerAction.error.adding.message2"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		} catch (BadLocationException e) {
 			Shell shell= getTextEditor().getSite().getShell();
-			String title= getString(getResourceBundle(), getResourceKeyPrefix() + "error.add.title", getResourceKeyPrefix() + "error.add.title");
-			String msg= getString(getResourceBundle(), getResourceKeyPrefix() + "error.add.message", getResourceKeyPrefix() + "error.add.message");
-			ErrorDialog.openError(shell, title, msg, null);
+			ErrorDialog.openError(shell, JavaEditorMessages.getString("BreakpointRulerAction.error.adding.title3"), JavaEditorMessages.getString("BreakpointRulerAction.error.adding.message3"), null); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 	
@@ -135,9 +167,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 			
 		} catch (CoreException e) {
 			Shell shell= getTextEditor().getSite().getShell();
-			String title= getString(getResourceBundle(), getResourceKeyPrefix() + "error.remove.title", getResourceKeyPrefix() + "error.remove.title");
-			String msg= getString(getResourceBundle(), getResourceKeyPrefix() + "error.remove.message", getResourceKeyPrefix() + "error.remove.message");
-			ErrorDialog.openError(shell, title, msg, e.getStatus());
+			ErrorDialog.openError(shell, JavaEditorMessages.getString("BreakpointRulerAction.error.removing.title1"), JavaEditorMessages.getString("BreakpointRulerAction.errro.removing.message1"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 }

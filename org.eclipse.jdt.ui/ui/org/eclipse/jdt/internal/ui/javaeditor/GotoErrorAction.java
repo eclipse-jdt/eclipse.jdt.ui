@@ -19,10 +19,9 @@ public class GotoErrorAction extends TextEditorAction {
 	private boolean fForward;
 	
 	
-	public GotoErrorAction(ResourceBundle bundle, String prefix, boolean forward) {
-		super(bundle, prefix, null);
+	public GotoErrorAction(String prefix, boolean forward) {
+		super(JavaEditorMessages.getResourceBundle(), prefix, null);
 		fForward= forward;
-		setImageDescriptor(forward ? JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR : JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 	}
 	
 	/**

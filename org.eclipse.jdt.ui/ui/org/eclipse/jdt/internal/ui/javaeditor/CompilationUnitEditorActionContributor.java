@@ -19,7 +19,7 @@ import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class CompilationUnitEditorActionContributor extends BasicEditorActionContributor {
 	
@@ -36,16 +36,18 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	public CompilationUnitEditorActionContributor() {
 		super();
 		
-		ResourceBundle bundle= JavaPlugin.getResourceBundle();
+		ResourceBundle bundle= JavaEditorMessages.getResourceBundle();
 		
-		fOpenOnSelection= new OpenOnSelectionAction(bundle, "Editor.OpenOnSelection.");
-		fOpenOnTypeSelection= new OpenHierarchyOnSelectionAction(bundle, "Editor.OpenHierarchyOnSelection.");
-		fAddImportOnSelection= new RetargetTextEditorAction(bundle, "AddImportOnSelectionAction.");
-		fOrganizeImports= new RetargetTextEditorAction(bundle, "OrganizeImportsAction.");
-		fTogglePresentation= new TogglePresentationAction(bundle, "Editor.TogglePresentation.");
-		fToggleTextHover= new ToggleTextHoverAction(bundle, "Editor.ToggleTextHover.");
-		fPreviousError= new GotoErrorAction(bundle, "Editor.PreviousError.", false);
-		fNextError= new GotoErrorAction(bundle, "Editor.NextError.", true);
+		fOpenOnSelection= new OpenOnSelectionAction();
+		fOpenOnTypeSelection= new OpenHierarchyOnSelectionAction();
+		fAddImportOnSelection= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "AddImportOnSelectionAction."); //$NON-NLS-1$
+		fOrganizeImports= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "OrganizeImportsAction."); //$NON-NLS-1$
+		fTogglePresentation= new TogglePresentationAction();
+		fToggleTextHover= new ToggleTextHoverAction();
+		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
+		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
+		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
+		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 	}
 	
 	/**
@@ -64,7 +66,6 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fAddImportOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fOrganizeImports);
 		}
-		
 	}
 	
 	/**
@@ -92,8 +93,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fOpenOnSelection.setContentEditor(textEditor);
 		fOpenOnTypeSelection.setContentEditor(textEditor);
 		
-		fAddImportOnSelection.setAction(getAction(textEditor,"AddImportOnSelection"));
-		fOrganizeImports.setAction(getAction(textEditor, "OrganizeImports"));
+		fAddImportOnSelection.setAction(getAction(textEditor,"AddImportOnSelection")); //$NON-NLS-1$
+		fOrganizeImports.setAction(getAction(textEditor, "OrganizeImports")); //$NON-NLS-1$
 		
 		fTogglePresentation.setEditor(textEditor);
 		fToggleTextHover.setEditor(textEditor);

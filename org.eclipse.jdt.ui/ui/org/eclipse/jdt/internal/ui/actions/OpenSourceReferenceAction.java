@@ -32,7 +32,8 @@ public class OpenSourceReferenceAction extends OpenJavaElementAction implements 
 	
 	
 	public OpenSourceReferenceAction() {
-		super(JavaUIMessages.getString("OpenSourceReferenceAction.label")); //$NON-NLS-1$
+		super();
+		setText(JavaUIMessages.getString("OpenSourceReferenceAction.label")); //$NON-NLS-1$
 		setDescription(JavaUIMessages.getString("OpenSourceReferenceAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("OpenSourceReferenceAction.tooltip")); //$NON-NLS-1$
 	}

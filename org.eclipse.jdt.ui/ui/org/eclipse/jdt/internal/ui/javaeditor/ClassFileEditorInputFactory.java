@@ -21,8 +21,8 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class ClassFileEditorInputFactory implements IElementFactory {
 	
-	public final static String ID=  "org.eclipse.jdt.ui.ClassFileEditorInputFactory";
-	public final static String KEY= "org.eclipse.jdt.ui.ClassFileIdentifier";
+	public final static String ID=  "org.eclipse.jdt.ui.ClassFileEditorInputFactory"; //$NON-NLS-1$
+	public final static String KEY= "org.eclipse.jdt.ui.ClassFileIdentifier"; //$NON-NLS-1$
 	
 	public ClassFileEditorInputFactory() {
 	}

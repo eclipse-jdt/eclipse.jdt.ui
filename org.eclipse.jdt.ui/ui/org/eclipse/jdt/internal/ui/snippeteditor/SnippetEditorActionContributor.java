@@ -97,7 +97,7 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 	protected void initializeActions() {
 		ResourceBundle bundle= JavaPlugin.getResourceBundle();
 		
-		fOpenOnSelectionAction= new SnippetOpenOnSelectionAction(bundle, "Editor.OpenOnSelection.");
+		fOpenOnSelectionAction= new SnippetOpenOnSelectionAction();
 
 		fDisplayAction= new DisplayAction(fSnippetEditor);		
 		fRunAction= new RunAction(fSnippetEditor);

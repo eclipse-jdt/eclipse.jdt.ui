@@ -14,11 +14,10 @@ import java.util.ResourceBundle;import org.eclipse.core.resources.IMarker;imp
  */
 public class AddBreakpointAction extends AddMarkerAction {
 	
-	protected static final String ERROR_ADD_BREAKPOINT= "error.add_breakpoint.";
 	private JavaEditor fJavaEditor;
 
-	public AddBreakpointAction(ResourceBundle bundle, String prefix, JavaEditor editor) {
-		super(bundle, prefix, editor, IDebugConstants.BREAKPOINT_MARKER, false);
+	public AddBreakpointAction(JavaEditor editor) {
+		super(JavaEditorMessages.getResourceBundle(), "AddBreakpoint.", editor, IDebugConstants.BREAKPOINT_MARKER, false); //$NON-NLS-1$
 		fJavaEditor= editor;
 	}
 	
@@ -73,19 +72,13 @@ public class AddBreakpointAction extends AddMarkerAction {
 				}
 			} catch (DebugException e) {
 				Shell shell= fJavaEditor.getSite().getShell();
-				String title= getString(getResourceBundle(), getResourceKeyPrefix()+ERROR_ADD_BREAKPOINT+"title", "Add Breakpoint");
-				String msg= getString(getResourceBundle(), getResourceKeyPrefix()+ERROR_ADD_BREAKPOINT+"message", "Cannot add breakpoint");
-				ErrorDialog.openError(shell, title, msg, e.getStatus());
+				ErrorDialog.openError(shell, JavaEditorMessages.getString("AddBreakpoint.error.title1"), JavaEditorMessages.getString("AddBreakpoint.error.message1"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 			} catch (CoreException e) {
 				Shell shell= fJavaEditor.getSite().getShell();
-				String title= getString(getResourceBundle(), getResourceKeyPrefix()+ERROR_ADD_BREAKPOINT+"title", "Add Breakpoint");
-				String msg= getString(getResourceBundle(), getResourceKeyPrefix()+ERROR_ADD_BREAKPOINT+"message", "Cannot add breakpoint");
-				ErrorDialog.openError(shell, title, msg, e.getStatus());
+				ErrorDialog.openError(shell, JavaEditorMessages.getString("AddBreakpoint.error.title2"), JavaEditorMessages.getString("AddBreakpoint.error.message2"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 			} catch (BadLocationException e) {
 				Shell shell= fJavaEditor.getSite().getShell();
-				String title= getString(getResourceBundle(), getResourceKeyPrefix()+ERROR_ADD_BREAKPOINT+"title", "Add Breakpoint");
-				String msg= getString(getResourceBundle(), getResourceKeyPrefix()+ERROR_ADD_BREAKPOINT+"message", "Cannot add breakpoint");
-				ErrorDialog.openError(shell, title, msg, null);
+				ErrorDialog.openError(shell, JavaEditorMessages.getString("AddBreakpoint.error.title3"), JavaEditorMessages.getString("AddBreakpoint.error.message3"), null); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 
 		}

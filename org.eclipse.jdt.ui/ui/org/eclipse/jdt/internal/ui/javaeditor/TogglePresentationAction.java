@@ -18,17 +18,18 @@ public class TogglePresentationAction extends TextEditorAction {
 		
 	private String fToolTipChecked;
 	private String fToolTipUnchecked;
-
+	
+	
 	/**
 	 * Constructs and updates the action.
 	 */
-	public TogglePresentationAction(ResourceBundle bundle, String prefix) {
-		super(bundle, prefix, null);
+	public TogglePresentationAction() {
+		super(JavaEditorMessages.getResourceBundle(), "TooglePresentation.", null); //$NON-NLS-1$
 		
-		JavaPluginImages.setImageDescriptors(this, "tool16", "segment_edit.gif");
+		JavaPluginImages.setImageDescriptors(this, "tool16", "segment_edit.gif"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		fToolTipChecked= getString(bundle, prefix + "tooltip.checked", prefix + "tooltip.checked");
-		fToolTipUnchecked= getString(bundle, prefix + "tooltip.unchecked", prefix + "tooltip.unchecked");
+		fToolTipChecked= JavaEditorMessages.getString("TogglePresentation.tooltip.checked"); //$NON-NLS-1$
+		fToolTipUnchecked= JavaEditorMessages.getString("TogglePresentation.tooltip.unchecked"); //$NON-NLS-1$
 		
 		update();
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION });					

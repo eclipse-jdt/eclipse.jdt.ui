@@ -6,11 +6,11 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 import java.util.Iterator;
-import java.util.ResourceBundle;
 import java.util.Vector;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -22,26 +22,22 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.actions.JavaUIAction;
 
 /**
  * Deletes ISourceManipulations such as IMethod or IType from its container. Works only
  * on working copies.
  */
-public class DeleteISourceManipulationsAction extends JavaUIAction implements ISelectionChangedListener {
+public class DeleteISourceManipulationsAction extends Action implements ISelectionChangedListener {
 	
-	protected final static String ERROR_TITLE= "error.delete.title";
-	protected final static String ERROR_MESSAGE= "error.delete.message";
-
-	
+		
 	protected JavaOutlinePage fPage;
-	protected ResourceBundle fBundle;
-	protected String fPrefix;
 	
-	public DeleteISourceManipulationsAction(ResourceBundle bndl, String prefix, JavaOutlinePage page) {
-		super(bndl, prefix);
-		fBundle= bndl;
-		fPrefix= prefix;
+	
+	public DeleteISourceManipulationsAction(JavaOutlinePage page) {
+		super(JavaEditorMessages.getString("DeleteISourceManipulations.label")); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("DeleteISourceManipulations.tooltip")); //$NON-NLS-1$
+		setDescription(JavaEditorMessages.getString("DeleteISourceManipulations.description")); //$NON-NLS-1$
+		
 		fPage= page;
 	}
 	
@@ -64,7 +60,7 @@ public class DeleteISourceManipulationsAction extends JavaUIAction implements IS
 					args[i].delete(true, /*IProgressMonitor*/ null);
 			}
 		} catch (JavaModelException x) {
-			ErrorDialog.openError(getShell(), fBundle.getString(fPrefix + ERROR_TITLE), fBundle.getString(fPrefix + ERROR_MESSAGE), x.getStatus());
+			ErrorDialog.openError(getShell(), JavaEditorMessages.getString("DeleteISourceManipulations.error.deleting.title1"), JavaEditorMessages.getString("DeleteISourceManipulations.error.deleting.message1"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 	

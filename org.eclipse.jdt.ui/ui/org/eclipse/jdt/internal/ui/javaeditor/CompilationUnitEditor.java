@@ -29,9 +29,9 @@ public class CompilationUnitEditor extends JavaEditor {
 	public CompilationUnitEditor() {
 		super();
 		setDocumentProvider(JavaPlugin.getDefault().getCompilationUnitDocumentProvider());
-		setEditorContextMenuId("#CompilationUnitEditorContext");
-		setRulerContextMenuId("#CompilationUnitRulerContext");
-		setOutlinerContextMenuId("#CompilationUnitOutlinerContext");
+		setEditorContextMenuId("#CompilationUnitEditorContext"); //$NON-NLS-1$
+		setRulerContextMenuId("#CompilationUnitRulerContext"); //$NON-NLS-1$
+		setOutlinerContextMenuId("#CompilationUnitOutlinerContext"); //$NON-NLS-1$
 		fSavePolicy= new CUSavePolicy();
 	}
 	
@@ -42,20 +42,20 @@ public class CompilationUnitEditor extends JavaEditor {
 		
 		super.createActions();
 		
-		setAction("ContentAssistProposal", new TextOperationAction(getResourceBundle(), "Editor.ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			
-		setAction("AddImportOnSelection", new AddImportOnSelectionAction(this));		
-		setAction("OrganizeImports", new OrganizeImportsAction(this));
+		setAction("ContentAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
+		setAction("AddImportOnSelection", new AddImportOnSelectionAction(this));		 //$NON-NLS-1$
+		setAction("OrganizeImports", new OrganizeImportsAction(this)); //$NON-NLS-1$
 		
-		setAction("Comment", new TextOperationAction(getResourceBundle(), "Editor.Comment.", this, ITextOperationTarget.PREFIX));
-		setAction("Uncomment", new TextOperationAction(getResourceBundle(), "Editor.Uncomment.", this, ITextOperationTarget.STRIP_PREFIX));
-		setAction("Format", new TextOperationAction(getResourceBundle(), "Editor.Format.", this, ISourceViewer.FORMAT));
+		setAction("Comment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
+		setAction("Uncomment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
+		setAction("Format", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT)); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		setAction("AddBreakpoint", new AddBreakpointAction(getResourceBundle(), "Editor.AddBreakpoint.", this));
-		setAction("ManageBreakpoints", new BreakpointRulerAction(getResourceBundle(), "Editor.ManageBreakpoints.", getVerticalRuler(), this));
+		setAction("AddBreakpoint", new AddBreakpointAction(this)); //$NON-NLS-1$
+		setAction("ManageBreakpoints", new BreakpointRulerAction(getVerticalRuler(), this)); //$NON-NLS-1$
 		
-		setAction("ExtractMethod", new ExtractMethodAction(this));
+		setAction("ExtractMethod", new ExtractMethodAction(this)); //$NON-NLS-1$
 		
-		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		
+		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		 //$NON-NLS-1$
 	}
 	
 	/**
@@ -86,14 +86,14 @@ public class CompilationUnitEditor extends JavaEditor {
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
-		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "ExtractMethod");
-		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "ContentAssistProposal");
-		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "AddImportOnSelection");
-		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "OrganizeImports");
-		addAction(menu, ITextEditorActionConstants.GROUP_ADD, "AddBreakpoint");
-		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Comment");
-		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Uncomment");
-		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format");
+		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "ExtractMethod"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "ContentAssistProposal"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "AddImportOnSelection"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "OrganizeImports"); //$NON-NLS-1$
+		addAction(menu, ITextEditorActionConstants.GROUP_ADD, "AddBreakpoint"); //$NON-NLS-1$
+		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Comment"); //$NON-NLS-1$
+		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Uncomment"); //$NON-NLS-1$
+		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -101,7 +101,7 @@ public class CompilationUnitEditor extends JavaEditor {
 	 */
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
-		addAction(menu, "ManageBreakpoints");
+		addAction(menu, "ManageBreakpoints"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -110,12 +110,12 @@ public class CompilationUnitEditor extends JavaEditor {
 	protected JavaOutlinePage createOutlinePage() {
 		JavaOutlinePage page= super.createOutlinePage();
 		
-		page.setAction("OrganizeImports", new OrganizeImportsAction(this));
-		page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page));
-		page.setAction("AddEdition", new JavaAddElementFromHistory(this, page));
+		page.setAction("OrganizeImports", new OrganizeImportsAction(this)); //$NON-NLS-1$
+		page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page)); //$NON-NLS-1$
+		page.setAction("AddEdition", new JavaAddElementFromHistory(this, page)); //$NON-NLS-1$
 		
-		DeleteISourceManipulationsAction deleteElement= new DeleteISourceManipulationsAction(getResourceBundle(), "Outliner.DeleteISourceManipulations.", page);
-		page.setAction("DeleteElement", deleteElement);
+		DeleteISourceManipulationsAction deleteElement= new DeleteISourceManipulationsAction(page);
+		page.setAction("DeleteElement", deleteElement); //$NON-NLS-1$
 		page.addSelectionChangedListener(deleteElement);
 		
 		return page;
@@ -153,19 +153,17 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			} else {
 				
-				Shell shell= getSite().getShell();
 				/* 
 				 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
 				 * Missing resources.
 				 */
-				String title= getResourceString("Editor.Error.save.deleted.title");
-				String msg= getResourceString("Editor.Error.save.deleted.message");
-				MessageDialog.openError(shell, title, msg);
+				Shell shell= getSite().getShell();
+				MessageDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title1"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message1")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
 		} else {	
 			
-			getStatusLineManager().setErrorMessage("");
+			getStatusLineManager().setErrorMessage(""); //$NON-NLS-1$
 			
 			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 			ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
@@ -221,25 +219,25 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			IWorkbenchPage page= getSite().getPage();
 			
-			IViewPart view= view= page.findView("org.eclipse.ui.views.TaskList");
+			IViewPart view= view= page.findView("org.eclipse.ui.views.TaskList"); //$NON-NLS-1$
 			if (view instanceof TaskList) {
 				StructuredSelection ss= new StructuredSelection(nextError);
 				((TaskList) view).setSelection(ss, true);
 			}
 			
-			getStatusLineManager().setErrorMessage(nextError.getAttribute(IMarker.MESSAGE, ""));
+			getStatusLineManager().setErrorMessage(nextError.getAttribute(IMarker.MESSAGE, "")); //$NON-NLS-1$
 			fStatusLineClearer= new ISelectionChangedListener() {
 				public void selectionChanged(SelectionChangedEvent event) {
 					getSelectionProvider().removeSelectionChangedListener(fStatusLineClearer);
 					fStatusLineClearer= null;
-					getStatusLineManager().setErrorMessage("");
+					getStatusLineManager().setErrorMessage(""); //$NON-NLS-1$
 				}
 			};
 			provider.addSelectionChangedListener(fStatusLineClearer);
 			
 		} else {
 			
-			getStatusLineManager().setErrorMessage("");
+			getStatusLineManager().setErrorMessage(""); //$NON-NLS-1$
 			
 		}
 	}
@@ -306,7 +304,7 @@ public class CompilationUnitEditor extends JavaEditor {
 				IJavaProject jProject= JavaCore.create(project);
 				if (jProject != null) {
 					try {
-						IJavaElement element= jProject.findElement(new Path(""));
+						IJavaElement element= jProject.findElement(new Path("")); //$NON-NLS-1$
 						if (element instanceof IPackageFragment) {
 							IPackageFragment fragment= (IPackageFragment) element;
 							IJavaElement parent= fragment.getParent();
@@ -423,16 +421,13 @@ public class CompilationUnitEditor extends JavaEditor {
 			/* 
 			 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
 			 * Missing resources.
-			 */			
-			String title= getResourceString("Editor.Error.save.title");
-			String msg= getResourceString("Editor.Error.save.message");
-			
+			 */						
 			Throwable t= x.getTargetException();
 			if (t instanceof CoreException) {
 				CoreException cx= (CoreException) t;
-				ErrorDialog.openError(shell, title, msg, cx.getStatus());
+				ErrorDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title2"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message2"), cx.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
-				MessageDialog.openError(shell, title, msg + t.getMessage());
+				MessageDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title3"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message3") + t.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
 		} finally {

@@ -34,14 +34,12 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	public ClassFileEditorActionContributor() {
 		super();
 		
-		ResourceBundle bundle= JavaPlugin.getResourceBundle();
-		
-		fOpenOnSelection= new OpenOnSelectionAction(bundle, "Editor.OpenOnSelection.");
-		fOpenHierarchyOnSelection= new OpenHierarchyOnSelectionAction(bundle, "Editor.OpenHierarchyOnSelection.");
-		fTogglePresentationAction= new TogglePresentationAction(bundle, "Editor.TogglePresentation.");
+		fOpenOnSelection= new OpenOnSelectionAction();
+		fOpenHierarchyOnSelection= new OpenHierarchyOnSelectionAction();
+		fTogglePresentationAction= new TogglePresentationAction();
 		
 		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
-		fToggleTextHover= new ToggleTextHoverAction(bundle, "Editor.ToggleTextHover.");
+		fToggleTextHover= new ToggleTextHoverAction();
 	}
 	
 	/**

@@ -11,7 +11,9 @@ public class GotoTypeAction extends OpenJavaElementAction {
 	private PackageExplorerPart fPackageExplorer;
 	
 	public GotoTypeAction(PackageExplorerPart part) {
-		super(PackagesMessages.getString("GotoType.action.label")); //$NON-NLS-1$
+		super();
+		setText(PackagesMessages.getString("GotoType.action.label")); //$NON-NLS-1$
+		setDescription("Searches and selects a given type");
 		fPackageExplorer= part;
 	}
 

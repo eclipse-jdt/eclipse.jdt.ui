@@ -12,8 +12,8 @@ import java.util.ResourceBundle;import org.eclipse.jface.dialogs.MessageDialog
  */
 public class EditorDisplayAction extends DisplayAction {
 
-	public EditorDisplayAction(ResourceBundle bundle, String prefix, IWorkbenchPart part) {
-		super(bundle, prefix, part);
+	public EditorDisplayAction(IWorkbenchPart part) {
+		super(JavaEditorMessages.getResourceBundle(), "Display.", part); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.DISPLAY_ACTION });	
 	}
 	
@@ -29,7 +29,7 @@ public class EditorDisplayAction extends DisplayAction {
 					return (IDataDisplay) value;
 			}			
 		} catch (PartInitException e) {
-			MessageDialog.openError(getShell(), "Error in OpenHierarchyOnSelectionAction", e.getMessage());
+			MessageDialog.openError(getShell(), JavaEditorMessages.getString("EditorDisplayAction.error.title1"), e.getMessage()); //$NON-NLS-1$
 		}
 		
 		return null;

@@ -22,29 +22,39 @@ import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
  * the code snippet.
  */
 public class SnippetOpenOnSelectionAction extends OpenJavaElementAction {
-	protected ResourceBundle fBundle;
-	protected String fPrefix;
-	protected JavaSnippetEditor fEditor;
+	
+	private JavaSnippetEditor fEditor;
+	private String fDialogTitle;
+	private String fDialogMessage;
+	
+	public SnippetOpenOnSelectionAction(JavaSnippetEditor editor) {
+		super();
 		
-	public SnippetOpenOnSelectionAction(JavaSnippetEditor editor, ResourceBundle bundle, String prefix) {
-		super(bundle, prefix);
-		fBundle= bundle;
-		fPrefix= prefix;
 		fEditor= editor;
+		
+		setText("&Open on Selection@F3");
+		setDescription("Open an editor on the selected element");
+		setToolTipText("Open an editor on the selected element");
+		setDialogTitle("Open on Selection");
+		setDialogMessage("Select or enter the element to open");
 	}
-
-	public SnippetOpenOnSelectionAction(ResourceBundle bundle, String prefix) {
-		this(null, bundle, prefix);
+	
+	public SnippetOpenOnSelectionAction() {
+		this(null);
+	}
+	
+	protected void setDialogTitle(String title) {
+		fDialogTitle= title;
+	}
+	
+	protected void setDialogMessage(String message) {
+		fDialogMessage= message;
 	}
 	
 	public void setContentEditor(JavaSnippetEditor contentEditor) {
 		fEditor= contentEditor;
 	}
-	
-	protected String getResourceString(String key) {
-		return fBundle.getString(fPrefix + key);
-	}
-		
+			
 	public void run() {
 		
 		Shell w= getShell();
@@ -55,8 +65,8 @@ public class SnippetOpenOnSelectionAction extends OpenJavaElementAction {
 				ISourceReference chosen= selectSourceReference(
 										filterResolveResults(result),
 										w, 
-										getResourceString("title"), 
-										getResourceString("message")
+										fDialogTitle, 
+										fDialogMessage
 										);
 				if (chosen != null) {
 					open(chosen);

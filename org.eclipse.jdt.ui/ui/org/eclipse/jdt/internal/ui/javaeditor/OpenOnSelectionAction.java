@@ -11,10 +11,14 @@ import java.util.ResourceBundle;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -52,21 +56,39 @@ public class OpenOnSelectionAction extends OpenJavaElementAction {
 	};
 	
 		
-	protected ResourceBundle fBundle;
-	protected String fPrefix;
+	private String fDialogTitle;
+	private String fDialogMessage;
 	protected ITextEditor fEditor;
 	protected ISelectionChangedListener fListener= new SelectionChangedListener();
 	
-	public OpenOnSelectionAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
-		super(bundle, prefix);
-		fBundle= bundle;
-		fPrefix= prefix;
-		fEditor= editor;
-		setEnabled(false);
+	
+	/**
+	 * Creates a new action with the given label and image.
+	 */
+	protected OpenOnSelectionAction() {
+		super();
+		
+		setText(JavaEditorMessages.getString("OpenOnSelection.label")); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("OpenOnSelection.tooltip")); //$NON-NLS-1$
+		setDescription(JavaEditorMessages.getString("OpenOnSelection.description")); //$NON-NLS-1$
+		setDialogTitle(JavaEditorMessages.getString("OpenOnSelection.dialog.title")); //$NON-NLS-1$
+		setDialogMessage(JavaEditorMessages.getString("OpenOnSelection.dialog.message")); //$NON-NLS-1$
 	}
 	
-	public OpenOnSelectionAction(ResourceBundle bundle, String prefix) {
-		this(bundle, prefix, null);
+	/**
+	 * Creates a new action with the given image.
+	 */
+	public OpenOnSelectionAction(ImageDescriptor image) {
+		this();
+		setImageDescriptor(image);
+	}
+	
+	protected void setDialogTitle(String title) {
+		fDialogTitle= title;
+	}
+	
+	protected void setDialogMessage(String message) {
+		fDialogMessage= message;
 	}
 	
 	public void setContentEditor(ITextEditor editor) {
@@ -83,11 +105,6 @@ public class OpenOnSelectionAction extends OpenJavaElementAction {
 			if (p != null) p.addSelectionChangedListener(fListener);
 		}
 	}
-	
-	protected String getResourceString(String key) {
-		return fBundle.getString(fPrefix + key);
-	}
-	
 	
 	protected ICodeAssist getCodeAssist() {	
 		IEditorInput input= fEditor.getEditorInput();
@@ -113,7 +130,7 @@ public class OpenOnSelectionAction extends OpenJavaElementAction {
 					IJavaElement[] result= resolve.codeSelect(selection.getOffset(), selection.getLength());
 					if (result != null && result.length > 0) {
 						List filtered= filterResolveResults(result);
-						ISourceReference chosen= selectSourceReference(filtered, getShell(), getResourceString("title"), getResourceString("message"));
+						ISourceReference chosen= selectSourceReference(filtered, getShell(), fDialogTitle, fDialogMessage);
 						if (chosen != null) {
 							open(chosen);
 							return;

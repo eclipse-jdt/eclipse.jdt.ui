@@ -10,7 +10,8 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class OpenTypeAction extends OpenJavaElementAction implements IWorkbenchWindowActionDelegate {
 	
 	public OpenTypeAction() {
-		super(JavaUIMessages.getString("OpenTypeAction.label")); //$NON-NLS-1$
+		super();
+		setText(JavaUIMessages.getString("OpenTypeAction.label")); //$NON-NLS-1$
 		setDescription(JavaUIMessages.getString("OpenTypeAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("OpenTypeAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_OPENTYPE);

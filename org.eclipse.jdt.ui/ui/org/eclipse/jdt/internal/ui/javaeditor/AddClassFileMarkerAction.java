@@ -1,26 +1,26 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
-
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-
+
 
 import java.util.Map;
 import java.util.ResourceBundle;
-
+
 import org.eclipse.core.resources.IResource;
-
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.AddMarkerAction;
 import org.eclipse.ui.texteditor.ITextEditor;
-
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
+
 import org.eclipse.jdt.internal.ui.IResourceLocator;
-
+
 
 class AddClassFileMarkerAction extends AddMarkerAction {
 	
@@ -28,10 +28,9 @@ class AddClassFileMarkerAction extends AddMarkerAction {
 	/**
 	 * Creates a marker action.
 	 */
-	public AddClassFileMarkerAction(ResourceBundle bundle, String prefix, ITextEditor textEditor, String markerType, boolean askForLabel) {
-		super(bundle, prefix, textEditor, markerType, askForLabel);
-	}
-	
+	public AddClassFileMarkerAction(String prefix, ITextEditor textEditor, String markerType, boolean askForLabel) {
+		super(JavaEditorMessages.getResourceBundle(), prefix, textEditor, markerType, askForLabel);
+	}	
 	/**
 	 * @see AddMarkerAction#getResource()
 	 */

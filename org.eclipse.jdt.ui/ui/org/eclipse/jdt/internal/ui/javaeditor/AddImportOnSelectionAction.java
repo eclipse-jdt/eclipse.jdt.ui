@@ -5,19 +5,51 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.CoreException;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.codemanipulation.AddImportsOperation;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import java.lang.reflect.InvocationTargetException;
 
-public class AddImportOnSelectionAction extends JavaUIAction implements IUpdate {
-	
-	private static final String ACTION_PREFIX= "AddImportOnSelectionAction.";
-	private static final String DIALOG_PREFIX= ACTION_PREFIX + "selectiondialog.";
-	
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.IUpdate;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.codemanipulation.AddImportsOperation;
+import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+
+public class AddImportOnSelectionAction extends Action implements IUpdate {
+		
 	private ITextEditor fEditor;
+		
 	
-	public AddImportOnSelectionAction(ITextEditor editor) {
-		super(JavaPlugin.getResourceBundle(), ACTION_PREFIX);		
+	public AddImportOnSelectionAction(ITextEditor editor) {	
+		super(JavaEditorMessages.getString("AddImportOnSelection.label"));		 //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("AddImportOnSelection.tooltip")); //$NON-NLS-1$
+		setDescription(JavaEditorMessages.getString("AddImportOnSelection.description")); //$NON-NLS-1$
+		
 		fEditor= editor;
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION });			
+		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION });	
 	}
 	
 	public AddImportOnSelectionAction() {
@@ -46,7 +78,7 @@ public class AddImportOnSelectionAction extends JavaUIAction implements IUpdate 
 			dialog.run(false, true, op);
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
-			MessageDialog.openError(getShell(), "AddGetterSetterAction failed", e.getTargetException().getMessage());
+			MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.message1"), e.getTargetException().getMessage()); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled.
 		}
@@ -80,9 +112,9 @@ public class AddImportOnSelectionAction extends JavaUIAction implements IUpdate 
 						return;
 					}
 				} catch (CoreException e) {
-					ErrorDialog.openError(getShell(), "Error", null, e.getStatus());			
+					ErrorDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.message2"), null, e.getStatus());			 //$NON-NLS-1$
 				} catch (BadLocationException e) {
-					MessageDialog.openError(getShell(), "Error", "BadLocationException: " + e.getMessage());
+					MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.message3"), JavaEditorMessages.getString("AddImportOnSelection.error.message4") + e.getMessage()); //$NON-NLS-2$ //$NON-NLS-1$
 				}
 			}
 		}
@@ -112,7 +144,7 @@ public class AddImportOnSelectionAction extends JavaUIAction implements IUpdate 
 					return;
 				}
 			}
-			doc.replace(nameStart, packLen + 1, "");
+			doc.replace(nameStart, packLen + 1, ""); //$NON-NLS-1$
 		}
 	}	
 	
@@ -143,8 +175,8 @@ public class AddImportOnSelectionAction extends JavaUIAction implements IUpdate 
 		
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(flags), true, false);
-		dialog.setTitle(plugin.getResourceString(DIALOG_PREFIX + "title"));
-		dialog.setMessage(plugin.getResourceString(DIALOG_PREFIX +  "message"));
+		dialog.setTitle(JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
+		dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
 		if (dialog.open(results) == dialog.OK) {
 			return (IType) dialog.getSelectedElement();
 		}

@@ -6,7 +6,77 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.Enumeration;import java.util.Hashtable;import java.util.MissingResourceException;import java.util.ResourceBundle;import java.util.Vector;import org.eclipse.swt.SWT;import org.eclipse.swt.events.KeyAdapter;import org.eclipse.swt.events.KeyEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Item;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.Tree;import org.eclipse.swt.widgets.Widget;import org.eclipse.jface.action.IAction;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.util.Assert;import org.eclipse.jface.util.ListenerList;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.part.Page;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.views.contentoutline.IContentOutlinePage;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IInitializer;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IParent;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GenerateGroup;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.ArrayUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.ListenerList;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.ViewerSorter;
+
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IInitializer;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
+import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
+import org.eclipse.jdt.internal.ui.actions.OpenHierarchyPerspectiveItem;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
+import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import org.eclipse.jdt.internal.ui.util.ArrayUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
 /**
@@ -112,7 +182,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 						try {
 							return filter(c.getChildren());
 						} catch (JavaModelException x) {
-							JavaPlugin.getDefault().logErrorStatus("JavaOutlinePage.ChildrenProvider.getChildren", x.getStatus());
+							JavaPlugin.getDefault().logErrorStatus(JavaEditorMessages.getString("JavaOutlinePage.error.ChildrenProvider.getChildren.message1"), x.getStatus()); //$NON-NLS-1$
 						}
 					}
 					return ArrayUtility.getEmptyArray();
@@ -137,7 +207,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 							IJavaElement[] children= filter(c.getChildren());
 							return (children != null && children.length > 0);
 						} catch (JavaModelException x) {
-							JavaPlugin.getDefault().logErrorStatus("JavaOutlinePage.ChildrenProvider.hasChildren", x.getStatus());
+							JavaPlugin.getDefault().logErrorStatus(JavaEditorMessages.getString("JavaOutlinePage.error.ChildrenProvider.hasChildren.message1"), x.getStatus()); //$NON-NLS-1$
 						}
 					}
 					return false;
@@ -260,7 +330,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 						if ((delta.getKind() & IJavaElementDelta.ADDED) != 0) {
 							return JavaModelUtility.isMainMethod((IMethod)element);
 						}
-						return "main".equals(element.getElementName());
+						return "main".equals(element.getElementName()); //$NON-NLS-1$
 					}
 					return false;
 				}
@@ -462,23 +532,17 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				}
 			};
 			
-			class LexicalSortingAction extends JavaUIAction {
+			class LexicalSortingAction extends Action {
 				
-				private static final String IS_CHECKED_KEY= "isChecked";
-				private static final String TOOLTIP_CHECKED_KEY= "tooltip.checked";
-				private static final String TOOLTIP_UNCHECKED_KEY= "tooltip.unchecked";
-				
-				private LexicalSorter fSorter= new LexicalSorter();
-				private String fPrefix;
-				private ResourceBundle fBundle;
-				
-				public LexicalSortingAction(ResourceBundle bundle, String prefix) {
-					super(bundle, prefix);
+				private LexicalSorter fSorter= new LexicalSorter();			
+
+				public LexicalSortingAction() {
+					super();
 					
-					fBundle= bundle;
-					fPrefix= prefix;
+					setText(JavaEditorMessages.getString("JavaOutlinePage.Sort.label")); //$NON-NLS-1$
+					JavaPluginImages.setImageDescriptors(this, "lcl16", "alphab_sort_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 					
-					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fPrefix + IS_CHECKED_KEY);
+					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean("LexicalSortingAction.isChecked"); //$NON-NLS-1$
 					valueChanged(checked, false);
 				}
 				
@@ -490,14 +554,11 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					setChecked(on);
 					fOutlineViewer.setSorter(on ? fSorter : null);
 					
-					try {
-						String key= fPrefix + (on ? TOOLTIP_CHECKED_KEY : TOOLTIP_UNCHECKED_KEY);
-						setToolTipText(fBundle.getString(key));
-					} catch (MissingResourceException x) {
-					}
+					setToolTipText(on ? JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip.checked") : JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip.unchecked")); //$NON-NLS-2$ //$NON-NLS-1$
+					setDescription(on ? JavaEditorMessages.getString("JavaOutlinePage.Sort.description.checked") : JavaEditorMessages.getString("JavaOutlinePage.Sort.description.unchecked")); //$NON-NLS-2$ //$NON-NLS-1$
 					
 					if (store)
-						JavaPlugin.getDefault().getPreferenceStore().setValue(fPrefix + IS_CHECKED_KEY, on);
+						JavaPlugin.getDefault().getPreferenceStore().setValue("LexicalSortingAction.isChecked", on); //$NON-NLS-1$
 				}
 			};
 			
@@ -582,25 +643,28 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				}
 			}; 
 			
-			class FilterAction extends JavaUIAction {
-				
-				private static final String IS_CHECKED_KEY= "isChecked";
-				private static final String TOOLTIP_CHECKED_KEY= "tooltip.checked";
-				private static final String TOOLTIP_UNCHECKED_KEY= "tooltip.unchecked";
-				
+			class FilterAction extends Action {
+								
 				private ViewerFilter fFilter;
-				private String fPrefix;
-				private ResourceBundle fBundle;
+				private String fCheckedDesc;
+				private String fUncheckedDesc;
+				private String fCheckedTooltip;
+				private String fUncheckedTooltip;
+				private String fPreferenceKey;
 				
-				public FilterAction(ResourceBundle bundle, String prefix, ViewerFilter filter) {
-					super(bundle, prefix);
-					
-					fBundle= bundle;
-					fPrefix= prefix;
-					
+				public FilterAction(ViewerFilter filter, String label, String checkedDesc, String uncheckedDesc, String checkedTooltip, String uncheckedTooltip, String prefKey) {
+					super();
+		
 					fFilter= filter;
 					
-					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fPrefix + IS_CHECKED_KEY);
+					setText(label);
+					fCheckedDesc= checkedDesc;
+					fUncheckedDesc= uncheckedDesc;
+					fCheckedTooltip= checkedTooltip;
+					fUncheckedTooltip= uncheckedTooltip;
+					fPreferenceKey= prefKey;
+					
+					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fPreferenceKey);
 					valueChanged(checked, false);
 				}
 				
@@ -609,20 +673,21 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				}
 				
 				private void valueChanged(boolean on, boolean store) {
+					
 					setChecked(on);
-					if (on) 
+					
+					if (on) {
 						fOutlineViewer.addFilter(fFilter);
-					else
+						setToolTipText(fCheckedTooltip);
+						setDescription(fCheckedDesc);
+					} else {
 						fOutlineViewer.removeFilter(fFilter);
-						
-					try {
-						String key= fPrefix + (on ? TOOLTIP_CHECKED_KEY : TOOLTIP_UNCHECKED_KEY);
-						setToolTipText(fBundle.getString(key));
-					} catch (MissingResourceException x) {
+						setToolTipText(fUncheckedTooltip);
+						setDescription(fUncheckedDesc);
 					}
 					
 					if (store)
-						JavaPlugin.getDefault().getPreferenceStore().setValue(fPrefix + IS_CHECKED_KEY, on);
+						JavaPlugin.getDefault().getPreferenceStore().setValue(fPreferenceKey, on);
 				}
 			};
 
@@ -770,7 +835,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	}
 	 
 	private void addRefactoring(IMenuManager menu){
-		MenuManager refactoring= new MenuManager("&Refactor");
+		MenuManager refactoring= new MenuManager(JavaEditorMessages.getString("JavaOutlinePage.ContextMenu.refactoring.label")); //$NON-NLS-1$
 		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup() }, fOutlineViewer);
 		if (!refactoring.isEmpty())
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
@@ -799,15 +864,15 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		JavaPlugin.createStandardGroups(menu);
 
 		if (OrganizeImportsAction.canActionBeAdded(getSelection())) {
-			addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "OrganizeImports");
+			addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "OrganizeImports"); //$NON-NLS-1$
 		}
 				
-		addAction(menu, IContextMenuConstants.GROUP_OPEN, "OpenImportDeclaration");
-		addAction(menu, IContextMenuConstants.GROUP_SHOW, "ShowInPackageView");
-		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "DeleteElement");
-		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "ReplaceWithEdition");
-		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddEdition");
-		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddMethodEntryBreakpoint");
+		addAction(menu, IContextMenuConstants.GROUP_OPEN, "OpenImportDeclaration"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_SHOW, "ShowInPackageView"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "DeleteElement"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "ReplaceWithEdition"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddEdition"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddMethodEntryBreakpoint"); //$NON-NLS-1$
 				
 		ContextMenuGroup.add(menu, fActionGroups, fOutlineViewer);
 		
@@ -833,20 +898,19 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			addSelectionChangedListener(updater);
 		}
 		
-		JavaUIAction action= new LexicalSortingAction(JavaPlugin.getResourceBundle(), "Outliner.SortMembers.");
-		action.setImageDescriptors("lcl16", "alphab_sort_co.gif");
-		toolBarManager.add(action);
+		Action action= new LexicalSortingAction();
+		toolBarManager.add(action);		
 		
-		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideFields.", new FieldFilter());
-		action.setImageDescriptors("lcl16", "fields_co.gif");
+		action= new FilterAction(new FieldFilter(), JavaEditorMessages.getString("JavaOutlinePage.HideFields.label"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.tooltip.unchecked"), "HideFields.isChecked"); //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setImageDescriptors(action, "lcl16", "fields_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+		toolBarManager.add(action);
+					
+		action= new FilterAction(new VisibilityFilter(VisibilityFilter.NOT_STATIC), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.label"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.tooltip.unchecked"), "HideStaticMembers.isChecked");		 //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setImageDescriptors(action, "lcl16", "static_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 		toolBarManager.add(action);
 				
-		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideStaticMembers.", new VisibilityFilter(VisibilityFilter.NOT_STATIC));		
-		action.setImageDescriptors("lcl16", "static_co.gif");
-		toolBarManager.add(action);
-		
-		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideNonePublicMembers.", new VisibilityFilter(VisibilityFilter.PUBLIC));		
-		action.setImageDescriptors("lcl16", "public_co.gif");
+		action= new FilterAction(new VisibilityFilter(VisibilityFilter.PUBLIC), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.label"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.tooltip.unchecked"), "HideNonePublicMembers.isChecked"); //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		JavaPluginImages.setImageDescriptors(action, "lcl16", "public_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 		toolBarManager.add(action);
 	}	
 	
@@ -905,7 +969,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		IAction action= null;
 		if (event.character == SWT.DEL) 
-			action= getAction("DeleteElement");
+			action= getAction("DeleteElement"); //$NON-NLS-1$
 		else if (event.keyCode == SWT.F4) {
 			// Special case since Open Type Hierarchy is no action.
 			(new OpenTypeHierarchyHelper()).open(getSelection(), fEditor.getSite().getWorkbenchWindow());

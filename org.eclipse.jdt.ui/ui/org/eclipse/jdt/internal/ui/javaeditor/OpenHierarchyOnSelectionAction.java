@@ -5,7 +5,21 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
  
-import java.util.ResourceBundle;import org.eclipse.jface.text.ITextSelection;import org.eclipse.ui.PartInitException;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+
+
 
 /**
  * This action opens a java editor on the element represented by text selection of
@@ -14,13 +28,19 @@ import java.util.ResourceBundle;import org.eclipse.jface.text.ITextSelection;
  */
 public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	
-	public OpenHierarchyOnSelectionAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
-		super(bundle, prefix, editor);
-		setEnabled(editor != null);
+	public OpenHierarchyOnSelectionAction(ImageDescriptor image, ITextEditor editor) {
+		this();
+		setImageDescriptor(image);
+		setContentEditor(editor);
 	}
 	
-	public OpenHierarchyOnSelectionAction(ResourceBundle bundle, String prefix) {
-		this(bundle, prefix, null);
+	public OpenHierarchyOnSelectionAction() {
+		super();
+		setText(JavaEditorMessages.getString("OpenHierarchy.label")); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("OpenHierarchy.tooltip")); //$NON-NLS-1$
+		setDescription(JavaEditorMessages.getString("OpenHierarchy.description")); //$NON-NLS-1$
+		setDialogTitle(JavaEditorMessages.getString("OpenHierarchy.dialog.title")); //$NON-NLS-1$
+		setDialogMessage(JavaEditorMessages.getString("OpenHierarchy.dialog.message")); //$NON-NLS-1$
 	}
 	
 	/**
@@ -31,7 +51,6 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 		fEditor= editor;
 		setEnabled(editor != null);
 	}
-	
 	
 	/**
 	 * @see OpenJavaElementAction#open

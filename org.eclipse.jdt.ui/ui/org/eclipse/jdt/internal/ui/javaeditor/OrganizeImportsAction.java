@@ -5,17 +5,44 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.lang.reflect.InvocationTargetException;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportContainer;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation;
 
-public class OrganizeImportsAction extends JavaUIAction {
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation;
+
+
+
+public class OrganizeImportsAction extends Action {
 	
-	private static final String ACTION_PREFIX= "OrganizeImportsAction.";
-	private static final String PREFIX_DILAOG= ACTION_PREFIX + "compilationerrordialog.";
-		
+	
 	private ITextEditor fEditor;
 	
+	
 	public OrganizeImportsAction(ITextEditor editor) {
-		super(JavaPlugin.getResourceBundle(), ACTION_PREFIX);
+		
+		super(JavaEditorMessages.getString("OrganizeImports.label")); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("OrganizeImports.tooltip")); //$NON-NLS-1$
+		setDescription(JavaEditorMessages.getString("OrganizeImports.description")); //$NON-NLS-1$
+		
 		setContentEditor(editor);
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION });					
 	}
@@ -46,17 +73,14 @@ public class OrganizeImportsAction extends JavaUIAction {
 				return;
 			} catch (InvocationTargetException e) {
 				e.printStackTrace();
-				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), "AddGetterSetterAction failed", e.getTargetException().getMessage());
+				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaEditorMessages.getString("OrganizeImports.error.title1"), e.getTargetException().getMessage()); //$NON-NLS-1$
 			} catch (InterruptedException e) {
 			}
 		}		
 	}
 	
 	private void showCompilationErrorDialog() {
-		String okLabel= JavaPlugin.getResourceString(IUIConstants.KEY_OK);
-		String message= JavaPlugin.getResourceString(PREFIX_DILAOG + "message");
-		String title= JavaPlugin.getResourceString(PREFIX_DILAOG + "title");
-		MessageDialog dialog= new MessageDialog(JavaPlugin.getActiveWorkbenchShell(), title, null, message, SWT.ICON_INFORMATION, new String[] { okLabel }, 0);
+		MessageDialog dialog= new MessageDialog(JavaPlugin.getActiveWorkbenchShell(), JavaEditorMessages.getString("OrganizeImports.error.title2"), null, JavaEditorMessages.getString("OrganizeImports.error.message2"), SWT.ICON_INFORMATION, new String[] { JavaEditorMessages.getString("OrganizeImports.ok_label") }, 0); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-2$
 	 	dialog.open();
 	}
 	

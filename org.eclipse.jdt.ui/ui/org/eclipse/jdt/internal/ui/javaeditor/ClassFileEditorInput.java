@@ -68,7 +68,7 @@ public class ClassFileEditorInput implements IEditorInput, IPersistableElement {
 	 * @see IEditorInput#getContentType()
 	 */
 	public String getContentType() {
-		return "class";
+		return "class"; //$NON-NLS-1$
 	}
 	
 	/**

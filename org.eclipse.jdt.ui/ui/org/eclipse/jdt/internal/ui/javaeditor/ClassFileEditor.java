@@ -33,9 +33,9 @@ public class ClassFileEditor extends JavaEditor {
 	public ClassFileEditor() {
 		super();
 		setDocumentProvider(JavaPlugin.getDefault().getClassFileDocumentProvider());
-		setEditorContextMenuId("#ClassFileEditorContext");
-		setRulerContextMenuId("#ClassFileRulerContext");
-		setOutlinerContextMenuId("#ClassFileOutlinerContext");
+		setEditorContextMenuId("#ClassFileEditorContext"); //$NON-NLS-1$
+		setRulerContextMenuId("#ClassFileRulerContext"); //$NON-NLS-1$
+		setOutlinerContextMenuId("#ClassFileOutlinerContext"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -47,25 +47,25 @@ public class ClassFileEditor extends JavaEditor {
 		setAction(ITextEditorActionConstants.SAVE, null);
 		setAction(ITextEditorActionConstants.REVERT_TO_SAVED, null);
 		
-		setAction("AddBreakpoint", new AddBreakpointAction(getResourceBundle(), "Editor.AddBreakpoint.", this));
-		setAction("ManageBreakpoints", new BreakpointRulerAction(getResourceBundle(), "Editor.ManageBreakpoints.", getVerticalRuler(), this));
+		setAction("AddBreakpoint", new AddBreakpointAction(this)); //$NON-NLS-1$
+		setAction("ManageBreakpoints", new BreakpointRulerAction(getVerticalRuler(), this)); //$NON-NLS-1$
 		
 		/*
 		 * 1GF82PL: ITPJUI:ALL - Need to be able to add bookmark to classfile
 		 *
 		 *  // replace default action with class file specific ones
-		 *	
-		 *	setAction(ITextEditorActionConstants.BOOKMARK, new AddClassFileMarkerAction(getResourceBundle(), "Editor.AddBookmark.", this, IMarker.BOOKMARK, true));
-		 *	setAction(ITextEditorActionConstants.ADD_TASK, new AddClassFileMarkerAction(getResourceBundle(), "Editor.AddTask.", this, IMarker.TASK, false));
-		 *	setAction(ITextEditorActionConstants.RULER_MANAGE_BOOKMARKS, new ClassFileMarkerRulerAction(getResourceBundle(), "Editor.ManageBookmarks.", getVerticalRuler(), this, IMarker.BOOKMARK, true));
-		 *	setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, new ClassFileMarkerRulerAction(getResourceBundle(), "Editor.ManageTasks.", getVerticalRuler(), this, IMarker.TASK, true));
 		 */
+		 	setAction(ITextEditorActionConstants.BOOKMARK, new AddClassFileMarkerAction("AddBookmark.", this, IMarker.BOOKMARK, true)); //$NON-NLS-1$
+		 	setAction(ITextEditorActionConstants.ADD_TASK, new AddClassFileMarkerAction("AddTask.", this, IMarker.TASK, false)); //$NON-NLS-1$
+		 	setAction(ITextEditorActionConstants.RULER_MANAGE_BOOKMARKS, new ClassFileMarkerRulerAction("ManageBookmarks.", getVerticalRuler(), this, IMarker.BOOKMARK, true)); //$NON-NLS-1$
+		 	setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, new ClassFileMarkerRulerAction("ManageTasks.", getVerticalRuler(), this, IMarker.TASK, true)); //$NON-NLS-1$
+		 /**/
 		setAction(ITextEditorActionConstants.BOOKMARK, null);
 		setAction(ITextEditorActionConstants.ADD_TASK, null);
 		setAction(ITextEditorActionConstants.RULER_MANAGE_BOOKMARKS, null);
 		setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, null);
 		
-		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		
+		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		 //$NON-NLS-1$
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class ClassFileEditor extends JavaEditor {
 		}
 		
 		if (!(input instanceof ClassFileEditorInput))
-			throw new PartInitException(getResourceString("Editor.Error.invalid_input"));
+			throw new PartInitException(JavaEditorMessages.getString("ClassFileEditor.error.invalid_input_message")); //$NON-NLS-1$
 			
 		super.init(site, input);
 	}
@@ -123,7 +123,7 @@ public class ClassFileEditor extends JavaEditor {
 			
 			try {
 				if (file.getSource() != null)
-					addAction(menu, ITextEditorActionConstants.GROUP_ADD, "AddBreakpoint");
+					addAction(menu, ITextEditorActionConstants.GROUP_ADD, "AddBreakpoint"); //$NON-NLS-1$
 			} catch (JavaModelException x) {
 				// ignore
 			}
@@ -143,7 +143,7 @@ public class ClassFileEditor extends JavaEditor {
 			
 			try {
 				if (file.getSource() != null)
-					addAction(menu, "ManageBreakpoints");
+					addAction(menu, "ManageBreakpoints"); //$NON-NLS-1$
 			} catch (JavaModelException x) {
 				// ignore
 			}

@@ -104,7 +104,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					if (event.getLength() > 0 || event.getText() != null)
 						fDocument.replace(event.getOffset(), event.getLength(), event.getText());
 				} catch (BadLocationException x) {
-					Assert.isTrue(false, "Buffer and Document are out of sync");
+					Assert.isTrue(false, JavaEditorMessages.getString("CompilationUnitDocumentProvider.out_of_sync.message")); //$NON-NLS-1$
 				} finally {
 					fDocument.addDocumentListener(this);
 				}
@@ -178,7 +178,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				try {
 					input.getFile().refreshLocal(IResource.DEPTH_INFINITE, null);
 				} catch (CoreException x) {
-					handleCoreException(x, "CompilationUnitDocumentProvider.createElementInfo");
+					handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.createElementInfo")); //$NON-NLS-1$
 				}
 				
 				ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy();
@@ -302,7 +302,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 */
 	protected IDocument createCompilationUnitDocument(ICompilationUnit unit) throws CoreException {
 		
-		String contents= "";
+		String contents= ""; //$NON-NLS-1$
 		
 		try {
 			contents= unit.getSource();
