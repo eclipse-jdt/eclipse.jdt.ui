@@ -19,7 +19,7 @@ public class Performance {
 
 	private static final String PLUGIN_ID= JdtTextTestPlugin.PLUGIN_ID;
 
-	private static final String PERFORMANCE_METER_FACTORY= "option/performanceMeterFactory";
+	private static final String PERFORMANCE_METER_FACTORY= "/option/performanceMeterFactory";
 	
 	private static final String PERFORMANCE_METER_FACTORY_PROPERTY= "PerformanceMeterFactory";
 	
