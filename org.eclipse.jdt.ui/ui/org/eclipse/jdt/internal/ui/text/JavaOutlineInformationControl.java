@@ -236,7 +236,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 */
 	public JavaOutlineInformationControl(Shell parent, int shellStyle, int treeStyle, String commandId) {
 		super(parent, shellStyle, treeStyle, commandId, true);
-		fForegroundColor= parent.getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE);
+		fForegroundColor= parent.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 	}
 
 	/**
