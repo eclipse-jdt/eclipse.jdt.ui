@@ -101,9 +101,9 @@ public class ExtractInterfaceTests extends RefactoringTest {
 			cus[i]= createCUfromTestFile(clas.getPackageFragment(), cuNames[i]);			
 		}
 		ref.setReplaceOccurrences(replaceOccurrences);	
-		IMethod[] extractedMethods= TestUtil.getMethods(clas, extractedMethodNames, extractedSignatures);
-	    IField[] extractedFields= TestUtil.getFields(clas, extractedFieldNames);
-		ref.setExtractedMembers(TestUtil.merge(extractedMethods, extractedFields));
+		IMethod[] extractedMethods= getMethods(clas, extractedMethodNames, extractedSignatures);
+	    IField[] extractedFields= getFields(clas, extractedFieldNames);
+		ref.setExtractedMembers(merge(extractedMethods, extractedFields));
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 
 		for (int i= 0; i < cus.length; i++) {
