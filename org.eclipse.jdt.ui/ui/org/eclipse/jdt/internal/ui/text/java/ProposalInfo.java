@@ -27,22 +27,24 @@ public class ProposalInfo {
 	private char[] fMemberName;
 	private char[][] fParameterPackages;
 	private char[][] fParameterTypes;
+	private boolean fIsConstructor;
 
-	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName, char[] methodName, char[][] paramPackages, char[][] paramTypes) {
+	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName, char[] methodName, char[][] paramPackages, char[][] paramTypes, boolean isConstructor) {
 		fJavaProject= jproject;
 		fPackageName= packName;
 		fTypeName= typeQualifiedName;
 		fMemberName= methodName;
 		fParameterPackages= paramPackages;
 		fParameterTypes= paramTypes;
+		fIsConstructor= isConstructor;
 	}
 	
 	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName) {
-		this(jproject, packName, typeQualifiedName, null, null, null);
+		this(jproject, packName, typeQualifiedName, null, null, null, false);
 	}
 
 	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName, char[] fieldName) {
-		this(jproject, packName, typeQualifiedName, fieldName, null, null);
+		this(jproject, packName, typeQualifiedName, fieldName, null, null, false);
 	}	
 	
 	private String getParameterSignature(int index) {
@@ -71,7 +73,7 @@ public class ProposalInfo {
 						for (int i= 0; i < fParameterTypes.length; i++) {
 							paramTypes[i]= getParameterSignature(i);
 						}
-						member= JavaModelUtil.findMethod(name, paramTypes, false, type);
+						member= JavaModelUtil.findMethod(name, paramTypes, fIsConstructor, type);
 					} else {
 						IField field= type.getField(name);
 						if (field.exists()) {

@@ -180,7 +180,7 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 
 		JavaCompletionProposal proposal= createExperimentalMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 //		JavaCompletionProposal proposal= createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
-		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames));
+		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
 
 		boolean hasClosingBracket= completionName.length > 0 && completionName[completionName.length - 1] == ')';
 	
@@ -205,6 +205,7 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 		
 		if (returnTypeName.length == 0 && fCompilationUnit != null) {
 			proposal= createAnonymousTypeCompletion(declaringTypePackageName, declaringTypeName, name, parameterTypeNames, parameterNames, completionName, start, end);
+			proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName));
 			fMethods.add(proposal);
 		}
 	}

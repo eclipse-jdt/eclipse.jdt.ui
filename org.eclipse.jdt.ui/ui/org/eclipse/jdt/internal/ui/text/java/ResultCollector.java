@@ -85,7 +85,7 @@ public class ResultCollector implements ICompletionRequestor {
 		char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
 		char[] typePackageName, char[] typeName, char[] completionName,
 		int modifiers, int start, int end) {
-	
+		
 		String iconName= JavaPluginImages.IMG_MISC_DEFAULT;
 		if (Flags.isPublic(modifiers)) {
 			iconName= JavaPluginImages.IMG_MISC_PUBLIC;
@@ -94,7 +94,7 @@ public class ResultCollector implements ICompletionRequestor {
 		} else if (Flags.isPrivate(modifiers)) {
 			iconName= JavaPluginImages.IMG_MISC_PRIVATE;
 		}
-	
+		
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
 		if (typeName.length > 0) {
@@ -176,7 +176,7 @@ public class ResultCollector implements ICompletionRequestor {
 		int start, int end) {
 	
 		JavaCompletionProposal proposal= createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
-		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames));
+		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
 
 		boolean hasClosingBracket= completionName.length > 0 && completionName[completionName.length - 1] == ')';
 	
@@ -201,6 +201,7 @@ public class ResultCollector implements ICompletionRequestor {
 		
 		if (returnTypeName.length == 0 && fCompilationUnit != null) {
 			proposal= createAnonymousTypeCompletion(declaringTypePackageName, declaringTypeName, name, parameterTypeNames, parameterNames, completionName, start, end);
+			proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName));
 			fTypes.add(proposal);
 		}		
 	}
