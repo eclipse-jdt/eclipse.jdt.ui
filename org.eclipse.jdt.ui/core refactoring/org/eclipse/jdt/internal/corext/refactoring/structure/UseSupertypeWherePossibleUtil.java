@@ -590,14 +590,32 @@ class UseSupertypeWherePossibleUtil {
 				return true;
 			if (parentNode instanceof FieldAccess)	
 				return true;
-			if (parentNode instanceof QualifiedName)	
-				return true;
 			if (parentNode instanceof ThisExpression)	
 				return true;
 			if (parentNode instanceof SuperMethodInvocation)	
 				return true;
 			if (parentNode instanceof ImportDeclaration)	
 				return true;	
+
+		    if (parentNode instanceof QualifiedName){
+		    	QualifiedName qn= (QualifiedName)parentNode;
+		    	IBinding binding= qn.resolveBinding();
+		    	if (! (binding instanceof IVariableBinding))
+			        return true;
+		        IVariableBinding vb= (IVariableBinding)binding;
+		        if (! vb.isField())
+			        return true;
+			    IField field= Binding2JavaModel.find(vb, getCompilationUnit(qn).getJavaProject());
+		        if (field != null)
+		            field= (IField)WorkingCopyUtil.getWorkingCopyIfExists(field);
+				
+				if (! fExtractedMemberSet.contains(field))
+			        return true;
+				IBinding b1= qn.getQualifier().resolveBinding();
+		        if (! (b1 instanceof ITypeBinding))
+			        return true;
+		        return false;
+		    }    
 
 			if (parentNode instanceof InstanceofExpression)
 				return ! fUpdateInstanceOf;
@@ -822,8 +840,6 @@ class UseSupertypeWherePossibleUtil {
 		}	
 			
 		if (unparenthesizedParent instanceof QualifiedName){
-			if (fSuperTypeToUse == null)
-				return true;
 			IBinding binding= ((QualifiedName)unparenthesizedParent).resolveBinding();
 			if (binding instanceof IVariableBinding)
 				return !(isVariableBindingOk((IVariableBinding)binding));
@@ -848,11 +864,13 @@ class UseSupertypeWherePossibleUtil {
 					return true;
 				IType paramType= getMethodParameterType(method, argumentIndex);
 				paramType= (IType)WorkingCopyUtil.getWorkingCopyIfExists(paramType);
-				if ( fSuperTypeToUse != null && 
-				     ! fSuperTypeSet.contains(paramType) && 
-					 ! fSuperTypeToUse.equals(paramType) && 
-					 ! paramType.equals(fInputClass))
-					return true;
+				
+				if (! fSuperTypeSet.contains(paramType) && ! paramType.equals(fInputClass)){
+					if (fSuperTypeToUse == null)
+						return true;
+					if (! fSuperTypeToUse.equals(paramType))
+						return true;
+				}
 			}
 		}
 		if (unparenthesizedParent instanceof Assignment){

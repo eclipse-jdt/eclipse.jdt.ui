@@ -13,6 +13,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -46,10 +47,13 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TemplateUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -259,7 +263,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
-			pm.beginTask("", 10); //$NON-NLS-1$
+			pm.beginTask("", 11); //$NON-NLS-1$
 			pm.setTaskName("Analyzing...");
 			TextChangeManager manager= new TextChangeManager();
 			updateTypeDeclaration(manager, new SubProgressMonitor(pm, 1));
@@ -267,11 +271,23 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				updateReferences(manager, new SubProgressMonitor(pm, 9));
 			else
 				pm.worked(1);	
+			deleteExtractedConstants(manager, new SubProgressMonitor(pm, 1));	
 			return manager;
 		} finally{
 			pm.done();
 		}	
 	}
+	
+    private void deleteExtractedConstants(TextChangeManager manager, SubProgressMonitor subProgressMonitor) throws CoreException {
+    	for (int i= 0; i < fExtractedMembers.length; i++) {
+            if (! (fExtractedMembers[i] instanceof IField))
+            	continue;
+            IField field= (IField)fExtractedMembers[i];
+    	    ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(field.getCompilationUnit());
+    	    TextEdit edit= new DeleteSourceReferenceEdit(field, wc);
+           	manager.get(wc).addTextEdit("Delete extracted field", edit);
+        }
+    }
 
 	private void updateReferences(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException, CoreException {
 		fUpdatedTypeReferenceNodes= UseSupertypeWherePossibleUtil.updateReferences(manager, fExtractedMembers, fNewInterfaceName, fInputClass, fCodeGenerationSettings, fASTMappingManager, pm);
@@ -290,8 +306,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private static boolean isExtractableMember(IMember iMember) throws JavaModelException {
 		if (iMember.getElementType() == IJavaElement.METHOD)
 			return isExtractableMethod((IMethod)iMember);
-//		if (iMember.getElementType() == IJavaElement.FIELD)	
-//			return isExtractableField((IField)iMember);
+		if (iMember.getElementType() == IJavaElement.FIELD)	
+			return isExtractableField((IField)iMember);
 		return false;	
 	}
 
@@ -407,19 +423,19 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private String createInterfaceSource() throws JavaModelException {
 		StringBuffer buff= new StringBuffer();
 		buff.append(createInterfaceModifierString())
-			 .append("interface ")
+			 .append("interface ")//$NON-NLS-1$
 			 .append(fNewInterfaceName)
-			 .append(" {")
+			 .append(" {")//$NON-NLS-1$
 			 .append(createInterfaceMemberDeclarationsSource())
-			 .append("}");
+			 .append("}");//$NON-NLS-1$
 		return buff.toString();
 	}
 
 	private String createInterfaceModifierString() throws JavaModelException {
 		if (JdtFlags.isPublic(fInputClass))
-			return "public ";
+			return JdtFlags.VISIBILITY_STRING_PUBLIC + " ";//$NON-NLS-1$
 		else
-			return "";	
+			return JdtFlags.VISIBILITY_STRING_PACKAGE;	
 	}
 
 	private String createInterfaceMemberDeclarationsSource() throws JavaModelException {
@@ -457,7 +473,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private String createInterfaceMethodDeclarationsSource(IMethod iMethod) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod);
 		if (methodDeclaration == null)
-			return ""; 
+			return ""; //$NON-NLS-1$
 	
 		int methodDeclarationOffset= methodDeclaration.getReturnType().getStartPosition();
 		int length= getMethodDeclarationLength(iMethod, methodDeclaration);
@@ -497,18 +513,56 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	
 	private String createImportsSource() throws JavaModelException {
 		StringBuffer buff= new StringBuffer();
-		ITypeBinding[] typesUsed= getTypesUsedInExtractedMemberDeclarations();
-		for (int i= 0; i < typesUsed.length; i++) {
-			ITypeBinding binding= typesUsed[i];
-			if (shouldBeImported(binding)){
-				buff.append("import ");//$NON-NLS-1$
-				buff.append(Bindings.getFullyQualifiedImportName(binding));
-				buff.append(";");//$NON-NLS-1$
-			}	
-		}
+        addImportsToTypesReferencedInMethodDeclarations(buff);
+	    addImportsToTypesReferencedInFieldDeclarations(buff);
 		return buff.toString();
 	}
-	
+
+    private IField[] getExtractedFields() {
+        List fields= new ArrayList();
+        for (int i= 0; i < fExtractedMembers.length; i++) {
+            if (fExtractedMembers[i] instanceof IField)
+                fields.add(fExtractedMembers[i]);
+        }
+        return (IField[]) fields.toArray(new IField[fields.size()]);
+    }
+
+    private void addImportsToTypesReferencedInFieldDeclarations(StringBuffer buff) throws JavaModelException {
+    	//XXX pm
+    	IProgressMonitor pm= new NullProgressMonitor();
+    	IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(getExtractedFields(), pm);
+    	for (int i= 0; i < referencedTypes.length; i++) {
+            IType type= referencedTypes[i];
+            if (shouldBeImported(type))
+	    	    addImportTo(JavaModelUtil.getFullyQualifiedName(type), buff);
+        }
+    }
+    
+    private void addImportsToTypesReferencedInMethodDeclarations(StringBuffer buff) throws JavaModelException {
+        ITypeBinding[] typesUsed= getTypesUsedInExtractedMethodDeclarations();
+        for (int i= 0; i < typesUsed.length; i++) {
+        	ITypeBinding binding= typesUsed[i];
+        	if (shouldBeImported(binding))
+        	    addImportTo(Bindings.getFullyQualifiedImportName(binding), buff);
+        }
+    }
+    
+    private static void addImportTo(String typeName, StringBuffer buff) {
+        buff.append("import ").append(typeName).append(";");//$NON-NLS-1$
+    }
+
+    private boolean shouldBeImported(IType iType) {
+        if (! iType.exists())
+            return false;
+        if (iType.getPackageFragment().equals(getInputClassPackage()))
+	        return false;
+	    if (iType.getPackageFragment().isDefaultPackage())    
+	        return false;
+        if (iType.getPackageFragment().getElementName().equals("java.lang"))//$NON-NLS-1$
+            return false;
+	    return true;    
+    }
+    
     private boolean shouldBeImported(ITypeBinding binding) {
     	if (binding == null)
     		return false;
@@ -518,32 +572,22 @@ public class ExtractInterfaceRefactoring extends Refactoring {
     		return shouldBeImported(binding.getElementType());
     	if (binding.getPackage().isUnnamed())	
    			return false;
-   		if (binding.getPackage().getName().equals("java.lang"))
+   		if (binding.getPackage().getName().equals("java.lang"))//$NON-NLS-1$
    			return false;
 		if (binding.getPackage().getName().equals(getInputClassPackage().getElementName()))
    			return false;
     	return true;	
     }
 
-	private ITypeBinding[] getTypesUsedInExtractedMemberDeclarations() throws JavaModelException{
+	private ITypeBinding[] getTypesUsedInExtractedMethodDeclarations() throws JavaModelException{
 		Set typesUsed= new HashSet();
 		for (int i= 0; i < fExtractedMembers.length; i++) {
-			if (fExtractedMembers[i].getElementType() == IJavaElement.METHOD)
+			if (fExtractedMembers[i] instanceof IMethod)
 				typesUsed.addAll(getTypesUsedInDeclaration((IMethod)fExtractedMembers[i]));
-			else if (fExtractedMembers[i].getElementType() == IJavaElement.FIELD)	
-				typesUsed.addAll(getTypesUsedInDeclaration((IField)fExtractedMembers[i]));	
-			else
-				Assert.isTrue(false);	
 		}
 		return (ITypeBinding[]) typesUsed.toArray(new ITypeBinding[typesUsed.size()]);
 	}
 	
-	//set of ITypeBindings
-	private Set getTypesUsedInDeclaration(IField iField) {
-		//XXX
-		return new HashSet(0);
-	}
-
 	//set of ITypeBindings
 	private Set getTypesUsedInDeclaration(IMethod iMethod) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod);
