@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
@@ -589,17 +590,13 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	}
 	
 	public void endVisit(SimpleName node) {
-		if (skipNode(node))
+		if (skipNode(node) || node.isDeclaration())
 			return;
-		IBinding binding= node.resolveBinding();
-		if (!(binding instanceof IVariableBinding))
+		IVariableBinding binding= ASTNodes.getLocalVariableBinding(node);
+		if (binding == null)
 			return;
-		IVariableBinding varBinding= (IVariableBinding)binding;
-		if (varBinding.isField())
-			return;
-			
 		setFlowInfo(node, new LocalFlowInfo(
-			varBinding,
+			binding,
 			FlowInfo.READ,
 			fFlowContext));
 	}
