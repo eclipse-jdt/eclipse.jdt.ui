@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -37,7 +36,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
@@ -48,9 +48,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class DeleteSourceReferencesAction extends SourceReferenceAction {
 
@@ -306,16 +303,12 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	
 	private static IMethod[] getGettersSettersForFields(IField[] fields) {
 		try {
-			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-			String[] namePrefixes= JavaPreferencesSettings.getGetterStetterPrefixes(store);
-			String[] nameSuffixes= JavaPreferencesSettings.getGetterStetterSuffixes(store);
-			
 			List gettersSetters= new ArrayList();
 			for (int i= 0; i < fields.length; i++) {
-				IMethod getter= GetterSetterUtil.getGetter(fields[i], namePrefixes, nameSuffixes);
+				IMethod getter= GetterSetterUtil.getGetter(fields[i]);
 				if (getter != null && getter.exists())
 					gettersSetters.add(getter);
-				IMethod setter= GetterSetterUtil.getSetter(fields[i], namePrefixes, nameSuffixes);
+				IMethod setter= GetterSetterUtil.getSetter(fields[i]);
 				if (setter != null && setter.exists())
 					gettersSetters.add(setter);			
 			}
