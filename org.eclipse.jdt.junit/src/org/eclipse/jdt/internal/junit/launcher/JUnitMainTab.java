@@ -63,6 +63,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.debug.ui.launcher.AddVMDialog;
 import org.eclipse.jdt.internal.debug.ui.launcher.IAddVMDialogRequestor;
 import org.eclipse.jdt.internal.debug.ui.launcher.VMStandin;
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
@@ -101,7 +102,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		createVerticalSpacer(comp);
 		
 		fProjLabel = new Label(comp, SWT.NONE);
-		fProjLabel.setText("&Project:");
+		fProjLabel.setText(JUnitMessages.getString("JUnitMainTab.label.project")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalSpan = 2;
 		fProjLabel.setLayoutData(gd);
@@ -116,7 +117,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		});
 		
 		fProjButton = new Button(comp, SWT.PUSH);
-		fProjButton.setText("&Browse...");
+		fProjButton.setText(JUnitMessages.getString("JUnitMainTab.label.browse")); //$NON-NLS-1$
 		fProjButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
 				handleProjectButtonSelected();
@@ -125,7 +126,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		setButtonGridData(fProjButton); 
 		
 		fTestLabel = new Label(comp, SWT.NONE);
-		fTestLabel.setText("&Test class:");
+		fTestLabel.setText(JUnitMessages.getString("JUnitMainTab.label.test")); //$NON-NLS-1$
 		gd = new GridData();
 		gd.horizontalSpan = 2;
 		fTestLabel.setLayoutData(gd);
@@ -140,7 +141,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		});
 		
 		fSearchButton = new Button(comp, SWT.PUSH);
-		fSearchButton.setText("&Search...");
+		fSearchButton.setText(JUnitMessages.getString("JUnitMainTab.label.search")); //$NON-NLS-1$
 		fSearchButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
 				handleSearchButtonSelected();
@@ -149,7 +150,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		setButtonGridData(fSearchButton);
 		
 		fKeepRunning = new Button(comp, SWT.CHECK);
-		fKeepRunning.setText("&Keep JUnit running after a test run when debugging");
+		fKeepRunning.setText(JUnitMessages.getString("JUnitMainTab.label.keeprunning")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.FILL;
 		gd.horizontalSpan= 2;
@@ -176,18 +177,18 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	}
 	
 	protected void updateProjectFromConfig(ILaunchConfiguration config) {
-		String projectName= "";
+		String projectName= ""; //$NON-NLS-1$
 		try {
-			projectName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
+			projectName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
 		} catch (CoreException ce) {
 		}
 		fProjText.setText(projectName);
 	}
 	
 	protected void updateTestTypeFromConfig(ILaunchConfiguration config) {
-		String testTypeName= "";
+		String testTypeName= ""; //$NON-NLS-1$
 		try {
-			testTypeName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "");
+			testTypeName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
 		} catch (CoreException ce) {			
 		}
 		fTestText.setText(testTypeName);		
@@ -225,8 +226,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		IJavaProject javaProject = getJavaProject();
 		
 		SelectionDialog dialog = new TestSelectionDialog(shell, getLaunchConfigurationDialog(), javaProject);
-		dialog.setTitle("Test Selection");
-		dialog.setMessage("Choose a test case or test suite:");
+		dialog.setTitle(JUnitMessages.getString("JUnitMainTab.testdialog.title")); //$NON-NLS-1$
+		dialog.setMessage(JUnitMessages.getString("JUnitMainTab.testdialog.message")); //$NON-NLS-1$
 		if (dialog.open() == dialog.CANCEL) {
 			return;
 		}
@@ -274,8 +275,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
-		dialog.setTitle("Project Selection");
-		dialog.setMessage("Choose a project to constrain the search for main types:");
+		dialog.setTitle(JUnitMessages.getString("JUnitMainTab.projectdialog.title")); //$NON-NLS-1$
+		dialog.setMessage(JUnitMessages.getString("JUnitMainTab.projectdialog.message")); //$NON-NLS-1$
 		dialog.setElements(projects);
 		
 		IJavaProject javaProject = getJavaProject();
@@ -325,14 +326,14 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		String name = fProjText.getText().trim();
 		if (name.length() > 0) {
 			if (!ResourcesPlugin.getWorkspace().getRoot().getProject(name).exists()) {
-				setErrorMessage("Project does not exist.");
+				setErrorMessage(JUnitMessages.getString("JUnitMainTab.error.projectnotexists")); //$NON-NLS-1$
 				return false;
 			}
 		}
 
 		name = fTestText.getText().trim();
 		if (name.length() == 0) {
-			setErrorMessage("Test not specified.");
+			setErrorMessage(JUnitMessages.getString("JUnitMainTab.error.testnotdefined")); //$NON-NLS-1$
 			return false;
 		}
 		// TO DO should verify that test exists
@@ -365,7 +366,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	 * Set the main type & name attributes on the working copy based on the IJavaElement
 	 */
 	protected void initializeTestTypeAndName(IJavaElement javaElement, ILaunchConfigurationWorkingCopy config) {
-		String name= "";
+		String name= ""; //$NON-NLS-1$
 		try {
 			// we only do a search for compilation units or class files or 
 			// or source references
@@ -417,6 +418,6 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	 * @see ILaunchConfigurationTab#getName()
 	 */
 	public String getName() {
-		return "&Test";
+		return JUnitMessages.getString("JUnitMainTab.tab.label"); //$NON-NLS-1$
 	}
 }

@@ -17,9 +17,9 @@ public class EnableStackFilterAction extends Action {
 	private FailureTraceView fView;	
 	
 	public EnableStackFilterAction(FailureTraceView view) {
-		super("Filter"); 
-		setDescription("Filter the stack trace."); 
-		setToolTipText("Filter Stack Trace");
+		super(JUnitMessages.getString("EnableStackFilterAction.action.label"));  //$NON-NLS-1$
+		setDescription(JUnitMessages.getString("EnableStackFilterAction.action.description"));  //$NON-NLS-1$
+		setToolTipText(JUnitMessages.getString("EnableStackFilterAction.action.tooltip")); //$NON-NLS-1$
 		
 		setImageDescriptors(); 
 		fView= view;
@@ -36,15 +36,15 @@ public class EnableStackFilterAction extends Action {
 	
 	private void setImageDescriptors() {	
 		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("dlfilter.gif")); 
+			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("dlfilter.gif"));  //$NON-NLS-1$
 			if (id != null)
 				setDisabledImageDescriptor(id);
 				
-			id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("clfilter.gif")); 
+			id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("clfilter.gif"));  //$NON-NLS-1$
 			if (id != null)
 				setHoverImageDescriptor(id);
 	
-			id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("elfilter.gif")); 
+			id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("elfilter.gif"));  //$NON-NLS-1$
 			if (id != null)
 				setImageDescriptor(id);
 				

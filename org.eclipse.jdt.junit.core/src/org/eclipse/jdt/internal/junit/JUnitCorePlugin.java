@@ -108,7 +108,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 	
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Error", e)); 
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Error", e));  //$NON-NLS-1$
 	}
 
 	public static void log(IStatus status) {
@@ -142,14 +142,15 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			
 		IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= window.getActivePage();
-		TestRunnerViewPart testRunner= null;
-		
-		try {
-			testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
-		} catch (PartInitException e) {
-			ErrorDialog.openError(getActiveWorkbenchShell(), 
-				"Could not show JUnit Result View", e.getMessage(), e.getStatus()
-			);
+		TestRunnerViewPart testRunner= (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
+		if (testRunner == null) {
+			try {
+				testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
+			} catch (PartInitException e) {
+				ErrorDialog.openError(getActiveWorkbenchShell(), 
+					JUnitMessages.getString("JUnitPlugin.error.cannotshow"), e.getMessage(), e.getStatus() //$NON-NLS-1$
+				);
+			}
 		}
 		if (testRunner != null)
 			testRunner.startTestRunListening(launchedType, port, launch);	

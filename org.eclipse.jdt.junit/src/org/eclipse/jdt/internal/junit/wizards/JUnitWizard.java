@@ -45,8 +45,8 @@ public abstract class JUnitWizard extends BasicNewResourceWizard {
 			getContainer().run(false, true, op);
 		} catch (InvocationTargetException e) {
 			Shell shell= getShell();
-			String title= Messages.getString("NewJUnitWizard.op_error.title"); //$NON-NLS-1$
-			String message= Messages.getString("NewJUnitWizard.op_error.message"); //$NON-NLS-1$
+			String title= WizardMessages.getString("NewJUnitWizard.op_error.title"); //$NON-NLS-1$
+			String message= WizardMessages.getString("NewJUnitWizard.op_error.message"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, shell, title, message);
 			return false;
 		} catch  (InterruptedException e) {

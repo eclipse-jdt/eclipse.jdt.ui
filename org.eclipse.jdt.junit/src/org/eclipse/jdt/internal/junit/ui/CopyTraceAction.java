@@ -26,7 +26,7 @@ public class CopyTraceAction extends Action {
 	 * Constructor for CopyTraceAction.
 	 */
 	public CopyTraceAction(FailureTraceView view) {
-		super("Copy Trace"); 
+		super(JUnitMessages.getString("CopyTrace.action.label"));  //$NON-NLS-1$
 		fView= view;
 	}
 
@@ -36,7 +36,7 @@ public class CopyTraceAction extends Action {
 	public void run() {
 		String trace= fView.getTrace();
 		if (trace == null)
-			trace= "";
+			trace= ""; //$NON-NLS-1$
 		
 		TextTransfer plainTextTransfer = TextTransfer.getInstance();
 		Clipboard clipboard= new Clipboard(fView.getComposite().getDisplay());		

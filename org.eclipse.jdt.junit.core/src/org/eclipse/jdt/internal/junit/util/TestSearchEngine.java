@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
@@ -107,7 +108,7 @@ public class TestSearchEngine {
 			IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InterruptedException {
 					int nElements= elements.length;
-					pm.beginTask("Searching suites...", nElements); 
+					pm.beginTask(JUnitMessages.getString("TestSearchEngine.message.searching"), nElements);  //$NON-NLS-1$
 					try {
 						for (int i= 0; i < nElements; i++) {
 							try {
@@ -177,7 +178,7 @@ public class TestSearchEngine {
 	}
 		
 	private static boolean hasSuiteMethod(IType type) throws JavaModelException {
-		IMethod method= type.getMethod("suite", new String[0]);
+		IMethod method= type.getMethod("suite", new String[0]); //$NON-NLS-1$
 		if (method == null || !method.exists()) 
 			return false;
 		

@@ -23,6 +23,7 @@ import junit.framework.TestFailure;
 import junit.framework.TestListener;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 
 /**
  * A TestRunner that reports results via a socket connection.
@@ -42,7 +43,7 @@ public class RemoteTestRunner implements TestListener {
 		}
 	}
 	
-	private static final String SUITE_METHODNAME= "suite";	
+	private static final String SUITE_METHODNAME= "suite";	 //$NON-NLS-1$
 	/**
 	 * The name of the test classes to be executed
 	 */
@@ -67,7 +68,7 @@ public class RemoteTestRunner implements TestListener {
 	/**
 	 * Host to connect to, default is the localhost
 	 */
-	private String fHost= "";
+	private String fHost= ""; //$NON-NLS-1$
 	/**
 	 * Port to connect to.
 	 */
@@ -94,7 +95,7 @@ public class RemoteTestRunner implements TestListener {
 	 */
 	private class ReaderThread extends Thread {
 		public ReaderThread() {
-			super("ReaderThread");
+			super("ReaderThread"); //$NON-NLS-1$
 		}
 
 		public void run(){
@@ -114,7 +115,7 @@ public class RemoteTestRunner implements TestListener {
 						
 						else if (message.startsWith(MessageIds.TEST_RERUN)) {
 							String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
-							int c= arg.indexOf(" ");
+							int c= arg.indexOf(" "); //$NON-NLS-1$
 							synchronized(RemoteTestRunner.this) {
 								fRerunRequests.add(new RerunRequest(arg.substring(0, c), arg.substring(c+1)));
 								RemoteTestRunner.this.notifyAll();
@@ -171,35 +172,35 @@ public class RemoteTestRunner implements TestListener {
 	 */
 	protected final void defaultInit(String[] args) {
 		for(int i= 0; i < args.length; i++) {
-			if(args[i].toLowerCase().equals("-classnames") || args[i].toLowerCase().equals("-classname")){
+			if(args[i].toLowerCase().equals("-classnames") || args[i].toLowerCase().equals("-classname")){ //$NON-NLS-1$ //$NON-NLS-2$
 				ArrayList list= new ArrayList();
 				for (int j= i+1; j < args.length; j++) {
-					if (args[j].startsWith("-"))
+					if (args[j].startsWith("-")) //$NON-NLS-1$
 						break;
 					list.add(args[j]);
 				}
 				fTestClassNames= (String[]) list.toArray(new String[list.size()]);
 			}		
-			else if(args[i].toLowerCase().equals("-port")) {
+			else if(args[i].toLowerCase().equals("-port")) { //$NON-NLS-1$
 				fPort= Integer.parseInt(args[i+1]);
 			}
-			else if(args[i].toLowerCase().equals("-host")) {
+			else if(args[i].toLowerCase().equals("-host")) { //$NON-NLS-1$
 				fHost= args[i+1];
 			}
-			else if(args[i].toLowerCase().equals("-keepalive")) {
+			else if(args[i].toLowerCase().equals("-keepalive")) { //$NON-NLS-1$
 				fKeepAlive= true;
 			}
-			else if(args[i].toLowerCase().equals("-debugging") || args[i].toLowerCase().equals("-debug")){
+			else if(args[i].toLowerCase().equals("-debugging") || args[i].toLowerCase().equals("-debug")){ //$NON-NLS-1$ //$NON-NLS-2$
 				fDebugMode= true;
 			}
 		}
 		if(fTestClassNames == null || fTestClassNames.length == 0)
-			throw new IllegalArgumentException("Error: parameter '-classNames' or '-className' not specified");
+			throw new IllegalArgumentException(JUnitMessages.getString("RemoteTestRunner.error.classnamemissing")); //$NON-NLS-1$
 
 		if (fPort == -1)
-			throw new IllegalArgumentException("Error: parameter '-port' not specified");
+			throw new IllegalArgumentException(JUnitMessages.getString("RemoterTestRunner.error.portmissing")); //$NON-NLS-1$
 		if (fDebugMode)
-			System.out.println("keepalive "+fKeepAlive);
+			System.out.println("keepalive "+fKeepAlive); //$NON-NLS-1$
 	}
 	
 	/**
@@ -252,10 +253,10 @@ public class RemoteTestRunner implements TestListener {
 			String clazz= e.getMessage();
 			if (clazz == null) 
 				clazz= suiteClassName;
-			runFailed("Class not found \""+clazz+"\"");
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.classnotfound", clazz)); //$NON-NLS-1$
 			return null;
 		} catch(Exception e) {
-			runFailed("Error: "+e.toString());
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.exception", e.toString() )); //$NON-NLS-1$
 			return null;
 		}
 		Method suiteMethod= null;
@@ -270,11 +271,11 @@ public class RemoteTestRunner implements TestListener {
 			test= (Test)suiteMethod.invoke(null, new Class[0]); // static method
 		} 
 		catch (InvocationTargetException e) {
-			runFailed("Failed to invoke suite():" + e.getTargetException().toString());
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.getTargetException().toString() )); //$NON-NLS-1$
 			return null;
 		}
 		catch (IllegalAccessException e) {
-			runFailed("Failed to invoke suite():" + e.toString());
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.invoke", e.toString() )); //$NON-NLS-1$
 			return null;
 		}
 		return test;
@@ -309,10 +310,10 @@ public class RemoteTestRunner implements TestListener {
 		
 		long startTime= System.currentTimeMillis();
 		if (fDebugMode)
-			System.out.println("start send tree");
+			System.out.println("start send tree"); //$NON-NLS-1$
 		sendTree(suites[0]);
 		if (fDebugMode)
-			System.out.println("done send tree"+(System.currentTimeMillis()-startTime));
+			System.out.println("done send tree"+(System.currentTimeMillis()-startTime)); //$NON-NLS-1$
 
 		long testStartTime= System.currentTimeMillis();
 		for (int i= 0; i < suites.length; i++) {
@@ -346,7 +347,7 @@ public class RemoteTestRunner implements TestListener {
 			Object[] args= new Object[]{testName};
 			reloadedTest=(Test)constructor.newInstance(args);
 		} catch(Exception e) {
-			System.err.println("Could not load " + reloadedTest);
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.load", reloadedTest )); //$NON-NLS-1$
 			return;
 		}
 		TestResult result= new TestResult();
@@ -425,7 +426,7 @@ public class RemoteTestRunner implements TestListener {
 	 */
 	private boolean connect() {
 		if (fDebugMode)
-			System.out.println("RemoteTestRunner: trying to connect" + fHost + ":" + fPort);
+			System.out.println("RemoteTestRunner: trying to connect" + fHost + ":" + fPort); //$NON-NLS-1$ //$NON-NLS-2$
 		Exception exception= null;
 		for (int i= 1; i < 5; i++) {
 			try{
@@ -442,7 +443,7 @@ public class RemoteTestRunner implements TestListener {
 			} catch(InterruptedException e) {
 			}
 		}
-		System.err.println("Could not connect to: " + fHost + ":" + fPort);			
+		runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.connect", new String[]{fHost, Integer.toString(fPort)} )); //$NON-NLS-1$
 		exception.printStackTrace();
 		return false;
 	}
@@ -540,13 +541,13 @@ public class RemoteTestRunner implements TestListener {
 			sendMessage(MessageIds.RTRACE_END);
 			fWriter.flush();
 		}
-		String status= "OK";
+		String status= "OK"; //$NON-NLS-1$
 		if (result.errorCount() > 0)
-			status= "ERROR";
+			status= "ERROR"; //$NON-NLS-1$
 		else if (result.failureCount() > 0)
-			status= "FAILURE";
+			status= "FAILURE"; //$NON-NLS-1$
 		if (fPort != -1) {
-			sendMessage(MessageIds.TEST_RERAN + testClass+" "+testName+" "+status);
+			sendMessage(MessageIds.TEST_RERAN + testClass+" "+testName+" "+status); //$NON-NLS-1$ //$NON-NLS-2$
 			fWriter.flush();
 		}
 	}

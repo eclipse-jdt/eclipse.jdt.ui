@@ -40,6 +40,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
@@ -54,7 +55,7 @@ import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
  */
 public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 
-	public static final String NAME= "org.eclipse.jdt.junit.viewpart";
+	public static final String NAME= "org.eclipse.jdt.junit.viewpart"; //$NON-NLS-1$
  	/**
  	 * Number of executed tests during a test run
  	 */
@@ -110,14 +111,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	 */
 	private RemoteTestRunnerClient fTestRunnerClient;
 	
-	protected final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass());
-	protected final Image fStackViewIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass());
+	protected final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass()); //$NON-NLS-1$
+	protected final Image fStackViewIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass()); //$NON-NLS-1$
 
 	private class StopAction extends Action{
 		public StopAction() {
-			setText("Stop JUnit Test");
-			setToolTipText("Stop JUnit Test Run");
-			setImageDescriptor(ImageDescriptor.createFromFile(getClass(), "icons/stopIcon.gif"));
+			setText(JUnitMessages.getString("TestRunnerViewPart.stopaction.text")); //$NON-NLS-1$
+			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.stopaction.tooltip")); //$NON-NLS-1$
+			setImageDescriptor(ImageDescriptor.createFromFile(getClass(), "icons/stopIcon.gif")); //$NON-NLS-1$
 		}
 		
 		public void run(){
@@ -127,9 +128,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	
 	private class RerunAction extends Action{
 		public RerunAction() {
-			setText("Rerun last Test");
-			setToolTipText("Rerun last test");
-			setImageDescriptor(ImageDescriptor.createFromFile(getClass(), "icons/relaunch.gif"));
+			setText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
+			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.tooltip")); //$NON-NLS-1$
+			setImageDescriptor(ImageDescriptor.createFromFile(getClass(), "icons/relaunch.gif")); //$NON-NLS-1$
 		}
 		
 		public void run(){
@@ -154,7 +155,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 				fLastLaunch.getLaunchConfiguration().launch(fLastLaunch.getLaunchMode(), null);		
 			} catch (CoreException e) {
 				ErrorDialog.openError(getSite().getShell(), 
-					"Could not rerun test", e.getMessage(), e.getStatus()
+					JUnitMessages.getString("TestRunnerViewPart.error.cannotrerun"), e.getMessage(), e.getStatus() //$NON-NLS-1$
 				);
 			}
 		}
@@ -173,7 +174,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	 */
 	public void testRunEnded(long elapsedTime){
 		fExecutedTests--;
-		postInfo("Finished: " + elapsedTimeAsString(elapsedTime) + " seconds");
+		String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.finish", elapsedTimeAsString(elapsedTime)); //$NON-NLS-1$
+		postInfo(msg);
 		postAsyncRunnable(new Runnable() {				
 			public void run() {
 				if(isDisposed()) 
@@ -182,15 +184,20 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 					fActiveRunView.setSelectedTest(fFirstFailure.fTestName);
 					handleTestSelected(fFirstFailure.fTestName);
 				}
+				firePropertyChange(IWorkbenchPart.PROP_TITLE);
 			}
 		});	
+	}
+
+	private String elapsedTimeAsString(long runTime) {
+		return NumberFormat.getInstance().format((double)runTime/1000);
 	}
 	
 	/*
 	 * @see ITestRunListener#testRunStopped
 	 */
 	public void testRunStopped(final long elapsedTime) {
-		String msg= "Stopped after " + elapsedTimeAsString(elapsedTime) + " seconds";
+		String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.stopped", elapsedTimeAsString(elapsedTime)); //$NON-NLS-1$
 		showMessage(msg);
 	}
 
@@ -198,7 +205,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	 * @see ITestRunListener#testRunTerminated
 	 */
 	public void testRunTerminated() {
-		String msg= "Terminated";
+		String msg= JUnitMessages.getString("TestRunnerViewPart.message.terminated"); //$NON-NLS-1$
 		showMessage(msg);
 	}
 
@@ -214,7 +221,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		// reveal the part when the first test starts
 		if (fExecutedTests == 1) 
 			postShowTestResultsView();
-		postInfo("Started: " + testName);
+			
+		postInfo(JUnitMessages.getFormattedString("TestRunnerViewPart.message.started", testName)); //$NON-NLS-1$
 		TestRunInfo testInfo= getTestInfo(testName);
 		if (testInfo == null) 
 			fTestInfos.put(testName, new TestRunInfo(testName));
@@ -245,19 +253,26 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			fFailures++;
 		if (fFirstFailure == null)
 			fFirstFailure= testInfo;
+		// show the view on the first error only
+		//if (fErrors + fFailures == 1) 
+		//	postShowTestResultsView();
 	}
 	
 	/*
 	 * @see ITestRunListener#testReran
 	 */
 	public void testReran(String className, String testName, int status, String trace) {
-		String test= testName+"("+className+")";
-		if (status == ITestRunListener.STATUS_ERROR)
-			postError(test + " had an error");
-		else if (status == ITestRunListener.STATUS_FAILURE)
-			postError(test + " had a failure");
-		else 
-			postInfo(test + " was successful");
+		if (status == ITestRunListener.STATUS_ERROR) {
+			String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.error", new String[]{testName, className}); //$NON-NLS-1$
+			postError(msg); 
+		} else if (status == ITestRunListener.STATUS_FAILURE) {
+			String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.failure", new String[]{testName, className}); //$NON-NLS-1$
+			postError(msg);
+		} else {
+			String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.success", new String[]{testName, className}); //$NON-NLS-1$
+			postInfo(msg);
+		}
+		String test= testName+"("+className+")"; //$NON-NLS-1$ //$NON-NLS-2$
 		TestRunInfo info= getTestInfo(test);
 		updateTest(info, status);
 		if (info.fTrace == null || !info.fTrace.equals(trace)) {
@@ -322,7 +337,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	public void startTestRunListening(IType type, int port, ILaunch launch) {
 		fTestType= type;
 		fLaunchMode= launch.getLaunchMode();
-		String msg= "Launching TestRunner";
+		String msg= JUnitMessages.getString("TestRunnerViewPart.message.launching"); //$NON-NLS-1$
 		showInformation(msg);
 		postInfo(msg);
 		
@@ -332,7 +347,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		fTestRunnerClient= new RemoteTestRunnerClient();
 		fTestRunnerClient.startListening(this, port);
 		fLastLaunch= launch;
-		setTitle("JUnit ("+fTestType.getElementName()+")");
+		String title= JUnitMessages.getFormattedString("TestRunnerViewPart.title", fTestType.getElementName()); //$NON-NLS-1$
+		setTitle(title);
 		setTitleToolTip(fTestType.getFullyQualifiedName());
 	}
 	
@@ -341,8 +357,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			fTestRunnerClient.rerunTest(className, testName);
 		else {
 			MessageDialog.openInformation(getSite().getShell(), 
-				"Rerun Test", 
-				"Can only rerun tests when they are launched under the debugger\nand when the 'keep JUnit running' preference is set."
+				JUnitMessages.getString("TestRunnerViewPart.cannotrerun.title"),  //$NON-NLS-1$
+				JUnitMessages.getString("TestRunnerViewPart.cannotrerurn.message") //$NON-NLS-1$
  			); 
 		}
 	}
@@ -441,7 +457,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
 		} catch (PartInitException e) {
 			ErrorDialog.openError(getSite().getShell(), 
-				"Could not show JUnit Result View", e.getMessage(), e.getStatus()
+				JUnitMessages.getString("TestRunnerViewPart.message.cannotshow"), e.getMessage(), e.getStatus() //$NON-NLS-1$
 			);
 		}
 	}
@@ -524,7 +540,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		fFailureView= new FailureTraceView(bottom, this);
 		bottom.setContent(fFailureView.getComposite()); 
 		CLabel label= new CLabel(bottom, SWT.NONE);
-		label.setText("Failure Trace");
+		label.setText(JUnitMessages.getString("TestRunnerViewPart.label.failure")); //$NON-NLS-1$
 		label.setImage(fStackViewIcon);
 		bottom.setTopLeft(label);
 
@@ -607,7 +623,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		TestRunInfo testInfo= getTestInfo(testName);
 
 		if (testInfo == null) {
-			showFailure("");
+			showFailure(""); //$NON-NLS-1$
 		} else {
 			showFailure(testInfo.fTrace);
 		}
@@ -626,10 +642,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		return fTestType.getJavaProject();
 	}
 
-	private String elapsedTimeAsString(long runTime) {
-		return NumberFormat.getInstance().format((double)runTime/1000);
-	}
-	
 	protected static Image createImage(String fName, Class clazz) {
 		return (new Image(Display.getCurrent(), clazz.getResourceAsStream(fName)));
 	}

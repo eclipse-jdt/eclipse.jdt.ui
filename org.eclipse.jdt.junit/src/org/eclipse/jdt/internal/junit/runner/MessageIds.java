@@ -23,78 +23,78 @@ public class MessageIds {
 	 * message. In between the TRACE_START and TRACE_END
 	 * the stack trace is submitted as multiple lines.
 	 */
-	public static final String TRACE_START= "%TRACES ";
+	public static final String TRACE_START= "%TRACES "; //$NON-NLS-1$
 	/**
 	 * Notification that a trace for a reran test has started.
 	 * The end of the trace is signaled by a RTrace_END
 	 * message.
 	 */
-	public static final String RTRACE_START= "%RTRACES";
+	public static final String RTRACE_START= "%RTRACES"; //$NON-NLS-1$
 	/**
 	 * Notification that a trace ends.
 	 */
-	public static final String TRACE_END=   "%TRACEE ";
+	public static final String TRACE_END=   "%TRACEE "; //$NON-NLS-1$
 	/**
 	 * Notification that a trace of a reran trace ends.
 	 */
-	public static final String RTRACE_END=  "%RTRACEE";
+	public static final String RTRACE_END=  "%RTRACEE"; //$NON-NLS-1$
 	/**
 	 * Notification that a test run has started. 
 	 * MessageIds.TEST_RUN_START+testCount.toString
 	 */
-	public static final String TEST_RUN_START=  "%TESTC  ";
+	public static final String TEST_RUN_START=  "%TESTC  "; //$NON-NLS-1$
 	/**
 	 * Notification that a test has started.
 	 * MessageIds.TEST_START + testName
 	 */
-	public static final String TEST_START=  "%TESTS  ";		
+	public static final String TEST_START=  "%TESTS  ";		 //$NON-NLS-1$
 	/**
 	 * Notification that a test has started.
 	 * TEST_END + testName
 	 */
-	public static final String TEST_END=    "%TESTE  ";		
+	public static final String TEST_END=    "%TESTE  ";		 //$NON-NLS-1$
 	/**
 	 * Notification that a test had a error.
 	 * TEST_ERROR + testName.
 	 * After the notification follows the stack trace.
 	 */
-	public static final String TEST_ERROR=  "%ERROR  ";		
+	public static final String TEST_ERROR=  "%ERROR  ";		 //$NON-NLS-1$
 	/**
 	 * Notification that a test had a failure.
 	 * TEST_FAILED + testName.
 	 * After the notification follows the stack trace.
 	 */
-	public static final String TEST_FAILED= "%FAILED ";	
+	public static final String TEST_FAILED= "%FAILED ";	 //$NON-NLS-1$
 	/**
 	 * Notification that a test run has ended.
 	 * TEST_RUN_END+elapsedTime.toString().
 	 */ 	
-	public static final String TEST_RUN_END="%RUNTIME";	
+	public static final String TEST_RUN_END="%RUNTIME";	 //$NON-NLS-1$
 	/**
 	 * Notification that a test run was successfully stopped.
 	 */ 
-	public static final String TEST_STOPPED="%TSTSTP ";
+	public static final String TEST_STOPPED="%TSTSTP "; //$NON-NLS-1$
 	/**
 	 * Notification that a test was reran.
 	 * TEST_RERAN+testClass+" "+testName+STATUS.
 	 * Status = "OK" or "FAILURE".
 	 */ 
-	public static final String TEST_RERAN=  "%TSTRERN";
+	public static final String TEST_RERAN=  "%TSTRERN"; //$NON-NLS-1$
 	/**
 	 * Notification about a test inside the test suite.
 	 * TEST_TREE+testName","isSuite","testcount
 	 * isSuite = "true" or "false"
 	 */ 
-	public static final String TEST_TREE="%TSTTREE";
+	public static final String TEST_TREE="%TSTTREE"; //$NON-NLS-1$
 	/**
 	 * Request to stop the current test run.
 	 */
-	public static final String TEST_STOP=	">STOP   ";
+	public static final String TEST_STOP=	">STOP   "; //$NON-NLS-1$
 	/**
 	 * Request to rerun a test.
 	 * TEST_RERUN+ClassName+" "+testName
 	 */
-	public static final String TEST_RERUN=	">RERUN  ";
+	public static final String TEST_RERUN=	">RERUN  "; //$NON-NLS-1$
 }
 
 

@@ -8,13 +8,13 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class Messages {
+public class WizardMessages {
 
-	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.junit.wizards.Messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.jdt.internal.junit.wizards.WizardMessages"; //$NON-NLS-1$
 
 	private static final ResourceBundle RESOURCE_BUNDLE= ResourceBundle.getBundle(BUNDLE_NAME);
 
-	private Messages() {
+	private WizardMessages() {
 	}
 
 	public static String getString(String key) {

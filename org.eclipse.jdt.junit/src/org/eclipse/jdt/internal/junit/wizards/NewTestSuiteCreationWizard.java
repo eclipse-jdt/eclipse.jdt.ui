@@ -36,7 +36,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 		super();
 		//setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		//setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(Messages.getString("Wizard.title.new")); //$NON-NLS-1$
+		setWindowTitle(WizardMessages.getString("Wizard.title.new")); //$NON-NLS-1$
 		initDialogSettings();
 	}
 
@@ -45,7 +45,6 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	 */	
 	public void addPages() {
 		super.addPages();
-		//IWorkspace workspace= JavaPlugin.getWorkspace();
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		fPage= new NewTestSuiteCreationWizardPage();
 		addPage(fPage);
@@ -62,7 +61,11 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 		if (cu.exists()) {
 			IEditorPart cu_ep= EditorUtility.isOpenInEditor(cu);
 			if (cu_ep != null && cu_ep.isDirty()) {
-				boolean saveUnsavedChanges= MessageDialog.openQuestion(fPage.getShell(), Messages.getString("NewTestSuiteWiz.unsavedchangesDialog.title"), Messages.getFormattedString("NewTestSuiteWiz.unsavedchangesDialog.message", filename)); //$NON-NLS-1$ //$NON-NLS-2$
+				boolean saveUnsavedChanges= 
+					MessageDialog.openQuestion(fPage.getShell(), 
+						WizardMessages.getString("NewTestSuiteWiz.unsavedchangesDialog.title"), //$NON-NLS-1$
+						WizardMessages.getFormattedString("NewTestSuiteWiz.unsavedchangesDialog.message", //$NON-NLS-1$
+						filename));  
 				if (saveUnsavedChanges) {
 					ProgressMonitorDialog progressDialog= new ProgressMonitorDialog(fPage.getShell());
 					try {
@@ -138,5 +141,4 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 			}
 		};
 	}
-
 }

@@ -92,17 +92,17 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 
 		fSuiteNameStatus= new JUnitStatus();
 		fSuiteNameTextInitialValue= ""; //$NON-NLS-1$
-		setTitle(Messages.getString("NewTestSuiteWizPage.title")); //$NON-NLS-1$
-		setDescription(Messages.getString("NewTestSuiteWizPage.description")); //$NON-NLS-1$
+		setTitle(WizardMessages.getString("NewTestSuiteWizPage.title")); //$NON-NLS-1$
+		setDescription(WizardMessages.getString("NewTestSuiteWizPage.description")); //$NON-NLS-1$
 		
 		String[] buttonNames= new String[] {
 			"public static void main(Strin&g[] args)", //$NON-NLS-1$
 			/* Add testrunner statement to main Method */
-			Messages.getString("NewTestClassWizPage.methodStub.testRunner"), //$NON-NLS-1$
+			WizardMessages.getString("NewTestClassWizPage.methodStub.testRunner"), //$NON-NLS-1$
 		};
 		
 		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
-		fMethodStubsButtons.setLabelText(Messages.getString("NewTestClassWizPage2.method.Stub.label")); //$NON-NLS-1$
+		fMethodStubsButtons.setLabelText(WizardMessages.getString("NewTestClassWizPage2.method.Stub.label")); //$NON-NLS-1$
 		
 		fClassesInSuiteStatus= new JUnitStatus();
 	}
@@ -124,7 +124,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		createPackageControls(composite, nColumns);	
 		createSeparator(composite, nColumns);
 		createSuiteNameControl(composite, nColumns);
-		setTypeName("AllTests",true); //$NON-NLS-1$
+		setTypeName("AllTests", true); //$NON-NLS-1$
 		createSeparator(composite, nColumns);
 		createClassesInSuiteControl(composite, nColumns);
 		createMethodStubSelectionControls(composite, nColumns);
@@ -217,7 +217,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		if (fClassesInSuiteTable == null) {
 
 			Label label = new Label(parent, SWT.LEFT);
-			label.setText(Messages.getString("NewTestSuiteWizPage.classes_in_suite.label")); //$NON-NLS-1$
+			label.setText(WizardMessages.getString("NewTestSuiteWizPage.classes_in_suite.label")); //$NON-NLS-1$
 			GridData gd= new GridData();
 			gd.horizontalAlignment = GridData.FILL;
 			gd.horizontalSpan = nColumns;
@@ -246,7 +246,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			buttonContainer.setLayout(buttonLayout);
 	
 			fSelectAllButton= new Button(buttonContainer, SWT.PUSH);
-			fSelectAllButton.setText(Messages.getString("NewTestSuiteWizPage.selectAll")); //$NON-NLS-1$
+			fSelectAllButton.setText(WizardMessages.getString("NewTestSuiteWizPage.selectAll")); //$NON-NLS-1$
 			GridData bgd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 			fSelectAllButton.setLayoutData(bgd);
 			fSelectAllButton.addSelectionListener(new SelectionAdapter() {
@@ -257,7 +257,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			});
 	
 			fDeselectAllButton= new Button(buttonContainer, SWT.PUSH);
-			fDeselectAllButton.setText(Messages.getString("NewTestSuiteWizPage.deselectAll")); //$NON-NLS-1$
+			fDeselectAllButton.setText(WizardMessages.getString("NewTestSuiteWizPage.deselectAll")); //$NON-NLS-1$
 			bgd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 			fDeselectAllButton.setLayoutData(bgd);
 			fDeselectAllButton.addSelectionListener(new SelectionAdapter() {
@@ -394,7 +394,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			}
 			
 			IType suiteType= cu.getType(getTypeName());
-			monitor.beginTask(Messages.getString("NewTestSuiteWizPage.createType.beginTask"), 10); //$NON-NLS-1$
+			monitor.beginTask(WizardMessages.getString("NewTestSuiteWizPage.createType.beginTask"), 10); //$NON-NLS-1$
 			IMethod suiteMethod= suiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
 			monitor.worked(1);
 			
@@ -413,7 +413,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 						//int end= source.toString().indexOf(END_MARKER, start) --> int end= source.indexOf(END_MARKER, start)
 						int end= source.toString().indexOf(END_MARKER, start);
 						if (end > -1) {
-							monitor.subTask(Messages.getString("NewTestSuiteWizPage.createType.updating.suite_method")); //$NON-NLS-1$
+							monitor.subTask(WizardMessages.getString("NewTestSuiteWizPage.createType.updating.suite_method")); //$NON-NLS-1$
 							monitor.worked(1);
 							end += END_MARKER.length();
 							source.replace(start, end, getUpdatableString());
@@ -433,7 +433,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 						cannotUpdateSuiteError();
 					}
 				} else {
-					MessageDialog.openError(getShell(), Messages.getString("NewTestSuiteWizPage.createType.updateErrorDialog.title"), Messages.getString("NewTestSuiteWizPage.createType.updateErrorDialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
+					MessageDialog.openError(getShell(), WizardMessages.getString("NewTestSuiteWizPage.createType.updateErrorDialog.title"), WizardMessages.getString("NewTestSuiteWizPage.createType.updateErrorDialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			} else {
 				suiteType.createMethod(getSuiteMethodString(), null, true, monitor);
@@ -464,7 +464,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	private IStatus classesInSuiteChanged() {
 		JUnitStatus status= new JUnitStatus();
 		if (fClassesInSuiteTable.getCheckedElements().length <= 0)
-			status.setWarning(Messages.getString("NewTestSuiteWizPage.classes_in_suite.error.no_testclasses_selected")); //$NON-NLS-1$
+			status.setWarning(WizardMessages.getString("NewTestSuiteWizPage.classes_in_suite.error.no_testclasses_selected")); //$NON-NLS-1$
 		return status;
 	}
 	
@@ -476,7 +476,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	protected void createSuiteNameControl(Composite composite, int nColumns) {
 		fSuiteNameLabel= new Label(composite, SWT.LEFT | SWT.WRAP);
 		fSuiteNameLabel.setFont(composite.getFont());
-		fSuiteNameLabel.setText(Messages.getString("NewTestSuiteWizPage.suiteName.text")); //$NON-NLS-1$
+		fSuiteNameLabel.setText(WizardMessages.getString("NewTestSuiteWizPage.suiteName.text")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= 1;
 		fSuiteNameLabel.setLayoutData(gd);
@@ -533,19 +533,19 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		String typeName= getTypeName();
 		// must not be empty
 		if (typeName.length() == 0) {
-			status.setError(Messages.getString("NewTestSuiteWizPage.typeName.error.name_empty")); //$NON-NLS-1$
+			status.setError(WizardMessages.getString("NewTestSuiteWizPage.typeName.error.name_empty")); //$NON-NLS-1$
 			return status;
 		}
 		if (typeName.indexOf('.') != -1) {
-			status.setError(Messages.getString("NewTestSuiteWizPage.typeName.error.name_qualified")); //$NON-NLS-1$
+			status.setError(WizardMessages.getString("NewTestSuiteWizPage.typeName.error.name_qualified")); //$NON-NLS-1$
 			return status;
 		}
 		IStatus val= JavaConventions.validateJavaTypeName(typeName);
 		if (val.getSeverity() == IStatus.ERROR) {
-			status.setError(Messages.getString("NewTestSuiteWizPage.typeName.error.name_not_valid")+val.getMessage()); //$NON-NLS-1$
+			status.setError(WizardMessages.getString("NewTestSuiteWizPage.typeName.error.name_not_valid")+val.getMessage()); //$NON-NLS-1$
 			return status;
 		} else if (val.getSeverity() == IStatus.WARNING) {
-			status.setWarning(Messages.getString("NewTestSuiteWizPage.typeName.error.name.name_discouraged")+val.getMessage()); //$NON-NLS-1$
+			status.setWarning(WizardMessages.getString("NewTestSuiteWizPage.typeName.error.name.name_discouraged")+val.getMessage()); //$NON-NLS-1$
 			// continue checking
 		}		
 
@@ -553,7 +553,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		if (pack != null) {
 			ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
 			if (cu.exists()) {
-				status.setWarning(Messages.getString("NewTestSuiteWizPage.typeName.warning.already_exists")); //$NON-NLS-1$
+				status.setWarning(WizardMessages.getString("NewTestSuiteWizPage.typeName.warning.already_exists")); //$NON-NLS-1$
 				fMethodStubsButtons.setEnabled(false);
 				return status;
 			}
@@ -577,8 +577,8 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	}
 	
 	protected void cannotUpdateSuiteError() {
-		MessageDialog.openError(getShell(), Messages.getString("NewTestSuiteWizPage.cannotUpdateDialog.title"), //$NON-NLS-1$
-			Messages.getFormattedString("NewTestSuiteWizPage.cannotUpdateDialog.message", new String[] {START_MARKER, END_MARKER})); //$NON-NLS-1$
+		MessageDialog.openError(getShell(), WizardMessages.getString("NewTestSuiteWizPage.cannotUpdateDialog.title"), //$NON-NLS-1$
+			WizardMessages.getFormattedString("NewTestSuiteWizPage.cannotUpdateDialog.message", new String[] {START_MARKER, END_MARKER})); //$NON-NLS-1$
 
 	}
 
@@ -619,6 +619,5 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			settings.put(STORE_USE_TESTRUNNER, fMethodStubsButtons.isSelected(1));
 			settings.put(STORE_TESTRUNNER_TYPE, fMethodStubsButtons.getComboSelection());
 		}
-	}
-	
+	}	
 }

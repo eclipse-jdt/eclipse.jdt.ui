@@ -58,8 +58,8 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	protected NewTestCaseCreationWizardPage2(NewTestCaseCreationWizardPage firstPage) {
 		super(PAGE_NAME);
 		fFirstPage= firstPage;
-		setTitle(Messages.getString("NewTestClassWizPage2.title")); //$NON-NLS-1$
-		setDescription(Messages.getString("NewTestClassWizPage2.description")); //$NON-NLS-1$
+		setTitle(WizardMessages.getString("NewTestClassWizPage2.title")); //$NON-NLS-1$
+		setDescription(WizardMessages.getString("NewTestClassWizPage2.description")); //$NON-NLS-1$
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		prefixContainer.setLayout(layout);
 		
 		fCreateTasksButton= new Button(prefixContainer, SWT.CHECK | SWT.LEFT);
-		fCreateTasksButton.setText(Messages.getString("NewTestClassWizPage2.create_tasks.text")); //$NON-NLS-1$
+		fCreateTasksButton.setText(WizardMessages.getString("NewTestClassWizPage2.create_tasks.text")); //$NON-NLS-1$
 		fCreateTasksButton.setEnabled(true);
 		fCreateTasksButton.setSelection(true);
 		gd= new GridData();
@@ -106,7 +106,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	protected void createMethodsTreeControls(Composite container) {
 		Label label= new Label(container, SWT.LEFT | SWT.WRAP);
 		label.setFont(container.getFont());
-		label.setText(Messages.getString("NewTestClassWizPage2.methods_tree.label")); //$NON-NLS-1$
+		label.setText(WizardMessages.getString("NewTestClassWizPage2.methods_tree.label")); //$NON-NLS-1$
 		GridData gd = new GridData();
 		gd.horizontalSpan = 2;
 		label.setLayoutData(gd);
@@ -142,7 +142,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		buttonContainer.setLayout(buttonLayout);
 
 		fSelectAllButton= new Button(buttonContainer, SWT.PUSH);
-		fSelectAllButton.setText(Messages.getString("NewTestClassWizPage2.selectAll")); //$NON-NLS-1$
+		fSelectAllButton.setText(WizardMessages.getString("NewTestClassWizPage2.selectAll")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fSelectAllButton.setLayoutData(gd);
 		fSelectAllButton.addSelectionListener(new SelectionAdapter() {
@@ -153,7 +153,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		});
 
 		fDeselectAllButton= new Button(buttonContainer, SWT.PUSH);
-		fDeselectAllButton.setText(Messages.getString("NewTestClassWizPage2.deselectAll")); //$NON-NLS-1$
+		fDeselectAllButton.setText(WizardMessages.getString("NewTestClassWizPage2.deselectAll")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fDeselectAllButton.setLayoutData(gd);
 		fDeselectAllButton.addSelectionListener(new SelectionAdapter() {
@@ -352,7 +352,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 			if (checked[i] instanceof IMethod)
 				checkedMethodCount++;
 		}
-		fSelectedMethodsLabel.setText(Messages.getFormattedString(((checkedMethodCount==1)?"NewTestClassWizPage2.selected_methods.label_one":"NewTestClassWizPage2.selected_methods.label_many"), new Integer(checkedMethodCount))); //$NON-NLS-1$ //$NON-NLS-2$
+		fSelectedMethodsLabel.setText(WizardMessages.getFormattedString(((checkedMethodCount==1)?"NewTestClassWizPage2.selected_methods.label_one":"NewTestClassWizPage2.selected_methods.label_many"), new Integer(checkedMethodCount))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**

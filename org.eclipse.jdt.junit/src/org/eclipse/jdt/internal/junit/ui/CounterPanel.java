@@ -24,9 +24,9 @@ public class CounterPanel extends Composite {
 	private Label fNumberOfRuns;
 	private int fTotal;
 	
-	private final Image fErrorIcon= TestRunnerViewPart.createImage("icons/error.gif", getClass());
-	private final Image fFailureIcon= TestRunnerViewPart.createImage("icons/failure.gif", getClass());
-	private final Image fRunIcon= TestRunnerViewPart.createImage("icons/run_exc.gif", getClass());
+	private final Image fErrorIcon= TestRunnerViewPart.createImage("icons/error.gif", getClass()); //$NON-NLS-1$
+	private final Image fFailureIcon= TestRunnerViewPart.createImage("icons/failure.gif", getClass()); //$NON-NLS-1$
+	private final Image fRunIcon= TestRunnerViewPart.createImage("icons/run_exc.gif", getClass()); //$NON-NLS-1$
 			
 	public CounterPanel(Composite parent) {
 		super(parent, SWT.WRAP);
@@ -36,9 +36,9 @@ public class CounterPanel extends Composite {
 		gridLayout.marginWidth= 0;
 		setLayout(gridLayout);
 		
-		fNumberOfRuns= createLabel("Runs: ", null, " 0/0  "); 
-		fNumberOfErrors= createLabel("Errors: ", fErrorIcon, " 0 ");
-		fNumberOfFailures= createLabel("Failures: ", fFailureIcon, " 0 ");
+		fNumberOfRuns= createLabel(JUnitMessages.getString("CounterPanel.label.runs"), null, " 0/0  ");  //$NON-NLS-1$ //$NON-NLS-2$
+		fNumberOfErrors= createLabel(JUnitMessages.getString("CounterPanel.label.errors"), fErrorIcon, " 0 "); //$NON-NLS-1$ //$NON-NLS-2$
+		fNumberOfFailures= createLabel(JUnitMessages.getString("CounterPanel.label.failures"), fFailureIcon, " 0 "); //$NON-NLS-1$ //$NON-NLS-2$
 
 		addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
@@ -74,9 +74,10 @@ public class CounterPanel extends Composite {
 	public void reset() {
 		fNumberOfErrors.setForeground(getDisplay().getSystemColor(SWT.COLOR_BLACK));
 		fNumberOfFailures.setForeground(getDisplay().getSystemColor(SWT.COLOR_BLACK));
-		fNumberOfErrors.setText(" 0 ");
-		fNumberOfFailures.setText(" 0 ");
-		fNumberOfRuns.setText(" 0/0  ");
+		fNumberOfErrors.setText(" 0 "); //$NON-NLS-1$
+		fNumberOfFailures.setText(" 0 "); //$NON-NLS-1$
+		String runString= JUnitMessages.getFormattedString("CounterPanel.runcount", new String[] { Integer.toString(0), Integer.toString(0) }); //$NON-NLS-1$
+		fNumberOfRuns.setText(runString); 
 		fTotal= 0;
 	}
 	
@@ -89,7 +90,9 @@ public class CounterPanel extends Composite {
 	}
 	
 	public void setRunValue(int value) {
-		fNumberOfRuns.setText(Integer.toString(value) + "/" + fTotal);
+		String runString= JUnitMessages.getFormattedString("CounterPanel.runcount", new String[] { Integer.toString(value), Integer.toString(fTotal) }); //$NON-NLS-1$
+		fNumberOfRuns.setText(runString);
+
 		fNumberOfRuns.redraw();
 		redraw();
 	}

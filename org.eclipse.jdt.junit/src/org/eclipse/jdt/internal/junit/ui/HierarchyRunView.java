@@ -74,11 +74,11 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	
 	private boolean fPressed= false;
 	
-	private final Image fOkIcon= TestRunnerViewPart.createImage("icons/ok.gif", getClass());
-	private final Image fErrorIcon= TestRunnerViewPart.createImage("icons/error.gif", getClass());
-	private final Image fFailureIcon= TestRunnerViewPart.createImage("icons/failure.gif", getClass());
-	private final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass());
-	private final Image fTestIcon= TestRunnerViewPart.createImage("icons/testIcon.gif", getClass());
+	private final Image fOkIcon= TestRunnerViewPart.createImage("icons/ok.gif", getClass()); //$NON-NLS-1$
+	private final Image fErrorIcon= TestRunnerViewPart.createImage("icons/error.gif", getClass()); //$NON-NLS-1$
+	private final Image fFailureIcon= TestRunnerViewPart.createImage("icons/failure.gif", getClass()); //$NON-NLS-1$
+	private final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass()); //$NON-NLS-1$
+	private final Image fTestIcon= TestRunnerViewPart.createImage("icons/testIcon.gif", getClass()); //$NON-NLS-1$
 		
 	public HierarchyRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
 		fTestRunnerPart= runner;
@@ -98,7 +98,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		testTreePanel.setLayoutData(gridData);
 		
 		hierarchyTab.setControl(testTreePanel);
-		hierarchyTab.setToolTipText("Test Hierarchy");
+		hierarchyTab.setToolTipText(JUnitMessages.getString("HierarchyRunView.tab.tooltip")); //$NON-NLS-1$
 		
 		fTree= new Tree(testTreePanel, SWT.V_SCROLL);
 		gridData= new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
@@ -137,7 +137,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	private String getTestLabel() {
 		TreeItem treeItem= fTree.getSelection()[0];
 		if(treeItem == null) 
-			return "";
+			return ""; //$NON-NLS-1$
 		return treeItem.getText();
 	}
 
@@ -173,7 +173,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	}		
 
 	public String getName() {
-		return "Hierarchy";
+		return JUnitMessages.getString("HierarchyRunView.tab.title"); //$NON-NLS-1$
 	}
 	
 	public void setSelectedTest(String testName) {
@@ -329,7 +329,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			treeItem= new TreeItem(fTree, SWT.NONE);
 			treeItem.setImage(fHierarchyIcon);
 			fSuiteInfos.addElement(new SuiteInfo(treeItem, testCount));
-		} else if(isSuite.equals("true")) {
+		} else if(isSuite.equals("true")) { //$NON-NLS-1$
 			testInfo.fStatus= IS_SUITE;
 			treeItem= new TreeItem(((SuiteInfo) fSuiteInfos.lastElement()).fTreeItem, SWT.NONE);
 			treeItem.setImage(fHierarchyIcon);

@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.SocketUtil;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
@@ -44,8 +45,8 @@ import org.eclipse.jdt.launching.sourcelookup.JavaSourceLocator;
  */
 public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchConfigurationDelegate {
 
-	public static final String PORT_ATTR= JUnitPlugin.PLUGIN_ID+".PORT";
-	public static final String TESTTYPE_ATTR= JUnitPlugin.PLUGIN_ID+".TESTTYPE";
+	public static final String PORT_ATTR= JUnitPlugin.PLUGIN_ID+".PORT"; //$NON-NLS-1$
+	public static final String TESTTYPE_ATTR= JUnitPlugin.PLUGIN_ID+".TESTTYPE"; //$NON-NLS-1$
 	public static final String ATTR_KEEPRUNNING = JUnitPlugin.PLUGIN_ID+ ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
 	
 	/**
@@ -55,14 +56,14 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor pm) throws CoreException {		
 		IJavaProject javaProject= getJavaProject(configuration);
 		if ((javaProject == null) || !javaProject.exists()) {
-			abort("Invalid project specified", null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
+			abort(JUnitMessages.getString("JUnitBaseLaunchConfiguration.error.invalidproject"), null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT); //$NON-NLS-1$
 		}
 		IType testType = getTestType(configuration, javaProject);
 		IVMInstallType type = getVMInstallType(configuration);
 		IVMInstall install= getVMInstall(configuration);
 		IVMRunner runner = install.getVMRunner(mode);
 		if (runner == null) {
-			abort(MessageFormat.format("Internal error: JRE {0} does not specify a VM Runner.", new String[]{install.getId()}), null, IJavaLaunchConfigurationConstants.ERR_VM_RUNNER_DOES_NOT_EXIST);
+			abort(MessageFormat.format(JUnitMessages.getString("JUnitBaseLaunchConfiguration.error.novmrunner"), new String[]{install.getId()}), null, IJavaLaunchConfigurationConstants.ERR_VM_RUNNER_DOES_NOT_EXIST); //$NON-NLS-1$
 		}
 		File workingDir = verifyWorkingDirectory(configuration);
 		String workingDirName = null;
@@ -71,11 +72,11 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		
 		// Program & VM args
 		String vmArgs= getVMArguments(configuration);
-		ExecutionArguments execArgs = new ExecutionArguments(vmArgs, "");
+		ExecutionArguments execArgs = new ExecutionArguments(vmArgs, ""); //$NON-NLS-1$
 		
 		// Create VM config
 		IType types[]= { testType };
-		int port= SocketUtil.findUnusedLocalPort("", 5000, 15000);  
+		int port= SocketUtil.findUnusedLocalPort("", 5000, 15000);   //$NON-NLS-1$
 
 		VMRunnerConfiguration runConfig= createVMRunner(configuration, types, port, mode);
 		runConfig.setVMArguments(execArgs.getVMArgumentsArray());

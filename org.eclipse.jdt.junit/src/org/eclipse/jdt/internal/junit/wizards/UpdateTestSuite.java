@@ -62,9 +62,9 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			}
 			String message;
 			if (count == 1) {
-				message= Messages.getFormattedString("UpdateAllTests.selected_methods.label_one", new Integer(count)); //$NON-NLS-1$
+				message= WizardMessages.getFormattedString("UpdateAllTests.selected_methods.label_one", new Integer(count)); //$NON-NLS-1$
 			} else {
-				message= Messages.getFormattedString("UpdateAllTests.selected_methods.label_many", new Integer(count)); //$NON-NLS-1$
+				message= WizardMessages.getFormattedString("UpdateAllTests.selected_methods.label_many", new Integer(count)); //$NON-NLS-1$
 			}
 			return new JUnitStatus(IStatus.INFO, message);
 		}
@@ -101,8 +101,8 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				if (originalContent.indexOf(NewTestSuiteCreationWizardPage.END_MARKER, start) > -1) {
 					CheckedTableSelectionDialog dialog= new CheckedTableSelectionDialog(fShell, lprovider, cprovider);
 					dialog.setValidator(new UpdateAllTestsValidator());
-					dialog.setTitle(Messages.getString("UpdateAllTests.title")); //$NON-NLS-1$
-					dialog.setMessage(Messages.getString("UpdateAllTests.message")); //$NON-NLS-1$
+					dialog.setTitle(WizardMessages.getString("UpdateAllTests.title")); //$NON-NLS-1$
+					dialog.setMessage(WizardMessages.getString("UpdateAllTests.message")); //$NON-NLS-1$
 					dialog.setInitialSelections(cprovider.getElements(fPack));
 					dialog.setSize(60, 25);
 					dialog.setInput(fPack);
@@ -148,7 +148,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	
 	private void updateTestCasesInSuite(IProgressMonitor monitor) {
 		try {
-			monitor.beginTask(Messages.getString("UpdateAllTests.beginTask"), 5); //$NON-NLS-1$
+			monitor.beginTask(WizardMessages.getString("UpdateAllTests.beginTask"), 5); //$NON-NLS-1$
 			ISourceRange range= fSuiteMethod.getSourceRange();
 			IBuffer buf= fTestSuite.getBuffer();
 			String originalContent= buf.getText(range.getOffset(), range.getLength());
@@ -198,12 +198,12 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	}
 
 	private void cannotUpdateSuiteError() {
-		MessageDialog.openError(fShell, Messages.getString("UpdateAllTests.cannotUpdate.errorDialog.title"), //$NON-NLS-1$
-			Messages.getFormattedString("UpdateAllTests.cannotUpdate.errorDialog.message", new String[] {NewTestSuiteCreationWizardPage.START_MARKER, NewTestSuiteCreationWizardPage.END_MARKER})); //$NON-NLS-1$
+		MessageDialog.openError(fShell, WizardMessages.getString("UpdateAllTests.cannotUpdate.errorDialog.title"), //$NON-NLS-1$
+			WizardMessages.getFormattedString("UpdateAllTests.cannotUpdate.errorDialog.message", new String[] {NewTestSuiteCreationWizardPage.START_MARKER, NewTestSuiteCreationWizardPage.END_MARKER})); //$NON-NLS-1$
 
 	}
 
 	private void noSuiteError() {
-		MessageDialog.openError(fShell, Messages.getString("UpdateAllTests.cannotFind.errorDialog.title"), Messages.getString("UpdateAllTests.cannotFind.errorDialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
+		MessageDialog.openError(fShell, WizardMessages.getString("UpdateAllTests.cannotFind.errorDialog.title"), WizardMessages.getString("UpdateAllTests.cannotFind.errorDialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

@@ -12,7 +12,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.junit.util.*;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.SelectionStatusDialog;
-import org.eclipse.jdt.internal.junit.wizards.Messages;
+import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -49,7 +49,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	
 	private ISelectionValidator fValidator= null;
 	private ViewerSorter fSorter;
-	private String fEmptyListMessage= Messages.getString("CheckedTableSelectionDialog.emptyListMessage"); //$NON-NLS-1$
+	private String fEmptyListMessage= WizardMessages.getString("CheckedTableSelectionDialog.emptyListMessage"); //$NON-NLS-1$
 	
 	private IStatus fCurrStatus= new JUnitStatus();
 	private List fFilters;
@@ -254,7 +254,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		data.grabExcessHorizontalSpace= true;
 		composite.setData(data);
 
-		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, Messages.getString("CheckedTableSelectionDialog.selectAll"), false); //$NON-NLS-1$
+		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, WizardMessages.getString("CheckedTableSelectionDialog.selectAll"), false); //$NON-NLS-1$
 
 		SelectionListener listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -264,7 +264,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		};
 		selectButton.addSelectionListener(listener);
 
-		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, Messages.getString("CheckedTableSelectionDialog.deselectAll"), false); //$NON-NLS-1$
+		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, WizardMessages.getString("CheckedTableSelectionDialog.deselectAll"), false); //$NON-NLS-1$
 
 		listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

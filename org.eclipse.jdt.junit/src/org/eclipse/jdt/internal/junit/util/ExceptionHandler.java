@@ -10,7 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.wizards.Messages;
+import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -85,7 +85,7 @@ public class ExceptionHandler {
 			msg.write("\n\n"); //$NON-NLS-1$
 		}
 		if (exceptionMessage == null || exceptionMessage.length() == 0)
-			msg.write(Messages.getString("ExceptionDialog.seeErrorLogMessage")); //$NON-NLS-1$
+			msg.write(WizardMessages.getString("ExceptionDialog.seeErrorLogMessage")); //$NON-NLS-1$
 		else
 			msg.write(exceptionMessage);
 		MessageDialog.openError(shell, title, msg.toString());			

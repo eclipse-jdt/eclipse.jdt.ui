@@ -34,9 +34,9 @@ class FailureTraceView implements IMenuListener {
 	private TestRunnerViewPart fTestRunner;
 	private String fInputTrace;
 	
-	private final Image fStackIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass());
-	private final Image fExceptionIcon= TestRunnerViewPart.createImage("icons/exc_catch.gif", getClass());
-	private final Image fInfoIcon= TestRunnerViewPart.createImage("icons/info_obj.gif", getClass());
+	private final Image fStackIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass()); //$NON-NLS-1$
+	private final Image fExceptionIcon= TestRunnerViewPart.createImage("icons/exc_catch.gif", getClass()); //$NON-NLS-1$
+	private final Image fInfoIcon= TestRunnerViewPart.createImage("icons/info_obj.gif", getClass()); //$NON-NLS-1$
 
 	public FailureTraceView(Composite parent, TestRunnerViewPart testRunner) {
 		fTable= new Table(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -98,12 +98,12 @@ class FailureTraceView implements IMenuListener {
 		try { 
 			// TO DO works for JDK stack trace only
 			String testName= traceLine;
-			testName= testName.substring(testName.indexOf("at "));
+			testName= testName.substring(testName.indexOf("at ")); //$NON-NLS-1$
 			testName= testName.substring(3, testName.indexOf('(')).trim();
 			testName= testName.substring(0, testName.lastIndexOf('.'));
 			
 			String lineNumber= traceLine;
-			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.indexOf(")"));
+			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.indexOf(")")); //$NON-NLS-1$
 			int line= Integer.valueOf(lineNumber).intValue();
 			return new OpenEditorAtLineAction(fTestRunner, testName, line);
 		} catch(NumberFormatException e) {
@@ -147,7 +147,7 @@ class FailureTraceView implements IMenuListener {
 	}
 
 	private void updateTable(String trace) {
-		if(trace == null || trace.trim().equals("")) {
+		if(trace == null || trace.trim().equals("")) { //$NON-NLS-1$
 			clear();
 			return;
 		}
@@ -180,7 +180,7 @@ class FailureTraceView implements IMenuListener {
 				if (itemLabel.trim().length() > 0) {
 					tableItem= new TableItem(fTable, SWT.NONE);
 					// heuristic for detecting a stack frame - works for JDK
-					if ((itemLabel.indexOf(" at ") >= 0)) {
+					if ((itemLabel.indexOf(" at ") >= 0)) { //$NON-NLS-1$
 						tableItem.setImage(fStackIcon);
 					}
 					tableItem.setText(itemLabel);

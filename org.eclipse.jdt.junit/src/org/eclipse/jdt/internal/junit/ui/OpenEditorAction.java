@@ -29,7 +29,7 @@ public abstract class OpenEditorAction extends Action {
 	 * Constructor for OpenEditorAction.
 	 */
 	protected OpenEditorAction(TestRunnerViewPart testRunner, String testClassName) {
-		super("&Goto File");
+		super(JUnitMessages.getString("OpenEditorAction.action.label")); //$NON-NLS-1$
 		fClassName= testClassName;
 		fTestRunner= testRunner;
 	}
@@ -43,17 +43,17 @@ public abstract class OpenEditorAction extends Action {
 			IJavaElement element= findElement(fTestRunner.getLaunchedProject(), fClassName);
 			if (element == null) {
 				MessageDialog.openError(fTestRunner.getSite().getShell(), 
-					"Cannot Open Editor", "Test class not found in project");
+					JUnitMessages.getString("OpenEditorAction.error.cannotopen.title"), JUnitMessages.getString("OpenEditorAction.error.cannotopen.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			}
 			// use of internal API for backward compatibility with 1.0
 			textEditor= (ITextEditor)EditorUtility.openInEditor(element, false);			
 		} catch (CoreException e) {
-			ErrorDialog.openError(fTestRunner.getSite().getShell(), "Error", "Could not open editor", e.getStatus());
+			ErrorDialog.openError(fTestRunner.getSite().getShell(), JUnitMessages.getString("OpenEditorAction.error.dialog.title"), JUnitMessages.getString("OpenEditorAction.error.dialog.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		if (textEditor == null) {
-			fTestRunner.postInfo("Could not open editor");
+			fTestRunner.postInfo(JUnitMessages.getString("OpenEditorAction.message.cannotopen")); //$NON-NLS-1$
 			return;
 		}
 		reveal(textEditor);

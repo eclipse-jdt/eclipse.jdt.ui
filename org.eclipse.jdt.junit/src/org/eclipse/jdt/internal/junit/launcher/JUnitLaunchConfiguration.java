@@ -35,16 +35,16 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 	 */
 	protected VMRunnerConfiguration createVMRunner(ILaunchConfiguration configuration, IType[] testTypes, int port, String runMode) throws CoreException {
 		String[] classPath= createClassPath(testTypes[0]);	
-		VMRunnerConfiguration vmConfig= new VMRunnerConfiguration("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", classPath);
+		VMRunnerConfiguration vmConfig= new VMRunnerConfiguration("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", classPath); //$NON-NLS-1$
 	
 		Vector argv= new Vector(10);
-		argv.add("-port");
+		argv.add("-port"); //$NON-NLS-1$
 		argv.add(Integer.toString(port));
 		//argv("-debugging");
-		argv.add("-classNames");
+		argv.add("-classNames"); //$NON-NLS-1$
 				
 		if (keepAlive(configuration) && runMode.equals(ILaunchManager.DEBUG_MODE))
-			argv.add(0, "-keepalive");
+			argv.add(0, "-keepalive"); //$NON-NLS-1$
 			
 		for (int i= 0; i < testTypes.length; i++) 
 			argv.add(testTypes[i].getFullyQualifiedName());
@@ -62,8 +62,8 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 		System.arraycopy(cp, 0, classPath, 2, cp.length);
 		try {
 			// assumption is that the output folder is called bin!
-			classPath[0]= Platform.asLocalURL(new URL(url, "bin")).getFile();
-			classPath[1]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile();
+			classPath[0]= Platform.asLocalURL(new URL(url, "bin")).getFile(); //$NON-NLS-1$
+			classPath[1]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			JUnitPlugin.log(e); // TO DO abort run and inform user
 		} catch (IOException e) {

@@ -24,7 +24,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		super();
 		//setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		//setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(Messages.getString("Wizard.title.new")); //$NON-NLS-1$
+		setWindowTitle(WizardMessages.getString("Wizard.title.new")); //$NON-NLS-1$
 		initDialogSettings();
 	}
 

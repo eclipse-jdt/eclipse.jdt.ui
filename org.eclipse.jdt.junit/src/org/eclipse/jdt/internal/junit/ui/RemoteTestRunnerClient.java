@@ -75,14 +75,14 @@ public class RemoteTestRunnerClient {
 		int fPort;
 		
 		public ServerConnection(int port) {
-			super("ServerConnection");
+			super("ServerConnection"); //$NON-NLS-1$
 			fPort= port;
 		}
 		
 		public void run() {
 			try {
 				if (fDebug)
-					System.out.println("Creating server socket "+fPort);
+					System.out.println("Creating server socket "+fPort); //$NON-NLS-1$
 				fServerSocket= new ServerSocket(fPort);
 				fSocket= fServerSocket.accept();				
 				fBufferedReader= new BufferedReader(new InputStreamReader(fSocket.getInputStream()));
@@ -126,14 +126,14 @@ public class RemoteTestRunnerClient {
 	 */
 	public synchronized void rerunTest(String className, String testName) {
 		if (isRunning()) {
-			fWriter.println(MessageIds.TEST_RERUN+className+" "+testName);
+			fWriter.println(MessageIds.TEST_RERUN+className+" "+testName); //$NON-NLS-1$
 			fWriter.flush();
 		}
 	}
 
 	private synchronized void shutDown() {
 		if (fDebug) 
-			System.out.println("shutdown "+fPort);
+			System.out.println("shutdown "+fPort); //$NON-NLS-1$
 		
 		if (fWriter != null) {
 			fWriter.close();
@@ -173,13 +173,13 @@ public class RemoteTestRunnerClient {
 	private void receiveMessage(String message) {
 		if (message.startsWith(MessageIds.TRACE_START)) {
 			fInReadTrace= true;
-			fFailedTrace= "";
+			fFailedTrace= ""; //$NON-NLS-1$
 			return;
 		}
 		if (message.startsWith(MessageIds.TRACE_END)) {
 			fInReadTrace= false;
 			fListener.testFailed(fFailureKind, fFailedTest, fFailedTrace);
-			fFailedTrace= "";
+			fFailedTrace= ""; //$NON-NLS-1$
 			return;
 		}
 		if (fInReadTrace) {
@@ -189,7 +189,7 @@ public class RemoteTestRunnerClient {
 		
 		if (message.startsWith(MessageIds.RTRACE_START)) {
 			fInReadRerunTrace= true;
-			fFailedRerunTrace= "";
+			fFailedRerunTrace= ""; //$NON-NLS-1$
 			return;
 		}
 		if (message.startsWith(MessageIds.RTRACE_END)) {
@@ -243,18 +243,18 @@ public class RemoteTestRunnerClient {
 		if (message.startsWith(MessageIds.TEST_RERAN)) {
 			// format: className" "testName" "status
 			// status: FAILURE, ERROR, OK
-			int c= arg.indexOf(" ");
-			int t= arg.indexOf(" ", c+1);
+			int c= arg.indexOf(" "); //$NON-NLS-1$
+			int t= arg.indexOf(" ", c+1); //$NON-NLS-1$
 			String className= arg.substring(0, c);
 			String testName= arg.substring(c+1, t);
 			String status= arg.substring(t+1);
 			int statusCode= ITestRunListener.STATUS_OK;
-			if (status.equals("FAILURE"))
+			if (status.equals("FAILURE")) //$NON-NLS-1$
 				statusCode= ITestRunListener.STATUS_FAILURE;
-			else if (status.equals("ERROR"))
+			else if (status.equals("ERROR")) //$NON-NLS-1$
 				statusCode= ITestRunListener.STATUS_ERROR;
 				
-			String trace= "";
+			String trace= ""; //$NON-NLS-1$
 			if (statusCode != ITestRunListener.STATUS_OK)
 				trace= fFailedRerunTrace; // assumption a rerun trace was sent before
 			fListener.testReran(className, testName, statusCode, trace);

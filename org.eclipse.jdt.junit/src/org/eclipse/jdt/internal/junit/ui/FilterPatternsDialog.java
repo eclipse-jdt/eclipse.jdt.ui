@@ -20,7 +20,7 @@ public class FilterPatternsDialog extends InputDialog {
 		public String isValid(String input) {
 		    if (input.length() > 0)
 		    	return null;
-		    return "Filter must not be empty";
+		    return JUnitMessages.getString("FilterPatternsDialog.message.notempty"); //$NON-NLS-1$
 		}
 	};
 	
@@ -28,7 +28,7 @@ public class FilterPatternsDialog extends InputDialog {
 	 * @see InputDialog#InputDialog
 	 */
 	public FilterPatternsDialog(Shell parent, String title, String message) {
-		super(parent, title, message, "", new NonEmptyValidator());
+		super(parent, title, message, "", new NonEmptyValidator()); //$NON-NLS-1$
 	}
 	
 	/*

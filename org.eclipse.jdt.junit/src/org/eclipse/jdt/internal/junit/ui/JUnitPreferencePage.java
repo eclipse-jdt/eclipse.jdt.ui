@@ -24,18 +24,18 @@ public class JUnitPreferencePage extends PreferencePage
 	private Button fAddButton;
 	private Button fRemoveButton;
 	
-	public static String STACK_FILTER_ENTRIES_COUNT= "NOF_STACK_FILTER_ENTRIES";
-	public static String STACK_FILTER_ENTRY_= "STACK_FILTER_ENTRY_";
-	public static String DO_FILTER_STACK= "DO_FILTER_STACK";
+	public static String STACK_FILTER_ENTRIES_COUNT= "NOF_STACK_FILTER_ENTRIES"; //$NON-NLS-1$
+	public static String STACK_FILTER_ENTRY_= "STACK_FILTER_ENTRY_"; //$NON-NLS-1$
+	public static String DO_FILTER_STACK= "DO_FILTER_STACK"; //$NON-NLS-1$
 
 	private static String[] fgDefaultFilterPatterns= new String[] {
-		"org.eclipse.jdt.internal.junit.runner",
-		"org.eclipse.jdt.internal.junit.ui",
-		"junit.framework.TestCase",
-		"junit.framework.TestResult",
-		"junit.framework.TestSuite",
-		"junit.framework.Assert.", // don't filter AssertionFailure
-		"java.lang.reflect.Method.invoke"
+		"org.eclipse.jdt.internal.junit.runner", //$NON-NLS-1$
+		"org.eclipse.jdt.internal.junit.ui", //$NON-NLS-1$
+		"junit.framework.TestCase", //$NON-NLS-1$
+		"junit.framework.TestResult", //$NON-NLS-1$
+		"junit.framework.TestSuite", //$NON-NLS-1$
+		"junit.framework.Assert.", // don't filter AssertionFailure //$NON-NLS-1$
+		"java.lang.reflect.Method.invoke" //$NON-NLS-1$
 	};
 
 	public JUnitPreferencePage() {
@@ -104,12 +104,12 @@ public class JUnitPreferencePage extends PreferencePage
 		buttonComposite.setLayoutData(gridData);
 		
 		fAddButton= new Button(buttonComposite, SWT.CENTER | SWT.PUSH);
-		fAddButton.setText("&Add...");
+		fAddButton.setText(JUnitMessages.getString("JUnitPreferencePage.addbutton.label")); //$NON-NLS-1$
 		setButtonGridData(fAddButton);
 		fAddButton.addSelectionListener(this);
 
 		fRemoveButton= new Button(buttonComposite, SWT.CENTER | SWT.PUSH);
-		fRemoveButton.setText("&Remove");
+		fRemoveButton.setText(JUnitMessages.getString("JUnitPreferencePage.removebutton.label")); //$NON-NLS-1$
 		setButtonGridData(fRemoveButton);
 		fRemoveButton.addSelectionListener(this);
 	}
@@ -126,7 +126,7 @@ public class JUnitPreferencePage extends PreferencePage
 
 	protected void createFilterTable(Composite composite) {
 		Label label= new Label(composite, SWT.NONE);
-		label.setText("&Stack filter patterns:");
+		label.setText(JUnitMessages.getString("JUnitPreferencePage.filter.label")); //$NON-NLS-1$
 		GridData gridData= new GridData();
 		gridData.horizontalAlignment= GridData.FILL;
 		gridData.horizontalSpan= 2;
@@ -176,7 +176,7 @@ public class JUnitPreferencePage extends PreferencePage
 	 */
 	public void widgetSelected(SelectionEvent selectionEvent) {
 		if (selectionEvent.getSource().equals(fAddButton)) {
-			FilterPatternsDialog dialog= new FilterPatternsDialog(getControl().getShell(), "Add Stack Filter Pattern", "Enter Filter Pattern:");
+			FilterPatternsDialog dialog= new FilterPatternsDialog(getControl().getShell(), JUnitMessages.getString("JUnitPreferencePage.adddialog.title"), JUnitMessages.getString("JUnitPreferencePage.addialog.prompt")); //$NON-NLS-1$ //$NON-NLS-2$
 			dialog.open();
 			String pattern= dialog.getValue();
 			addFilterString(pattern);

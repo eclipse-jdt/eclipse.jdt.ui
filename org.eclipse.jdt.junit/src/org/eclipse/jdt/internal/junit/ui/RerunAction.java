@@ -28,7 +28,7 @@ public class RerunAction extends Action {
 	 * Constructor for RerunAction.
 	 */
 	public RerunAction(TestRunnerViewPart runner, String className, String testName) {
-		super("&Rerun"); 
+		super(JUnitMessages.getString("RerunAction.action.label"));  //$NON-NLS-1$
 		fTestRunner= runner;
 		fClassName= className;
 		fTestName= testName;

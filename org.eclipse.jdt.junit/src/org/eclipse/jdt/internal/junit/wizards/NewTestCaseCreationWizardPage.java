@@ -105,19 +105,19 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fFirstTime= true;
 		fTestClassTextInitialValue= ""; //$NON-NLS-1$
 		
-		setTitle(Messages.getString("NewTestClassWizPage.title")); //$NON-NLS-1$
-		setDescription(Messages.getString("NewTestClassWizPage.description")); //$NON-NLS-1$
+		setTitle(WizardMessages.getString("NewTestClassWizPage.title")); //$NON-NLS-1$
+		setDescription(WizardMessages.getString("NewTestClassWizPage.description")); //$NON-NLS-1$
 		
 		String[] buttonNames= new String[] {
 			"public static void main(Strin&g[] args)", //$NON-NLS-1$
 			/* Add testrunner statement to main Method */
-			Messages.getString("NewTestClassWizPage.methodStub.testRunner"), //$NON-NLS-1$
-			Messages.getString("NewTestClassWizPage.methodStub.setUp"), //$NON-NLS-1$
-			Messages.getString("NewTestClassWizPage.methodStub.tearDown") //$NON-NLS-1$
+			WizardMessages.getString("NewTestClassWizPage.methodStub.testRunner"), //$NON-NLS-1$
+			WizardMessages.getString("NewTestClassWizPage.methodStub.setUp"), //$NON-NLS-1$
+			WizardMessages.getString("NewTestClassWizPage.methodStub.tearDown") //$NON-NLS-1$
 		};
 		
 		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
-		fMethodStubsButtons.setLabelText(Messages.getString("NewTestClassWizPage.method.Stub.label")); //$NON-NLS-1$
+		fMethodStubsButtons.setLabelText(WizardMessages.getString("NewTestClassWizPage.method.Stub.label")); //$NON-NLS-1$
 
 		fClassToTestStatus= new JUnitStatus();
 		fTestClassStatus= new JUnitStatus();
@@ -268,7 +268,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fClassToTestLabel= new Label(composite, SWT.LEFT | SWT.WRAP);
 		fClassToTestLabel.setFont(composite.getFont());
 
-		fClassToTestLabel.setText(Messages.getString("NewTestClassWizPage.class_to_test.label")); //$NON-NLS-1$
+		fClassToTestLabel.setText(WizardMessages.getString("NewTestClassWizPage.class_to_test.label")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= 1;
 		fClassToTestLabel.setLayoutData(gd);
@@ -288,7 +288,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fClassToTestText.setLayoutData(gd);
 		
 		fClassToTestButton= new Button(composite, SWT.PUSH);
-		fClassToTestButton.setText(Messages.getString("NewTestClassWizPage.class_to_test.browse")); //$NON-NLS-1$
+		fClassToTestButton.setText(WizardMessages.getString("NewTestClassWizPage.class_to_test.browse")); //$NON-NLS-1$
 		fClassToTestButton.setEnabled(true);
 		fClassToTestButton.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -327,8 +327,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		IType type= null;
 		try {
 			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES, false, null);
-			dialog.setTitle(Messages.getString("NewTestClassWizPage.class_to_test.dialog.title")); //$NON-NLS-1$
-			dialog.setMessage(Messages.getString("NewTestClassWizPage.class_to_test.dialog.message")); //$NON-NLS-1$
+			dialog.setTitle(WizardMessages.getString("NewTestClassWizPage.class_to_test.dialog.title")); //$NON-NLS-1$
+			dialog.setMessage(WizardMessages.getString("NewTestClassWizPage.class_to_test.dialog.message")); //$NON-NLS-1$
 			dialog.open();
 			if (dialog.getReturnCode() != SelectionDialog.OK)
 				return type;
@@ -420,13 +420,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			constr= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
 		} else {
 			StringBuffer field= new StringBuffer();
-			if (settings.createComments)
-				field.append("/**\n * The name of the test case.\n */\n"); //$NON-NLS-1$
-			field.append("private String fName;\n\n"); //$NON-NLS-1$
-			type.createField(field.toString(), null, true, null);
-			if (settings.createComments)
-				constr="/**\n * Constructs a test case with the given name.\n */\n"; //$NON-NLS-1$
-			constr += "public "+getTypeName()+"(String name) {\nfName= name;\n}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			constr += "public "+getTypeName()+"(String name) {\nsuper(name);\n}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		type.createMethod(constr, null, true, null);	
 		fIndexOfFirstTestMethod++;
@@ -496,13 +490,9 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			genStubSettings.fCallSuper= true;
 			genStubSettings.fMethodOverwrites= true;
 			tearDown= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
-		} else {
-			if (settings.createComments)
-				tearDown="/**\n * Tears down the fixture, for example, close a network connection.\n * This method is called after a test is executed.\n * @throws Exception\n */\n"; //$NON-NLS-1$ 
-			tearDown+= "protected void "+TEARDOWN+"() throws Exception {}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			type.createMethod(tearDown, null, false, null);	
+			fIndexOfFirstTestMethod++;
 		}				
-		type.createMethod(tearDown, null, false, null);	
-		fIndexOfFirstTestMethod++;
 	}
 
 	protected void createTestMethodStubs(IType type) throws JavaModelException {
@@ -545,7 +535,9 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	
 				if (overloadedMethods.contains(methods[i])) {
 					IMethod method= methods[i];
-					newMethod.append("/*\n * Test for "+Signature.toString(method.getReturnType())+" "+method.getElementName()+"("); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					String returnType= Signature.toString(method.getReturnType());
+					String body= WizardMessages.getFormattedString("NewTestClassWizPage.comment.class_to_test", new String[]{returnType, method.getElementName()}); //$NON-NLS-1$
+					newMethod.append("/*\n * "+body+"(");  //$NON-NLS-1$ //$NON-NLS-2$
 					String[] paramTypes= method.getParameterTypes();
 					if (paramTypes.length > 0) {
 						if (paramTypes.length > 1) {
@@ -650,7 +642,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			IMarker marker= res.createMarker("org.eclipse.jdt.junit.junit_task"); //$NON-NLS-1$
 			HashMap attributes= new HashMap(10);
 			attributes.put(IMarker.PRIORITY, new Integer(IMarker.PRIORITY_NORMAL));
-			attributes.put(IMarker.MESSAGE, Messages.getFormattedString("NewTestClassWizPage.marker.message",method.getElementName())); //$NON-NLS-1$
+			attributes.put(IMarker.MESSAGE, WizardMessages.getFormattedString("NewTestClassWizPage.marker.message",method.getElementName())); //$NON-NLS-1$
 			ISourceRange markerRange= method.getSourceRange();
 			attributes.put(IMarker.CHAR_START, new Integer(markerRange.getOffset()));
 			attributes.put(IMarker.CHAR_END, new Integer(markerRange.getOffset()+markerRange.getLength()));
@@ -667,15 +659,15 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				IType type= NewTestCaseCreationWizardPage.resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);
 				JUnitStatus status = new JUnitStatus();				
 				if (type == null) {
-					status.setError(Messages.getString("NewTestClassWizPage.error.superclass.not_exist")); //$NON-NLS-1$
+					status.setError(WizardMessages.getString("NewTestClassWizPage.error.superclass.not_exist")); //$NON-NLS-1$
 					fSuperClassStatus= status;
 				} else {
 					if (type.isInterface()) {
-						status.setError(Messages.getString("NewTestClassWizPage.error.superclass.is_interface")); //$NON-NLS-1$
+						status.setError(WizardMessages.getString("NewTestClassWizPage.error.superclass.is_interface")); //$NON-NLS-1$
 						fSuperClassStatus= status;
 					}
 					if (!TestSearchEngine.isTestImplementor(type)) {
-						status.setError(Messages.getFormattedString("NewTestClassWizPage.error.superclass.not_implementing_test_interface", JUnitPlugin.TEST_INTERFACE_NAME)); //$NON-NLS-1$
+						status.setError(WizardMessages.getFormattedString("NewTestClassWizPage.error.superclass.not_implementing_test_interface", JUnitPlugin.TEST_INTERFACE_NAME)); //$NON-NLS-1$
 						fSuperClassStatus= status;
 					} else {
 						IMethod setupMethod= type.getMethod(SETUP, new String[] {});
@@ -695,7 +687,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected void createTestClassControls(Composite composite, int nColumns) {
 		fTestClassLabel= new Label(composite, SWT.LEFT | SWT.WRAP);
 		fTestClassLabel.setFont(composite.getFont());
-		fTestClassLabel.setText(Messages.getString("NewTestClassWizPage.testcase.label")); //$NON-NLS-1$
+		fTestClassLabel.setText(WizardMessages.getString("NewTestClassWizPage.testcase.label")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= 1;
 		fTestClassLabel.setLayoutData(gd);
@@ -751,20 +743,20 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		String typeName= getTypeName();
 		// must not be empty
 		if (typeName.length() == 0) {
-			status.setError(Messages.getString("NewTestClassWizPage.error.testcase.name_empty")); //$NON-NLS-1$
+			status.setError(WizardMessages.getString("NewTestClassWizPage.error.testcase.name_empty")); //$NON-NLS-1$
 			return status;
 		}
 		if (typeName.indexOf('.') != -1) {
-			status.setError(Messages.getString("NewTestClassWizPage.error.testcase.name_qualified")); //$NON-NLS-1$
+			status.setError(WizardMessages.getString("NewTestClassWizPage.error.testcase.name_qualified")); //$NON-NLS-1$
 			return status;
 		}
 		IStatus val= JavaConventions.validateJavaTypeName(typeName);
 
 		if (val.getSeverity() == IStatus.ERROR) {
-			status.setError(Messages.getString("NewTestClassWizPage.error.testcase.name_not_valid")+val.getMessage()); //$NON-NLS-1$
+			status.setError(WizardMessages.getString("NewTestClassWizPage.error.testcase.name_not_valid")+val.getMessage()); //$NON-NLS-1$
 			return status;
 		} else if (val.getSeverity() == IStatus.WARNING) {
-			status.setWarning(Messages.getString("NewTestClassWizPage.error.testcase.name_discouraged")+val.getMessage()); //$NON-NLS-1$
+			status.setWarning(WizardMessages.getString("NewTestClassWizPage.error.testcase.name_discouraged")+val.getMessage()); //$NON-NLS-1$
 			// continue checking
 		}		
 
@@ -772,7 +764,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		if (pack != null) {
 			ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
 			if (cu.exists()) {
-					status.setError(Messages.getString("NewTestClassWizPage.error.testcase.already_exists")); //$NON-NLS-1$
+					status.setError(WizardMessages.getString("NewTestClassWizPage.error.testcase.already_exists")); //$NON-NLS-1$
 				return status;
 			}
 		}
@@ -804,7 +796,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		IStatus val= JavaConventions.validateJavaTypeName(classToTestName);
 //		if (!val.isOK()) {
 		if (val.getSeverity() == IStatus.ERROR) {
-			status.setError(Messages.getString("NewTestClassWizPage.error.class_to_test.not_valid")); //$NON-NLS-1$
+			status.setError(WizardMessages.getString("NewTestClassWizPage.error.class_to_test.not_valid")); //$NON-NLS-1$
 			return status;
 		}
 		
@@ -814,19 +806,19 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				//IType type= wizpage.resolveClassToTestName();
 				if (type == null) {
 					//status.setWarning("Warning: "+typeLabel+" does not exist in current project.");
-					status.setError(Messages.getString("NewTestClassWizPage.error.class_to_test.not_exist")); //$NON-NLS-1$
+					status.setError(WizardMessages.getString("NewTestClassWizPage.error.class_to_test.not_exist")); //$NON-NLS-1$
 					return status;
 				} else {
 					if (type.isInterface()) {
-						status.setWarning(Messages.getFormattedString("NewTestClassWizPage.warning.class_to_test.is_interface",classToTestName)); //$NON-NLS-1$
+						status.setWarning(WizardMessages.getFormattedString("NewTestClassWizPage.warning.class_to_test.is_interface",classToTestName)); //$NON-NLS-1$
 					}
 					if (pack != null && !JavaModelUtil.isVisible(type, pack)) {
-						status.setWarning(Messages.getFormattedString("NewTestClassWizPage.warning.class_to_test.not_visible", new String[] {(type.isInterface())?Messages.getString("Interface"):Messages.getString("Class") , classToTestName})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						status.setWarning(WizardMessages.getFormattedString("NewTestClassWizPage.warning.class_to_test.not_visible", new String[] {(type.isInterface())?WizardMessages.getString("Interface"):WizardMessages.getString("Class") , classToTestName})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 				}
 				fClassToTest= type;
 			} catch (JavaModelException e) {
-				status.setError(Messages.getString("NewTestClassWizPage.error.class_to_test.not_valid")); //$NON-NLS-1$
+				status.setError(WizardMessages.getString("NewTestClassWizPage.error.class_to_test.not_valid")); //$NON-NLS-1$
 			}							
 		} else {
 			status.setError(""); //$NON-NLS-1$
