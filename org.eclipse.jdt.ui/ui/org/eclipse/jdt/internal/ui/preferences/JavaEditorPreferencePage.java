@@ -211,6 +211,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fStickyOccurrencesButton;
 	
 	/**
+	 * Tells whether the fields are initialized.
+	 * @since 3.0
+	 */
+	private boolean fFieldsInitialized= false;
+
+	
+	/**
 	 * Creates a new preference page.
 	 */
 	public JavaEditorPreferencePage() {
@@ -1426,6 +1433,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fStickyOccurrencesButton.setEnabled(markOccurrences);
 		
         updateAutoactivationControls();
+        
+        fFieldsInitialized= true;
+        updateStatus(validatePositiveNumber("0")); //$NON-NLS-1$
 	}
 
 	private void initializeDefaultColors() {	
@@ -1537,6 +1547,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 *  - first element is of type <code>Label</code>
 	 *  - second element is of type <code>Text</code>
 	 * Use <code>getLabelControl</code> and <code>getTextControl</code> to get the 2 controls.
+	 * 
+	 * @param composite 	the parent composite
+	 * @param label			the text field's label
+	 * @param key			the preference key
+	 * @param textLimit		the text limit
+	 * @param indentation	the field's indentation
+	 * @param isNumber		<code>true</code> iff this text field is used to e4dit a number
+	 * @return
 	 */
 	private Control[] addLabelledTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
 		Label labelControl= new Label(composite, SWT.NONE);
@@ -1607,6 +1625,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	}
 	
 	void updateStatus(IStatus status) {
+		if (!fFieldsInitialized)
+			return;
+		
 		if (!status.matches(IStatus.ERROR)) {
 			for (int i= 0; i < fNumberFields.size(); i++) {
 				Text text= (Text) fNumberFields.get(i);
