@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 2000, 2002 IBM Corp. and others.
+Copyright (c) 2000, 2003 IBM Corp. and others.
 All rights reserved. This program and the accompanying materials
 are made available under the terms of the Common Public License v1.0
 which accompanies this distribution, and is available at
@@ -264,7 +264,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 				if (originalImage != null) {
 					ImageRegistry imageRegistry= getGrayMarkerImageRegistry(display);
 					if (imageRegistry != null) {
-						String key= Integer.toString(originalImage.handle);
+						String key= Integer.toString(originalImage.hashCode());
 						Image grayImage= imageRegistry.get(key);
 						if (grayImage == null) {
 							grayImage= new Image(display, originalImage, SWT.IMAGE_GRAY);
