@@ -222,7 +222,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				IPath containerPath= null;
 				IJavaProject jproject= root.getJavaProject();
 				
-				if (entry == null || !root.isArchive()) {
+				if (entry == null || root.getKind() != IPackageFragmentRoot.K_BINARY) {
 					createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
 					return;
 				}
