@@ -20,6 +20,9 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.TextUtilities;
+
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
@@ -27,7 +30,7 @@ import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
 public abstract class CommentTestCase extends TestCase {
 
-	public static final String DELIMITER= "\r\n"; //$NON-NLS-1$
+	public static final String DELIMITER= TextUtilities.getDefaultLineDelimiter(new Document());
 
 	protected CommentTestCase(String name) {
 		super(name);
