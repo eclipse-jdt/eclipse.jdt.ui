@@ -1537,8 +1537,8 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 			updateReferenceInImport(enclosingImport, node, rewrite);
 		else {
 			final TextEditGroup group= rewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_type_reference")); //$NON-NLS-1$
-			boolean updated= updateReference(parameters, node, rewrite, group);
-			if (updated && !fType.getPackageFragment().equals(cu.getParent())) {
+			updateReference(parameters, node, rewrite, group);
+			if (!fType.getPackageFragment().equals(cu.getParent())) {
 				final String name= fType.getPackageFragment().getElementName() + '.' + fType.getElementName();
 				rewrite.getImportRemover().registerAddedImport(name);
 				rewrite.getImportRewrite().addImport(name);
