@@ -62,25 +62,30 @@ public class JavaSnippetFormattingStrategy extends ContextBasedFormattingStrateg
 	 */
 	public void format() {
 		super.format();
+		
 		Assert.isLegal(fIndentations.size() > 0);
 		Assert.isLegal(fPartitions.size() > 0);
 		Assert.isLegal(fPositions.size() > 0);
+		
 		final TypedPosition partition= (TypedPosition) fPartitions.removeFirst();
 		final Map preferences= getPreferences();
 		final IDocument document= getViewer().getDocument();
+		
 		int indent= 0;
+		
 		try {
 			//TODO rewrite using the edit API (CodeFormatterUtil.format2)
 
 			// convert html entities (mainly needed for &gt; and &lt;)
 			String toFormat= document.get(partition.offset, partition.length);
 			toFormat= convertHtml2Java(toFormat);
-			String formatted= CodeFormatterUtil.format(CodeFormatter.K_UNKNOWN, toFormat, indent, null, TextUtilities
-					.getDefaultLineDelimiter(document), preferences);
+			String formatted= CodeFormatterUtil.format(CodeFormatter.K_UNKNOWN, toFormat, indent, null, TextUtilities.getDefaultLineDelimiter(document), preferences);
 			formatted= convertJava2Html(formatted);
+			
 			final String raw= document.get(partition.getOffset(), partition.getLength());
 			if (formatted != null && !formatted.equals(raw))
 				document.replace(partition.getOffset(), partition.getLength(), formatted);
+			
 		} catch (BadLocationException exception) {
 			// Can only happen on concurrent document modification - log and
 			// bail out
@@ -122,8 +127,8 @@ public class JavaSnippetFormattingStrategy extends ContextBasedFormattingStrateg
 	 */
 	private String convertHtml2Java(String html) {
 		HTMLEntity2JavaReader reader= new HTMLEntity2JavaReader(new StringReader(html));
-		char[] buf= new char[html.length()]; // html2text never gets longer,
-											 // only shorter!
+		char[] buf= new char[html.length()]; // html2text never gets longer, only shorter!
+		
 		try {
 			int read= reader.read(buf);
 			return new String(buf, 0, read);
@@ -137,6 +142,7 @@ public class JavaSnippetFormattingStrategy extends ContextBasedFormattingStrateg
 	 */
 	public void formatterStarts(IFormattingContext context) {
 		super.formatterStarts(context);
+		
 		final FormattingContext current= (FormattingContext) context;
 		fIndentations.addLast(current.getProperty(FormattingContextProperties.CONTEXT_INDENTATION));
 		fPartitions.addLast(current.getProperty(FormattingContextProperties.CONTEXT_PARTITION));
@@ -148,6 +154,7 @@ public class JavaSnippetFormattingStrategy extends ContextBasedFormattingStrateg
 	 */
 	public void formatterStops() {
 		super.formatterStops();
+		
 		fIndentations.clear();
 		fPartitions.clear();
 		fPositions.clear();

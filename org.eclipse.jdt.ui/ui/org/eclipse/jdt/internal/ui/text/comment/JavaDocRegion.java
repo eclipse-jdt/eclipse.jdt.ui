@@ -231,6 +231,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 
 				range.markHtmlTag(JAVADOC_SEPARATOR_TAGS, token, COMMENT_SEPARATOR, true, true);
 				range.markHtmlTag(JAVADOC_BREAK_TAGS, token, COMMENT_BREAK, false, true);
+				range.markHtmlTag(JAVADOC_SINGLE_BREAK_TAG, token, COMMENT_BREAK, true, false);
 				range.markHtmlTag(JAVADOC_NEWLINE_TAGS, token, COMMENT_NEWLINE, true, false);
 
 			} else
@@ -274,7 +275,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 				current= (CommentRange)iterator.next();
 				count= current.getLength();
 
-				if (count > 0 || level > 0) { // PR44035: when inside a tag, mark blank lines as well to get proper snippet formatting
+				if (count > 0) { // PR44035: when inside a tag, mark blank lines as well to get proper snippet formatting
 
 					token= getText(current.getOffset(), current.getLength());
 					level= current.markRange(token, tags[index], level, key, include);

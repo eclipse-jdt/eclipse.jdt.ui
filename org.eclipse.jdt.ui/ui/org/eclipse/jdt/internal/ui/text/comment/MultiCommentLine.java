@@ -11,6 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.text.comment;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
@@ -19,7 +22,7 @@ import org.eclipse.jface.text.Region;
  * 
  * @since 3.0
  */
-public class MultiCommentLine extends CommentLine implements ICommentAttributes, IHtmlTagConstants, ILinkTagConstants {
+public class MultiCommentLine extends CommentLine implements ICommentAttributes, IHtmlTagConstants, ILinkTagConstants, IJavaDocTagConstants {
 
 	/** Line prefix of multi-line comment content lines */
 	public static final String MULTI_COMMENT_CONTENT_PREFIX= " * "; //$NON-NLS-1$
@@ -32,6 +35,31 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 
 	/** The reference indentation of this line */
 	private String fIndentation= ""; //$NON-NLS-1$
+	
+	/** The javadoc tag lookup. */
+	private static final Set fgTagLookup;
+	
+	static {
+		fgTagLookup= new HashSet();
+		for (int i= 0; i < JAVADOC_BREAK_TAGS.length; i++) {
+			fgTagLookup.add(JAVADOC_BREAK_TAGS[i]);
+		}
+		for (int i= 0; i < JAVADOC_SINGLE_BREAK_TAG.length; i++) {
+			fgTagLookup.add(JAVADOC_SINGLE_BREAK_TAG[i]);
+		}
+		for (int i= 0; i < JAVADOC_CODE_TAGS.length; i++) {
+			fgTagLookup.add(JAVADOC_CODE_TAGS[i]);
+		}
+		for (int i= 0; i < JAVADOC_IMMUTABLE_TAGS.length; i++) {
+			fgTagLookup.add(JAVADOC_IMMUTABLE_TAGS[i]);
+		}
+		for (int i= 0; i < JAVADOC_NEWLINE_TAGS.length; i++) {
+			fgTagLookup.add(JAVADOC_NEWLINE_TAGS[i]);
+		}
+		for (int i= 0; i < JAVADOC_SEPARATOR_TAGS.length; i++) {
+			fgTagLookup.add(JAVADOC_SEPARATOR_TAGS[i]);
+		}
+	}
 
 	/**
 	 * Creates a new multi-line comment line.
@@ -242,13 +270,23 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 
 				if (content.charAt(index) == HTML_TAG_PREFIX) {
 
-					while (index < length && content.charAt(index) != HTML_TAG_POSTFIX)
+					// in order to avoid recognizign any < in a comment, even those which are part of e.g.
+					// java source code, we validate the tag content to be one of the recognized
+					// tags (structural, breaks, pre, code).
+					int tag= ++index;
+					while (index < length && content.charAt(index) != HTML_TAG_POSTFIX && content.charAt(index) != HTML_TAG_PREFIX)
 						index++;
 
-					if (index < length && content.charAt(index) == HTML_TAG_POSTFIX)
+					if (index < length && content.charAt(index) == HTML_TAG_POSTFIX && isValidTag(content.substring(tag, index))) {
 						index++;
+						attribute |= COMMENT_HTML; // only set html attribute if postfix found
+					} else {
+						// no tag - do the usual thing from the original offset
+						index= tag;
+						while (index < length && !Character.isWhitespace(content.charAt(index)) && content.charAt(index) != HTML_TAG_PREFIX && !content.startsWith(LINK_TAG_PREFIX, index))
+							index++;
+					}
 
-					attribute |= COMMENT_HTML;
 
 				} else if (content.startsWith(LINK_TAG_PREFIX, index)) {
 
@@ -278,6 +316,44 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 			
 			attribute= 0;
 		}
+	}
+
+	/**
+	 * Checks whether <code>tag</code> is a valid tag content (text inside the angular
+	 * brackets &lt;, &gt;).
+	 * <p>
+	 * The algorithm is to see if the tag trimmed of whitespace and an optional slash 
+	 * starts with one of our recognized tags.
+	 * 
+	 * @param tag
+	 * @return <code>true</code> if <code>tag</code> is a valid tag content
+	 */
+	private boolean isValidTag(String tag) {
+		// strip the slash
+		if (tag.startsWith("/")) //$NON-NLS-1$
+			tag= tag.substring(1, tag.length());
+		
+		// strip ws
+		tag= tag.trim();
+		
+		// extract first token
+		int i= 0;
+		while (i < tag.length() && !Character.isWhitespace(tag.charAt(i)))
+			i++;
+		tag= tag.substring(0, i);
+		
+		// see if it's a tag
+		return isTagName(tag.toLowerCase());
+	}
+
+	/**
+	 * Checks whether <code>tag</code> is one of the configured tags.
+	 * 
+	 * @param tag the tag to check
+	 * @return <code>true</code> if <code>tag</code> is a configured tag name
+	 */
+	private boolean isTagName(String tag) {
+		return fgTagLookup.contains(tag);
 	}
 
 	/**
