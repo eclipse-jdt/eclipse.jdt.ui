@@ -35,10 +35,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
 import org.eclipse.ui.commands.IKeySequenceBinding;
-import org.eclipse.ui.keys.CharacterKey;
 import org.eclipse.ui.keys.KeySequence;
-import org.eclipse.ui.keys.KeyStroke;
-import org.eclipse.ui.keys.ModifierKey;
 import org.eclipse.ui.keys.SWTKeySupport;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
@@ -108,10 +105,6 @@ public class ControlContentAssistHelper {
 							return fKeySequences;
 						}		
 					}
-					// default is Ctrl+Space
-					fKeySequences= new KeySequence[] { 
-							KeySequence.getInstance(KeyStroke.getInstance(ModifierKey.CTRL, CharacterKey.SPACE))
-					};
 				}
 				return fKeySequences;
 			}
