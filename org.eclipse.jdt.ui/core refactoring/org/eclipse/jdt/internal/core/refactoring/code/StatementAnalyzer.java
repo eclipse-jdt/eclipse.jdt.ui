@@ -1279,6 +1279,12 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	}
 
 	public boolean visit(QualifiedAllocationExpression qualifiedAllocationExpression, BlockScope scope) {
+		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=4385
+		if (qualifiedAllocationExpression.anonymousType instanceof AnonymousLocalTypeDeclaration) {
+			AnonymousLocalTypeDeclaration decl= (AnonymousLocalTypeDeclaration)qualifiedAllocationExpression.anonymousType;
+			qualifiedAllocationExpression.sourceEnd= decl.declarationSourceEnd;
+		}
+		// XXX end http://dev.eclipse.org/bugs/show_bug.cgi?id=4385
 		if (!visitNode(qualifiedAllocationExpression, scope))
 			return false;
 		trackExpressionTypeBinding(qualifiedAllocationExpression, qualifiedAllocationExpression.type.binding, scope);
