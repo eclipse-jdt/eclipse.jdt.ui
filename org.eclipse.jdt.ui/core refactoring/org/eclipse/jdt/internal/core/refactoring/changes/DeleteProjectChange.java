@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.internal.core.refactoring.changes;
 
 import org.eclipse.core.resources.IProject;
@@ -6,35 +10,35 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
-class DeleteProjectChange extends DeleteChange {
+public class DeleteProjectChange extends AbstractDeleteChange {
 	
 	private IProject fProject;
 	private boolean fDeleteContents;
 	
-	DeleteProjectChange(IProject project, boolean deleteProjectContents){
+	public DeleteProjectChange(IProject project, boolean deleteProjectContents){
 		fProject= project;
 		fDeleteContents= deleteProjectContents;
 	}
 		
-	/**
+	/* non java-doc
 	 * @see IChange#getName()
 	 */
 	public String getName() {
 		return "Delete project";
 	}
 
-	/**
+	/* non java-doc
 	 * @see IChange#getCorrespondingJavaElement()
 	 */
 	public IJavaElement getCorrespondingJavaElement() {
 		return JavaCore.create(fProject);
 	}
 	
-	/**
+	/* non java-doc
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
 	protected void doDelete(IProgressMonitor pm) throws CoreException{
-		fProject.delete(fDeleteContents, true, pm);
+		fProject.delete(fDeleteContents, false, pm);
 	}
 }
 
