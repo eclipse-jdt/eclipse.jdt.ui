@@ -267,6 +267,8 @@ public abstract class ReorgRefactoring extends Refactoring {
 	static IContainer getDestinationForResources(IResource dest){
 		if (dest instanceof IContainer)
 			return (IContainer)dest;
+		if (dest instanceof IFile)
+			return (IContainer)((IFile)dest).getParent();
 		return null;
 	}
 	
@@ -615,6 +617,9 @@ public abstract class ReorgRefactoring extends Refactoring {
 		
 		if (dest instanceof ICompilationUnit && ((ICompilationUnit)dest).getParent() instanceof IPackageFragment)
 			return (IPackageFragment)((ICompilationUnit)dest).getParent();
+			
+		if (dest instanceof IFile && (ReorgUtils.getJavaParent((IFile)dest) instanceof IPackageFragment))
+			return (IPackageFragment)ReorgUtils.getJavaParent((IFile)dest);
 			
 		return null;
 	}	
