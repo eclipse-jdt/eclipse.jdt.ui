@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -96,11 +97,23 @@ public abstract class FindAction extends SelectionDispatchAction {
 		
 		if (element != null) {
 			for (int i= 0; i < fValidTypes.length; i++) {
-				if (fValidTypes[i].isInstance(element))
-					return true;
+				if (fValidTypes[i].isInstance(element)) {
+					if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
+						return hasChildren((IPackageFragment)element);
+					else
+						return true;
+				}
 			}
 		}
 		return false;
+	}
+	
+	private boolean hasChildren(IPackageFragment packageFragment) {
+		try {
+			return packageFragment.hasChildren();
+		} catch (JavaModelException ex) {
+			return false;
+		}
 	}
 
 	private IJavaElement getJavaElement(IJavaElement o, boolean silent) {
