@@ -443,7 +443,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	public void showTest(TestRunInfo test) {
 		fActiveRunTab.setSelectedTest(test.getTestId());
 		handleTestSelected(test.getTestId());
-		new OpenTestAction(this, test.getClassName(), test.getTestMethodName()).run();
+		new OpenTestAction(this, test.getClassName(), test.getTestMethodName(), false).run();
 	}
 
 	

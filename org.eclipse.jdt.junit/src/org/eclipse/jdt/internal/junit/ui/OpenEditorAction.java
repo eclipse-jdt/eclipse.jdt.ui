@@ -31,14 +31,20 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 public abstract class OpenEditorAction extends Action {
 	protected String fClassName;
 	protected TestRunnerViewPart fTestRunner;
+	private final boolean fActivate;
 	
 	/**
 	 * Constructor for OpenEditorAction.
 	 */
 	protected OpenEditorAction(TestRunnerViewPart testRunner, String testClassName) {
+		this(testRunner, testClassName, true);
+	}
+
+	public OpenEditorAction(TestRunnerViewPart testRunner, String className, boolean activate) {
 		super(JUnitMessages.getString("OpenEditorAction.action.label")); //$NON-NLS-1$
-		fClassName= testClassName;
+		fClassName= className;
 		fTestRunner= testRunner;
+		fActivate= activate;
 	}
 
 	/*
@@ -53,7 +59,7 @@ public abstract class OpenEditorAction extends Action {
 					JUnitMessages.getString("OpenEditorAction.error.cannotopen.title"), JUnitMessages.getString("OpenEditorAction.error.cannotopen.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			} 
-			textEditor= (ITextEditor)EditorUtility.openInEditor(element, false);			
+			textEditor= (ITextEditor)EditorUtility.openInEditor(element, fActivate);			
 		} catch (CoreException e) {
 			ErrorDialog.openError(getShell(), JUnitMessages.getString("OpenEditorAction.error.dialog.title"), JUnitMessages.getString("OpenEditorAction.error.dialog.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
