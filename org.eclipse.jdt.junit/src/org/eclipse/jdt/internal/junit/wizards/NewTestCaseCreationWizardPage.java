@@ -57,6 +57,8 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -307,7 +309,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalSpan= 1;
-		gd.heightHint = SWTUtil.getButtonHeigthHint(fClassToTestButton);
+		gd.heightHint = SWTUtil.getButtonHeightHint(fClassToTestButton);
 		gd.widthHint = SWTUtil.getButtonWidthHint(fClassToTestButton);		
 		fClassToTestButton.setLayoutData(gd);
 
@@ -335,7 +337,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			dialog.setTitle(WizardMessages.getString("NewTestClassWizPage.class_to_test.dialog.title")); //$NON-NLS-1$
 			dialog.setMessage(WizardMessages.getString("NewTestClassWizPage.class_to_test.dialog.message")); //$NON-NLS-1$
 			dialog.open();
-			if (dialog.getReturnCode() != SelectionDialog.OK)
+			if (dialog.getReturnCode() != Window.OK)
 				return type;
 			else {
 				Object[] resultArray= dialog.getResult();
