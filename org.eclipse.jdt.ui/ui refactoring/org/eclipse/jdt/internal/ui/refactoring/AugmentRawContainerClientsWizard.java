@@ -66,7 +66,7 @@ public class AugmentRawContainerClientsWizard extends RefactoringWizard {
 			result.setLayout(layout);
 			
 			Label doit= new Label(result, SWT.NONE);
-			doit.setText("Augment raw references to container classes in selected elements to use generics.");
+			doit.setText("Augment raw references to container classes to use generics.");
 			doit.setLayoutData(new GridData());
 			
 			updateStatus();

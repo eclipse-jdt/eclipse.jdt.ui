@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
  * plain type (without an updatable Source location)
  */
 
-public class PlainTypeVariable2 extends ConstraintVariable2 {
+public class PlainTypeVariable2 extends TypeConstraintVariable2 {
 
 	protected PlainTypeVariable2(TypeHandle typeHandle) {
 		super(typeHandle);
@@ -27,7 +27,16 @@ public class PlainTypeVariable2 extends ConstraintVariable2 {
 	}
 
 	protected boolean isSameAs(ConstraintVariable2 other) {
-		return getTypeHandle() == other.getTypeHandle();
+		if (this == other)
+			return true;
+		if (other.getClass() != PlainTypeVariable2.class)
+			return false;
+		
+		return getTypeHandle() == ((PlainTypeVariable2) other).getTypeHandle();
+	}
+	
+	public String toString() {
+		return getTypeHandle().getSimpleName();
 	}
 
 }

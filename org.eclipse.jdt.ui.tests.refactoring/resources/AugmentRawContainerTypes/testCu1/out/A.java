@@ -5,7 +5,7 @@ import java.util.List;
 
 class A {
 	void foo() {
-		List<String>/*<String>*/ l= new ArrayList();
+		ArrayList/*<String>*/<String> l= new ArrayList<String>();
 		l.add(new String());
 	}
 }

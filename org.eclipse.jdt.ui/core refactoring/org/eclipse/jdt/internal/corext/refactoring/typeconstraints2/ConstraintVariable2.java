@@ -11,58 +11,80 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import org.eclipse.jdt.internal.corext.Assert;
 
-
-/**
- * A ConstraintVariable stands for an AST entity which has a type. 
- */
 public abstract class ConstraintVariable2 {
 	
 	protected static final String TO_STRING= "toString"; //$NON-NLS-1$
 	
-	private TypeHandle fTypeHandle;
-	
 	private Object[] fDatas;
 
-	/**
-	 * @param typeHandle the type binding TODO: allow null?
-	 */
-	protected ConstraintVariable2(TypeHandle typeHandle) {
-		Assert.isNotNull(typeHandle);
-		fTypeHandle= typeHandle;
-//		if (DEBUG)
-//			setData(TO_STRING, Bindings.asString(typeBinding));
-	}
-	
-	public TypeHandle getTypeHandle() {
-		return fTypeHandle;
-	}
-	
 	public void setData(String name, Object data) {
-		if (data == null) { // remove
-			if (fDatas != null) {
-				int len= fDatas.length;
-				if (len == 2) {
-					fDatas= null;
-				} else {
-					Object[] newData= new Object[len - 2];
-					System.arraycopy(fDatas, 0, newData, 0, len - 2);
-					fDatas= newData;
-				}				
+		int index= 0;
+		if (fDatas != null) {
+			while (index < fDatas.length) {
+				if (name.equals (fDatas[index]))
+					break;
+				index += 2;
 			}
-		} else { // add
-			if (fDatas == null) {
-				fDatas= new Object[2];
-			} else {
-				int len= fDatas.length;
-				Object[] newData= new Object[len + 2];
-				System.arraycopy(fDatas, 0, newData, 2, len);
-				fDatas= newData;
-			}
-			fDatas[0]= name;
-			fDatas[1]= data;
 		}
+		if (data != null) { //add
+			if (fDatas != null) {
+				if (index == fDatas.length) {
+					Object[] newTable= new Object[fDatas.length + 2];
+					System.arraycopy(fDatas, 0, newTable, 0, fDatas.length);
+					fDatas= newTable;
+				}
+			} else {
+				fDatas= new Object[2];
+			}
+			fDatas[index]= name;
+			fDatas[index + 1]= data;
+		} else { //remove
+			if (fDatas != null) {
+				if (index != fDatas.length) {
+					int length= fDatas.length - 2;
+					if (length == 0) {
+						fDatas= null;
+					} else {
+						Object[] newTable= new Object[length];
+						System.arraycopy(fDatas, 0, newTable, 0, index);
+						System.arraycopy(fDatas, index + 2, newTable, index, length - index);
+						fDatas= newTable;
+					}
+				}
+			}
+		}
+		
+//		int index= -1;
+//		for (int i= 0; i < fDatas.length; i+= 2) {
+//			String key= (String) fDatas[i];
+//			if (key.equals(name))
+//				index= i;
+//		}
+//		
+//		if (fDatas == null) { // remove
+//			if (fDatas != null) {
+//				int len= fDatas.length;
+//				if (len == 2) {
+//					fDatas= null;
+//				} else {
+//					Object[] newData= new Object[len - 2];
+//					System.arraycopy(fDatas, 0, newData, 0, len - 2);
+//					fDatas= newData;
+//				}				
+//			}
+//		} else { // add
+//			if (fDatas == null) {
+//				fDatas= new Object[2];
+//			} else {
+//				int len= fDatas.length;
+//				Object[] newData= new Object[len + 2];
+//				System.arraycopy(fDatas, 0, newData, 2, len);
+//				fDatas= newData;
+//			}
+//			fDatas[0]= name;
+//			fDatas[1]= fDatas;
+//		}
 	}
 
 	public Object getData(String name) {
@@ -79,10 +101,16 @@ public abstract class ConstraintVariable2 {
 	}
 	
 	public String toString() {
-		String name= getClass().getName();
-		int dot= name.lastIndexOf('.');
-		return name.substring(dot + 1) + ": " //$NON-NLS-1$
-				+ (fTypeHandle == null ? "<NULL TYPE HANDLE>" : fTypeHandle.getQualifiedName()); //$NON-NLS-1$
+		String toString= (String) getData(TO_STRING);
+		if (toString != null)
+			return toString;
+		else
+			return super.toString();
+		
+//		String name= getClass().getName();
+//		int dot= name.lastIndexOf('.');
+//		return name.substring(dot + 1) + ": " //$NON-NLS-1$
+//				+ (fTypeHandle == null ? "<NULL TYPE HANDLE>" : fTypeHandle.getQualifiedName()); //$NON-NLS-1$
 		//TODO:
 //		if (fTypeHandle == null)
 //			return "<NULL TYPE HANDLE>"; //$NON-NLS-1$

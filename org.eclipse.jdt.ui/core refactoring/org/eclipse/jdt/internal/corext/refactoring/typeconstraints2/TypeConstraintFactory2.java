@@ -14,6 +14,9 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
@@ -25,6 +28,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Type;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -50,10 +54,16 @@ public class TypeConstraintFactory2 {
 		}
 	}
 	
-	private static final Object NULL= new Object();
+	private static final Object NULL= new Object() {
+		public String toString() {
+			return ""; //$NON-NLS-1$
+		}
+	};
 	protected static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/TypeConstraints")); //$NON-NLS-1$//$NON-NLS-2$
 	
-	protected CustomHashtable/*<TypeConstraint2, NULL>*/ fTypeConstraints;
+	protected TypeHandleFactory fTypeHandleFactory;
+	protected static boolean fStoreToString= DEBUG;
+	
 	
 	/**
 	 * Map from {@link ConstraintVariable2} to
@@ -63,8 +73,11 @@ public class TypeConstraintFactory2 {
 	 * </ul>
 	 */
 	protected CustomHashtable/*<ConstraintVariable2, Object>*/ fConstraintVariables;
-	protected TypeHandleFactory fTypeHandleFactory;
-	protected boolean fStoreToString;
+	
+	protected CustomHashtable/*<TypeConstraint2, NULL>*/ fTypeConstraints;
+	
+	private HashSet fCuScopedConstraintVariables;
+	
 	private Collection fNewTypeConstraints;
 	private Collection fNewConstraintVariables;
 	
@@ -72,12 +85,16 @@ public class TypeConstraintFactory2 {
 		fTypeConstraints= new CustomHashtable(new TypeConstraintComparer());
 		fConstraintVariables= new CustomHashtable(new ConstraintVariableComparer());
 		fTypeHandleFactory= new TypeHandleFactory();
-		fStoreToString= DEBUG;
 		
+		fCuScopedConstraintVariables= new HashSet();
 		fNewTypeConstraints= new ArrayList();
 		fNewConstraintVariables= new ArrayList();
 	}
 	
+	/**
+	 * @param cv
+	 * @return a List of ITypeConstraint2s where cv is used
+	 */
 	public List getUsedIn(ConstraintVariable2 cv) {
 		Object storedTcs= fConstraintVariables.get(cv);
 		if (storedTcs instanceof ITypeConstraint2)
@@ -94,8 +111,26 @@ public class TypeConstraintFactory2 {
 	 */
 	public void newCu() {
 		fNewTypeConstraints.clear();
-		//TODO: prune unused CVs for local variable declarations
 		fNewConstraintVariables.clear();
+		pruneUnusedCuScopedCvs();
+		fCuScopedConstraintVariables.clear();
+	}
+	
+	private void pruneUnusedCuScopedCvs() {
+		for (Iterator iter= fCuScopedConstraintVariables.iterator(); iter.hasNext();) {
+			ConstraintVariable2 cv= (ConstraintVariable2) iter.next();
+			if (getUsedIn(cv).size() == 0)
+				fConstraintVariables.remove(cv);
+		}
+	}
+
+	public ConstraintVariable2[] getAllConstraintVariables() {
+		ConstraintVariable2[] result= new ConstraintVariable2[fConstraintVariables.size()];
+		int i= 0;
+		for (Enumeration e= fConstraintVariables.keys(); e.hasMoreElements(); i++) {
+			result[i]= (ConstraintVariable2) e.nextElement();
+		}
+		return result;
 	}
 	
 	public ConstraintVariable2[] getNewConstraintVariables() {
@@ -118,10 +153,16 @@ public class TypeConstraintFactory2 {
 	 * @param cv1 
 	 * @param cv2
 	 * @param operator
-	 * @return whether the type constraint should <em>not</em> be created
+	 * @return <code>true</code> iff the type constraint should really be created
 	 */
-	public boolean filter(ConstraintVariable2 cv1, ConstraintVariable2 cv2, ConstraintOperator2 operator) {
-		return cv1 == null || cv2 == null;
+	public boolean keep(ConstraintVariable2 cv1, ConstraintVariable2 cv2, ConstraintOperator2 operator) {
+		if (cv1 == cv2) {
+			Assert.isTrue(false);
+		}
+		if (cv1.isSameAs(cv2)) {
+			Assert.isTrue(false);
+		}
+		return cv1 != null && cv2 != null;
 	}
 	
 	/**
@@ -138,7 +179,7 @@ public class TypeConstraintFactory2 {
 	 * 
 	 * @param store <code>true</code> iff information for toString() should be stored 
 	 */
-	public void setStoreToString(boolean store) {
+	public static void setStoreToString(boolean store) {
 		fStoreToString= store;
 	}
 	
@@ -146,26 +187,30 @@ public class TypeConstraintFactory2 {
 		return createSimpleTypeConstraint(v1, v2, ConstraintOperator2.createSubTypeOperator());
 	}
 	
-	public ITypeConstraint2[] createStrictSubtypeConstraint(ConstraintVariable2 v1, ConstraintVariable2 v2){
-		return createSimpleTypeConstraint(v1, v2, ConstraintOperator2.createStrictSubtypeOperator());
+//	public ITypeConstraint2[] createStrictSubtypeConstraint(ConstraintVariable2 v1, ConstraintVariable2 v2){
+//		return createSimpleTypeConstraint(v1, v2, ConstraintOperator2.createStrictSubtypeOperator());
+//	}
+//	
+	public TypeHandleFactory getTypeHandleFactory() {
+		return fTypeHandleFactory;
 	}
 	
-	/**
-	 * @param v1
-	 * @param v2
-	 * @return
-	 * @deprecated resolve on creation
-	 */
-	public ITypeConstraint2[] createEqualsConstraint(ConstraintVariable2 v1, ConstraintVariable2 v2){
-		return createSimpleTypeConstraint(v1, v2, ConstraintOperator2.createEqualsOperator());
-	}
-	
+//	/**
+//	 * @param v1
+//	 * @param v2
+//	 * @return
+//	 * @deprecated resolve on creation
+//	 */
+//	public ITypeConstraint2[] createEqualsConstraint(ConstraintVariable2 v1, ConstraintVariable2 v2){
+//		return createSimpleTypeConstraint(v1, v2, ConstraintOperator2.createEqualsOperator());
+//	}
+//	
 	protected ITypeConstraint2[] createSimpleTypeConstraint(ConstraintVariable2 cv1, ConstraintVariable2 cv2, ConstraintOperator2 operator) {
-		if (filter(cv1, cv2, operator))
+		if (! keep(cv1, cv2, operator))
 			return new ITypeConstraint2[0];
 		
 		ConstraintVariable2 storedCv1= (ConstraintVariable2) fConstraintVariables.getKey(cv1);
-		ConstraintVariable2 storedCv2= (ConstraintVariable2) fConstraintVariables.getKey(cv1);
+		ConstraintVariable2 storedCv2= (ConstraintVariable2) fConstraintVariables.getKey(cv2);
 		SimpleTypeConstraint2 typeConstraint= new SimpleTypeConstraint2(
 				storedCv1 == null ? cv1 : storedCv1,
 				storedCv2 == null ? cv2 : storedCv2,
@@ -185,10 +230,12 @@ public class TypeConstraintFactory2 {
 	}
 
 	private void registerCvWithTc(ConstraintVariable2 storedCv, ConstraintVariable2 cv, SimpleTypeConstraint2 typeConstraint) {
+		//TODO: special handling for CollectionElementVariable2
 		if (storedCv == null) {
 			// new CV -> directly store TC:
 			fConstraintVariables.put(cv, typeConstraint);
 			fNewConstraintVariables.add(cv);
+			registerElementCVWithTC(cv, typeConstraint);
 		} else {
 			// existing stored CV:
 			//TODO: could avoid call to get() if there was a method HashMapEntry getEntry(Object key) 
@@ -197,16 +244,26 @@ public class TypeConstraintFactory2 {
 			if (storedTcs instanceof ITypeConstraint2) {
 				// CV only used in one TC so far:
 				typeConstraintList= new ArrayList(2);
+				typeConstraintList.add(storedTcs);
+				typeConstraintList.add(typeConstraint);
 				fConstraintVariables.put(storedCv, typeConstraintList);
-				typeConstraintList.add(storedTcs); // typeConstraintList.add((ITypeConstraint2) tcs);
+				registerElementCVWithTC(cv, typeConstraint);
 			} else {
 				// CV already used in multiple or zero TCs:
 				typeConstraintList= (ArrayList) storedTcs;
+				typeConstraintList.add(typeConstraint);
 			}
-			typeConstraintList.add(typeConstraint);
 		}
 	}
 	
+	private void registerElementCVWithTC(ConstraintVariable2 cv, SimpleTypeConstraint2 typeConstraint) {
+		if (cv instanceof CollectionElementVariable2) {
+			ConstraintVariable2 elementCv= ((CollectionElementVariable2) cv).getElementVariable();
+			ConstraintVariable2 storedElementCv= (ConstraintVariable2) fConstraintVariables.getKey(elementCv);
+			registerCvWithTc(storedElementCv, elementCv, typeConstraint);
+		}
+	}
+
 	public CompositeOrTypeConstraint2 createCompositeOrTypeConstraint(ITypeConstraint2[] constraints) {
 		// TODO Auto-generated method stub
 		return null;
@@ -257,30 +314,36 @@ public class TypeConstraintFactory2 {
 //		return ev;
 //	}
 
-	public ExpressionVariable2 makeExpressionVariable(Expression expression) {
-		ITypeBinding typeBinding= expression.resolveTypeBinding();
-		if (filterConstraintVariableType(typeBinding))
-			return null;
-		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
-		ExpressionVariable2 expressionVariable= new ExpressionVariable2(typeHandle, expression);
-		if (fStoreToString)
-			expressionVariable.setData(ConstraintVariable2.TO_STRING, "[" + expression.toString() + "]"); //$NON-NLS-1$//$NON-NLS-2$
-		return expressionVariable;
-	}
+//	public ExpressionVariable2 makeExpressionVariable(Expression expression) {
+//		ITypeBinding typeBinding= expression.resolveTypeBinding();
+//		if (filterConstraintVariableType(typeBinding))
+//			return null;
+//		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
+//		ExpressionVariable2 expressionVariable= new ExpressionVariable2(typeHandle, expression);
+//		if (fStoreToString)
+//			expressionVariable.setData(ConstraintVariable2.TO_STRING, "[" + expression.toString() + "]"); //$NON-NLS-1$//$NON-NLS-2$
+//		return expressionVariable;
+//	}
+	
+	//TODO: pass in the ASTNode, to store a reference to the origin of a CV iff fStoreToString is true.
 
 	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding) {
 		ITypeBinding typeBinding= variableBinding.getType();
 		if (filterConstraintVariableType(typeBinding))
 			return null;
 		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
-		VariableVariable2 fieldVariable= new VariableVariable2(typeHandle, variableBinding);
-		//TODO: tostring
-		return fieldVariable;
+		VariableVariable2 cv= new VariableVariable2(typeHandle, variableBinding);
+		if (fStoreToString)
+			cv.setData(ConstraintVariable2.TO_STRING, '[' + variableBinding.getName() + ']');
+		return cv;
 	}
 
 	public VariableVariable2 makeDeclaredVariableVariable(IVariableBinding variableBinding, ICompilationUnit cu) {
 		VariableVariable2 cv= makeVariableVariable(variableBinding);
-		return (VariableVariable2) registerDeclaredVariable(cv, cu);
+		VariableVariable2 storedCv= (VariableVariable2) registerDeclaredVariable(cv, cu);
+		if (! variableBinding.isField())
+			fCuScopedConstraintVariables.add(storedCv);
+		return storedCv;
 	}
 	
 	public TypeVariable2 makeTypeVariable(Type type) {
@@ -336,7 +399,10 @@ public class TypeConstraintFactory2 {
 	 */
 	public ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu) {
 		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex);
-		return (ParameterTypeVariable2) registerDeclaredVariable(cv, cu);
+		ParameterTypeVariable2 storedCv= (ParameterTypeVariable2) registerDeclaredVariable(cv, cu);
+		if (methodBinding.getDeclaringClass().isLocal())
+			fCuScopedConstraintVariables.add(storedCv);
+		return storedCv;
 	}
 
 	private IDeclaredConstraintVariable registerDeclaredVariable(IDeclaredConstraintVariable cv, ICompilationUnit unit) {
@@ -359,13 +425,17 @@ public class TypeConstraintFactory2 {
 			return null;
 		TypeHandle returnTypeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
 		ReturnTypeVariable2 cv= new ReturnTypeVariable2(returnTypeHandle, methodBinding);
-		//TODO: toString
+		if (fStoreToString)
+			cv.setData(ConstraintVariable2.TO_STRING, "[ReturnType(" + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$
 		return cv;
 	}
 
 	public ReturnTypeVariable2 makeDeclaredReturnTypeVariable(IMethodBinding methodBinding, ICompilationUnit unit) {
 		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding);
-		return (ReturnTypeVariable2) registerDeclaredVariable(cv, unit);
+		ReturnTypeVariable2 storedCv= (ReturnTypeVariable2) registerDeclaredVariable(cv, unit);
+		if (methodBinding.getDeclaringClass().isLocal())
+			fCuScopedConstraintVariables.add(storedCv);
+		return storedCv;
 	}
 	
 //	public DeclaringTypeVariable2 makeDeclaringTypeVariable(IMethodBinding methodBinding) {
@@ -390,4 +460,13 @@ public class TypeConstraintFactory2 {
 		return cv;
 	}
 	
+	
+	//TODO: move down to AugmentRawContainerClientsTCFactory?
+	public ConstraintVariable2 makeElementVariable(ConstraintVariable2 expressionCv) {
+		ConstraintVariable2 cv= new CollectionElementVariable2(expressionCv);
+		if (fStoreToString)
+			cv.setData(ConstraintVariable2.TO_STRING, "Elem[" + expressionCv.toString() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+		return cv;
+	}
+
 }

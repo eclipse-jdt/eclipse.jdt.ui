@@ -15,7 +15,6 @@ import java.util.HashMap;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-
 public class TypeHandleFactory {
 
 	private final static TypeHandle[] EMPTY= { };
@@ -36,7 +35,7 @@ public class TypeHandleFactory {
 		if ((typeBinding.isClass() || typeBinding.isInterface())
 				&& ! typeBinding.isArray()) {
 			TypeHandle[] directSupertypes= getDirectSuperTypes(typeBinding);
-			// Have to check again, since type could have been stored in the meantime!
+			// Have to check again, since type handle could have been stored in the meantime!
 			stored= (TypeHandle) fKeyToTypeHandle.get(key);
 			if (stored != null)
 				return stored;

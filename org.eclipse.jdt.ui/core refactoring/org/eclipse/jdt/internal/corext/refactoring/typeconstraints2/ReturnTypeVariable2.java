@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
  * the return type of a method.
  */
 
-public class ReturnTypeVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
+public class ReturnTypeVariable2 extends TypeConstraintVariable2 implements IDeclaredConstraintVariable {
 
 	private String fMethodBindingKey;
 	private ICompilationUnit fCompilationUnit;

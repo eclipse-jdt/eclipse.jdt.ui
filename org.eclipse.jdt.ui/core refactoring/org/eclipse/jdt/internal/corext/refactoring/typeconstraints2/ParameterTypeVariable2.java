@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.corext.Assert;
  * A ParameterTypeVariable is a ConstraintVariable which stands for
  * the type of a method parameter.
  */
-public class ParameterTypeVariable2 extends ConstraintVariable2 implements IDeclaredConstraintVariable {
+public class ParameterTypeVariable2 extends TypeConstraintVariable2 implements IDeclaredConstraintVariable {
 
 	private final int fParameterIndex;
 	private final String fMethodBindingKey;

@@ -11,8 +11,11 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-//TODO: tell that TypeHandles are unique and can be compared by == or equals()
-public class TypeHandle {
+/**
+ * {@link TypeHandle}s from the same {@link TypeHandleFactory} are unique
+ * and can be compared with == instead of equals().
+ */
+public final class TypeHandle {
 	
 	private String fTypeKey;
 	private final String fQualifiedName;
@@ -43,13 +46,28 @@ public class TypeHandle {
 	public String toString() {
 		return fQualifiedName;
 	}
+
+	public String getSimpleName() {
+		int dot= fQualifiedName.lastIndexOf('.');
+		return fQualifiedName.substring(dot + 1);
+	}
 	
-	public boolean canAssign(TypeHandle targetTypeCandidate) {
+	/**
+	 * Subtype test.
+	 * @param targetTypeCandidate the type of the target
+	 * @return <code>true</code> iff 
+	 * <pre>
+	 * 		'this' x; 
+	 * 		'targetTypeCandidate' target= x;
+	 * </pre>
+	 * is valid; <code>false</code> otherwise
+	 */
+	public boolean canAssignTo(TypeHandle targetTypeCandidate) {
 		if (this == targetTypeCandidate)
 			return true;
 
 		for (int i= 0; i < fDirectSupertypes.length; i++)
-			if (fDirectSupertypes[i].canAssign(targetTypeCandidate))
+			if (fDirectSupertypes[i].canAssignTo(targetTypeCandidate))
 				return true;
 
 		return false;

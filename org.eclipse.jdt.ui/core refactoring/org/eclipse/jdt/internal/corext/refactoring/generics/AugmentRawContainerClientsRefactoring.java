@@ -12,6 +12,12 @@
 package org.eclipse.jdt.internal.corext.refactoring.generics;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,15 +25,31 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeHandle;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -79,9 +101,11 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 			fAnalyzer= new AugmentRawContainerClientsAnalyzer(fElements);
 			fAnalyzer.analyzeContainerReferences(pm, result);
 			
+			HashMap declarationsToUpdate= fAnalyzer.getDeclarationsToUpdate();
+			fChangeManager= new TextChangeManager();
+			rewriteDeclarations(declarationsToUpdate);
 //			result.merge(performAnalysis(pm));
 			
-			fChangeManager= new TextChangeManager();
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 			result.merge(Checks.validateModifiesFiles(filesToModify, null));
 			return result;
@@ -136,7 +160,54 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 //		return new RefactoringStatus();
 //	}
 
-	
+	private void rewriteDeclarations(HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ declarationsToUpdate) throws CoreException {
+		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
+		Set entrySet= declarationsToUpdate.entrySet();
+		for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
+			Map.Entry entry= (Map.Entry) iter.next();
+			ICompilationUnit cu= (ICompilationUnit) entry.getKey();
+			CompilationUnit compilationUnit= parser.parse(cu, true);
+			AST ast= compilationUnit.getAST();
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+			List cvs= (List) entry.getValue();
+			for (Iterator cvIter= cvs.iterator(); cvIter.hasNext();) {
+				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
+				if (cv instanceof CollectionElementVariable2) {
+					CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
+					ConstraintVariable2 element= elementCv.getElementVariable();
+					if (element instanceof VariableVariable2) {
+						String variableBindingKey= ((VariableVariable2) element).getVariableBindingKey();
+						ASTNode node= compilationUnit.findDeclaringNode(variableBindingKey);
+						if (node instanceof VariableDeclarationFragment) {
+							VariableDeclarationStatement stmt= (VariableDeclarationStatement) node.getParent();
+							Type originalType= stmt.getType();
+							if (originalType.isSimpleType() || originalType.isQualifiedType()) {
+								Type movingType= (Type) rewrite.createMoveTarget(originalType);
+								ParameterizedType newType= ast.newParameterizedType(movingType);
+								TypeHandle chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
+								String typeName= chosenType.getSimpleName(); // TODO: use ImportRewrite
+								newType.typeArguments().add(rewrite.createStringPlaceholder(typeName, ASTNode.SIMPLE_TYPE));
+								rewrite.replace(originalType, newType, null); // TODO: description
+							}
+						}
+					}
+				}
+			}
+			TextBuffer buffer= null;
+			try {
+				buffer= TextBuffer.acquire((IFile) cu.getResource());
+				TextEdit edit= rewrite.rewriteAST(buffer.getDocument(), declarationsToUpdate);
+				CompilationUnitChange change= new CompilationUnitChange(cu.getElementName(), cu);
+				change.setEdit(edit);
+				fChangeManager.manage(cu, change);
+			} finally {
+				TextBuffer.release(buffer);
+			}
+			
+		}
+		
+	}
+
 
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)

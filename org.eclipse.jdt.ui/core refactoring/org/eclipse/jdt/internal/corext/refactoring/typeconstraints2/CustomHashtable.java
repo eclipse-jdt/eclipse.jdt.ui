@@ -41,6 +41,23 @@ import java.util.NoSuchElementException;
 			key= theKey;
 			value= theValue;
 		}
+		
+		public String toString() {
+			StringBuffer buffer= new StringBuffer();
+			toString(buffer);
+			return buffer.toString();
+		}
+		
+		private void toString(StringBuffer buffer) {
+			CustomHashtable.HashMapEntry hashMapEntry= this;
+			do {
+				buffer.append(hashMapEntry.key);
+				buffer.append('=');
+				buffer.append(hashMapEntry.value);
+				buffer.append(",\n"); //$NON-NLS-1$
+				hashMapEntry= hashMapEntry.next;
+			} while (hashMapEntry != null);
+		}
 	}
 
 	private static final class EmptyEnumerator implements Enumeration {
@@ -404,13 +421,8 @@ import java.util.NoSuchElementException;
 		buffer.append('{');
 		for (int i= elementData.length; --i >= 0;) {
 			HashMapEntry entry= elementData[i];
-			while (entry != null) {
-				buffer.append(entry.key);
-				buffer.append('=');
-				buffer.append(entry.value);
-				buffer.append(", "); //$NON-NLS-1$
-				entry= entry.next;
-			}
+			if (entry != null)
+				entry.toString(buffer);
 		}
 		// Remove the last ", "
 		if (elementCount > 0)

@@ -11,8 +11,23 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.generics;
 
+import org.eclipse.jdt.core.dom.MethodInvocation;
+
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeHandle;
 
 
-public class SpecialMethod {
+public abstract class SpecialMethod {
+
+	protected final TypeHandle fTypeHandle;
+	protected final String fName;
+	protected final TypeHandle[] fParameterTypes;
+
+	public SpecialMethod(TypeHandle typeHandle, String name, TypeHandle[] argumentTypes) {
+		fTypeHandle= typeHandle;
+		fName= name;
+		fParameterTypes= argumentTypes;
+	}
+
+	public abstract void generateConstraintsFor(MethodInvocation invocation, AugmentRawContClConstraintCreator creator);
 
 }

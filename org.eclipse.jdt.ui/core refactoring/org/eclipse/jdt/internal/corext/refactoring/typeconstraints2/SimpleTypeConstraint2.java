@@ -56,14 +56,14 @@ public final class SimpleTypeConstraint2 implements ITypeConstraint2 {
 		return fOperator.isSubtypeOperator();
 	}
 
-	public boolean isStrictSubtypeConstraint(){
-		return fOperator.isStrictSubtypeOperator();
-	}
-
-	public boolean isEqualsConstraint(){
-		return fOperator.isEqualsOperator();
-	}
-	
+//	public boolean isStrictSubtypeConstraint(){
+//		return fOperator.isStrictSubtypeOperator();
+//	}
+//
+//	public boolean isEqualsConstraint(){
+//		return fOperator.isEqualsOperator();
+//	}
+//	
 	
 	public boolean isSameAs(ITypeConstraint2 other) {
 		// can use object identity on ConstraintVariables, since we have the stored (or to be stored) objects

@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.IBinding;
  * A DeclaringTypeVariable is a ConstraintVariable which stands for
  * the declaring type of a member.
  */
-public class DeclaringTypeVariable2 extends ConstraintVariable2 {
+public class DeclaringTypeVariable2 extends TypeConstraintVariable2 {
 
 	private String fBindingKey;
 

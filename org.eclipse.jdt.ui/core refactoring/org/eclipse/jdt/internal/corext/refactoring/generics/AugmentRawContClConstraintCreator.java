@@ -21,11 +21,13 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -61,7 +63,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	}
 	
 	public boolean visit(CompilationUnit node) {
-		fTCFactory.newCu();
+		fTCFactory.newCu(); //TODO: make sure that accumulators are reset after last CU!
 		fCU= RefactoringASTParser.getCompilationUnit(node);
 		return super.visit(node);
 	}
@@ -73,6 +75,18 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	public boolean visit(Type node) {
 		return false;
 	}
+	
+	
+	public boolean visit(SimpleName node) {
+		IBinding binding= node.resolveBinding();
+		if (binding instanceof IVariableBinding) {
+			VariableVariable2 cv= fTCFactory.makeDeclaredVariableVariable((IVariableBinding) binding, fCU);
+			setConstraintVariable(node, cv);
+		}
+		// TODO else?
+		return super.visit(node);
+	}
+	
 	
 	public void endVisit(Assignment node) {
 		Expression lhs= node.getLeftHandSide();
@@ -105,6 +119,16 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		//TODO: arguments, class body
 		PlainTypeVariable2 cv= fTCFactory.makePlainTypeVariable(node.resolveTypeBinding());
 		setConstraintVariable(node, cv);
+		
+		//TODO: should be a TypeVariable (per call-site...)
+		
+//		TypeHandle cicTypeHandle= fTCFactory.getTypeHandleFactory().getTypeHandle(node.resolveTypeBinding());
+//		TypeHandle collectionTypeHandle= fTCFactory.getCollectionTypeHandle();
+//		if (cicTypeHandle.canAssignTo(collectionTypeHandle)) {
+//			fTCFactory.makeElementVariable();
+//		}
+//		
+		
 		return true;
 	}
 	public boolean visit(MethodDeclaration node) {
@@ -144,7 +168,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		return true;
 	}
 	
-	public void endvisit(MethodInvocation node) {
+	public void endVisit(MethodInvocation node) {
 		IMethodBinding methodBinding= node.resolveMethodBinding();
 		
 		SpecialMethod specialMethod= fContainerMethods.getSpecialMethodFor(methodBinding);
@@ -159,9 +183,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	
 	private void visitContainerMethodInvocation(MethodInvocation node, SpecialMethod specialMethod) {
 		Expression expression= node.getExpression();
-		//TODO: expression can be null when visiting a non-special method in a subclass of a container type.
-		ConstraintVariable2 expressionCv= getConstraintVariable(expression);
-		
+		specialMethod.generateConstraintsFor(node, this);
 		// TODO Auto-generated method stub
 		
 	}
@@ -302,6 +324,11 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 //		}
 //		return (ITypeConstraint2[]) result.toArray(new ITypeConstraint2[result.size()]);
 //	}
+	
+	
+	public AugmentRawContainerClientsTCFactory getTCFactory() {
+		return fTCFactory;
+	}
 	
 	/**
 	 * @param node the ASTNode

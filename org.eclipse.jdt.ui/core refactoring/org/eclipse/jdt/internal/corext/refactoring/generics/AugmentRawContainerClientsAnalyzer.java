@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.generics;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.eclipse.core.runtime.CoreException;
@@ -46,6 +47,7 @@ public class AugmentRawContainerClientsAnalyzer {
 	private final IJavaElement[] fElements;
 	private HashSet fProcessedCus;
 	private AugmentRawContainerClientsTCFactory fTypeConstraintFactory;
+	private HashMap fDeclarationsToUpdate;
 
 	public AugmentRawContainerClientsAnalyzer(IJavaElement[] elements) {
 		fElements= elements;
@@ -83,9 +85,14 @@ public class AugmentRawContainerClientsAnalyzer {
 			}
 		};
 		new SearchEngine().search(pattern, participants, searchScope, requestor, new SubProgressMonitor(pm, 9));
+		fTypeConstraintFactory.newCu();
 		
-		//TODO: solve constraints
+		AugmentRawContClConstraintsSolver solver= new AugmentRawContClConstraintsSolver(fTypeConstraintFactory);
+		solver.solveConstraints();
+		fDeclarationsToUpdate= solver.getDeclarationsToUpdate();
+		solver= null; //free caches
 	}
+
 
 	protected void analyzeCU(ICompilationUnit cu) {
 		AugmentRawContClConstraintCreator unitCollector= new AugmentRawContClConstraintCreator(fTypeConstraintFactory);
@@ -159,6 +166,10 @@ public class AugmentRawContainerClientsAnalyzer {
 //			if (DEBUG_COLLECTION) System.out.println("  Done adding referenced CU's to scan list."); //$NON-NLS-1$
 //		} while(cUsToScan.size() > 0);
 		
+	}
+	
+	public HashMap getDeclarationsToUpdate() {
+		return fDeclarationsToUpdate;
 	}
 
 }

@@ -41,17 +41,17 @@ public final class ConstraintOperator2 {
 		return fgSubtype;
 	}
 
-	public static ConstraintOperator2 createEqualsOperator() {
-		return fgEquals;
-	}
-
+//	public static ConstraintOperator2 createEqualsOperator() {
+//		return fgEquals;
+//	}
+//
 //	public static ConstraintOperator2 createDefinesOperator() {
 //		return fgDefines;
 //	}
-
-	public static ConstraintOperator2 createStrictSubtypeOperator() {
-		return fgStrictSubtype;
-	}
+//
+//	public static ConstraintOperator2 createStrictSubtypeOperator() {
+//		return fgStrictSubtype;
+//	}
 	
 	private ConstraintOperator2(String string, int code){
 		Assert.isTrue(fgOperatorStrings.contains(string));
@@ -92,14 +92,14 @@ public final class ConstraintOperator2 {
 		return fOperatorCode == CODE_SUBTYPE;
 	}
 
-	public final boolean isStrictSubtypeOperator() {
-		return fOperatorCode == CODE_STRICT_SUBTYPE;
-	}
-
-	public final boolean isEqualsOperator() {
-		return fOperatorCode == CODE_EQUALS;
-	}
-
+//	public final boolean isStrictSubtypeOperator() {
+//		return fOperatorCode == CODE_STRICT_SUBTYPE;
+//	}
+//
+//	public final boolean isEqualsOperator() {
+//		return fOperatorCode == CODE_EQUALS;
+//	}
+//
 //	public final boolean isDefinesOperator() {
 //		return fOperatorCode == CODE_DEFINES;
 //	}
