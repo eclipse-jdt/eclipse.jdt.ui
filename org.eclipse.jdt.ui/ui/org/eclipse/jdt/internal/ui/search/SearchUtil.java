@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -424,6 +425,10 @@ public class SearchUtil extends JavaModelUtil {
 	}
 	
 	public static String getProjectScopeDescription(IType type) {
-		return SearchMessages.getFormattedString("ProjectScope", type.getJavaProject().getElementName()); //$NON-NLS-1$
+		IJavaProject project= type.getJavaProject();
+		if (project != null)
+			return SearchMessages.getFormattedString("ProjectScope", project.getElementName()); //$NON-NLS-1$
+		else 
+			return SearchMessages.getFormattedString("ProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
