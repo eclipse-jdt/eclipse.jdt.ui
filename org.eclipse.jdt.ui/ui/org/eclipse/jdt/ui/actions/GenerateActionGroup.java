@@ -192,17 +192,17 @@ public class GenerateActionGroup extends ActionGroup {
 		fConvertToWindows= new ConvertLineDelimitersAction(editor, "\r\n"); //$NON-NLS-1$
 		fConvertToWindows.setActionDefinitionId(ITextEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
 		fConvertToWindows.setHelpContextId(IAbstractTextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
-		editor.setAction("ConvertLineDelimitersToWindows", fConvertToWindows); //$NON-NLS-1$		
+		editor.setAction(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_WINDOWS, fConvertToWindows); //$NON-NLS-1$		
 		
 		fConvertToUNIX= new ConvertLineDelimitersAction(editor, "\n"); //$NON-NLS-1$
 		fConvertToUNIX.setActionDefinitionId(ITextEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
 		fConvertToUNIX.setHelpContextId(IAbstractTextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
-		editor.setAction("ConvertLineDelimitersToUNIX", fConvertToUNIX); //$NON-NLS-1$		
+		editor.setAction(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_UNIX, fConvertToUNIX); //$NON-NLS-1$		
 	
 		fConvertToMac= new ConvertLineDelimitersAction(editor, "\r"); //$NON-NLS-1$
 		fConvertToMac.setActionDefinitionId(ITextEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_MAC);
 		fConvertToMac.setHelpContextId(IAbstractTextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_MAC);
-		editor.setAction("ConvertLineDelimitersToMac", fConvertToMac); //$NON-NLS-1$
+		editor.setAction(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_MAC, fConvertToMac); //$NON-NLS-1$
 		
 		fQuickAccessAction= new RefactorQuickAccessAction(editor);
 		fKeyBindingService= editor.getEditorSite().getKeyBindingService();

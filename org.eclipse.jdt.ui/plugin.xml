@@ -1852,36 +1852,6 @@
                retarget="true"
                id="org.eclipse.jdt.ui.actions.Comment">
          </action>
-<!-- convert group -->
-         <menu
-               label="%ConvertLineDelimitersActions.label"
-               path="org.eclipse.jdt.ui.source.menu/convertGroup"
-               id="convertSubMenu">
-            <separator
-                  name="group1">
-            </separator>
-         </menu>
-         <action
-               label="%ConvertLineDelimitersToMacAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
-               allowLabelUpdate="true"
-               id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac">
-         </action>
-         <action
-               label="%ConvertLineDelimitersToUNIXAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
-               allowLabelUpdate="true"
-               id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX">
-         </action>
-         <action
-               label="%ConvertLineDelimitersToWindowsAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
-               allowLabelUpdate="true"
-               id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToWindows">
-         </action>
       </actionSet>
    </extension>
    <extension
