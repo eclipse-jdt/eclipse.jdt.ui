@@ -5,7 +5,6 @@ package org.eclipse.jdt.internal.debug.ui.display;
  * All Rights Reserved.
  */
 
-
 import java.text.MessageFormat;
 
 import org.eclipse.debug.core.DebugException;
@@ -16,7 +15,6 @@ import org.eclipse.jdt.debug.eval.IEvaluationResult;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
-
 
 /**
  * Displays the result of an evaluation in the display view
