@@ -34,7 +34,6 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
 
 public class AssistQuickFixTest extends QuickFixTest {
 	
@@ -450,8 +449,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
@@ -489,8 +487,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
@@ -534,8 +531,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
