@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -224,7 +225,9 @@ public class JavaElementSorter extends ViewerSorter {
 		if (e1 instanceof IMember) {
 			if (fMemberOrderCache.isSortByVisibility()) {
 				try {
-					int vis= fMemberOrderCache.getVisibilityIndex(((IMember) e1).getFlags()) - fMemberOrderCache.getVisibilityIndex(((IMember) e2).getFlags());
+					int flags1= JdtFlags.getVisibilityCode((IMember) e1);
+					int flags2= JdtFlags.getVisibilityCode((IMember) e2);
+					int vis= fMemberOrderCache.getVisibilityIndex(flags1) - fMemberOrderCache.getVisibilityIndex(flags2);
 					if (vis != 0) {
 						return vis;
 					}
@@ -258,8 +261,6 @@ public class JavaElementSorter extends ViewerSorter {
 		}
 		
 		if (e1 instanceof IMethod) {
-
-			
 			String[] params1= ((IMethod) e1).getParameterTypes();
 			String[] params2= ((IMethod) e2).getParameterTypes();
 			int len= Math.min(params1.length, params2.length);
