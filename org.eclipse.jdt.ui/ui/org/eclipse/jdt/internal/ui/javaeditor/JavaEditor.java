@@ -2292,8 +2292,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 		
 		if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH.equals(event.getProperty())) {
-			// ignore tab setting since we rely on the formatter preferences
-			// do this outside the try-finally block to avoid walking the inheritance chain
+			/*
+			 * Ignore tab setting since we rely on the formatter preferences.
+			 * We do this outside the try-finally block to avoid that EDITOR_TAB_WIDTH
+			 * is handled by the sub-class (AbstractDecoratedTextEditor).
+			 */
 			return;
 		}
 		
