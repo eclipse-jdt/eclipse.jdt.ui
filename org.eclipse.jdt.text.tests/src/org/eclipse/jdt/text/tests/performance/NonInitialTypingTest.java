@@ -47,6 +47,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 	private KeyboardProbe fKeyboardProbe;
 
 	protected void setUp() throws Exception {
+		super.setUp();
 		EditorTestHelper.runEventQueue();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), getEditorId(), true);
 		// dirty editor to avoid initial dirtying / validate edit costs
@@ -84,6 +85,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 	}
 
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		sleep(1000);
 		fMeter.dispose();
 		EditorTestHelper.revertEditor(fEditor, true);

@@ -50,6 +50,7 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 	}
 	
 	protected void setUp() throws Exception {
+		super.setUp();
 		EditorTestHelper.runEventQueue();
 		Performance performance= Performance.getDefault();
 		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
@@ -66,6 +67,7 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 	}
 
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		EditorTestHelper.closeAllEditors();
 		fPerformanceMeter.dispose();
 	}

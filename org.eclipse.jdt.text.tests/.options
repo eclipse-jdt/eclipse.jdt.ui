@@ -5,7 +5,7 @@ org.eclipse.jdt.text.tests/debug=true
 org.eclipse.jdt.text.tests/debug/performance/OverrideRuns=false
 
 # Override the number of warm-up runs in performance measurements with the given value
-org.eclipse.jdt.text.tests/debug/performance/OverrideWarmUpRuns=1
+org.eclipse.jdt.text.tests/debug/performance/OverrideWarmUpRuns=2
 
 # Override the number of measured runs in performance measurements with the given value
 org.eclipse.jdt.text.tests/debug/performance/OverrideMeasuredRuns=2

@@ -71,12 +71,14 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 	private PerformanceMeter fPerformanceMeter;
 	
 	protected void setUp() throws Exception {
+		super.setUp();
 		Performance performance= Performance.getDefault();
 		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		EditorTestHelper.bringToTop();
 	}
 	
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		fPerformanceMeter.dispose();
 	}
 	

@@ -43,6 +43,7 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 	}
 
 	protected void setUp() throws Exception {
+		super.setUp();
 		Performance performance= Performance.getDefault();
 		fCommentMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "comment"));
 		fUncommentMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "uncomment"));
@@ -53,6 +54,7 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 	}
 	
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		EditorTestHelper.closeAllEditors();
 		fCommentMeter.dispose();
 		fUncommentMeter.dispose();

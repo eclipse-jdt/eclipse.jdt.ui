@@ -56,6 +56,7 @@ public class OpenQuickOutlineTest extends TextPerformanceTestCase {
 	}
 	
 	protected void setUp() throws Exception {
+		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 		Performance performance= Performance.getDefault();
@@ -69,6 +70,7 @@ public class OpenQuickOutlineTest extends TextPerformanceTestCase {
 	}
 	
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		for (int i= 0, n= getWarmUpRuns() + getMeasuredRuns(); i < n; i++)
 			ResourceTestHelper.delete(PATH + ORIG_NAME + i + ".java");
 		if (fWasOutlineViewShown)
