@@ -48,6 +48,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private TogglePresentationAction fTogglePresentation;
 	private GotoAnnotationAction fPreviousAnnotation;
 	private GotoAnnotationAction fNextAnnotation;
+	
 	private RetargetTextEditorAction fGotoMatchingBracket;
 	private RetargetTextEditorAction fShowOutline;
 	private RetargetTextEditorAction fOpenStructure;
@@ -62,7 +63,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private RetargetTextEditorAction fStructureSelectHistoryAction;	
 
 	private RetargetTextEditorAction fGotoNextMemberAction;	
-	private RetargetTextEditorAction fGotoPreviousMemberAction;	
+	private RetargetTextEditorAction fGotoPreviousMemberAction;
+
+	private RetargetTextEditorAction fRemoveOccurrenceAnnotationsAction;	
 	
 	public BasicJavaEditorActionContributor() {
 		super();
@@ -108,6 +111,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fGotoNextMemberAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_NEXT_MEMBER);
 		fGotoPreviousMemberAction= new RetargetTextEditorAction(b, "GotoPreviousMember."); //$NON-NLS-1$
 		fGotoPreviousMemberAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);		
+
+		fRemoveOccurrenceAnnotationsAction= new RetargetTextEditorAction(b, "RemoveOccurrenceAnnotations."); //$NON-NLS-1$
+		fRemoveOccurrenceAnnotationsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.REMOVE_OCCURRENCE_ANNOTATIONS);
 	}
 	
 	protected final void markAsPartListener(RetargetAction action) {
@@ -206,6 +212,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 				
 		fGotoNextMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.NEXT_MEMBER));
 		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
+		
+		fRemoveOccurrenceAnnotationsAction.setAction(getAction(textEditor, "RemoveOccurrenceAnnotations")); //$NON-NLS-1$
 		
 		if (part instanceof JavaEditor) {
 			JavaEditor javaEditor= (JavaEditor) part;

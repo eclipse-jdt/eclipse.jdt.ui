@@ -122,9 +122,9 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AddTaskAction;
 import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.DefaultAnnotation;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
-import org.eclipse.ui.texteditor.DefaultAnnotation;
 import org.eclipse.ui.texteditor.ExtendedTextEditor;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -2164,7 +2164,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see IWorkbenchPart#dispose()
 	 */
 	public void dispose() {
-		// cancel possiblle running computation
+		// cancel possible running computation
 		fMarkOccurrenceAnnotations= false;
 		fComputeCount++;
 		
@@ -2275,6 +2275,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		action= new QuickFormatAction();
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.QUICK_FORMAT);
 		setAction(IJavaEditorActionDefinitionIds.QUICK_FORMAT, action);
+
+		action= new RemoveOccurrenceAnnotations(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.REMOVE_OCCURRENCE_ANNOTATIONS);
+		setAction("RemoveOccurrenceAnnotations", action); //$NON-NLS-1$
 	}
 	
 	public void updatedTitleImage(Image image) {
@@ -2339,6 +2343,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					fMarkOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
 					if (!fMarkOccurrenceAnnotations) {
 						fComputeCount++;
+						removeOccurrenceAnnotations();
 					}
 				}
 			}
@@ -2703,18 +2708,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				if (currentCount != fComputeCount)
 					return;
 				
-				IDocumentProvider documentProvider= getDocumentProvider();
-				if (documentProvider == null)
-					return;
 				
-				IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
-				if (annotationModel == null)
-					return;
-				
-				// Remove existing occurrence annotations
-				for (int i= 0, size= fOccurrenceAnnotations.size(); i < size; i++)
-					annotationModel.removeAnnotation((Annotation)fOccurrenceAnnotations.get(i));
-				fOccurrenceAnnotations.clear();
+				removeOccurrenceAnnotations();
 	
 				if (currentCount != fComputeCount)
 					return;
@@ -2726,28 +2721,40 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				IDocument document= textViewer.getDocument();
 				if (document == null)
 					return;
+
+				IDocumentProvider documentProvider= getDocumentProvider();
+				if (documentProvider == null)
+					return;
+				
+				IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
+				if (annotationModel == null)
+					return;
 				
 				// Add occurrence annotations
-				for (Iterator each= matches.iterator(); each.hasNext();) {
+				synchronized (fOccurrenceAnnotations) {
 					if (currentCount != fComputeCount)
-						return; 
-					
-					ASTNode node= (ASTNode)each.next();
-					if (node == null)
-						continue;
-					
-					String message;
-					// Create & add annotation
-					try {
-						message= document.get(node.getStartPosition(), node.getLength());
-					} catch (BadLocationException ex) {
-						// Skip this match
-						continue;
+						return;
+					for (Iterator each= matches.iterator(); each.hasNext();) {
+						if (currentCount != fComputeCount)
+							return; 
+						
+						ASTNode node= (ASTNode)each.next();
+						if (node == null)
+							continue;
+						
+						String message;
+						// Create & add annotation
+						try {
+							message= document.get(node.getStartPosition(), node.getLength());
+						} catch (BadLocationException ex) {
+							// Skip this match
+							continue;
+						}
+						Annotation annotation= new DefaultAnnotation(SearchUI.SEARCH_MARKER, IMarker.SEVERITY_INFO, true, message);
+						Position pos= new Position(node.getStartPosition(), node.getLength());
+						annotationModel.addAnnotation(annotation, pos);
+						fOccurrenceAnnotations.add(annotation);
 					}
-					Annotation annotation= new DefaultAnnotation(SearchUI.SEARCH_MARKER, IMarker.SEVERITY_INFO, true, message);
-					Position pos= new Position(node.getStartPosition(), node.getLength());
-					annotationModel.addAnnotation(annotation, pos);
-					fOccurrenceAnnotations.add(annotation);
 				}
 			}
 		};
@@ -2755,6 +2762,22 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		thread.setDaemon(true);
 		thread.start();
 		
+	}
+	
+	void removeOccurrenceAnnotations() {
+		IDocumentProvider documentProvider= getDocumentProvider();
+		if (documentProvider == null)
+			return;
+		
+		IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
+		if (annotationModel == null)
+			return;
+
+		synchronized (fOccurrenceAnnotations) {
+			for (int i= 0, size= fOccurrenceAnnotations.size(); i < size; i++)
+				annotationModel.removeAnnotation((Annotation)fOccurrenceAnnotations.get(i));
+			fOccurrenceAnnotations.clear();
+		}
 	}
 
 	/**

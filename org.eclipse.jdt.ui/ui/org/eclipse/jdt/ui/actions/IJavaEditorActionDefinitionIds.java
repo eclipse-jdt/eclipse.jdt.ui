@@ -517,16 +517,23 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String SEARCH_IMPLEMENTORS_IN_WORKSPACE= "org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"; //$NON-NLS-1$
 	/**
 	 * Action definition ID of the search -> implementors in working set action
-	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.seach.implementors.in.working.set"</code>).
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"</code>).
 	 */
-	public static final String SEARCH_IMPLEMENTORS_IN_WORKING_SET= "org.eclipse.jdt.ui.edit.text.java.seach.implementors.in.working.set"; //$NON-NLS-1$
+	public static final String SEARCH_IMPLEMENTORS_IN_WORKING_SET= "org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the search -> implementors in project action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.implementors.in.project"</code>).
+	 * @since 3.0
+	 */
+	public static final String SEARCH_IMPLEMENTORS_IN_PROJECT= "org.eclipse.jdt.ui.edit.text.java.search.implementors.in.project"; //$NON-NLS-1$
 
 	// miscellaneous
 	
 	/**
 	 * Action definition ID of the toggle presentation toolbar button action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.toggle.presentation"</code>).
-	 * @deprecated as of 3.0 replaces by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#TOGGLE_SHOW_SELECTED_ELEMENT_ONLY
+	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#TOGGLE_SHOW_SELECTED_ELEMENT_ONLY
 	 */
 	public static final String TOGGLE_PRESENTATION= "org.eclipse.jdt.ui.edit.text.java.toggle.presentation"; //$NON-NLS-1$
 	
@@ -537,9 +544,9 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String TOGGLE_TEXT_HOVER= "org.eclipse.jdt.ui.edit.text.java.toggle.text.hover"; //$NON-NLS-1$
 
 	/**
-	 * Action definition ID of the search -> implementors in project action
-	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.seach.implementors.in.project"</code>).
+	 * Action definition ID of the remove occurrence annotations action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations"</code>).
+	 * @since 3.0
 	 */
-	public static final String SEARCH_IMPLEMENTORS_IN_PROJECT= "org.eclipse.jdt.ui.edit.text.java.seach.implementors.in.project"; //$NON-NLS-1$
-	
+	public static final String REMOVE_OCCURRENCE_ANNOTATIONS= "org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations";  //$NON-NLS-1$
 }

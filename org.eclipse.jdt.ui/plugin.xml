@@ -3070,6 +3070,19 @@
 		command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
+	
+	<command
+		category="org.eclipse.jdt.ui.category.source"
+		id="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations"
+		name= "%ActionDefinition.removeOccurrenceAnnotations.name"
+		description="%ActionDefinition.removeOccurrenceAnnotations.description"
+	/>
+	<keyBinding
+		string="Alt+Shift+U"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
 
 </extension>
 
