@@ -359,19 +359,6 @@
 </extension>
 
 <extension point="org.eclipse.ui.popupMenus">
-	<viewerContribution
-		id="org.eclipse.jdt.ui.actions.CopyNamesToClipboardActionContrib"
-		targetID="org.eclipse.jdt.ui.PackageExplorer">
-		<action
-			id="org.eclipse.jdt.ui.actions.CopyNamesToClipboardAction1"
-			label="%CopyNamesToClipboardAction.label"
-			tooltip="%CopyNamesToClipboardAction.tooltip"
-			menubarPath="group.reorganize"
-			class="org.eclipse.jdt.internal.ui.actions.CopyNamesToClipboardAction"
-			enablesFor="+">
-		</action>
-	</viewerContribution>
-	
 	<objectContribution
 		id="org.eclipse.jdt.ui.actions.OpenSuperImplementationAction"
 		objectClass="org.eclipse.jdt.core.IMethod">
@@ -516,7 +503,7 @@
 			class="org.eclipse.jdt.internal.ui.compare.JavaCompareWithEditionAction">
 		</action>
 		<action
-			id="javaCompareFromHistory"
+			id="javaCompare"
 			label="%JavaCompareAction.label"
 			tooltip="%JavaCompareAction.tooltip"
 			menubarPath="compareWithMenu/compareWithGroup"
@@ -941,20 +928,4 @@ JavaStructureDiffViewerCreator
 		category="org.eclipse.jdt.ui.preferences.WorkInProgressPreferencePage">
 	</page>
 </extension>
-
-<extension point="org.eclipse.ui.popupMenus">
-	<viewerContribution
-		id="org.eclipse.jdt.ui.actions.CopyNamesToClipboardActionContribution"
-		targetID="org.eclipse.jdt.ui.ProjectsView">
-		<action
-			id="org.eclipse.jdt.ui.actions.CopyNamesToClipboardAction"
-			label="%CopyNamesToClipboardAction.label"
-			tooltip="%CopyNamesToClipboardAction.tooltip"
-			menubarPath="group.reorganize"
-			class="org.eclipse.jdt.internal.ui.actions.CopyNamesToClipboardAction"
-			enablesFor="+">
-		</action>
-	</viewerContribution>
-</extension>
-
 </plugin>
