@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -36,7 +37,11 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
 
 
 public class JavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2 {
@@ -52,6 +57,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	private ProposalInfo fProposalInfo;
 	private char[] fTriggerCharacters;
 	protected boolean fToggleEating;
+	protected ITextViewer fTextViewer;	
 	
 	private int fRelevance;
 	private StyleRange fRememberedStyleRange;
@@ -67,6 +73,21 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	 * If set to <code>null</code>, the replacement string will be taken as display string.
 	 */
 	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, String displayString, int relevance) {
+		this(replacementString, replacementOffset, replacementLength, image, displayString, relevance, null);
+	}
+
+	/**
+	 * Creates a new completion proposal. All fields are initialized based on the provided information.
+	 *
+	 * @param replacementString the actual string to be inserted into the document
+	 * @param replacementOffset the offset of the text to be replaced
+	 * @param replacementLength the length of the text to be replaced
+	 * @param image the image to display for this proposal
+	 * @param displayString the string to be displayed for the proposal
+	 * @param viewer the text viewer for which this proposal is computed, may be <code>null</code>
+	 * If set to <code>null</code>, the replacement string will be taken as display string.
+	 */
+	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, String displayString, int relevance, ITextViewer viewer) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
@@ -77,6 +98,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		fImage= image;
 		fDisplayString= displayString != null ? displayString : replacementString;
 		fRelevance= relevance;
+		fTextViewer= viewer;
 
 		fCursorPosition= replacementString.length();
 	
@@ -132,8 +154,9 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			if (delta > 0)
 				fReplacementLength += delta;
 			
+			String string;
 			if (trigger == (char) 0) {
-				replace(document, fReplacementOffset, fReplacementLength, fReplacementString);
+				string= fReplacementString;
 			} else {
 				StringBuffer buffer= new StringBuffer(fReplacementString);
 
@@ -143,12 +166,73 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 					++fCursorPosition;
 				}
 				
-				replace(document, fReplacementOffset, fReplacementLength, buffer.toString());
+				string= buffer.toString();
 			}
+
+			replace(document, fReplacementOffset, fReplacementLength, string);
+
+			if (fTextViewer != null && string != null) {
+				int index= string.indexOf("()"); //$NON-NLS-1$
+				if (index != -1) {
+					
+					IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+					if (preferenceStore.getBoolean(CompilationUnitEditor.CLOSE_BRACKETS)) {
+	
+						int newOffset= fReplacementOffset + index;
+		
+						LinkedPositionManager manager= new LinkedPositionManager(document);
+						manager.addPosition(newOffset + 1, 0);
+		
+						LinkedPositionUI editor= new LinkedPositionUI(fTextViewer, manager);
+						editor.setExitPolicy(new ExitPolicy(')'));
+						editor.setFinalCaretOffset(newOffset + 2);
+						editor.enter();							
+					}
+				}
+			}
+
 		} catch (BadLocationException x) {
 			// ignore
 		}		
 	}
+	
+	private static class ExitPolicy implements LinkedPositionUI.ExitPolicy {
+		
+		final char fExitCharacter;
+		
+		public ExitPolicy(char exitCharacter) {
+			fExitCharacter= exitCharacter;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
+		 */
+		public ExitFlags doExit(LinkedPositionManager manager, VerifyEvent event, int offset, int length) {
+			
+			if (event.character == fExitCharacter) {
+				if (manager.anyPositionIncludes(offset, length))
+					return new ExitFlags(LinkedPositionUI.COMMIT| LinkedPositionUI.UPDATE_CARET, false);
+				else
+					return new ExitFlags(LinkedPositionUI.COMMIT, true);
+			}	
+			
+			switch (event.character) {			
+			case '\b':
+				if (manager.getFirstPosition().length == 0)
+					return new ExitFlags(0, true);
+				else
+					return null;
+				
+			case '\n':
+			case '\r':
+				return new ExitFlags(LinkedPositionUI.COMMIT, true);
+				
+			default:
+				return null;
+			}						
+		}
+
+	}	
 	
 	// #6410 - File unchanged but dirtied by code assist
 	private void replace(IDocument document, int offset, int length, String string) throws BadLocationException {

@@ -430,7 +430,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	}
 	
 	protected JavaCompletionProposal createCompletion(int start, int end, String completion, ImageDescriptor descriptor, String name, int relevance) {
-		return new JavaCompletionProposal(completion, start, getLength(start, end), getImage(descriptor), name, relevance);
+		return new JavaCompletionProposal(completion, start, getLength(start, end), getImage(descriptor), name, relevance, fTextViewer);
 	}
 
 	private int getLength(int start, int end) {
