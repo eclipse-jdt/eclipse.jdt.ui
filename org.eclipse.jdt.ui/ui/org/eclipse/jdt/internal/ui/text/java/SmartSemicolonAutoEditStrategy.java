@@ -137,6 +137,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		command.caretOffset= position;
 		command.text= adjustSpacing(document, position, fCharacter);
 		command.doit= true;
+		command.owner= null;
 	}
 
 	/**
@@ -580,10 +581,10 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			if (pos < 0)
 				return false;
 
-			if (pos != 0 && Character.isJavaIdentifierPart(document.getChar(pos - 1)))
+			if (pos != 0 && Character.isJavaIdentifierPart(text.charAt(pos - 1)))
 				return false;
 
-			if (pos + 3 < length && Character.isJavaIdentifierPart(document.getChar(pos + 3)))
+			if (pos + 3 < length && Character.isJavaIdentifierPart(text.charAt(pos + 3)))
 				return false;
 			
 			return true;

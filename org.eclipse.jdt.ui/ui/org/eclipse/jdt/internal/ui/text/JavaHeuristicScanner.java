@@ -589,7 +589,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * 
 	 * @param position the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with <code>bound</code> &gt; <code>position</code>, or <code>UNBOUND</code>
-	 * @return the smallest position of a non-whitespace character in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @return the smallest position of a non-whitespace character in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int findNonWhitespaceForward(int position, int bound) {
 		return scanForward(position, bound, fNonWSDefaultPart);
@@ -601,7 +601,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * 
 	 * @param position the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with <code>bound</code> &gt; <code>position</code>, or <code>UNBOUND</code>
-	 * @return the smallest position of a non-whitespace character in [<code>position</code>, <code>bound</code>), or <code>-1</code> if none can be found
+	 * @return the smallest position of a non-whitespace character in [<code>position</code>, <code>bound</code>), or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int findNonWhitespaceForwardInAnyPartition(int position, int bound) {
 		return scanForward(position, bound, fNonWS);
@@ -614,7 +614,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * 
 	 * @param position the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with <code>bound</code> &lt; <code>position</code>, or <code>UNBOUND</code>
-	 * @return the highest position of a non-whitespace character in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @return the highest position of a non-whitespace character in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int findNonWhitespaceBackward(int position, int bound) {		
 		return scanBackward(position, bound, fNonWSDefaultPart);
@@ -627,7 +627,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * @param start the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with <code>bound</code> &gt; <code>start</code>, or <code>UNBOUND</code>
 	 * @param condition the <code>StopCondition</code> to check
-	 * @return the lowest position in [<code>start</code>, <code>bound</code>) for which <code>condition</code> holds, or <code>-1</code> if none can be found
+	 * @return the lowest position in [<code>start</code>, <code>bound</code>) for which <code>condition</code> holds, or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int scanForward(int start, int bound, StopCondition condition) {
 		Assert.isTrue(start >= 0);
@@ -661,7 +661,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * @param position the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with <code>bound</code> &gt; <code>position</code>, or <code>UNBOUND</code>
 	 * @param ch the <code>char</code> to search for
-	 * @return the lowest position of <code>ch</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @return the lowest position of <code>ch</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int scanForward(int position, int bound, char ch) {
 		return scanForward(position, bound, new CharacterMatch(ch));
@@ -675,7 +675,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * @param position the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with <code>bound</code> &gt; <code>position</code>, or <code>UNBOUND</code>
 	 * @param chars an array of <code>char</code> to search for
-	 * @return the lowest position of a non-whitespace character in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @return the lowest position of a non-whitespace character in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int scanForward(int position, int bound, char[] chars) {
 		return scanForward(position, bound, new CharacterMatch(chars));
@@ -688,7 +688,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * @param start the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with <code>bound</code> &lt; <code>start</code>, or <code>UNBOUND</code>
 	 * @param condition the <code>StopCondition</code> to check
-	 * @return the highest position in (<code>bound</code>, <code>start</code> for which <code>condition</code> holds, or <code>-1</code> if none can be found
+	 * @return the highest position in (<code>bound</code>, <code>start</code> for which <code>condition</code> holds, or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int scanBackward(int start, int bound, StopCondition condition) {
 		if (bound == UNBOUND)
@@ -720,7 +720,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * @param position the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with <code>bound</code> &lt; <code>position</code>, or <code>UNBOUND</code>
 	 * @param ch the <code>char</code> to search for
-	 * @return the highest position of one element in <code>chars</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @return the highest position of one element in <code>chars</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int scanBackward(int position, int bound, char ch) {
 		return scanBackward(position, bound, new CharacterMatch(ch));
@@ -734,7 +734,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * @param position the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with <code>bound</code> &lt; <code>position</code>, or <code>UNBOUND</code>
 	 * @param chars an array of <code>char</code> to search for
-	 * @return the highest position of one element in <code>chars</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @return the highest position of one element in <code>chars</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int scanBackward(int position, int bound, char[] chars) {
 		return scanBackward(position, bound, new CharacterMatch(chars));

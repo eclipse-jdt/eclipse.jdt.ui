@@ -137,7 +137,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 		
 		int pos= fScanner.findReferencePosition(fDocument.getLength());
 //		Assert.assertEquals(1, pos);
-		Assert.assertEquals(15, pos);
+		Assert.assertEquals(46, pos);
 	}
 	
 	public void testPrevIndentationUnit9() {
@@ -581,5 +581,97 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals("			", indent);
 	}
 
+	public void testAnonymousIndentation1() {
+		fDocument.set(	"		MenuItem mi= new MenuItem(\"About...\");\n" + 
+						"		mi.addActionListener(\n" + 
+						"			new ActionListener() {\n" 
+						);
+				
+		String indent= fScanner.computeIndentation(fDocument.getLength());
+		Assert.assertEquals("				", indent);
+	}
+	
+	public void testAnonymousIndentation2() {
+		fDocument.set(	"		MenuItem mi= new MenuItem(\"About...\");\n" + 
+						"		mi.addActionListener(\n" + 
+						"			new ActionListener() {\n" + 
+						"				public void actionPerformed(ActionEvent event) {\n" + 
+						"					about();\n" + 
+						"				}\n" + 
+						"			}\n" +
+						");"
+						);
+				
+		// this is bogus, since this is really just an unfinished call argument list - how could we know 
+		String indent= fScanner.computeIndentation(fDocument.getLength() - 2);
+		Assert.assertEquals("		", indent);
+	}
+	
+	public void testExceptionIndentation1() {
+		fDocument.set("public void processChildren(CompositeExpression result, IConfigurationElement element) throws CoreException {\n" + 
+				"			IConfigurationElement[] children= element.getChildren();\n" + 
+				"			if (children != null) {\n" + 
+				"				for (int i= 0; i < children.length; i++) {\n" + 
+				"					Expression child= parse(children[i]);\n" + 
+				"					if (child == null)\n" + 
+				"						new Bla(new CoreExeption(new Status(IStatus.ERROR, JavaPlugin.getPluginId()");
+	
+		String indent= fScanner.computeIndentation(fDocument.getLength());
+		Assert.assertEquals("								", indent);
+	}
+	
+	public void testExceptionIndentation2() {
+		fDocument.set("public void processChildren(CompositeExpression result, IConfigurationElement element) throws CoreException {\n" + 
+				"			IConfigurationElement[] children= element.getChildren();\n" + 
+				"			if (children != null) {\n" + 
+				"				for (int i= 0; i < children.length; i++) {\n" + 
+				"					Expression child= parse(children[i]);\n" + 
+				"					if (child == null)\n" + 
+				"						new Bla(new CoreExeption(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),");
+		
+		String indent= fScanner.computeIndentation(fDocument.getLength());
+		Assert.assertEquals("								", indent);
+	}
+	
+	public void testExceptionIndentation3() {
+		fDocument.set("public void processChildren(CompositeExpression result, IConfigurationElement element) throws CoreException {\n" + 
+				"			IConfigurationElement[] children= element.getChildren();\n" + 
+				"			if (children != null) {\n" + 
+				"				for (int i= 0; i < children.length; i++) {\n" + 
+				"					Expression child= parse(children[i]);\n" + 
+				"					if (child == null)\n" + 
+				"						new char[] { new CoreExeption(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),");
+		
+		String indent= fScanner.computeIndentation(fDocument.getLength());
+		Assert.assertEquals("								", indent);
+	}
+	
+	public void testListAlignmentMethodDeclaration() {
+		// parameter declaration - alignment with parenthesis 
+		fDocument.set(	"\tvoid proc (  int par1, int par2,\n" +
+				"	   int par3, int par4,\n");
+		
+		String indent= fScanner.computeIndentation(fDocument.getLength());
+		Assert.assertEquals("	   ", indent);
+	}
+	
+	public void testListAlignmentMethodCall() {
+		// parameter declaration - alignment with parenthesis 
+		fDocument.set(	"\this.proc (par1, par2,\n" +
+				"	   par3, par4,\n");
+		
+		String indent= fScanner.computeIndentation(fDocument.getLength());
+		Assert.assertEquals("	   ", indent);
+	}
+	
+	public void testListAlignmentArray() {
+		// parameter declaration - alignment with parenthesis 
+		fDocument.set(	"\tint[]= new int[] { 1, two,\n" +
+				"	   three, four,\n");
+		
+		String indent= fScanner.computeIndentation(fDocument.getLength());
+		Assert.assertEquals("	   ", indent);
+	}
 	
 }
+

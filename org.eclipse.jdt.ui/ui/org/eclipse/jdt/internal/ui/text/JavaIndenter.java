@@ -18,11 +18,15 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+
 /**
- * Uses the {@link org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner} to get the indentation
- * level for a certain position in a document.
+ * Uses the {@link org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner}to
+ * get the indentation level for a certain position in a document.
  * 
- * <p>An instance holds some internal position in the document and is therefore not threadsafe.</p>
+ * <p>
+ * An instance holds some internal position in the document and is therefore
+ * not threadsafe.
+ * </p>
  * 
  * @since 3.0
  */
@@ -37,17 +41,17 @@ public class JavaIndenter {
 	 * (method defs, array initializers)
 	 */
 	private int fAlign;
-	/** Whether to add one space to the absolute indentation. */
-	private boolean fAlignPlusOne;
-	/** The stateful scanpositionf or the indentation methods. */
+	/** The stateful scanposition for the indentation methods. */
 	private int fPosition;
 	/** The previous position. */
 	private int fPreviousPos;
 	/** The most recent token. */
 	private int fToken;
-	/** 
-	 * The scanner we will use to scan the document. It has to be installed on the same document
-	 * as the one we get.
+	/** The line of <code>fPosition</code>. */
+	private int fLine;
+	/**
+	 * The scanner we will use to scan the document. It has to be installed
+	 * on the same document as the one we get.
 	 */
 	private JavaHeuristicScanner fScanner;
 	
@@ -63,14 +67,17 @@ public class JavaIndenter {
 		fScanner= scanner;
 	}
 	
+	
 	/**
 	 * Computes the indentation at the reference point of <code>position</code>.
 	 * 
-	 * @param position the position in the document, either at the beginning of a line or in the 
-	 * whitespace at the beginning of a line
-	 * @return a String which reflects the indentation at the line in which the reference position
-	 * to <code>position</code> resides, or <code>null</code> if it cannot be determined.
+	 * @param position the position in the document, either at the beginning of
+	 *        a line or in the whitespace at the beginning of a line
+	 * @return a String which reflects the indentation at the line in which the
+	 *         reference position to <code>position</code> resides, or <code>null</code>
+	 *         if it cannot be determined.
 	 */
+
 	public String getReferenceIndentation(int position) {
 		
 		try {
@@ -79,6 +86,7 @@ public class JavaIndenter {
 			
 			boolean danglingElse= false;
 			boolean matchBrace= false;
+			boolean matchParen= false;
 			
 			if (position < fDocument.getLength()) {
 				IRegion line= fDocument.getLineInformationOfOffset(position);
@@ -96,7 +104,7 @@ public class JavaIndenter {
 			}
 			
 			// find the base position
-			int unit= findReferencePosition(position, danglingElse, matchBrace);
+			int unit= findReferencePosition(position, danglingElse, matchBrace, matchParen);
 			
 			// if we were unable to find anything, return null
 			if (unit == JavaHeuristicScanner.NOT_FOUND)
@@ -116,14 +124,17 @@ public class JavaIndenter {
 		return null;
 	}
 	
+	
 	/**
 	 * Computes the indentation at <code>position</code>.
 	 * 
-	 * @param position the position in the document, either at the beginning of a line or in the 
-	 * whitespace at the beginning of a line
-	 * @return a String which reflects the correct indentation for the line in which position
-	 * resides, or <code>null</code> if it cannot be determined..
+	 * @param position the position in the document, either at the beginning of
+	 *        a line or in the whitespace at the beginning of a line
+	 * @return a String which reflects the correct indentation for the line in
+	 *         which position resides, or <code>null</code> if it cannot be
+	 *         determined..
 	 */
+
 	public String computeIndentation(int position) {
 		
 		try {
@@ -133,6 +144,7 @@ public class JavaIndenter {
 			boolean danglingElse= false;
 			boolean unindent= false;
 			boolean matchBrace= false;
+			boolean matchParen= false;
 			
 			if (position < fDocument.getLength()) {
 				IRegion line= fDocument.getLineInformationOfOffset(position);
@@ -158,13 +170,16 @@ public class JavaIndenter {
 						break;
 					case Symbols.TokenWHILE:
 						break;
+					case Symbols.TokenRPAREN:
+						matchParen= true;
+						break;
 				}
 			} else {
 				danglingElse= true; // assume an else could come - align with 'if' 
 			}
 			
 			// find the base position
-			int unit= findReferencePosition(position, danglingElse, matchBrace);
+			int unit= findReferencePosition(position, danglingElse, matchBrace, matchParen);
 			
 			// handle special alignment
 			if (fAlign != JavaHeuristicScanner.NOT_FOUND) {
@@ -213,14 +228,17 @@ public class JavaIndenter {
 		}			
 	}
 
+	
 	/**
-	 * Creates an indentation string of the length indent - start + 1, consisting of the content 
-	 * in <code>fDocument</code> in the range [start, indent), with every character replaced by
-	 * a space except for tabs, which are kept as such.
+	 * Creates an indentation string of the length indent - start + 1,
+	 * consisting of the content in <code>fDocument</code> in the range
+	 * [start, indent), with every character replaced by a space except for
+	 * tabs, which are kept as such.
 	 * 
-	 * @return the indentation corresponding to the document content specified by <code>start</code>
-	 * and <code>indent</code>
+	 * @return the indentation corresponding to the document content specified
+	 *         by <code>start</code> and <code>indent</code>
 	 */
+
 	private String createIndent(int start, int indent) {
 		int tabLen;
 		if (JavaPlugin.getDefault() != null)
@@ -247,9 +265,6 @@ public class JavaIndenter {
 				
 				start++;
 			}
-			if (fAlignPlusOne)
-				spaces++;
-			
 			if (spaces == tabLen)
 				ret.append('\t');
 			else
@@ -262,12 +277,16 @@ public class JavaIndenter {
 		return ret.toString();
 	}
 
+	
 	/**
-	 * Creates a string that represents the given number of indents (can be spaces or tabs..)
+	 * Creates a string that represents the given number of indents (can be
+	 * spaces or tabs..)
+	 * 
 	 * @param indent the requested indentation level.
 	 * 
 	 * @return the indentation specified by <code>indent</code>
 	 */
+
 	private String createIndent(int indent) {
 		// get a sensible default when running without the infrastructure for testing
 		if (JavaPlugin.getDefault() == null) {
@@ -281,35 +300,92 @@ public class JavaIndenter {
 		return CodeFormatterUtil.createIndentString(indent);
 	}
 	
-	/**
-	 * Returns the reference position regarding to indentation for <code>position</code>, or
-	 * <code>NOT_FOUND</code>. <code>fIndent</code> will contain the relative indentation (in 
-	 * indentation units, not characters) after the call. If there is a special alignment (e.g. for
-	 * a method declaration where parameters should be aligned), <code>fAlign</code> will contain the absolute
-	 * position of the alignment reference in <code>fDocument</code>, otherwise <code>fAlign</code>
-	 * is set to <code>JavaHeuristicScanner.NOT_FOUND</code>.
-	 * 
-	 * @param position the position for which the reference is computed
-	 * @return the reference statement relative to which <code>position</code> should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
-	 */
-	public int findReferencePosition(int position) {
-		return findReferencePosition(position, false, false);
-	}
 	
 	/**
-	 * Returns the reference position regarding to indentation for <code>position</code>, or
-	 * <code>NOT_FOUND</code>. <code>fIndent</code> will contain the relative indentation (in 
-	 * indentation units, not characters) after the call. If there is a special alignment (e.g. for
-	 * a method declaration where parameters should be aligned), <code>fAlign</code> will contain the absolute
-	 * position of the alignment reference in <code>fDocument</code>, otherwise <code>fAlign</code>
-	 * is set to <code>JavaHeuristicScanner.NOT_FOUND</code>.
+	 * Returns the reference position regarding to indentation for <code>position</code>,
+	 * or <code>NOT_FOUND</code>.
+	 * 
+	 * @param position the position for which the reference is computed
+	 * @return the reference statement relative to which <code>position</code>
+	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
+	 */
+
+	public int findReferencePosition(int position) {
+		return findReferencePosition(position, false, false, false);
+	}
+	
+	
+	/**
+	 * Returns the reference position regarding to indentation for <code>position</code>,
+	 * or <code>NOT_FOUND</code>.
+	 * 
+	 * @param position the position for which the reference is computed
+	 * @param peekNextChar whether to account for the next character (closing
+	 *        brace etc.) on the same line as <code>position</code> and
+	 *        handle indentation accordingly
+	 * @return the reference statement relative to which <code>position</code>
+	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
+	 */
+
+	public int findReferencePosition(int position, boolean peekNextChar) {
+		boolean danglingElse= false;
+		boolean matchBrace= false;
+		boolean matchParen= false;
+		
+		if (peekNextChar) {
+			try {
+				// account for unindenation characters already typed in, but after position
+				// also account for a dangling else
+				
+				if (position < fDocument.getLength()) {
+					IRegion line= fDocument.getLineInformationOfOffset(position);
+					int next= fScanner.nextToken(position, line.getOffset() + line.getLength());
+					switch (next) {
+						case Symbols.TokenEOF:
+						case Symbols.TokenELSE:
+							danglingElse= true;
+							break;
+						case Symbols.TokenRBRACE: // closing braces get unindented
+							matchBrace= true;
+							break;
+						case Symbols.TokenWHILE:
+							break;
+						case Symbols.TokenRPAREN:
+							matchParen= true;
+							break;
+					}
+				} else {
+					danglingElse= true; // assume an else could come - align with 'if' 
+				}
+				
+			} catch (BadLocationException e) {
+			}
+		}
+		return findReferencePosition(position, danglingElse, matchBrace, matchParen);
+		
+	}
+	
+	
+	/**
+	 * Returns the reference position regarding to indentation for <code>position</code>,
+	 * or <code>NOT_FOUND</code>.<code>fIndent</code> will contain the
+	 * relative indentation (in indentation units, not characters) after the
+	 * call. If there is a special alignment (e.g. for a method declaration
+	 * where parameters should be aligned), <code>fAlign</code> will contain
+	 * the absolute position of the alignment reference in <code>fDocument</code>,
+	 * otherwise <code>fAlign</code> is set to <code>JavaHeuristicScanner.NOT_FOUND</code>.
 	 * 
 	 * @param position the position for which the reference is computed
 	 * @param danglingElse whether a dangling else should be assumed at <code>position</code>
-	 * @param matchBrace whether the position of the matching brace should be returned instead of doing code analysis
-	 * @return the reference statement relative to which <code>position</code> should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
+	 * @param matchBrace whether the position of the matching brace should be
+	 *        returned instead of doing code analysis
+	 * @param matchBrace whether the position of the matching parenthesis
+	 *        should be returned instead of doing code analysis
+	 * @return the reference statement relative to which <code>position</code>
+	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
-	private int findReferencePosition(int position, boolean danglingElse, boolean matchBrace) {
+
+	private int findReferencePosition(int position, boolean danglingElse, boolean matchBrace, boolean matchParen) {
 		fIndent= 0; // the indentation modification
 		fAlign= JavaHeuristicScanner.NOT_FOUND;
 		fPosition= position;
@@ -317,17 +393,37 @@ public class JavaIndenter {
 		boolean indentBlockLess= true; // whether to indent after an if / while / for without block (set false by semicolons and braces)
 		boolean takeNextExit= true; // whether the next possible exit should be taken (instead of looking for the base; see blockless stuff)
 		boolean found= false; // whether we have found anything at all. If we have, we'll trace back to it once we have a hoist point
-		boolean hasBrace= false;
+		boolean hasBrace= false; // whether we have found a left brace
+		boolean longIndentSet= false; // whehter we have already added a deep indentation (to avoid multiple deep / double indents for multiple calls)
+		int listItemPos= JavaHeuristicScanner.NOT_FOUND; // position of the alignment element in a comma separated list
+		int listItemLine= -1; // line of listItemPos
 		
 		if (matchBrace) {
 			if (!skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE)) {
 				fPosition= position;
-				fIndent= -1;
+				fIndent= -1; // if the opening brace is not there (ie. we are running on a very local fragment, e.g. when pasting code), reduce indent by one.
 			} else {
 				indentBlockLess= false;
 				hasBrace= true;
 			}
 		}
+		
+		if (matchParen) {
+			if (!skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
+				fPosition= position;
+				fIndent= 0;
+			} else {
+				int pos= fPosition;
+				fPosition= position;
+				nextToken();
+				if (fToken != Symbols.TokenCOMMA)
+					return pos;
+				
+				fPosition= position;
+				fIndent= 0;
+			}
+		}
+		
 		
 		nextToken();
 		while (true) {
@@ -394,14 +490,14 @@ public class JavaIndenter {
 				
 				case Symbols.TokenCOLON: // switch statements and labels
 					if (searchCaseGotoDefault()) {
-						if (!hasBrace)
+						if (!hasBrace || matchBrace)
 							fIndent++;
 						return fPosition;
 					}
 					break;
 					
 				case Symbols.TokenQUESTIONMARK: // ternary expressions
-					if (takeNextExit && prefTenaryDeepAlign())
+					if (fAlign == JavaHeuristicScanner.NOT_FOUND && takeNextExit && prefTenaryDeepAlign())
 						fAlign= fPosition;
 					nextToken();
 					break;
@@ -412,16 +508,28 @@ public class JavaIndenter {
 				case Symbols.TokenLBRACE:
 				
 					int searchPos= fPreviousPos;
+					int bracePos= fPosition;
 					
 					// special array handling
 					nextToken();
 					if (fToken == Symbols.TokenEQUAL || skipBrackets()) {
 						int first= fScanner.findNonWhitespaceForwardInAnyPartition(searchPos, position);
 						// ... with a first element already defined - take its offset
-						if (prefArrayDeepIndent() && first != JavaHeuristicScanner.NOT_FOUND) {
+						if (fAlign == JavaHeuristicScanner.NOT_FOUND && listItemLine > fLine) {
+							// there are more list items later on - adjust to current usage
+							int lineOffset;
+							try {
+								lineOffset= fDocument.getLineOffset(listItemLine);
+								fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(lineOffset, listItemPos + 1);
+							} catch (BadLocationException e) {
+							}
+						}
+						if (fAlign == JavaHeuristicScanner.NOT_FOUND && prefArrayDeepIndent() && first != JavaHeuristicScanner.NOT_FOUND) {
 							fAlign= first;
-						} else
+						} else if (!longIndentSet) {
 							fIndent += prefArrayIndent();
+							longIndentSet= true;
+						}
 					}
 					
 					hasBrace= true;
@@ -435,7 +543,7 @@ public class JavaIndenter {
 					
 					// indent when searching over an LBRACE
 					fIndent++;
-					break;
+					return bracePos;
 					
 				case Symbols.TokenSEMICOLON:
 					// search start of code forward or continue
@@ -445,6 +553,14 @@ public class JavaIndenter {
 					takeNextExit= false; // search to the bottom of blockless statements
 					indentBlockLess= false; // don't indent at the next blockless introducer
 					
+					nextToken();
+					break;
+				
+				case Symbols.TokenNEW:
+					if (hasBrace && takeNextExit && found) {
+						// we're probably in an array or anonymous class 
+						return fScanner.findNonWhitespaceForward(fPreviousPos, position);
+					}
 					nextToken();
 					break;
 				
@@ -472,30 +588,51 @@ public class JavaIndenter {
 				// handle method definitions separately
 				case Symbols.TokenLPAREN:
 					// TODO differentiate between conditional continuation and calls
-					if (!hasBrace)
+					
+					// handle list items.
+					if (listItemLine > fLine && fAlign == JavaHeuristicScanner.NOT_FOUND) {
+						// there are more list items later on - adjust to current usage
+						int lineOffset;
+						try {
+							lineOffset= fDocument.getLineOffset(listItemLine);
+							fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(lineOffset, listItemPos + 1);
+						} catch (BadLocationException e) {
+						}
+					}
+					
+					if (!hasBrace && !longIndentSet) {
 						fIndent += prefCallContinuationIndent();
+						longIndentSet= true;
+					}
 					
 					searchPos= fPreviousPos;
 					
-					if (prefMethodDeclDeepIndent() && looksLikeMethodDecl() && found) {
+					if (looksLikeMethodDecl() && found && fAlign == JavaHeuristicScanner.NOT_FOUND && prefMethodDeclDeepIndent()) {
 						fAlign= fScanner.findNonWhitespaceForward(searchPos, position);
 					}
-					
-					break;
+				
+					return fPosition;
 
 				// array dimensions
 				case Symbols.TokenLBRACKET:
-					if (prefArrayDimensionsDeepIndent() && found)
+					if (fAlign == JavaHeuristicScanner.NOT_FOUND && prefArrayDimensionsDeepIndent() && found)
 						fAlign= fScanner.findNonWhitespaceForward(fPreviousPos, position);
 					
-					fIndent+= prefArrayDimensionIndent();
+					if (!longIndentSet) {
+						fIndent+= prefArrayDimensionIndent();
+						longIndentSet= true;
+					}
 						
 					nextToken();
 					break;
 				
 				case Symbols.TokenCOMMA:
-					if (found)
-						fScanner.findNonWhitespaceForward(fPreviousPos, position);
+					// align with comma list except for when in a method declaration
+					if (found && listItemPos == JavaHeuristicScanner.NOT_FOUND) {
+						listItemPos= fScanner.findNonWhitespaceForwardInAnyPartition(fPreviousPos, position);
+						listItemLine= fLine;
+					}
+					
 					nextToken();
 					break;
 
@@ -508,12 +645,14 @@ public class JavaIndenter {
 		}
 	}
 	
+	
 	/**
 	 * Searches for a case, goto, or default after a scanned colon.
 	 * 
-	 * @return <code>true</code> if one of the above keywords can be scanned, possibly separated
-	 * by an identifier or constant.
+	 * @return <code>true</code> if one of the above keywords can be scanned,
+	 *         possibly separated by an identifier or constant.
 	 */
+
 	private boolean searchCaseGotoDefault() {
 		// after a colon
 		while (true) {
@@ -536,24 +675,31 @@ public class JavaIndenter {
 		}
 	}
 
+	
 	/**
-	 * while(condition); is ambiguous when parsed backwardly, as it is a valid statement by its own,
-	 * so we have to check whether there is a matching do. A <code>do</code> can either be separated
-	 * from the while by a block, or by a single statement, which limits our search distance.
+	 * while(condition); is ambiguous when parsed backwardly, as it is a valid
+	 * statement by its own, so we have to check whether there is a matching
+	 * do. A <code>do</code> can either be separated from the while by a
+	 * block, or by a single statement, which limits our search distance.
 	 * 
-	 * @return <code>true</code> if the <code>while</code> currently in <code>fToken</code> has a matching <code>do</code>.
+	 * @return <code>true</code> if the <code>while</code> currently in
+	 *         <code>fToken</code> has a matching <code>do</code>.
 	 */
+
 	private boolean hasMatchingDo() {
 		Assert.isTrue(fToken == Symbols.TokenWHILE);
 		
 		return skipStatementOrBlock() && fToken == Symbols.TokenDO;
 	}
 
+	
 	/**
 	 * Skips a statement or block, the token being the next token after it.
 	 * 
-	 * @return <code>true</code> if a statement or block could be parsed, <code>false</code> otherwise.
+	 * @return <code>true</code> if a statement or block could be parsed,
+	 *         <code>false</code> otherwise.
 	 */
+
 	private boolean skipStatementOrBlock() {
 		nextToken();
 		
@@ -611,13 +757,15 @@ public class JavaIndenter {
 		return false;		
 	}
 	
+	
 	/**
-	 * Skips brackets if the current token is a RBRACKET. There can be nothing in between, this is
-	 * only to be used for <code>[]</code> elements.
+	 * Skips brackets if the current token is a RBRACKET. There can be nothing
+	 * in between, this is only to be used for <code>[]</code> elements.
 	 * 
-	 * @return <code>true</code> if a <code>[]</code> could be scanned, the current token is left at
-	 * the LBRACKET.
+	 * @return <code>true</code> if a <code>[]</code> could be scanned, the
+	 *         current token is left at the LBRACKET.
 	 */
+
 	private boolean skipBrackets() {
 		if (fToken == Symbols.TokenRBRACKET) {
 			nextToken();
@@ -628,11 +776,14 @@ public class JavaIndenter {
 		return false;
 	}
 
+	
 	/**
 	 * Searches for the <code>if</code> matching a just scanned else.
 	 * 
-	 * @return <code>true</code> if the matching if can be found, <code>false</code> otherwise
+	 * @return <code>true</code> if the matching if can be found, <code>false</code>
+	 *         otherwise
 	 */
+
 	private boolean searchIfForElse() {
 		
 		int depth= 1;
@@ -660,30 +811,44 @@ public class JavaIndenter {
 		
 	}
 
+	
 	/**
-	 * Reads the next token in backward direction from the heuristic scanner and sets the fields
-	 * <code>fToken, fPreviousPosition</code> and <code>fPosition</code> accordingly.
+	 * Reads the next token in backward direction from the heuristic scanner
+	 * and sets the fields <code>fToken, fPreviousPosition</code> and <code>fPosition</code>
+	 * accordingly.
 	 */
+
 	private void nextToken() {
 		nextToken(fPosition);
 	}
 
+	
 	/**
-	 * Reads the next token in backward direction of <code>start</code> from the heuristic scanner and sets the fields
-	 * <code>fToken, fPreviousPosition</code> and <code>fPosition</code> accordingly.
+	 * Reads the next token in backward direction of <code>start</code> from
+	 * the heuristic scanner and sets the fields <code>fToken, fPreviousPosition</code>
+	 * and <code>fPosition</code> accordingly.
 	 */
+
 	private void nextToken(int start) {
 		fToken= fScanner.previousToken(start - 1, JavaHeuristicScanner.UNBOUND);
 		fPreviousPos= start;
 		fPosition= fScanner.getPosition() + 1;
+		try {
+			fLine= fDocument.getLineOfOffset(fPosition);
+		} catch (BadLocationException e) {
+			fLine= -1;
+		}
 	}
 
+	
 	/**
-	 * Returns <code>true</code> if the current tokens look like a method declaration header 
-	 * (i.e. only the return type and method name). 
+	 * Returns <code>true</code> if the current tokens look like a method
+	 * declaration header (i.e. only the return type and method name).
 	 * 
-	 * @return <code>true</code> if the current position looks like a method header.
+	 * @return <code>true</code> if the current position looks like a method
+	 *         header.
 	 */
+
 	private boolean looksLikeMethodDecl() {
 		/*
 		 * TODO does not recognize package private constructors
@@ -702,8 +867,10 @@ public class JavaIndenter {
 	/**
 	 * Scans tokens for the matching parenthesis.
 	 * 
-	 * @return <code>true</code> if a matching token was found, <code>false</code> otherwise
+	 * @return <code>true</code> if a matching token was found, <code>false</code>
+	 *         otherwise
 	 */
+
 	private boolean skipScope(int openToken, int closeToken) {
 		
 		int depth= 1;
