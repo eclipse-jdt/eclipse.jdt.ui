@@ -38,12 +38,14 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 
 	private static final String fgLineDelim= System.getProperty("line.separator"); //$NON-NLS-1$
 	private Clipboard fClipboard;
+	private SelectionDispatchAction fPasteAction;
 	
-	protected CopyResourcesToClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
+	protected CopyResourcesToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
 		super(site);
 		Assert.isNotNull(clipboard);
 		setText(ReorgMessages.getString("CopyResourcesToClipboardAction.copy"));//$NON-NLS-1$
 		fClipboard= clipboard;
+		fPasteAction= pasteAction;
 	}
 
 	protected void selectionChanged(IStructuredSelection selection) {
@@ -62,6 +64,11 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 						ResourceTransfer.getInstance(), 
 						FileTransfer.getInstance(), 
 						TextTransfer.getInstance()});
+		
+			// update the enablement of the paste action
+			// workaround since the clipboard does not suppot callbacks				
+			if (fPasteAction != null && fPasteAction.getSelection() != null)
+				fPasteAction.update(fPasteAction.getSelection());
 		} catch (SWTError e){
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 				throw e;

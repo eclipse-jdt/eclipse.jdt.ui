@@ -25,29 +25,36 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CopySourceReferencesToClipboardAction extends SourceReferenceAction{
 
 	private Clipboard fClipboard;
+	private SelectionDispatchAction fPasteAction;
 
-	protected CopySourceReferencesToClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
+	protected CopySourceReferencesToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
 		super(site);
 		Assert.isNotNull(clipboard);
 		fClipboard= clipboard;
+		fPasteAction= pasteAction;
 	}
 
 	protected void perform(IStructuredSelection selection) throws JavaModelException {
-			copyToOSClipbard(getElementsToProcess(selection));
-	}
-
-	private Clipboard getSystemClipboard() {
-		return fClipboard;
+		copyToOSClipbard(getElementsToProcess(selection));
 	}
 	
 	private void copyToOSClipbard(ISourceReference[] refs)  throws JavaModelException {
 		try{
-			getSystemClipboard().setContents(createClipboardInput(refs), createTransfers());
+			fClipboard.setContents(createClipboardInput(refs), createTransfers());
+					
+			// update the enablement of the paste action
+			// workaround since the clipboard does not suppot callbacks				
+			if (fPasteAction != null && fPasteAction.getSelection() != null)
+				fPasteAction.update(fPasteAction.getSelection());
+			
 		} catch (SWTError e){
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 				throw e;

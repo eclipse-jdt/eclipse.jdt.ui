@@ -28,14 +28,14 @@ public class ReorgActionFactory {
 
 	private ReorgActionFactory(){
 	}
-	public static SelectionDispatchAction createCutAction(IWorkbenchSite site, Clipboard clipboard){
-		SelectionDispatchAction a1= new CutSourceReferencesToClipboardAction(site, clipboard);
+	public static SelectionDispatchAction createCutAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction){
+		SelectionDispatchAction a1= new CutSourceReferencesToClipboardAction(site, clipboard, pasteAction);
 		return a1;
 	}
 	
-	public static SelectionDispatchAction createCopyAction(IWorkbenchSite site, Clipboard clipboard){
-		SelectionDispatchAction a1= new CopyResourcesToClipboardAction(site, clipboard);
-		SelectionDispatchAction a2= new CopySourceReferencesToClipboardAction(site, clipboard);
+	public static SelectionDispatchAction createCopyAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction){
+		SelectionDispatchAction a1= new CopyResourcesToClipboardAction(site, clipboard, pasteAction);
+		SelectionDispatchAction a2= new CopySourceReferencesToClipboardAction(site, clipboard, pasteAction);
 		SelectionDispatchAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.copy"), ReorgMessages.getString("copyAction.description"), a1, a2);//$NON-NLS-1$ //$NON-NLS-2$
 		return dual;
 	}

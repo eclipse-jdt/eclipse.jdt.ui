@@ -68,10 +68,12 @@ public class CCPActionGroup extends ActionGroup {
 	private CCPActionGroup(IWorkbenchSite site) {
 		fSite= site;
 		fClipboard= new Clipboard(site.getShell().getDisplay());
+		fPasteAction= ReorgActionFactory.createPasteAction(fSite, fClipboard);
+		fCopyAction= ReorgActionFactory.createCopyAction(fSite, fClipboard, fPasteAction);
 		fActions= new SelectionDispatchAction[] {	
-			fCutAction= ReorgActionFactory.createCutAction(fSite, fClipboard),
-			fCopyAction= ReorgActionFactory.createCopyAction(fSite, fClipboard),
-			fPasteAction= ReorgActionFactory.createPasteAction(fSite, fClipboard),
+			fCutAction= ReorgActionFactory.createCutAction(fSite, fClipboard, fPasteAction),
+			fCopyAction,
+			fPasteAction,
 			fDeleteAction= ReorgActionFactory.createDeleteAction(fSite),
 		};
 		registerActionsAsSelectionChangeListeners();

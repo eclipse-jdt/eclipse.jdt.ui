@@ -12,15 +12,17 @@ import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
 public class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
 
 	CopySourceReferencesToClipboardAction fCopy;
 	DeleteSourceReferencesAction fDelete;
 	
-	protected CutSourceReferencesToClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
+	protected CutSourceReferencesToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
 		super(site);
 		setText(ReorgMessages.getString("CutSourceReferencesToClipboardAction.cut")); //$NON-NLS-1$
-		fCopy= new CopySourceReferencesToClipboardAction(site, clipboard);
+		fCopy= new CopySourceReferencesToClipboardAction(site, clipboard, pasteAction);
 		fDelete= new DeleteSourceReferencesAction(site);
 		update(getSelection());
 	}
