@@ -13,10 +13,13 @@ import java.util.Vector;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -194,6 +197,19 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 		IContentProvider contentProvider= getContentProvider();
 		return contentProvider instanceof BaseJavaElementContentProvider
 			&& ((BaseJavaElementContentProvider)contentProvider).getProvideWorkingCopy();
+	}
+
+	/**
+	 * @see AbstractTreeViewer#doUpdateItem(Item, Object)
+	 */
+	protected void doUpdateItem(Item item, Object element) {
+		super.doUpdateItem(item, element);
+		// experiment with greying out read only elements
+		if (item instanceof TreeItem && element instanceof IJavaElement) {
+			IJavaElement jelement= (IJavaElement)element;
+			if (jelement.isReadOnly())
+				((TreeItem)item).setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
+		}
 	}
 }
 
