@@ -101,30 +101,4 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		
 		return result;	
 	}
-	
-	//---- Save open editors -------------------------------------------------------------
-
-	/**
-	 * Creates a runnable to be used inside an operation to save all editors.
-	 */
-	private static IRunnableWithProgress createRunnable(final List editorsToSave) {
-		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) {
-				Iterator iter= editorsToSave.iterator();
-				while (iter.hasNext())
-					((IEditorPart) iter.next()).doSave(monitor);
-			}
-		};
-	}
-		
-	private static ILabelProvider createLabelProvider() {
-		return new LabelProvider() {
-			public Image getImage(Object element) {
-				return ((IEditorPart) element).getTitleImage();
-			}
-			public String getText(Object element) {
-				return ((IEditorPart) element).getTitle();
-			}
-		};
-	}
 }
