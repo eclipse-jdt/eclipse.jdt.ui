@@ -1,4 +1,4 @@
-package ppp;
+package p;
 
 class Query {
 	void doit() {
