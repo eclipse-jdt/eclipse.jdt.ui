@@ -613,7 +613,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @throws JavaModelException if an error occurs
 	 */
 	protected final void solveSuperTypeConstraints(final ICompilationUnit subUnit, final CompilationUnit subNode, final IType type, final ITypeBinding subType, final ITypeBinding superType, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
-		int level= AST.JLS3;
+		int level= 3;
 		final SuperTypeConstraintsModel model= new SuperTypeConstraintsModel(fEnvironment, fEnvironment.create(subType), fEnvironment.create(superType));
 		final SuperTypeConstraintsCreator creator= new SuperTypeConstraintsCreator(model, fInstanceOf);
 		fSuperType= model.getSuperType();
@@ -630,8 +630,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				final Map groups= new HashMap();
 				for (final Iterator outer= firstPass.keySet().iterator(); outer.hasNext();) {
 					project= (IJavaProject) outer.next();
-					if (level == AST.JLS3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
-						level= AST.JLS2;
+					if (level == 3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
+						level= 2;
 					collection= (Collection) firstPass.get(project);
 					if (collection != null) {
 						for (final Iterator inner= collection.iterator(); inner.hasNext();) {
@@ -640,17 +640,23 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 						}
 					}
 				}
+				Set units= null;
 				final Set processed= new HashSet();
 				processed.add(subUnit);
-				for (final Iterator iterator= firstPass.keySet().iterator(); iterator.hasNext();) {
-					project= (IJavaProject) iterator.next();
+				for (final Iterator outer= firstPass.keySet().iterator(); outer.hasNext();) {
+					project= (IJavaProject) outer.next();
 					collection= (Collection) firstPass.get(project);
-					if (collection != null && !collection.isEmpty()) {
+					if (collection != null) {
+						units= new HashSet(collection.size());
+						for (final Iterator inner= collection.iterator(); inner.hasNext();) {
+							group= (SearchResultGroup) inner.next();
+							units.add(group.getCompilationUnit());
+						}
 						parser.setWorkingCopyOwner(fOwner);
 						parser.setResolveBindings(true);
 						parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 						parser.setProject(project);
-						parser.createASTs((ICompilationUnit[]) groups.keySet().toArray(new ICompilationUnit[groups.keySet().size()]), new String[0], new ASTRequestor() {
+						parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
 
 							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 								monitor.subTask(unit.getElementName());
@@ -669,10 +675,10 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				performFirstPass(creator, secondPass, groups, subUnit, subNode);
 				for (final Iterator iterator= secondPass.keySet().iterator(); iterator.hasNext();) {
 					project= (IJavaProject) iterator.next();
-					if (level == AST.JLS3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
-						level= AST.JLS2;
+					if (level == 3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
+						level= 2;
 					collection= (Collection) secondPass.get(project);
-					if (collection != null && !collection.isEmpty()) {
+					if (collection != null) {
 						parser.setWorkingCopyOwner(fOwner);
 						parser.setResolveBindings(true);
 						parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
