@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.IDocument;
@@ -26,6 +27,8 @@ import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
+
+import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -71,10 +74,10 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		 */
 		public boolean visit(SimpleName node) {
 			fToken.update(node);
-			for (int i= 0, n= fSemanticHighlightings.length; i < n; i++) {
-				SemanticHighlighting semanticHighlighting= fSemanticHighlightings[i];
+			for (int i= 0, n= fJobSemanticHighlightings.length; i < n; i++) {
+				SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
 				if (semanticHighlighting.consumes(fToken)) {
-					addPosition(node.getStartPosition(), node.getLength(), fHighlightings[i]);
+					addPosition(node.getStartPosition(), node.getLength(), fJobHighlightings[i]);
 					break;
 				}
 			}
@@ -104,7 +107,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 			}
 
 			if (!isExisting) {
-				Position position= fPresenter.createHighlightedPosition(offset, length, highlighting);
+				Position position= fJobPresenter.createHighlightedPosition(offset, length, highlighting);
 				fAddedPositions.add(position);
 			}
 		}
@@ -146,12 +149,20 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private List fRemovedPositions= new ArrayList();
 	/** Number of removed positions */
 	private int fNOfRemovedPositions;
+	
 	/** Background job */
 	private Job fJob;
 	/** Cancel scheduled background jobs */
 	private boolean fCancelJobs;
 	/** Background job lock */
 	private Object fJobLock= new Object();
+
+	/** The semantic highlighting presenter - cache for background thread, only valid during {@link #reconciled(CompilationUnit, boolean, IProgressMonitor)} */
+	private SemanticHighlightingPresenter fJobPresenter;
+	/** Semantic highlightings - cache for background thread, only valid during {@link #reconciled(CompilationUnit, boolean, IProgressMonitor)} */
+	private SemanticHighlighting[] fJobSemanticHighlightings;
+	/** Highlightings - cache for background thread, only valid during {@link #reconciled(CompilationUnit, boolean, IProgressMonitor)} */
+	private Highlighting[] fJobHighlightings;
 	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
@@ -164,12 +175,19 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 */
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
-		if (fPresenter == null)
+		fJobPresenter= fPresenter;
+		fJobSemanticHighlightings= fSemanticHighlightings;
+		fJobHighlightings= fHighlightings;
+		if (fJobPresenter == null || fJobSemanticHighlightings == null || fJobHighlightings == null) {
+			fJobPresenter= null;
+			fJobSemanticHighlightings= null;
+			fJobHighlightings= null;
 			return;
+		}
 		
-		fPresenter.setCanceled(progressMonitor.isCanceled());
+		fJobPresenter.setCanceled(progressMonitor.isCanceled());
 		
-		if (ast == null || fPresenter.isCanceled())
+		if (ast == null || fJobPresenter.isCanceled())
 			return;
 		
 		ASTNode[] subtrees= getAffectedSubtrees(ast);
@@ -178,13 +196,21 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		
 		startReconcilingPositions();
 		
-		reconcilePositions(subtrees);
+		if (!fJobPresenter.isCanceled())
+			reconcilePositions(subtrees);
 		
-		TextPresentation textPresentation= fPresenter.createPresentation(fAddedPositions, fRemovedPositions);
+		TextPresentation textPresentation;
+		if (!fJobPresenter.isCanceled());
+			textPresentation= fJobPresenter.createPresentation(fAddedPositions, fRemovedPositions);
 		
-		updatePresentation(textPresentation, fAddedPositions, fRemovedPositions);
+		if (!fJobPresenter.isCanceled())
+			updatePresentation(textPresentation, fAddedPositions, fRemovedPositions);
 		
 		stopReconcilingPositions();
+		
+		fJobPresenter= null;
+		fJobSemanticHighlightings= null;
+		fJobHighlightings= null;
 	}
 	
 	/**
@@ -200,7 +226,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * Start reconciling positions.
 	 */
 	private void startReconcilingPositions() {
-		fPresenter.addAllPositions(fRemovedPositions);
+		fJobPresenter.addAllPositions(fRemovedPositions);
 		fNOfRemovedPositions= fRemovedPositions.size();
 	}
 	
@@ -231,14 +257,27 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @param removedPositions the removed positions
 	 */
 	private void updatePresentation(TextPresentation textPresentation, List addedPositions, List removedPositions) {
-		Runnable runnable= fPresenter.createUpdateRunnable(textPresentation, addedPositions, removedPositions);
+		Runnable runnable= fJobPresenter.createUpdateRunnable(textPresentation, addedPositions, removedPositions);
 		if (runnable == null)
 			return;
 		
-		Shell shell= fEditor.getSite().getShell();
-		if (shell != null && !shell.isDisposed()) { 
-			shell.getDisplay().asyncExec(runnable);
-		}
+		JavaEditor editor= fEditor;
+		if (editor == null)
+			return;
+		
+		IWorkbenchPartSite site= editor.getSite();
+		if (site == null)
+			return;
+		
+		Shell shell= site.getShell();
+		if (shell == null || shell.isDisposed())
+			return;
+		
+		Display display= shell.getDisplay();
+		if (display == null || display.isDisposed())
+			return;
+		
+		display.asyncExec(runnable);
 	}
 	
 	/**
@@ -277,6 +316,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * Uninstall this reconciler from the editor
 	 */
 	public void uninstall() {
+		if (fPresenter != null)
+			fPresenter.setCanceled(true);
+		
 		if (fEditor != null) {
 			if (fEditor instanceof CompilationUnitEditor)
 				((CompilationUnitEditor)fEditor).removeReconcileListener(this);

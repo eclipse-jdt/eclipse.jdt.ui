@@ -282,13 +282,15 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @return the text presentation or <code>null</code>, if reconciliation should be canceled
 	 */
 	public TextPresentation createPresentation(List addedPositions, List removedPositions) {
-		if (fSourceViewer == null || fPresentationReconciler == null)
+		JavaSourceViewer sourceViewer= fSourceViewer;
+		JavaPresentationReconciler presentationReconciler= fPresentationReconciler;
+		if (sourceViewer == null || presentationReconciler == null)
 			return null;
 		
 		if (isCanceled())
 			return null;
 		
-		IDocument document= fSourceViewer.getDocument();
+		IDocument document= sourceViewer.getDocument();
 		if (document == null)
 			return null;
 		
@@ -309,7 +311,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		
 		if (minStart < maxEnd)
 			try {
-				return fPresentationReconciler.createRepairDescription(new Region(minStart, maxEnd - minStart), document);
+				return presentationReconciler.createRepairDescription(new Region(minStart, maxEnd - minStart), document);
 			} catch (RuntimeException e) {
 				// Assume concurrent modification from UI thread
 			}
@@ -362,9 +364,9 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		if (fSourceViewer == null)
 			return;
 		
-		checkOrdering("added positions: ", Arrays.asList(addedPositions)); //$NON-NLS-1$
-		checkOrdering("removed positions: ", Arrays.asList(removedPositions)); //$NON-NLS-1$
-		checkOrdering("old positions: ", fPositions); //$NON-NLS-1$
+//		checkOrdering("added positions: ", Arrays.asList(addedPositions)); //$NON-NLS-1$
+//		checkOrdering("removed positions: ", Arrays.asList(removedPositions)); //$NON-NLS-1$
+//		checkOrdering("old positions: ", fPositions); //$NON-NLS-1$
 		
 		// TODO: double-check consistency with document.getPositions(...)
 		// TODO: reuse removed positions
@@ -426,7 +428,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 			// Should not happen
 			JavaPlugin.log(e);
 		}
-		checkOrdering("new positions: ", fPositions); //$NON-NLS-1$
+//		checkOrdering("new positions: ", fPositions); //$NON-NLS-1$
 		
 		if (textPresentation != null)
 			fSourceViewer.changeTextPresentation(textPresentation, false);
@@ -434,14 +436,14 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 			fSourceViewer.invalidateTextPresentation();
 	}
 
-	private void checkOrdering(String s, List positions) {
-		Position previous= null;
-		for (int i= 0, n= positions.size(); i < n; i++) {
-			Position current= (Position) positions.get(i);
-			if (previous != null && previous.getOffset() + previous.getLength() > current.getOffset())
-				return;
-		}
-	}
+//	private void checkOrdering(String s, List positions) {
+//		Position previous= null;
+//		for (int i= 0, n= positions.size(); i < n; i++) {
+//			Position current= (Position) positions.get(i);
+//			if (previous != null && previous.getOffset() + previous.getLength() > current.getOffset())
+//				return;
+//		}
+//	}
 
 	/**
 	 * Returns <code>true</code> iff the positions contain the position.
@@ -561,13 +563,13 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
 	 */
 	public void documentAboutToBeChanged(DocumentEvent event) {
+		setCanceled(true);
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
 	 */
 	public void documentChanged(DocumentEvent event) {
-		setCanceled(true);
 	}
 	
 	/**
@@ -592,7 +594,12 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @param isCanceled <code>true</code> iff the current reconcile is cancelled
 	 */
 	public void setCanceled(boolean isCanceled) {
-		IDocument document= fSourceViewer.getDocument();
+		IDocument document= fSourceViewer != null ? fSourceViewer.getDocument() : null;
+		if (document == null) {
+			fIsCanceled= isCanceled;
+			return;
+		}
+		
 		synchronized (getLockObject(document)) {
 			fIsCanceled= isCanceled;
 		}
@@ -630,6 +637,8 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * Uninstall this presenter.
 	 */
 	public void uninstall() {
+		setCanceled(true);
+		
 		if (fSourceViewer != null) {
 			fSourceViewer.removeTextPresentationListener(this);
 			releaseDocument(fSourceViewer.getDocument());
