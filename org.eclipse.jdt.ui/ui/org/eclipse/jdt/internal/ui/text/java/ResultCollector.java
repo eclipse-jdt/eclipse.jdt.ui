@@ -455,8 +455,6 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 		if (typeQualifier.length() > 0) {
 			buf.append(" - "); //$NON-NLS-1$
 			buf.append(typeQualifier);
-		} else if (containerName != null) {
-			buf.append(JavaTextMessages.getString("ResultCollector.default_package")); //$NON-NLS-1$
 		}
 		String name= buf.toString();
 
