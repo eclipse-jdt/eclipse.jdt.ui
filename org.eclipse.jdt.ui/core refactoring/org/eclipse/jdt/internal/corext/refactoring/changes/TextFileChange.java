@@ -10,113 +10,45 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import org.eclipse.text.edits.UndoEdit;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
-import org.eclipse.text.edits.UndoEdit;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 public class TextFileChange extends TextChange  {
-
-	protected static class UndoTextFileChange extends UndoTextChange {
-		private IFile fFile;
-		private TextBuffer fAcquiredTextBuffer;
-		private int fAcquireCounter;
-		public UndoTextFileChange(String name, IFile file, int changeKind, UndoEdit undo) {
-			super(name, changeKind, undo);
-			fFile= file;
-		}
-		public Object getModifiedLanguageElement(){
-			return fFile;
-		}
-		protected TextBuffer acquireTextBuffer() throws CoreException {
-			TextBuffer result= TextBuffer.acquire(fFile);
-			if (fAcquiredTextBuffer == null || result == fAcquiredTextBuffer) {
-				fAcquiredTextBuffer= result;
-				fAcquireCounter++;
-			}
-			return result;
-		}
-		protected void releaseTextBuffer(TextBuffer textBuffer) {
-			TextBuffer.release(textBuffer);
-			if (textBuffer == fAcquiredTextBuffer) {
-				if (--fAcquireCounter == 0)
-					fAcquiredTextBuffer= null;
-			}
-		}
-		protected TextBuffer createTextBuffer() throws CoreException {
-			return TextBuffer.create(fFile);
-		}
-		protected IChange createReverseChange(UndoEdit undo, int changeKind) {
-			return new UndoTextFileChange(getName(), fFile, changeKind, undo);
-		}
-		public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
-			RefactoringStatus result= Checks.validateModifiesFiles(new IFile[] {fFile});
-			if (result.hasFatalError())
-				return result;
-			context.checkUnsavedFile(result, fFile);
-			return result;
-		}
-		public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
-			if (!isActive()) {
-				super.perform(context, pm);
-				return;
-			}
-			try{
-				acquireTextBuffer();
-				pm.beginTask("", 10); //$NON-NLS-1$
-				super.perform(context, new SubProgressMonitor(pm, 8));
-				TextBuffer.aboutToChange(fAcquiredTextBuffer);
-				TextBuffer.save(fAcquiredTextBuffer, new SubProgressMonitor(pm, 2));
-			} catch (Exception e) {
-				handleException(context, e);
-			} finally {
-				pm.done();
-			}
-		}
-		public void performed() {
-			// During acquiring of text buffer an exception has occured. In this case
-			// the pointer is <code>null</code>
-			if (fAcquiredTextBuffer != null) {
-				try {
-					TextBuffer.changed(fAcquiredTextBuffer);
-				} catch (CoreException e) {
-					Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	 //$NON-NLS-1$
-				} finally {
-					releaseTextBuffer(fAcquiredTextBuffer);
-				}
-			}
-			super.performed();
-		}		
-	}
-
+	
 	private IFile fFile;
-	private TextBuffer fAcquiredTextBuffer;
-	private int fAcquireCounter;
 	private boolean fSave= true;
+	
+	private int fAquireCount;
+	private ITextFileBuffer fBuffer;
 
 	/**
 	 * Creates a new <code>TextFileChange</code> for the given file.
-	 * 
+	 * s
 	 * @param name the change's name mainly used to render the change in the UI
 	 * @param file the file this text change operates on
 	 */
 	public TextFileChange(String name, IFile file) {
 		super(name);
+		Assert.isNotNull(file);
 		fFile= file;
-		Assert.isNotNull(fFile);
 	}
 	
 	/**
@@ -137,103 +69,57 @@ public class TextFileChange extends TextChange  {
 	public IFile getFile() {
 		return fFile;
 	}
-		
-	/* non java-doc
-	 * Method declared in TextChange
-	 */
-	protected TextBuffer acquireTextBuffer() throws CoreException {
-		TextBuffer result= TextBuffer.acquire(fFile);
-		if (fAcquiredTextBuffer == null || result == fAcquiredTextBuffer) {
-			fAcquiredTextBuffer= result;
-			fAcquireCounter++;
-		}
-		return result;
-	}
-	
-	/* non java-doc
-	 * Method declared in TextChange
-	 */
-	protected void releaseTextBuffer(TextBuffer textBuffer) {
-		TextBuffer.release(textBuffer);
-		if (textBuffer == fAcquiredTextBuffer) {
-			if (--fAcquireCounter == 0)
-				fAcquiredTextBuffer= null;
-		}
-	}
 
-	/* non java-doc
-	 * Method declared in TextChange
-	 */
-	protected TextBuffer createTextBuffer() throws CoreException {
-		return TextBuffer.create(fFile);
-	}
-	
-	/* non java-doc
-	 * Method declared in TextChange
-	 */
-	protected IChange createReverseChange(UndoEdit undo, int changeKind) {
-		return new UndoTextFileChange(getName(), fFile, changeKind, undo);
-	}
-	
-	/* non java-doc
-	 * Method declared in IChange.
+	/**
+	 * {@inheritDoc}
 	 */
 	public Object getModifiedLanguageElement(){
 		return fFile;
 	}
 	
-	/* non java-doc
-	 * Method declared in TextChange
-	 */
-	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
+	public RefactoringStatus isValid(IProgressMonitor pm) {
 		if (fSave) {
 			return Checks.validateModifiesFiles(new IFile[] {fFile});
 		}
 		return new RefactoringStatus();
 	}
-	
-	/* non java-doc
-	 * Method declared in TextChange
+
+	/**
+	 * {@inheritDoc}
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
-		if (pm == null)
-			pm= new NullProgressMonitor();
-		if (!isActive()) {
-			super.perform(context, pm);
-			return;
-		}
-		try{
-			acquireTextBuffer();
-			pm.beginTask("", 10); //$NON-NLS-1$
-			super.perform(context, new SubProgressMonitor(pm, 8));
-			if (fSave) {
-				TextBuffer.aboutToChange(fAcquiredTextBuffer);
-				TextBuffer.save(fAcquiredTextBuffer, new SubProgressMonitor(pm, 2));
-			}
-		} catch (Exception e) {
-			handleException(context, e);
-		} finally {
-			pm.done();
-		}
+	protected IDocument aquireDocument(IProgressMonitor pm) throws CoreException {
+		if (fAquireCount > 0)
+			return fBuffer.getDocument();
+		
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		IPath path= fFile.getFullPath();
+		manager.connect(path, new NullProgressMonitor());
+		fAquireCount++;
+		fBuffer= manager.getTextFileBuffer(path);
+		return fBuffer.getDocument();
 	}
 	
-	/* non java-doc
-	 * Method declared in TextChange
+	/**
+	 * {@inheritDoc}
 	 */
-	public void performed() {
-		// During acquiring of text buffer an exception has occured. In this case
-		// the pointer is <code>null</code>
-		if (fAcquiredTextBuffer != null) {
-			try {
-				if (fSave)
-					TextBuffer.changed(fAcquiredTextBuffer);
-			} catch (CoreException e) {
-				Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	 //$NON-NLS-1$
-			} finally {
-				releaseTextBuffer(fAcquiredTextBuffer);
-			}
+	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
+		Assert.isTrue(fAquireCount > 0);
+		if (fAquireCount == 1) {
+			pm.beginTask("", fSave ? 2 : 1); //$NON-NLS-1$
+			if (fSave)
+				fBuffer.commit(new SubProgressMonitor(pm, 1), false);
+			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+			manager.disconnect(fFile.getFullPath(), new SubProgressMonitor(pm, 1));
+			pm.done();
 		}
-		super.performed();
-	}		
+		fAquireCount--;
+ 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected IChange createUndoChange(UndoEdit edit) throws CoreException {
+		return new UndoTextFileChange(getName(), fFile, edit);
+	}
 }
 

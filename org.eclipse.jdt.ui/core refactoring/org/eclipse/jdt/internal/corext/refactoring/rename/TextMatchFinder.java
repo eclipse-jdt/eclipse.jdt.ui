@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
@@ -92,7 +93,7 @@ class TextMatchFinder {
 			Set results= (Set)matches.get(cu);
 			for (Iterator resultIter= results.iterator(); resultIter.hasNext();){
 				int match= ((Integer)resultIter.next()).intValue();
-				manager.get(cu).addTextEdit(matchName, new ReplaceEdit(match, patternLength, newText));
+				TextChangeCompatibility.addTextEdit(manager.get(cu), matchName, new ReplaceEdit(match, patternLength, newText));
 			}
 		}
 	}

@@ -323,7 +323,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			MultiTextEdit root= new MultiTextEdit(); 
 			rewriter.rewriteNode(buffer, root);
 			change.setEdit(root);
-			change.addGroupDescriptions((TextEditGroup[])groups.toArray(new TextEditGroup[groups.size()]));
+			for (Iterator iter= groups.iterator(); iter.hasNext();) {
+				change.addGroupDescription((TextEditGroup)iter.next());
+			}
 		} finally {
 			TextBuffer.release(buffer);
 		}

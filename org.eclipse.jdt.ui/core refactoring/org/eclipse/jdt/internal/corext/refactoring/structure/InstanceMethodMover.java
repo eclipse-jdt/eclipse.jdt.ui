@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.InstanceMethodMover.Method.Delegation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.InstanceMethodMover.Method.MethodEditSession;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
@@ -178,7 +179,7 @@ class InstanceMethodMover {
 			methodEditSession.replaceBodyWithDelegation(
 				specifyDelegationToNewMethod(originalMethod, newMethodName));
 			TextChange cuChange= manager.get(originalMethod.getDeclaringCU());
-			cuChange.addTextEdit(RefactoringCoreMessages.getString("InstanceMethodMover.replace_with_delegation"), methodEditSession.getEdits()); //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(cuChange, RefactoringCoreMessages.getString("InstanceMethodMover.replace_with_delegation"), methodEditSession.getEdits());
 		}
 		
 		abstract Method.Delegation specifyDelegationToNewMethod(Method originalMethod, String newMethodName);
@@ -202,12 +203,9 @@ class InstanceMethodMover {
 			rewrite.removeModifications();
 			
 			TextChange cuChange= manager.get(getReceiverClassCU());
-			cuChange.addTextEdit(RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver"), edit); //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(cuChange, RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver"), edit);
 			ImportRewrite importRewrite= createImportRewrite(allTypesUsedWithoutQualification, getReceiverClassCU());
-			cuChange.addTextEdit(
-				RefactoringCoreMessages.getString("InstanceMethodMover.add_imports"), //$NON-NLS-1$
-				importRewrite.createEdit(buffer)
-			);
+			TextChangeCompatibility.addTextEdit(cuChange, RefactoringCoreMessages.getString("InstanceMethodMover.add_imports"), importRewrite.createEdit(buffer));
 		}
 
 		private ImportRewrite createImportRewrite(List types, ICompilationUnit cu) throws CoreException {

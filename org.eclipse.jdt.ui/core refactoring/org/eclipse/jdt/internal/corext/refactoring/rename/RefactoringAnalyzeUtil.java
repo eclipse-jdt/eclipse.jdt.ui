@@ -18,8 +18,9 @@ import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -39,10 +40,11 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class RefactoringAnalyzeUtil {
@@ -50,13 +52,13 @@ public class RefactoringAnalyzeUtil {
 	private RefactoringAnalyzeUtil(){
 	}
 	
-	public static ICompilationUnit getWorkingCopyWithNewContent(TextEdit[] edits, TextChange change, ICompilationUnit cu) throws JavaModelException {
+	public static ICompilationUnit getWorkingCopyWithNewContent(TextEdit[] edits, TextChange change, ICompilationUnit cu) throws CoreException {
 		for (int i= 0; i < edits.length; i++) {
-			change.addTextEdit("", edits[i]); //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, "", edits[i]); //$NON-NLS-1$
 		}
 		ICompilationUnit wc= WorkingCopyUtil.getNewWorkingCopy(cu);
 		Assert.isTrue(! cu.equals(wc));
-		wc.getBuffer().setContents(change.getPreviewTextBuffer().getContent());
+		wc.getBuffer().setContents(change.getPreviewContent());
 		return wc;
 	}
 
@@ -68,7 +70,7 @@ public class RefactoringAnalyzeUtil {
 		return result;
 	}
 
-	public static RefactoringStatus reportProblemNodes(String modifiedWorkingCopySource, SimpleName[] problemNodes){
+	public static RefactoringStatus reportProblemNodes(String modifiedWorkingCopySource, SimpleName[] problemNodes) {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problemNodes.length; i++) {
 			RefactoringStatusContext context= new JavaStringStatusContext(modifiedWorkingCopySource, new SourceRange(problemNodes[i]));

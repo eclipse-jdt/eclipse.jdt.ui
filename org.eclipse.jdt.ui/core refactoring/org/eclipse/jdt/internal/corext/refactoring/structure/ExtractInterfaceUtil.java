@@ -77,6 +77,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
@@ -211,13 +212,9 @@ class ExtractInterfaceUtil {
 			        ImportRewrite importRewrite= new ImportRewrite(cu, settings);
 			        cuToImportType.put(cu, importRewrite.addImport(supertypeToUse.getFullyQualifiedName()));
 			        TextEdit importEdit= importRewrite.createEdit(TextBuffer.create(cu.getSource()));
-			        change.addTextEdit(
-			        	RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_imports"), //$NON-NLS-1$
-						importEdit);
+			        TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_imports"), importEdit);
 			    }
-				change.addTextEdit(
-					RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_reference"), //$NON-NLS-1$
-					createTypeUpdateEdit(range.getSourceRange(), typeName, (String)cuToImportType.get(cu)));
+				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_reference"), createTypeUpdateEdit(range.getSourceRange(), typeName, (String)cuToImportType.get(cu)));
 			}
 		}
 		return ranges;

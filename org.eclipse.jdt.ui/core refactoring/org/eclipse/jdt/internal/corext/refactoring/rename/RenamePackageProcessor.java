@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
@@ -499,7 +500,7 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 			ICompilationUnit wc= 	WorkingCopyUtil.getWorkingCopyIfExists(cu);
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				manager.get(wc).addTextEdit(name, createTextChange(results[j]));
+				TextChangeCompatibility.addTextEdit(manager.get(wc), name, createTextChange(results[j]));
 			}
 			pm.worked(1);
 		}	

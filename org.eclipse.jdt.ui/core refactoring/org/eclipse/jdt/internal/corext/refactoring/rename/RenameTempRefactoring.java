@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -258,7 +259,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		}	
 	}
 		
-	private RefactoringStatus analyzeAST() throws JavaModelException{
+	private RefactoringStatus analyzeAST() throws CoreException{
 		ICompilationUnit wc= null;
 		try {
 			RefactoringStatus result= new RefactoringStatus();
@@ -332,7 +333,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 						new String[]{fCurrentName, fNewName});
 			TextEdit[] edits= getAllRenameEdits();
 			for (int i= 0; i < edits.length; i++) {
-				change.addTextEdit(changeName, edits[i]);
+				TextChangeCompatibility.addTextEdit(change, changeName, edits[i]);
 			}
 			
 			return change;

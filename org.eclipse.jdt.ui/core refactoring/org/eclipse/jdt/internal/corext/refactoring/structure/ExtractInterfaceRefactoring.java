@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
@@ -317,9 +318,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				String typeName= fInputType.getElementName();
 				int offset= oldRange.getOffset() + oldRange.getLength() - typeName.length();
 				TextEdit edit= new ReplaceEdit(offset, typeName.length(), fNewInterfaceName);
-				ExtractInterfaceUtil.getTextChange(manager, cu).addTextEdit(
-						RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_reference"), //$NON-NLS-1$ 
-						edit); 
+				TextChangeCompatibility.addTextEdit(ExtractInterfaceUtil.getTextChange(manager, cu), RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_reference"), edit); 
 			}
 			fSource= ExtractInterfaceUtil.getTextChange(manager, newCuWC).getPreviewContent();
 			manager.remove(newCuWC);
@@ -387,9 +386,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		rewrite.rewriteNode(textBuffer, resultingEdits);
 
 		TextChange textChange= manager.get(cu);
-		textChange.addTextEdit(
-			RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_type_declaration"), //$NON-NLS-1$
-			resultingEdits);
+		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_type_declaration"), resultingEdits);
 		rewrite.removeModifications();
 		return textChange;
 	}

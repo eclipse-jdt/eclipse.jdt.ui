@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -825,7 +826,7 @@ public class PushDownRefactoring extends Refactoring {
 		TextChange textChange= manager.get(cu);
 		if (fImportManager.hasImportEditFor(cu))
 			resultingEdits.addChild(fImportManager.getImportRewrite(cu).createEdit(textBuffer));
-		textChange.addTextEdit(RefactoringCoreMessages.getString("PushDownRefactoring.25"), resultingEdits); //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("PushDownRefactoring.25"), resultingEdits);
 		rewrite.removeModifications();
 	}
 

@@ -12,8 +12,12 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -52,6 +56,23 @@ public class CompilationUnitChange extends TextFileChange {
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCUnit;
-	}	
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected IDocument aquireDocument(IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", 2); //$NON-NLS-1$
+		fCUnit.becomeWorkingCopy(null, new SubProgressMonitor(pm, 1));
+		return super.aquireDocument(new SubProgressMonitor(pm, 1));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
+		super.releaseDocument(document, pm);
+		fCUnit.discardWorkingCopy();
+	}
 }
 

@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -364,7 +365,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			result.merge(checkMatchingFragments());
 			
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
-			change.addTextEdit("", getAllEdits(buffer));//$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, "", getAllEdits(buffer));
 			String newCuSource= change.getPreviewContent();
 			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
 			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
@@ -570,19 +571,19 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private void addTempDeclaration(TextChange change) throws CoreException {
-		change.addTextEdit(RefactoringCoreMessages.getString("ExtractTempRefactoring.declare_local_variable"), createTempDeclarationEdit()); //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.declare_local_variable"), createTempDeclarationEdit());
 	}
 
 	private void addImportIfNeeded(TextChange change, TextBuffer buffer) throws CoreException {
 		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
-			change.addTextEdit(RefactoringCoreMessages.getString("ExtractTempRefactoring.update_imports"), importEdit); //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.update_imports"), importEdit);
 	}
 
 	private void addReplaceExpressionWithTemp(TextChange change) throws JavaModelException {
 		TextEdit[] edits= createReplaceExpressionWithTempEdits();
 		for (int i= 0; i < edits.length; i++) {
-			change.addTextEdit(RefactoringCoreMessages.getString("ExtractTempRefactoring.replace"), edits[i]); //$NON-NLS-1$		
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.replace"), edits[i]);
 		}
 	}
 			

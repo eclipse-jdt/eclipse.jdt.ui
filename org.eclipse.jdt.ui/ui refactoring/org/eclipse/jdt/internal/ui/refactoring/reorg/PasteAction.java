@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
@@ -584,7 +585,7 @@ public class PasteAction extends SelectionDispatchAction{
 				rewrite.rewriteNode(textBuffer, rootEdit);
 				CompilationUnitChange change= new CompilationUnitChange("name", getDestinationCu());
 				change.setSave(!getDestinationCu().isWorkingCopy());
-				change.addTextEdit("paste elements", rootEdit);
+				TextChangeCompatibility.addTextEdit(change, "paste elements", rootEdit);
 				return change;
 			}
 			

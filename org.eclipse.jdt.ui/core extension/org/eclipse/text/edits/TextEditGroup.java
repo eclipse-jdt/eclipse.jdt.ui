@@ -25,14 +25,20 @@ public class TextEditGroup {
 	private List fEdits;
 
 	public TextEditGroup(String description) {
-		super();
 		Assert.isNotNull(description);
 		fDescription= description;
 		fEdits= new ArrayList(3);
 	}
 
+	public TextEditGroup(String description, TextEdit edit) {
+		Assert.isNotNull(description);
+		Assert.isNotNull(edit);
+		fDescription= description;
+		fEdits= new ArrayList(1);
+		fEdits.add(edit);
+	}
+	
 	public TextEditGroup(String description, TextEdit[] edits) {
-		super();
 		Assert.isNotNull(description);
 		Assert.isNotNull(edits);
 		fDescription= description;
@@ -56,9 +62,12 @@ public class TextEditGroup {
 	}
 	
 	/**
-	 * Returns the text range covered by the edits managed via this
-	 * group description. The method requires that the group description
-	 * manages at least one text edit.
+	 * Returns the text region covered by the edits managed via this
+	 * edit group. If the group doesn't manage any edits <code>null
+	 * </code> is returned.
+	 * 
+	 * @return the text region covered by this edit group or <code>
+	 *  null</code> if no edits are managed
 	 */
 	public IRegion getRegion() {
 		int size= fEdits.size();

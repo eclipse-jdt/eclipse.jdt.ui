@@ -163,7 +163,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		try {
 			CompilationUnitChange change= getCompilationUnitChange();
 
-			TextBuffer previewConent= change.getPreviewTextBuffer();
+			TextBuffer previewConent= new TextBuffer(change.getPreviewDocument());
 			String currentConentString= change.getCurrentContent();
 			
 			ITokenComparator leftSide= new JavaTokenComparator(previewConent.getContent(), true); 

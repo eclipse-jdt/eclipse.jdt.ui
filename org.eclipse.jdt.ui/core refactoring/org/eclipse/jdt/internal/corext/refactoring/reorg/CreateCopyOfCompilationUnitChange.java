@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -103,7 +104,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 				continue;
 			int offset= searchResult.getStart();
 			int length= searchResult.getEnd() - searchResult.getStart();
-			manager.get(wc).addTextEdit(name, new ReplaceEdit(offset, length, newName));
+			TextChangeCompatibility.addTextEdit(manager.get(wc), name, new ReplaceEdit(offset, length, newName));
 		}
 		return manager;
 	}

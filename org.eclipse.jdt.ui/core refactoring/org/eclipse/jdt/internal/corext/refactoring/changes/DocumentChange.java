@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,57 +17,56 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 /**
- * A text change that operates directly on a text buffer. Note that the ownership
- * of the text buffer is still at the client of this class. So after performing the change
- * the client is responsible to save the text buffer if needed.
+ * TODO
+ * @since 3.0
  */
-public class TextBufferChange extends TextChange {
+public class DocumentChange extends TextChange {
 
-	private TextBuffer fBuffer;
-	private DocumentChange fChange;
+	private IDocument fDocument;
 	
 	/**
-	 * Creates a new <code>TextBufferChange</code> for the given
-	 * <code>ITextBuffer</code>.
+	 * Creates a new <code>DocumentChange</code> for the given 
+	 * {@link IDocument}.
 	 * 
-	 * @param name the change's name mainly used to render the change in the UI.
-	 * @param textBuffer the text buffer this change is working on
+	 * @param name the change's name. Has to be a human readable name.
+	 * @param document the document this change is working on
 	 */
-	public TextBufferChange(String name, TextBuffer textBuffer) {
+	public DocumentChange(String name, IDocument document) {
 		super(name);
-		fChange= new DocumentChange(name, textBuffer.getDocument());
+		Assert.isNotNull(document);
+		fDocument= document;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public Object getModifiedLanguageElement(){
-		return fBuffer;
+		return fDocument;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	protected IDocument aquireDocument(IProgressMonitor pm) throws CoreException {
-		return fChange.aquireDocument(pm);
+		return fDocument;
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
-		fChange.releaseDocument(document, pm);
+		//do nothing
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	protected IChange createUndoChange(UndoEdit edit) throws CoreException {
-		return fChange.createUndoChange(edit);
+		return new UndoDocumentChange(getName(), fDocument, edit);
 	}	
 }
 

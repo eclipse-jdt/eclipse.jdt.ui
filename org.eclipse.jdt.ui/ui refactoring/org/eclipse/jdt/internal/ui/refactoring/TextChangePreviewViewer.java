@@ -152,14 +152,14 @@ public class TextChangePreviewViewer implements IChangePreviewViewer {
 			if (edi.change != null && edi.surroundingLines >= 0) {
 				TextChange.EditChange editChange= edi.change;
 				TextChange change= editChange.getTextChange();
-				setInput(change.getCurrentContent(editChange, 2),
-					change.getPreviewContent(editChange, 2),
+				setInput(change.getCurrentContent(editChange.getTextRange(), true, 2),
+					change.getPreviewContent(new EditChange[] { editChange }, editChange.getTextRange(), true, 2),
 					change.getTextType());
 				return;
 			} else if (edi.changes != null && edi.changes.length > 0 && edi.range != null) {
 				TextChange change= edi.changes[0].getTextChange();
-				setInput(change.getCurrentContent(edi.range),
-					change.getPreviewContent(edi.changes, edi.range),
+				setInput(change.getCurrentContent(edi.range, true, 0),
+					change.getPreviewContent(edi.changes, edi.range, true, 0),
 					change.getTextType());
 				return;
 			}

@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -705,7 +706,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			TextChange change= new CompilationUnitChange(fUnit.getElementName(), fUnit);
 			TextEdit[] edits= getEdits(status);
 			for(int i= 0; i < edits.length; i++)
-				change.addTextEdit(RefactoringCoreMessages.getString("InlineConstantRefactoring.Inline"), edits[i]); //$NON-NLS-1$
+				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("InlineConstantRefactoring.Inline"), edits[i]);
 			return change;
 		}
 		
@@ -1086,7 +1087,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			return;
 		
 		TextChange change= findOrAddDeclaringCUChange(changes);
-		change.addTextEdit(RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration"), edit); //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration"), edit);
 	}
 	
 	private TextChange findOrAddDeclaringCUChange(List changes) throws JavaModelException, CoreException {

@@ -69,6 +69,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -395,7 +396,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
 			TextEdit[] edits= getAllEdits(buffer);
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
-			change.addTextEdit("", edits);//$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, "", edits);
 
 			String newCuSource= change.getPreviewContent();
 			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
@@ -598,21 +599,21 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	// !!!
 	private void addConstantDeclaration(TextChange change) throws CoreException {
-		change.addTextEdit(RefactoringCoreMessages.getString("ExtractConstantRefactoring.declare_constant"), createConstantDeclarationEdit()); //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.declare_constant"), createConstantDeclarationEdit());
 	}
 
 	// !!! very similar to equivalent in ExtractTempRefactoring
 	private void addImportIfNeeded(TextChange change, TextBuffer buffer) throws CoreException {
 		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
-			change.addTextEdit(RefactoringCoreMessages.getString("ExtractConstantRefactoring.update_imports"), importEdit); //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.update_imports"), importEdit);
 	}
 
 	// !!! very similar to equivalent in ExtractTempRefactoring
 	private void addReplaceExpressionWithConstant(TextChange change) throws JavaModelException {
 		TextEdit[] edits= createReplaceExpressionWithConstantEdits();
 		for (int i= 0; i < edits.length; i++) {
-			change.addTextEdit(RefactoringCoreMessages.getString("ExtractConstantRefactoring.replace"), edits[i]); //$NON-NLS-1$		
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.replace"), edits[i]);
 		}
 	}
 

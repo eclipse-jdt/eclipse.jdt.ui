@@ -35,10 +35,6 @@ public abstract class AbstractTextChange extends Change {
 	private int fChangeKind;
 	private IChange fUndoChange;
 
-	protected final static int ORIGINAL_CHANGE=		0;
-	protected final static int UNDO_CHANGE=			1;
-	protected final static int REDO_CHANGE=			2;
-
 	protected static class LocalTextEditProcessor extends TextBufferEditor {
 		public static final int EXCLUDE= 1;
 		public static final int INCLUDE= 2;
@@ -151,24 +147,6 @@ public abstract class AbstractTextChange extends Change {
 	 */
 	protected abstract IChange createReverseChange(UndoEdit edits , int changeKind);
 	
-	/**
-	 * Returns <code>true</code> if this change is a reverse change. This is the case for an undo
-	 * or a redo change. Returns <code>false</code> if the change is an original 
-	 * change.
-	 * 
-	 * @return whether or not this change is a reverse change
-	 */
-	public boolean isReverseChange() {
-		return fChangeKind != ORIGINAL_CHANGE;
-	}
-	
-	protected int getReverseKind() {
-		if (fChangeKind == ORIGINAL_CHANGE || fChangeKind == REDO_CHANGE)
-			return UNDO_CHANGE;
-		else
-			return REDO_CHANGE;
-	}	
-	
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
@@ -196,7 +174,7 @@ public abstract class AbstractTextChange extends Change {
 			fUndoChange= null;
 			editor= new LocalTextEditProcessor(acquireTextBuffer());
 			addTextEdits(editor);
-			fUndoChange= createReverseChange(editor.performEdits(pm), getReverseKind());
+			fUndoChange= createReverseChange(editor.performEdits(pm), 0);
 		} catch (Exception e) {
 			handleException(context, e);
 		} finally {

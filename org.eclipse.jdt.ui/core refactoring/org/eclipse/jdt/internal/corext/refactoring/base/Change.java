@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -22,6 +24,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -37,7 +40,28 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public abstract class Change implements IChange {
 
 	private boolean fIsActive= true;
+	private String fName;
 
+	public Change() {
+	}
+	
+	public Change(String name) {
+		Assert.isNotNull(name);
+		fName= name;
+	}
+	
+	public String getName() {
+		return fName;
+	}
+	
+	public Object getAdapter(Class adapter) {
+		return null;
+	}
+	
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return new RefactoringStatus();
+	}
+	
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */

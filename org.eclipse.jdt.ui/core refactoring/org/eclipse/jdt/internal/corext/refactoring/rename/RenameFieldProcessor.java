@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -585,7 +586,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 				SearchResult searchResult= results[j];
 				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
 				TextEdit edit= new ReplaceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), newAccessorName);
-				manager.get(wc).addTextEdit(editName, edit);
+				TextChangeCompatibility.addTextEdit(manager.get(wc), editName, edit);
 			}
 		}
 	}
@@ -610,7 +611,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException{ 
 		TextEdit textEdit= new ReplaceEdit(fField.getNameRange().getOffset(), fField.getElementName().length(), fNewElementName);
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fField.getCompilationUnit());
-		manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_field_declaration"), textEdit); //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(manager.get(cu), RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_field_declaration"), textEdit);
 	}
 	
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
@@ -623,7 +624,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 			SearchResult[] results= fReferences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-				manager.get(wc).addTextEdit(editName, createTextChange(results[j]));
+				TextChangeCompatibility.addTextEdit(manager.get(wc), editName, createTextChange(results[j]));
 			}
 			pm.worked(1);			
 		}

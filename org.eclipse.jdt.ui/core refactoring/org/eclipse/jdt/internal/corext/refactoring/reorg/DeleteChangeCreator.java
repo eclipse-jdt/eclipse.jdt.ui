@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -119,7 +120,7 @@ class DeleteChangeCreator {
 			tfc.setSave(! cu.isWorkingCopy());
 		}
 		String message= RefactoringCoreMessages.getString("DeleteChangeCreator.1"); //$NON-NLS-1$
-		textChange.addTextEdit(message, resultingEdits);
+		TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
 		rewrite.removeModifications();
 		return textChange;
 	}

@@ -94,10 +94,10 @@ public abstract class Refactoring implements IAdaptable {
 		
 	/**
 	 * Creates an <code>IChange</code> object that performs the actual refactoring.
-	 * This is guaranteed not to be called before <code>checkPreconditions</code> or
-	 * if <code>checkPreconditions</code> returns an <code>RefactoringStatus</code>
-	 * object with severity <code>RefactoringStatus.ERROR</code>.
-	 * Implementors can assume the progress monitor to be not initialized.
+	 * It is guaranteed that <code>createChange</code> is not called before <code>
+	 * checkPreconditions</code> or that it isn't called at all if <code>checkPreconditions
+	 * </code> returns an <code>RefactoringStatus</code> object with a severity of <code>
+	 * RefactoringStatus.ERROR</code>.
 	 */
 	public abstract IChange createChange(IProgressMonitor pm) throws CoreException;
 	

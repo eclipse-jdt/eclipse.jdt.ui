@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+
 import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.MatchLocator;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
@@ -61,7 +63,7 @@ public class QualifiedNameFinder {
 			if (element != null && element.exists())
 				return;
 			TextChange change= fResult.getChange(file);
-			change.addTextEdit(RefactoringCoreMessages.getString("QualifiedNameFinder.update_name"), new ReplaceEdit(start, length, fNewValue)); //$NON-NLS-1$
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("QualifiedNameFinder.update_name"), new ReplaceEdit(start, length, fNewValue));
 		}
 
 		public void done() throws CoreException {

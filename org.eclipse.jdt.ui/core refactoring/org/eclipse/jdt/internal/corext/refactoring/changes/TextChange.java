@@ -15,23 +15,34 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jface.text.IRegion;
-
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditCopier;
 import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.text.edits.TextEditProcessor;
+import org.eclipse.text.edits.UndoEdit;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
-public abstract class TextChange extends AbstractTextChange {
+public abstract class TextChange extends Change {
 
 	public static class EditChange {
 		private boolean fIsActive;
@@ -61,7 +72,7 @@ public abstract class TextChange extends AbstractTextChange {
 		public boolean isEmpty() {
 			return fDescription.isEmpty();
 		}
-		/* package */ TextEditGroup getGroupDescription() {
+		/* package */ TextEditGroup getTextEditGroup() {
 			return fDescription;
 		}
 		public boolean coveredBy(IRegion sourceRegion) {
@@ -90,34 +101,114 @@ public abstract class TextChange extends AbstractTextChange {
 		}
 	}
 	
+	protected static class LocalTextEditProcessor extends TextEditProcessor {
+		public static final int EXCLUDE= 1;
+		public static final int INCLUDE= 2;
+
+		private TextEdit[] fExcludes;
+		private TextEdit[] fIncludes;
+		
+		public LocalTextEditProcessor(IDocument document, TextEdit root, int flags) {
+			super(document, root, flags);
+		}
+		public void setIncludes(TextEdit[] includes) {
+			Assert.isNotNull(includes);
+			Assert.isTrue(fExcludes == null);
+			fIncludes= flatten(includes);
+		}
+		public void setExcludes(TextEdit[] excludes) {
+			Assert.isNotNull(excludes);
+			Assert.isTrue(fIncludes == null);
+			fExcludes= excludes;
+		}
+		protected boolean considerEdit(TextEdit edit) {
+			if (fExcludes != null) {
+				for (int i= 0; i < fExcludes.length; i++) {
+					if (edit.equals(fExcludes[i]))
+						return false;
+				}
+				return true;
+			}
+			if (fIncludes != null) {
+				for (int i= 0; i < fIncludes.length; i++) {
+					if (edit.equals(fIncludes[i]))
+						return true;
+				}
+				return false;
+			}
+			return true;
+		}
+		private TextEdit[] flatten(TextEdit[] edits) {
+			List result= new ArrayList(5);
+			for (int i= 0; i < edits.length; i++) {
+				flatten(result, edits[i]);
+			}
+			return (TextEdit[])result.toArray(new TextEdit[result.size()]);
+		}
+		private void flatten(List result, TextEdit edit) {
+			result.add(edit);
+			TextEdit[] children= edit.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				flatten(result, children[i]);
+			}
+		}
+	}
+	
+	private static class PreviewAndRegion {
+		public PreviewAndRegion(IDocument d, IRegion r) {
+			document= d;
+			region= r;
+		}
+		public IDocument document;
+		public IRegion region;
+	}
+	
 	private List fTextEditChanges;
 	private TextEditCopier fCopier;
 	private TextEdit fEdit;
-	private boolean fKeepExecutedTextEdits;
-	private boolean fAutoMode;
+	private boolean fTrackEdits;
 	private String fTextType;
+	private IChange fUndoChange;
 
 	/**
-	 * Creates a new <code>TextChange</code> with the given name.
+	 * A special object denoting all edits managed by the text change. This even 
+	 * includes those edits not managed by a <code>TextEditChangeGroup</code> 
+	 */
+	private static final EditChange[] ALL_EDITS= new EditChange[0]; 
+	
+	/**
+	 * Creates a new text change with the specified name.  The name is a 
+	 * human-readable value that is displayed to users.  The name does not 
+	 * need to be unique, but it must not be <code>null</code>.
+	 * <p>
+	 * The text type of this text change is set to <code>txt</code>.
+	 * </p>
 	 * 
-	 * @param name the change's name mainly used to render the change in the UI.
+	 * @param name the name of the text change
+	 * 
+	 * @see #setTextType(String)
 	 */
 	protected TextChange(String name) {
-		super(name, ORIGINAL_CHANGE);
+		super(name);
 		fTextEditChanges= new ArrayList(5);
 		fTextType= "txt"; //$NON-NLS-1$
 	}
 	
 	/**
-	 * Sets the text type. Text types are defined by the extension
-	 * point >>TODO<<. 
+	 * Sets the text type. The text type is used to determine the content
+	 * merge viewer used to present the difference between the original
+	 * and the preview content in the user interface. Content merge viewers
+	 * are defined via the extension point <code>org.eclipse.compare.contentMergeViewers</code>.
+	 * <p>
+	 * The default text type is <code>txt</code>. 
+	 * </p>
 	 * 
-	 * @param type the text type. If <code>null</code> is passed the
-	 *  text type is resetted to the default text type "text".
+	 * @param type the text type. If <code>null</code> is passed the text type is 
+	 *  resetted to the default text type <code>txt</code>.
 	 */
-	protected void setTextType(String type) {
+	public void setTextType(String type) {
 		if (type == null)
-			fTextType= "txt"; //$NON-NLS-1$
+			type= "txt"; //$NON-NLS-1$
 		fTextType= type;
 	}
 	
@@ -130,106 +221,76 @@ public abstract class TextChange extends AbstractTextChange {
 		return fTextType;
 	}
 	
-	/**
-	 * Adds a text edit object to this text buffer change.
-	 *
-	 * @param name the name of the given text edit. The name is used to render this 
-	 * 	change in the UI.
-	 * @param edit the text edit to add
-	 */
-	public void addTextEdit(String name, TextEdit edit) {
-		addTextEdit(name, new TextEdit[] {edit});
-	}
-	
-	/**
-	 * Adds an array of  text edit objects to this text buffer change.
-	 *
-	 * @param name the name of the given text edit. The name is used to render this 
-	 * 	change in the UI.
-	 * @param edite the array of text edits to add
-	 */
-	public void addTextEdit(String name, TextEdit[] edits) {
-		Assert.isNotNull(name);
-		Assert.isNotNull(edits);
-		TextEditGroup description= new TextEditGroup(name, edits);
-		fTextEditChanges.add(new EditChange(description, this));
-		if (fEdit == null) {
-			fEdit= new MultiTextEdit();
-			fAutoMode= true;
-		} else {
-			Assert.isTrue(fAutoMode, "Can only add edits when in auto organizing mode"); //$NON-NLS-1$
-		}
-		for (int i= 0; i < edits.length; i++) {
-			insert(fEdit, edits[i]);
+	public final RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
+		try {
+			return isValid(pm);
+		} catch (CoreException e) {
+			return RefactoringStatus.createFatalErrorStatus(e.getMessage());
 		}
 	}
 	
 	/**
-	 * Sets the root text edit.
+	 * Sets the root text edit that should be applied to the 
+	 * document represented by this text change.
 	 * 
-	 * @param edit the root text edit
+	 * @param edit the root text edit. The root text edit
+	 *  can only be set once. 
 	 */
 	public void setEdit(TextEdit edit) {
 		Assert.isTrue(fEdit == null, "Root edit can only be set once"); //$NON-NLS-1$
 		Assert.isTrue(edit != null);
 		fEdit= edit;
-		fTextEditChanges=  new ArrayList(5);
-		fAutoMode= false;
+		fTextEditChanges= new ArrayList(5);
 	}
 	
 	/**
-	 * Gets the root text edit.
+	 * Returns the root text edit.
 	 * 
-	 * @return Returns the root text edit
+	 * @return the root text edit
 	 */
 	public TextEdit getEdit() {
 		return fEdit;
 	}	
 	
 	/**
-	 * Adds a group description.
+	 * Adds a {@link TextEditGroup}. Calling the methods requires that a
+	 * root edit has been set via the method {@link #setEdit(TextEdit)}.
+	 * The edits managed by the given text edit group must be part of the
+	 * change's root edit. 
 	 * 
-	 * @param description the group description to be added
+	 * @param group the text edit group to add
 	 */
-	public void addGroupDescription(TextEditGroup description) {
+	public void addGroupDescription(TextEditGroup group) {
 		Assert.isTrue(fEdit != null, "Can only add a description if a root edit exists"); //$NON-NLS-1$
-		Assert.isTrue(!fAutoMode, "Group descriptions are only supported if root edit has been set by setEdit"); //$NON-NLS-1$
-		Assert.isTrue(description != null);
-		fTextEditChanges.add(new EditChange(description, this));
+		Assert.isTrue(group != null);
+		fTextEditChanges.add(new EditChange(group, this));
 	}
 	
 	/**
-	 * Adds a set of group descriptions.
+	 * Returns the {@link TextEditGroup}s added to this text change via
+	 * the method {@link #addTextEditGroup}.
 	 * 
-	 * @param descriptios the group descriptions to be added
-	 */
-	public void addGroupDescriptions(TextEditGroup[] descriptions) {
-		for (int i= 0; i < descriptions.length; i++) {
-			addGroupDescription(descriptions[i]);
-		}
-	}
-	
-	/**
-	 * Returns the group descriptions that have been added to this change
-	 * @return GroupDescription[]
+	 * @return the text edit groups added by this text change
 	 */	
 	public TextEditGroup[] getGroupDescriptions() {
 		TextEditGroup[] res= new TextEditGroup[fTextEditChanges.size()];
 		for (int i= 0; i < res.length; i++) {
 			EditChange elem= (EditChange) fTextEditChanges.get(i);
-			res[i]= elem.getGroupDescription();
+			res[i]= elem.getTextEditGroup();
 		}
 		return res;	
 	}
 	
 	/**
-	 * Returns the group description with the given name or <code>null</code> if no such
-	 * GroupDescription exists.
+	 * Returns the {@link TextEditGroup} with the given name or <code>
+	 * null</code> if no such {@link TextEditGroup} exists.
+	 * 
+	 * @return the text edit group with the given name
 	 */	
 	public TextEditGroup getGroupDescription(String name) {
 		for (int i= 0; i < fTextEditChanges.size(); i++) {
 			EditChange elem= (EditChange) fTextEditChanges.get(i);
-			TextEditGroup description= elem.getGroupDescription();
+			TextEditGroup description= elem.getTextEditGroup();
 			if (name.equals(description.getName())) {
 				return description;
 			}
@@ -246,125 +307,104 @@ public abstract class TextChange extends AbstractTextChange {
 	public EditChange[] getTextEditChanges() {
 		return (EditChange[])fTextEditChanges.toArray(new EditChange[fTextEditChanges.size()]);
 	}
+	
+	private final IDocument getDocument() throws CoreException {
+		IDocument result= aquireDocument(new NullProgressMonitor());
+		releaseDocument(result, new NullProgressMonitor());
+		return result;
+	}
+	
+	protected abstract IDocument aquireDocument(IProgressMonitor pm) throws CoreException;
+	
+	protected abstract void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException;
+	
+	protected abstract IChange createUndoChange(UndoEdit edit) throws CoreException;
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IChange getUndoChange() {
+		return fUndoChange;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public final void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+		pm.beginTask("", 2); //$NON-NLS-1$
+		try {
+			IDocument document= null;
+			try {
+				document= aquireDocument(new SubProgressMonitor(pm, 1));
+				TextEditProcessor processor= createTextEditProcessor(document, TextEdit.CREATE_UNDO);
+				UndoEdit undo= processor.performEdits();
+				fUndoChange= createUndoChange(undo);
+			} catch (BadLocationException e) {
+				Changes.asCoreException(e);
+			} finally {
+				if (document != null)
+					releaseDocument(document, new SubProgressMonitor(pm, 1));
+				pm.done();
+			}
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
+		}
+	}
 
 	/**
 	 * Returns the text this change is working on.
 	 * 
 	 * @return the original text.
-	 * @exception JavaModelException if text cannot be accessed
+	 * @exception CoreException if text cannot be accessed
 	 */
-	public String getCurrentContent() throws JavaModelException {
-		TextBuffer buffer= null;
-		try {
-			buffer= acquireTextBuffer();
-			return buffer.getContent();
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		} finally {
-			if (buffer != null)
-				releaseTextBuffer(buffer);
-		}
+	public String getCurrentContent() throws CoreException {
+		return getDocument().get();
 	}
 	
 	/**
-	 * Returns a preview of the change without actually modifying the underlying text.
+	 * 
+	 * @param region the region of the document that should be returned. The
+	 *  region must denote a valid range in the document represented by this
+	 *  text change.
+	 * @param expandRegionToFullLine if <code>true</code> is passed the region
+	 *  is extended to cover full lines. If <code>false</code> is passed the
+	 *  region is unchanged.
+	 * @param surroundLines
+	 * @return
+	 * @throws CoreException
+	 */
+	public String getCurrentContent(IRegion region, boolean expandRegionToFullLine, int surroundLines) throws CoreException {
+		Assert.isNotNull(region);
+		Assert.isTrue(surroundLines >= 0);
+		IDocument document= getDocument();
+		Assert.isTrue(document.getLength() >= region.getOffset() + region.getLength());
+		return getContent(document, region, expandRegionToFullLine, 0);
+	}
+
+	public IDocument getPreviewDocument() throws CoreException {
+		PreviewAndRegion result= getPreviewDocument(ALL_EDITS);
+		return result.document;
+	}
+	
+	/**
+	 * Returns a preview of the change without actually modifying the 
+	 * underlying element.
 	 * 
 	 * @return the change's preview
-	 * @exception JavaModelException if the preview could not be created
+	 * @exception CoreException if the preview could not be created
 	 */
-	public String getPreviewContent() throws JavaModelException {
-		return getPreviewTextBuffer().getContent();
+	public String getPreviewContent() throws CoreException {
+		return getPreviewDocument().get();
 	}
 	
-	/**
-	 * Note: API is under construction
-	 */
-	public TextBuffer getPreviewTextBuffer() throws JavaModelException {
-		try {
-			LocalTextEditProcessor editor= new LocalTextEditProcessor(createTextBuffer());
-			addTextEdits(editor);
-			editor.performEdits(new NullProgressMonitor());
-			return editor.getTextBuffer();
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		}
-	}
-	
-	/**
-	 * Returns the current content to be modified by the given text edit change. The
-	 * text edit change must have been added to this <code>TextChange<code>
-	 * by calling <code>addTextEdit()</code>
-	 * 
-	 * @param change the text edit change for which the content is requested
-	 * @param surroundingLines the number of surrounding lines added at top and bottom
-	 * 	of the content
-	 * @return the current content to be modified by the given text edit change
-	 */
-	public String getCurrentContent(EditChange change, int surroundingLines) throws CoreException {
-		return getContent(change, surroundingLines, false);
-	}
-	
-	/**
-	 * Returns the preview of the given text edit change. The text edit change must 
-	 * have been added to this <code>TextChange<code> by calling <code>addTextEdit()
-	 * </code>
-	 * 
-	 * @param change the text edit change for which the preview is requested
-	 * @param surroundingLines the number of surrounding lines added at top and bottom
-	 * 	of the preview
-	 * @return the preview of the given text edit change
-	 */
-	public String getPreviewContent(EditChange change, int surroundingLines) throws CoreException {
-		return getContent(change, surroundingLines, true);
-	}
-
-	/**
-	 * Returns the current content denoted by the given <code>range</code>.
-	 * 
-	 * @param range the range describing the content to be returned
-	 * @return the current content denoted by the given <code>range</code>
-	 */	
-	public String getCurrentContent(IRegion range) throws CoreException {
-		TextBuffer buffer= null;
-		try {
-			buffer= acquireTextBuffer();
-			int offset= buffer.getLineInformationOfOffset(range.getOffset()).getOffset();
-			int length= range.getLength() + range.getOffset() - offset;
-			return buffer.getContent(offset, length);
-		} finally {
-			if (buffer != null)
-				releaseTextBuffer(buffer);
-		}
-	}
-
-	/**
-	 * Returns a preview denoted by the given <code>range</code>. First the changes
-	 * passed in argument <code>changes</code> are applied and then a string denoted
-	 * by <code>range</code> is extracted from the result.
-	 * 
-	 * @param changes the changes to apply
-	 * @param range the range denoting the resulting string.
-	 * @return the computed preview 
-	 */	
-	public String getPreviewContent(EditChange[] changes, IRegion range) throws CoreException {
-		TextBuffer buffer= createTextBuffer();
-		LocalTextEditProcessor editor= new LocalTextEditProcessor(buffer);
-		addTextEdits(editor, changes);
-		int oldLength= buffer.getLength();
-		editor.performEdits(new NullProgressMonitor());
-		int delta= buffer.getLength() - oldLength;
-		int offset= buffer.getLineInformationOfOffset(range.getOffset()).getOffset();
-		int length= range.getLength() + range.getOffset() - offset + delta;
-		if (length > 0) {
-			return buffer.getContent(offset, length);
-		} else {
-			// range got removed
-			return ""; //$NON-NLS-1$
-		}
+	public String getPreviewContent(EditChange[] changes, IRegion region, boolean expandRegionToFullLine, int surroundingLines) throws CoreException {
+		IRegion currentRegion= getRegion(changes);
+		Assert.isTrue(region.getOffset() <= currentRegion.getOffset() && 
+			currentRegion.getOffset() + currentRegion.getLength() <= region.getOffset() + region.getLength());
+		PreviewAndRegion result= getPreviewDocument(changes);
+		int delta= result.region.getLength() - currentRegion.getLength();
+		return getContent(result.document, new Region(region.getOffset(), region.getLength() + delta), expandRegionToFullLine, surroundingLines);
+		
 	}
 
 	/**
@@ -375,8 +415,8 @@ public abstract class TextChange extends AbstractTextChange {
 	 * @param keep if <code>true</code> executed edits are kept
 	 */
 	public void setKeepExecutedTextEdits(boolean keep) {
-		fKeepExecutedTextEdits= keep;
-		if (!fKeepExecutedTextEdits)
+		fTrackEdits= keep;
+		if (!fTrackEdits)
 			fCopier= null;
 	}
 	
@@ -386,7 +426,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * @return the executed edit
 	 */
 	private TextEdit getExecutedTextEdit(TextEdit original) {
-		if (!fKeepExecutedTextEdits || fCopier == null)
+		if (!fTrackEdits || fCopier == null)
 			return null;
 		return fCopier.getCopy(original);
 	}
@@ -418,7 +458,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 */
 	public IRegion getNewTextRange(TextEdit[] edits) {
 		Assert.isTrue(edits != null && edits.length > 0);
-		if (!fKeepExecutedTextEdits || fCopier == null)
+		if (!fTrackEdits || fCopier == null)
 			return null;		
 		
 		TextEdit[] copies= new TextEdit[edits.length];
@@ -435,7 +475,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * Note: API is under construction
 	 */
 	public IRegion getNewTextRange(EditChange editChange) {
-		return getNewTextRange(editChange.getGroupDescription().getTextEdits());
+		return getNewTextRange(editChange.getTextEditGroup().getTextEdits());
 	}
 	
 	/* (Non-Javadoc)
@@ -449,52 +489,70 @@ public abstract class TextChange extends AbstractTextChange {
 		}
 	}
 	
-	/* non Java-doc
-	 * @see AbstractTextChange#addTextEdits
-	 */
-	protected void addTextEdits(LocalTextEditProcessor editor) throws CoreException {
+	//---- private helper methods --------------------------------------------------
+	
+	private PreviewAndRegion getPreviewDocument(EditChange[] changes) throws CoreException {
+		IDocument document= new Document(getDocument().get());
+		boolean trackChanges= fTrackEdits;
+		setKeepExecutedTextEdits(true);
+		TextEditProcessor processor= changes == ALL_EDITS
+			? createTextEditProcessor(document, TextEdit.NONE)
+			: createTextEditProcessor(document, TextEdit.NONE, changes);
+		try {
+			processor.performEdits();
+			return new PreviewAndRegion(document, getNewRegion(changes));
+		} catch (BadLocationException e) {
+			throw Changes.asCoreException(e);
+		} finally {
+			setKeepExecutedTextEdits(trackChanges);
+		}
+	}
+	
+	private TextEditProcessor createTextEditProcessor(IDocument document, int flags) throws CoreException {
 		if (fEdit == null)
-			return;
+			return new TextEditProcessor(document, new MultiTextEdit(0,0), flags);
 		List excludes= new ArrayList(0);
 		for (Iterator iter= fTextEditChanges.iterator(); iter.hasNext(); ) {
 			EditChange edit= (EditChange)iter.next();
 			if (!edit.isActive()) {
-				excludes.addAll(Arrays.asList(edit.getGroupDescription().getTextEdits()));
+				excludes.addAll(Arrays.asList(edit.getTextEditGroup().getTextEdits()));
 			}
 		}
 		fCopier= new TextEditCopier(fEdit);
 		TextEdit copiedEdit= fCopier.perform();
-		if (copiedEdit != null) {
-			editor.add(copiedEdit);
-			editor.setExcludes(mapEdits(
-				(TextEdit[])excludes.toArray(new TextEdit[excludes.size()]),
-				fCopier));	
-		}
-		if (!fKeepExecutedTextEdits)
+		if (fTrackEdits)
+			flags= flags | TextEdit.UPDATE_REGIONS;
+		LocalTextEditProcessor result= new LocalTextEditProcessor(document, copiedEdit, flags);
+		result.setExcludes(mapEdits(
+			(TextEdit[])excludes.toArray(new TextEdit[excludes.size()]),
+			fCopier));	
+		if (!fTrackEdits)
 			fCopier= null;
+		return result;
 	}
 	
-	protected void addTextEdits(LocalTextEditProcessor editor, EditChange[] changes) throws CoreException {
+	private TextEditProcessor createTextEditProcessor(IDocument document, int flags, EditChange[] changes) throws CoreException {
 		if (fEdit == null)
-			return;
+			return new TextEditProcessor(document, new MultiTextEdit(0,0), flags);
 		List includes= new ArrayList(0);
 		for (int c= 0; c < changes.length; c++) {
 			EditChange change= changes[c];
 			Assert.isTrue(change.getTextChange() == this);
 			if (change.isActive()) {
-				includes.addAll(Arrays.asList(change.getGroupDescription().getTextEdits()));
+				includes.addAll(Arrays.asList(change.getTextEditGroup().getTextEdits()));
 			}
 		}
 		fCopier= new TextEditCopier(fEdit);
 		TextEdit copiedEdit= fCopier.perform();
-		if (copiedEdit != null) {
-			editor.add(copiedEdit);
-			editor.setIncludes(mapEdits(
-				(TextEdit[])includes.toArray(new TextEdit[includes.size()]),
-				fCopier));
-		}		
-		if (!fKeepExecutedTextEdits)
+		if (fTrackEdits)
+			flags= flags | TextEdit.UPDATE_REGIONS;
+		LocalTextEditProcessor result= new LocalTextEditProcessor(document, copiedEdit, flags);
+		result.setIncludes(mapEdits(
+			(TextEdit[])includes.toArray(new TextEdit[includes.size()]),
+			fCopier));
+		if (!fTrackEdits)
 			fCopier= null;
+		return result;
 	}
 	
 	private TextEdit[] mapEdits(TextEdit[] edits, TextEditCopier copier) {
@@ -506,71 +564,62 @@ public abstract class TextChange extends AbstractTextChange {
 		return edits;
 	}
 	
-	private String getContent(EditChange change, int surroundingLines, boolean preview) throws CoreException {
-		Assert.isTrue(change.getTextChange() == this);
-		TextBuffer buffer= createTextBuffer();
-		IRegion range= null;
-		if (preview) {
-			LocalTextEditProcessor editor= new LocalTextEditProcessor(buffer);
-			boolean keepEdits= fKeepExecutedTextEdits;
-			setKeepExecutedTextEdits(true);
-			addTextEdits(editor, new EditChange[] { change });
-			editor.performEdits(new NullProgressMonitor());
-			range= getNewTextRange(change);
-			setKeepExecutedTextEdits(keepEdits);
-		} else {
-			range= change.getTextRange();
-		}
-		int startLine= Math.max(buffer.getLineOfOffset(range.getOffset()) - surroundingLines, 0);
-		int endLine= Math.min(
-			buffer.getLineOfOffset(range.getOffset() + range.getLength() - 1) + surroundingLines,
-			buffer.getNumberOfLines() - 1);
-		int offset= buffer.getLineInformation(startLine).getOffset();
-		TextRegion region= buffer.getLineInformation(endLine);
-		int length = region.getOffset() + region.getLength() - offset;
-		return buffer.getContent(offset, length);
-	}
-
-	private static void insert(TextEdit parent, TextEdit edit) {
-		if (!parent.hasChildren()) {
-			parent.addChild(edit);
-			return;
-		}
-		TextEdit[] children= parent.getChildren();
-		// First dive down to find the right parent.
-		for (int i= 0; i < children.length; i++) {
-			TextEdit child= children[i];
-			if (covers(child, edit)) {
-				insert(child, edit);
-				return;
+	private String getContent(IDocument document, IRegion region, boolean expandRegionToFullLine, int surroundingLines) throws CoreException {
+		try {
+			if (expandRegionToFullLine) {
+				int startLine= Math.max(document.getLineOfOffset(region.getOffset()) - surroundingLines, 0);
+				int endLine= Math.min(
+					document.getLineOfOffset(region.getOffset() + region.getLength() - 1) + surroundingLines,
+					document.getNumberOfLines() - 1);
+				
+				int offset= document.getLineInformation(startLine).getOffset();
+				IRegion endLineRegion= document.getLineInformation(endLine);
+				int length = endLineRegion.getOffset() + endLineRegion.getLength() - offset;
+				return document.get(offset, length);
+				
+			} else {
+				return document.get(region.getOffset(), region.getLength());
 			}
+		} catch (BadLocationException e) {
+			throw Changes.asCoreException(e);
 		}
-		// We have the right parent. Now check if some of the children have to
-		// be moved under the new edit since it is covering it.
-		for (int i= children.length - 1; i >= 0; i--) {
-			TextEdit child= children[i];
-			if (covers(edit, child)) {
-				parent.removeChild(i);
-				edit.addChild(child);
-			}
-		}
-		parent.addChild(edit);
 	}
 	
-	private static boolean covers(TextEdit thisEdit, TextEdit otherEdit) {
-		if (thisEdit.getLength() == 0)	// an insertion point can't cover anything
-			return false;
-		
-		int thisOffset= thisEdit.getOffset();
-		int thisEnd= thisEdit.getExclusiveEnd();	
-		if (otherEdit.getLength() == 0) {
-			int otherOffset= otherEdit.getOffset();
-			return thisOffset < otherOffset && otherOffset < thisEnd;
+	private IRegion getRegion(EditChange[] changes) {
+		if (changes == ALL_EDITS) {
+			if (fEdit == null)
+				return null;
+			return fEdit.getRegion();
 		} else {
-			int otherOffset= otherEdit.getOffset();
-			int otherEnd= otherEdit.getExclusiveEnd();
-			return thisOffset <= otherOffset && otherEnd <= thisEnd;
+			List edits= new ArrayList();
+			for (int i= 0; i < changes.length; i++) {
+				edits.addAll(Arrays.asList(changes[i].getTextEditGroup().getTextEdits()));
+			}
+			if (edits.size() == 0)
+				return null;
+			return TextEdit.getCoverage((TextEdit[]) edits.toArray(new TextEdit[edits.size()]));
 		}
-	}		
+	}
+	
+	private IRegion getNewRegion(EditChange[] changes) {
+		if (changes == ALL_EDITS) {
+			if (fEdit == null)
+				return null;
+			return fCopier.getCopy(fEdit).getRegion();
+		} else {
+			List result= new ArrayList();
+			for (int c= 0; c < changes.length; c++) {
+				TextEdit[] edits= changes[c].getTextEditGroup().getTextEdits();
+				for (int e= 0; e < edits.length; e++) {
+					TextEdit copy= fCopier.getCopy(edits[e]);
+					if (copy != null)
+						result.add(copy);
+				}
+			}
+			if (result.size() == 0)
+				return null;
+			return TextEdit.getCoverage((TextEdit[]) result.toArray(new TextEdit[result.size()]));
+		}
+	}
 }
 

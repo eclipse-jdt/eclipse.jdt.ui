@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,20 +11,17 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
-import org.eclipse.text.edits.UndoEdit;
+import org.eclipse.jface.text.BadLocationException;
 
-abstract class UndoTextChange extends AbstractTextChange {
+import org.eclipse.jdt.internal.corext.Corext;
 
-	private UndoEdit fUndos;
 
-	public UndoTextChange(String name, int changeKind, UndoEdit undos) {
-		super(name, changeKind);
-		fUndos= undos;
-	}
+/* package */ class Changes {
 	
-	protected void addTextEdits(LocalTextEditProcessor editor) throws CoreException {
-		editor.add(fUndos);
-	}	
+	public static CoreException asCoreException(BadLocationException e) {
+		return new CoreException(new Status(IStatus.ERROR, Corext.getPluginId(), StatusCodes.BAD_LOCATION, e.getMessage(), e));
+	}
 }
-

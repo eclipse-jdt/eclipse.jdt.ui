@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
@@ -720,7 +721,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.update"); //$NON-NLS-1$
 		int typeNameLength= fType.getElementName().length();
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
-		manager.get(cu).addTextEdit(name, new ReplaceEdit(fType.getNameRange().getOffset(), typeNameLength, fNewElementName));
+		TextChangeCompatibility.addTextEdit(manager.get(cu), name, new ReplaceEdit(fType.getNameRange().getOffset(), typeNameLength, fNewElementName));
 	}
 	
 	private void addConstructorRenames(TextChangeManager manager) throws CoreException {
@@ -736,7 +737,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 				 * (checked as a precondition)
 				 */				
 				String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.rename_constructor"); //$NON-NLS-1$
-				manager.get(cu).addTextEdit(name, new ReplaceEdit(methods[i].getNameRange().getOffset(), typeNameLength, fNewElementName));
+				TextChangeCompatibility.addTextEdit(manager.get(cu), name, new ReplaceEdit(methods[i].getNameRange().getOffset(), typeNameLength, fNewElementName));
 			}
 		}
 	}
@@ -756,8 +757,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 				SearchResult searchResult= results[j];
 				String oldName= fType.getElementName();
 				int offset= searchResult.getEnd() - oldName.length();
-				manager.get(wc).addTextEdit(name, 
-					new ReplaceEdit(offset, oldName.length(), fNewElementName));
+				TextChangeCompatibility.addTextEdit(manager.get(wc), name, new ReplaceEdit(offset, oldName.length(), fNewElementName));
 			}
 			pm.worked(1);
 		}

@@ -19,10 +19,12 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
@@ -55,17 +57,17 @@ public class TrackPositionTest extends TestCase {
 
 	public void test1() throws Exception {
 		TextEdit edit= new ReplaceEdit(2, 2, "xyz");
-		fChange.addTextEdit(NN, edit);
+		TextChangeCompatibility.addTextEdit(fChange, NN, edit);
 		executeChange();
 		assertEquals(fChange.getNewTextRange(edit), 2, 3);
 	}
 	
 	public void test2() throws Exception {
 		TextEdit edit= new ReplaceEdit(5, 3, "xy");
-		fChange.addTextEdit(NN, edit);
-		TextBuffer preview= fChange.getPreviewTextBuffer();
+		TextChangeCompatibility.addTextEdit(fChange, NN, edit);
+		IDocument preview= fChange.getPreviewDocument();
 		assertEquals(fBuffer.getContent(), "0123456789");
-		assertEquals(preview.getContent(), "01234xy89");
+		assertEquals(preview.get(), "01234xy89");
 		assertEquals(fChange.getNewTextRange(edit), 5, 2);
 	}
 		

@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
@@ -239,7 +240,7 @@ public class InlineTempRefactoring extends Refactoring {
 		for(int i= 0; i < offsets.length; i++){
 			int offset= offsets[i].intValue();
             String sourceToInline= getInitializerSource(needsBrackets(offset));
-			change.addTextEdit(changeName, new ReplaceEdit(offset, length, sourceToInline));
+			TextChangeCompatibility.addTextEdit(change, changeName, new ReplaceEdit(offset, length, sourceToInline));
 			pm.worked(1);	
 		}
 	}
@@ -294,7 +295,7 @@ public class InlineTempRefactoring extends Refactoring {
 	private void removeDeclaration(TextChange change, int offset, int length)  throws JavaModelException {
 		ISourceRange range= SourceRangeComputer.computeSourceRange(new SourceRange(offset, length), fCu.getSource());
 		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.remove_edit_name") + getTempName();  //$NON-NLS-1$
-		change.addTextEdit(changeName, new DeleteEdit(range.getOffset(), range.getLength()));
+		TextChangeCompatibility.addTextEdit(change, changeName, new DeleteEdit(range.getOffset(), range.getLength()));
 	}
 	
 	private String getInitializerSource(boolean brackets) throws JavaModelException{

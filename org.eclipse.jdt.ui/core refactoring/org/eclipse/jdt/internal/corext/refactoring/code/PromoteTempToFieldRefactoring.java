@@ -67,6 +67,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -600,7 +601,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
         TextEdit resultingEdits= new MultiTextEdit();
         rewrite.rewriteNode(textBuffer, resultingEdits);
-        change.addTextEdit(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.editName"), resultingEdits); //$NON-NLS-1$
+        TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.editName"), resultingEdits);
         rewrite.removeModifications();
         return change;
     }

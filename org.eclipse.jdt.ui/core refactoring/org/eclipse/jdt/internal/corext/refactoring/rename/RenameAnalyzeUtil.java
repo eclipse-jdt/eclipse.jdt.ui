@@ -74,7 +74,7 @@ class RenameAnalyzeUtil {
 		for (int i= 0; i < compilationUnitsToModify.length; i++) {
 			ICompilationUnit cu= compilationUnitsToModify[i];
 			newWorkingCopies[i]= WorkingCopyUtil.getNewWorkingCopy(cu);
-			newWorkingCopies[i].getBuffer().setContents(manager.get(cu).getPreviewTextBuffer().getContent());
+			newWorkingCopies[i].getBuffer().setContents(manager.get(cu).getPreviewContent());
 			newWorkingCopies[i].makeConsistent(new SubProgressMonitor(pm, 1));
 		}
 		return newWorkingCopies;

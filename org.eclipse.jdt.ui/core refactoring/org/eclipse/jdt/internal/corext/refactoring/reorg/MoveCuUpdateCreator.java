@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -104,9 +105,7 @@ public class MoveCuUpdateCreator {
 					TextBuffer buffer= null;
 					try {
 						buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(cu).getResource());
-						changeManager.get(cu).addTextEdit(
-							RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), 
-							importRewrite.createEdit(buffer)); //$NON-NLS-1$
+						TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer));
 					} finally {
 						if (buffer != null)
 							TextBuffer.release(buffer);
@@ -366,9 +365,7 @@ public class MoveCuUpdateCreator {
 		
 		public void addEdit(TextChange change, String text) {
 			if (fQualified) {
-				change.addTextEdit(
-				RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"), //$NON-NLS-1$
-				new ReplaceEdit(getStart(), getEnd() - getStart(), text));
+				TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"), new ReplaceEdit(getStart(), getEnd() - getStart(), text));
 			}
 		}
 		public boolean isQualified() {

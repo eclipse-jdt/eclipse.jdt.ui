@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
@@ -450,7 +451,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_occurrence"); //$NON-NLS-1$
-				manager.get(wc).addTextEdit(editName, createTextChange(results[j]));
+				TextChangeCompatibility.addTextEdit(manager.get(wc), editName, createTextChange(results[j]));
 			}
 			pm.worked(1);
 		}		
@@ -463,9 +464,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	}
 	
 	final void addDeclarationUpdate(TextChange change) throws CoreException {
-		change.addTextEdit(
-			RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), 
-			new ReplaceEdit(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewElementName));  //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), new ReplaceEdit(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewElementName));
 	}
 	
 	final TextEdit createTextChange(SearchResult searchResult) {

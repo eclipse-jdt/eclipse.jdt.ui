@@ -100,6 +100,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -369,7 +370,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private String getNewSourceForInputType(ICompilationUnit processedCu, ASTRewrite rewrite) throws CoreException, JavaModelException {
 		TextChange ch= new CompilationUnitChange("", processedCu); //$NON-NLS-1$
 		TextEdit edit= getRewriteTextEdit(processedCu, rewrite);
-		ch.addTextEdit("", edit); //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(ch, "", edit);
 		String newSource= ch.getPreviewContent();
 		CompilationUnit cuNode= AST.parseCompilationUnit(newSource.toCharArray());
 		TypeDeclaration td= findTypeDeclaration(fType, cuNode);
@@ -550,7 +551,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 		TextChange textChange= manager.get(cu);
 		TextEdit resultingEdit= getRewriteTextEdit(cu, rewrite);
-		textChange.addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.30"), resultingEdit); //$NON-NLS-1$
+		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.30"), resultingEdit);
 		rewrite.removeModifications();
 	}
 

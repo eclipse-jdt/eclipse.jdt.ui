@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.JavaModelException;
@@ -31,10 +33,12 @@ import org.eclipse.jdt.core.JavaModelException;
  * this early stage to solicit feedback from pioneering adopters on the understanding that any 
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
-public interface IChange {
+public interface IChange extends IAdaptable {
 
 	public static final int REFACTORING_CHANGE_ABORTED= 900;
 
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException;
+	
 	/**
 	 * The client is about to calling <code>perform</code> on this change. The client of this
 	 * change must ensure that the method is called outside a runnable that modifies the 
