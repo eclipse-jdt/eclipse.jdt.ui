@@ -171,6 +171,9 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 */
 	public void launchRemoved(ILaunch launch) {
 		fTrackedLaunches.remove(launch);
+		TestRunnerViewPart testRunnerViewPart= findAndShowTestRunnerViewPart();
+		if (testRunnerViewPart != null && launch.equals(testRunnerViewPart.getLastLaunch()))
+			testRunnerViewPart.reset();
 	}
 
 	/*
@@ -181,32 +184,37 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	public void connectTestRunner(ILaunch launch, IType launchedType, int port) {
-		IWorkbench workbench= getWorkbench();
-		if (workbench == null)
-			return;
-			
-		IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
-		IWorkbenchPage page= window.getActivePage();
-		TestRunnerViewPart testRunner= null;
-		if (page != null) {
-			try { // show the result view if it isn't shown yet
-				testRunner= (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
-				// TODO: have force the creation of view part contents 
-				// otherwise the UI will not be updated
-				if(testRunner == null || !testRunner.isCreated()) {
-					IWorkbenchPart activePart= page.getActivePart();
-					testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
-					//restore focus stolen by the creation of the result view
-					page.activate(activePart);
-				} 
-			} catch (PartInitException pie) {
-				log(pie);
-			}
-		}
-		if (testRunner != null)
-			testRunner.startTestRunListening(launchedType, port, launch);	
+		TestRunnerViewPart testRunnerViewPart= findAndShowTestRunnerViewPart();
+		if (testRunnerViewPart != null)
+			testRunnerViewPart.startTestRunListening(launchedType, port, launch);	
 	}
 
+	private TestRunnerViewPart findAndShowTestRunnerViewPart(){
+		IWorkbench workbench= getWorkbench();
+		if (workbench == null)
+			return null;
+			
+		IWorkbenchPage page= getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		if (page == null)
+			return null;
+			
+		try { // show the result view if it isn't shown yet
+			TestRunnerViewPart  testRunner= (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
+			// TODO: have force the creation of view part contents 
+			// otherwise the UI will not be updated
+			if(testRunner == null || ! testRunner.isCreated()) {
+				IWorkbenchPart activePart= page.getActivePart();
+				testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
+				//restore focus stolen by the creation of the result view
+				page.activate(activePart);
+			} 
+			return testRunner;
+		} catch (PartInitException pie) {
+			log(pie);
+			return null;
+		}
+	}
+	
 	/*
 	 * @see ILaunchListener#launchChanged(ILaunch)
 	 */

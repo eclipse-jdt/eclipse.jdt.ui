@@ -275,6 +275,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fShowOnErrorOnly= JUnitPreferencePage.getShowOnErrorOnly();
 		fExecutedTests++;
 	}
+	
+	public void reset(){
+		reset(0);
+		setViewPartTitle(null);
+		resetViewIcon();
+	}
 
 	/*
 	 * @see ITestRunListener#testRunEnded
@@ -493,13 +499,21 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fTestRunnerClient.startListening(listenerArray, port);
 		
 		fLastLaunch= launch;
-		String title= JUnitMessages.getFormattedString("TestRunnerViewPart.title", type.getElementName()); //$NON-NLS-1$
-		setTitle(title);
+		setViewPartTitle(type);
 		if (type instanceof IType)
 			setTitleToolTip(((IType)type).getFullyQualifiedName());
 		else
 			setTitleToolTip(type.getElementName());
 			
+	}
+
+	private void setViewPartTitle(IJavaElement type) {
+		String title;
+		if (type == null)
+			title= JUnitMessages.getString("TestRunnerViewPart.title_no_type"); //$NON-NLS-1$
+		else	
+			title= JUnitMessages.getFormattedString("TestRunnerViewPart.title", type.getElementName()); //$NON-NLS-1$
+		setTitle(title);
 	}
 
 	private void aboutToLaunch() {
@@ -861,7 +875,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	public IJavaProject getLaunchedProject() {
 		return fTestProject;
 	}
-
+	
+	public ILaunch getLastLaunch() {
+		return fLastLaunch;
+	}
+	
 	protected static Image createImage(String path) {
 		try {
 			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL(path));
