@@ -15,15 +15,18 @@ import junit.framework.TestCase;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.PartInitException;
 
 public abstract class OpenEditorTest extends TestCase {
-	protected void measureOpenInEditor(IFile[] files) throws PartInitException {
+	protected void measureOpenInEditor(IFile[] files, String summaryName) throws PartInitException {
 		Performance performance= Performance.getDefault();
 		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		if (summaryName != null)
+			performance.tagAsGlobalSummary(performanceMeter, summaryName, Dimension.ELAPSED_PROCESS); 
 		try {
 			for (int i= 0, n= files.length; i < n; i++) {
 				performanceMeter.start();
