@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
@@ -132,6 +133,8 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	 */
 	protected void run(IStructuredSelection selection) {
 		IMember member= getMember(selection);
+		if (!ActionUtil.isProcessable(getShell(), member))
+			return;
 		FindOccurrencesEngine engine= FindOccurrencesEngine.create(member);
 		try {
 			ISourceRange range= member.getNameRange();
@@ -163,6 +166,8 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	 */
 	protected final void run(ITextSelection ts) {
 		IJavaElement input= getEditorInput(fEditor);
+		if (!ActionUtil.isProcessable(getShell(), input))
+			return;
 		FindOccurrencesEngine engine= FindOccurrencesEngine.create(input);
 		try {
 			String result= engine.run(ts.getOffset(), ts.getLength());
