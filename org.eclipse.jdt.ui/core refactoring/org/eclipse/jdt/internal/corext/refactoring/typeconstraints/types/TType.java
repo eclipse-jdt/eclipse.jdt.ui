@@ -78,10 +78,12 @@ public abstract class TType {
 			fModifiers= binding.getModifiers();
 			if (binding.isClass()) {
 				fFlags= F_IS_CLASS;
+			// the annotation test has to be done before test for interface
+			// since annotations are interfaces as well.
+			} else if (binding.isAnnotation()) { 
+				fFlags= F_IS_ANNOTATION | F_IS_INTERFACE;
 			} else if (binding.isInterface()) {
 				fFlags= F_IS_INTERFACE;
-			} else if (binding.isAnnotation()) {
-				fFlags= F_IS_ANNOTATION;
 			} else if (binding.isEnum()) {
 				fFlags= F_IS_ENUM;
 			}
