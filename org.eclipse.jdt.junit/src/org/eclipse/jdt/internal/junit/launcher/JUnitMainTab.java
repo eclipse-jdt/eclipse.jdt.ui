@@ -82,6 +82,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	private Text fTestText;
 	private Button fSearchButton;
 	private final Image fTestIcon= createImage("obj16/test.gif"); //$NON-NLS-1$
+	private String fOriginalTestMethodName;
 	private Label fTestMethodLabel;
 	private Text fContainerText;
 	private IJavaElement fContainerElement;
@@ -233,12 +234,15 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 
 	private void handleContainerSearchButtonSelected() {
 		IJavaElement javaElement= chooseContainer(fContainerElement);
-		if (javaElement != null) {
-			fContainerElement= javaElement;
-			fContainerText.setText(getPresentationName(javaElement));
-			validatePage();
-			updateLaunchConfigurationDialog();
-		}
+		if (javaElement != null)
+			setContainerElement(javaElement);
+	}
+
+	private void setContainerElement(IJavaElement javaElement) {
+		fContainerElement= javaElement;
+		fContainerText.setText(getPresentationName(javaElement));
+		validatePage();
+		updateLaunchConfigurationDialog();
 	}
 
 	public void createKeepAliveGroup(Composite comp) {
@@ -309,10 +313,10 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	
 	protected void updateTestTypeFromConfig(ILaunchConfiguration config) {
 		String testTypeName= ""; //$NON-NLS-1$
-		String testMethodName= ""; //$NON-NLS-1$
+		fOriginalTestMethodName= ""; //$NON-NLS-1$
 		try {
 			testTypeName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
-			testMethodName = config.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
+			fOriginalTestMethodName = config.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
 		} catch (CoreException ce) {			
 		}
 		fTestRadioButton.setSelection(true);
@@ -321,12 +325,15 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fTestContainerRadioButton.setSelection(false);
 		fTestText.setText(testTypeName);
 		fContainerText.setText(""); //$NON-NLS-1$
+		setTestMethodLabel(fOriginalTestMethodName);
+	}
+
+	private void setTestMethodLabel(String testMethodName) {
 		if (!"".equals(testMethodName)) { //$NON-NLS-1$
-			fTestMethodLabel.setText(JUnitMessages.getString("JUnitMainTab.label.method")+testMethodName); //$NON-NLS-1$
+			fTestMethodLabel.setText(JUnitMessages.getString("JUnitMainTab.label.method")+fOriginalTestMethodName); //$NON-NLS-1$
 		} else {
 			fTestMethodLabel.setText(""); //$NON-NLS-1$
 		}
-		
 	}
 
 	protected void updateTestContainerFromConfig(ILaunchConfiguration config) {
@@ -360,6 +367,12 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$			
 		}
 		config.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
+		config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, fOriginalTestMethodName);
+		String testMethod= config.contentsEqual(config.getOriginal()) //workaround for bug 65399
+			? fOriginalTestMethodName
+			: ""; //$NON-NLS-1$
+		config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testMethod);
+		setTestMethodLabel(testMethod);
 	}
 
 	/**
@@ -498,6 +511,11 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		boolean isSingleTestMode= fTestRadioButton.getSelection();
 		setEnableSingleTestGroup(isSingleTestMode);
 		setEnableContainerTestGroup(!isSingleTestMode);
+		if (!isSingleTestMode && fContainerText.getText().length() == 0) {
+			IJavaProject javaProject= getJavaModel().getJavaProject(fProjText.getText());
+			if (javaProject != null && javaProject.exists())
+				setContainerElement(javaProject);
+		}
 		validatePage();
 		updateLaunchConfigurationDialog();
 	}

@@ -47,9 +47,18 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchConfigurationDelegate {
 
 	public static final String PORT_ATTR= JUnitPlugin.PLUGIN_ID+".PORT"; //$NON-NLS-1$
+	/**
+	 * The single test type, or "" iff running a launch container.
+	 */
 	public static final String TESTTYPE_ATTR= JUnitPlugin.PLUGIN_ID+".TESTTYPE"; //$NON-NLS-1$
+	/**
+	 * The test method, or "" iff running the whole test type.
+	 */
 	public static final String TESTNAME_ATTR= JUnitPlugin.PLUGIN_ID+".TESTNAME"; //$NON-NLS-1$
 	public static final String ATTR_KEEPRUNNING = JUnitPlugin.PLUGIN_ID+ ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
+	/**
+	 * The launch container, or "" iff running a single test type.
+	 */
 	public static final String LAUNCH_CONTAINER_ATTR= JUnitPlugin.PLUGIN_ID+".CONTAINER"; //$NON-NLS-1$
 
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor pm) throws CoreException {		
