@@ -61,6 +61,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * <p>
  * Note: This class is for internal use only. Clients should not use this class.
  * </p>
+ * 
+ * @since 2.0
  */
 public abstract class FindAction extends SelectionDispatchAction {
 
