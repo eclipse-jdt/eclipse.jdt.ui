@@ -1,4 +1,4 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.util.ArrayUtility;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 
 public class VariableBlock {
@@ -9,10 +9,9 @@ public class VariableBlock {
 	private static final String RESERVED= PAGE_NAME + ".reserved";
 	
 	private static final String ADD= VARS + ".add.button";
-	private static final String EDIT= VARS + ".edit.button";
+	private static final String EDIT= VARS + ".edit.button";		private static final String OP_DESC= PAGE_NAME + ".operation_desc";
 	
 	private ListDialogField fVariablesList;
-	private ListDialogField fReservedList;
 	
 	private StatusInfo fSelectionStatus;
 	
@@ -42,67 +41,24 @@ public class VariableBlock {
 		fVariablesList.setDialogFieldListener(adapter);
 		fVariablesList.setLabelText(JavaPlugin.getResourceString(VARS + ".label"));
 		fVariablesList.setRemoveButtonLabel(JavaPlugin.getResourceString(VARS + ".remove.button"));
-
-		fReservedList= new ListDialogField(adapter, null, labelProvider, 0);
-		fReservedList.setDialogFieldListener(adapter);
-		fReservedList.setLabelText(JavaPlugin.getResourceString(RESERVED + ".label"));
-		
+	
 		fVariablesList.enableCustomButton(1, false);
 		
 		CPVariableElement initSelectedElement= null;
 		
 		String[] reservedName= getReservedVariableNames();
-		ArrayList reserved= new ArrayList(reservedName.length);
-		for (int i= 0; i < reservedName.length; i++) {
-			String name= reservedName[i];
-			CPVariableElement resVar= new CPVariableElement(name, null);
-			reserved.add(resVar);
-			
-			if (name.equals(initSelection)) {
-				initSelectedElement= resVar;
-			}
-		}
-		
-		boolean isInReserved= (initSelectedElement != null);
-		
+		ArrayList reserved= new ArrayList(reservedName.length);		ArrayUtility.addAll(reservedName, reserved);				
 		String[] entries= JavaCore.getClasspathVariableNames();
 		ArrayList elements= new ArrayList(entries.length);
 		for (int i= 0; i < entries.length; i++) {
-			String name= entries[i];
-			IPath entryPath= JavaCore.getClasspathVariable(name);
-			if (entryPath != null) {
-				CPVariableElement elem= new CPVariableElement(name, entryPath);
-				if (!reserved.contains(elem)) {
-					elements.add(elem);
-					if (name.equals(initSelection)) {
-						initSelectedElement= elem;
-						isInReserved= false;
-					}
-				}
-			} else {
-				JavaPlugin.log(new Exception("classpath variable not found: " + name));
-			}
+			String name= entries[i];			CPVariableElement elem;			if (reserved.contains(name)) {				elem= new CPVariableElement(name, null, true);			} else {				IPath entryPath= JavaCore.getClasspathVariable(name);				elem= new CPVariableElement(name, entryPath, false);			}			elements.add(elem);			if (name.equals(initSelection)) {				initSelectedElement= elem;			}			
 		}
 		fVariablesList.setElements(elements);
-		fReservedList.setElements(reserved);
 		
-		Object selElement= null;
+		ISelection sel;
 		if (initSelectedElement != null) {
-			ISelection sel= new StructuredSelection(initSelectedElement);
-			if (isInReserved) {
-				fReservedList.selectElements(sel);
-			} else {
-				fVariablesList.selectElements(sel);
-			}
-		} else {
-			if (fVariablesList.getSize() > 0) {
-				fVariablesList.selectElements(new StructuredSelection(fVariablesList.getElement(0)));
-			} else if (fReservedList.getSize() > 0) {
-				fReservedList.selectElements(new StructuredSelection(fReservedList.getElement(0)));
-			}
-		}
-		
-	}
+			sel= new StructuredSelection(initSelectedElement);
+		} else {			sel= new StructuredSelection(fVariablesList.getElement(0));		}		fVariablesList.selectElements(sel);	}
 	
 	private String[] getReservedVariableNames() {
 		return new String[] {
@@ -112,18 +68,14 @@ public class VariableBlock {
 		};
 	}
 	
-
 	public Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList, fReservedList }, true, 420, 0);	
-		MGridData data= (MGridData)fReservedList.getListControl(null).getLayoutData();
-		data.heightHint= 50;
-		return composite;
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList }, true, 420, 0);	
+		fVariablesList.getTableViewer().setSorter(new ViewerSorter() {			public int compare(Viewer viewer, Object e1, Object e2) {				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {					return ((CPVariableElement)e1).getName().compareTo(((CPVariableElement)e2).getName());				}				return super.compare(viewer, e1, e2);			}		});		return composite;
 	}
 	
 	public void addDoubleClickListener(IDoubleClickListener listener) {
 		fVariablesList.getTableViewer().addDoubleClickListener(listener);
-		fReservedList.getTableViewer().addDoubleClickListener(listener);
 	}
 		
 	
@@ -161,19 +113,10 @@ public class VariableBlock {
 		public void dialogFieldChanged(DialogField field) {
 		}
 	
-	}
-	
+	}		private boolean containsReserved(List selected) {		for (int i= selected.size()-1; i >= 0; i--) {			if (((CPVariableElement)selected.get(i)).isReserved()) {				return true;			}		}		return false;	}	
 	private void doSelectionChanged(DialogField field) {
-		List selected= ((ListDialogField)field).getSelectedElements();
-		boolean isSingleSelected= (selected.size() == 1);
-		if (field == fVariablesList) {
-			fVariablesList.enableCustomButton(1, isSingleSelected);
-		}
-		
-		if (fRemovingSelection) {
-			return;
-		}
-		
+		List selected= fVariablesList.getSelectedElements();
+		boolean isSingleSelected= selected.size() == 1;		boolean containsReserved= containsReserved(selected);				fVariablesList.enableCustomButton(1, isSingleSelected && !containsReserved);		fVariablesList.enableRemoveButton(!containsReserved);		
 		fSelectedVariable= null;
 		if (fUseAsSelectionDialog) {
 			if (isSingleSelected) {
@@ -184,20 +127,10 @@ public class VariableBlock {
 			}
 			fContext.statusChanged(fSelectionStatus);
 		}	
-		
-		fRemovingSelection= true;
-		ISelection emptySelection= new StructuredSelection();
-		if (field == fVariablesList) {
-			fReservedList.selectElements(emptySelection);
-		} else {
-			fVariablesList.selectElements(emptySelection);
-		}
-		fRemovingSelection= false;		
 	}
 	
 	private void editEntries(CPVariableElement entry) {
 		List existingEntries= fVariablesList.getElements();
-		existingEntries.addAll(fReservedList.getElements());
 
 		VariableCreationDialog dialog= new VariableCreationDialog(getShell(), entry, existingEntries);
 		if (dialog.open() != dialog.OK) {
@@ -216,41 +149,12 @@ public class VariableBlock {
 	}
 	
 	public void performDefaults() {
-		fVariablesList.removeAllElements();
+		fVariablesList.removeAllElements();		String[] reservedName= getReservedVariableNames();		for (int i= 0; i < reservedName.length; i++) {			CPVariableElement elem= new CPVariableElement(reservedName[i], null, true);			elem.setReserved(true);			fVariablesList.addElement(elem);		}	}
+
+	public boolean performOk() {		List toRemove= new ArrayList();		toRemove.addAll(Arrays.asList(JavaCore.getClasspathVariableNames()));		// remove all unchanged		List elements= fVariablesList.getElements();		for (int i= elements.size()-1; i >= 0; i--) {			CPVariableElement curr= (CPVariableElement) elements.get(i);			if (curr.isReserved()) {				elements.remove(curr);			} else {				IPath path= curr.getPath();				IPath prevPath= JavaCore.getClasspathVariable(curr.getName());				if (prevPath != null && prevPath.equals(path)) {					elements.remove(curr);				}			}			toRemove.remove(curr.getName());		}		int steps= elements.size() + toRemove.size();		if (steps > 0) {			IRunnableWithProgress runnable= new VariableBlockRunnable(toRemove, elements);						ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());			try {				dialog.run(true, true, runnable);			} catch (InvocationTargetException e) {				JavaPlugin.log(e.getTargetException());				return false;			} catch (InterruptedException e) {				return true;			}		}		return true;	}		private class VariableBlockRunnable implements IRunnableWithProgress {		private List fToRemove;		private List fToChange;				public VariableBlockRunnable(List toRemove, List toChange) {			fToRemove= toRemove;			fToChange= toChange;		}				/**
+	 	 * @see IRunnableWithProgress#run(IProgressMonitor)
+		 */
+		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			int steps= fToChange.size() + fToRemove.size();			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), steps);			try {				for (int i= 0; i < fToChange.size(); i++) {					CPVariableElement curr= (CPVariableElement) fToChange.get(i);					SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);					JavaCore.setClasspathVariable(curr.getName(), curr.getPath(), subMonitor);					if (monitor.isCanceled()) {						return;					}				}				for (int i= 0; i < fToRemove.size(); i++) {					SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);					JavaCore.removeClasspathVariable((String) fToRemove.get(i), subMonitor);					if (monitor.isCanceled()) {						return;					}									}			} catch (JavaModelException e) {				throw new InvocationTargetException(e);			} finally {				monitor.done();			}		}
 	}
-
-	public boolean performOk() {
-		try {
-			List existing= new ArrayList();
-			existing.addAll(Arrays.asList(JavaCore.getClasspathVariableNames()));
-			existing.removeAll(Arrays.asList(getReservedVariableNames()));
-			
-			List elements= fVariablesList.getElements();
-			
-			for (int i= 0; i < elements.size(); i++) {
-				CPVariableElement curr= (CPVariableElement) elements.get(i);
-				String name= curr.getName();
-				IPath path= curr.getPath();
-				
-				IPath prevPath= JavaCore.getClasspathVariable(name);
-				if (prevPath == null || !prevPath.equals(path)) {
-					JavaCore.setClasspathVariable(name, path);
-				}
-				if (prevPath != null) {
-					existing.remove(curr.getName());
-				}
-			}
-			
-			for (int i= 0; i < existing.size(); i++) {
-				JavaCore.removeClasspathVariable((String) existing.get(i));
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
-			ErrorDialog.openError(getShell(), "Error", "", e.getStatus());
-			return true;
-		}
-		
-		return true;
-	}	
-
 }

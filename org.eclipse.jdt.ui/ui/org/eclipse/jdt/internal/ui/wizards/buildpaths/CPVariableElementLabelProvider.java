@@ -2,7 +2,7 @@
 
 
 public class CPVariableElementLabelProvider extends LabelProvider {
-	
+		private static final String RESERVED= "CPVariableElementLabelProvider.reserved";	
 	private Image fVariableImage;
 	
 	public CPVariableElementLabelProvider() {
@@ -28,12 +28,11 @@ public class CPVariableElementLabelProvider extends LabelProvider {
 			CPVariableElement curr= (CPVariableElement)element;
 			String name= curr.getName();
 			IPath path= curr.getPath();
-			StringBuffer buf= new StringBuffer(name);
-			if (path != null) {
-				buf.append(" - ");
-				buf.append(path.toString());
-			}
-			return buf.toString();
+			StringBuffer buf= new StringBuffer(name);			if (!curr.isReserved()) {
+				if (path != null) {
+					buf.append(" - ");
+					buf.append(path.toString());
+				}			} else {				buf.append(' ');				buf.append(JavaPlugin.getResourceString(RESERVED));			}			return buf.toString();
 		}		
 		
 		

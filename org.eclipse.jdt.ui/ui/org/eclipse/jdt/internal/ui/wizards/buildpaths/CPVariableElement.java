@@ -4,11 +4,11 @@
 public class CPVariableElement {
 
 	private String fName;
-	private IPath fPath;
+	private IPath fPath;		private boolean fIsReserved;
 
-	public CPVariableElement(String name, IPath path) {
+	public CPVariableElement(String name, IPath path, boolean reserved) {
 		fName= name;
-		fPath= path;
+		fPath= path;		fIsReserved= reserved;
 	}
 	
 	/**
@@ -50,5 +50,21 @@ public class CPVariableElement {
 			return fName.equals(elem.fName);
 		}
 		return false;
+	}	
+	/**
+	 * Returns true if variable is reserved
+	 * @return Returns a boolean
+	 */
+	public boolean isReserved() {
+		return fIsReserved;
 	}
+
+	/**
+	 * Sets the isReserved
+	 * @param isReserved The state to set
+	 */
+	public void setReserved(boolean isReserved) {
+		fIsReserved= isReserved;
+	}
+
 }

@@ -4,56 +4,66 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.io.File;import java.io.IOException;import java.net.MalformedURLException;import java.net.URL;import java.util.ArrayList;import java.util.zip.ZipFile;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.preferences.ZipContentProvider;import org.eclipse.jdt.internal.ui.preferences.ZipLabelProvider;import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.io.File;import java.io.IOException;import java.net.MalformedURLException;import java.net.URL;import java.util.ArrayList;import java.util.zip.ZipFile;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.preferences.ZipContentProvider;import org.eclipse.jdt.internal.ui.preferences.ZipLabelProvider;import org.eclipse.jdt.internal.ui.viewsupport.ResourceFilter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class SourceAttachmentBlock {
 	
-	private static final String FILENAME= "SourceAttachmentBlock.filename";
-	private static final String PREFIX= "SourceAttachmentBlock.prefix";
+	private static final String PAGE_NAME= "SourceAttachmentBlock";
 	
-	private static final String JAVADOC= "SourceAttachmentBlock.javadoc";
-	
-	private static final String ERR_FILENAME_NOTEXISTS= FILENAME + ".error.notexists";
+	private static final String FILENAME= PAGE_NAME + ".filename";
+	private static final String PREFIX= PAGE_NAME + ".prefix";
+	private static final String JAVADOC= PAGE_NAME + ".javadoc";
+		
 	private static final String ERR_FILENAME_NOTVALID= FILENAME + ".error.notvalid";
+	private static final String ERR_FILENAME_DEVICEINPATH= FILENAME + ".error.deviceinpath";
+	private static final String ERR_FILENAME_VARIABLENOTEXISTS= FILENAME + ".error.varnotexists";
+	private static final String ERR_FILENAME_NOTEXISTS= FILENAME + ".error.filenotexists";
+
+	private static final String ERR_PREFIX_NOTVALID= PREFIX + ".error.notvalid";
+	private static final String ERR_PREFIX_DEVICEINPATH= PREFIX + ".error.deviceinpath";
+	private static final String ERR_PREFIX_VARIABLENOTEXISTS= PREFIX + ".error.varnotexists";
 	
 	private static final String ERR_JDOCLOCATION_MALFORMED= JAVADOC + ".error.malformed";
 	private static final String ERR_JDOCLOCATION_NOTAFOLDER= JAVADOC + ".error.notafolder";
 	
 	private static final String ERR_JDOCLOCATION_IDXNOTFOUND= JAVADOC + ".warning.filesnotfound";
 	
-	private static final String DIALOG_INTJARDIALOG= "SourceAttachmentBlock.intjardialog";
-	private static final String DIALOG_PREFIXDIALOG= "SourceAttachmentBlock.prefixdialog";
-	private static final String DIALOG_EXTJARDIALOG= "SourceAttachmentBlock.extjardialog";
-	private static final String DIALOG_JDOCDIALOG= "SourceAttachmentBlock.jdocdialog";	
+	private static final String DIALOG_INTJARDIALOG= PAGE_NAME + ".intjardialog";
+	private static final String DIALOG_PREFIXDIALOG= PAGE_NAME + ".prefixdialog";
+	private static final String DIALOG_EXTJARDIALOG= PAGE_NAME + ".extjardialog";
+	private static final String DIALOG_JDOCDIALOG= PAGE_NAME + ".jdocdialog";	
 	
 	private IStatusChangeListener fContext;
 	
 	private StringButtonDialogField fFileNameField;
 	private SelectionButtonDialogField fInternalButtonField;
 	
-	private boolean fIsVariableEntry;
-	private VariableSelectionBlock fVariableSelectionBlock;
-	
-	private IStatus fNameStatus;
-	private IStatus fNameExistsStatus;
-	private IStatus fJavaDocStatus;
-	
-	private StringButtonDialogField fPrefixVarField;
-	
 	private StringButtonDialogField fPrefixField;
 	private StringButtonDialogField fJavaDocField;
+	
+	private boolean fIsVariableEntry;
+	
+	private IStatus fNameStatus;
+	private IStatus fPrefixStatus;
+	private IStatus fJavaDocStatus;
 		
 	private IPath fJARPath;
 	
 	private IPath fFileName;
+	private File fResolvedFile;
 	private IPath fPrefix;
 	private URL fJavaDocLocation;
+	
+	private String fFilePathVariable;
+	private String fPrefixVariable;
 	
 	private IProject fCurrProject;
 	private IWorkspaceRoot fRoot;
 	
 	private Control fSWTWidget;
+	private Label fFullPathResolvedLabel;
+	private Label fPrefixResolvedLabel;
 	
 	public SourceAttachmentBlock(IProject project, IStatusChangeListener context, IClasspathEntry oldEntry) {
 		fContext= context;
@@ -63,38 +73,27 @@ public class SourceAttachmentBlock {
 		fIsVariableEntry= (oldEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE);
 		
 		fNameStatus= new StatusInfo();
-		fNameExistsStatus= new StatusInfo();
+		fPrefixStatus= new StatusInfo();
 		fJavaDocStatus= new StatusInfo();		
 		
-		IPath attachPath= (oldEntry != null) ? oldEntry.getSourceAttachmentPath() : new Path("");
-		IPath attachRoot= (oldEntry != null) ? oldEntry.getSourceAttachmentRootPath() : new Path("");
 		fJARPath= (oldEntry != null) ? oldEntry.getPath() : new Path("");
 		
 		SourceAttachmentAdapter adapter= new SourceAttachmentAdapter();
-
-		fPrefixField= new StringButtonDialogField(adapter);
-		fPrefixField.setDialogFieldListener(adapter);
-		fPrefixField.setLabelText(JavaPlugin.getResourceString(PREFIX + ".label"));
-		fPrefixField.setButtonLabel(JavaPlugin.getResourceString(PREFIX + ".button"));		
-
-		fJavaDocField= new StringButtonDialogField(adapter);
-		fJavaDocField.setDialogFieldListener(adapter);
-		fJavaDocField.setLabelText(JavaPlugin.getResourceString(JAVADOC + ".label"));
-		fJavaDocField.setButtonLabel(JavaPlugin.getResourceString(JAVADOC + ".button"));		
 		
 		if (fIsVariableEntry) {
-			IStatusChangeListener listener= new IStatusChangeListener() {
-				public void statusChanged(IStatus status) {
-					variableUpdated(status);
-				}
-			};
-			String initSelection= (oldEntry != null) ? oldEntry.getPath().segment(0) : null;
-			fVariableSelectionBlock= new VariableSelectionBlock(listener, new ArrayList(), attachPath, initSelection, true);
-			variableUpdated(fNameStatus);
+			fFileNameField= new VariablePathDialogField(adapter);
+			fFileNameField.setDialogFieldListener(adapter);
+			fFileNameField.setLabelText(JavaPlugin.getResourceString(FILENAME + ".varlabel"));
+			fFileNameField.setButtonLabel(JavaPlugin.getResourceString(FILENAME + ".external.varbutton"));
+			((VariablePathDialogField)fFileNameField).setVariableButtonLabel(JavaPlugin.getResourceString(FILENAME + ".variable.button"));
+		
+			fPrefixField= new VariablePathDialogField(adapter);
+			fPrefixField.setDialogFieldListener(adapter);
+			fPrefixField.setLabelText(JavaPlugin.getResourceString(PREFIX + ".varlabel"));
+			fPrefixField.setButtonLabel(JavaPlugin.getResourceString(PREFIX + ".varbutton"));			
+			((VariablePathDialogField)fPrefixField).setVariableButtonLabel(JavaPlugin.getResourceString(PREFIX + ".variable.button"));
 			
-			fPrefixVarField= new StringButtonDialogField(adapter); 
-			
-		} else {		
+		} else {
 			fFileNameField= new StringButtonDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
 			fFileNameField.setLabelText(JavaPlugin.getResourceString(FILENAME + ".label"));
@@ -103,20 +102,29 @@ public class SourceAttachmentBlock {
 			fInternalButtonField= new SelectionButtonDialogField(SWT.PUSH);
 			fInternalButtonField.setDialogFieldListener(adapter);
 			fInternalButtonField.setLabelText(JavaPlugin.getResourceString(FILENAME + ".internal.button"));
-		
-			if (attachPath != null) {
-				fFileNameField.setText(attachPath.toString());
-			} else {
-				fFileNameField.setText("");
-			}
-		}
-	
-		if (attachRoot != null) {
-			fPrefixField.setText(attachRoot.toString());
+			
+			fPrefixField= new StringButtonDialogField(adapter);
+			fPrefixField.setDialogFieldListener(adapter);
+			fPrefixField.setLabelText(JavaPlugin.getResourceString(PREFIX + ".label"));
+			fPrefixField.setButtonLabel(JavaPlugin.getResourceString(PREFIX + ".button"));
+		}	
+			
+		fJavaDocField= new StringButtonDialogField(adapter);
+		fJavaDocField.setDialogFieldListener(adapter);
+		fJavaDocField.setLabelText(JavaPlugin.getResourceString(JAVADOC + ".label"));
+		fJavaDocField.setButtonLabel(JavaPlugin.getResourceString(JAVADOC + ".button"));		
+			
+		if (oldEntry != null && oldEntry.getSourceAttachmentPath() != null) {
+			fFileNameField.setText(oldEntry.getSourceAttachmentPath().toString());
+		} else {
+			fFileNameField.setText("");
+		}	
+				
+		if (oldEntry != null && oldEntry.getSourceAttachmentRootPath() != null) {
+			fPrefixField.setText(oldEntry.getSourceAttachmentRootPath().toString());
 		} else {
 			fPrefixField.setText("");
-		}		
-
+		}
 	}
 	
 	
@@ -146,6 +154,23 @@ public class SourceAttachmentBlock {
 	//}	
 	
 
+	private Label createHelpText(Composite composite, int style, String label, String text) {
+		if (label == null) {
+			DialogField.createEmptySpace(composite, 1);
+		} else {
+			Label labelControl= new Label(composite, SWT.LEFT);
+			labelControl.setText(label);
+		}
+			
+		Label helpTextLabel= new Label(composite, style);
+		helpTextLabel.setText(text);
+		MGridData gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		//gd.horizontalSpan= 2;
+		helpTextLabel.setLayoutData(gd);
+		DialogField.createEmptySpace(composite, 2);
+		return helpTextLabel;
+	}		
+
 	
 	/**
 	 * Creates the control
@@ -160,26 +185,33 @@ public class SourceAttachmentBlock {
 		layout.marginWidth= 0;
 		layout.minimumWidth= 450;
 		layout.minimumHeight= 0;
-		layout.numColumns= 3;		
+		layout.numColumns= 4;		
 		composite.setLayout(layout);
 		
-		if (fVariableSelectionBlock != null) {
-			fVariableSelectionBlock.doFillIntoGrid(composite, 3);
-			fVariableSelectionBlock.setFocus(parent.getDisplay());
-		} else {
-			fFileNameField.doFillIntoGrid(composite, 3);
-			DialogField.createEmptySpace(composite, 2);	
+		if (fIsVariableEntry) {
+			createHelpText(composite, SWT.LEFT + SWT.WRAP, null, JavaPlugin.getResourceString(FILENAME + ".description"));
+		}			
+		
+		fFileNameField.doFillIntoGrid(composite, 4);
+		if (!fIsVariableEntry) {
+			DialogField.createEmptySpace(composite, 3);	
 			fInternalButtonField.doFillIntoGrid(composite, 1);
-			fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
-		}		
+		} else {
+			String label= JavaPlugin.getResourceString(FILENAME + ".resolvedpath");
+			fFullPathResolvedLabel= createHelpText(composite, SWT.LEFT, null, getResolvedLabelString(fFileName));
+		}
 		
-		DialogField.createEmptySpace(composite, 1);
-		Label prefixDescription= new Label(composite, SWT.LEFT + SWT.WRAP);
-		prefixDescription.setText(JavaPlugin.getResourceString(PREFIX + ".description"));
-		DialogField.createEmptySpace(composite, 1);
+		// label
+		createHelpText(composite, SWT.LEFT + SWT.WRAP, null, JavaPlugin.getResourceString(PREFIX + ".description"));
+	
+		fPrefixField.doFillIntoGrid(composite, 4);
+		if (fIsVariableEntry) {
+			String label= JavaPlugin.getResourceString(PREFIX + ".resolvedpath");
+			fPrefixResolvedLabel= createHelpText(composite, SWT.LEFT, null, getResolvedLabelString(fPrefix));
+		}
 		
-		fPrefixField.doFillIntoGrid(composite, 3);
-
+		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
+		
 		//DialogField.createEmptySpace(composite, 1);
 		//Label jdocDescription= new Label(composite, SWT.LEFT + SWT.WRAP);
 		//jdocDescription.setText(JavaPlugin.getResourceString(JAVADOC + ".description"));
@@ -202,7 +234,7 @@ public class SourceAttachmentBlock {
 					fFileNameField.setText(fFileName.toString());
 				}
 			} else if (field == fPrefixField) {
-				IPath prefixPath= choosePrefix(fPrefixField.getText());
+				IPath prefixPath= choosePrefix();
 				if (prefixPath != null) {
 					fPrefix= prefixPath;
 					fPrefixField.setText(fPrefix.toString());
@@ -221,83 +253,138 @@ public class SourceAttachmentBlock {
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fFileNameField) {
 				fNameStatus= updateFileNameStatus();
-				fNameExistsStatus= updateFileExistsStatus();
-				doStatusLineUpdate();
 			} else if (field == fInternalButtonField) {
 				IPath jarFilePath= chooseInternalJarFile(fFileNameField.getText());
 				if (jarFilePath != null) {
 					fFileName= jarFilePath;
 					fFileNameField.setText(fFileName.toString());
 				}
+				return;
 			} else if (field == fPrefixField) {
-				fPrefix= new Path(fPrefixField.getText());
+				fPrefixStatus= updatePrefixStatus();
 			} else if (field == fJavaDocField) {
 				fJavaDocStatus= updateJavaDocLocationStatus();
-				doStatusLineUpdate();
 			}
+			doStatusLineUpdate();
 		}
 	}
+		
+	private void doStatusLineUpdate() {
+		boolean canBrowseFileName= !fIsVariableEntry || (fResolvedFile == null && fFilePathVariable != null);
+		boolean canBrowsePrefix= (fResolvedFile != null) && (!fIsVariableEntry ||  fPrefixVariable != null);
+	
+		fPrefixField.enableButton(canBrowsePrefix);
+		fFileNameField.enableButton(canBrowseFileName);
 
-	private IPath getResolvedPath() {
-		if (fFileName != null) {
-			if (fIsVariableEntry) {
-				return fVariableSelectionBlock.getResolvedPath();
-			} else {
-				return fFileName;
+		if (fPrefixResolvedLabel != null) {
+			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefix));
+		}
+		if (fFullPathResolvedLabel != null) {
+			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileName));
+		}			
+		
+		IStatus status= StatusTool.getMostSevere(new IStatus[] { fNameStatus, fPrefixStatus, fJavaDocStatus });
+		fContext.statusChanged(status);
+	}
+	
+	private String getResolvedLabelString(IPath path) {
+		IPath resolvedPath= getResolvedPath(path);
+		if (resolvedPath != null) {
+			return resolvedPath.toString();
+		}
+		return "";
+	}	
+	
+	private IPath getResolvedPath(IPath path) {
+		if (path != null) {
+			String varName= path.segment(0);
+			if (varName != null) {
+				IPath varPath= JavaCore.getClasspathVariable(varName);
+				if (varPath != null) {
+					return varPath.append(path.removeFirstSegments(1));
+				}
 			}
 		}
 		return null;
 	}
-	
-	private void doStatusLineUpdate() {
-		IStatus status= StatusTool.getMostSevere(new IStatus[] { fNameStatus, fNameExistsStatus, fJavaDocStatus });
-		fContext.statusChanged(status);
-	}		
-	
-	private void variableUpdated(IStatus varStatus) {
-		fNameStatus= varStatus;
-		if (fVariableSelectionBlock != null) {
-			if (fNameStatus.isOK()) {
-				fFileName= fVariableSelectionBlock.getVariablePath();
-				fNameExistsStatus= updateFileExistsStatus();
-				doStatusLineUpdate();
-			} else {
-				fFileName= null;
+		
+	private IStatus updatePrefixStatus() {
+		StatusInfo status= new StatusInfo();
+		fPrefix= null;
+		fPrefixVariable= null;
+		
+		String prefix= fPrefixField.getText();
+		if (prefix.length() == 0) {
+			return status;
+		} else {
+			if (!Path.EMPTY.isValidPath(prefix)) {
+				status.setError(JavaPlugin.getResourceString(ERR_PREFIX_NOTVALID));
+				return status;
 			}
+			IPath path= new Path(prefix);
+			if (path.getDevice() != null) {
+				status.setError(JavaPlugin.getResourceString(ERR_PREFIX_DEVICEINPATH));
+				return status;
+			} 			
+			if (fIsVariableEntry) {
+				IPath resolvedPath= getResolvedPath(path);
+				if (path == null) {
+					status.setError(JavaPlugin.getResourceString(ERR_PREFIX_VARIABLENOTEXISTS));
+					return status;
+				}
+				fPrefixVariable= path.segment(0);
+			}
+			fPrefix= path;
 		}
+		return status;
 	}
 	
 	private IStatus updateFileNameStatus() {
 		StatusInfo status= new StatusInfo();
 		fFileName= null;
+		fResolvedFile= null;
+		fFilePathVariable= null;
+		
 		String fileName= fFileNameField.getText();
-		if ("".equals(fileName)) {
+		if (fileName.length() == 0) {
 			return status;
 		} else {
-			IWorkspace ws= fCurrProject.getWorkspace();
 			if (!Path.EMPTY.isValidPath(fileName)) {
 				status.setError(JavaPlugin.getResourceString(ERR_FILENAME_NOTVALID));
 				return status;
 			}
-			fFileName= new Path(fileName);
-		}
-		return status;
-	}
-	
-	private IStatus updateFileExistsStatus() {
-		StatusInfo status= new StatusInfo();
-		IWorkspace ws= fCurrProject.getWorkspace();
-		IPath fileNamePath= getResolvedPath();
-		if (fileNamePath != null) {
-			File file= findFile(fileNamePath);
-			if (file == null) {
-				status.setError(JavaPlugin.getResourceString(ERR_FILENAME_NOTEXISTS));
+			IPath filePath= new Path(fileName);
+			IPath resolvedPath;
+			if (fIsVariableEntry) {
+				if (filePath.getDevice() != null) {
+					status.setError(JavaPlugin.getResourceString(ERR_FILENAME_DEVICEINPATH));
+					return status;
+				} 
+				resolvedPath= getResolvedPath(filePath);
+				if (resolvedPath == null) {
+					status.setError(JavaPlugin.getResourceString(ERR_FILENAME_VARIABLENOTEXISTS));
+					return status;
+				}
+				if (fFullPathResolvedLabel != null) {
+					fFullPathResolvedLabel.setText(resolvedPath.toString());
+				}				
+				fFilePathVariable= filePath.segment(0);		
+			} else {
+				resolvedPath= filePath;
 			}
+			fFileName= filePath;
+			
+			File resolvedFile= findFile(resolvedPath);
+			if (resolvedFile == null) {
+				status.setError(JavaPlugin.getResourceString(ERR_FILENAME_NOTEXISTS));
+				return status;
+			}
+			
+			fResolvedFile= resolvedFile;
+			
 		}
-		fPrefixField.enableButton(status.isOK() && fileNamePath != null);
 		return status;
 	}	
-	
 	
 	private IStatus updateJavaDocLocationStatus() {
 		StatusInfo status= new StatusInfo();
@@ -338,15 +425,25 @@ public class SourceAttachmentBlock {
 		if (prevPath.isEmpty()) {
 			prevPath= fJARPath;
 		}
-		String initPath= prevPath.removeLastSegments(1).toOSString();
-		
+		if (fIsVariableEntry) {
+			prevPath= getResolvedPath(prevPath);
+		}
+		String ext= prevPath.getFileExtension();
+		if ("jar".equals(ext) || "zip".equals(ext)) {
+			prevPath= prevPath.removeLastSegments(1);
+		}
+	
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setText(JavaPlugin.getResourceString(DIALOG_EXTJARDIALOG + ".text"));
 		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"});
-		dialog.setFilterPath(initPath);
+		dialog.setFilterPath(prevPath.toOSString());
 		String res= dialog.open();
 		if (res != null) {
-			return new Path(res).makeAbsolute();
+			IPath returnPath= new Path(res).makeAbsolute();
+			if (fIsVariableEntry) {
+				returnPath= modifyPath(returnPath, fFilePathVariable);
+			}
+			return returnPath;
 		}
 		return null;
 	}
@@ -384,42 +481,39 @@ public class SourceAttachmentBlock {
 	/*
 	 * Open a dialog to choose path in a zip file
 	 */		
-	private IPath choosePrefix(String initSelection) {
-		if (fIsVariableEntry) {
-			return chooseVariablePrefix(initSelection);
-		}
-		
-		IPath resolvedPath= getResolvedPath();
-		if (resolvedPath == null) {
-			return null;
-		}
-		File file= findFile(resolvedPath);
-		if (file != null) {
+	private IPath choosePrefix() {
+		if (fResolvedFile != null) {
+			IPath currPath= new Path(fPrefixField.getText());
+			String initSelection= null;
+			if (fIsVariableEntry) {
+				IPath resolvedPath= getResolvedPath(currPath);
+				if (resolvedPath != null) {
+					initSelection= resolvedPath.toString();
+				}
+			} else {
+				initSelection= currPath.toString();
+			}
 			try {
-				ZipFile zipFile= new ZipFile(file);			
+				ZipFile zipFile= new ZipFile(fResolvedFile);			
 				ZipContentProvider contentProvider= new ZipContentProvider(initSelection, zipFile);
 				ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), new ZipLabelProvider(), contentProvider, false, true); 
 				dialog.setTitle(JavaPlugin.getResourceString(DIALOG_PREFIXDIALOG + ".title"));
 				dialog.setMessage(JavaPlugin.getResourceString(DIALOG_PREFIXDIALOG + ".message"));
 				if (dialog.open(zipFile, contentProvider.getSelectedNode()) == dialog.OK) {
 					Object obj= dialog.getPrimaryResult();
-					return new Path(obj.toString());
+					IPath path= new Path(obj.toString());
+					if (fIsVariableEntry) {
+						path= modifyPath(path, fPrefixVariable);
+					}
+					return path;
 				}
 			} catch (IOException e) {
-				MessageDialog.openError(getShell(), "Error", "IOException when opening ZipFile " + file.getPath());
+				MessageDialog.openError(getShell(), "Error", "IOException when opening ZipFile " + fResolvedFile.getPath());
 			}				
 		
 		}
 		return null;
 	}
-	
-	private IPath chooseVariablePrefix(String initSelection) {
-		ChooseVariableDialog dialog= new ChooseVariableDialog(getShell(), initSelection);
-		if (dialog.open() == dialog.OK) {
-			return new Path(dialog.getSelectedVariable());
-		}
-		return null;
-	}	
 	
 	/*
 	 * Open a dialog to choose a root in the file system
@@ -450,6 +544,20 @@ public class SourceAttachmentBlock {
 			return fSWTWidget.getShell();
 		}
 		return JavaPlugin.getActiveWorkbenchShell();			
+	}
+	
+	private IPath modifyPath(IPath path, String varName) {
+		IPath varPath= JavaCore.getClasspathVariable(varName);
+		if (varPath != null) {
+			if (varPath.isPrefixOf(path)) {
+				path= path.removeFirstSegments(varPath.segmentCount());
+			} else {
+				path= new Path(path.lastSegment());
+			}
+		} else {
+			path= new Path(path.lastSegment());
+		}
+		return new Path(varName).append(path);
 	}
 	
 	/*
