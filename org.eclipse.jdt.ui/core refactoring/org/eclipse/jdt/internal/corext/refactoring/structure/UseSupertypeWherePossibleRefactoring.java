@@ -81,6 +81,10 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 		}	
 		fInputType= orig;
 		fSuperTypes= getSuperTypes(pm);
+		if (Checks.isException(fInputType, pm)){
+			String message= "Use Supertype Where Possible refactoring is not available on \"java.lang.Throwable\" and its subclasses";
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}
 		return Checks.checkIfCuBroken(fInputType);
 	}
 

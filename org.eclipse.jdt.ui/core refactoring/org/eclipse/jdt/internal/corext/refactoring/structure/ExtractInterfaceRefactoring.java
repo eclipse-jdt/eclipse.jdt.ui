@@ -166,9 +166,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}	
 		fInputClass= orig;
 		
+		if (Checks.isException(fInputClass, pm)){
+			String message= "Extract Interface refactoring is not available on \"java.lang.Throwable\" and its subclasses";
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}
+			
 		return Checks.checkIfCuBroken(fInputClass);
 	}
-
+	
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(IProgressMonitor)
 	 */
