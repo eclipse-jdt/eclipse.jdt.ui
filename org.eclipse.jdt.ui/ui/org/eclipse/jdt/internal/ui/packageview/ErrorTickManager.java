@@ -73,7 +73,7 @@ public class ErrorTickManager implements IResourceChangeListener {
 				IJavaProject jProject= getJavaProject(p);
 				if (jProject != null) {
 					try {
-						IClasspathEntry[] cps= jProject.getClasspath();
+						IClasspathEntry[] cps= jProject.getRawClasspath();
 						for (int i= 0; i < cps.length; i++) {
 							if (cps[i].getEntryKind() == IClasspathEntry.CPE_SOURCE)
 								delta.accept(new PkgFragmentRootErrorVisitor(cps[i].getPath()));

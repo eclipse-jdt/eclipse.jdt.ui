@@ -27,7 +27,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -124,16 +124,18 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private final static String OPEN_TYPEHIERARCHY_DESC= "PackageViewer.open_typehierarchy.description";	
 	
 	// Persistance tags.
-	private static final String TAG_SELECTION= "selection";
-	private static final String TAG_EXPANDED= "expanded";
-	private static final String TAG_ELEMENT= "element";
-	private static final String TAG_PATH= "path";
-	private static final String TAG_VERTICAL_POSITION= "verticalPosition";
-	private static final String TAG_HORIZONTAL_POSITION= "horizontalPosition";
-	private static final String TAG_FILTERS = "filters";
-	private static final String TAG_FILTER = "filter";
+	static final String TAG_SELECTION= "selection";
+	static final String TAG_EXPANDED= "expanded";
+	static final String TAG_ELEMENT= "element";
+	static final String TAG_PATH= "path";
+	static final String TAG_VERTICAL_POSITION= "verticalPosition";
+	static final String TAG_HORIZONTAL_POSITION= "horizontalPosition";
+	static final String TAG_FILTERS = "filters";
+	static final String TAG_FILTER = "filter";
+	static final String TAG_SHOWLIBRARIES = "showLibraries";
 
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
+	private LibraryFilter fLibraryFilter= new LibraryFilter();
 
 	/**
 	 * Help context id used for the resource navigator view
@@ -153,6 +155,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
  	private RefreshAction fRefreshAction;
 	private static final String SELECT_FILTERS_LABEL = "Select &Filters...";
  	private FilterSelectionAction fFilterAction;
+	private static final String SHOW_LIBRARIES_LABEL = "Show/Hide &Libraries";
+ 	private ShowLibrariesAction fShowLibrariesAction;
 
 	private IMemento fMemento;
 	
@@ -233,9 +237,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.addFilter(new EmptyInnerPackageFilter());
 		fViewer.setUseHashlookup(true);
 		fViewer.addFilter(fPatternFilter);
+		fViewer.addFilter(fLibraryFilter);
 		if(fMemento != null) 
 			restoreFilters();
-
+		else
+			initFilterFromPreferences();
+			
 		// Set input after filter and sorter has been set. This avoids resorting
 		// and refiltering.
 		fViewer.setInput(findInputElement());
@@ -249,7 +256,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fContextMenu= menuMgr.createContextMenu(fViewer.getTree());
 		fViewer.getTree().setMenu(fContextMenu);
 		getSite().registerContextMenu(menuMgr.getId(), menuMgr, fViewer);		
-		makeActions();
 			
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -277,6 +283,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fMemento= null;
 		// Set help for the view 
 		WorkbenchHelp.setHelp(fViewer.getControl(), new ViewContextComputer(this, PACKAGE_VIEW_HELP_ID));
+
+		makeActions();
+		
+		// toolbar actions	
+		IToolBarManager toolbar= getViewSite().getActionBars().getToolBarManager();
+		toolbar.add(fShowLibrariesAction);
+
 	}
 	
 	private Object findInputElement() {
@@ -381,6 +394,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fDeleteAction= new DeleteAction(provider);
 		fRefreshAction= new RefreshAction(getShell());
 		fFilterAction = new FilterSelectionAction(getShell(), this, SELECT_FILTERS_LABEL);
+		fShowLibrariesAction = new ShowLibrariesAction(getShell(), this, SHOW_LIBRARIES_LABEL);
 
 		IActionBars actionService= getViewSite().getActionBars();
 		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
@@ -674,9 +688,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				child.putString(TAG_ELEMENT,filters[i]);
 			}
 		}
+		//save library filter
+		boolean showLibraries= getLibraryFilter().getShowLibraries();
+		String show= "true";
+		if (!showLibraries)
+			show= "false";
+		memento.putString(TAG_SHOWLIBRARIES, show);
 	}
 
 	void restoreState(IMemento memento) {
+		// restore expansion state
 		IMemento childMem= memento.getChild(TAG_EXPANDED);
 		if (childMem != null) {
 			ArrayList elements= new ArrayList();
@@ -687,6 +708,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			}
 			fViewer.setExpandedElements(elements.toArray());
 		}
+		// restoreSelection
 		childMem= memento.getChild(TAG_SELECTION);
 		if (childMem != null) {
 			ArrayList list= new ArrayList();
@@ -790,7 +812,15 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		return fPatternFilter;
 	}
 	
-	public void restoreFilters() {
+	/**
+ 	 * Returns the library filter for this view.
+ 	 * @return the library filter
+ 	 */
+	LibraryFilter getLibraryFilter() {
+		return fLibraryFilter;
+	}
+
+	void restoreFilters() {
 		IMemento filtersMem= fMemento.getChild(TAG_FILTERS);
 		if(filtersMem != null) {	
 			IMemento children[]= filtersMem.getChildren(TAG_FILTER);
@@ -802,6 +832,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		} else {
 			getPatternFilter().setPatterns(new String[0]);
 		}
+		//restore library
+		String show= fMemento.getString(TAG_SHOWLIBRARIES);
+		getLibraryFilter().setShowLibraries(show.equals("true"));
+
+	}
+	
+	void initFilterFromPreferences() {
+		JavaPlugin plugin= JavaPlugin.getDefault();
+		boolean show= plugin.getPreferenceStore().getBoolean(TAG_SHOWLIBRARIES);
+		getLibraryFilter().setShowLibraries(show);
 	}
 
 	/**

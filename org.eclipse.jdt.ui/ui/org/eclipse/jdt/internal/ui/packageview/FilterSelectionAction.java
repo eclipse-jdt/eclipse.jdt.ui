@@ -44,8 +44,8 @@ class FilterSelectionAction extends SelectionProviderAction {
 		dialog.setInitialSelections(contentProvider.getInitialSelections());
 		dialog.open();
 		if (dialog.getReturnCode() == dialog.OK) {
-			Object[] results = dialog.getResult();
-			String[] selectedPatterns = new String[results.length];
+			Object[] results= dialog.getResult();
+			String[] selectedPatterns= new String[results.length];
 			System.arraycopy(results, 0, selectedPatterns, 0, results.length);
 			filter.setPatterns(selectedPatterns);
 			saveInPreferences(selectedPatterns);
@@ -58,7 +58,7 @@ class FilterSelectionAction extends SelectionProviderAction {
 	 */
 	private void saveInPreferences(String[] patterns) {
 		JavaPlugin plugin= JavaPlugin.getDefault();
-		StringWriter writer = new StringWriter();
+		StringWriter writer= new StringWriter();
 	
 		for (int i = 0; i < patterns.length; i++) {
 			writer.write(patterns[i]);

@@ -134,7 +134,7 @@ public class PackageViewerSorter extends ViewerSorter {
 		
 		try {
 			if (fClassPath == null)
-				fClassPath= root.getJavaProject().getClasspath();
+				fClassPath= root.getJavaProject().getRawClasspath();
 		} catch(JavaModelException e) {
 			return 0;
 		}
