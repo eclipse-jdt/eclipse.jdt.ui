@@ -730,11 +730,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				}
 			}
 
-			if (someChange)
+			if (someChange) {
 				unitRewriter.rewriteNode(buffer, root);
-			// N.B.: Since the factory method always currently goes on the same
-			// class as the original constructor, no additional imports need to
-			// be created, so we don't need to call fImportRewriter.rewrite().
+				fImportRewriter.rewrite(buffer, root);
+			}
 		} finally {
 			if (unitRewriter != null)
 				unitRewriter.removeModifications();
@@ -876,6 +875,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		TypeDeclaration	factoryOwner= (TypeDeclaration) unit.findDeclaringNode(fFactoryOwningClass.resolveBinding().getKey());
 		TypeDeclaration	methodOwner= factoryOwner;
+
+		fImportRewriter.addImport(fCtorOwningClass.resolveBinding());
+
 		List	methodDeclList= methodOwner.bodyDeclarations(); // where to put factory method
 
 		int	idx= ASTNodes.getInsertionIndex(fFactoryMethod, methodDeclList);
@@ -1044,6 +1046,15 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 					fFactoryUnitHandle= factoryUnitHandle;
 				}
 				fFactoryOwningClass= ASTNodeSearchUtil.getTypeDeclarationNode(factoryType, fFactoryCU);
+
+				String factoryPkg= factoryType.getPackageFragment().getElementName();
+				String ctorPkg= fCtorOwningClass.resolveBinding().getPackage().getName();
+
+				if (!factoryPkg.equals(ctorPkg))
+					fConstructorVisibility= Modifier.PUBLIC;
+				else if (fFactoryOwningClass != fCtorOwningClass)
+					fConstructorVisibility= 0; // No such thing as Modifier.PACKAGE...
+
 
 				if (fFactoryOwningClass != fCtorOwningClass)
 					fConstructorVisibility= 0; // No such thing as Modifier.PACKAGE...
