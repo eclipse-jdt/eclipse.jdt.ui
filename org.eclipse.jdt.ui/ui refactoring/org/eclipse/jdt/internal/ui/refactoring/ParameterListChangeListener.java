@@ -12,13 +12,13 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
-public interface ParameterChangeListener {
+public interface ParameterListChangeListener {
 
 	/**
 	 * Gets fired when the given parameter has changed	 * @param parameter the paramter that has changed.	 */
 	public void parameterChanged(ParameterInfo parameter);
 
 	/**
-	 * Gets fired if the paramters got reordered.	 */
-	public void parameterReordered();
+	 * Gets fired if the parameter list got modified by reordering, adding or removing parameters)	 */
+	public void parameterListChanged();
 }
