@@ -1777,7 +1777,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		ISelection selection= getSelectionProvider().getSelection();
 		if (selection instanceof TextSelection) {
 			TextSelection textSelection= (TextSelection) selection;
-			if (textSelection.getOffset() != 0 || textSelection.getLength() != 0)
+			// PR 39995: [navigation] Forward history cleared after going back in navigation history:
+			// mark only in navigation history if the cursor is being moved (which it isn't if
+			// this is called from a PostSelectionEvent that should only update the magnet)
+			if (moveCursor && (textSelection.getOffset() != 0 || textSelection.getLength() != 0))
 				markInNavigationHistory();
 		}
 		
