@@ -175,7 +175,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			if (!ActionUtil.isProcessable(getShell(), element))
 				return;
 			int type= element != null ? element.getElementType() : -1;
-			if (type != IJavaElement.METHOD && type != IJavaElement.TYPE) {
+			if (type != IJavaElement.METHOD && type != IJavaElement.TYPE && type != IJavaElement.FIELD) {
 		 		element= SelectionConverter.getTypeAtOffset(fEditor);
 		 		if (element == null) {
 					MessageDialog.openInformation(getShell(), getDialogTitle(), 
