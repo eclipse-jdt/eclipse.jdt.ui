@@ -12,8 +12,6 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
-
 /*
  * XXX: This class should become part of the MemberFilterActionGroup
  *      which should be renamed to MemberActionsGroup
@@ -27,8 +25,10 @@ class LexicalSortingAction extends Action {
 		super();
 		fViewer= viewer;
 		fPreferenceKey= "LexicalSortingAction." + id + ".isChecked"; //$NON-NLS-1$ //$NON-NLS-2$
-		setText(JavaEditorMessages.getString("JavaOutlinePage.Sort.label")); //$NON-NLS-1$
+		setText(JavaBrowsingMessages.getString("LexicalSortingAction.label")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
+		setToolTipText(JavaBrowsingMessages.getString("LexicalSortingAction.tooltip")); //$NON-NLS-1$
+		setDescription(JavaBrowsingMessages.getString("LexicalSortingAction.description")); //$NON-NLS-1$
 		boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fPreferenceKey); //$NON-NLS-1$
 		valueChanged(checked, false);
 	}
@@ -39,16 +39,11 @@ class LexicalSortingAction extends Action {
 
 	private void valueChanged(boolean on, boolean store) {
 		setChecked(on);
-		if (on) {
+		if (on)
 			fViewer.setSorter(fSorter);
-			setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip.checked")); //$NON-NLS-1$
-			setDescription(JavaEditorMessages.getString("JavaOutlinePage.Sort.description.checked")); //$NON-NLS-1$
-		} else {
+		else
 			fViewer.setSorter(null);
-			setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip.unchecked")); //$NON-NLS-1$
-			setDescription(JavaEditorMessages.getString("JavaOutlinePage.Sort.description.unchecked")); //$NON-NLS-1$
-		}
 		if (store)
-			JavaPlugin.getDefault().getPreferenceStore().setValue(fPreferenceKey, on); //$NON-NLS-1$
+			JavaPlugin.getDefault().getPreferenceStore().setValue(fPreferenceKey, on);
 	}
 };
