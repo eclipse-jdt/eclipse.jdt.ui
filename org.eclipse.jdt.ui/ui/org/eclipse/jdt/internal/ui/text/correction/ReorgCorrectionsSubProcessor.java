@@ -261,12 +261,13 @@ public class ReorgCorrectionsSubProcessor {
 				Map map= fProject.getOptions(false);
 				JavaModelUtil.set50CompilanceOptions(map);
 				fProject.setOptions(map);
+				CoreUtility.startBuildInBackground(fProject.getProject());
 			} else {
 				Hashtable map= JavaCore.getOptions();
 				JavaModelUtil.set50CompilanceOptions(map);
 				JavaCore.setOptions(map);
+				CoreUtility.startBuildInBackground(null);
 			}
-			CoreUtility.startBuildInBackground(fProject.getProject());
 		}
 	}
 
