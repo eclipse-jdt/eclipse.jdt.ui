@@ -565,9 +565,8 @@ public class NLSRefactoring extends Refactoring {
 	//---- resource bundle file
 	
 	private IChange createPropertyFile() throws JavaModelException{
-		CreateTextFileChange change= new CreateTextFileChange(getPropertyFilePath(), createPropertyFileSource());
 		if (! propertyFileExists())
-			return change;
+			return new CreateTextFileChange(getPropertyFilePath(), createPropertyFileSource());
 			
 		IPath path= getPropertyFilePath();
 		IFile file= (IFile)ResourcesPlugin.getWorkspace().getRoot().findMember(path);
@@ -575,6 +574,9 @@ public class NLSRefactoring extends Refactoring {
 		TextChange tfc= new TextFileChange(name, file);
 		
 		StringBuffer old= new StringBuffer(getOldPropertyFileSource());
+
+		if (needsLineDelimiter(old))
+			tfc.addTextEdit("add line delimiter", SimpleTextEdit.createInsert(old.length(), fgLineDelimiter));
 		
 		for (int i= 0; i < fNlsSubs.length; i++){
 			if (fNlsSubs[i].task == NLSSubstitution.TRANSLATE){
@@ -584,8 +586,6 @@ public class NLSRefactoring extends Refactoring {
 				}	
 			}	
 		}	
-		if (needsLineDelimiter(old))
-			tfc.addTextEdit("add line delimiter", SimpleTextEdit.createInsert(old.length(), fgLineDelimiter));
 		return tfc;
 	}
 	
