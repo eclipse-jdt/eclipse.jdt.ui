@@ -107,7 +107,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
 		public RGB getDefaultTextColor() {
-			return new RGB(0, 192, 0);
+			return new RGB(0, 0, 0);
 		}
 
 		/*
@@ -128,7 +128,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -170,14 +170,14 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
 		public boolean isBoldByDefault() {
-			return false;
+			return true;
 		}
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
 		 */
 		public boolean isItalicByDefault() {
-			return false;
+			return true;
 		}
 		
 		/*
@@ -226,7 +226,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
 		public boolean isBoldByDefault() {
-			return false;
+			return true;
 		}
 		
 		/*
@@ -275,7 +275,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
 		public RGB getDefaultTextColor() {
-			return new RGB(192, 0, 192);
+			return new RGB(0, 0, 0);
 		}
 
 		/*
@@ -392,14 +392,14 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
 		public RGB getDefaultTextColor() {
-			return new RGB(192, 0, 192);
+			return new RGB(0, 0, 0);
 		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
 		public boolean isBoldByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -413,7 +413,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -448,14 +448,14 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
 		public RGB getDefaultTextColor() {
-			return new RGB(192, 0, 192);
+			return new RGB(0, 0, 0);
 		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
 		public boolean isBoldByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -469,7 +469,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -516,7 +516,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
 		public RGB getDefaultTextColor() {
-			return new RGB(0, 192, 192);
+			return new RGB(0, 0, 0);
 		}
 
 		/*
@@ -537,7 +537,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -572,7 +572,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
 		public RGB getDefaultTextColor() {
-			return new RGB(0, 192, 192);
+			return new RGB(0, 0, 0);
 		}
 
 		/*
@@ -593,7 +593,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
@@ -632,7 +632,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
 		 */
 		public RGB getDefaultTextColor() {
-			return new RGB(0, 192, 192);
+			return new RGB(0, 0, 0);
 		}
 
 		/*
@@ -653,7 +653,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
 		 */
 		public boolean isEnabledByDefault() {
-			return true;
+			return false;
 		}
 		
 		/*
