@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -71,7 +72,6 @@ import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
@@ -280,7 +280,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private void addOpenNewWindowAction(IMenuManager menu, Object element) {
 		if (element instanceof IJavaElement) {
 			element= ((IJavaElement)element).getResource();
-			}
+			
+		}
 		if (!(element instanceof IContainer))
 			return;
 		menu.appendToGroup(
@@ -329,6 +330,10 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			IAction delete= fCCPActionGroup.getDeleteAction();
 			if (delete != null && delete.isEnabled())
 				delete.run();
+		}
+		else if (event.keyCode == SWT.BS) {
+			if (fUpAction != null && fUpAction.isEnabled()) 
+				fUpAction.run();
 		}
 	}
 	
