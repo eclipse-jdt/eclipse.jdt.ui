@@ -7,8 +7,6 @@ package org.eclipse.jdt.ui.text;
 
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -37,8 +35,6 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -65,47 +61,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
  * </p>
  */
 public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
-
-	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
-
-	private static class PreferenceListener implements IPropertyChangeListener, DisposeListener {
-
-		private final ISourceViewer fSourceViewer;
-		private final IPreferenceStore fPreferenceStore;
-
-		public PreferenceListener(ISourceViewer viewer, IPreferenceStore store) {
-
-			fSourceViewer= viewer;
-			fPreferenceStore= store;
-			
-			fSourceViewer.getTextWidget().addDisposeListener(this);
-			fPreferenceStore.addPropertyChangeListener(this);
-		}
-
-		/*
-		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
-		 */
-		public void propertyChange(PropertyChangeEvent event) {
-			if (event.getProperty().equals(PREF_TAB_SIZE)) {
-				Object value= event.getNewValue();
-				
-				if (value instanceof Integer) {
-					Integer tabWidth= (Integer) value;
-					fSourceViewer.getTextWidget().setTabs(tabWidth.intValue());
-
-				} else if (value instanceof String) {
-					fSourceViewer.getTextWidget().setTabs(Integer.parseInt((String)value));
-				}
-			}
-		}
-
-		/*
-		 * @see DisposeListener#widgetDisposed(DisposeEvent)
-		 */
-		public void widgetDisposed(DisposeEvent e) {
-			fPreferenceStore.removePropertyChangeListener(this);
-		}
-	}	
+	
 	
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
@@ -285,13 +241,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		IPreferenceStore store= getPreferenceStore();
-		
-		new PreferenceListener(sourceViewer, store);
-		
-		return store.getInt(PREF_TAB_SIZE);
-		
-//		return 4;
+		return 4;
 	}
 
 	/*
