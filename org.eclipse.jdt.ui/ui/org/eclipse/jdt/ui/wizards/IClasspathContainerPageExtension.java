@@ -28,7 +28,8 @@ public interface IClasspathContainerPageExtension {
 	 * to give additional information about the context the classpath container entry is configured in. This information
 	 * only reflects the underlying dialogs current selection state. The user still can make changes after the
 	 * the classpath container pages has been closed or decide to cancel the operation.
-	 * @param project The project the new or modified entry is added to. The project does not have to exist.
+	 * @param project The project the new or modified entry is added to. The project does not have to exist. 
+	 * Project can be <code>null</code>.
 	 * @param currentEntries The class path entries currently selected to be set as the projects classpath. This can also
 	 * include the entry to be edited.
 	 */
