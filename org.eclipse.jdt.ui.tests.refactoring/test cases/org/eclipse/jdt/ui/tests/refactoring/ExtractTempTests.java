@@ -503,9 +503,9 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(7, 48, 7, 49, true, false, "temp", "j");
 	}	
 
-	public void test77() throws Exception {
-//		printTestDisabledMessage("test for bug 40353: extracting fragment which matches for_initializer");
-		helper1(10, 13, 10, 17, true, false, "temp", "i");
+	public void testZeroLengthSelection0() throws Exception {
+//		printTestDisabledMessage("test for bug 30146");
+		helper1(4, 18, 4, 18, true, false, "temp", "j");
 	}
 
 	// -- testing failing preconditions
