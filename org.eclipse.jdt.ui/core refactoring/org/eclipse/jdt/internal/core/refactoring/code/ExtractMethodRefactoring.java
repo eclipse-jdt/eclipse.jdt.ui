@@ -109,7 +109,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				return result;
 			}
 			if (!fCUnit.isStructureKnown()) {
-				result.addFatalError("Syntax errors in compilation unit prevent method extraction. Fix fix errors.");
+				result.addFatalError("Syntax errors in this compilation unit prevent method extraction. Fix the errors first.");
 				return result;
 			}
 			fBuffer= new ExtendedBuffer(fCUnit.getBuffer());
