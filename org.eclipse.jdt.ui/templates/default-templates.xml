@@ -144,7 +144,7 @@ return ${name};</template>
 	${line_selection}${cursor}
 }</template>
 
-<template name="test" description="%Templates.test" id="org.eclipse.jdt.ui.templates.test" context="java" enabled="true">public void test${name}() {
+<template name="test" description="%Templates.test" id="org.eclipse.jdt.ui.templates.test" context="java" enabled="true">public void test${name}() throws Exception {
 	${cursor} 
 }</template>
 
