@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 class CalleeMethodWrapper extends MethodWrapper {
     private Comparator fMethodWrapperComparator = new MethodWrapperComparator();
 
-    private class MethodWrapperComparator implements Comparator {
+    private static class MethodWrapperComparator implements Comparator {
         /* (non-Javadoc)
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
@@ -88,19 +88,17 @@ class CalleeMethodWrapper extends MethodWrapper {
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
      */
     protected Map findChildren(IProgressMonitor progressMonitor) {
-        if (getMember().getElementType() == IJavaElement.METHOD) {
-            CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor((IMethod) getMember(),
-                    progressMonitor);
+        if (getMember().exists() && getMember().getElementType() == IJavaElement.METHOD) {
             ICompilationUnit icu = getMember().getCompilationUnit();
-        
-            if (icu != null) {
+            if (icu != null && icu.exists()) {
+                CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor((IMethod) getMember(),
+                        progressMonitor);
+            
                 CompilationUnit cu = AST.parseCompilationUnit(icu, true);
                 cu.accept(visitor);
+                return visitor.getCallees();
             }
-        
-            return visitor.getCallees();
-        } else {
-            return new HashMap();
         }
+        return new HashMap(0);
     }
 }
