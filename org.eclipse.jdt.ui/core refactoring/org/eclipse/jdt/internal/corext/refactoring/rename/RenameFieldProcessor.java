@@ -94,16 +94,20 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	public boolean isApplicable() throws CoreException {
+		return isAvailable() && ! fField.getDeclaringType().isEnum();
+	}
+	
+	protected boolean isAvailable() throws CoreException {
 		if (fField == null)
 			return false;
 		return Checks.isAvailable(fField);
 	}
 	
-	 public String getProcessorName() {
+	public String getProcessorName() {
 		return RefactoringCoreMessages.getFormattedString(
 			"RenameFieldRefactoring.name", //$NON-NLS-1$
 			new String[]{fField.getElementName(), getNewElementName()});
-	 }
+	}
 	
 	protected String[] getAffectedProjectNatures() throws CoreException {
 		return JavaProcessors.computeAffectedNatures(fField);

@@ -29,6 +29,10 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 		super(field);
 	}
 
+	public boolean isApplicable() throws CoreException {
+		return isAvailable() && getField().getDeclaringType().isEnum();
+	}
+	
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor#canEnableGetterRenaming()
 	 */

@@ -19,9 +19,11 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -88,7 +90,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		IType classA= getType(cu, "A");
 		IField field= classA.getField(fieldName);
 		String[] handles= ParticipantTesting.createHandles(field);
-		RenameFieldProcessor processor= new RenameFieldProcessor(field);
+		RenameFieldProcessor processor= field.getDeclaringType().isEnum() ? new RenameEnumConstProcessor(field) : new RenameFieldProcessor(field);
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setNewElementName(newFieldName);
 		processor.setUpdateReferences(updateReferences);
@@ -274,4 +276,44 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		helper2("test", "test1");
 	}
 	
+	public void testStaticImport() throws Exception{
+		//bug 77622 
+		IPackageFragment test1= getRoot().createPackageFragment("test1", true, null);
+		ICompilationUnit cuC= null;
+		try {
+			ICompilationUnit cuB= createCUfromTestFile(test1, "B");
+			cuC= createCUfromTestFile(getRoot().getPackageFragment(""), "C");
+			
+			helper2("PI", "e");
+			
+			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("C")), cuC.getSource());
+		} finally {
+			if (test1.exists())
+				test1.delete(true, null);
+			if (cuC != null && cuC.exists())
+				cuC.delete(true, null);
+		}
+	}
+	
+	public void testEnumConst() throws Exception {
+		//bug 77619
+		IPackageFragment test1= getRoot().createPackageFragment("test1", true, null);
+		ICompilationUnit cuC= null;
+		try {
+			ICompilationUnit cuB= createCUfromTestFile(test1, "B");
+			cuC= createCUfromTestFile(getRoot().getPackageFragment(""), "C");
+			
+			helper2("RED", "REDDISH");
+			
+			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("C")), cuC.getSource());
+		} finally {
+			if (test1.exists())
+				test1.delete(true, null);
+			if (cuC != null && cuC.exists())
+				cuC.delete(true, null);
+		}
+		
+	}
 }
