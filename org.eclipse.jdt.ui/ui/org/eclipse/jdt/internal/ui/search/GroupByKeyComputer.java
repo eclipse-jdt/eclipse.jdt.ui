@@ -53,7 +53,10 @@ public class GroupByKeyComputer implements IGroupByKeyComputer {
 		
 		if (!handle.equals(fLastHandle)) {
 			fLastJavaElement= SearchUtil.getJavaElement(marker);
-			fLastHandle= fLastJavaElement.getHandleIdentifier();
+			if (fLastJavaElement != null)
+				fLastHandle= fLastJavaElement.getHandleIdentifier();
+			else
+				fLastHandle= null;
 		}
 		return fLastJavaElement;
 	}
