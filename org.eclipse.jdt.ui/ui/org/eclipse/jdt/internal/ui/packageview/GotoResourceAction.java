@@ -19,7 +19,10 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -49,15 +52,12 @@ public class GotoResourceAction extends Action {
 			WorkbenchHelp.setHelp(parentShell, IJavaHelpContextIds.GOTO_RESOURCE_DIALOG);
 		}
 		protected boolean select(IResource resource) {
-			if (!fJavaModel.contains(resource))
-				return false;
-			return isVisible(resource.getParent(), resource);
-		}
-		private boolean isVisible(Object parent, Object element) {
-			for (int i= 0; i < fFilters.length; i++) {
-				ViewerFilter filter= fFilters[i];
-				if (!filter.select(fViewer, parent, element))
-					return false;
+			IProject project= resource.getProject();
+			try {
+				if (project.getNature(JavaCore.NATURE_ID) != null)
+					return fJavaModel.contains(resource);
+			} catch (CoreException e) {
+				// do nothing. Consider resource;
 			}
 			return true;
 		}
