@@ -41,7 +41,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -99,6 +98,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
@@ -115,11 +115,9 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -1164,21 +1162,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Computes the files that are being modified by this refactoring.
-	 * 
-	 * @param source the source compilation unit
-	 * @param target the target compilation unit
-	 * @return the modified files
-	 */
-	protected IFile[] computeModifiedFiles(final ICompilationUnit source, final ICompilationUnit target) {
-		Assert.isNotNull(source);
-		Assert.isNotNull(target);
-		if (source.equals(target))
-			return ResourceUtil.getFiles(new ICompilationUnit[] { source});
-		return ResourceUtil.getFiles(new ICompilationUnit[] { source, target});
-	}
-
-	/**
 	 * Searches for references to the original method.
 	 * 
 	 * @param monitor the progress monitor to use
@@ -1186,7 +1169,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 * @return the array of search result groups
 	 * @throws CoreException if an error occurred during search
 	 */
-	protected SearchResultGroup[] computeOriginalMethodReferences(final IProgressMonitor monitor, final RefactoringStatus status) throws CoreException {
+	protected SearchResultGroup[] computeMethodReferences(final IProgressMonitor monitor, final RefactoringStatus status) throws CoreException {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		try {
@@ -1194,7 +1177,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
 			CollectingSearchRequestor requestor= new CollectingSearchRequestor();
 			try {
-				new SearchEngine().search(RefactoringSearchEngine.createOrPattern(new IJavaElement[] { fMethod}, IJavaSearchConstants.REFERENCES), SearchUtils.getDefaultSearchParticipants(), RefactoringScopeFactory.create(fMethod), requestor, new SubProgressMonitor(monitor, 1));
+				new SearchEngine().search(SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES), SearchUtils.getDefaultSearchParticipants(), SearchEngine.createWorkspaceScope(), requestor, new SubProgressMonitor(monitor, 1));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
 			}
@@ -1211,7 +1194,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			for (final Iterator iterator= grouped.keySet().iterator(); iterator.hasNext();) {
 				resource= (IResource) iterator.next();
 				element= JavaCore.create(resource);
-				if (!(element instanceof ICompilationUnit) && !(element instanceof IClassFile))
+				if (element == null)
 					iterator.remove();
 			}
 			final SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
@@ -1227,6 +1210,21 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		} finally {
 			monitor.done();
 		}
+	}
+
+	/**
+	 * Computes the files that are being modified by this refactoring.
+	 * 
+	 * @param source the source compilation unit
+	 * @param target the target compilation unit
+	 * @return the modified files
+	 */
+	protected IFile[] computeModifiedFiles(final ICompilationUnit source, final ICompilationUnit target) {
+		Assert.isNotNull(source);
+		Assert.isNotNull(target);
+		if (source.equals(target))
+			return ResourceUtil.getFiles(new ICompilationUnit[] { source});
+		return ResourceUtil.getFiles(new ICompilationUnit[] { source, target});
 	}
 
 	/**
@@ -1371,7 +1369,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final TextChangeManager manager= new TextChangeManager();
 		final CompilationUnitRewrite targetRewrite= fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()) ? fSourceRewrite : new CompilationUnitRewrite(getTargetType().getCompilationUnit());
 		final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
-		final SearchResultGroup[] references= computeOriginalMethodReferences(new SubProgressMonitor(monitor, 1), status);
+		final SearchResultGroup[] references= computeMethodReferences(new SubProgressMonitor(monitor, 1), status);
 		final boolean result= createMethodCopy(declaration, targetRewrite, monitor);
 		createMethodJavadocReferences(manager, declaration, targetRewrite, references, result, status, monitor);
 		if (!fSourceRewrite.getCu().equals(targetRewrite.getCu()))
@@ -1847,9 +1845,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 							if (!fSourceRewrite.getCu().equals(unit) && !targetRewrite.getCu().equals(unit))
 								manager.manage(unit, rewrite.createChange());
 						} else {
-							final IClassFile file= (IClassFile) JavaCore.create(group.getResource());
-							if (file != null && file.exists())
-								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary.type", file.getType().getFullyQualifiedName('.')))); //$NON-NLS-1$
+							final IJavaElement element= JavaCore.create(group.getResource());
+							if (element != null && element.exists())
+								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary.project", element.getJavaProject().getElementName()))); //$NON-NLS-1$
 							else
 								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.binary.resource", group.getResource().getName()))); //$NON-NLS-1$
 							result= false;
@@ -2030,9 +2028,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						if (!fSourceRewrite.getCu().equals(unit) && !targetRewrite.getCu().equals(unit))
 							manager.manage(unit, rewrite.createChange());
 					} else {
-						final IClassFile file= (IClassFile) JavaCore.create(group.getResource());
-						if (file != null && file.exists())
-							status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.javadoc.binary.type", file.getType().getFullyQualifiedName('.')))); //$NON-NLS-1$
+						final IJavaElement element= JavaCore.create(group.getResource());
+						if (element != null && element.exists())
+							status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.javadoc.binary.project", element.getJavaProject().getElementName()))); //$NON-NLS-1$
 						else
 							status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.javadoc.binary.resource", group.getResource().getName()))); //$NON-NLS-1$
 					}
