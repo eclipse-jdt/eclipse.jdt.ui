@@ -5,7 +5,8 @@
  */
 package org.eclipse.jdt.internal.ui.util;
 
-import java.util.ArrayList;import java.util.Arrays;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IProjectDescription;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;
+import java.util.ArrayList;import java.util.Arrays;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IProjectDescription;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.IClasspathEntry;
 
 
 /**
@@ -133,7 +134,38 @@ public class JavaModelUtility {
 		}
 	}
 		
-	
+	/**
+	 * Returns the raw class path entry corresponding to a package fragment root
+	 * or null if there isn't a corresponding entry.
+	 */
+	public static IClasspathEntry getRawClasspathEntry(IPackageFragmentRoot root) {
+		IPath path= root.getPath();
+		IJavaProject project= root.getJavaProject();
+		// find the class path entry of the root and
+		// check whether it corresponds to variable entry
+		try {
+			IClasspathEntry[] entries= project.getResolvedClasspath(true);
+			int slot= -1;
+			for (int i= 0; i < entries.length; i++) {
+				IClasspathEntry entry= entries[i];
+				if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+					if (entry.getPath().equals(path)) {
+						slot= i;
+						break;
+					}
+				}
+			}
+			if (slot == -1)
+				return null;
+			IClasspathEntry[] raw= project.getRawClasspath();
+			if (raw[slot].getEntryKind() == IClasspathEntry.CPE_VARIABLE) 
+				return raw[slot];
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return null;
+	}	
+
 	/**
 	 * Concatenates to names. Uses a dot for separation
 	 * Both strings can be empty or null
