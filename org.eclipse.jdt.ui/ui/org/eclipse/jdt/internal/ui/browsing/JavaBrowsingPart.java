@@ -1132,7 +1132,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			IEditorInput ei= ((IEditorPart)part).getEditorInput();
 			if (selection instanceof ITextSelection) {
 				int offset= ((ITextSelection)selection).getOffset();
-				element= getElementForInputAt(ei, offset);
+				element= getElementAt(ei, offset);
 			}
 			if (element != null) {
 				adjustInputAndSetSelection(element);
@@ -1226,7 +1226,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	/**
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getElementAt(int)
 	 */
-	protected IJavaElement getElementForInputAt(IEditorInput input, int offset) {
+	protected IJavaElement getElementAt(IEditorInput input, int offset) {
 		if (input instanceof IClassFileEditorInput) {
 			try {
 				return ((IClassFileEditorInput)input).getClassFile().getElementAt(offset);
@@ -1239,11 +1239,17 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		ICompilationUnit unit= manager.getWorkingCopy(input);
 		if (unit != null)
 			try {
-				synchronized (unit) {
-					unit.reconcile(false, null);
+				if (unit.isConsistent())
+					return unit.getElementAt(offset);
+				else {
+					/*
+					 * XXX: We should set the selection later when the
+					 *      CU is reconciled.
+					 *      see https://bugs.eclipse.org/bugs/show_bug.cgi?id=51290 
+					 */
 				}
-				return unit.getElementAt(offset);
 			} catch (JavaModelException ex) {
+				// fall through
 			}
 		return null;
 	}
