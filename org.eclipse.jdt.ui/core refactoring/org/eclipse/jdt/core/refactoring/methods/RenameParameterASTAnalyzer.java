@@ -33,7 +33,7 @@ class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 		fMethodSourceRangeEnd= fMethodSourceRange.getOffset() + fMethodSourceRange.getLength();
 	}
 	
-	private String[] getSortedCopy(String[] array){
+	private static String[] getSortedCopy(String[] array){
 		String[] copy= (String[])array.clone();
 		Arrays.sort(copy);
 		return copy;
