@@ -36,7 +36,7 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 	/**
 	 * Constructs a list selection dialog.
 	 * @param renderer The label renderer used
-	 * @param ignoreCase Decides if the match string ignores lower/upppr case
+	 * @param ignoreCase Decides if the match string ignores lower/upper case
 	 * @param multipleSelection Allow multiple selection	 
 	 */
 	public ElementListSelectionDialog(Shell parent, String title, Image image, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
@@ -96,7 +96,9 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 		
 		setSelectionListElements(fElements, false);
       	//a little trick to make the window come up faster
-      	String initialFilter= (String)getPrimaryInitialSelection();
+      	String initialFilter= null;
+      	if (getPrimaryInitialSelection() instanceof String)
+			initialFilter= (String)getPrimaryInitialSelection();
       	if (initialFilter != null)
       		setFilter(initialFilter, true);
       	else
