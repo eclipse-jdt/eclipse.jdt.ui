@@ -387,7 +387,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			result.merge(checkMatchingFragments());
 			
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
-			TextChangeCompatibility.addTextEdit(change, "", getAllEdits(buffer));
+			TextChangeCompatibility.addTextEdit(change, "", getAllEdits(buffer)); //$NON-NLS-1$
 			String newCuSource= change.getPreviewContent();
 			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
 			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
@@ -652,7 +652,13 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	private static Object[] getLongestArrayPrefix(Object[][] arrays){
 		int length= -1;
-		for (int i= 0; i < arrays[0].length; i++) {
+		if (arrays.length == 0)
+			return new Object[0];
+		int minArrayLength= arrays[0].length;
+		for (int i= 1; i < arrays.length; i++)
+			minArrayLength= Math.min(minArrayLength, arrays[i].length);
+		
+		for (int i= 0; i < minArrayLength; i++) {
 			if (! allArraysEqual(arrays, i))
 				break;
 			length++;	

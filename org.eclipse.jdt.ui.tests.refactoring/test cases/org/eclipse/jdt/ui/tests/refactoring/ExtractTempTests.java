@@ -519,6 +519,11 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(10, 13, 10, 17, true, false, "temp", "i");
 	}
 
+	public void test78() throws Exception {
+//		printTestDisabledMessage("test for bug 50971: Extract temp: index out of bounds error [refactoring]");
+		helper1(5, 21, 5, 27, true, false, "o2", "o");
+	}
+
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
