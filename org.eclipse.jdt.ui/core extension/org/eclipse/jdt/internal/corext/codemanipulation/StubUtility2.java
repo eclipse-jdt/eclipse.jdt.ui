@@ -68,7 +68,7 @@ public final class StubUtility2 {
 		IMethodBinding methodBinding= (IMethodBinding) bindings[1];
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, methodBinding.getModifiers() & ~Modifier.ABSTRACT));
+		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, methodBinding.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 
 		decl.setName(ast.newSimpleName(methodBinding.getName()));
 		decl.setConstructor(false);
@@ -172,7 +172,7 @@ public final class StubUtility2 {
 	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations) throws CoreException {
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, binding.getModifiers() & ~Modifier.ABSTRACT));
+		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, binding.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
@@ -249,7 +249,7 @@ public final class StubUtility2 {
 	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportsStructure structure, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations) throws CoreException {
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, binding.getModifiers() & ~Modifier.ABSTRACT));
+		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, binding.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
@@ -336,7 +336,7 @@ public final class StubUtility2 {
 	private static IMethodBinding findOverridingMethod(IMethodBinding method, List allMethods) {
 		for (int i= 0; i < allMethods.size(); i++) {
 			IMethodBinding curr= (IMethodBinding) allMethods.get(i);
-			if (curr.overrides(method) || Bindings.isEqualMethod(curr, method.getName(), method.getParameterTypes()))
+			if (Bindings.isOverriddenMethod(curr, method) || Bindings.isEqualMethod(curr, method.getName(), method.getParameterTypes()))
 				return curr;
 		}
 		return null;
@@ -460,7 +460,7 @@ public final class StubUtility2 {
 		for (int index= allMethods.size() - 1; index >= 0; index--) {
 			IMethodBinding method= (IMethodBinding) allMethods.get(index);
 			modifiers= method.getModifiers();
-			if (Modifier.isFinal(modifiers) || Modifier.isNative(modifiers))
+			if (Modifier.isFinal(modifiers))
 				allMethods.remove(index);
 		}
 		return (IMethodBinding[]) allMethods.toArray(new IMethodBinding[allMethods.size()]);
