@@ -120,6 +120,7 @@ public class OpenTypeHierarchyUtil {
 		}
 		IWorkbenchPage page= workbench.showPerspective(JavaUI.ID_HIERARCHYPERSPECTIVE, window, perspectiveInput);
 		TypeHierarchyViewPart part= (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
+		part.setInputElement(perspectiveInput);
 		if (input instanceof IMember) {
 			openEditor(input, false);
 		}

@@ -457,7 +457,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		} else {
 			fInputElement= inputElement;
 			try {
-				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, getSite().getWorkbenchWindow());
+				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, JavaPlugin.getActiveWorkbenchWindow());
+				// fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, getSite().getWorkbenchWindow());
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				clearInput();
@@ -772,7 +773,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		getSite().setSelectionProvider(fSelectionProviderMediator);
 		getSite().getPage().addPartListener(fPartListener);
 		
-		IJavaElement input= determineInputElement();
+		// see http://bugs.eclipse.org/bugs/show_bug.cgi?id=33657
+		IJavaElement input= null; //determineInputElement();
 		if (fMemento != null) {
 			restoreState(fMemento, input);
 		} else if (input != null) {
