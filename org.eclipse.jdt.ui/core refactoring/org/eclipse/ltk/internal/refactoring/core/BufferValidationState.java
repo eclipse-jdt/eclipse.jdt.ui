@@ -95,8 +95,8 @@ public abstract class BufferValidationState {
 
 class DirtyBufferValidationState extends BufferValidationState {
 	
-	private IDocumentListener fDocumentListener= new DocumentChangedListener();
-	private FileBufferListener fFileBufferListener= new FileBufferListener();
+	private IDocumentListener fDocumentListener;
+	private FileBufferListener fFileBufferListener;
 	private boolean fChanged;
 	private long fModificationStamp= IResource.NULL_STAMP;
 	
@@ -111,12 +111,15 @@ class DirtyBufferValidationState extends BufferValidationState {
 	class FileBufferListener implements IFileBufferListener {
 		public void bufferCreated(IFileBuffer buffer) {
 			if (buffer.equals(getBuffer(fFile))) {
+				if (fDocumentListener == null)
+					fDocumentListener= new DocumentChangedListener();
 				getDocument().addDocumentListener(fDocumentListener);
 			}
 		}
 		public void bufferDisposed(IFileBuffer buffer) {
 			if (fDocumentListener != null && buffer.equals(getBuffer(fFile))) {
 				getDocument().removeDocumentListener(fDocumentListener);
+				fDocumentListener= null;
 				fModificationStamp= fFile.getModificationStamp();
 			}
 		}
@@ -141,7 +144,9 @@ class DirtyBufferValidationState extends BufferValidationState {
 	
 	public DirtyBufferValidationState(IFile file) {
 		super(file);
+		fFileBufferListener= new FileBufferListener();
 		FileBuffers.getTextFileBufferManager().addFileBufferListener(fFileBufferListener);
+		fDocumentListener= new DocumentChangedListener();
 		getDocument().addDocumentListener(fDocumentListener);
 	}
 
