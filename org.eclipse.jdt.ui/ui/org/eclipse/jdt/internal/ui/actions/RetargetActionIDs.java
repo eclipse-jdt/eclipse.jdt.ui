@@ -86,4 +86,6 @@ public class RetargetActionIDs {
 	public static String MODIFY_PARAMETERS= "org.eclipse.jdt.ui.actions.ModifyParameters"; //$NON-NLS-1$
 	
 	public static String PULL_UP= "org.eclipse.jdt.ui.actions.PullUp"; //$NON-NLS-1$
+	
+	public static String MOVE= "org.eclipse.jdt.ui.actions.Move"; //$NON-NLS-1$
 }

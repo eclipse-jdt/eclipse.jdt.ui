@@ -190,5 +190,11 @@ public class ActionDelegates {
 			return RetargetActionIDs.PULL_UP;
 		}
 	}
+
+	public static class Move extends RetargetActionDelegator {
+		protected String getId() {
+			return RetargetActionIDs.MOVE; 
+		}
+	}
 	
 }
