@@ -197,7 +197,7 @@ public class ParameterGuesser {
 			char[] typePackageName, char[] typeName, char[] completionName, int modifiers, int completionStart,
 			int completionEnd, int relevance)
 		{
-			char[] triggers= isPrimitive(typeName) ? new char[0] : new char[] {'.'};
+			char[] triggers= new char[0];
 			if (!isInherited(new String(declaringTypeName)))
 				addVariable(Variable.FIELD, typePackageName, typeName, name, triggers, getFieldDescriptor(modifiers));
 			else
@@ -210,7 +210,7 @@ public class ParameterGuesser {
 		public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers,
 			int completionStart, int completionEnd, int relevance)
 		{
-			char[] triggers= isPrimitive(typeName) ? new char[0] : new char[] {'.'};
+			char[] triggers= new char[0];
 			addVariable(Variable.LOCAL, typePackageName, typeName, name, triggers, JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
 		}
 		
@@ -220,7 +220,7 @@ public class ParameterGuesser {
 		public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 			// TODO: for now: only add zero-arg methods.
 			if (parameterNames.length == 0) {
-				char[] triggers= isPrimitive(returnTypeName) ? new char[0] : new char[] {'.'};
+				char[] triggers= new char[0];
 				addVariable(isInherited(new String(declaringTypeName)) ? Variable.INHERITED_METHOD : Variable.METHOD, returnTypePackageName, returnTypeName, completionName, triggers, getMemberDescriptor(modifiers));
 			}
 		}
