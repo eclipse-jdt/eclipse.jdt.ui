@@ -153,7 +153,9 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 
 		final Text text= new Text(result, SWT.SINGLE | SWT.BORDER);
 		text.setText(getMoveRefactoring().getNewMethodName());
+		text.selectAll();
 		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		text.setFocus();
 		text.addModifyListener(new ModifyListener(){
 			public void modifyText(ModifyEvent arg0) {
 				RefactoringStatus status= getMoveRefactoring().setNewMethodName(text.getText());
@@ -191,7 +193,6 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 		Assert.isTrue(possibleNewReceivers.length > 0);
 		viewer.setInput(possibleNewReceivers);
 		INewReceiver chosen= possibleNewReceivers[0];
-		viewer.getControl().setFocus();
 		viewer.setSelection(new StructuredSelection(new Object[]{chosen}));
 		getMoveRefactoring().chooseNewReceiver(chosen);
 		
