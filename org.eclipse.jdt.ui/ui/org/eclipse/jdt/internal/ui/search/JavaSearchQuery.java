@@ -122,23 +122,23 @@ public class JavaSearchQuery implements ISearchQuery {
 			boolean ignorePotentials= SearchPreferencePage.arePotentialMatchesIgnored();
 			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, ignoreImports, ignorePotentials);
 			
-			ISearchPattern pattern;
+			SearchPattern pattern;
 			String stringPattern= null;
 			
 			if (fPatternData instanceof ElementQuerySpecification) {
-				pattern= SearchEngine.createSearchPattern(((ElementQuerySpecification)fPatternData).getElement(), fPatternData.getLimitTo());
+				pattern= SearchPattern.createPattern(((ElementQuerySpecification)fPatternData).getElement(), fPatternData.getLimitTo());
 				stringPattern= ((ElementQuerySpecification)fPatternData).getElement().getElementName();
 			} else {
-				PatternQuerySpecification patternSpec= (PatternQuerySpecification)fPatternData;
-				pattern= SearchEngine.createSearchPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), patternSpec.isCaseSensitive());
-				stringPattern= patternSpec.getPattern();
+				PatternQuerySpecification patternSpec = (PatternQuerySpecification) fPatternData;
+				stringPattern = patternSpec.getPattern();
+				int matchMode = stringPattern.indexOf('*') != -1 || stringPattern.indexOf('?') != -1 ? SearchPattern.R_PATTERN_MATCH : SearchPattern.R_EXACT_MATCH;
+				pattern = SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode, patternSpec.isCaseSensitive());
 			}
 			
 			if (pattern == null) {
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, SearchMessages.getFormattedString("JavaSearchQuery.error.unsupported_pattern", stringPattern), null);  //$NON-NLS-1$
 			}
-			// TODO we shouldn't have to cast this.
-			engine.search((SearchPattern)pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, fPatternData.getScope(), collector, mainSearchPM);
+			engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, fPatternData.getScope(), collector, mainSearchPM);
 			for (int i= 0; i < participants.length; i++) {
 				ISearchRequestor requestor= new SearchRequestor(participants[i], textResult);
 				IProgressMonitor participantPM= new SubProgressMonitor(monitor, ticks[i]);
