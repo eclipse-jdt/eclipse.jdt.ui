@@ -80,9 +80,11 @@ public class SourceReferenceSourceRangeComputer {
 						break;	
 					case ITerminalSymbols.TokenNameCOMMENT_LINE :
 						break;
+						
 					default:{
-						int currentLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
-						if (startLine == currentLine)
+						int currentTokenStartLine= buff.getLineOfOffset(scanner.getCurrentTokenStartPosition() + 1);
+						int currentTokenEndLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
+						if ((startLine == currentTokenEndLine) || (currentTokenStartLine != currentTokenEndLine))
 							return scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenSource().length + 1;
 						TextRegion nextLine= buff.getLineInformation(startLine + 1);
 						if (nextLine != null)
