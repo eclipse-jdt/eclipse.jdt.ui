@@ -61,26 +61,26 @@ public class JavadocWriter {
 			Document document= docBuilder.newDocument();
 
 			// Create the document
-			Element project= document.createElement("project");
+			Element project= document.createElement("project"); //$NON-NLS-1$
 			document.appendChild(project);
 			
 			try {
 				IJavaProject proj= store.getJavaProject();
 				if(proj!=null) {
-					project.setAttribute("name", proj.getCorrespondingResource().getName());
-				} else project.setAttribute("name", "project_name");
+					project.setAttribute("name", proj.getCorrespondingResource().getName()); //$NON-NLS-1$
+				} else project.setAttribute("name", "project_name"); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch(DOMException e) {
-				project.setAttribute("name", "project_name");
+				project.setAttribute("name", "project_name"); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch(JavaModelException e) {
-				project.setAttribute("name", "project_name");
+				project.setAttribute("name", "project_name"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			project.setAttribute("default", "javadoc");
+			project.setAttribute("default", "javadoc"); //$NON-NLS-1$ //$NON-NLS-2$
 
-			Element javadocTarget= document.createElement("target");
+			Element javadocTarget= document.createElement("target"); //$NON-NLS-1$
 			project.appendChild(javadocTarget);
-			javadocTarget.setAttribute("name", "javadoc");
+			javadocTarget.setAttribute("name", "javadoc"); //$NON-NLS-1$ //$NON-NLS-2$
 
-			Element xmlJavadocDesc= document.createElement("javadoc");
+			Element xmlJavadocDesc= document.createElement("javadoc"); //$NON-NLS-1$
 			javadocTarget.appendChild(xmlJavadocDesc);
 
 			if (!store.fromStandard())
@@ -101,32 +101,32 @@ public class JavadocWriter {
 
 		xmlJavadocDesc.setAttribute(store.DESTINATION, store.getDestination());
 		xmlJavadocDesc.setAttribute(store.VISIBILITY, store.getAccess());
-		xmlJavadocDesc.setAttribute(store.USE, booleanToString(store.getBoolean("use")));
-		xmlJavadocDesc.setAttribute(store.NOTREE, booleanToString(store.getBoolean("notree")));
-		xmlJavadocDesc.setAttribute(store.NONAVBAR, booleanToString(store.getBoolean("nonavbar")));
-		xmlJavadocDesc.setAttribute(store.NOINDEX, booleanToString(store.getBoolean("noindex")));
-		xmlJavadocDesc.setAttribute(store.SPLITINDEX, booleanToString(store.getBoolean("splitindex")));
-		xmlJavadocDesc.setAttribute(store.AUTHOR, booleanToString(store.getBoolean("author")));
-		xmlJavadocDesc.setAttribute(store.VERSION, booleanToString(store.getBoolean("version")));
-		xmlJavadocDesc.setAttribute(store.NODEPRECATEDLIST, booleanToString(store.getBoolean("nodeprecatedlist")));
-		xmlJavadocDesc.setAttribute(store.NODEPRECATED, booleanToString(store.getBoolean("nodeprecated")));
+		xmlJavadocDesc.setAttribute(store.USE, booleanToString(store.getBoolean("use"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(store.NOTREE, booleanToString(store.getBoolean("notree"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(store.NONAVBAR, booleanToString(store.getBoolean("nonavbar"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(store.NOINDEX, booleanToString(store.getBoolean("noindex"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(store.SPLITINDEX, booleanToString(store.getBoolean("splitindex"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(store.AUTHOR, booleanToString(store.getBoolean("author"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(store.VERSION, booleanToString(store.getBoolean("version"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(store.NODEPRECATEDLIST, booleanToString(store.getBoolean("nodeprecatedlist"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(store.NODEPRECATED, booleanToString(store.getBoolean("nodeprecated"))); //$NON-NLS-1$
 		xmlJavadocDesc.setAttribute(store.PACKAGENAMES, toPackageList(store.getPackagenames()));
 		xmlJavadocDesc.setAttribute(store.SOURCEPATH, store.getSourcepath());
 		xmlJavadocDesc.setAttribute(store.CLASSPATH, store.getClasspath());
 		String str= store.getOverview();
-		if (!str.equals(""))
+		if (!str.equals("")) //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(store.OVERVIEW, str);
 
 		str= store.getStyleSheet();
-		if (!str.equals(""))
+		if (!str.equals("")) //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(store.STYLESHEETFILE, str);
 			
 		str= store.getTitle();	
-		if(!str.equals(""))
+		if(!str.equals("")) //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(store.TITLE, str);
 
 		str= store.getAdditionalParams();
-		if (!str.equals(""))
+		if (!str.equals("")) //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
 
 	}
@@ -144,11 +144,11 @@ public class JavadocWriter {
 		doclet.setAttribute(store.PATH, store.getDocletPath());
 
 		String str= store.getOverview();
-		if (!str.equals(""))
+		if (!str.equals("")) //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(store.OVERVIEW, str);
 
 		str= store.getAdditionalParams();
-		if (!str.equals(""))
+		if (!str.equals("")) //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
 
 	}
@@ -166,7 +166,7 @@ public class JavadocWriter {
 		for (i = 0; i < strs.length-1; i++) {
 			String pack = strs[i];
 			buf.append(pack);
-			buf.append(",");
+			buf.append(","); //$NON-NLS-1$
 		}
 		//this should never happen
 		if(strs.length > 0)
@@ -176,8 +176,8 @@ public class JavadocWriter {
 	
 	private String booleanToString(boolean bool){
 		if(bool)
-			return "true";
-		else return"false";
+			return "true"; //$NON-NLS-1$
+		else return"false"; //$NON-NLS-1$
 	}
 
 	public void close() throws IOException {

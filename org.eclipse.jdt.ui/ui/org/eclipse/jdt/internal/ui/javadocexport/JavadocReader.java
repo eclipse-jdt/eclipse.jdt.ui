@@ -69,11 +69,11 @@ public class JavadocReader extends Object {
 			Node target= targets.item(i);
 			
 			//look through the xml file for the javadoc task
-			if(target.getNodeName().equals("target")){
+			if(target.getNodeName().equals("target")){ //$NON-NLS-1$
 				NodeList children= target.getChildNodes();
 				for (int j = 0; j < children.getLength(); j++) {
 						Node child= children.item(j);
-						if(child.getNodeName().equals("javadoc") && (child.getNodeType() == Node.ELEMENT_NODE)){
+						if(child.getNodeName().equals("javadoc") && (child.getNodeType() == Node.ELEMENT_NODE)){ //$NON-NLS-1$
 							return (Element)child;
 						}
 				}	

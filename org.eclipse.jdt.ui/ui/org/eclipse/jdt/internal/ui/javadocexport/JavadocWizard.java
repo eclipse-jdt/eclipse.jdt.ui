@@ -74,8 +74,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private boolean fFromAnt;
 	private boolean fOpenInBrowser;
 
-	protected final String TreePageDesc= "JavadocTreePage";
-	protected final String SpecificsPageDesc= "JavadocSpecificsPage";
+	protected final String TreePageDesc= "JavadocTreePage"; //$NON-NLS-1$
+	protected final String SpecificsPageDesc= "JavadocSpecificsPage"; //$NON-NLS-1$
 
 	private JavadocOptionsManager fStore;
 	private IWorkspaceRoot fRoot;
@@ -91,7 +91,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	public JavadocWizard(IFile xmlJavadocFile) {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
-		setWindowTitle("Generate Javadoc");
+		setWindowTitle(JavadocExportMessages.getString("JavadocWizard.javadocwizard.title")); //$NON-NLS-1$
 
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		
@@ -129,8 +129,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			URL newURL= fDestination.toFile().toURL();
 
 			if (fStore.fromStandard() && ((currURL == null) || !(currURL.equals(newURL)))) {
-				String message=  "Do you want to update the Javadoc location for ''{0}'' with the chosen destination folder ''{1}''?";
-				if (MessageDialog.openQuestion(getShell(), "Update Javadoc Location", MessageFormat.format(message, new String[] { fStore.getJavaProject().getElementName(), fStore.getDestination() }))) {
+				String message=  JavadocExportMessages.getString("JavadocWizard.updatejavadoclocation.message"); //$NON-NLS-1$
+				if (MessageDialog.openQuestion(getShell(), JavadocExportMessages.getString("JavadocWizard.updatejavadocdialog.label"), MessageFormat.format(message, new String[] { fStore.getJavaProject().getElementName(), fStore.getDestination() }))) { //$NON-NLS-1$
 					JavaDocLocations.setProjectJavadocLocation(fStore.getJavaProject(), newURL);
 				}
 			}
@@ -173,13 +173,13 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				ILaunchConfigurationWorkingCopy wc= null;
 				try {
 					ILaunchConfigurationType lcType= DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
-					String name= "Javadoc Export Wizard";// + System.currentTimeMillis();
+					String name= "Javadoc Export Wizard";// + System.currentTimeMillis(); //$NON-NLS-1$
 					wc= lcType.newInstance(null, name);
 					wc.setAttribute(IDebugUIConstants.ATTR_TARGET_RUN_PERSPECTIVE, (String) null);
 					wc.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
 					
 					ILaunch newLaunch= new Launch(wc, ILaunchManager.RUN_MODE, null);
-					IProcess iprocess= DebugPlugin.newProcess(newLaunch, process, "Javadoc Generation");
+					IProcess iprocess= DebugPlugin.newProcess(newLaunch, process, JavadocExportMessages.getString("JavadocWizard.javadocprocess.label")); //$NON-NLS-1$
 					iprocess.setAttribute(JavaRuntime.ATTR_CMDLINE, buf.toString());
 	
 					DebugPlugin.getDefault().getLaunchManager().addLaunch(newLaunch);
@@ -241,9 +241,9 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					if (saveModifiedResources(dirtyFiles)) 
 						 return true;
 				} catch(CoreException e) {
-					ExceptionHandler.handle(e, getShell(), "Save Resources", "Saving resources failed.");
+					ExceptionHandler.handle(e, getShell(), JavadocExportMessages.getString("JavadocWizard.saveresourcedialogCE.title"), JavadocExportMessages.getString("JavadocWizard.saveresourcedialogCE.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				} catch(InvocationTargetException e) {
-					ExceptionHandler.handle(e, getShell(), "Save Resources", "Saving resources failed.");
+					ExceptionHandler.handle(e, getShell(), JavadocExportMessages.getString("JavadocWizard.saveresourcedialogITE.title"), JavadocExportMessages.getString("JavadocWizard.saveresourcedialogITE.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				}		
 			}
 		return false;
@@ -341,7 +341,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	public void init(IWorkbench workbench, IStructuredSelection structuredSelection) {
 		IDialogSettings settings= getDialogSettings();
 		if (fXmlJavadocFile == null) {
-			fStore= new JavadocOptionsManager(settings.getSection("javadoc"), fRoot, structuredSelection);
+			fStore= new JavadocOptionsManager(settings.getSection("javadoc"), fRoot, structuredSelection); //$NON-NLS-1$
 		} else {
 			fStore= new JavadocOptionsManager(fXmlJavadocFile, settings, fRoot, structuredSelection);
 		}
@@ -360,7 +360,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private void spawnInBrowser() {
 		if (fOpenInBrowser) {
 			try {
-				IPath indexFile= fDestination.append("index.html");
+				IPath indexFile= fDestination.append("index.html"); //$NON-NLS-1$
 				URL url= indexFile.toFile().toURL();
 				OpenExternalJavadocAction.openInBrowser(url, getShell());
 			} catch (MalformedURLException e) {

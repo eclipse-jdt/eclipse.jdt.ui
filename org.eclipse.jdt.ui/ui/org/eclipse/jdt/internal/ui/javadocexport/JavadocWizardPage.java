@@ -25,7 +25,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 
 	protected JavadocWizardPage(String pageName) {
 		super(pageName);
-		setTitle("Javadoc Generation");
+		setTitle(JavadocExportMessages.getString("JavadocWizardPage.javadocwizardpage.description")); //$NON-NLS-1$
 	}
 
 	protected Button createButton(Composite composite, int style, String message, GridData gd) {
