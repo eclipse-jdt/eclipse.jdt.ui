@@ -5,11 +5,16 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -25,6 +30,7 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -35,9 +41,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.template.Template;
+import org.eclipse.jdt.internal.ui.text.template.TemplateCollector;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
 import org.eclipse.jdt.internal.ui.text.template.TemplateInterpolator;
 import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
+import org.eclipse.jdt.internal.ui.text.template.TemplateVariableDialog;
 import org.eclipse.jdt.internal.ui.text.template.VariableEvaluator;
 
 /**
@@ -106,7 +114,7 @@ public class EditTemplateDialog extends StatusDialog {
 	private Combo fContextCombo;
 	private SourceViewer fPatternEditor;
 	
-//	private Button fAddVariableButton;
+	private Button fInsertVariableButton;
 
 	private TemplateInterpolator fInterpolator= new TemplateInterpolator();
 	private TemplateVerifier fVerifier= new TemplateVerifier();
@@ -124,12 +132,15 @@ public class EditTemplateDialog extends StatusDialog {
 		fTemplate= template;
 	}
 	
+	/*
+	 * @see Dialog#createDialogArea(Composite)
+	 */
 	protected Control createDialogArea(Composite ancestor) {
 		Composite parent= new Composite(ancestor, SWT.NONE);
-		parent.setLayout(new GridLayout());		
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		parent.setLayout(layout);
+		parent.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		createLabel(parent, TemplateMessages.getString("EditTemplateDialog.name")); //$NON-NLS-1$	
 		
@@ -158,9 +169,29 @@ public class EditTemplateDialog extends StatusDialog {
 		createLabel(parent, TemplateMessages.getString("EditTemplateDialog.description")); //$NON-NLS-1$		
 		fDescriptionText= createText(parent);
 
-		Label patternLabel= createLabel(parent, TemplateMessages.getString("EditTemplateDialog.pattern")); //$NON-NLS-1$
-		patternLabel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
+		composite= new Composite(parent, SWT.NONE);
+		composite.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+		layout= new GridLayout();		
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		composite.setLayout(layout);
+
+		Label patternLabel= createLabel(composite, TemplateMessages.getString("EditTemplateDialog.pattern")); //$NON-NLS-1$
 		fPatternEditor= createEditor(parent);
+		
+		Label filler= new Label(composite, SWT.NONE);		
+		filler.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+		
+		fInsertVariableButton= new Button(composite, SWT.NONE);
+		fInsertVariableButton.setLayoutData(new GridData());
+		fInsertVariableButton.setText(TemplateMessages.getString("EditTemplateDialog.insert.variable")); //$NON-NLS-1$
+		fInsertVariableButton.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				insertVariable();				
+			}
+
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
 
 		// initialize fields
 		fNameText.setText(fTemplate.getName());
@@ -250,6 +281,21 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 
 		updateStatus(status);
+	}
+
+	private void insertVariable() {
+		TemplateVariableDialog dialog= new TemplateVariableDialog(getShell(), TemplateCollector.getVariables());
+
+		if (dialog.open() == Window.OK) {
+			String variable= "${" + dialog.getSelectedName() + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+
+			StyledText text= fPatternEditor.getTextWidget();
+			Point selection= text.getSelection();
+			text.replaceTextRange(selection.x, selection.y - selection.x, variable);
+
+			int caretOffset= selection.x + variable.length();
+			text.setSelection(caretOffset, caretOffset);
+		}
 	}
 
 }

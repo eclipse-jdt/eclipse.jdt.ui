@@ -44,6 +44,21 @@ public class TemplateCollector implements ICodeCompletionRequestor {
 	private static final String RETURN_TYPE= "return_type"; //$NON-NLS-1$
 	private static final String ARGUMENTS= "arguments"; //$NON-NLS-1$
 
+	private static final String[][] fgVariables = {
+		{FILE,			TemplateMessages.getString("TemplateCollector.variable.description.file")},
+//		{LINE,			TemplateMessages.getString("TemplateCollector.variable.description.line")},
+		{DATE,			TemplateMessages.getString("TemplateCollector.variable.description.date")},
+		{TIME,			TemplateMessages.getString("TemplateCollector.variable.description.time")},
+		{ARRAY,			TemplateMessages.getString("TemplateCollector.variable.description.array")},
+		{ARRAY_TYPE,	TemplateMessages.getString("TemplateCollector.variable.description.array.type")},
+		{ARRAY_ELEMENT,	TemplateMessages.getString("TemplateCollector.variable.description.array.element")},
+		{INDEX,			TemplateMessages.getString("TemplateCollector.variable.description.index")},
+		{COLLECTION,	TemplateMessages.getString("TemplateCollector.variable.description.collector")},
+		{ITERATOR,		TemplateMessages.getString("TemplateCollector.variable.description.iterator")},
+		{RETURN_TYPE,	TemplateMessages.getString("TemplateCollector.variable.description.return.type")},
+		{ARGUMENTS,		TemplateMessages.getString("TemplateCollector.variable.description.arguments")}		
+	};
+
 	private static class LocalVariable {
 		String name;
 		String typePackageName;
@@ -483,6 +498,15 @@ public class TemplateCollector implements ICodeCompletionRequestor {
 	
 	private static void openErrorDialog(Shell shell, Exception e) {
 		MessageDialog.openError(shell, TemplateMessages.getString("TemplateCollector.error.title"), e.getMessage()); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Returns all variables with special meaning.
+	 * The size of the second dimension is two. The first value is the
+	 * name of the variable, the second value is its description.
+	 */
+	public static String[][] getVariables() {
+		return fgVariables;
 	}
 }
 
