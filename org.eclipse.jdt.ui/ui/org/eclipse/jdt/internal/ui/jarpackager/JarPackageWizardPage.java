@@ -57,6 +57,7 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
@@ -543,6 +544,20 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			fDestinationNamesCombo.setFocus();
 			return false;
 		}
+
+		if (JavaPlugin.getWorkspace().getRoot().getLocation().isPrefixOf(fJarPackage.getJarLocation())) {
+			int segments= JavaPlugin.getWorkspace().getRoot().getLocation().matchingFirstSegments(fJarPackage.getJarLocation());
+			IPath path= fJarPackage.getJarLocation().removeFirstSegments(segments);
+			IResource resource= JavaPlugin.getWorkspace().getRoot().findMember(path);
+			if (resource != null) {
+				// test if included
+				if (fJarPackage.getSelectedResources().contains(resource)) {
+					setErrorMessage(JarPackagerMessages.getString("JarPackageWizardPage.error.cantExportJARIntoItself")); //$NON-NLS-1$
+					return false;
+				}
+			}
+		}
+		
 		return ensureTargetFileIsValid(fJarPackage.getJarLocation().toFile());
 	}
 
