@@ -1321,7 +1321,13 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			if (text != null && !text.isDisposed()) {
 				
 				final Point selection= text.getSelection();
-				text.setSelectionRange(selection.x, modelOffset2WidgetOffset(viewer, position) - selection.x);
+				final int caret= text.getCaretOffset();
+				final int offset= modelOffset2WidgetOffset(viewer, position);
+				
+				if (caret == selection.x)
+					text.setSelectionRange(selection.y, offset - selection.y);
+				else
+					text.setSelectionRange(selection.x, offset - selection.x);		
 
 				final Event event= new Event();
 				event.x= text.getSelection().x;
@@ -1515,7 +1521,13 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			if (text != null && !text.isDisposed()) {
 				
 				final Point selection= text.getSelection();
-				text.setSelectionRange(selection.y, modelOffset2WidgetOffset(viewer, position) - selection.y);
+				final int caret= text.getCaretOffset();
+				final int offset= modelOffset2WidgetOffset(viewer, position);
+				
+				if (caret == selection.x)
+					text.setSelectionRange(selection.y, offset - selection.y);
+				else
+					text.setSelectionRange(selection.x, offset - selection.x);		
 
 				final Event event= new Event();
 				event.x= text.getSelection().x;
