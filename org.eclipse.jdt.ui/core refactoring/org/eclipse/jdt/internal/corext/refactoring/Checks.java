@@ -28,7 +28,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
@@ -64,8 +63,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Resources;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -395,16 +392,9 @@ public class Checks {
 			if (expression instanceof Name) {
 				final Name name= (Name) expression;
 				final IBinding binding= name.resolveBinding();
-				if (binding != null) {
-					final IJavaElement element= binding.getJavaElement();
-					if (element instanceof IMember) {
-						final IMember member= (IMember) element;
-						try {
-							return Flags.isEnum(member.getFlags());
-						} catch (JavaModelException exception) {
-							JavaPlugin.log(exception);
-						}
-					}
+				if (binding instanceof IVariableBinding) {
+					IVariableBinding variableBinding= (IVariableBinding) binding;
+					return variableBinding.isEnumConstant();
 				}
 			}
 		}
