@@ -66,7 +66,7 @@ public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring
 	}
 
 	/**
-	 * Returns the extract interface processor
+	 * Returns the extract interface processor.
 	 * 
 	 * @return the refactoring processor
 	 */
