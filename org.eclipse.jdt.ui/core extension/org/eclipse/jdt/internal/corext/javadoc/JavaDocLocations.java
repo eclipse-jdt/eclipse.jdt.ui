@@ -324,7 +324,7 @@ public class JavaDocLocations {
 		IType declaringType= meth.getDeclaringType();
 		for (int i= 0; i < params.length; i++) {
 			if (i != 0) {
-				buf.append(",%20");
+				buf.append(", ");
 			}
 			String curr= params[i];
 			String fullName= JavaModelUtil.getResolvedTypeName(curr, declaringType);
