@@ -4,23 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import java.util.Iterator;import java.util.List;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -334,6 +318,37 @@ public class Checks {
 		return false;
 	}
 	
+	//---------------------
+	
+	/**
+	 * From the List of Lists of SearchResults passed as the parameter
+	 * this method removes all those that correspond to a non-parsable ICompilationUnit
+	 * Returns the status describing the result of this check.
+	 * Note: it modifies the parameter.
+	 * 
+	 * @see ICompilationUnit::isStructureKnown
+	 */
+	public static RefactoringStatus excludeBrokenCompilationUnits(List grouped) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();	
+		
+		boolean wasEmpty= grouped.isEmpty();
+		
+		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){	
+			List searchResults= (List)iter.next();
+			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(((SearchResult)searchResults.get(0)).getResource());
+			if (! cu.isStructureKnown()){
+				String path= AbstractRefactoringASTAnalyzer.getFullPath(cu);
+				result.addError("\"" + path + "\" cannot be correctly parsed and will be excluded from refactoring if you proceed");
+				iter.remove();
+			}	
+		}
+		
+		if ((!wasEmpty) && grouped.isEmpty())
+			result.addFatalError("No resources left to refactor. Cannot proceed");
+		return result;	
+	}
+	
+	//---------------------
 	private static String getFormattedString(String key, String arg) {
 		return Resources.getFormattedString("Checks." + key, arg);
 	}

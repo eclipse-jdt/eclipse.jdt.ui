@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.IChange;
 import org.eclipse.jdt.core.refactoring.RefactoringStatus;
-import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.core.refactoring.text.ITextBuffer;
 import org.eclipse.jdt.core.refactoring.text.ITextBufferChange;
 import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;
@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
  * this early stage to solicit feedback from pioneering adopters on the understanding that any 
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
-public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRefactoring{
+public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRefactoring, IPreactivatedRefactoring{
 
 	private String fNewName;
 	private List fOccurrences;
@@ -169,8 +169,8 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
 		return fOccurrences;
 	}
-	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+
+	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getType()));
 		if (!Checks.isTopLevel(getType()))
@@ -179,7 +179,14 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			result.addFatalError("It is a special case");	
 		return result;
 	}
-	
+
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
+		if (! getType().getCompilationUnit().isStructureKnown())
+			result.addFatalError("Compilation unit that declares this type cannot be parsed correctly.");
+		return result;
+	}
+		
 	public RefactoringStatus checkNewName(){
 		Assert.isNotNull(getType(), "type");
 		Assert.isNotNull(fNewName, "new name");
@@ -349,7 +356,10 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	 * Analyzes all compilation units in which type is referenced
 	 */
 	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
+		RefactoringStatus result= Checks.excludeBrokenCompilationUnits(fOccurrences);
+		if (result.hasFatalError())
+			return result;
+		
 		Iterator iter= fOccurrences.iterator();
 		pm.beginTask("", fOccurrences.size());
 		RenameTypeASTAnalyzer analyzer= new RenameTypeASTAnalyzer(fNewName, getType());

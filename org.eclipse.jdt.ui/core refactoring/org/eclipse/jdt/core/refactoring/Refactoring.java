@@ -63,14 +63,14 @@ public abstract class Refactoring implements IRefactoring {
 	}
 	
 	//---- Conditions ---------------------------
-
+	
 	/**
 	 * Checks if this refactoring can be activated.
 	 * Typically, this is used in the ui to check if a corresponding menu entry should be shown.
 	 * Must not return <code>null</code>.
 	 */ 
 	public abstract RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException;
-
+	
 	/**
 	 * After <code>checkActivation</code> has been performed and the user has provided all input
 	 * necessary to perform the refactoring this method is called to check the remaining preconditions.
@@ -85,7 +85,7 @@ public abstract class Refactoring implements IRefactoring {
 	
 	/**
 	 * @see IRefactoring#checkPreconditions
-	 * This implementation performes <code>checkActivation</code>
+	 * This implementation performs <code>checkActivation</code>
 	 * and <code>checkInput</code> and merges the results.
 	 * 
 	 * @see #checkActivation
@@ -99,7 +99,6 @@ public abstract class Refactoring implements IRefactoring {
 		result.merge(checkActivation(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK)));
 		if (!result.hasFatalError())
 			result.merge(checkInput(new SubProgressMonitor(pm, 10, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK)));	
-		// done sends any remaining work items.	
 		pm.done();
 		return result;
 	}

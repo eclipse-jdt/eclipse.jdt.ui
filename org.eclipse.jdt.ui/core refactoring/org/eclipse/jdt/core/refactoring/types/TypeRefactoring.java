@@ -45,7 +45,9 @@ abstract class TypeRefactoring extends Refactoring{
 	protected static boolean typeNameExistsInPackage(IPackageFragment pack, String name) throws JavaModelException{
 		Assert.isTrue(pack.exists(), "package must exist");
 		Assert.isTrue(!pack.isReadOnly(), "package must not be read-only");
-		HackFinder.fixMeSoon("ICompilationUnit feature - assert fails if arg for getType has '.'");
+		/*
+		 * ICompilationUnit.getType feature - walkback if not simple name
+		 */  
 		if (name.indexOf(".") != -1)
 			name= name.substring(0, name.indexOf("."));
 		ICompilationUnit[] cus= pack.getCompilationUnits();
