@@ -705,16 +705,18 @@ public class JavadocOptionsManager {
 	}
 
 	private void getProject(List selectedElements, Iterator iter) {
-		fProject= null;
+		fProject = null;
 		while (iter.hasNext()) {
-			Object selectedElement= iter.next();
-			IJavaElement elem= getSelectableJavaElement(selectedElement);
+			Object selectedElement = iter.next();
+			IJavaElement elem = getSelectableJavaElement(selectedElement);
 			if (elem != null) {
-				IJavaProject jproj= elem.getJavaProject();
-				if (fProject == null || fProject.equals(jproj)) {
-					selectedElements.add(elem);
-					fProject= jproj;
-					break;
+				IJavaProject jproj = elem.getJavaProject();
+				if (jproj != null) {
+					if (fProject == null){
+						fProject = jproj;
+						selectedElements.add(elem);
+					} else if (fProject.equals(jproj)) {
+						selectedElements.add(elem); }
 				}
 			}
 		}

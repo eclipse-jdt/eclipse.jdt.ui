@@ -36,14 +36,12 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 
@@ -62,12 +60,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
 import org.eclipse.jdt.internal.ui.jarpackager.ConfirmSaveModifiedResourcesDialog;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class JavadocWizard extends Wizard implements IExportWizard {
 
 	private JavadocTreeWizardPage fJTWPage;
 	private JavadocSpecificsWizardPage fJSWPage;
-
+	
 	private IPath fDestination;
 	private IJavaProject fCurrentProject;
 
@@ -114,7 +113,9 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		fJTWPage.finish();
 		fJSWPage.finish();
 		
-		checkPreconditions(fJTWPage.getResources());
+		if (!checkPreconditions(fJTWPage.getResources())) {
+			return false;
+		}
 
 		fDestination= new Path(fStore.getDestination());
 		fDestination.toFile().mkdirs();
@@ -198,25 +199,53 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 	}
 	
-	private void checkPreconditions(List resources) {
-		IFile[] unSavedFiles= getUnsavedFiles(resources);	
-		saveModifiedResourcesIfUserConfirms(unSavedFiles);
+	private boolean checkPreconditions(List resources) {
+
+		//message could be null
+		IFile[] unSavedFiles = getUnsavedFiles(resources);
+		return saveModifiedResourcesIfUserConfirms(unSavedFiles);
+	}
+	
+	/**
+	 * Returns the files which are not saved and which are
+	 * part of the files being exported.
+	 * 
+	 * @return an array of unsaved files
+	 */
+	private IFile[] getUnsavedFiles(List resources) {
+		IEditorPart[] dirtyEditors = JavaPlugin.getDirtyEditors();
+		Set unsavedFiles = new HashSet(dirtyEditors.length);
+		if (dirtyEditors.length > 0) {
+			for (int i = 0; i < dirtyEditors.length; i++) {
+				if (dirtyEditors[i].getEditorInput() instanceof IFileEditorInput) {
+					IFile dirtyFile =
+						((IFileEditorInput) dirtyEditors[i].getEditorInput()).getFile();
+					if (resources.contains(dirtyFile)) {
+						unsavedFiles.add(dirtyFile);
+					}
+				}
+			}
+		}
+		return (IFile[]) unsavedFiles.toArray(new IFile[unsavedFiles.size()]);
 	}
 	
 	/**
 	 * Asks to confirm to save the modified resources
-	 * and save them if OK is pressed.
+	 * and save them if OK is pressed. Must be run in the display thread.
 	 * 
 	 * @return true if user pressed OK and save was successful.
 	 */
 	private boolean saveModifiedResourcesIfUserConfirms(IFile[] dirtyFiles) {
-		if (confirmSaveModifiedResources(dirtyFiles))
-			return saveModifiedResources(getShell(), dirtyFiles);
-
-		// Report unsaved files
-		//@Change 
-		//for (int i= 0; i < dirtyFiles.length; i++)
-		//	System.out.println(dirtyFiles[i].getFullPath().toOSString());
+			if (confirmSaveModifiedResources(dirtyFiles)) {
+				try {
+					if (saveModifiedResources(dirtyFiles)) 
+						 return true;
+				} catch(CoreException e) {
+					ExceptionHandler.handle(e, getShell(), "Save Resources", "Saving resources failed.");
+				} catch(InvocationTargetException e) {
+					ExceptionHandler.handle(e, getShell(), "Save Resources", "Saving resources failed.");
+				}		
+			}
 		return false;
 	}	
 
@@ -247,6 +276,52 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		return intResult[0] == IDialogConstants.OK_ID;
 	}
 
+	/**
+	 * Save all of the editors in the workbench.  Must be run in the display thread.
+	 * 
+	 * @return true if successful.
+	 */
+	private boolean saveModifiedResources(final IFile[] dirtyFiles) throws CoreException, InvocationTargetException {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IWorkspaceDescription description= workspace.getDescription();
+		boolean autoBuild= description.isAutoBuilding();
+		description.setAutoBuilding(false);
+		try {
+			workspace.setDescription(description);
+			// This save operation can not be canceled.
+			try {
+				new ProgressMonitorDialog(getShell()).run(false, false, createSaveModifiedResourcesRunnable(dirtyFiles));
+			} finally {
+				description.setAutoBuilding(autoBuild);
+				workspace.setDescription(description);
+			}
+		} catch (InterruptedException ex) {
+			return false;
+		}		
+		return true;
+	}
+
+		private IRunnableWithProgress createSaveModifiedResourcesRunnable(final IFile[] dirtyFiles) {
+		return new IRunnableWithProgress() {
+			public void run(final IProgressMonitor pm) {
+				IEditorPart[] editorsToSave= JavaPlugin.getDirtyEditors();
+				pm.beginTask("Saving modified resources", editorsToSave.length); //$NON-NLS-1$
+				try {
+					List dirtyFilesList= Arrays.asList(dirtyFiles);
+					for (int i= 0; i < editorsToSave.length; i++) {
+						if (editorsToSave[i].getEditorInput() instanceof IFileEditorInput) {
+							IFile dirtyFile= ((IFileEditorInput)editorsToSave[i].getEditorInput()).getFile();					
+							if (dirtyFilesList.contains((dirtyFile)))
+								editorsToSave[i].doSave(new SubProgressMonitor(pm, 1));
+						}
+						pm.worked(1);
+					}
+				} finally {
+					pm.done();
+				}
+			}
+		};
+	}
 
 
 	/*
@@ -312,97 +387,4 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			}
 		}
 	}
-	
-	/**
-	 * Returns the files which are not saved and are part of the given list.
-	 * 
-	 * @return an array of unsaved files
-	 */
-	public static IFile[] getUnsavedFiles(List resources) {
-		IEditorPart[] dirtyEditors= JavaPlugin.getDirtyEditors();
-		Set unsavedFiles= new HashSet(dirtyEditors.length);
-		if (dirtyEditors.length > 0) {
-			for (int i= 0; i < dirtyEditors.length; i++) {
-				if (dirtyEditors[i].getEditorInput() instanceof IFileEditorInput) {
-					IFile dirtyFile= ((IFileEditorInput) dirtyEditors[i].getEditorInput()).getFile();
-					if (resources.contains(dirtyFile)) {
-						unsavedFiles.add(dirtyFile);
-					}
-				}
-			}
-		}
-		return (IFile[]) unsavedFiles.toArray(new IFile[unsavedFiles.size()]);
-	}
-
-	/**
-	* Save the given files.
-	* 
-	* @return true if successful.
-	*/
-	public static boolean saveModifiedResources(final Shell shell, final IFile[] dirtyFiles) {
-		
-		// Get display for further UI operations
-		Display display= shell.getDisplay();
-		if (display == null || display.isDisposed())
-			return false;
-
-		final boolean[] retVal= new boolean[1];
-		Runnable runnable= new Runnable() {
-			public void run() {
-				IWorkspace workspace= ResourcesPlugin.getWorkspace();
-				IWorkspaceDescription description= workspace.getDescription();
-				boolean autoBuild= description.isAutoBuilding();
-				description.setAutoBuilding(false);
-				try {
-					workspace.setDescription(description);
-					// This save operation can not be canceled.
-					try {
-						new ProgressMonitorDialog(shell).run(false, false, createSaveModifiedResourcesRunnable(dirtyFiles));
-						retVal[0]= true;
-					} finally {
-						description.setAutoBuilding(autoBuild);
-						workspace.setDescription(description);
-					}
-
-				} catch (InvocationTargetException ex) {
-					//status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, JarPackagerMessages.getString("JarFileExportOperation.errorSavingModifiedResources"), ex));
-					retVal[0]= false;
-				} catch (InterruptedException ex) {
-					Assert.isTrue(false); // Can't happen. Operation isn't cancelable.
-					retVal[0]= false;
-				} catch (CoreException ex) {
-					//addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingModifiedResources"), ex); //$NON-NLS-1$
-					JavaPlugin.log(ex);
-					retVal[0]= false;
-				}
-
-			}
-		};
-		display.syncExec(runnable);
-		return retVal[0];
-	}
-
-	private static IRunnableWithProgress createSaveModifiedResourcesRunnable(final IFile[] dirtyFiles) {
-		return new IRunnableWithProgress() {
-			public void run(final IProgressMonitor pm) {
-				IEditorPart[] editorsToSave= JavaPlugin.getDirtyEditors();
-				pm.beginTask("Saving modified resources", editorsToSave.length); //$NON-NLS-1$
-				try {
-					List dirtyFilesList= Arrays.asList(dirtyFiles);
-					for (int i= 0; i < editorsToSave.length; i++) {
-						if (editorsToSave[i].getEditorInput() instanceof IFileEditorInput) {
-							IFile dirtyFile= ((IFileEditorInput) editorsToSave[i].getEditorInput()).getFile();
-							if (dirtyFilesList.contains((dirtyFile)))
-								editorsToSave[i].doSave(new SubProgressMonitor(pm, 1));
-						}
-						pm.worked(1);
-					}
-				} finally {
-					pm.done();
-				}
-			}
-		};
-	}	
-	
-	
 }
