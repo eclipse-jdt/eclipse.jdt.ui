@@ -117,14 +117,14 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	public void checkActivation(RefactoringStatus status) {
 		if (fEnclosingMethod == null || fLastSelectedNode == null) {
 			if (fMessage == null && !fStatus.hasFatalError())
-				fMessage= "Can not extract new method form selection. Only statements from the body of a top level method can be extracted.";
+				fMessage= "Cannot extract new method from selection. Only statements from the body of a top level method can be extracted.";
 			if (fMessage != null)
 				status.addFatalError(fMessage);
 		}
 		status.merge(fStatus);
 		if (fFirstSelectedNode == fLastSelectedNodeWithSameParentAsFirst &&
 				fFirstSelectedNode instanceof ReturnStatement) {
-			status.addFatalError("Can not extract a single return statement.");
+			status.addFatalError("Cannot extract a single return statement.");
 		}
 		fLocalVariableAnalyzer.checkActivation(status);
 		fLocalTypeAnalyzer.checkActivation(status);
