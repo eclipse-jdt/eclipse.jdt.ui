@@ -110,10 +110,6 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
 	 */
 	public void dispose() {
-		if (fResolvedBackground != null) {
-			fResolvedBackground.dispose();
-			fResolvedBackground= null;
-		}
 		super.dispose();
 	}
 
