@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ProgressService;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -432,7 +433,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 			try {
-				context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
+				ProgressService.runSuspended(context, false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 				IProblem parseError= op.getParseError();
 				if (parseError != null) {
 					String message= ActionMessages.getFormattedString("OrganizeImportsAction.single.error.parse", parseError.getMessage()); //$NON-NLS-1$

@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ProgressService;
 
 /**
  * Creates unimplemented constructors for a type.
@@ -268,8 +269,8 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null) {
 					context= new BusyIndicatorRunnableContext();
-				}				
-				context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
+				}
+				ProgressService.runSuspended(context, false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
 					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.error.nothing_found")); //$NON-NLS-1$

@@ -15,17 +15,17 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
@@ -49,13 +49,12 @@ import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -63,7 +62,10 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ProgressService;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 
 public class AddImportOnSelectionAction extends Action implements IUpdate {
@@ -152,9 +154,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { type }, settings, false);
-					ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 					try {
-						dialog.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
+						ProgressService.runSuspended(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 					} catch (InvocationTargetException e) {
 						ExceptionHandler.handle(e, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null); //$NON-NLS-1$
 					} catch (InterruptedException e) {

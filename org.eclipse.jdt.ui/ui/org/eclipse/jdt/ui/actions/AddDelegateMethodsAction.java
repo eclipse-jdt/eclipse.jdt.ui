@@ -53,14 +53,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.Methods2Field;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -75,6 +73,10 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ProgressService;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
 
 /**
  * Creates delegate methods for a type's fields. Opens a dialog with a list of
@@ -420,7 +422,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			context= new BusyIndicatorRunnableContext();
 		}
 		try {
-			context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
+			ProgressService.runSuspended(context, false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 		} catch (InterruptedException e) {
 			// cancel pressed
 			return null;

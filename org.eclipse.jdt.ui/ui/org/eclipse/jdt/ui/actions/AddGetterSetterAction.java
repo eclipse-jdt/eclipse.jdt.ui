@@ -83,6 +83,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ProgressService;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
@@ -519,8 +520,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			if (context == null) {
 				context= new BusyIndicatorRunnableContext();
 			}
-			context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
-		
+			
+			ProgressService.runSuspended(context, false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
+			
 			IMethod[] createdMethods= op.getCreatedAccessors();
 			if (createdMethods.length > 0) {
 				EditorUtility.revealInEditor(editor, createdMethods[0]);

@@ -65,12 +65,11 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.AddCustomConstructorOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -86,7 +85,10 @@ import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ProgressService;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * Creates constructors for a type based on existing fields.
@@ -408,7 +410,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				if (context == null) {
 					context= new BusyIndicatorRunnableContext();
 				}
-				context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
+				ProgressService.runSuspended(context, false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 				IMethod res= op.getCreatedConstructor();
 				JavaModelUtil.reconcile(res.getCompilationUnit());
 				EditorUtility.revealInEditor(editor, res);

@@ -58,6 +58,37 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
  */
 public class GenerateActionGroup extends ActionGroup {
 	
+	/**
+	 * Pop-up menu: id of the source sub menu (value <code>org.eclipse.jdt.ui.source.menu</code>).
+	 * 
+	 * @since 3.0
+	 */
+	public static final String MENU_ID= "org.eclipse.jdt.ui.source.menu"; //$NON-NLS-1$
+	
+	/**
+	 * Pop-up menu: id of the import group of the source sub menu (value
+	 * <code>importGroup</code>).
+	 * 
+	 * @since 3.0
+	 */
+	public static final String GROUP_IMPORT= "importGroup";  //$NON-NLS-1$
+	
+	/**
+	 * Pop-up menu: id of the generate group of the source sub menu (value
+	 * <code>generateGroup</code>).
+	 * 
+	 * @since 3.0
+	 */
+	public static final String GROUP_GENERATE= "generateGroup";  //$NON-NLS-1$
+	
+	/**
+	 * Pop-up menu: id of the code group of the source sub menu (value
+	 * <code>codeGroup</code>).
+	 * 
+	 * @since 3.0
+	 */
+	public static final String GROUP_CODE= "codeGroup";  //$NON-NLS-1$
+	
 	private CompilationUnitEditor fEditor;
 	private IWorkbenchSite fSite;
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
@@ -335,7 +366,8 @@ public class GenerateActionGroup extends ActionGroup {
 			shortCut= fQuickAccessAction.getShortCutString(); //$NON-NLS-1$
 		}		
 		IMenuManager subMenu= new MenuManager(
-			ActionMessages.getString("SourceMenu.label") + (shortCut != null ? "\t" + shortCut : "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			ActionMessages.getString("SourceMenu.label") + (shortCut != null ? "\t" + shortCut : ""), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			MENU_ID); 
 		int added= 0;
 		if (isEditorOwner()) {
 			added= fillEditorSubMenu(subMenu);
@@ -361,17 +393,17 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addEditorAction(source, "RemoveBlockComment"); //$NON-NLS-1$
 		added+= addEditorAction(source, "Format"); //$NON-NLS-1$
 		added+= addEditorAction(source, "Indent"); //$NON-NLS-1$
-		source.add(new Separator());
+		source.add(new Separator(GROUP_IMPORT));
 		added+= addAction(source, fOrganizeImports);
 		added+= addAction(source, fAddImport);
-		source.add(new Separator());
+		source.add(new Separator(GROUP_GENERATE));
 		added+= addAction(source, fOverrideMethods);
 		added+= addAction(source, fAddGetterSetter);
 		added+= addAction(source, fAddDelegateMethods);
 		added+= addAction(source, fAddUnimplementedConstructors);
 		added+= addAction(source, fGenerateConstructorUsingFields);
 		added+= addAction(source, fAddJavaDocStub);
-		source.add(new Separator());		
+		source.add(new Separator(GROUP_CODE));		
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);
 		return added;
@@ -381,10 +413,10 @@ public class GenerateActionGroup extends ActionGroup {
 		int added= 0;
 		added+= addAction(source, fFormatAll);
 		added+= addAction(source, fSortMembers);
-		source.add(new Separator());
+		source.add(new Separator(GROUP_IMPORT));
 		added+= addAction(source, fOrganizeImports);
 		added+= addAction(source, fAddImport);
-		source.add(new Separator());
+		source.add(new Separator(GROUP_GENERATE));
 		added+= addAction(source, fOverrideMethods);
 		added+= addAction(source, fAddGetterSetter);
 		added+= addAction(source, fAddDelegateMethods);
@@ -393,7 +425,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fAddJavaDocStub);
 		added+= addAction(source, fAddToClasspathAction);
 		added+= addAction(source, fRemoveFromClasspathAction);
-		source.add(new Separator());		
+		source.add(new Separator(GROUP_CODE));		
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);
 		added+= addAction(source, fFindStringsToExternalize);

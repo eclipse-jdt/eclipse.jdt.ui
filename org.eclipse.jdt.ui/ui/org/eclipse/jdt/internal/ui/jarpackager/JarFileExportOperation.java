@@ -27,14 +27,6 @@ import java.util.Set;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,11 +35,19 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.operation.ModalContext;
 import org.eclipse.jface.util.Assert;
@@ -68,17 +68,18 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.core.util.ISourceAttribute;
 
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
-import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
-import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-import org.eclipse.jdt.ui.jarpackager.JarWriter;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ProgressService;
+
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
+import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.ui.jarpackager.JarWriter;
 
 /**
  * Operation for exporting a resource and its children to a new  JAR file.
@@ -970,7 +971,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * 
 	 * @return true if user pressed OK.
 	 */
-	private boolean confirmSaveModifiedResources(IFile[] dirtyFiles) {
+	private boolean confirmSaveModifiedResources(final IFile[] dirtyFiles) {
 		if (dirtyFiles == null || dirtyFiles.length == 0)
 			return true;
 
@@ -980,10 +981,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			return false;
 
 		// Ask user to confirm saving of all files
-		final ConfirmSaveModifiedResourcesDialog dlg= new ConfirmSaveModifiedResourcesDialog(fParentShell, dirtyFiles);
 		final int[] intResult= new int[1];
 		Runnable runnable= new Runnable() {
 			public void run() {
+				ConfirmSaveModifiedResourcesDialog dlg= new ConfirmSaveModifiedResourcesDialog(fParentShell, dirtyFiles);
 				intResult[0]= dlg.open();
 			}
 		};
@@ -1023,7 +1024,8 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		Runnable runnable= new Runnable() {
 			public void run() {
 				try {
-					new ProgressMonitorDialog(fParentShell).run(false, false, createSaveModifiedResourcesRunnable(dirtyFiles));
+					ProgressService.runSuspended(false, false, 
+							createSaveModifiedResourcesRunnable(dirtyFiles), ResourcesPlugin.getWorkspace().getRoot());
 					retVal[0]= true;
 				} catch (InvocationTargetException ex) {
 					addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingModifiedResources"), ex); //$NON-NLS-1$

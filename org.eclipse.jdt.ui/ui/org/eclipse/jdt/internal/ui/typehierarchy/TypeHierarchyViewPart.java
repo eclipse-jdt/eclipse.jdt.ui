@@ -977,12 +977,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		JavaPlugin.createStandardGroups(menu);
 		// viewer entries
 		fMethodsViewer.contributeToContextMenu(menu);
-		if (fSelectedType != null &&  fAddStubAction.init(fSelectedType, fMethodsViewer.getSelection())) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fAddStubAction);
-		}
 		fActionGroups.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
 		fActionGroups.fillContextMenu(menu);
 		fActionGroups.setContext(null);
+		if (fSelectedType != null &&  fAddStubAction.init(fSelectedType, fMethodsViewer.getSelection())) {
+			IMenuManager source= menu.findMenuUsingPath(GenerateActionGroup.MENU_ID);
+			if (source != null)
+				source.appendToGroup(GenerateActionGroup.GROUP_GENERATE, fAddStubAction);
+		}
 	}
 	
 	/**

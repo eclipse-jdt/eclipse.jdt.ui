@@ -32,9 +32,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.SortMembersOperation;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -47,6 +46,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ProgressService;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Sorts the members of a compilation unit with the sort order as specified in
@@ -200,7 +202,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 		SortMembersOperation op= new SortMembersOperation(cu, null);
 		try {
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-			context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
+			ProgressService.runSuspended(context, false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
 		} catch (InterruptedException e) {

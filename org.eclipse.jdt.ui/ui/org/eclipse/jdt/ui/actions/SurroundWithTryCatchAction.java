@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ProgressService;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
@@ -128,7 +129,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			change.initializeValidationData(new NullProgressMonitor());
 			PerformChangeOperation op= RefactoringUI.createUIAwareChangeOperation(change);
 			// must be fork == false since file buffers can't be manipulated in a different thread.
-			new BusyIndicatorRunnableContext().run(false, false, new WorkbenchRunnableAdapter(op)); // lock workspace
+			ProgressService.runSuspended(new BusyIndicatorRunnableContext(), false, false, new WorkbenchRunnableAdapter(op));
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
 		} catch (InvocationTargetException e) {

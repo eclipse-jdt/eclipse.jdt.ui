@@ -52,6 +52,10 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 		fWorkspaceRunnable= runnable;
 		fRule= rule;
 	}
+	
+	public ISchedulingRule getSchedulingRule() {
+		return fRule;
+	}
 
 	/*
 	 * @see IRunnableWithProgress#run(IProgressMonitor)
@@ -98,7 +102,5 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 		
 		// TODO: should block until user pressed 'to background'
 	}
-
-
 }
 

@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -38,14 +37,15 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddMethodStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ProgressService;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-
 
 /**
  * Creates method stubs in a type.
@@ -107,9 +107,8 @@ public class AddMethodStubAction extends Action {
 			IMethod[] methods= (IMethod[]) list.toArray(new IMethod[list.size()]); 
 			AddMethodStubOperation op= new AddMethodStubOperation(fParentType, methods, settings, createOverrideQuery(), createReplaceQuery(), false);
 		
-			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
+			ProgressService.runSuspended(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 			
-			dialog.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
 			IMethod[] res= op.getCreatedMethods();
 			if (res != null && res.length > 0 && editor != null) {
 				EditorUtility.revealInEditor(editor, res[0]);
