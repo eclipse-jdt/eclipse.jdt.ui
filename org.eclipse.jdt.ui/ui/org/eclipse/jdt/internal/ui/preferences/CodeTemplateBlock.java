@@ -7,6 +7,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -104,6 +105,9 @@ public class CodeTemplateBlock {
 
 		public void dialogFieldChanged(DialogField field) {
 		}
+
+		public void keyPressed(TreeListDialogField field, KeyEvent event) {
+		}
 	
 	}
 	
@@ -180,8 +184,8 @@ public class CodeTemplateBlock {
 	private final static int IDX_EXPORT= 3;
 	private final static int IDX_EXPORTALL= 4;
 	
-	private final static Object COMMENT_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.comment.node"); //$NON-NLS-1$
-	private final static Object CODE_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.code.node"); //$NON-NLS-1$
+	protected final static Object COMMENT_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.comment.node"); //$NON-NLS-1$
+	protected final static Object CODE_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.code.node"); //$NON-NLS-1$
 	
 	private static final String PREF_JAVADOC_STUBS= PreferenceConstants.CODEGEN__JAVADOC_STUBS;
 	
