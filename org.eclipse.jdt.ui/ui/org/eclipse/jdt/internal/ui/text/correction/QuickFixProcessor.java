@@ -65,6 +65,12 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UndefinedConstructorInDefaultConstructor:
 			case IProblem.UnhandledExceptionInDefaultConstructor:
 			case IProblem.NotVisibleConstructorInDefaultConstructor:
+			case IProblem.FieldTypeAmbiguous:
+			case IProblem.ArgumentTypeAmbiguous:
+			case IProblem.ExceptionTypeAmbiguous:
+			case IProblem.ReturnTypeAmbiguous:
+			case IProblem.SuperclassAmbiguous:
+			case IProblem.InterfaceAmbiguous:					
 				return true;
 			default:
 				return false;
@@ -104,7 +110,15 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UndefinedField:
 			case IProblem.UndefinedName:
 				UnresolvedElementsSubProcessor.getVariableProposals(context, proposals);
-				break;					
+				break;
+			case IProblem.FieldTypeAmbiguous:
+			case IProblem.ArgumentTypeAmbiguous:
+			case IProblem.ExceptionTypeAmbiguous:
+			case IProblem.ReturnTypeAmbiguous:
+			case IProblem.SuperclassAmbiguous:
+			case IProblem.InterfaceAmbiguous:		
+				UnresolvedElementsSubProcessor.getAmbiguosTypeReferenceProposals(context, proposals);
+				break;	
 			case IProblem.PublicClassMustMatchFileName:
 				ReorgCorrectionsSubProcessor.getWrongTypeNameProposals(context, proposals);
 				break;

@@ -50,6 +50,13 @@ public final class ImportEdit extends SimpleTextEdit {
 	}
 	
 	/**
+	 * @see ImportsStructure#findAmbiguosImports(boolean)
+	 */
+	public void setFindAmbiguosImports(boolean findAmbiguosImports) {
+		fImportsStructure.setFindAmbiguousImports(findAmbiguosImports);
+	}	
+	
+	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.

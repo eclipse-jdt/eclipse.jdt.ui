@@ -435,4 +435,26 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
+	public static void getAmbiguosTypeReferenceProposals(ICorrectionContext context, List proposals) throws CoreException {
+		final ICompilationUnit cu= context.getCompilationUnit();
+		int offset= context.getOffset();
+		int len= context.getLength();
+		
+		IJavaElement[] elements= cu.codeSelect(offset, len);
+		for (int i= 0; i < elements.length; i++) {
+			IJavaElement curr= elements[i];
+			if (curr instanceof IType) {
+				String qualifiedTypeName= JavaModelUtil.getFullyQualifiedName((IType) curr);
+				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importexplicit.description", qualifiedTypeName); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
+				CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 1, image);
+				ImportEdit importEdit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
+				importEdit.addImport(qualifiedTypeName);
+				importEdit.setFindAmbiguosImports(true);
+				proposal.getRootTextEdit().add(importEdit);
+				proposals.add(proposal);			
+			}
+		}
+	}	
+	
 }
