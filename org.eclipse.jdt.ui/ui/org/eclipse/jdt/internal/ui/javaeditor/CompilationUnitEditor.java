@@ -1414,13 +1414,22 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installOverrideIndicator(org.eclipse.jface.text.source.IAnnotationModel)
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installOverrideIndicator(boolean)
 	 * @since 3.0
 	 */
-	protected void installOverrideIndicator(IAnnotationModel model) {
-		uninstallOverrideIndicator();
-		fOverrideAndImplementsIndicator= new OverrideIndicatorManager(model, getInputJavaElement(), null);		
-		addReconcileListener(fOverrideAndImplementsIndicator);
+	protected void installOverrideIndicator(boolean waitForReconcilation) {
+		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
+		if (!waitForReconcilation)
+			super.installOverrideIndicator(false);
+		else {
+			uninstallOverrideIndicator();
+			IJavaElement inputElement= getInputJavaElement();
+			if (model == null || inputElement == null)
+				return;
+			
+			fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);		
+			addReconcileListener(fOverrideIndicatorManager);
+		}
 	}
 	
 	/*
@@ -1428,8 +1437,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @since 3.0
 	 */
 	protected void uninstallOverrideIndicator() {
-		if (fOverrideAndImplementsIndicator != null)
-			removeReconcileListener(fOverrideAndImplementsIndicator);
+		if (fOverrideIndicatorManager != null)
+			removeReconcileListener(fOverrideIndicatorManager);
 		super.uninstallOverrideIndicator();
 	}
 

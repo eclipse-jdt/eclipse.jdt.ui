@@ -14,28 +14,13 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jface.text.Assert;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
-
-import org.eclipse.ui.editors.text.EditorsUI;
-
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.texteditor.AnnotationPreference;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -50,11 +35,9 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
-
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -120,7 +103,9 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 						IType[] superTypes= th.getAllSupertypes(type);
 						
 						IMethodBinding definingMethodBinding= Bindings.findMethodDefininition(methodBinding);
-						IType definingType= findType(superTypes, definingMethodBinding.getDeclaringClass().getQualifiedName());
+						IType definingType= null;
+						if (definingMethodBinding != null)
+							definingType= findType(superTypes, definingMethodBinding.getDeclaringClass().getQualifiedName());
 						
 						if (definingType != null) {
 							IMethod definingMethod= Bindings.findMethod(definingMethodBinding, definingType);
@@ -142,7 +127,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		}
 		
 		private IType getType(IMethodBinding methodBinding) throws JavaModelException {
-			if (fJavaElement == null || methodBinding == null)
+			if (methodBinding == null)
 				return null;
 			
 			int type= fJavaElement.getElementType();
@@ -171,126 +156,30 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	
 	static final String ANNOTATION_TYPE= "org.eclipse.jdt.ui.overrideIndicator"; //$NON-NLS-1$
 
-	private OverrideIndicatorJob fOverrideIndicatorJob;
 	private IAnnotationModel fAnnotationModel;
-	private AnnotationPreference fAnnotationPreference;
 	private Annotation[] fOverrideAnnotations;
 	private boolean fCancelled= false;
 	private IJavaElement fJavaElement;
 
 	
 	public OverrideIndicatorManager(IAnnotationModel annotationModel, IJavaElement javaElement, CompilationUnit ast) {
-		this(annotationModel);
+		Assert.isNotNull(annotationModel);
+		Assert.isNotNull(javaElement);
+		
 		fJavaElement= javaElement;
+		fAnnotationModel=annotationModel; 
+
 		updateAnnotations(ast);
 	}
-	
-	public OverrideIndicatorManager(IAnnotationModel annotationModel) {
-		Assert.isNotNull(annotationModel);
-		fAnnotationModel=annotationModel; 
-		
-		fAnnotationPreference= EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreferenceFragment(ANNOTATION_TYPE);
-	}
-	
-
-	/**
-	 * Creates and adds the override annotations.
-	 * 
-	 * XXX: Delete if not needed. 
-	 */
-	class OverrideIndicatorJob extends Job {
-		
-		private IDocument fDocument;
-		private IProgressMonitor fProgressMonitor;
-		private Position[] fPositions;
-
-		public OverrideIndicatorJob(Position[] positions) {
-			this(null, positions);
-		}
-
-		public OverrideIndicatorJob(IDocument document, Position[] positions) {
-			super("Override Indicator"); //$NON-NLS-1$
-			fDocument= document;
-			fPositions= positions;
-		}
-		
-		private boolean isCancelled() {
-			return fCancelled || fProgressMonitor.isCanceled();
-		}
-		
-		/*
-		 * @see Job#run(org.eclipse.core.runtime.IProgressMonitor)
-		 */
-		public IStatus run(IProgressMonitor progressMonitor) {
-			
-			fProgressMonitor= progressMonitor;
-			
-			if (isCancelled())
-				return Status.CANCEL_STATUS;
-			
-			// Add annotations
-			int length= fPositions.length;
-			Map annotationMap= new HashMap(length);
-			for (int i= 0; i < length; i++) {
-				
-				if (isCancelled())
-					return Status.CANCEL_STATUS; 
-				
-				String message;
-				Position position= fPositions[i];
-				
-				// Create & add annotation
-				try {
-					// FIXME
-					message= "document.get(position.offset, position.length)";
-					if (false)
-						throw new BadLocationException();
-				} catch (BadLocationException ex) {
-					// Skip this match
-					continue;
-				}
-				annotationMap.put(
-						new Annotation(ANNOTATION_TYPE, false, message), //$NON-NLS-1$
-						position);
-			}
-			
-			if (isCancelled())
-				return Status.CANCEL_STATUS;
-			
-			synchronized (fAnnotationModel) {
-				if (fAnnotationModel instanceof IAnnotationModelExtension) {
-					((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(fOverrideAnnotations, annotationMap);
-				} else {
-					removeAnnotations();
-					Iterator iter= annotationMap.entrySet().iterator();
-					while (iter.hasNext()) {
-						Map.Entry mapEntry= (Map.Entry)iter.next(); 
-						fAnnotationModel.addAnnotation((Annotation)mapEntry.getKey(), (Position)mapEntry.getValue());
-					}
-				}
-				fOverrideAnnotations= (Annotation[])annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
-			}
-
-			return Status.OK_STATUS;
-		}
-	}	
 
 	/**
 	 * Updates the override and implements annotations based
 	 * on the given AST.
 	 * 
-	 * @param ast the compilation unit ast
+	 * @param ast the compilation unit AST
 	 * @since 3.0
 	 */
 	protected void updateAnnotations(CompilationUnit ast) {
-
-		if (fOverrideIndicatorJob != null)
-			fOverrideIndicatorJob.cancel();
-
-		if (!showOverrideIndicators()) {
-			removeAnnotations();
-			return;
-		}
 		
 		if (ast == null)
 			return;
@@ -346,16 +235,6 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			}
 			fOverrideAnnotations= (Annotation[])annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
 		}
-		
-		// XXX: code we might want to use when processing the annotations in a separate job 
-		
-//		Position[] positions= (Position[])matches.toArray(new Position[matches.size()]);
-//		
-//		fOverrideIndicatorJob= new OverrideIndicatorJob(positions);
-//		//fOccurrencesFinderJob.setPriority(Job.DECORATE);
-//		//fOccurrencesFinderJob.setSystem(true);
-//		//fOccurrencesFinderJob.schedule();
-//		fOverrideIndicatorJob.run(new NullProgressMonitor());
 	}
 
 	/**
@@ -374,19 +253,6 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			}
 			fOverrideAnnotations= null;
 		}
-	}
-
-	/**
-	 * Tells whether override indicators are shown.
-	 * 
-	 * @return <code>true</code> if the override indicators are shown
-	 */
-	private boolean showOverrideIndicators() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(fAnnotationPreference.getHighlightPreferenceKey())
-			|| store.getBoolean(fAnnotationPreference.getVerticalRulerPreferenceKey())
-			|| store.getBoolean(fAnnotationPreference.getOverviewRulerPreferenceKey())
-			|| store.getBoolean(fAnnotationPreference.getTextPreferenceKey());
 	}
 
 	/*

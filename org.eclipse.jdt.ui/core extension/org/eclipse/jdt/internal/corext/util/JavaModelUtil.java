@@ -762,12 +762,7 @@ public final class JavaModelUtil {
 	 */
 	public static boolean isJDTCore_1_5() {
 		if (fgIsJDTCore_1_5 == null) {
-			try {
-				Class.forName("org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding"); //$NON-NLS-1$
-				fgIsJDTCore_1_5= Boolean.TRUE;
-			} catch (ClassNotFoundException e) {
-				fgIsJDTCore_1_5= Boolean.FALSE;
-			}
+			fgIsJDTCore_1_5= new Boolean(JavaCore.getDefaultOptions().containsKey("org.eclipse.jdt.core.compiler.problem.unsafeTypeOperation")); //$NON-NLS-1$
 		}
 		return fgIsJDTCore_1_5.booleanValue();
 	}
