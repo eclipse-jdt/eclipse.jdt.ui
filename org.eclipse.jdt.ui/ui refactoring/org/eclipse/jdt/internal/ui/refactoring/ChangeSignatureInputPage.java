@@ -18,11 +18,11 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -114,10 +114,10 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 				"pri&vate"
 			};
 			Integer[] data= new Integer[] {
-						new Integer(JdtFlags.VISIBILITY_CODE_PUBLIC),
-						new Integer(JdtFlags.VISIBILITY_CODE_PROTECTED),
-						new Integer(JdtFlags.VISIBILITY_CODE_PACKAGE),
-						new Integer(JdtFlags.VISIBILITY_CODE_PRIVATE)};
+						new Integer(Modifier.PUBLIC),
+						new Integer(Modifier.PROTECTED),
+						new Integer(Modifier.NONE),
+						new Integer(Modifier.PRIVATE)};
 			Integer initialVisibility= new Integer(getChangeMethodSignatureRefactoring().getVisibility());
 			for (int i= 0; i < labels.length; i++) {
 				Button radio= new Button(group, SWT.RADIO);

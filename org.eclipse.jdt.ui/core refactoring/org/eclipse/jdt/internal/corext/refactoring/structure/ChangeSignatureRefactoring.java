@@ -179,10 +179,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	 * @see JdtFlags
 	 */	
 	public void setVisibility(int visibility){
-		Assert.isTrue(	visibility == JdtFlags.VISIBILITY_CODE_PUBLIC ||
-		            	visibility == JdtFlags.VISIBILITY_CODE_PROTECTED ||
-		            	visibility == JdtFlags.VISIBILITY_CODE_PACKAGE ||
-		            	visibility == JdtFlags.VISIBILITY_CODE_PRIVATE);  
+		Assert.isTrue(	visibility == Modifier.PUBLIC ||
+		            	visibility == Modifier.PROTECTED ||
+		            	visibility == Modifier.NONE ||
+		            	visibility == Modifier.PRIVATE);  
 		fVisibility= visibility;            	
 	}
 	
@@ -191,12 +191,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	 */	
 	public int[] getAvailableVisibilities() throws JavaModelException{
 		if (fMethod.getDeclaringType().isInterface())
-			return new int[]{JdtFlags.VISIBILITY_CODE_PUBLIC};
+			return new int[]{Modifier.PUBLIC};
 		else 	
-			return new int[]{	JdtFlags.VISIBILITY_CODE_PUBLIC,
-								JdtFlags.VISIBILITY_CODE_PROTECTED,
-								JdtFlags.VISIBILITY_CODE_PACKAGE,
-								JdtFlags.VISIBILITY_CODE_PRIVATE};
+			return new int[]{	Modifier.PUBLIC,
+								Modifier.PROTECTED,
+								Modifier.NONE,
+								Modifier.PRIVATE};
 	}
 	
 	/**
@@ -526,8 +526,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return null;
 	    if (fRippleMethods.length == 1)
 	    	return null;
-	    Assert.isTrue(getInitialMethodVisibility() != JdtFlags.VISIBILITY_CODE_PRIVATE);
-	    if (fVisibility == JdtFlags.VISIBILITY_CODE_PRIVATE)
+	    Assert.isTrue(getInitialMethodVisibility() != Modifier.PRIVATE);
+	    if (fVisibility == Modifier.PRIVATE)
 	    	return RefactoringStatus.createWarningStatus("Changing visibility to 'private' will make this method non-virtual, which may affect the program's behavior");
 		return null;
 	}
@@ -946,17 +946,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private int getNewModifiers(MethodDeclaration md) {
-		return clearAccessModifiers(md.getModifiers()) | getModifierFlag(fVisibility);
-	}
-	
-	private static int getModifierFlag(int visibility) {
-		switch(visibility){
-			case JdtFlags.VISIBILITY_CODE_PUBLIC: 		return Modifier.PUBLIC;
-   		 	case JdtFlags.VISIBILITY_CODE_PRIVATE: 	return Modifier.PRIVATE;
-   		 	case JdtFlags.VISIBILITY_CODE_PROTECTED: 	return Modifier.PROTECTED;
-   		 	case JdtFlags.VISIBILITY_CODE_PACKAGE: 	return Modifier.NONE;
-   		 	default: Assert.isTrue(false); return Modifier.NONE;
-		}
+		return clearAccessModifiers(md.getModifiers()) | fVisibility;
 	}
 	
 	private static int clearAccessModifiers(int flags) {
