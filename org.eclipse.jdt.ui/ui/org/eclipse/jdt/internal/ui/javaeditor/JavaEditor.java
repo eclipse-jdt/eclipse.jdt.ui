@@ -158,6 +158,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -2007,6 +2008,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				
 				if (reference instanceof IMember) {
 					range= ((IMember) reference).getNameRange();
+					if (range != null) {
+						offset= range.getOffset();
+						length= range.getLength();
+					}
+				} else if (reference instanceof ITypeParameter) {
+					range= ((ITypeParameter) reference).getNameRange();
 					if (range != null) {
 						offset= range.getOffset();
 						length= range.getLength();
