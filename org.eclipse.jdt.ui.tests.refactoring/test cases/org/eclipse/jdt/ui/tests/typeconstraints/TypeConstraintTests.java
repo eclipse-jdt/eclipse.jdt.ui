@@ -170,21 +170,21 @@ public class TypeConstraintTests extends RefactoringTest {
 		String[] strings= {"[null] <= [A:f1()]_returnType", "Decl(A:f1()) =^= p.A", "[A:f1()]_returnType =^= A[]"};
 		testConstraints(strings);
 	}	
-//
-//	public void testConstraints11() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
 
-//	public void testConstraints12() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
-//
-//	public void testConstraints13() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
+	public void testConstraints11() throws Exception{
+		String[] strings= {"[null] <= [A:f(A, Object)]_returnType", "[Parameter(1,B:f(A, Object))] =^= [a4]", "[B:f(A, Object)]_returnType =^= A", "Decl(B:f(A, Object)) < Decl(A:f(A, Object))", "[Parameter(1,A:f(A, Object))] == [Parameter(1,B:f(A, Object))]", "[Parameter(0,A:f(A, Object))] == [Parameter(0,B:f(A, Object))]", "[A:f(A, Object)]_returnType == [B:f(A, Object)]_returnType", "[Parameter(0,B:f(A, Object))] =^= [a3]", "[Parameter(0,A:f(A, Object))] =^= [a0]", "Decl(A:f(A, Object)) =^= p.A", "[null] <= [B:f(A, Object)]_returnType", "[Parameter(1,A:f(A, Object))] =^= [a1]", "[A:f(A, Object)]_returnType =^= A", "Decl(B:f(A, Object)) =^= p.B"};
+		testConstraints(strings);
+	}	
+
+	public void testConstraints12() throws Exception{
+		String[] strings= {"Decl(B:f(A, Object)) =^= p.B", "[Parameter(1,B:f(A, Object))] =^= [a4]", "[B:f(A, Object)]_returnType =^= A", "[null] <= [B:f(A, Object)]_returnType", "[A:f(A, Object)]_returnType =^= A", "[Parameter(1,A:f(A, Object))] =^= [a1]", "Decl(A:f(A, Object)) =^= p.A", "[Parameter(0,B:f(A, Object))] =^= [a3]", "[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]"};
+		testConstraints(strings);
+	}	
+
+	public void testConstraints13() throws Exception{
+		String[] strings= {"Decl(B:f(A, Object)) =^= p.B", "[Parameter(1,B:f(A, Object))] =^= [a4]", "[B:f(A, Object)]_returnType =^= A", "[null] <= [B:f(A, Object)]_returnType", "[A:f(A, Object)]_returnType =^= A", "[Parameter(1,A:f(A, Object))] =^= [a1]", "Decl(A:f(A, Object)) =^= p.A", "[Parameter(0,B:f(A, Object))] =^= [a3]", "[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]"};
+		testConstraints(strings);
+	}	
 //
 //	public void testConstraints14() throws Exception{
 //		String[] strings= {};
