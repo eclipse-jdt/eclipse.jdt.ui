@@ -228,11 +228,10 @@ public class MemberFilterActionGroup extends ActionGroup {
 				if (currProperty == filterProperty) {
 					fFilterActions[j].setChecked(set);
 					found= true;
-					break;
+					store.setValue(getPreferenceKey(filterProperty), set);
 				}
 			}
 			if (found) {
-				store.setValue(getPreferenceKey(filterProperty), hasMemberFilter(filterProperty));
 				if (set) {
 					fFilter.addFilter(filterProperty);
 				} else {
