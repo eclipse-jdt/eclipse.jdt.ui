@@ -19,9 +19,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IEditorPart;
@@ -40,7 +40,6 @@ import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
-
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -204,7 +203,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		setSortOrder(fCurrentSortOrder);
 	}
 
-	protected void configureTreeViewer(AbstractTreeViewer viewer) {
+	protected void configureTreeViewer(TreeViewer viewer) {
 		viewer.setSorter(new ViewerSorter());
 		viewer.setLabelProvider(new PostfixLabelProvider(this));
 		fContentProvider= new LevelTreeContentProvider(viewer, fCurrentGrouping);
