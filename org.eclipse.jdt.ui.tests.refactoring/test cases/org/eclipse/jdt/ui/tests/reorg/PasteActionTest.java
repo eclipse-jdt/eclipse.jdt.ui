@@ -19,9 +19,13 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -42,6 +46,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSource;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 
 
 public class PasteActionTest extends RefactoringTest{
@@ -228,6 +234,86 @@ public class PasteActionTest extends RefactoringTest{
 			IResource[] pasteResources= {};
 			PasteAction paste= verifyEnabled(copyResources, copyJavaElements, pasteResources, pasteJavaElements);
 			paste.run((IStructuredSelection)paste.getSelection());
+			compareContents("A");
+		} finally{
+			delete(cuA);
+		}
+	}
+
+	private void setClipboardContents(TypedSource[] typedSources, int repeat) {
+		final int maxRepeat= 10;
+		try {
+			fClipboard.setContents(new Object[] {typedSources}, new Transfer[] {TypedSourceTransfer.getInstance()});
+		} catch (SWTError e) {
+			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD || repeat >= maxRepeat)
+				throw e;
+			setClipboardContents(typedSources, repeat+1);
+		}
+	}
+	
+	private void copyAndPasteTypeResources(IJavaElement[] elemsForClipboard, IJavaElement[] pasteSelectedJavaElements, boolean pasteEnabled) throws CoreException {
+		setClipboardContents(TypedSource.createTypedSources(elemsForClipboard), 0);
+		PasteAction pasteAction= new PasteAction(new MockWorkbenchSite(pasteSelectedJavaElements), fClipboard);
+		pasteAction.update(pasteAction.getSelection());
+		assertEquals("action enablement", pasteEnabled, pasteAction.isEnabled());
+		if (pasteEnabled)
+			pasteAction.run((IStructuredSelection)pasteAction.getSelection());
+	}
+
+	public void testPastingTypedResources0() throws Exception {
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		try {
+			IJavaElement methodM= cuA.getType("A").getMethod("m", new String[0]);
+			IJavaElement[] elemsForClipboard= {methodM};
+			IJavaElement[] pasteSelectedJavaElements= {methodM};
+			boolean enabled= true;
+			copyAndPasteTypeResources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+			compareContents("A");
+		} finally{
+			delete(cuA);
+		}
+	}
+
+	public void testPastingTypedResources1() throws Exception {
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		try {
+			IType typeA= cuA.getType("A");
+			IJavaElement fieldF= typeA.getField("f");
+			IJavaElement[] elemsForClipboard= {fieldF};
+			IJavaElement[] pasteSelectedJavaElements= {typeA};
+			boolean enabled= true;
+			copyAndPasteTypeResources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+			compareContents("A");
+		} finally{
+			delete(cuA);
+		}
+	}
+
+	public void testPastingTypedResources2() throws Exception {
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		try {
+			IType typeA= cuA.getType("A");
+			IJavaElement fieldF= typeA.getField("f");
+			IJavaElement[] elemsForClipboard= {fieldF};
+			IJavaElement[] pasteSelectedJavaElements= {typeA};
+			boolean enabled= true;
+			copyAndPasteTypeResources(elemsForClipboard, pasteSelectedJavaElements, enabled);
+			compareContents("A");
+		} finally{
+			delete(cuA);
+		}
+	}
+
+	public void testPastingTypedResources3() throws Exception {
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		try {
+			IType typeA= cuA.getType("A");
+			IJavaElement fieldF= typeA.getField("f");
+			IJavaElement fieldG= typeA.getField("g");
+			IJavaElement[] elemsForClipboard= {fieldF, fieldG};
+			IJavaElement[] pasteSelectedJavaElements= {typeA};
+			boolean enabled= true;
+			copyAndPasteTypeResources(elemsForClipboard, pasteSelectedJavaElements, enabled);
 			compareContents("A");
 		} finally{
 			delete(cuA);
