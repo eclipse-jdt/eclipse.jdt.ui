@@ -61,6 +61,8 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 
 	private boolean fIsFlatLayout;
 	private PackageFragmentProvider fPackageFragmentProvider= new PackageFragmentProvider();
+	
+	private int fPendingChanges;
 
 
 	/**
@@ -95,7 +97,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		JavaCore.removeElementChangedListener(this);
 		fPackageFragmentProvider.dispose();
 	}
-
+	
 	// ------ Code which delegates to PackageFragmentProvider ------
 
 	private boolean needsToDelegate(Object element) {
@@ -476,6 +478,9 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		return false;
 	}
 	
+	void setIsFlatLayout(boolean state) {
+		fIsFlatLayout= state;
+	}
 	/**
 	 * Process resource deltas.
 	 *
@@ -506,7 +511,6 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	private void postRefresh(final Object root, final boolean updateLabels) {
 		postRunnable(new Runnable() {
 			public void run() {
-				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()){
 					fViewer.refresh(root, updateLabels);
@@ -517,7 +521,6 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	private void postAdd(final Object parent, final Object element) {
 		postRunnable(new Runnable() {
 			public void run() {
-				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()){
 					fViewer.add(parent, element);
@@ -529,7 +532,6 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	private void postRemove(final Object element) {
 		postRunnable(new Runnable() {
 			public void run() {
-				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
 					fViewer.remove(element);
@@ -540,12 +542,44 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 
 	private void postRunnable(final Runnable r) {
 		Control ctrl= fViewer.getControl();
+		final Runnable trackedRunnable= new Runnable() {
+			public void run() {
+				try {
+					r.run();
+				} finally {
+					removePendingChange();
+				}
+			}
+		};
 		if (ctrl != null && !ctrl.isDisposed()) {
-			ctrl.getDisplay().asyncExec(r); 
+			addPendingChange();
+			try {
+				ctrl.getDisplay().asyncExec(trackedRunnable); 
+			} catch (RuntimeException e) {
+				removePendingChange();
+				throw e;
+			} catch (Error e) {
+				removePendingChange();
+				throw e; 
+			}
 		}
 	}
 
-	void setIsFlatLayout(boolean state) {
-		fIsFlatLayout= state;
+	// ------ Pending change management due to the use of asyncExec in postRunnable.
+	
+	public synchronized boolean hasPendingChanges() {
+		return fPendingChanges > 0;  
+	}
+	
+	private synchronized void addPendingChange() {
+		fPendingChanges++;
+		// System.out.print(fPendingChanges);
+	}
+
+	private synchronized void removePendingChange() {
+		fPendingChanges--;
+		if (fPendingChanges < 0)
+			fPendingChanges= 0;
+		// System.out.print(fPendingChanges);
 	}
 }

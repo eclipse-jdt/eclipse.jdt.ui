@@ -622,10 +622,28 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	public void selectReveal(ISelection selection) {
+		selectReveal(selection, 0);
+	}
+	
+	private void selectReveal(final ISelection selection, final int count) {
+		Control ctrl= getViewer().getControl();
+		if (ctrl == null || ctrl.isDisposed())
+			return;
 		ISelection javaSelection= convertSelection(selection);
-	 	fViewer.setSelection(javaSelection, true);
-	 	if (javaSelection != selection && !javaSelection.equals(fViewer.getSelection()))
-	 		fViewer.setSelection(selection);
+		fViewer.setSelection(javaSelection, true);
+		PackageExplorerContentProvider provider= (PackageExplorerContentProvider)getViewer().getContentProvider();
+		ISelection cs= fViewer.getSelection();
+		// If we have Pending changes and the element could not be selected then
+		// we try it again on more time by posting the select and reveal asynchronuoulsy
+		// to the event queue. See PR http://bugs.eclipse.org/bugs/show_bug.cgi?id=30700
+		// for a discussion of the underlying problem.
+		if (count == 0 && provider.hasPendingChanges() && !javaSelection.equals(cs)) {
+			ctrl.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					selectReveal(selection, count + 1);
+				}
+			});
+		}
 	}
 
 	private ISelection convertSelection(ISelection s) {
@@ -640,7 +658,7 @@ public class PackageExplorerPart extends ViewPart
 			Object o= elements[i];
 			if (o instanceof IResource) {
 				IJavaElement jElement= JavaCore.create((IResource)o);
-				if (jElement != null) 
+				if (jElement != null && jElement.exists()) 
 					elements[i]= jElement;
 			}
 		}
