@@ -9,7 +9,7 @@ public class ClassName extends SuperClass {
 	// This comment may span only this line
 	private String string= "zero";
 	// TASK: refactor
-	public void method() {
-		super();
+	public int foo() {
+		return bar() + 24;
 	}
 }
