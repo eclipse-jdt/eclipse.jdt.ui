@@ -22,6 +22,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -321,6 +322,9 @@ public class JavaDocLocations {
 				varElement.setAttribute(NODE_URL, url.toExternalForm());
 				rootElement.appendChild(varElement);
 			}
+			
+			JavaDocVMInstallListener.saveVMInstallJavadocLocations(document, rootElement);
+					
 
 			Transformer transformer=TransformerFactory.newInstance().newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
@@ -371,6 +375,13 @@ public class JavaDocLocations {
 					}
 				}
 			}
+		}
+		
+		// check for updates in the vm installs
+		ArrayList paths= new ArrayList(), urls= new ArrayList();
+		JavaDocVMInstallListener.collectChangedVMInstallJavadocLocations(cpElement, paths, urls);
+		for (int i= 0; i < paths.size(); i++) {
+			setJavadocBaseLocation(canonicalizedPath((IPath) paths.get(i)), (URL) urls.get(i), false);
 		}
 	}	
 	
