@@ -833,7 +833,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	}
 
 	private Display getDisplay() {
-		return fCounterPanel.getDisplay();
+		return getViewSite().getShell().getDisplay();
 	}
 	/**
 	 * @see IWorkbenchPart#getTitleImage()
@@ -877,4 +877,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 		});
 	}
 	
+	boolean isCreated() {
+		return fCounterPanel != null;
+	}
 }

@@ -156,7 +156,9 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		if (page != null) {
 			try { // show the result view if it isn't shown yet
 				testRunner= (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
-				if(testRunner == null) {
+				// TODO: have force the creation of view part contents 
+				// otherwise the UI will not be updated
+				if(testRunner == null || !testRunner.isCreated()) {
 					IWorkbenchPart activePart= page.getActivePart();
 					testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
 					//restore focus stolen by the creation of the result view
