@@ -837,7 +837,6 @@ JavaStructureDiffViewerCreator
 	</perspective>
 </extension>
 
-
 <extension point="org.eclipse.ui.perspectiveExtensions">
 	<perspectiveExtension 
 		targetID="org.eclipse.ui.resourcePerspective">
@@ -867,7 +866,6 @@ JavaStructureDiffViewerCreator
 		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
 	</perspectiveExtension>
 </extension>
-
 
 <extension 
 	point="org.eclipse.ui.views">
@@ -916,6 +914,21 @@ JavaStructureDiffViewerCreator
 		class="org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.WorkInProgressPreferencePage">
 	</page>
+</extension>
+
+<extension point="org.eclipse.ui.popupMenus">
+	<viewerContribution
+		id="org.eclipse.jdt.ui.actions.CopyNamesToClipboardActionContribution"
+		targetID="org.eclipse.jdt.ui.ProjectsView">
+		<action
+			id="org.eclipse.jdt.ui.actions.CopyNamesToClipboardAction"
+			label="%CopyNamesToClipboardAction.label"
+			tooltip="%CopyNamesToClipboardAction.tooltip"
+			menubarPath="group.reorganize"
+			class="org.eclipse.jdt.internal.ui.actions.CopyNamesToClipboardAction"
+			enablesFor="+">
+		</action>
+	</viewerContribution>
 </extension>
 
 </plugin>
