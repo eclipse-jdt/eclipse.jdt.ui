@@ -163,10 +163,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			structureSelection.add(fStructureSelectPreviousAction);
 			structureSelection.add(fStructureSelectHistoryAction);
 			
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_OPEN));			
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
-			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 		}
 
