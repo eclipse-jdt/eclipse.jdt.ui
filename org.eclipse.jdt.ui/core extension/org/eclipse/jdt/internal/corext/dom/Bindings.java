@@ -225,7 +225,56 @@ public class Bindings {
 				return false;
 		}
 		return true;
-	}	
+	}
+
+	public static ITypeBinding findTypeInHierarchy(ITypeBinding hierarchyType, String fullyQualifiedTypeName) {
+		if (hierarchyType.isArray() || hierarchyType.isPrimitive()) {
+			return null;
+		}
+		if (fullyQualifiedTypeName.equals(hierarchyType.getQualifiedName())) {
+			return hierarchyType;
+		}
+		ITypeBinding superClass= hierarchyType.getSuperclass();
+		if (superClass != null) {
+			ITypeBinding res= findTypeInHierarchy(superClass, fullyQualifiedTypeName);
+			if (res != null) {
+				return res;
+			}
+		}
+		ITypeBinding[] superInterfaces= hierarchyType.getInterfaces();
+		for (int i= 0; i < superInterfaces.length; i++) {
+			ITypeBinding res= findTypeInHierarchy(superInterfaces[i], fullyQualifiedTypeName);
+			if (res != null) {
+				return res;
+			}			
+		}
+		return null;
+	}
+	
+	public static boolean findTypeInHierarchy(ITypeBinding hierarchyType, ITypeBinding type) {
+		if (hierarchyType.isArray() || hierarchyType.isPrimitive()) {
+			return false;
+		}
+		if (hierarchyType == type) {
+			return true;
+		}
+		ITypeBinding superClass= hierarchyType.getSuperclass();
+		if (superClass != null) {
+			if (findTypeInHierarchy(superClass, type)) {
+				return true;
+			}
+		}
+		
+		if (type.isInterface()) {
+			ITypeBinding[] superInterfaces= hierarchyType.getInterfaces();
+			for (int i= 0; i < superInterfaces.length; i++) {
+				if (findTypeInHierarchy(superInterfaces[i], type)) {
+					return true;
+				}			
+			}
+		}
+		return false;
+	}		
 	
 
 }

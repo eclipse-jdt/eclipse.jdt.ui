@@ -17,10 +17,13 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
@@ -55,13 +58,39 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			return true;
 		}
 		
+		public boolean visit(TypeDeclaration node) {
+			if (fBinding.getKind() == IBinding.METHOD) {
+				IMethodBinding binding= (IMethodBinding) fBinding;
+				if (binding.isConstructor() && binding.getDeclaringClass() == node.resolveBinding()) {
+					fResult.add(node.getName());
+				}
+			}
+			return true;
+		}		
+		
 		public boolean visit(SimpleName node) {
-			if (fBinding == node.resolveBinding()) {
+			IBinding binding= node.resolveBinding();
+			
+			if (fBinding == binding) {
 				fResult.add(node);
+			} else if (binding != null && binding.getKind() == fBinding.getKind() && binding.getKind() == IBinding.METHOD) {
+				if (isConnectedMethod((IMethodBinding) binding, (IMethodBinding) fBinding)) {
+					fResult.add(node);
+				}
 			}
 			return false;
 		}
-
+		
+		private boolean isConnectedMethod(IMethodBinding meth1, IMethodBinding meth2) {
+			if (Bindings.isEqualMethod(meth1, meth2.getName(), meth2.getParameterTypes())) {
+				ITypeBinding type1= meth1.getDeclaringClass();
+				ITypeBinding type2= meth2.getDeclaringClass();
+				if (Bindings.findTypeInHierarchy(type1, type2) || Bindings.findTypeInHierarchy(type2, type1)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 
