@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.core.refactoring.util.WorkingCopyUtil;
 
 class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	

@@ -52,8 +52,8 @@ import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.util.TextBufferChangeManager;
 import org.eclipse.jdt.internal.core.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.core.refactoring.util.WorkingCopyUtil;
 
 public class RenameTypeRefactoring extends Refactoring implements IRenameRefactoring, ITextUpdatingRefactoring, IReferenceUpdatingRefactoring{
 

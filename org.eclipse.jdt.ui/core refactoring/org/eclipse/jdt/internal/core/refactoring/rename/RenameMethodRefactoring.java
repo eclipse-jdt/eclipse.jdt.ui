@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.util.WorkingCopyUtil;
 
 public abstract class RenameMethodRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring{
 	

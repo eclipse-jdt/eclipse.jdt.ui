@@ -1,4 +1,8 @@
-package org.eclipse.jdt.internal.core.refactoring.rename;
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
+package org.eclipse.jdt.internal.core.refactoring.util;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -6,12 +10,12 @@ import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.core.refactoring.util.ResourceManager;
 
-class WorkingCopyUtil {
+public class WorkingCopyUtil {
 
 	private WorkingCopyUtil(){
 	}
 	
-	static ICompilationUnit getWorkingCopyIfExists(ICompilationUnit cu){
+	public static ICompilationUnit getWorkingCopyIfExists(ICompilationUnit cu){
 		if (cu.isWorkingCopy())
 			return cu;
 		ICompilationUnit[] wcs= ResourceManager.getWorkingCopies();
@@ -22,7 +26,7 @@ class WorkingCopyUtil {
 		return cu;
 	}
 	
-	static IJavaElement getOriginal(IMember member){
+	public static IJavaElement getOriginal(IMember member){
 		if (! member.getCompilationUnit().isWorkingCopy())
 			return member;
 		return member.getCompilationUnit().getOriginal(member);	
