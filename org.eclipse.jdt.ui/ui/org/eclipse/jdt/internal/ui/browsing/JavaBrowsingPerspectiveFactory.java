@@ -143,6 +143,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
 		placeHolderBottom.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
+		placeHolderBottom.addPlaceholder(JavaPerspectiveFactory.ID_PROGRESS_VIEW);
 	}
 	
 	private boolean shouldShowProjectsView() {
