@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 class ToggleOrientationAction extends Action {
 
     private CallHierarchyViewPart fView;    
-    private int fOrientation;
+    private int fActionOrientation;
     
     public ToggleOrientationAction(CallHierarchyViewPart v, int orientation) {
         super("", AS_RADIO_BUTTON); //$NON-NLS-1$
@@ -39,6 +39,11 @@ class ToggleOrientationAction extends Action {
             setDescription(CallHierarchyMessages.getString("ToggleOrientationAction.vertical.description")); //$NON-NLS-1$
             setToolTipText(CallHierarchyMessages.getString("ToggleOrientationAction.vertical.tooltip")); //$NON-NLS-1$  
             JavaPluginImages.setLocalImageDescriptors(this, "th_vertical.gif"); //$NON-NLS-1$
+		} else if (orientation == CallHierarchyViewPart.VIEW_ORIENTATION_AUTOMATIC) {
+			setText(CallHierarchyMessages.getString("ToggleOrientationAction.automatic.label")); //$NON-NLS-1$
+			setDescription(CallHierarchyMessages.getString("ToggleOrientationAction.automatic.description")); //$NON-NLS-1$
+			setToolTipText(CallHierarchyMessages.getString("ToggleOrientationAction.automatic.tooltip")); //$NON-NLS-1$	
+			JavaPluginImages.setLocalImageDescriptors(this, "th_automatic.gif"); //$NON-NLS-1$
         } else if (orientation == CallHierarchyViewPart.VIEW_ORIENTATION_SINGLE) {
             setText(CallHierarchyMessages.getString("ToggleOrientationAction.single.label")); //$NON-NLS-1$
             setDescription(CallHierarchyMessages.getString("ToggleOrientationAction.single.description")); //$NON-NLS-1$
@@ -48,19 +53,22 @@ class ToggleOrientationAction extends Action {
             Assert.isTrue(false);
         }
         fView= v;
-        fOrientation= orientation;
+        fActionOrientation= orientation;
         WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_TOGGLE_ORIENTATION_ACTION);
     }
     
     public int getOrientation() {
-        return fOrientation;
+        return fActionOrientation;
     }   
     
     /*
      * @see Action#actionPerformed
      */     
     public void run() {
-        fView.setOrientation(fOrientation); // will toggle the checked state
+		if (isChecked()) {
+			fView.fOrientation= fActionOrientation; 
+			fView.computeOrientation();
+		}
     }
     
 }

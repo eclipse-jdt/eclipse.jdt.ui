@@ -102,6 +102,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     static final int VIEW_ORIENTATION_VERTICAL = 0;
     static final int VIEW_ORIENTATION_HORIZONTAL = 1;
     static final int VIEW_ORIENTATION_SINGLE = 2;
+    static final int VIEW_ORIENTATION_AUTOMATIC = 3;
     static final int CALL_MODE_CALLERS = 0;
     static final int CALL_MODE_CALLEES = 1;
     static final String GROUP_SEARCH_SCOPE = "MENU_SEARCH_SCOPE"; //$NON-NLS-1$
@@ -113,6 +114,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private PageBook fPagebook;
     private IDialogSettings fDialogSettings;
     private int fCurrentOrientation;
+    int fOrientation= VIEW_ORIENTATION_AUTOMATIC;
     private int fCurrentCallMode;
     private MethodWrapper fCalleeRoot;
     private MethodWrapper fCallerRoot;
@@ -229,14 +231,18 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                 fHierarchyLocationSplitter.layout();
             }
 
-            for (int i = 0; i < fToggleOrientationActions.length; i++) {
-                fToggleOrientationActions[i].setChecked(orientation == fToggleOrientationActions[i].getOrientation());
-            }
+            updateCheckedState();
 
             fCurrentOrientation = orientation;
             fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, orientation);
         }
     }
+
+	private void updateCheckedState() {
+		for (int i= 0; i < fToggleOrientationActions.length; i++) {
+			fToggleOrientationActions[i].setChecked(fOrientation == fToggleOrientationActions[i].getOrientation());
+		}
+	}
 
     /**
      * called from ToggleCallModeAction.
@@ -340,19 +346,27 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			public void controlMoved(ControlEvent e) {
 			}
 			public void controlResized(ControlEvent e) {
-				if (fCurrentOrientation == VIEW_ORIENTATION_SINGLE)
-					return;
-				Point size= fParent.getSize();
-				if (size.x != 0 && size.y != 0) {
-					if (size.x > size.y) 
-						setOrientation(VIEW_ORIENTATION_HORIZONTAL);
-					else 
-						setOrientation(VIEW_ORIENTATION_VERTICAL);
-				}
+				computeOrientation();
 			}
 		});
 	}
 
+	void computeOrientation() {
+		if (fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
+			setOrientation(fOrientation);
+		}
+		else {
+			if (fOrientation == VIEW_ORIENTATION_SINGLE)
+				return;
+			Point size= fParent.getSize();
+			if (size.x != 0 && size.y != 0) {
+				if (size.x > size.y) 
+					setOrientation(VIEW_ORIENTATION_HORIZONTAL);
+				else 
+					setOrientation(VIEW_ORIENTATION_VERTICAL);
+			}
+		}
+	}
     /**
      * @param PAGE_EMPTY
      */
@@ -371,9 +385,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         Integer orientation= memento.getInteger(TAG_ORIENTATION);
 
         if (orientation != null) {
-            setOrientation(orientation.intValue());
+            fOrientation= orientation.intValue();
         }
-
+        computeOrientation();
+        updateCheckedState();
+        
         Integer callMode= memento.getInteger(TAG_CALL_MODE);
 
         if (callMode != null) {
@@ -412,23 +428,20 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     }
 
     private void initOrientation() {
-        int orientation;
 
         try {
-            orientation = fDialogSettings.getInt(DIALOGSTORE_VIEWORIENTATION);
+            fOrientation = fDialogSettings.getInt(DIALOGSTORE_VIEWORIENTATION);
 
-            if ((orientation < 0) || (orientation > 2)) {
-                orientation = VIEW_ORIENTATION_VERTICAL;
+            if ((fOrientation < 0) || (fOrientation > 3)) {
+            	fOrientation = VIEW_ORIENTATION_AUTOMATIC;
             }
         } catch (NumberFormatException e) {
-            orientation = VIEW_ORIENTATION_VERTICAL;
+        	fOrientation = VIEW_ORIENTATION_AUTOMATIC;
         }
 
         // force the update
         fCurrentOrientation = -1;
-
-        // will fill the main tool bar
-        setOrientation(orientation);
+        setOrientation(fOrientation);
     }
 
     private void fillViewMenu() {
@@ -499,7 +512,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
 
         memento.putInteger(TAG_CALL_MODE, fCurrentCallMode);
-        memento.putInteger(TAG_ORIENTATION, fCurrentOrientation);
+        memento.putInteger(TAG_ORIENTATION, fOrientation);
 
         int[] weigths = fHierarchyLocationSplitter.getWeights();
         int ratio = (weigths[0] * 1000) / (weigths[0] + weigths[1]);
@@ -744,6 +757,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fToggleOrientationActions = new ToggleOrientationAction[] {
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
+                new ToggleOrientationAction(this, VIEW_ORIENTATION_AUTOMATIC),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_SINGLE)
             };
         fToggleCallModeActions = new ToggleCallModeAction[] {

@@ -867,7 +867,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			setOrientation(fOrientation);
 		}
 		else {
-			if (fCurrentOrientation == VIEW_ORIENTATION_SINGLE)
+			if (fOrientation == VIEW_ORIENTATION_SINGLE)
 				return;
 			Point size= fParent.getSize();
 			if (size.x != 0 && size.y != 0) {
@@ -885,7 +885,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */	
 	public void setOrientation(int orientation) {
 		if (fCurrentOrientation != orientation) {
-			fCurrentOrientation= orientation;
 			boolean methodViewerNeedsUpdate= false;
 			
 			if (fMethodViewerViewForm != null && !fMethodViewerViewForm.isDisposed()
@@ -906,11 +905,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				fTypeMethodsSplitter.layout();
 			}
 			updateCheckedState();
-			fCurrentOrientation= orientation;
 			if (methodViewerNeedsUpdate) {
 				updateMethodViewer(fSelectedType);
 			}
 			fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, orientation);
+			fCurrentOrientation= orientation;
+
 		}
 	}
 	
