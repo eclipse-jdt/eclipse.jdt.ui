@@ -293,7 +293,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 	
 	private boolean performValidateEdit(ICompilationUnit unit) {
-		IStatus status= Resources.makeCommittable(unit.getResource(), null);
+		IStatus status= Resources.makeCommittable(unit.getResource(), JavaPlugin.getActiveWorkbenchShell());
 		if (!status.isOK()) {
 			String label= CorrectionMessages.getString("CUCorrectionProposal.error.title"); //$NON-NLS-1$
 			String message= CorrectionMessages.getString("CUCorrectionProposal.error.message"); //$NON-NLS-1$
