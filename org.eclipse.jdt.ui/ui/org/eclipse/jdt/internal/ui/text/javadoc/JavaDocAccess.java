@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
  */
  
 import java.io.IOException;
-import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -25,9 +24,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.SingleCharReader;
+
+
 
 public class JavaDocAccess {
-	
 	
 	private static QualifiedName getQualifiedName(IPackageFragmentRoot root) {
 		return new QualifiedName(JavaUI.ID_PLUGIN, "jdocattachment: " + root.getPath().toString()); //$NON-NLS-1$
@@ -88,7 +89,7 @@ public class JavaDocAccess {
 	 * Returns null if the member does not contain a JavaDoc comment or
 	 * if no source is available.
 	 */
-	public static Reader getJavaDoc(IMember member) throws JavaModelException {
+	public static SingleCharReader getJavaDoc(IMember member) throws JavaModelException {
 		IBuffer buf= member.isBinary() ? member.getClassFile().getBuffer() : member.getCompilationUnit().getBuffer();
 		if (buf == null) {
 			// no source attachment found
@@ -102,7 +103,7 @@ public class JavaDocAccess {
 
 			int end= findCommentEnd(buf, start + 3, start + length);
 			if (end != -1) {
-				return new JavaDocCommentReader(buf, start, end);
+				return new JavaDoc2HTMLTextReader(new JavaDocCommentReader(buf, start, end));
 			}
 		}
 		return null;
@@ -115,18 +116,17 @@ public class JavaDocAccess {
 	 */
 	public static String getJavaDocText(IMember member) throws JavaModelException {
 		try {
-			Reader rd= getJavaDoc(member);
-			if (rd != null) {
-				JavaDocTextReader txtRd= new JavaDocTextReader(rd);
-				return txtRd.getString();
-			}
+			SingleCharReader rd= getJavaDoc(member);
+			if (rd != null)
+				return rd.getString();
+				
 		} catch (IOException e) {
 			throw new JavaModelException(e, IStatus.ERROR);
 		}
+		
 		return null;
 	}
 		
-	
 	private static int findCommentEnd(IBuffer buffer, int start, int end) {
 		for (int i= start; i < end; i++) {
 			char ch= buffer.getChar(i);
@@ -135,6 +135,5 @@ public class JavaDocAccess {
 			}
 		}
 		return -1;
-	}	
-
+	}
 }

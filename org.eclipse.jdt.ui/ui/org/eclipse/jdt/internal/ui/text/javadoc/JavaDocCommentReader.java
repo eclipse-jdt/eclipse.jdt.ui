@@ -7,6 +7,8 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import org.eclipse.jdt.core.IBuffer;
 
+import org.eclipse.jdt.internal.ui.text.SingleCharReader;
+
 /**
  * Reads a java doc comment from a java doc comment. Skips star-character
  * on begin of line

@@ -6,22 +6,25 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 import java.util.Iterator;
-import java.util.ResourceBundle;
+
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPartService;
@@ -85,6 +88,20 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
+	
+	/**
+	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
+	 * 
+	 * This is the code that can be found in 1.0 fixing the bidi rendering of Java code.
+	 * Looking for something less vulernable in this stream.
+	 *
+	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+		ISourceViewer viewer= super.createSourceViewer(parent, ruler, styles);
+		StyledText text= viewer.getTextWidget();
+		text.setBidiColoring(true);
+		return viewer;
+	}
+	 */
 	
 	/**
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)

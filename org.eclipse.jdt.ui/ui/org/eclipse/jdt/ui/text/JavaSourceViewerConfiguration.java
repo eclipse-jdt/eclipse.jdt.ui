@@ -7,10 +7,14 @@ package org.eclipse.jdt.ui.text;
 
 
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
+import org.eclipse.jface.text.HoverTextControl;
 import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IHoverControl;
+import org.eclipse.jface.text.IHoverControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.TextAttribute;
@@ -19,6 +23,7 @@ import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.ContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.formatter.IFormattingStrategy;
+import org.eclipse.jface.text.internal.html.HoverBrowserControl;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
@@ -34,6 +39,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.LineWrappingTextPresenter;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
@@ -147,7 +153,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		assistant.setAutoActivationDelay(500);
 		assistant.setProposalPopupOrientation(assistant.PROPOSAL_OVERLAY);
 		assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
-		assistant.setContextInformationPopupBackground(getColorManager().getColor(new RGB(150, 150, 0)));
+		assistant.setContextInformationPopupBackground(getColorManager().getColor(new RGB(255, 255, 88)));
+		assistant.setHoverControlCreator(getHoverControlCreator(sourceViewer));
 
 		return assistant;
 	}
@@ -229,7 +236,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		return new String[] { IDocument.DEFAULT_CONTENT_TYPE, JavaPartitionScanner.JAVA_DOC, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT };
 	}
 	
-	/**
+	/*
 	 * @see SourceViewerConfiguration#getContentFormatter(ISourceViewer)
 	 */
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
@@ -242,5 +249,19 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		formatter.setPartitionManagingPositionCategories(fJavaTextTools.getPartitionManagingPositionCategories());
 		
 		return formatter;
+	}
+	
+	/*
+	 * @see SourceViewerConfiguration#getHoverControlCreator(ISourceViewer)
+	 */
+	public IHoverControlCreator getHoverControlCreator(ISourceViewer sourceViewer) {
+		return new IHoverControlCreator() {
+			public IHoverControl createHoverControl(Shell parent) {
+				if (true)
+					return new HoverTextControl(parent, new LineWrappingTextPresenter());
+				else
+					return new HoverBrowserControl(parent);
+			}
+		};
 	}
 }

@@ -5,7 +5,16 @@ package org.eclipse.jdt.internal.ui.text.java;
  * All Rights Reserved.
  */
  
-import java.io.IOException;import java.io.Reader;import org.eclipse.swt.graphics.GC;import org.eclipse.swt.graphics.Rectangle;import org.eclipse.swt.widgets.Display;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;import org.eclipse.jdt.internal.ui.text.LineBreakingReader;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocTextReader;import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 
 public class ProposalInfo {
@@ -36,6 +45,17 @@ public class ProposalInfo {
 		this(jproject, packName, typeQualifiedName, fieldName, null, null);
 	}	
 	
+	private String getParameterSignature(int index) {
+		StringBuffer buf= new StringBuffer();
+		char[] pack= fParameterPackages[index];
+		if (pack != null && pack.length > 0) {
+			buf.append(pack);
+			buf.append('.');
+		}
+		buf.append(fParameterTypes[index]);
+		return Signature.createTypeSignature(buf.toString(), true);
+	}
+	
 	/**
 	 * Gets the text for this proposal info
 	 */	
@@ -61,76 +81,14 @@ public class ProposalInfo {
 				} else {
 					member= type;
 				}
-				if (member != null) {
-					String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-2$ //$NON-NLS-1$
-					return getJavaDocText(member, lineDelim);
-				}
+				
+				if (member != null)
+					return  JavaDocAccess.getJavaDocText(member);
+					
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e.getStatus());
 		}
 		return null;
 	}
-	
-	private String getParameterSignature(int index) {
-		StringBuffer buf= new StringBuffer();
-		char[] pack= fParameterPackages[index];
-		if (pack != null && pack.length > 0) {
-			buf.append(pack);
-			buf.append('.');
-		}
-		buf.append(fParameterTypes[index]);
-		return Signature.createTypeSignature(buf.toString(), true);
-	}
-	
-	private String getJavaDocText(IMember member, String lineDelim) throws JavaModelException {
-		Reader rd= JavaDocAccess.getJavaDoc(member);
-		if (rd != null) {
-			JavaDocTextReader textReader= new JavaDocTextReader(rd);
-			
-			Display display= Display.getDefault();
-			GC gc= new GC(display);
-			try {
-				StringBuffer buf= new StringBuffer();
-				int maxNumberOfLines= NUMBER_OF_JAVADOC_LINES;
-				
-				LineBreakingReader reader= new LineBreakingReader(textReader, gc, getHoverWidth(display));
-				String line= reader.readLine();
-				while (maxNumberOfLines > 0 && line != null) {
-					if (buf.length() != 0) {
-						buf.append(lineDelim);
-					}
-					buf.append(' '); // add one space indent
-					buf.append(line);
-					line= reader.readLine();
-					maxNumberOfLines--;
-				}
-				if (line != null) {
-					buf.append(lineDelim);
-					buf.append(JavaTextMessages.getString("ProposalInfo.more_to_come")); //$NON-NLS-1$
-				}
-				return buf.toString();
-			} catch (IOException e) {
-				JavaPlugin.log(e);
-			} finally {
-				gc.dispose();
-			}
-		}
-		return null;
-	}
-	
-	private int getHoverWidth(Display display) {
-		Rectangle displayBounds= display.getClientArea();
-		int hoverWidth= displayBounds.width - (display.getCursorLocation().x - displayBounds.x);
-		hoverWidth-= 5; // add some space to the border
-		if (hoverWidth < 200) {
-			hoverWidth= 200;
-		}
-		return hoverWidth;
-	}	
-		
-		
-	
-	
-
 }

@@ -381,18 +381,26 @@ public class CompilationUnitEditor extends JavaEditor {
 						IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 						ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
 						
-						/* 
-						 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
-						 * Changed false to true.
+						/*
+						 * 1GJXY0L: ITPJUI:WINNT - NPE during save As in Java editor
+						 * Introduced null check, just go on in the null case
 						 */
-						unit.copy(fragment, null, fileName, true, monitor);
-						return;
+						if (unit != null) {
+							/* 
+							 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
+							 * Changed false to true.
+							 */
+							unit.copy(fragment, null, fileName, true, monitor);
+							return;
+						}
 						
 					} catch (JavaModelException x) {
 					}
 				}
 				
-				// copy to another directory
+				// if (fragment == null) then copy to a directory which is not a package
+				// if (unit == null) copy the file that is not a compilation unit
+				
 				/* 
 				 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
 				 * Changed false to true.
