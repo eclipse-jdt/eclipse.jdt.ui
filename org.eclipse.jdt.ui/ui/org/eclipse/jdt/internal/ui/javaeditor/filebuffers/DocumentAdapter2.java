@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,15 +37,11 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 
-import org.eclipse.ui.IFileEditorInput;
-
 import org.eclipse.jdt.core.BufferChangedEvent;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferChangedListener;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 
 
 /**
@@ -82,107 +79,100 @@ public class DocumentAdapter2 implements IBuffer, IDocumentListener {
 		}
 	
 	
-	/** NULL implementing <code>IBuffer</code> */
-	public final static IBuffer NULL= new NullBuffer();
+		/** NULL implementing <code>IBuffer</code> */
+		public final static IBuffer NULL= new NullBuffer();
+			
 		
-	
-	/**
-	 *  Executes a document set content call in the ui thread.
-	 */
-	protected class DocumentSetCommand implements Runnable {
+		/**
+		 *  Executes a document set content call in the ui thread.
+		 */
+		protected class DocumentSetCommand implements Runnable {
+			
+			private String fContents;
+			
+			public void run() {
+				fDocument.set(fContents);
+			}
 		
-		private String fContents;
-		
-		public void run() {
-			fDocument.set(fContents);
-		}
-	
-		public void set(String contents) {
-			fContents= contents;
-			Display.getDefault().syncExec(this);
-		}
-	}
-	
-	/**
-	 * Executes a document replace call in the ui thread.
-	 */
-	protected class DocumentReplaceCommand implements Runnable {
-		
-		private int fOffset;
-		private int fLength;
-		private String fText;
-		
-		public void run() {
-			try {
-				fDocument.replace(fOffset, fLength, fText);
-			} catch (BadLocationException x) {
-				// ignore
+			public void set(String contents) {
+				fContents= contents;
+				Display.getDefault().syncExec(this);
 			}
 		}
 		
-		public void replace(int offset, int length, String text) {
-			fOffset= offset;
-			fLength= length;
-			fText= text;
-			Display.getDefault().syncExec(this);
+		/**
+		 * Executes a document replace call in the ui thread.
+		 */
+		protected class DocumentReplaceCommand implements Runnable {
+			
+			private int fOffset;
+			private int fLength;
+			private String fText;
+			
+			public void run() {
+				try {
+					fDocument.replace(fOffset, fLength, fText);
+				} catch (BadLocationException x) {
+					// ignore
+				}
+			}
+			
+			public void replace(int offset, int length, String text) {
+				fOffset= offset;
+				fLength= length;
+				fText= text;
+				Display.getDefault().syncExec(this);
+			}
 		}
-	}
 	
 	private IOpenable fOwner;
+	private IFile fFile;
+	private ITextFileBuffer fTextFileBuffer;
 	private IDocument fDocument;
+	
 	private DocumentSetCommand fSetCmd= new DocumentSetCommand();
 	private DocumentReplaceCommand fReplaceCmd= new DocumentReplaceCommand();
-	
-	private IFileEditorInput fProviderKey;
-	private ICompilationUnitDocumentProvider fProvider;
 	private String fLineDelimiter;
 	private ILineTracker fLineTracker;
 	
 	private List fBufferListeners= new ArrayList(3);
 	private IStatus fStatus;
-	private boolean fConnected= false;
 	
 	
 	/**
 	 * This method is <code>public</code> for test purposes only.
 	 */
-	public DocumentAdapter2(IOpenable owner, ICompilationUnitDocumentProvider provider, IFileEditorInput providerKey) {
+	public DocumentAdapter2(IOpenable owner, IFile file, ILineTracker lineTracker) {
 		
 		fOwner= owner;
-		fProvider= provider;
-		fProviderKey= providerKey;
+		fFile= file;
+		fLineTracker= lineTracker;
 		
-		fLineTracker= fProvider.createLineTracker(fProviderKey);
-		fDocument= createDocument();		
-		fDocument.addPrenotifiedDocumentListener(this);
+		initialize();
 	}
 	
-	private IDocument createDocument() {
-		
-		IDocument document= null;
+	private void initialize() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-		
 		try {
-			
-			manager.connect(fProviderKey.getFile(), new NullProgressMonitor());
-			fConnected= true;
-			ITextFileBuffer buffer= manager.getTextFileBuffer(fProviderKey.getFile());
-			document= buffer.getDocument();
-						
+			manager.connect(fFile, new NullProgressMonitor());
+			fTextFileBuffer= manager.getTextFileBuffer(fFile);
+			fDocument= fTextFileBuffer.getDocument();
 		} catch (CoreException x) {
-			fConnected= false;
 			fStatus= x.getStatus();
-			document= manager.createEmptyDocument(fProviderKey.getFile());
+			fDocument= manager.createEmptyDocument(fFile);
 		}
-		
-		return document;
+		fDocument.addPrenotifiedDocumentListener(this);
 	}
 	
 	/**
 	 * Returns the status of this document adapter.
 	 */
 	public IStatus getStatus() {
-		return fStatus;
+		if (fStatus != null)
+			return fStatus;
+		if (fTextFileBuffer != null)
+			return fTextFileBuffer.getStatus();
+		return null;
 	}
 	
 	/**
@@ -282,14 +272,14 @@ public class DocumentAdapter2 implements IBuffer, IDocumentListener {
 		fDocument= null;
 		d.removePrenotifiedDocumentListener(this);
 		
-		if (fConnected) {
-			fConnected= false;
+		if (fTextFileBuffer != null) {
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 			try {
-				manager.disconnect(fProviderKey.getFile(), new NullProgressMonitor());
+				manager.disconnect(fFile, new NullProgressMonitor());
 			} catch (CoreException x) {
 				// ignore
 			}
+			fTextFileBuffer= null;
 		}
 		
 		fireBufferChanged(new BufferChangedEvent(this, 0, 0, null));
@@ -351,14 +341,14 @@ public class DocumentAdapter2 implements IBuffer, IDocumentListener {
 	 * @see IBuffer#getUnderlyingResource()
 	 */
 	public IResource getUnderlyingResource() {
-		return fProvider != null ? fProviderKey.getFile() : null;
+		return fFile;
 	}
 	
 	/*
 	 * @see IBuffer#hasUnsavedChanges()
 	 */
 	public boolean hasUnsavedChanges() {
-		return fProvider != null ? fProvider.canSaveDocument(fProviderKey) : false;
+		return fTextFileBuffer != null ? fTextFileBuffer.isDirty() : false;
 	}
 	
 	/*
@@ -394,12 +384,11 @@ public class DocumentAdapter2 implements IBuffer, IDocumentListener {
 	 * @see IBuffer#save(IProgressMonitor, boolean)
 	 */
 	public void save(IProgressMonitor progress, boolean force) throws JavaModelException {
-		if (fProvider instanceof CompilationUnitDocumentProvider2) {
-			try {
-				fProvider.saveDocumentContent(progress, fProviderKey, fDocument, force);
-			} catch (CoreException e) {
-				throw new JavaModelException(e);
-			}
+		try {
+			if (fTextFileBuffer != null)
+				fTextFileBuffer.commit(progress, force);
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
 		}
 	}
 	
