@@ -17,18 +17,20 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.util.Assert;
-
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -37,8 +39,8 @@ import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.util.IOCloser;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /* package */ class TextBufferFactory {
 
@@ -128,6 +130,14 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 				}
 			};
 			try {
+				IResource schedulingRule= ResourcesPlugin.getWorkspace().getRoot();
+				if (value.input != null) {
+					schedulingRule= value.input.getFile();
+					if (schedulingRule != null)
+						schedulingRule= schedulingRule.getParent(); 
+				}
+				// FIXME: waiting for J Core to support scheduling rules (see bug 46332)
+//				ResourcesPlugin.getWorkspace().run(action, schedulingRule, IWorkspace.AVOID_UPDATE, monitor);
 				ResourcesPlugin.getWorkspace().run(action, monitor);
 			} finally {
 				fDocumentProvider.changed(value.input);

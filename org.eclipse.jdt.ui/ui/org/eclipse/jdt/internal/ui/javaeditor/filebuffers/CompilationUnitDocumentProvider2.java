@@ -20,8 +20,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -892,6 +894,17 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			return new DocumentProviderOperation() {
 				protected void execute(IProgressMonitor monitor) throws CoreException {
 					commitWorkingCopy(monitor, element, (CompilationUnitInfo) info, overwrite);
+				}
+				/*
+				 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.DocumentProviderOperation#getSchedulingRule()
+				 */
+				public ISchedulingRule getSchedulingRule() {
+					if (info.fElement instanceof IFileEditorInput)
+						// FIXME: waiting for J Core to support scheduling rules (see bug 46332)
+//						return ((IFileEditorInput)info.fElement).getFile().getParent();
+						return ResourcesPlugin.getWorkspace().getRoot();
+					else
+						return null;
 				}
 			};
 		}
