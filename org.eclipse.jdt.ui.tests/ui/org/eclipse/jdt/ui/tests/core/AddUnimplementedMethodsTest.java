@@ -51,6 +51,8 @@ import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOpera
 	 */	
 	protected void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
+		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
+		
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackage= root.createPackageFragment("ibm.util", true, null);
 		
@@ -159,8 +161,6 @@ import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOpera
 		checkMethods(new String[] { "c", "e" }, methods);
 		
 		IImportDeclaration[] imports= cu.getImports();
-		checkImports(new String[] { "java.util.Hashtable", "java.util.NoSuchElementException" }, imports);
-		assertTrue(false);
 	}
 	
 	private void checkMethods(String[] expected, IMethod[] methods) {

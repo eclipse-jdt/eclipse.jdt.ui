@@ -54,7 +54,6 @@ public class JavaDocTestCase extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
-
 		IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(fJavaProject);
 		assertTrue("jdk not found", jdk != null);
 		
