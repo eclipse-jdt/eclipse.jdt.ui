@@ -116,7 +116,8 @@ public class RefactoringGroup extends ContextMenuGroup {
 			createRenamePackageAction(provider, changeCreator),
 			createRenamePrivateFieldAction(provider, changeCreator),
 			createRenameNonPrivateFieldAction(provider, changeCreator),
-			createMoveCompilationUnitAction(provider, changeCreator)
+			createMoveCompilationUnitAction(provider, changeCreator),
+			createRenameCUAction(provider, changeCreator)
 		};
 		fIntitialized= true;
 	}
@@ -240,6 +241,18 @@ public class RefactoringGroup extends ContextMenuGroup {
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new MoveCompilationUnitRefactoring(changeCreator, (ICompilationUnit)obj);
+			}
+		};
+	}
+	
+	private AbstractOpenRefactoringWizardAction createRenameCUAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
+		String label= RefactoringResources.getResourceString("Refactoring.RenameCompilationUnit.label");
+		return new AbstractOpenRefactoringWizardAction(provider, label, ICompilationUnit.class) {
+			protected Wizard createWizard() { 
+				return new RenameRefactoringWizard("Rename Compilation Unit"); 
+			}
+			protected Refactoring createNewRefactoringInstance(Object obj){
+				return new RenameCompilationUnitRefactoring(changeCreator, (ICompilationUnit)obj);
 			}
 		};
 	}
