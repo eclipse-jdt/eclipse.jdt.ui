@@ -97,12 +97,13 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
 		CopyRefactoring2 refactoring= createRefactoring(resources, javaElements);
 		RefactoringWizard wizard= createWizard(refactoring);
-//		/*
-//		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
-//		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
-//		 */
+		/*
+		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
+		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
+		 */
 		//TODO fix the queries
-		refactoring.setQueries(new org.eclipse.jdt.internal.ui.reorg.ReorgQueries(wizard));
+		refactoring.setNewNameQueries(new org.eclipse.jdt.internal.ui.reorg.ReorgQueries(wizard));
+		refactoring.setReorgQueries(new ReorgQueries(wizard));
 		if (refactoring != null)
 			new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
 	}

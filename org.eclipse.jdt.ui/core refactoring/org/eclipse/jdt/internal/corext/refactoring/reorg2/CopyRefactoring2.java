@@ -23,14 +23,15 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgPolicy.ICopyPolicy;
 
 public final class CopyRefactoring2 extends Refactoring{
 
-	private ICopyQueries fCopyQueries;
+	private INewNameQueries fNewNameQueries;
+	private IReorgQueries fReorgQueries;
 	private ICopyPolicy fCopyPolicy;
-
+	
 	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
 		return isAvailable(ReorgPolicyFactory.createCopyPolicy(resources, javaElements, settings));
 	}
@@ -50,9 +51,14 @@ public final class CopyRefactoring2 extends Refactoring{
 		fCopyPolicy= copyPolicy;
 	}
 	
-	public void setQueries(ICopyQueries copyQueries){
-		Assert.isNotNull(copyQueries);
-		fCopyQueries= copyQueries;
+	public void setNewNameQueries(INewNameQueries newNameQueries){
+		Assert.isNotNull(newNameQueries);
+		fNewNameQueries= newNameQueries;
+	}
+
+	public void setReorgQueries(IReorgQueries queries){
+		Assert.isNotNull(queries);
+		fReorgQueries= queries;
 	}
 
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
@@ -77,15 +83,15 @@ public final class CopyRefactoring2 extends Refactoring{
 	}
 
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		Assert.isNotNull(fCopyQueries);
-		return fCopyPolicy.checkInput(pm);
+		Assert.isNotNull(fNewNameQueries);
+		return fCopyPolicy.checkInput(pm, fReorgQueries);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		Assert.isNotNull(fCopyQueries);
+		Assert.isNotNull(fNewNameQueries);
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() == null || fCopyPolicy.getResourceDestination() == null);
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() != null || fCopyPolicy.getResourceDestination() != null);		
 		try {
@@ -94,7 +100,7 @@ public final class CopyRefactoring2 extends Refactoring{
 					return false; 
 				}
 			};
-			IChange change= fCopyPolicy.createChange(pm, fCopyQueries);
+			IChange change= fCopyPolicy.createChange(pm, fNewNameQueries);
 			if (change instanceof ICompositeChange){
 				ICompositeChange subComposite= (ICompositeChange)change;
 				resultComposite.addAll(subComposite.getChildren());

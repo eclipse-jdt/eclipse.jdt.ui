@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatin
 
 public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdatingRefactoring{
 
+	private IReorgQueries fReorgQueries;
 	private IMovePolicy fMovePolicy;
 
 	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
@@ -73,11 +74,16 @@ public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdat
 		return fMovePolicy.setDestination(destination);
 	}
 
+	public void setReorgQueries(IReorgQueries queries){
+		Assert.isNotNull(queries);
+		fReorgQueries= queries;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		return fMovePolicy.checkInput(pm);
+		return fMovePolicy.checkInput(pm, fReorgQueries);
 	}
 
 	/* (non-Javadoc)

@@ -84,7 +84,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CreateCopyOfCompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveCuUpdateCreator;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgPolicy.ICopyPolicy;
@@ -131,18 +131,18 @@ class ReorgPolicyFactory {
 			if (resources.length != 0 || ReorgUtils2.hasElementsNotOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT))
 				return NO;
 			if (copy)
-				return new CopyPackagesPolicy(convertToPackageArray(javaElements));
+				return new CopyPackagesPolicy(ArrayTypeConverter.toPackageArray(javaElements));
 			else
-				return new MovePackagesPolicy(convertToPackageArray(javaElements));
+				return new MovePackagesPolicy(ArrayTypeConverter.toPackageArray(javaElements));
 		}
 		
 		if (ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT_ROOT)){
 			if (resources.length != 0 || ReorgUtils2.hasElementsNotOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT_ROOT))
 				return NO;
 			if (copy)
-				return new CopyPackageFragmentRootsPolicy(convertToPackageFragmentRootArray(javaElements));
+				return new CopyPackageFragmentRootsPolicy(ArrayTypeConverter.toPackageFragmentRootArray(javaElements));
 			else
-				return new MovePackageFragmentRootsPolicy(convertToPackageFragmentRootArray(javaElements));
+				return new MovePackageFragmentRootsPolicy(ArrayTypeConverter.toPackageFragmentRootArray(javaElements));
 		}
 		
 		if (ReorgUtils2.hasElementsOfType(resources, IResource.FILE | IResource.FOLDER) || ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT)){
@@ -151,9 +151,9 @@ class ReorgPolicyFactory {
 			if (ReorgUtils2.hasElementsNotOfType(resources, IResource.FILE | IResource.FOLDER))
 				return NO;
 			if (copy)
-				return new CopyFilesFoldersAndCusPolicy(ReorgUtils2.getFiles(resources), ReorgUtils2.getFolders(resources), convertToCompilationUnitArray(javaElements));
+				return new CopyFilesFoldersAndCusPolicy(ReorgUtils2.getFiles(resources), ReorgUtils2.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements));
 			else
-				return new MoveFilesFoldersAndCusPolicy(ReorgUtils2.getFiles(resources), ReorgUtils2.getFolders(resources), convertToCompilationUnitArray(javaElements), settings);
+				return new MoveFilesFoldersAndCusPolicy(ReorgUtils2.getFiles(resources), ReorgUtils2.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements), settings);
 		}
 		
 		if (hasElementsSmallerThanCuOrClassFile(javaElements)){
@@ -187,21 +187,6 @@ class ReorgPolicyFactory {
 				return true;
 		}
 		return false;
-	}
-
-	private static ICompilationUnit[] convertToCompilationUnitArray(IJavaElement[] javaElements) {
-		List result= Arrays.asList(javaElements);
-		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
-	}
-	
-	private static IPackageFragment[] convertToPackageArray(IJavaElement[] javaElements) {
-		List result= Arrays.asList(javaElements);
-		return (IPackageFragment[]) result.toArray(new IPackageFragment[result.size()]);
-	}
-	
-	private static IPackageFragmentRoot[] convertToPackageFragmentRootArray(IJavaElement[] javaElements) {
-		List result= Arrays.asList(javaElements);
-		return (IPackageFragmentRoot[]) result.toArray(new IPackageFragmentRoot[result.size()]);
 	}
 
 	private static boolean haveCommonParent(IResource[] resources, IJavaElement[] javaElements) {
@@ -277,7 +262,7 @@ class ReorgPolicyFactory {
 		public IFile[] getAllModifiedFiles() {
 			return new IFile[0];
 		}
-		public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
+		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException{
 			return Checks.validateModifiesFiles(getAllModifiedFiles());
 		}
 		public boolean canUpdateReferences() {
@@ -315,9 +300,9 @@ class ReorgPolicyFactory {
 
 	private static abstract class FilesFoldersAndCusReorgPolicy extends ReorgPolicy{
 
-		private final ICompilationUnit[] fCus;
-		private final IFolder[] fFolders;
-		private final IFile[] fFiles;
+		private ICompilationUnit[] fCus;
+		private IFolder[] fFolders;
+		private IFile[] fFiles;
 
 		public FilesFoldersAndCusReorgPolicy(IFile[] files, IFolder[] folders, ICompilationUnit[] cus){
 			fFiles= files;
@@ -459,6 +444,26 @@ class ReorgPolicyFactory {
 		}
 		protected final ICompilationUnit[] getCus(){
 			return fCus;
+		}
+		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
+			RefactoringStatus status= super.checkInput(pm, reorgQueries);
+			confirmOverwritting(reorgQueries);
+			return status;
+		}
+
+		private void confirmOverwritting(IReorgQueries reorgQueries) throws JavaModelException {
+			OverwriteHelper oh= new OverwriteHelper();
+			oh.setFiles(fFiles);
+			oh.setFolders(fFolders);
+			oh.setCus(fCus);
+			IPackageFragment destPack= getDestinationAsPackageFragment();
+			if (destPack != null)
+				oh.confirmOverwritting(reorgQueries, destPack);
+			else
+				oh.confirmOverwritting(reorgQueries, getDestinationAsContainer());
+			fFiles= oh.getFilesWithoutUnconfirmedOnes();
+			fFolders= oh.getFoldersWithoutUnconfirmedOnes();
+			fCus= oh.getCusWithoutUnconfirmedOnes();
 		}
 	}
 
@@ -694,7 +699,7 @@ class ReorgPolicyFactory {
 
 	private static abstract class PackageFragmentRootsReorgPolicy extends ReorgPolicy {
 
-		private final IPackageFragmentRoot[] fPackageFragmentRoots;
+		private IPackageFragmentRoot[] fPackageFragmentRoots;
 
 		public IJavaElement[] getJavaElements(){
 			return fPackageFragmentRoots;
@@ -742,18 +747,32 @@ class ReorgPolicyFactory {
 		protected IPackageFragmentRoot[] getPackageFragmentRoots(){
 			return fPackageFragmentRoots;
 		}
+		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
+			 RefactoringStatus status= super.checkInput(pm, reorgQueries);
+			 confirmOverwritting(reorgQueries);
+			 return status;
+		}
+
+		private void confirmOverwritting(IReorgQueries reorgQueries) throws JavaModelException {
+			OverwriteHelper oh= new OverwriteHelper();
+			oh.setPackageFragmentRoots(fPackageFragmentRoots);
+			IJavaProject javaProject= getDestinationJavaProject();
+			oh.confirmOverwritting(reorgQueries, javaProject);
+			fPackageFragmentRoots= oh.getPackageFragmentRootsWithoutUnconfirmedOnes();
+		}
 	}
 
 	private static abstract class PackagesReorgPolicy extends ReorgPolicy {
-
-		private final IPackageFragment[] fPackageFragments;
+		private IPackageFragment[] fPackageFragments;
 	
 		public IJavaElement[] getJavaElements(){
 			return fPackageFragments;
 		}
+		
 		public IResource[] getResources() {
 			return new IResource[0];
-		}	
+		}
+		
 		protected IPackageFragment[] getPackages(){
 			return fPackageFragments;
 		}
@@ -775,21 +794,58 @@ class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IResource resource) {
 			return RefactoringStatus.createFatalErrorStatus("Packages can only be moved or copied to source folders or Java projects that do not have source folders");
 		}
-			
+		
+		protected IPackageFragmentRoot getDestinationAsPackageFragmentRoot() throws JavaModelException {
+			return getDestinationAsPackageFragmentRoot(getJavaElementDestination());
+		}
+		
+		private IPackageFragmentRoot getDestinationAsPackageFragmentRoot(IJavaElement javaElement) throws JavaModelException {
+			if (javaElement == null)
+				return null;
+				
+			if (javaElement instanceof IPackageFragmentRoot)
+				return (IPackageFragmentRoot) javaElement;
+
+			if (javaElement instanceof IPackageFragment){
+				IPackageFragment pack= (IPackageFragment)javaElement;
+				if (pack.getParent() instanceof IPackageFragmentRoot)
+					return (IPackageFragmentRoot) pack.getParent();
+			}
+
+			if (javaElement instanceof IJavaProject)
+				return ReorgUtils2.getCorrespondingPackageFragmentRoot((IJavaProject) javaElement);				
+			return null;
+		}
+		
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
-			IPackageFragmentRoot destRoot= ReorgUtils2.getDestinationAsPackageFragmentRoot(javaElement);
+			IPackageFragmentRoot destRoot= getDestinationAsPackageFragmentRoot(javaElement);
 			if (! ReorgUtils2.isSourceFolder(destRoot))
 				return RefactoringStatus.createFatalErrorStatus("Packages can only be moved or copied to source folders or Java projects that do not have source folders");
 			return new RefactoringStatus();
 		}
+		
+		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
+			RefactoringStatus refactoringStatus= super.checkInput(pm, reorgQueries);
+			confirmOverwritting(reorgQueries);
+			return refactoringStatus;
+		}
+		
+		private void confirmOverwritting(IReorgQueries reorgQueries) throws JavaModelException {
+			OverwriteHelper oh= new OverwriteHelper();
+			oh.setPackages(fPackageFragments);
+			IPackageFragmentRoot destRoot= getDestinationAsPackageFragmentRoot();
+			oh.confirmOverwritting(reorgQueries, destRoot);
+			fPackageFragments= oh.getPackagesWithoutUnconfirmedOnes();
+		}
 	}
+
 	private static class CopySubCuElementsPolicy extends SubCuElementReorgPolicy implements ICopyPolicy{
 		CopySubCuElementsPolicy(IJavaElement[] javaElements){
 			super(javaElements);
 		}
 			
-		public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) throws JavaModelException {
+		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException {
 			try {					
 				CompilationUnit sourceCuNode= createSourceCuNode();
 				ICompilationUnit destinationCu= getDestinationCu();
@@ -836,7 +892,7 @@ class ReorgPolicyFactory {
 			super(files, folders, cus);
 		}
 				
-		public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) {
+		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			IFile[] file= getFiles();
 			IFolder[] folders= getFolders();
 			ICompilationUnit[] cus= getCus();
@@ -859,7 +915,7 @@ class ReorgPolicyFactory {
 			return composite;
 		}
 
-		private IChange createChange(ICompilationUnit unit, NewNameProposer nameProposer, ICopyQueries copyQueries) {
+		private IChange createChange(ICompilationUnit unit, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			IPackageFragment pack= getDestinationAsPackageFragment();
 			if (pack != null)
 				return copyCuToPackage(unit, pack, nameProposer, copyQueries);
@@ -868,17 +924,17 @@ class ReorgPolicyFactory {
 			return copyFileToContainer(unit, container, nameProposer, copyQueries);
 		}
 	
-		private static IChange copyFileToContainer(ICompilationUnit cu, IContainer dest, NewNameProposer nameProposer, ICopyQueries copyQueries) {
+		private static IChange copyFileToContainer(ICompilationUnit cu, IContainer dest, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			IResource resource= ReorgUtils2.getResource(cu);
 			return createCopyResourceChange(resource, nameProposer, copyQueries, dest);
 		}
 
-		private IChange createChange(IResource resource, NewNameProposer nameProposer, ICopyQueries copyQueries) {
+		private IChange createChange(IResource resource, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			IContainer dest= getDestinationAsContainer();
 			return createCopyResourceChange(resource, nameProposer, copyQueries, dest);
 		}
 			
-		private static IChange createCopyResourceChange(IResource resource, NewNameProposer nameProposer, ICopyQueries copyQueries, IContainer destination) {
+		private static IChange createCopyResourceChange(IResource resource, NewNameProposer nameProposer, INewNameQueries copyQueries, IContainer destination) {
 			INewNameQuery nameQuery;
 			if (nameProposer.createNewName(resource, destination) == null)
 				nameQuery= copyQueries.createNullQuery();
@@ -887,7 +943,7 @@ class ReorgPolicyFactory {
 			return new CopyResourceChange(resource, destination, nameQuery);
 		}
 
-		private static IChange copyCuToPackage(ICompilationUnit cu, IPackageFragment dest, NewNameProposer nameProposer, ICopyQueries copyQueries) {
+		private static IChange copyCuToPackage(ICompilationUnit cu, IPackageFragment dest, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			//XXX workaround for bug 31998 we will have to disable renaming of linked packages (and cus)
 			IResource res= ReorgUtils2.getResource(cu);
 			if (res != null && res.isLinked()){
@@ -920,7 +976,7 @@ class ReorgPolicyFactory {
 			super(roots);
 		}
 		
-		public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) {
+		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			pm.beginTask("", roots.length);
@@ -935,7 +991,7 @@ class ReorgPolicyFactory {
 			return composite;
 		}
 		
-		private IChange createChange(IPackageFragmentRoot root, IJavaProject destination, NewNameProposer nameProposer, ICopyQueries copyQueries) {
+		private IChange createChange(IPackageFragmentRoot root, IJavaProject destination, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			IResource res= root.getResource();
 			IProject destinationProject= destination.getProject();
 			String newName= nameProposer.createNewName(res, destinationProject);
@@ -953,21 +1009,21 @@ class ReorgPolicyFactory {
 			super(packageFragments);
 		}
 
-		public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) throws JavaModelException {
+		public IChange createChange(IProgressMonitor pm, INewNameQueries newNameQueries) throws JavaModelException {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragment[] fragments= getPackages();
 			pm.beginTask("", fragments.length);
 			CompositeChange composite= new CompositeChange();
-			IPackageFragmentRoot root= ReorgUtils2.getDestinationAsPackageFragmentRoot(getJavaElementDestination());
+			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < fragments.length; i++) {
-				composite.add(createChange(fragments[i], root, nameProposer, copyQueries));
+				composite.add(createChange(fragments[i], root, nameProposer, newNameQueries));
 				pm.worked(1);
 			}
 			pm.done();
 			return composite;
 		}
 
-		private IChange createChange(IPackageFragment pack, IPackageFragmentRoot destination, NewNameProposer nameProposer, ICopyQueries copyQueries) throws JavaModelException {
+		private IChange createChange(IPackageFragment pack, IPackageFragmentRoot destination, NewNameProposer nameProposer, INewNameQueries copyQueries) throws JavaModelException {
 			String newName= nameProposer.createNewName(pack, destination);
 			if (newName == null || JavaConventions.validatePackageName(newName).getSeverity() < IStatus.ERROR){
 				INewNameQuery nameQuery;
@@ -997,7 +1053,7 @@ class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus("Copying is not available");
 		}
-		public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) {
+		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			return new NullChange();
 		}
 		public IResource[] getResources() {
@@ -1140,7 +1196,7 @@ class ReorgPolicyFactory {
 			if (superStatus.hasFatalError())
 				return superStatus;
 			
-			IPackageFragmentRoot root= ReorgUtils2.getDestinationAsPackageFragmentRoot(getJavaElementDestination());
+			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
 			if (isParentOfAny(root, getPackages()))
 				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
 			return superStatus;
@@ -1158,7 +1214,7 @@ class ReorgPolicyFactory {
 			IPackageFragment[] fragments= getPackages();
 			pm.beginTask("", fragments.length);
 			CompositeChange result= new CompositeChange();
-			IPackageFragmentRoot root= ReorgUtils2.getDestinationAsPackageFragmentRoot(getJavaElementDestination());
+			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < fragments.length; i++) {
 				result.add(createChange(fragments[i], root));
 				pm.worked(1);
@@ -1390,10 +1446,10 @@ class ReorgPolicyFactory {
 						fFilePatterns, type.getJavaProject().getProject(), pm);
 		}	
 		
-		public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+		public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException {
 			pm.beginTask("", 2);
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
-			RefactoringStatus status= super.checkInput(new SubProgressMonitor(pm, 1));
+			RefactoringStatus status= super.checkInput(new SubProgressMonitor(pm, 1), reorgQueries);
 			pm.done();
 			return status;
 		}
