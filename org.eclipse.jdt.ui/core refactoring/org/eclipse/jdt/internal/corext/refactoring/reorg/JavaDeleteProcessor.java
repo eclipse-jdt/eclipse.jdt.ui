@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringParticipant;
@@ -67,7 +67,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	private int fStyle;
 	private IReorgQueries fDeleteQueries;	
 
-	private IChange fDeleteChange;
+	private Change fDeleteChange;
 	
 	public JavaDeleteProcessor() {
 		fSuggestGetterSetterDeletion= true;
@@ -358,7 +358,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		fJavaElements= parentUtil.getJavaElements();
 	}
 	
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		pm.done();
 		return fDeleteChange;

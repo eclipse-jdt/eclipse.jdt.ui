@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,8 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
@@ -55,12 +54,9 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 			 new String[]{getOldName(), getNewName()});
 	}
 
-	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
-		RefactoringStatus result= super.aboutToPerform(context, pm);
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
 
-		if (context.getUnsavedFiles().length == 0)
-			return result;
-			
 		if (! getJavaProject().exists()) 
 			return result;
 			
@@ -71,10 +67,8 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 			
 			pm.beginTask("", roots.length); //$NON-NLS-1$
 			for (int i= 0; i < roots.length; i++) {
-				result.merge(checkIfModifiable(roots[i], context, new SubProgressMonitor(pm, 1)));
+				result.merge(checkIfModifiable(roots[i], new SubProgressMonitor(pm, 1)));
 			}
-		} catch (JavaModelException e) {
-			handleJavaModelException(e, result);
 		} finally{
 			pm.done();
 		}
@@ -103,7 +97,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	/* non java-doc
 	 * @see AbstractRenameChange#createUndoChange()
 	 */
-	protected IChange createUndoChange() throws JavaModelException {
+	protected Change createUndoChange() throws JavaModelException {
 		return new RenameJavaProjectChange(createNewPath(), getNewName(), getOldName());
 	}
 
@@ -115,7 +109,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	}
 
 	private IJavaProject getJavaProject() {
-		return  (IJavaProject)getModifiedLanguageElement();
+		return  (IJavaProject)getModifiedElement();
 	}
 	
 	private void modifyClassPaths(IProgressMonitor pm) throws JavaModelException{

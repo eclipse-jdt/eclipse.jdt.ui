@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.Dialog;
@@ -306,7 +306,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			boolean superFinish= super.performFinish();
 			if (! superFinish)
 				return false;				
-			IChange c= getRefactoringWizard().getChange();
+			Change c= getRefactoringWizard().getChange();
 			if (c instanceof CompositeChange && ((CompositeChange)c).getChildren().length == 0) {
 				return false;
 			}

@@ -21,7 +21,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 /**
@@ -103,7 +103,7 @@ class ErrorWizardPage extends RefactoringWizardPage {
 	 */
 	public IWizardPage getNextPage() {
 		RefactoringWizard wizard= getRefactoringWizard();
-		IChange change= wizard.getChange();
+		Change change= wizard.getChange();
 		if (change == null) {
 			change= wizard.createChange(CreateChangeOperation.CHECK_NONE, RefactoringStatus.ERROR, false);
 			wizard.setChange(change);
@@ -119,7 +119,7 @@ class ErrorWizardPage extends RefactoringWizardPage {
 	 */
 	protected boolean performFinish() {
 		RefactoringWizard wizard= getRefactoringWizard();
-		IChange change= wizard.getChange();
+		Change change= wizard.getChange();
 		PerformChangeOperation op= null;
 		if (change != null) {
 			op= new PerformChangeOperation(change);
@@ -128,7 +128,6 @@ class ErrorWizardPage extends RefactoringWizardPage {
 			ccop.setCheckPassedSeverity(RefactoringStatus.ERROR);
 			
 			op= new PerformChangeOperation(ccop);
-			op.setCheckPassedSeverity(RefactoringStatus.ERROR);
 		}
 		return wizard.performFinish(op);
 	} 

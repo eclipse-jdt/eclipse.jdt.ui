@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -26,12 +24,9 @@ import org.eclipse.jdt.internal.corext.Assert;
  */
 public class VariablePool implements IVariablePool {
 
-	public static final String PLUGIN_DESCRIPTOR= "pluginDescriptor";  //$NON-NLS-1$
-	public static final String SELECTION= "selection";  //$NON-NLS-1$
-	
 	private IVariablePool fParent;
 	private Object fDefaultVariable;
-	private Map fVariables;
+	private Map/*<String, Object>*/ fVariables;
 	
 	/**
 	 * Create a new variable pool with the given parent and default
@@ -110,6 +105,8 @@ public class VariablePool implements IVariablePool {
 	 */
 	public Object getVariable(String name) {
 		Assert.isNotNull(name);
+		if (SYSTEM.equals(name))
+			return System.class;
 		if (fVariables == null)
 			return null;
 		return fVariables.get(name);
@@ -118,14 +115,18 @@ public class VariablePool implements IVariablePool {
 	/* (non-Javadoc)
 	 * @IVariablePool#resolveVariable(java.lang.String, java.lang.Object[])
 	 */
-	public Object resolveVariable(String name, Object[] args) throws CoreException {
+	public Object resolveVariable(String name, Object[] args) throws ExpressionException {
 		if (PLUGIN_DESCRIPTOR.equals(name)) {
 			if (args == null ||args.length != 1)
-				throw new CoreException(new ExpressionStatus(IStatus.ERROR,
-					IExpressionStatus.WRONG_NUMBER_OF_ARGUMENTS, "Wrong number of arguments"));
+				throw new ExpressionException(
+					ExpressionException.VARAIBLE_POOL_WRONG_NUMBER_OF_ARGUMENTS,
+					ExpressionMessages.getFormattedString(
+						"VariablePool.resolveVariable.arguments.wrong_number",  //$NON-NLS-1$
+						new Object[] { "1", args == null ? "0" : ("" + args.length)})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (!(args[0] instanceof String)) 
-				throw new CoreException(new ExpressionStatus(IStatus.ERROR,
-					IExpressionStatus.TYPE_CONVERSION_ERROR, "Argument is of wrong type"));
+				throw new ExpressionException(
+					ExpressionException.VARAIBLE_POOL_ARGUMENT_IS_NOT_A_STRING,
+					ExpressionMessages.getString("VariablePool.resolveVariable.arguments.not_a_string")); //$NON-NLS-1$
 			return Platform.getPluginRegistry().getPluginDescriptor((String)(args[0]));
 		}
 		return null;

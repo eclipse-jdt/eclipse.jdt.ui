@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.refactoring.changes;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class AbortChangeExceptionHandler implements IChangeExceptionHandler {
 	
-	public void handle(ChangeContext context, IChange change, Exception e) {
+	public void handle(ChangeContext context, Change change, Exception e) {
 		JavaPlugin.log(e);
 		throw new ChangeAbortException(e);
 	}

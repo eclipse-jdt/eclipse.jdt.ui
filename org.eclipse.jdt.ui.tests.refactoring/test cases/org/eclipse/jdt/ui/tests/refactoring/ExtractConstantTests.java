@@ -113,7 +113,7 @@ public class ExtractConstantTests extends RefactoringTest {
 		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 		assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
 		
-		performChange(ref.createChange(new NullProgressMonitor()));
+		performChange(ref);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);

@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.xml;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtender;
 
 
 public class B_TypeExtender extends TypeExtender {
 
-	public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
+	public Object invoke(Object receiver, String method, Object[] args) {
 		if ("overridden".equals(method)) {
 			return "B";
 		}

@@ -18,7 +18,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.internal.refactoring.core.TextChanges;
 
 /**
  * TODO
@@ -27,6 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 public class DocumentChange extends TextChange {
 
 	private IDocument fDocument;
+	private int fLength;
 	
 	/**
 	 * Creates a new <code>DocumentChange</code> for the given 
@@ -44,8 +47,27 @@ public class DocumentChange extends TextChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getModifiedLanguageElement(){
+	public Object getModifiedElement(){
 		return fDocument;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void initializeValidationData(IProgressMonitor pm) throws CoreException {
+		// as long as we don't have modification stamps on documents
+		// we can only remember its length.
+		fLength= fDocument.getLength();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", 1); //$NON-NLS-1$
+		RefactoringStatus result= TextChanges.isValid(fDocument, fLength);
+		pm.worked(1);
+		return result;
 	}
 
 	/**
@@ -58,7 +80,7 @@ public class DocumentChange extends TextChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void commit(IProgressMonitor pm) throws CoreException {
+	protected void commit(IDocument document, IProgressMonitor pm) throws CoreException {
 		// do nothing
 	}
 	
@@ -72,7 +94,7 @@ public class DocumentChange extends TextChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IChange createUndoChange(UndoEdit edit) throws CoreException {
+	protected Change createUndoChange(UndoEdit edit) throws CoreException {
 		return new UndoDocumentChange(getName(), fDocument, edit);
 	}	
 }

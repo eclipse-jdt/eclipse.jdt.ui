@@ -69,10 +69,11 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
@@ -355,7 +356,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	/* (non-Javadoc)
 	 * Method declared in IRefactoring
 	 */
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		if (fMethodName == null)
 			return null;
 		
@@ -370,6 +371,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		final CompilationUnitChange result= new CompilationUnitChange(
 			RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.change_name", new String[]{fMethodName, sourceMethodName}),  //$NON-NLS-1$
 			fCUnit);
+		result.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
 	
 		MultiTextEdit root= new MultiTextEdit();
 		result.setEdit(root);

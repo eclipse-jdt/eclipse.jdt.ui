@@ -14,24 +14,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.util.IOCloser;
 
-public class DeleteFileChange extends Change {
+public class DeleteFileChange extends JDTChange {
 
 	private IPath fPath;
 	private String fSource;
@@ -44,10 +42,8 @@ public class DeleteFileChange extends Change {
 	/*
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+	public Change perform(IProgressMonitor pm) throws CoreException {
 		try {
-			if (!isActive())
-				return;
 			pm.beginTask(NLSChangesMessages.getString("deleteFile.deleting_resource"), 1); //$NON-NLS-1$
 			IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 			Assert.isNotNull(file);
@@ -55,9 +51,7 @@ public class DeleteFileChange extends Change {
 			Assert.isTrue(!file.isReadOnly());
 			fSource= getSource(file);
 			file.delete(true, false, pm);
-		} catch (Exception e) {
-			handleException(context, e);
-			setActive(false);
+			return new CreateFileChange(fPath, fSource);
 		} finally {
 			pm.done();
 		}
@@ -86,16 +80,6 @@ public class DeleteFileChange extends Change {
 	}
 
 	/*
-	 * @see IChange#getUndoChange()
-	 */
-	public IChange getUndoChange() {
-		if (!isActive())
-			return new NullChange();
-		else	
-			return new CreateFileChange(fPath, fSource);
-	}
-
-	/*
 	 * @see IChange#getName()
 	 */
 	public String getName() {
@@ -105,7 +89,7 @@ public class DeleteFileChange extends Change {
 	/*
 	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return null;
 	}
 

@@ -127,7 +127,7 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, op);
 		} catch (InvocationTargetException e) {
 			Refactoring.getUndoManager().flush();
-			ExceptionHandler.handle(e, RefactoringMessages.getString("UndoManagerAction.error"), RefactoringMessages.getString("UndoManagerAction.internal_error")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, RefactoringMessages.getString("UndoManagerAction.internal_error.title"), RefactoringMessages.getString("UndoManagerAction.internal_error.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// Opertation isn't cancelable.
 		} finally {
@@ -157,14 +157,14 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 		MultiStatus status= new MultiStatus(
 			JavaPlugin.getPluginId(), 
 			IStatus.ERROR,
-			RefactoringMessages.getString("UndoManagerAction.unsaved_filed"), //$NON-NLS-1$
+			RefactoringMessages.getString("UndoManagerAction.validation_failed"), //$NON-NLS-1$
 			null);
-		String id= JavaPlugin.getPluginId();
 		RefactoringStatusEntry[] entries= fPreflightStatus.getEntries();
 		for (int i= 0; i < entries.length; i++) {
+			String pluginId= entries[i].getPluginId();
 			status.merge(new Status(
 				IStatus.ERROR,
-				id,
+				pluginId != null ? pluginId : JavaPlugin.getPluginId(),
 				IStatus.ERROR,
 				entries[i].getMessage(),
 				null));

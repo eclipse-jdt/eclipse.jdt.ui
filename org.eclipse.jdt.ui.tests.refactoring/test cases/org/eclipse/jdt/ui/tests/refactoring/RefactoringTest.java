@@ -23,12 +23,10 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -41,22 +39,23 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
+import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 public abstract class RefactoringTest extends TestCase {
 
@@ -160,45 +159,64 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected final RefactoringStatus performRefactoring(Refactoring ref) throws Exception {
+		return performRefactoring(ref, true);
+	}
+	
+	protected final RefactoringStatus performRefactoring(Refactoring ref, boolean providesUndo) throws Exception {
 		performDummySearch();
-		RefactoringStatus status= ref.checkPreconditions(new NullProgressMonitor());
+		IUndoManager undoManager= getUndoManager();
+		CreateChangeOperation create= new CreateChangeOperation(ref, 
+			CreateChangeOperation.CHECK_PRECONDITION, RefactoringStatus.ERROR);
+		PerformChangeOperation perform= new PerformChangeOperation(create);
+		perform.setUndoManager(Refactoring.getUndoManager(), ref.getName());
+		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
+		RefactoringStatus status= create.getStatus();
 		if (!status.isOK())
 			return status;
-
-		IChange change= ref.createChange(new NullProgressMonitor());
-		performChange(change);
-		
-		// XXX: this should be done by someone else
-		Refactoring.getUndoManager().addUndo(ref.getName(), change.getUndoChange());
-
+		assertTrue("Change wasn't executed", perform.changeExecuted());
+		Change undo= perform.getUndoChange();
+		if (providesUndo) {
+			assertNotNull("Undo doesn't exist", undo);
+			assertTrue("Undo manager is empty", undoManager.anythingToUndo());
+		} else {
+			assertNull("Undo manager contains undo but shouldn't", undo);
+		}
 		return null;
 	}
 	
 	protected final RefactoringStatus performRefactoringWithStatus(Refactoring ref) throws Exception {
-		RefactoringStatus status= ref.checkPreconditions(new NullProgressMonitor());
+		performDummySearch();
+		CreateChangeOperation create= new CreateChangeOperation(ref, 
+			CreateChangeOperation.CHECK_PRECONDITION, RefactoringStatus.ERROR);
+		PerformChangeOperation perform= new PerformChangeOperation(create);
+		perform.setUndoManager(Refactoring.getUndoManager(), ref.getName());
+		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
+		RefactoringStatus status= create.getStatus();
 		if (status.hasFatalError())
 			return status;
-
-		IChange change= ref.createChange(new NullProgressMonitor());
-		performChange(change);
-		
-		// XXX: this should be done by someone else
-		Refactoring.getUndoManager().addUndo(ref.getName(), change.getUndoChange());
-
+		assertTrue("Change wasn't executed", perform.changeExecuted());
 		return status;
 	}
 	
-	protected void performChange(final IChange change) throws Exception {
-		change.aboutToPerform(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		try {
-			JavaCore.run(new IWorkspaceRunnable() {
-		 		public void run(IProgressMonitor pm) throws CoreException {
-		 			change.perform(new ChangeContext(new TestExceptionHandler()), pm);
-		 		}
-		 	}, new NullProgressMonitor());
-		} finally {
-			change.performed();
-		}
+	protected final Change performChange(final Refactoring refactoring) throws Exception {
+		CreateChangeOperation create= new CreateChangeOperation(refactoring, CreateChangeOperation.CHECK_NONE);
+		PerformChangeOperation perform= new PerformChangeOperation(create);
+		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
+		assertTrue("Change wasn't executed", perform.changeExecuted());
+		return perform.getUndoChange();
+	}
+	
+	protected final Change performChange(final Change change) throws Exception {
+		PerformChangeOperation perform= new PerformChangeOperation(change);
+		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
+		assertTrue("Change wasn't executed", perform.changeExecuted());
+		return perform.getUndoChange();
+	}
+	
+	protected IUndoManager getUndoManager() {
+		IUndoManager undoManager= Refactoring.getUndoManager();
+		undoManager.flush();
+		return undoManager;
 	}
 
 	/****************  helpers  ******************/

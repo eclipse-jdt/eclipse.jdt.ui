@@ -15,19 +15,16 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit; 
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-
-import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 
 public class TrackPositionTest extends TestCase {
 
@@ -49,6 +46,7 @@ public class TrackPositionTest extends TestCase {
 		fBuffer= TextBuffer.create("0123456789");
 		fChange= new TextBufferChange(NN, fBuffer);
 		fChange.setKeepPreviewEdits(true);
+		fChange.initializeValidationData(new NullProgressMonitor());
 	}
 	
 	protected void tearDown() throws Exception {
@@ -73,11 +71,10 @@ public class TrackPositionTest extends TestCase {
 		
 	private void executeChange() throws Exception {
 		try {
-			ChangeContext context= new ChangeContext(new AbortChangeExceptionHandler());
-			fChange.aboutToPerform(context, new NullProgressMonitor());
-			fChange.perform(context, new NullProgressMonitor());
+			assertTrue(!fChange.isValid(new NullProgressMonitor()).hasFatalError());
+			fChange.perform(new NullProgressMonitor());
 		} finally {
-			fChange.performed();
+			fChange.dispose();
 		}
 	}
 	

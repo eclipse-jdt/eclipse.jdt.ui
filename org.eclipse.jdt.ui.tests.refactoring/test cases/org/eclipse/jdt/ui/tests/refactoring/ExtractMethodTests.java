@@ -17,8 +17,7 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -26,19 +25,17 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
-public class ExtractMethodTests extends AbstractSelectionTestCase {
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-	private String[] fNewNames;
-	private int[] fNewOrder;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import org.eclipse.ltk.refactoring.core.PerformRefactoringOperation;
+
+public class ExtractMethodTests extends AbstractSelectionTestCase {
 
 	private static ExtractMethodTestSetup fgTestSetup;
 	
@@ -77,6 +74,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
  	}
 	
 	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
+		performTest(packageFragment, id, mode, outputFolder, null, null);
+	}
+	
+	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder, String[] newNames, int[] newOrder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
@@ -85,37 +86,43 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 			JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setMethodName("extracted");
 		refactoring.setVisibility(Modifier.PROTECTED);
+		RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
+		switch (mode) {
+			case VALID_SELECTION:
+				assertTrue(status.isOK());
+				break;
+			case INVALID_SELECTION:
+				if (!status.isOK())
+					return;
+		}
+		List parameters= refactoring.getParameterInfos();
+		if (newNames != null && newNames.length > 0) {
+			for (int i= 0; i < newNames.length; i++) {
+				if (newNames[i] != null)
+					((ParameterInfo)parameters.get(i)).setNewName(newNames[i]);
+			}
+		}
+		if (newOrder != null && newOrder.length > 0) {
+			assertTrue(newOrder.length == parameters.size());
+			List current= new ArrayList(parameters);
+			for (int i= 0; i < newOrder.length; i++) {
+				parameters.set(newOrder[i], current.get(i));
+			}
+		}
+		
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:
 				out= getProofedContent(outputFolder, id);
 				break;		
 		}
-		performTest(unit, refactoring, mode, out);
-	}	
-	
-	protected RefactoringStatus checkPreconditions(Refactoring refactoring, IProgressMonitor pm) throws CoreException {
-		RefactoringStatus result= refactoring.checkActivation(pm);
-		if (result.hasFatalError())
-			return result;
-		ExtractMethodRefactoring extract= (ExtractMethodRefactoring)refactoring;
-		List parameters= extract.getParameterInfos();
-		if (fNewNames != null && fNewNames.length > 0) {
-			for (int i= 0; i < fNewNames.length; i++) {
-				if (fNewNames[i] != null)
-					((ParameterInfo)parameters.get(i)).setNewName(fNewNames[i]);
-			}
-		}
-		if (fNewOrder != null && fNewOrder.length > 0) {
-			assertTrue(fNewOrder.length == parameters.size());
-			List current= new ArrayList(parameters);
-			for (int i= 0; i < fNewOrder.length; i++) {
-				parameters.set(fNewOrder[i], current.get(i));
-			}
-		}
-		result.merge(refactoring.checkInput(pm));
-		return result;
+		performTest(unit, refactoring, mode, out, true);
 	}
+	
+	protected int getCheckingStyle() {
+		return PerformRefactoringOperation.CHECK_INPUT;
+	}
+	
 	protected void invalidSelectionTest() throws Exception {
 		performTest(fgTestSetup.getInvalidSelectionPackage(), "A", INVALID_SELECTION, null);
 	}
@@ -1488,15 +1495,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	//---- Test parameter name changes
 	
 	private void invalidParameterNameTest(String[] newNames) throws Exception {
-		fNewNames= newNames;
-		fNewOrder= null;
-		performTest(fgTestSetup.getParameterNamePackage(), "A", INVALID_SELECTION, null);
+		performTest(fgTestSetup.getParameterNamePackage(), "A", INVALID_SELECTION, null, newNames, null);
 	}
 	
 	private void parameterNameTest(String[] newNames, int[] newOrder) throws Exception {
-		fNewNames= newNames;
-		fNewOrder= newOrder;
-		performTest(fgTestSetup.getParameterNamePackage(), "A", COMPARE_WITH_OUTPUT, "parameterName_out");
+		performTest(fgTestSetup.getParameterNamePackage(), "A", COMPARE_WITH_OUTPUT, "parameterName_out", newNames, newOrder);
 	}
 	
 	public void test900() throws Exception {

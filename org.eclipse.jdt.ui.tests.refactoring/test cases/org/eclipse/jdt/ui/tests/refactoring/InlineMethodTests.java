@@ -61,14 +61,13 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
 			unit, selection[0], selection[1],
 			JavaPreferencesSettings.getCodeGenerationSettings());
-		refactoring.setSaveChanges(true);
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:
 				out= getProofedContent(outputFolder, id);
 				break;		
 		}
-		performTest(unit, refactoring, mode, out);
+		performTest(unit, refactoring, mode, out, true);
 	}
 
 	/************************ Invalid Tests ********************************/

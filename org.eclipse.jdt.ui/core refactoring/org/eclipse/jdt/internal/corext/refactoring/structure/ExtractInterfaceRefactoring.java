@@ -61,7 +61,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
@@ -265,7 +265,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			final ValidationStateChange result= new ValidationStateChange(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.name")); //$NON-NLS-1$
@@ -424,7 +424,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	//----- methods related to creation of the new interface -------
-	private IChange createExtractedInterface(IProgressMonitor pm) throws CoreException {
+	private Change createExtractedInterface(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		IPath cuPath= ResourceUtil.getFile(getInputTypeCU()).getFullPath();
 		IPath interfaceCuPath= cuPath.removeLastSegments(1).append(getCuNameForNewInterface());

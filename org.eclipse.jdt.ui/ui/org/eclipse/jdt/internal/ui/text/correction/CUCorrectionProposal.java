@@ -14,15 +14,18 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.eclipse.compare.contentmergeviewer.ITokenComparator;
-import org.eclipse.compare.rangedifferencer.RangeDifference;
-import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.compare.contentmergeviewer.ITokenComparator;
+import org.eclipse.compare.rangedifferencer.RangeDifference;
+import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -37,16 +40,16 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
@@ -90,7 +93,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	private CompilationUnitChange createCompilationUnitChange(String name) throws CoreException {
 		CompilationUnitChange change= new CompilationUnitChange(name, getCompilationUnit());
 		change.setEdit(getRootTextEdit());
-		change.setSave(false);
+		change.setSaveMode(TextFileChange.LEAVE_DIRTY);
 		setChange(change);
 		
 		TextBuffer buffer= null;

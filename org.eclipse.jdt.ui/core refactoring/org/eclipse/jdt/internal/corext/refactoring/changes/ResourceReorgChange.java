@@ -10,27 +10,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
-abstract class ResourceReorgChange extends Change {
+abstract class ResourceReorgChange extends JDTChange {
 	
 	private final IPath fResourcePath;
 	private final boolean fIsFile;
@@ -49,25 +46,20 @@ abstract class ResourceReorgChange extends Change {
 		fNewNameQuery= nameQuery;
 	}
 	
-	protected abstract void doPerform(IPath path, IProgressMonitor pm) throws CoreException;
+	protected abstract Change doPerformReorg(IPath path, IProgressMonitor pm) throws CoreException;
 	
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public final void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+	public final Change perform(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask(getName(), 2);
-			if (!isActive())
-				return;
 			
 			String newName= getNewResourceName();
 			boolean performReorg= deleteIfAlreadyExists(new SubProgressMonitor(pm, 1), newName);
-			if (performReorg)
-				doPerform(getDestinationPath(newName), new SubProgressMonitor(pm, 1));	
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);			
+			if (!performReorg)
+				return null;
+			return doPerformReorg(getDestinationPath(newName), new SubProgressMonitor(pm, 1));
 		} finally {
 			pm.done();
 		}
@@ -118,7 +110,7 @@ abstract class ResourceReorgChange extends Change {
 	/* non java-doc
 	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return getResource();
 	}
 
@@ -142,20 +134,6 @@ abstract class ResourceReorgChange extends Change {
 			return Utils.getProject(fDestinationPath);
 		else
 			return Utils.getFolder(fDestinationPath);	
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getUndoChange()
-	 */
-	public IChange getUndoChange() {
-		return null;
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#isUndoable()
-	 */
-	public boolean isUndoable() {
-		return false;
 	}
 
 	protected int getReorgFlags() {

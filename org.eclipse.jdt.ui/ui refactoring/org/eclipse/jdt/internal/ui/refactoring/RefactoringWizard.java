@@ -20,12 +20,13 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -33,7 +34,7 @@ public class RefactoringWizard extends Wizard {
 
 	private String fDefaultPageTitle;
 	private Refactoring fRefactoring;
-	private IChange fChange;
+	private Change fChange;
 	private RefactoringStatus fActivationStatus= new RefactoringStatus();
 	private RefactoringStatus fStatus;
 	private boolean fHasUserInputPages;
@@ -180,7 +181,7 @@ public class RefactoringWizard extends Wizard {
 	/**
 	 * Sets the change object.
 	 */
-	public void setChange(IChange change){
+	public void setChange(Change change){
 		IPreviewWizardPage page= (IPreviewWizardPage)getPage(IPreviewWizardPage.PAGE_NAME);
 		if (page != null)
 			page.setChange(change);
@@ -190,7 +191,7 @@ public class RefactoringWizard extends Wizard {
 	/**
 	 * Returns the current change object.
 	 */
-	public IChange getChange() {
+	public Change getChange() {
 		return fChange;
 	}
 	
@@ -294,7 +295,7 @@ public class RefactoringWizard extends Wizard {
 	}
 
 	private IWizardPage computeUserInputSuccessorPage(IWizardPage caller, IRunnableContext context) {
-		IChange change= createChange(CheckConditionsOperation.INPUT, RefactoringStatus.OK, true, context);
+		Change change= createChange(CheckConditionsOperation.INPUT, RefactoringStatus.OK, true, context);
 		// Status has been updated since we have passed true
 		RefactoringStatus status= getStatus();
 		
@@ -364,17 +365,17 @@ public class RefactoringWizard extends Wizard {
 	 *  with the status returned from the <code>CreateChangeOperation</code>.
 	 *  if <code>false</code> no status updating is performed.
 	 */
-	IChange createChange(int style, int checkPassedSeverity, boolean updateStatus) {
+	Change createChange(int style, int checkPassedSeverity, boolean updateStatus) {
 		return createChange(style, checkPassedSeverity, updateStatus, getContainer());
 	}
 
-	private IChange createChange(int style, int checkPassedSeverity, boolean updateStatus, IRunnableContext context){
+	private Change createChange(int style, int checkPassedSeverity, boolean updateStatus, IRunnableContext context){
 		CreateChangeOperation op= new CreateChangeOperation(fRefactoring, style);
 		op.setCheckPassedSeverity(checkPassedSeverity); 
 
 		InvocationTargetException exception= null;
 		try {
-			context.run(true, fIsChangeCreationCancelable, op);
+			context.run(true, fIsChangeCreationCancelable, new WorkbenchRunnableAdapter(op));
 		} catch (InterruptedException e) {
 			setStatus(null);
 			return null;
@@ -401,7 +402,7 @@ public class RefactoringWizard extends Wizard {
 			if (exception != null)
 				ExceptionHandler.handle(exception, RefactoringMessages.getString("RefactoringWizard.refactoring"), RefactoringMessages.getString("RefactoringWizard.unexpected_exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
-		IChange change= op.getChange();	
+		Change change= op.getChange();	
 		return change;
 	}
 
@@ -427,7 +428,7 @@ public class RefactoringWizard extends Wizard {
 
 		Exception exception= null;
 		try {
-			context.run(true, true, op);
+			context.run(true, true, new WorkbenchRunnableAdapter(op));
 		} catch (InterruptedException e) {
 			exception= e;
 		} catch (InvocationTargetException e) {

@@ -25,14 +25,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
+import org.eclipse.ltk.refactoring.core.NullChange;
 
-public class AddToClasspathChange extends Change {
+public class AddToClasspathChange extends JDTChange {
 	
 	private String fProjectHandle;
 	private int fEntryKind;
@@ -69,16 +67,17 @@ public class AddToClasspathChange extends Change {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+	public Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 1);
-		try{
-			if (!isActive())
-				return;
-			if (!entryAlreadyExists())
+		try {
+			if (!entryAlreadyExists()) {
 				getJavaProject().setRawClasspath(getNewClasspathEntries(), new SubProgressMonitor(pm, 1));
-			else
-				setActive(false);	
-		}finally{
+				IPath classpathEntryPath= JavaCore.getResolvedClasspathEntry(createNewClasspathEntry()).getPath();
+				return new DeleteFromClasspathChange(classpathEntryPath, getJavaProject());
+			} else {
+				return new NullChange();
+			}
+		} finally {
 			pm.done();
 		}		
 	}
@@ -118,17 +117,6 @@ public class AddToClasspathChange extends Change {
 	}
 
 	/* non java-doc
-	 * @see IChange#getUndoChange()
-	 */
-	public IChange getUndoChange() {
-		if (!isActive())
-			return new NullChange();
-
-		IPath classpathEntryPath= JavaCore.getResolvedClasspathEntry(createNewClasspathEntry()).getPath();
-		return new DeleteFromClasspathChange(classpathEntryPath, getJavaProject());
-	}
-
-	/* non java-doc
 	 * @see IChange#getName()
 	 */
 	public String getName() {
@@ -139,7 +127,7 @@ public class AddToClasspathChange extends Change {
 	/* non java-doc
 	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return getJavaProject();
 	}
 }

@@ -64,11 +64,12 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
@@ -574,7 +575,7 @@ public class PasteAction extends SelectionDispatchAction{
 				return result;
 			}
 
-			public IChange createChange(IProgressMonitor pm) throws CoreException {
+			public Change createChange(IProgressMonitor pm) throws CoreException {
 				CompilationUnit cuNode= AST.parseCompilationUnit(getDestinationCu(), false);
 				ASTRewrite rewrite= new ASTRewrite(cuNode);
 				for (int i= 0; i < fSources.length; i++) {
@@ -584,7 +585,8 @@ public class PasteAction extends SelectionDispatchAction{
 				TextEdit rootEdit= new MultiTextEdit();
 				rewrite.rewriteNode(textBuffer, rootEdit);
 				final CompilationUnitChange result= new CompilationUnitChange("name", getDestinationCu());
-				result.setSave(!getDestinationCu().isWorkingCopy());
+				if (getDestinationCu().isWorkingCopy()) 
+					result.setSaveMode(TextFileChange.LEAVE_DIRTY);
 				TextChangeCompatibility.addTextEdit(result, "paste elements", rootEdit);
 				return result;
 			}

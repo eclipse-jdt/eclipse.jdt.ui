@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -151,7 +151,7 @@ class InstanceMethodMover {
 		
 		abstract Expression createReferenceForContext(Method context);
 		
-		IChange moveMethodToMe(Method method, String newMethodName, String originalReceiverParameterName, boolean inlineDelegator, boolean removeDelegator) throws CoreException {
+		Change moveMethodToMe(Method method, String newMethodName, String originalReceiverParameterName, boolean inlineDelegator, boolean removeDelegator) throws CoreException {
 			Assert.isNotNull(method);
 			Assert.isNotNull(newMethodName);
 			Assert.isNotNull(originalReceiverParameterName);
@@ -165,7 +165,7 @@ class InstanceMethodMover {
 			return getChange(manager);
 		}
 		
-		private static IChange getChange(TextChangeManager manager) {
+		private static Change getChange(TextChangeManager manager) {
 			TextChange[] changes= manager.getAllChanges();
 			if (changes.length == 1) {
 				return changes[0];
@@ -1909,7 +1909,7 @@ class InstanceMethodMover {
 		}
 	}
 
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try{		
 			pm.beginTask("", 1); //$NON-NLS-1$
 			return fNewReceiver.moveMethodToMe(fMethodToMove, fNewMethodName, fOriginalReceiverParameterName, fInlineDelegator, fRemoveDelegator);

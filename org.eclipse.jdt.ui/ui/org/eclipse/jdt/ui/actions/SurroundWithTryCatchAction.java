@@ -13,6 +13,12 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceRange;
+
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -21,29 +27,24 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ISourceRange;
-
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ISurroundWithTryCatchQuery;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
-import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -122,9 +123,10 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			}
 			if (refactoring.stopExecution())
 				return;
-			PerformChangeOperation op= new PerformChangeOperation(refactoring.createChange(new NullProgressMonitor()));
-			op.setChangeContext(new ChangeContext(new AbortChangeExceptionHandler()));
-			new BusyIndicatorRunnableContext().run(false, false, op);
+			Change change= refactoring.createChange(new NullProgressMonitor());
+			change.initializeValidationData(new NullProgressMonitor());
+			PerformChangeOperation op= new PerformChangeOperation(change);
+			new BusyIndicatorRunnableContext().run(false, false, new WorkbenchRunnableAdapter(op));
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$
 		} catch (InvocationTargetException e) {

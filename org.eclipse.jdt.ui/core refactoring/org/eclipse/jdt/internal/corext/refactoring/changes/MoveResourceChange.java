@@ -10,13 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 
 public class MoveResourceChange extends ResourceReorgChange {
 	
@@ -27,8 +29,9 @@ public class MoveResourceChange extends ResourceReorgChange {
 	/* non java-doc
 	 * @see ResourceReorgChange#doPerform(IPath, IProgressMonitor)
 	 */
-	protected void doPerform(IPath path, IProgressMonitor pm) throws CoreException{
+	protected Change doPerformReorg(IPath path, IProgressMonitor pm) throws CoreException{
 		getResource().move(path, getReorgFlags(), pm);
+		return null;
 	}
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("MoveResourceChange.move", //$NON-NLS-1$

@@ -8,39 +8,60 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring;
+package org.eclipse.ltk.refactoring.core;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 public class NullChange extends Change {
 
 	private String fName;
 	
-	public NullChange(String name){
+	public NullChange() {
+		this("No change");
+	}
+
+	public NullChange(String name) {
+		Assert.isNotNull(name);
 		fName= name;
 	}
 	
-	public NullChange(){
-		this(null);
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getName() {
+		return fName;
 	}
-		
-	public void perform(ChangeContext context, IProgressMonitor pm) throws CoreException {
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void initializeValidationData(IProgressMonitor pm) throws CoreException {
+		// do nothing
 	}
 
-	public IChange getUndoChange() {
-		return new NullChange(fName);
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return new RefactoringStatus();
 	}
 	
-	public String getName(){
-		return "NullChange (" + fName + ")";  //$NON-NLS-1$ //$NON-NLS-2$
+	/**
+	 * {@inheritDoc}
+	 */
+	public Change perform(IProgressMonitor pm) throws CoreException {
+		return new NullChange();
 	}
-	
-	public Object getModifiedLanguageElement(){
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object getModifiedElement() {
 		return null;
 	}
 }

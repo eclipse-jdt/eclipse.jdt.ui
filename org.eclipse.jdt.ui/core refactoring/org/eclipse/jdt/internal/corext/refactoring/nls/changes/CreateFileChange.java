@@ -15,30 +15,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 
-public class CreateFileChange extends Change {
+public class CreateFileChange extends JDTChange {
 
 	private IPath fPath;
 	private String fSource;
-	private IChange fUndoChange;
 	private String fName;
 	private String fEncoding;
 	
@@ -69,32 +65,23 @@ public class CreateFileChange extends Change {
 	/*
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm)	throws ChangeAbortException, CoreException {
+	public Change perform(IProgressMonitor pm)	throws CoreException {
 
 		InputStream is= null;
 		try {
 			pm.beginTask(NLSChangesMessages.getString("createFile.creating_resource"), 2); //$NON-NLS-1$
 
-			if (!isActive()){
-				fUndoChange= new NullChange();	
-			} else{
-				IFile file= getOldFile(new SubProgressMonitor(pm, 1));
-				if (file.exists()){
-					CompositeChange composite= new CompositeChange();
-					composite.add(new DeleteFileChange(file));
-					composite.add(new CreateFileChange(fPath, fSource));
-					composite.perform(context, pm);
-					fUndoChange= composite.getUndoChange();
-				} else {
-					is= getInputStream();
-					file.create(is, false, pm);
-					fUndoChange= new DeleteFileChange(file);
-				}				
-			}	
-		} catch (Exception e) {
-			handleException(context, e);
-			fUndoChange= new NullChange();
-			setActive(false);
+			IFile file= getOldFile(new SubProgressMonitor(pm, 1));
+			if (file.exists()){
+				CompositeChange composite= new CompositeChange();
+				composite.add(new DeleteFileChange(file));
+				composite.add(new CreateFileChange(fPath, fSource));
+				return composite.perform(pm);
+			} else {
+				is= getInputStream();
+				file.create(is, false, pm);
+				return new DeleteFileChange(file);
+			}				
 		} finally {
 			pm.done();
 			try{
@@ -126,13 +113,6 @@ public class CreateFileChange extends Change {
 	}
 	
 	/*
-	 * @see IChange#getUndoChange()
-	 */
-	public IChange getUndoChange() {
-		return fUndoChange;
-	}
-
-	/*
 	 * @see IChange#getName()
 	 */
 	public String getName() {
@@ -145,7 +125,7 @@ public class CreateFileChange extends Change {
 	/*
 	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return null;
 	}
 

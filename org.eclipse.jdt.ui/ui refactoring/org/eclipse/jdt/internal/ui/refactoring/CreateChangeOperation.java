@@ -11,16 +11,15 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
@@ -28,12 +27,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
  * Operation that, when performed, creates an <code>IChange</code> object for the refactoring
  * passed as a constructor parameter.
  */
-public class CreateChangeOperation implements IRunnableWithProgress {
+public class CreateChangeOperation implements IWorkspaceRunnable {
 
 	private Refactoring fRefactoring;
 	private int fStyle;
 	private int fCheckPassedSeverity;
-	private IChange fChange;
+	private Change fChange;
 	private RefactoringStatus fStatus;
 	
 	public static final int CHECK_NONE=         CheckConditionsOperation.NONE;
@@ -53,7 +52,7 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 		fRefactoring= refactoring;
 		fStyle= style;
 		Assert.isTrue(checkStyle(fStyle));
-		fCheckPassedSeverity= RefactoringStatus.ERROR;
+		setCheckPassedSeverity(RefactoringStatus.ERROR);
 	}
 	
 	/**
@@ -84,31 +83,42 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 		Assert.isTrue (fCheckPassedSeverity < RefactoringStatus.FATAL);
 	}
 	
+	/**
+	 * Returns the check passed severity.
+	 * 
+	 * @return the check passed severity
+	 * 
+	 * @see RefactoringStatus
+	 */
+	public int getCheckPassedSeverity() {
+		return fCheckPassedSeverity;
+	}
+	
 	/* (Non=Javadoc)
 	 * Method declared in IRunnableWithProgress
 	 */
-	public void run(IProgressMonitor pm) throws InvocationTargetException {
+	public void run(IProgressMonitor pm) throws CoreException {
 		fChange= null;
 		fStatus= null;
 		try {
 			fChange= null;
 			if (fStyle != CHECK_NONE) {
-				pm.beginTask("", 5); //$NON-NLS-1$
+				pm.beginTask("", 7); //$NON-NLS-1$
 				pm.subTask(""); //$NON-NLS-1$
 				CheckConditionsOperation op= new CheckConditionsOperation(fRefactoring, fStyle);
-				op.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+				op.run(new SubProgressMonitor(pm, 4));
 				fStatus= op.getStatus();
 				if (fStatus != null && fStatus.getSeverity() <= fCheckPassedSeverity) {
-					fChange= fRefactoring.createChange(
-						new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+					fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2));
+					fChange.initializeValidationData(new SubProgressMonitor(pm, 1));
 				} else {
-					pm.worked(1);
+					pm.worked(2);
 				}
 			} else {
-				fChange= fRefactoring.createChange(pm);
+				pm.beginTask("", 3); //$NON-NLS-1$
+				fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2));
+				fChange.initializeValidationData(new SubProgressMonitor(pm, 1));
 			}
-		} catch (CoreException e) {
-			throw new InvocationTargetException(e);
 		} finally {
 			pm.done();
 		}
@@ -120,7 +130,7 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 	 * 
 	 * @return the outcome of the operation
 	 */
-	public IChange getChange() {
+	public Change getChange() {
 		return fChange;
 	}
 	

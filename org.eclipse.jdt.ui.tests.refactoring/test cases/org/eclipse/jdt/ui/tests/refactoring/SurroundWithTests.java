@@ -49,11 +49,10 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, name);
 		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(unit, 
 			getTextSelection(unit.getSource()), JavaPreferencesSettings.getCodeGenerationSettings(), null);
-		refactoring.setSaveChanges(true);
 		String out= null;
 		if (mode == COMPARE_WITH_OUTPUT)
 			out= getProofedContent(outputFolder, name);
-		performTest(unit, refactoring, mode, out);
+		performTest(unit, refactoring, mode, out, true);
 	}
 	
 	protected void tryCatchInvalidTest() throws Exception {

@@ -101,7 +101,7 @@ public abstract class Refactoring implements IAdaptable {
 	 * </code> returns an <code>RefactoringStatus</code> object with a severity of <code>
 	 * RefactoringStatus.ERROR</code>.
 	 */
-	public abstract IChange createChange(IProgressMonitor pm) throws CoreException;
+	public abstract Change createChange(IProgressMonitor pm) throws CoreException;
 	
 	/* (non-Javadoc)
 	 * Method declared in IAdaptabe 

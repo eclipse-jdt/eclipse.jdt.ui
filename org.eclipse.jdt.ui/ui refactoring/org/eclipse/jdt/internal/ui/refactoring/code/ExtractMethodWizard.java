@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.refactoring.code;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -31,7 +31,7 @@ public class ExtractMethodWizard extends RefactoringWizard {
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 
-	public IChange createChange(){
+	public Change createChange(){
 		// creating the change is cheap. So we don't need to show progress.
 		try {
 			return getRefactoring().createChange(new NullProgressMonitor());

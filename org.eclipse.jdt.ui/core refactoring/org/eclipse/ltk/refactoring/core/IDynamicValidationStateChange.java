@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.ltk.refactoring.core;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 
 /**
  * This is a tagging interface to indicate that the validation
  * state of a change changes dynamically. This gives clients
  * that rely on the change's validation state (the value returned
- * form {@link org.eclipse.jdt.internal.corext.refactoring.base.IChange#isValid(IProgressMonitor)
+ * form {@link org.eclipse.jdt.internal.corext.refactoring.base.Change#isValid(IProgressMonitor)
  * IChange#isValid}) the opportunity to dynamically update their state 
  * as well. For example, the undo/redo stack listens to validation 
  * state changs and removes undo/redo changes from the undo/redo stack
@@ -50,7 +50,7 @@ public interface IDynamicValidationStateChange {
 	 * 
 	 * @param change the change to be executed
 	 */
-	public void aboutToPerformChange(IChange change);
+	public void aboutToPerformChange(Change change);
 	
 	/**
 	 * Hook method that gets called when the given change has been 
@@ -62,8 +62,10 @@ public interface IDynamicValidationStateChange {
 	 * valid and the recorded validation state changes should be flushed.
 	 * 
 	 * @param change the change that has been executed
+	 * @param undo the corresponding undo change or <code>null</code> if no
+	 *  undo exists
 	 * @param e <code>null</code> if the change has been executed
 	 *  successfully; otherwise the catched exception
 	 */
-	public void changePerformed(IChange change, Exception e);
+	public void changePerformed(Change change, Change undo, Exception e);
 }

@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
@@ -45,7 +45,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	/* non java-doc
 	 * @see AbstractRenameChange#createUndoChange()
 	 */
-	protected IChange createUndoChange() {
+	protected Change createUndoChange() {
 		return new RenameSourceFolderChange(createNewPath(), getNewName(), getOldName());
 	}
 
@@ -71,7 +71,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	}
 
 	private IPackageFragmentRoot getSourceFolder() {
-		return (IPackageFragmentRoot)getModifiedLanguageElement();
+		return (IPackageFragmentRoot)getModifiedElement();
 	}
 
 	private int getJavaModelUpdateFlags() {
@@ -88,17 +88,10 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 			return IResource.NONE;
 	}
 	
-	/* non java-doc
-	 * @see IChange#aboutToPerform(ChangeContext, IProgressMonitor)
-	 */	
-	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
-		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
-		RefactoringStatus result= super.aboutToPerform(context, pm);
+	public RefactoringStatus isValid(ChangeContext context, IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
 
-		if (context.getUnsavedFiles().length == 0)
-			return result;
-		
-		result.merge(checkIfModifiable(getSourceFolder(), context, pm));
+		result.merge(checkIfModifiable(getSourceFolder(), pm));
 		
 		return result;
 	}

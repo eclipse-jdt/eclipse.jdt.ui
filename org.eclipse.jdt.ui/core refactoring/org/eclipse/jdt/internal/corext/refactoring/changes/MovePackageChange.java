@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 
 public class MovePackageChange extends PackageReorgChange {
 	
@@ -24,8 +25,9 @@ public class MovePackageChange extends PackageReorgChange {
 		super(pack, dest, null);
 	}
 	
-	protected void doPerform(IProgressMonitor pm) throws JavaModelException{
+	protected Change doPerformReorg(IProgressMonitor pm) throws JavaModelException{
 		getPackage().move(getDestination(), null, getNewName(), true, pm);
+		return null;
 	}
 	
 	/* non java-doc

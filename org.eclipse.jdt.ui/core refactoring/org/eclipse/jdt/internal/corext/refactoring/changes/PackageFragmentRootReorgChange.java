@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -24,16 +24,13 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
-abstract class PackageFragmentRootReorgChange extends Change {
+abstract class PackageFragmentRootReorgChange extends JDTChange {
 
 	private final String fRootHandle;
 	private final IPath fDestinationPath;
@@ -51,47 +48,27 @@ abstract class PackageFragmentRootReorgChange extends Change {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public final void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+	public final Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 2);
-		try{
-			if (!isActive())
-				return;
-				
+		try {
 			String newName= getNewResourceName();
-			doPerform(getDestinationProjectPath().append(newName), new SubProgressMonitor(pm, 1));
-		} catch (Exception e) {
-			handleException(context, e);
-			setActive(false);	
-		} finally{
+			return doPerformReorg(getDestinationProjectPath().append(newName), new SubProgressMonitor(pm, 1));
+		} finally {
 			pm.done();
 		}
 	}
 
-	protected abstract void doPerform(IPath destinationPath, IProgressMonitor pm) throws JavaModelException;
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getUndoChange()
-	 */
-	public IChange getUndoChange() {
-		return new NullChange();
-	}
+	protected abstract Change doPerformReorg(IPath destinationPath, IProgressMonitor pm) throws JavaModelException;
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return getRoot();
 	}
 	
 	protected IPackageFragmentRoot getRoot(){
 		return (IPackageFragmentRoot)JavaCore.create(fRootHandle);
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#isUndoable()
-	 */
-	public boolean isUndoable() {
-		return false;
 	}
 	
 	protected IPath getDestinationProjectPath(){

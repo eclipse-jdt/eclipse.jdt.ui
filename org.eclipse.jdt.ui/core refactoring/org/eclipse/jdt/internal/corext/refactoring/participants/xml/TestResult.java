@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.corext.Assert;
  * by the three values <code>FALSE</code>, <code>TRUE</code>
  * and <code>NOT_LOADED</code>.
  * 
- * TODO some mathematical background.
+ * @since 3.0
  */
 public class TestResult {
 	

@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -508,7 +508,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	// --- changes
 	
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 3); //$NON-NLS-1$
 			final ValidationStateChange result= new ValidationStateChange();
@@ -534,7 +534,7 @@ public class NLSRefactoring extends Refactoring {
 
 	//---- modified source files
 			
-	private IChange createSourceModification() throws CoreException{
+	private Change createSourceModification() throws CoreException{
 		String message= NLSMessages.getFormattedString("NLSRefactoring.externalize_strings", //$NON-NLS-1$
 							fCu.getElementName());
 		TextChange change= new CompilationUnitChange(message, fCu); 
@@ -631,7 +631,7 @@ public class NLSRefactoring extends Refactoring {
 
 	//---- resource bundle file
 	
-	private IChange createPropertyFile() throws JavaModelException{
+	private Change createPropertyFile() throws JavaModelException{
 		if (! propertyFileExists())
 			return new CreateTextFileChange(getPropertyFilePath(), createPropertyFileSource(), "8859_1", "txt"); //$NON-NLS-1$ //$NON-NLS-2$
 			
@@ -786,7 +786,7 @@ public class NLSRefactoring extends Refactoring {
 		return fAccessorClassName + ".java"; //$NON-NLS-1$
 	}
 	
-	private IChange createAccessorCU(IProgressMonitor pm) throws CoreException {
+	private Change createAccessorCU(IProgressMonitor pm) throws CoreException {
 		return new CreateTextFileChange(getAccessorCUPath(), createAccessorCUSource(pm), "java");	 //$NON-NLS-1$
 	} 
 		

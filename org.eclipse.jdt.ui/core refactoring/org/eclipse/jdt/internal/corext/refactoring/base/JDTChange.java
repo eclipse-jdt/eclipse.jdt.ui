@@ -1,0 +1,100 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.corext.refactoring.base;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+/**
+ * JDT specific change object.
+ */  
+public abstract class JDTChange extends Change {
+	
+	private long fModificationStamp= IResource.NULL_STAMP;
+
+	public void initializeValidationData(IProgressMonitor pm) throws CoreException {
+		IResource resource= getResource(getModifiedElement());
+		if (resource != null) {
+			fModificationStamp= resource.getModificationStamp();
+		}
+	}
+
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", 1); //$NON-NLS-1$
+		RefactoringStatus result= new RefactoringStatus();
+		IResource resource= getResource(getModifiedElement());
+		if (resource != null) {
+			pm.subTask(RefactoringCoreMessages.getFormattedString("Change.checking_for", resource.getName())); //$NON-NLS-1$
+			if (resource.getModificationStamp() != fModificationStamp) {
+				result.addFatalError(RefactoringCoreMessages.getFormattedString(
+					"JDTChange.error.resource_changed",  //$NON-NLS-1$
+					resource.getFullPath().toString()));
+			} else {
+				checkIfModifiable(result, resource);
+			}
+		}
+		pm.worked(1);
+		return result;
+	}
+	
+	/* (Non-Javadoc)
+	 * debugging only
+	 */	
+	public String toString(){
+		return getName();
+	}
+	
+	protected static void checkIfModifiable(RefactoringStatus status, Object element) {
+		IResource resource= getResource(element);
+		if (resource != null)
+			checkIfModifiable(status, resource);
+	}
+	
+	protected static void checkIfModifiable(RefactoringStatus status, IResource resource) {
+		if (resource.isReadOnly()) {
+			status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_read_only", resource.getFullPath().toString())); //$NON-NLS-1$
+		}
+		if (resource instanceof IFile) {
+			IFile file= (IFile)resource;
+			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+			ITextFileBuffer buffer= manager.getTextFileBuffer(file.getFullPath());
+			if (buffer != null && buffer.isDirty()) {
+				status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_unsaved", file.getFullPath().toString())); //$NON-NLS-1$
+			}
+		}
+	}
+
+	private static IResource getResource(Object element) {
+		if (element instanceof IResource) {
+			return (IResource)element;
+		} 
+		if (element instanceof ICompilationUnit) {
+			return JavaModelUtil.toOriginal((ICompilationUnit)element).getResource();
+		}
+		if (element instanceof IAdaptable) {
+			return (IResource) ((IAdaptable)element).getAdapter(IResource.class);
+		}
+		return null;
+	}	
+}

@@ -932,7 +932,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);
 			
 			assertTrue("source file does not exist before moving", cu1.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("source file exists after moving", ! cu1.exists());
 			ICompilationUnit newCu= otherPackage.getCompilationUnit(cu1.getElementName());
@@ -958,7 +958,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);			
 			
 			assertTrue("source file does not exist before moving", cu1.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("source file exists after moving", ! cu1.exists());
 			newCu= getRoot().getPackageFragment("").getCompilationUnit(cu1.getElementName());
@@ -985,7 +985,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);			
 
 			assertTrue("source file does not exist before moving", cu1.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("source file exists after moving", ! cu1.exists());
 			newFile= MySetup.getProject().getProject().getFile(cu1.getElementName());
@@ -1013,7 +1013,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);
 
 			assertTrue("source file does not exist before moving", cu1.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("source file exists after moving", ! cu1.exists());
 			newFile= simpleProject.getFile(cu1.getElementName());
@@ -1042,7 +1042,7 @@ public class MoveTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before", cu1.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file not moved", ! cu1.exists());
@@ -1079,7 +1079,7 @@ public class MoveTest extends RefactoringTest {
 			assertTrue("source file does not exist before", cu1.exists());
 			String expectedSource= cu1.getSource();
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file not moved", ! cu1.exists());
@@ -1114,7 +1114,7 @@ public class MoveTest extends RefactoringTest {
 
 			assertTrue("source file does not exist before", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file not moved", ! file.exists());
@@ -1145,7 +1145,7 @@ public class MoveTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file not moved", ! file.exists());
@@ -1175,7 +1175,7 @@ public class MoveTest extends RefactoringTest {
 
 			assertTrue("source file does not exist before", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file not moved", ! file.exists());
@@ -1205,7 +1205,7 @@ public class MoveTest extends RefactoringTest {
 
 			assertTrue("source file does not exist before", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file not moved", ! file.exists());
@@ -1235,7 +1235,7 @@ public class MoveTest extends RefactoringTest {
 
 			assertTrue("source file does not exist before", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file not moved", ! file.exists());
@@ -1284,7 +1284,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);
 			
 			assertTrue("folder does not exist before", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("folder not moved", ! folder.exists());
 			newFolder= otherFolder.getFolder(folder.getName());
@@ -1329,7 +1329,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);						
 			
 			assertTrue("folder does not exist before", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("folder not moved", ! folder.exists());
 			newPackage= getRoot().getPackageFragment(folder.getName());
@@ -1355,7 +1355,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);						
 
 			assertTrue("folder does not exist before", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("folder not moved", ! folder.exists());
 			newPackage= getRoot().getPackageFragment(getPackageP().getElementName() + "." + folder.getName());
@@ -1387,7 +1387,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);						
 			
 			assertTrue("folder does not exist before", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("folder not moved", ! folder.exists());
 			newFolder= otherFolder.getFolder(folder.getName());
@@ -1416,7 +1416,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);						
 
 			assertTrue("folder does not exist before", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("folder not moved", ! folder.exists());
 			newPackage= getRoot().getPackageFragment(getPackageP().getElementName() + "." + folder.getName());
@@ -1448,7 +1448,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);
 			
 			assertTrue("folder does not exist before", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("folder not moved", ! folder.exists());
 			newFolder= simpleProject.getFolder(folder.getName());
@@ -1474,7 +1474,7 @@ public class MoveTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);
 
 			assertTrue("folder does not exist before", oldRoot.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("folder not moved", ! oldRoot.exists());
 			newRoot= getSourceFolder(otherJavaProject, oldRoot.getElementName());
@@ -1513,7 +1513,7 @@ public class MoveTest extends RefactoringTest {
 			IType otherType= cu.getType("B");
 			Object destination= otherType;
 			verifyValidDestination(ref, destination);
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 
 			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
@@ -1536,7 +1536,7 @@ public class MoveTest extends RefactoringTest {
 			IType otherType= cu.getType("B");
 			Object destination= otherType;
 			verifyValidDestination(ref, destination);
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));
@@ -1559,7 +1559,7 @@ public class MoveTest extends RefactoringTest {
 			IType otherType= cu.getType("B");
 			Object destination= otherType;
 			verifyValidDestination(ref, destination);
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			String expected= getFileContents(getOutputTestFileName(removeExtension(cu.getElementName())));

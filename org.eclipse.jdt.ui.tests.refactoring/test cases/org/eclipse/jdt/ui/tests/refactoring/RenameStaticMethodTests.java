@@ -14,16 +14,16 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 public class RenameStaticMethodTests extends RefactoringTest {
 	private static final Class clazz= RenameStaticMethodTests.class;
@@ -74,14 +74,14 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 			//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 			
-			Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+			Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
 			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 	
 			assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
 			assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 			//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 			
-			Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+			Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
 			assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		} finally{
 			performDummySearch();

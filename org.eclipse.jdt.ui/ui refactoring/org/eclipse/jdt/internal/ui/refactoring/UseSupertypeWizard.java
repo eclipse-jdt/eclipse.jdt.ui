@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.jdt.core.IType;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -30,14 +32,11 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
 
 public class UseSupertypeWizard extends RefactoringWizard{
 
@@ -133,9 +132,9 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 		private void updateUpdateLabels() {
 			IType selectedType= getSelectedSupertype();
-			IChange change= getRefactoringWizard().getChange();
-			if (change instanceof ICompositeChange){
-				fFileCount.put(selectedType, new Integer(((ICompositeChange)change).getChildren().length));
+			Change change= getRefactoringWizard().getChange();
+			if (change instanceof CompositeChange){
+				fFileCount.put(selectedType, new Integer(((CompositeChange)change).getChildren().length));
 			}
 			fTableViewer.refresh();
 			if (noSupertypeCanBeUsed()){
@@ -170,7 +169,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			boolean superFinish= super.performFinish();
 			if (! superFinish)
 				return false;
-			IChange c= getRefactoringWizard().getChange();
+			Change c= getRefactoringWizard().getChange();
 			if (c instanceof CompositeChange && ((CompositeChange)c).getChildren().length == 0) {
 				updateUpdateLabels();
 				return false;

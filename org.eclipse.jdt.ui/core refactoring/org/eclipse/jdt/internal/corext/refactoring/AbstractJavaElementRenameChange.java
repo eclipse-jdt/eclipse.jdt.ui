@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,11 +27,10 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
-public abstract class AbstractJavaElementRenameChange extends Change {
+public abstract class AbstractJavaElementRenameChange extends JDTChange {
 
 	private String fNewName;
 
@@ -39,8 +38,6 @@ public abstract class AbstractJavaElementRenameChange extends Change {
 
 	private IPath fResourcePath;
 
-	private IChange fUndoChange;
-	
 	protected AbstractJavaElementRenameChange(IPath resourcePath, String oldName, String newName) {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		Assert.isNotNull(oldName, "old name"); //$NON-NLS-1$
@@ -57,27 +54,20 @@ public abstract class AbstractJavaElementRenameChange extends Change {
 	/**
 	 * May be <code>null</code>.
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return JavaCore.create(getResource());
 	}
 
-	public final IChange getUndoChange() {
-		return fUndoChange;
-	}
-
-	protected abstract IChange createUndoChange() throws JavaModelException;
+	protected abstract Change createUndoChange() throws JavaModelException;
 
 	protected abstract void doRename(IProgressMonitor pm) throws CoreException;
 
-	public final void perform(ChangeContext context, IProgressMonitor pm) throws CoreException {
+	public final Change perform(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("AbstractRenameChange.Renaming"), 1); //$NON-NLS-1$
-			if (isActive()) {
-				fUndoChange= createUndoChange();
-				doRename(new SubProgressMonitor(pm, 1));
-			} else {
-				fUndoChange= new NullChange();
-			}
+			Change result= createUndoChange();
+			doRename(new SubProgressMonitor(pm, 1));
+			return result;
 		} finally {
 			pm.done();
 		}
@@ -110,7 +100,7 @@ public abstract class AbstractJavaElementRenameChange extends Change {
 		return fOldName;
 	}
 
-	protected static RefactoringStatus checkIfModifiable(IPackageFragmentRoot root, ChangeContext context, IProgressMonitor pm) {
+	protected static RefactoringStatus checkIfModifiable(IPackageFragmentRoot root, IProgressMonitor pm) throws CoreException {
 		if (root == null)
 			return null;
 
@@ -125,24 +115,19 @@ public abstract class AbstractJavaElementRenameChange extends Change {
 
 		RefactoringStatus result= new RefactoringStatus();
 
-		try {
-			IJavaElement[] packs= root.getChildren();
-			if (packs == null || packs.length == 0)
-				return null;
+		IJavaElement[] packs= root.getChildren();
+		if (packs == null || packs.length == 0)
+			return null;
 
-			pm.beginTask("", packs.length); //$NON-NLS-1$
-			for (int i= 0; i < packs.length; i++) {
-				result.merge(checkIfModifiable((IPackageFragment)packs[i], context, new SubProgressMonitor(pm, 1)));
-			}
-			pm.done();
-		} catch (JavaModelException e) {
-			handleJavaModelException(e, result);
+		pm.beginTask("", packs.length); //$NON-NLS-1$
+		for (int i= 0; i < packs.length; i++) {
+			result.merge(checkIfModifiable((IPackageFragment)packs[i], new SubProgressMonitor(pm, 1)));
 		}
+		pm.done();
 		return result;
 	}
 
-	protected static RefactoringStatus checkIfModifiable(IPackageFragment pack, ChangeContext context, IProgressMonitor pm)
-		throws JavaModelException {
+	protected static RefactoringStatus checkIfModifiable(IPackageFragment pack, IProgressMonitor pm) throws CoreException {
 		ICompilationUnit[] units= pack.getCompilationUnits();
 		if (units == null || units.length == 0)
 			return null;
@@ -151,9 +136,10 @@ public abstract class AbstractJavaElementRenameChange extends Change {
 
 		pm.beginTask("", units.length); //$NON-NLS-1$
 		for (int i= 0; i < units.length; i++) {
-			pm.subTask(RefactoringCoreMessages.getString("AbstractJavaElementRenameChange.checking_change")
-				+ pack.getElementName()); //$NON-NLS-1$
-			checkIfModifiable(units[i], result, context);
+			pm.subTask(
+				RefactoringCoreMessages.getString("AbstractJavaElementRenameChange.checking_change")  //$NON-NLS-1$
+				+ pack.getElementName());
+			checkIfModifiable(result, units[i]);
 			pm.worked(1);
 		}
 		pm.done();

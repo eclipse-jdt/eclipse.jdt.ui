@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -19,8 +21,10 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
@@ -29,9 +33,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog2;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 /**
  * A helper class to activate the UI of a refactoring
@@ -63,7 +64,7 @@ public class RefactoringStarter {
 		try {
 			CheckConditionsOperation cco= new CheckConditionsOperation(refactoring, CheckConditionsOperation.ACTIVATION);
 			IRunnableContext context= new BusyIndicatorRunnableContext();
-			context.run(false, false, cco);
+			context.run(false, false, new WorkbenchRunnableAdapter(cco));
 			return cco.getStatus();
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, "Error", RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));//$NON-NLS-1$ //$NON-NLS-2$

@@ -33,5 +33,5 @@ public interface IChangeExceptionHandler {
 	 * @param exception the exception cought during executing the change
 	 * @exception ChangeAbortException if the change is to be aborted
 	 */
-	public void handle(ChangeContext context, IChange change, Exception exception) throws ChangeAbortException;	
+	public void handle(ChangeContext context, Change change, Exception exception) throws ChangeAbortException;	
 }

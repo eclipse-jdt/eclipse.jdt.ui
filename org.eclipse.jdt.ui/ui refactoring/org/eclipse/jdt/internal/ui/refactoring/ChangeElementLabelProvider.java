@@ -22,13 +22,14 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 class ChangeElementLabelProvider extends LabelProvider {
 
@@ -64,7 +65,7 @@ class ChangeElementLabelProvider extends LabelProvider {
 	
 	public String getText(Object object) {
 		if (object instanceof DefaultChangeElement) {
-			IChange change= ((DefaultChangeElement)object).getChange();
+			Change change= ((DefaultChangeElement)object).getChange();
 			if (!fShowQualification)
 				return change.getName();
 			
@@ -107,7 +108,7 @@ class ChangeElementLabelProvider extends LabelProvider {
 		if (descriptor == null) {
 			if (element instanceof TextEditChangeElement) {
 				descriptor= JavaPluginImages.DESC_OBJS_TEXT_EDIT;
-			} else if (element instanceof ICompositeChange) {
+			} else if (element instanceof CompositeChange) {
 				descriptor= JavaPluginImages.DESC_OBJS_COMPOSITE_CHANGE;	
 			} else if (element instanceof CompilationUnitChange) {
 				descriptor= JavaPluginImages.DESC_OBJS_CU_CHANGE;

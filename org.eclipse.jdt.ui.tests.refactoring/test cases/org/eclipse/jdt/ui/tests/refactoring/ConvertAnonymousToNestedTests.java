@@ -111,7 +111,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 			preconditionResult= null;
 		assertEquals("precondition was supposed to pass", null, preconditionResult);
 		
-		performChange(ref.createChange(new NullProgressMonitor()));
+		performChange(ref);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);

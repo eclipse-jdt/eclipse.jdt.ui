@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 public class InstanceofExpression extends Expression {
@@ -26,7 +25,7 @@ public class InstanceofExpression extends Expression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public TestResult evaluate(IVariablePool pool) throws CoreException {
+	public TestResult evaluate(IVariablePool pool) {
 		Object element= pool.getDefaultVariable();
 		return TestResult.valueOf(isInstanceOf(element, fValue));
 	}

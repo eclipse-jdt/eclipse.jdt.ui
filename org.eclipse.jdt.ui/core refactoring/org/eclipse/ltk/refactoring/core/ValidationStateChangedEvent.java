@@ -12,7 +12,7 @@ package org.eclipse.ltk.refactoring.core;
 
 import java.util.EventObject;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 
 
 /**
@@ -31,7 +31,7 @@ public class ValidationStateChangedEvent extends EventObject {
 	 *  
 	 * @param source the change which validation state changed
 	 */
-	public ValidationStateChangedEvent(IChange source) {
+	public ValidationStateChangedEvent(Change source) {
 		super(source);
 	}
 	
@@ -40,8 +40,8 @@ public class ValidationStateChangedEvent extends EventObject {
 	 * 
 	 * @return the change that triggered this event
 	 */
-	public IChange getChange() {
-		return (IChange)getSource();
+	public Change getChange() {
+		return (Change)getSource();
 	}
 
 }

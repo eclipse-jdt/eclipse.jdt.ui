@@ -193,7 +193,7 @@ public class ResourceModifications implements IResourceModifications {
 			result.addAll(Arrays.asList(moves));
 		}
 		if (fCopy != null) {
-			ICopyParticipant[] copies= CopyExtensionManager.getParticipants(processor, fMove.toArray());
+			ICopyParticipant[] copies= CopyExtensionManager.getParticipants(processor, fCopy.toArray());
 			for (int i= 0; i < copies.length; i++) {
 				copies[i].setTarget(fCopyTarget);
 			}

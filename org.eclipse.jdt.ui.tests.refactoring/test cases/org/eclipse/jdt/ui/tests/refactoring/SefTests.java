@@ -13,7 +13,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 
@@ -25,12 +24,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 public class SefTests extends AbstractSelectionTestCase {
 
@@ -58,7 +53,6 @@ public class SefTests extends AbstractSelectionTestCase {
 	}	
 	
 	protected void performTest(IPackageFragment packageFragment, String id, String outputFolder, String fieldName) throws Exception {
-		IProgressMonitor pm= new NullProgressMonitor();
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IField field= getField(unit, fieldName);
 		assertNotNull(field);
@@ -70,18 +64,7 @@ public class SefTests extends AbstractSelectionTestCase {
 		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
 		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
-		RefactoringStatus status= refactoring.checkPreconditions(pm);
-		assertTrue(!status.hasFatalError());
-		IChange change= refactoring.createChange(pm);
-		assertNotNull(change);
-		ChangeContext context= new ChangeContext(new TestExceptionHandler());
-		change.aboutToPerform(context, new NullProgressMonitor());
-		change.perform(context, pm);
-		change.performed();
-		assertNotNull(change.getUndoChange());
-		String source= unit.getSource();
-		String out= getProofedContent(outputFolder, id);
-		compareSource(source, out);
+		performTest(unit, refactoring, COMPARE_WITH_OUTPUT, getProofedContent(outputFolder, id), true);
 	}
 	
 	protected void performInvalidTest(IPackageFragment packageFragment, String id, String fieldName) throws Exception {

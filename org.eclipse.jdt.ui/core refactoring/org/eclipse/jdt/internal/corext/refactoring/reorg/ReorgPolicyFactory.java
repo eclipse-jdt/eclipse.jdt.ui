@@ -71,9 +71,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyCompilationUnitChange;
@@ -99,6 +98,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.ltk.refactoring.core.NullChange;
 
 class ReorgPolicyFactory {
 	private ReorgPolicyFactory(){
@@ -516,7 +516,8 @@ class ReorgPolicyFactory {
 			TextChange textChange= new CompilationUnitChange(cu.getElementName(), cu);
 			if (textChange instanceof TextFileChange){
 				TextFileChange tfc= (TextFileChange)textChange;
-				tfc.setSave(! cu.isWorkingCopy());
+				if (cu.isWorkingCopy()) 
+					tfc.setSaveMode(TextFileChange.LEAVE_DIRTY);
 			}
 			String message= RefactoringCoreMessages.getString("ReorgPolicyFactory.copy"); //$NON-NLS-1$
 			TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
@@ -877,7 +878,7 @@ class ReorgPolicyFactory {
 			super(javaElements);
 		}
 			
-		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException {
+		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException {
 			try {					
 				CompilationUnit sourceCuNode= createSourceCuNode();
 				ICompilationUnit destinationCu= getDestinationCu();
@@ -925,7 +926,7 @@ class ReorgPolicyFactory {
 			super(files, folders, cus);
 		}
 				
-		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
+		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			IFile[] file= getFiles();
 			IFolder[] folders= getFolders();
 			ICompilationUnit[] cus= getCus();
@@ -948,7 +949,7 @@ class ReorgPolicyFactory {
 			return composite;
 		}
 
-		private IChange createChange(ICompilationUnit unit, NewNameProposer nameProposer, INewNameQueries copyQueries) {
+		private Change createChange(ICompilationUnit unit, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			IPackageFragment pack= getDestinationAsPackageFragment();
 			if (pack != null)
 				return copyCuToPackage(unit, pack, nameProposer, copyQueries);
@@ -956,17 +957,17 @@ class ReorgPolicyFactory {
 			return copyFileToContainer(unit, container, nameProposer, copyQueries);
 		}
 	
-		private static IChange copyFileToContainer(ICompilationUnit cu, IContainer dest, NewNameProposer nameProposer, INewNameQueries copyQueries) {
+		private static Change copyFileToContainer(ICompilationUnit cu, IContainer dest, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			IResource resource= ReorgUtils.getResource(cu);
 			return createCopyResourceChange(resource, nameProposer, copyQueries, dest);
 		}
 
-		private IChange createChange(IResource resource, NewNameProposer nameProposer, INewNameQueries copyQueries) {
+		private Change createChange(IResource resource, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			IContainer dest= getDestinationAsContainer();
 			return createCopyResourceChange(resource, nameProposer, copyQueries, dest);
 		}
 			
-		private static IChange createCopyResourceChange(IResource resource, NewNameProposer nameProposer, INewNameQueries copyQueries, IContainer destination) {
+		private static Change createCopyResourceChange(IResource resource, NewNameProposer nameProposer, INewNameQueries copyQueries, IContainer destination) {
 			if (resource == null || destination == null)
 				return new NullChange();
 			INewNameQuery nameQuery;
@@ -978,7 +979,7 @@ class ReorgPolicyFactory {
 			return new CopyResourceChange(resource, destination, nameQuery);
 		}
 
-		private static IChange copyCuToPackage(ICompilationUnit cu, IPackageFragment dest, NewNameProposer nameProposer, INewNameQueries copyQueries) {
+		private static Change copyCuToPackage(ICompilationUnit cu, IPackageFragment dest, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			//XXX workaround for bug 31998 we will have to disable renaming of linked packages (and cus)
 			IResource res= ReorgUtils.getResource(cu);
 			if (res != null && res.isLinked()){
@@ -987,7 +988,7 @@ class ReorgPolicyFactory {
 			}
 		
 			String newName= nameProposer.createNewName(cu, dest);
-			IChange simpleCopy= new CopyCompilationUnitChange(cu, dest, copyQueries.createStaticQuery(newName));
+			Change simpleCopy= new CopyCompilationUnitChange(cu, dest, copyQueries.createStaticQuery(newName));
 			if (newName == null || newName.equals(cu.getElementName()))
 				return simpleCopy;
 		
@@ -1005,7 +1006,7 @@ class ReorgPolicyFactory {
 			super(roots);
 		}
 		
-		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
+		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			pm.beginTask("", roots.length); //$NON-NLS-1$
@@ -1020,7 +1021,7 @@ class ReorgPolicyFactory {
 			return composite;
 		}
 		
-		private IChange createChange(IPackageFragmentRoot root, IJavaProject destination, NewNameProposer nameProposer, INewNameQueries copyQueries) {
+		private Change createChange(IPackageFragmentRoot root, IJavaProject destination, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			IResource res= root.getResource();
 			IProject destinationProject= destination.getProject();
 			String newName= nameProposer.createNewName(res, destinationProject);
@@ -1040,7 +1041,7 @@ class ReorgPolicyFactory {
 			super(packageFragments);
 		}
 
-		public IChange createChange(IProgressMonitor pm, INewNameQueries newNameQueries) throws JavaModelException {
+		public Change createChange(IProgressMonitor pm, INewNameQueries newNameQueries) throws JavaModelException {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragment[] fragments= getPackages();
 			pm.beginTask("", fragments.length); //$NON-NLS-1$
@@ -1054,7 +1055,7 @@ class ReorgPolicyFactory {
 			return composite;
 		}
 
-		private IChange createChange(IPackageFragment pack, IPackageFragmentRoot destination, NewNameProposer nameProposer, INewNameQueries copyQueries) throws JavaModelException {
+		private Change createChange(IPackageFragment pack, IPackageFragmentRoot destination, NewNameProposer nameProposer, INewNameQueries copyQueries) throws JavaModelException {
 			String newName= nameProposer.createNewName(pack, destination);
 			if (newName == null || JavaConventions.validatePackageName(newName).getSeverity() < IStatus.ERROR){
 				INewNameQuery nameQuery;
@@ -1084,7 +1085,7 @@ class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.noCopying")); //$NON-NLS-1$
 		}
-		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
+		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			return new NullChange();
 		}
 		public IResource[] getResources() {
@@ -1183,7 +1184,7 @@ class ReorgPolicyFactory {
 		MovePackageFragmentRootsPolicy(IPackageFragmentRoot[] roots){
 			super(roots);
 		}
-		public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			pm.beginTask("", roots.length); //$NON-NLS-1$
 			CompositeChange composite= new CompositeChange();
@@ -1197,7 +1198,7 @@ class ReorgPolicyFactory {
 			return composite;
 		}
 
-		private IChange createChange(IPackageFragmentRoot root, IJavaProject destination) {
+		private Change createChange(IPackageFragmentRoot root, IJavaProject destination) {
 			///XXX fix the query
 			return new MovePackageFragmentRootChange(root, destination.getProject(), null);
 		}
@@ -1270,7 +1271,7 @@ class ReorgPolicyFactory {
 			return false;
 		}
 
-		public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			IPackageFragment[] fragments= getPackages();
 			pm.beginTask("", fragments.length); //$NON-NLS-1$
 			CompositeChange result= new CompositeChange();
@@ -1283,7 +1284,7 @@ class ReorgPolicyFactory {
 			return result;
 		}
 
-		private IChange createChange(IPackageFragment pack, IPackageFragmentRoot destination) {
+		private Change createChange(IPackageFragment pack, IPackageFragmentRoot destination) {
 			return new MovePackageChange(pack, destination);
 		}
 		
@@ -1363,7 +1364,7 @@ class ReorgPolicyFactory {
 			return new ParentChecker(getResources(), getJavaElements()).getCommonParent();
 		}
 
-		public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			if (! fUpdateReferences){
 				if (fUpdateQualifiedNames)
 					return createMoveAndUpdateQualifiedNameChange(pm);
@@ -1372,7 +1373,7 @@ class ReorgPolicyFactory {
 				return createReferenceUpdatingMoveChange(pm);
 		}
 
-		private IChange createReferenceUpdatingMoveChange(IProgressMonitor pm) throws JavaModelException {
+		private Change createReferenceUpdatingMoveChange(IProgressMonitor pm) throws JavaModelException {
 			pm.beginTask("", 2 + (fUpdateQualifiedNames ? 1 : 0)); //$NON-NLS-1$
 			try{
 				CompositeChange composite= new CompositeChange();
@@ -1393,7 +1394,7 @@ class ReorgPolicyFactory {
 					composite.addAll(fQualifiedNameSearchResult.getAllChanges());
 				}
 							
-				IChange fileMove= createSimpleMoveChange(new SubProgressMonitor(pm, 1));
+				Change fileMove= createSimpleMoveChange(new SubProgressMonitor(pm, 1));
 				if (fileMove instanceof CompositeChange) {
 					composite.merge(((CompositeChange)fileMove));		
 				} else{
@@ -1422,12 +1423,13 @@ class ReorgPolicyFactory {
 			}		
 		}
 
-		private IChange createMoveAndUpdateQualifiedNameChange(IProgressMonitor pm) throws JavaModelException {
+		private Change createMoveAndUpdateQualifiedNameChange(IProgressMonitor pm) throws JavaModelException {
 			pm.beginTask("", 2); //$NON-NLS-1$
-			IChange simpleCopyChange= createSimpleMoveChange(new SubProgressMonitor(pm, 1));
-			CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), 2) { //$NON-NLS-1$
-				public boolean isUndoable(){
-					return false; 
+			Change simpleCopyChange= createSimpleMoveChange(new SubProgressMonitor(pm, 1));
+			CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements")) { //$NON-NLS-1$
+				public Change perform(IProgressMonitor pm) throws CoreException {
+					super.perform(pm);
+					return null;
 				}
 			};
 			if (simpleCopyChange instanceof CompositeChange) {
@@ -1440,7 +1442,7 @@ class ReorgPolicyFactory {
 			return result;
 		}
 
-		private IChange createSimpleMoveChange(IProgressMonitor pm) throws JavaModelException {
+		private Change createSimpleMoveChange(IProgressMonitor pm) throws JavaModelException {
 			CompositeChange result= new CompositeChange();
 			IFile[] files= getFiles();
 			IFolder[] folders= getFolders();
@@ -1462,7 +1464,7 @@ class ReorgPolicyFactory {
 			return result;
 		}
 
-		private IChange createChange(ICompilationUnit cu) throws JavaModelException{
+		private Change createChange(ICompilationUnit cu) throws JavaModelException{
 			IPackageFragment pack= getDestinationAsPackageFragment();
 			if (pack != null)
 				return moveCuToPackage(cu, pack);
@@ -1472,7 +1474,7 @@ class ReorgPolicyFactory {
 			return moveFileToContainer(cu, container);
 		}
 
-		private static IChange moveCuToPackage(ICompilationUnit cu, IPackageFragment dest) {
+		private static Change moveCuToPackage(ICompilationUnit cu, IPackageFragment dest) {
 			//XXX workaround for bug 31998 we will have to disable renaming of linked packages (and cus)
 			IResource resource= ResourceUtil.getResource(cu);
 			if (resource != null && resource.isLinked()){
@@ -1482,11 +1484,11 @@ class ReorgPolicyFactory {
 			return new MoveCompilationUnitChange(cu, dest);
 		}
 
-		private static IChange moveFileToContainer(ICompilationUnit cu, IContainer dest) {
+		private static Change moveFileToContainer(ICompilationUnit cu, IContainer dest) {
 			return new MoveResourceChange(ResourceUtil.getResource(cu), dest);
 		}
 
-		private IChange createChange(IResource res) throws JavaModelException{
+		private Change createChange(IResource res) throws JavaModelException{
 			IContainer destinationAsContainer= getDestinationAsContainer();
 			if (destinationAsContainer == null)
 				return new NullChange();
@@ -1615,7 +1617,7 @@ class ReorgPolicyFactory {
 			return AST.parseCompilationUnit(getSourceCu(), false);
 		}
 
-		public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			try {
 				CompilationUnit sourceCuNode= createSourceCuNode();
 				ICompilationUnit destinationCu= getDestinationCu();
@@ -1627,7 +1629,7 @@ class ReorgPolicyFactory {
 				}
 				ASTRewrite sourceRewrite= getSourceCu().equals(destinationCu) ? targetRewrite: new ASTRewrite(sourceCuNode);
 				ASTNodeDeleteUtil.markAsDeleted(javaElements, sourceCuNode, sourceRewrite);
-				IChange targetCuChange= addTextEditFromRewrite(destinationCu, targetRewrite);
+				Change targetCuChange= addTextEditFromRewrite(destinationCu, targetRewrite);
 				if (getSourceCu().equals(destinationCu)){
 					return targetCuChange;
 				} else{
@@ -1662,7 +1664,7 @@ class ReorgPolicyFactory {
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.noMoving")); //$NON-NLS-1$
 		}
-		public IChange createChange(IProgressMonitor pm) {
+		public Change createChange(IProgressMonitor pm) {
 			return new NullChange();
 		}
 		public boolean canEnable() throws JavaModelException {

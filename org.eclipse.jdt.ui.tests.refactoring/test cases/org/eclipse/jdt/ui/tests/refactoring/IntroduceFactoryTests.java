@@ -179,7 +179,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		RefactoringStatus	checkInputResult= ref.checkInput(new NullProgressMonitor());
 
 		if (!checkInputResult.isOK()) {
-			performChange(ref.createChange(new NullProgressMonitor()));
+			performChange(ref);
 
 			String newSource = cu.getSource();
 
@@ -190,7 +190,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 			assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), false);
 		}
 
-		performChange(ref.createChange(new NullProgressMonitor()));
+		performChange(ref);
 
 		String newSource = cu.getSource();
 
@@ -258,7 +258,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 
-		performChange(ref.createChange(new NullProgressMonitor()));
+		performChange(ref);
 
 		String newSource = cu.getSource();
 
@@ -293,7 +293,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 
-		performChange(ref.createChange(new NullProgressMonitor()));
+		performChange(ref);
 
 		String	testName= getName();
 

@@ -15,9 +15,8 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.UndoManager;
+import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 
 public class UndoManagerTests extends RefactoringTest {
@@ -35,19 +34,29 @@ public class UndoManagerTests extends RefactoringTest {
 		checkState(0, undo, redo, undoCount, redoCount);
 	}
 	
+	protected IUndoManager getUndoManager() {
+		return Refactoring.getUndoManager();
+	}
+	
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		Refactoring.getUndoManager().flush();
+	}
+	
 	private void checkState(int iterationCount, boolean undo, boolean redo, int undoCount, int redoCount){
 		assertTrue(iterationCount + " undo", undo == Refactoring.getUndoManager().anythingToUndo());
 		assertTrue(iterationCount + " redo", redo == Refactoring.getUndoManager().anythingToRedo());
-		//assertEquals(iterationCount + "undo stack", undoCount, Refactoring.getUndoManager().getRefactoringLog().size());
-		//assertEquals(iterationCount + "redo stack", redoCount, Refactoring.getUndoManager().getRedoStack().size());
+		UndoManager manager= (UndoManager)Refactoring.getUndoManager();
+		assertTrue(iterationCount + "undo stack", manager.testHasNumberOfUndos(undoCount));
+		assertTrue(iterationCount + "redo stack", manager.testHasNumberOfRedos(redoCount));
 	}
 	
 	private void performUndo() throws Exception {
-		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
 	}
 	
 	private void performRedo() throws Exception {
-		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+		Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
 	}
 	
 	public void test0() throws Exception{

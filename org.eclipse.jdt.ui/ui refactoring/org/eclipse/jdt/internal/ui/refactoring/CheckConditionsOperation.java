@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -25,7 +24,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
  * Operation that, when run, check proceconditions of an <code>Refactoring</code> passed 
  * on creation.
  */
-public class CheckConditionsOperation implements IRunnableWithProgress {
+public class CheckConditionsOperation implements IWorkspaceRunnable {
 	private Refactoring fRefactoring;
 	private int fStyle;
 	private RefactoringStatus fStatus;
@@ -53,7 +52,7 @@ public class CheckConditionsOperation implements IRunnableWithProgress {
 	 * (Non-Javadoc)
 	 * Method defined int IRunnableWithProgress
 	 */
-	public void run(IProgressMonitor pm) throws InvocationTargetException {
+	public void run(IProgressMonitor pm) throws CoreException {
 		try {
 			fStatus= null;
 			if ((fStyle & PRECONDITIONS) == PRECONDITIONS)
@@ -62,8 +61,6 @@ public class CheckConditionsOperation implements IRunnableWithProgress {
 				fStatus= fRefactoring.checkActivation(pm);
 			else if ((fStyle & INPUT) == INPUT)
 				fStatus= fRefactoring.checkInput(pm);
-		} catch (CoreException e) {
-			throw new InvocationTargetException(e);
 		} finally {
 			pm.done();
 		}

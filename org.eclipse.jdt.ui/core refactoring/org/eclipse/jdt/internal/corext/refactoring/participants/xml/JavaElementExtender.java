@@ -12,13 +12,13 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -31,12 +31,16 @@ public class JavaElementExtender extends TypeExtender {
 	private static final String PROPERTY_IS_AVAILABLE= "isAvailable"; //$NON-NLS-1$
 	private static final String CAN_DELETE= "canDelete"; //$NON-NLS-1$
 	
-	public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
+	public Object invoke(Object receiver, String method, Object[] args) {
 		IJavaElement jElement= (IJavaElement)receiver;
-		if (PROPERTY_IS_AVAILABLE.equals(method)) {
-			return Boolean.valueOf(Checks.isAvailable(jElement));
-		} else if (CAN_DELETE.equals(method)) {
-			return Boolean.valueOf(canDelete(jElement));
+		try {
+			if (PROPERTY_IS_AVAILABLE.equals(method)) {
+				return Boolean.valueOf(Checks.isAvailable(jElement));
+			} else if (CAN_DELETE.equals(method)) {
+				return Boolean.valueOf(canDelete(jElement));
+			}
+		} catch (CoreException e) {
+			return Boolean.FALSE;
 		}
 		Assert.isTrue(false);
 		return null;
@@ -77,8 +81,8 @@ public class JavaElementExtender extends TypeExtender {
 	}
 	
 	private static boolean isWorkingCopyElement(IJavaElement element) {
-		if (element instanceof IWorkingCopy) 
-			return ((IWorkingCopy)element).isWorkingCopy();
+		if (element instanceof ICompilationUnit) 
+			return ((ICompilationUnit)element).isWorkingCopy();
 		if (ReorgUtils.isInsideCompilationUnit(element))
 			return ReorgUtils.getCompilationUnit(element).isWorkingCopy();
 		return false;

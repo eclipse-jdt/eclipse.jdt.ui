@@ -10,9 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -23,12 +22,16 @@ public class JavaMemberExtender extends TypeExtender {
 	private static final String PROPERTY_IS_STATIC= "isStatic"; //$NON-NLS-1$
 	private static final String PROPERTY_IS_PRIVATE= "isPrivate"; //$NON-NLS-1$
 	
-	public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
+	public Object invoke(Object receiver, String method, Object[] args) {
 		IMember member= (IMember)receiver;
-		if (PROPERTY_IS_STATIC.equals(method)) {
-			return Boolean.valueOf(JdtFlags.isStatic(member));
-		} else if (PROPERTY_IS_PRIVATE.equals(method)) {
-			return Boolean.valueOf(JdtFlags.isPrivate(member));
+		try {
+			if (PROPERTY_IS_STATIC.equals(method)) {
+				return Boolean.valueOf(JdtFlags.isStatic(member));
+			} else if (PROPERTY_IS_PRIVATE.equals(method)) {
+				return Boolean.valueOf(JdtFlags.isPrivate(member));
+			}
+		} catch (JavaModelException e) {
+			return Boolean.FALSE;
 		}
 		Assert.isTrue(false);
 		return null;

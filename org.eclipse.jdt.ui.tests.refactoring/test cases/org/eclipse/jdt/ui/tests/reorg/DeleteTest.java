@@ -93,7 +93,7 @@ public class DeleteTest extends RefactoringTest{
 		try {
 			DeleteRefactoring refactoring= createRefactoring(elems);
 			assertNotNull(refactoring);
-			RefactoringStatus status= performRefactoring(refactoring);
+			RefactoringStatus status= performRefactoring(refactoring, false);
 			assertEquals("precondition was supposed to pass", null, status);
 
 			newCuA= getPackageP().getCompilationUnit(CU_NAME + ".java");
@@ -542,7 +542,7 @@ public class DeleteTest extends RefactoringTest{
 		performDummySearch();			
 		
 		DeleteRefactoring ref= createRefactoring(elem);
-		RefactoringStatus status= performRefactoring(ref);
+		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("file not deleted", ! file.exists());
 	}
@@ -558,7 +558,7 @@ public class DeleteTest extends RefactoringTest{
 		performDummySearch();			
 
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref);
+		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("folder not deleted", ! subFolder.exists());
 	}
@@ -577,7 +577,7 @@ public class DeleteTest extends RefactoringTest{
 		performDummySearch();			
 
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref);
+		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("folder not deleted", ! subFolder.exists());
 		assertTrue("folder not deleted", ! subsubFolder.exists());
@@ -592,7 +592,7 @@ public class DeleteTest extends RefactoringTest{
 		performDummySearch();			
 		
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref);
+		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("package not deleted", ! newPackage.exists());
 	}
@@ -606,7 +606,7 @@ public class DeleteTest extends RefactoringTest{
 		performDummySearch();			
 		
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref);
+		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("cu not deleted", ! newCU.exists());
 	}
@@ -620,7 +620,7 @@ public class DeleteTest extends RefactoringTest{
 		performDummySearch();			
 
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref);
+		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("not deleted", ! fredRoot.exists());
 	}
@@ -635,7 +635,7 @@ public class DeleteTest extends RefactoringTest{
 		performDummySearch();			
 
 		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref);
+		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("not deleted", ! internalJAR.exists());		
 	}

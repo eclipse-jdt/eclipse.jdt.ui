@@ -22,11 +22,10 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.refactoring.core.NullChange;
 
 
 public class RenamePackageChange extends AbstractJavaElementRenameChange {
@@ -52,7 +51,7 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 	}
 
 	private IPackageFragment getPackage() {
-		return (IPackageFragment)getModifiedLanguageElement();
+		return (IPackageFragment)getModifiedElement();
 	}
 	
 	public String getName() {
@@ -62,7 +61,7 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 	/* non java-doc
 	 * @see AbstractRenameChange#createUndoChange()
 	 */
-	protected IChange createUndoChange() {
+	protected Change createUndoChange() {
 		if (getPackage() == null)
 			return new NullChange();
 		return new RenamePackageChange(createNewPath(), getNewName(), getOldName());
@@ -74,27 +73,22 @@ public class RenamePackageChange extends AbstractJavaElementRenameChange {
 			pack.rename(getNewName(), false, pm);
 	}
 
-	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
-		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
-		RefactoringStatus result= super.aboutToPerform(context, pm);
-		IJavaElement element= (IJavaElement)getModifiedLanguageElement();
-		if (element != null && element.exists() && context.getUnsavedFiles().length > 0 && element instanceof IPackageFragment) {
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
+		IJavaElement element= (IJavaElement)getModifiedElement();
+		if (element != null && element.exists() && element instanceof IPackageFragment) {
 			IPackageFragment pack= (IPackageFragment)element;
-			try {
-				ICompilationUnit[] units= pack.getCompilationUnits();
-				if (units == null || units.length == 0)
-					return result;
-					
-				pm.beginTask("", units.length); //$NON-NLS-1$
-				for (int i= 0; i < units.length; i++) {
-					pm.subTask(RefactoringCoreMessages.getFormattedString("RenamePackageChange.checking_change", element.getElementName())); //$NON-NLS-1$
-					checkIfModifiable(units[i], result, context);
-					pm.worked(1);
-				}
-				pm.done();
-			} catch (JavaModelException e) {
-				handleJavaModelException(e, result);
+			ICompilationUnit[] units= pack.getCompilationUnits();
+			if (units == null || units.length == 0)
+				return result;
+				
+			pm.beginTask("", units.length); //$NON-NLS-1$
+			for (int i= 0; i < units.length; i++) {
+				pm.subTask(RefactoringCoreMessages.getFormattedString("RenamePackageChange.checking_change", element.getElementName())); //$NON-NLS-1$
+				checkIfModifiable(result, units[i]);
+				pm.worked(1);
 			}
+			pm.done();
 		}
 		return result;
 	}

@@ -13,17 +13,17 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.refactoring.core.NullChange;
 
 /**
  * useful for tests
  */
 public class NullRefactoring extends Refactoring {
 	
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);
 		pm.worked(1);
 		pm.done();

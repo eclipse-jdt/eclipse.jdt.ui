@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginDescriptor;
@@ -26,16 +25,16 @@ public class AdaptExpression extends CompositeExpression {
 
 	private IPluginDescriptor fPluginDescriptor;
 	
-	public AdaptExpression(IConfigurationElement configElement) throws CoreException {
+	public AdaptExpression(IConfigurationElement configElement) throws ExpressionException {
 		fTypeName= configElement.getAttribute(ATT_TYPE);
-		checkAttribute(ATT_TYPE, fTypeName);
+		Expressions.checkAttribute(ATT_TYPE, fTypeName);
 		fPluginDescriptor= configElement.getDeclaringExtension().getDeclaringPluginDescriptor();
 	}
 	
 	/* (non-Javadoc)
 	 * @see Expression#evaluate(IVariablePool)
 	 */
-	public TestResult evaluate(IVariablePool pool) throws CoreException {
+	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
 		if (fTypeName == null)
 			return TestResult.FALSE;
 		Object var= pool.getDefaultVariable();

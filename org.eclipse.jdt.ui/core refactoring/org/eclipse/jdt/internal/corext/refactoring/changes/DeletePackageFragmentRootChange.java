@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -21,7 +22,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
@@ -48,7 +48,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return getRoot();
 	}
 	
@@ -59,7 +59,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.changes.AbstractDeleteChange#doDelete(org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected void doDelete(ChangeContext context, IProgressMonitor pm) throws CoreException {
+	protected void doDelete(IProgressMonitor pm) throws CoreException {
 		if (! confirmDeleteIfReferenced())
 			return;
 		int resourceUpdateFlags= IResource.KEEP_HISTORY;

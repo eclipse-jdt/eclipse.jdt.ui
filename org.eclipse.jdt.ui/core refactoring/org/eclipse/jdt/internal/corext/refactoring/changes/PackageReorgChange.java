@@ -18,14 +18,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
-abstract class PackageReorgChange extends Change {
+abstract class PackageReorgChange extends JDTChange {
 
 	private String fPackageHandle;
 	private String fDestinationHandle;
@@ -37,21 +34,16 @@ abstract class PackageReorgChange extends Change {
 		fNameQuery= nameQuery;
 	}
 	
-	abstract void doPerform(IProgressMonitor pm) throws JavaModelException;
+	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException;
 	
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public final void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+	public final Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 1);
-		try{
-			if (!isActive())
-				return;
-			doPerform(pm);
-		}catch (Exception e) {
-			handleException(context, e);
-			setActive(false);	
-		} finally{
+		try {
+			return doPerformReorg(pm);
+		} finally {
 			pm.done();
 		}
 	}
@@ -59,7 +51,7 @@ abstract class PackageReorgChange extends Change {
 	/* non java-doc
 	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return getPackage();
 	}
 	
@@ -75,14 +67,6 @@ abstract class PackageReorgChange extends Change {
 		if (fNameQuery == null)
 			return null;
 		return fNameQuery.getNewName();
-	}
-
-	public boolean isUndoable() {
-		return false;
-	}
-
-	public IChange getUndoChange() {
-		return new NullChange();
 	}
 }
 

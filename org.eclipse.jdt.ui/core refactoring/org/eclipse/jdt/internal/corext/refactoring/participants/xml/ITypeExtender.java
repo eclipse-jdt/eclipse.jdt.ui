@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 International Business Machines Corp. and others.
+ * Copyright (c) 2000, 2004 International Business Machines Corp. and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v0.5 
  * which accompanies this distribution, and is available at
@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
-
 /**
  * A type extender can be used to add additional methods to an 
  * existing type.
@@ -19,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
  * This interface is not intended to be implemented by clients. Clients
  * should subclass type <code>PropertyAdapter</code>.
  * </p>
+ * 
  * @since 3.0
  */
 /* package */ interface ITypeExtender {
@@ -46,5 +45,5 @@ import org.eclipse.core.runtime.CoreException;
 	 * @param args the method arguments
 	 * @return the method's result value
 	 */
-	public Object invoke(Object receiver, String method, Object[] args) throws CoreException;
+	public Object invoke(Object receiver, String method, Object[] args) throws ExpressionException;
 }

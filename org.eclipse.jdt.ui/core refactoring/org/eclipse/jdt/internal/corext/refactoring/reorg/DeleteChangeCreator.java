@@ -19,6 +19,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -40,9 +41,8 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFolderChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathChange;
@@ -54,17 +54,19 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.ltk.refactoring.core.NullChange;
 
 
 class DeleteChangeCreator {
 	private DeleteChangeCreator() {
 	}
 	
-	static IChange createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements) throws CoreException {
+	static Change createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements) throws CoreException {
 		final ValidationStateChange result= new ValidationStateChange() {
-			public boolean isUndoable() {
-				return false;
-			}	
+			public Change perform(IProgressMonitor pm) throws CoreException {
+				super.perform(pm);
+				return null;
+			}
 		};
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
@@ -88,7 +90,7 @@ class DeleteChangeCreator {
 		return result;
 	}
 	
-	private static IChange createDeleteChange(IResource resource) {
+	private static Change createDeleteChange(IResource resource) {
 		Assert.isTrue(! (resource instanceof IWorkspaceRoot));//cannot be done
 		Assert.isTrue(! (resource instanceof IProject)); //project deletion is handled by the workbench
 		if (resource instanceof IFile)
@@ -102,8 +104,8 @@ class DeleteChangeCreator {
 	/*
 	 * List<IJavaElement> javaElements 
 	 */
-	private static IChange createDeleteChange(ICompilationUnit cu, List javaElements, TextChangeManager manager) throws CoreException {
-		CompilationUnit cuNode= AST.parseCompilationUnit(cu, false);
+	private static Change createDeleteChange(ICompilationUnit cu, List javaElements, TextChangeManager manager) throws CoreException {
+		CompilationUnit cuNode= AST.parseCompilationUnit(cu, false, null, null);
 		ASTRewrite rewrite= new ASTRewrite(cuNode);
 		IJavaElement[] elements= (IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]);
 		ASTNodeDeleteUtil.markAsDeleted(elements, cuNode, rewrite);
@@ -118,7 +120,8 @@ class DeleteChangeCreator {
 		TextChange textChange= manager.get(cu);
 		if (textChange instanceof TextFileChange){
 			TextFileChange tfc= (TextFileChange)textChange;
-			tfc.setSave(! cu.isWorkingCopy());
+			if (cu.isWorkingCopy()) 
+				tfc.setSaveMode(TextFileChange.LEAVE_DIRTY);
 		}
 		String message= RefactoringCoreMessages.getString("DeleteChangeCreator.1"); //$NON-NLS-1$
 		TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
@@ -137,7 +140,7 @@ class DeleteChangeCreator {
 		return result;
 	}
 
-	private static IChange createDeleteChange(IJavaElement javaElement) throws JavaModelException {
+	private static Change createDeleteChange(IJavaElement javaElement) throws JavaModelException {
 		Assert.isTrue(! ReorgUtils.isInsideCompilationUnit(javaElement));
 		
 		switch(javaElement.getElementType()){
@@ -177,7 +180,7 @@ class DeleteChangeCreator {
 		}
 	}
 
-	private static IChange createSourceManipulationDeleteChange(ISourceManipulation element) {
+	private static Change createSourceManipulationDeleteChange(ISourceManipulation element) {
 		//XXX workaround for bug 31384, in case of linked ISourceManipulation delete the resource
 		if (element instanceof ICompilationUnit || element instanceof IPackageFragment){
 			IResource resource;
@@ -191,13 +194,13 @@ class DeleteChangeCreator {
 		return new DeleteSourceManipulationChange(element);
 	}
 	
-	private static IChange createPackageFragmentRootDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
+	private static Change createPackageFragmentRootDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
 		IResource resource= root.getResource();
 		if (resource != null && resource.isLinked()){
 			//XXX using this code is a workaround for jcore bug 31998
 			//jcore cannot handle linked stuff
 			//normally, we should always create DeletePackageFragmentRootChange
-			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("DeleteRefactoring.delete_package_fragment_root"), 2); //$NON-NLS-1$
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("DeleteRefactoring.delete_package_fragment_root")); //$NON-NLS-1$
 	
 			composite.add(new DeleteFromClasspathChange(root));
 			Assert.isTrue(! Checks.isClasspathDelete(root));//checked in preconditions

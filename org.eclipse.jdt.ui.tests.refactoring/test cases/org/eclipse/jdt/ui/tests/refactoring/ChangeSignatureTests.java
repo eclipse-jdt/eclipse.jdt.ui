@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
@@ -348,10 +348,10 @@ public class ChangeSignatureTests extends RefactoringTest {
 	
 		status= ref.checkInput(new NullProgressMonitor());
 		assertTrue("checkInput was supposed to pass", status.isOK());
-		IChange change= ref.createChange(new NullProgressMonitor());
-		performChange(change);
+		Change undo= performChange(ref);
+		assertNotNull(undo);
 		// XXX: this should be done by someone else
-		Refactoring.getUndoManager().addUndo(ref.getName(), change.getUndoChange());
+		Refactoring.getUndoManager().addUndo(ref.getName(), undo);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);

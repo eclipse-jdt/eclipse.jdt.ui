@@ -17,5 +17,6 @@ public abstract class StatusConstants {
 		// no instance 
 	}
 	
-	public static final int INTERNAL_ERROR= 10001;
+	public static final int INTERNAL_ERROR= 1;
+	
 }

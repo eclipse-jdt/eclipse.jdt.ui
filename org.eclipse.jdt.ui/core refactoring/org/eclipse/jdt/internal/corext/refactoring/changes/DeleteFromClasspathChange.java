@@ -20,14 +20,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 
-public class DeleteFromClasspathChange extends Change {
+public class DeleteFromClasspathChange extends JDTChange {
 
 	private final String fProjectHandle;
 	private final IPath fPathToDelete;
@@ -50,11 +47,9 @@ public class DeleteFromClasspathChange extends Change {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm)	throws ChangeAbortException, CoreException {
+	public Change perform(IProgressMonitor pm)	throws CoreException {
 		pm.beginTask(getName(), 1);
 		try{
-			if (!isActive())
-				return;
 			IJavaProject project= getJavaProject();
 			IClasspathEntry[] cp= project.getRawClasspath();
 			IClasspathEntry[] newCp= new IClasspathEntry[cp.length-1];
@@ -77,7 +72,10 @@ public class DeleteFromClasspathChange extends Change {
 				setDeletedEntryProperties(last);
 				
 			project.setRawClasspath(newCp, pm);
-		} finally{
+			
+			return new AddToClasspathChange(getJavaProject(), fEntryKind, fPath, 
+				fSourceAttachmentPath, fSourceAttachmentRootPath);
+		} finally {
 			pm.done();
 		}
 	}
@@ -99,14 +97,6 @@ public class DeleteFromClasspathChange extends Change {
 		return (IJavaProject)JavaCore.create(fProjectHandle);
 	}
 	
-	public IChange getUndoChange() {
-		if (!isActive())
-			return new NullChange();
-
-		return new AddToClasspathChange(getJavaProject(), fEntryKind, fPath, 
-										fSourceAttachmentPath, fSourceAttachmentRootPath);
-	}
-
 	/* non java-doc
 	 * @see IChange#getName()
 	 */
@@ -117,7 +107,7 @@ public class DeleteFromClasspathChange extends Change {
 	/* non java-doc
 	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return getJavaProject();
 	}
 }

@@ -12,7 +12,9 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -20,26 +22,18 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+
 public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	
-	private static class CorrectionChangeExceptionHandler implements IChangeExceptionHandler {
-		public void handle(ChangeContext context, IChange change, Exception e) {
-			throw new ChangeAbortException(e);
-		}
-	}
-
 	private Change fChange;
 	private String fName;
 	private int fRelevance;
@@ -67,22 +61,21 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 				// close any open linked mode before applying our changes
 				LinkedEnvironment.closeEnvironment(document);
 				
-				ChangeContext context= new ChangeContext(new CorrectionChangeExceptionHandler());
-				change.aboutToPerform(context, new NullProgressMonitor());
-				change.perform(context, new NullProgressMonitor());
+				change.initializeValidationData(new NullProgressMonitor());
+				RefactoringStatus valid= change.isValid(new NullProgressMonitor());
+				if (valid.hasFatalError()) {
+					IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+						valid.getMessageMatchingSeverity(RefactoringStatus.FATAL), null);
+					throw new CoreException(status);
+				} else {
+					change.perform(new NullProgressMonitor());
+				}
 			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, CorrectionMessages.getString("ChangeCorrectionProposal.error.title"), CorrectionMessages.getString("ChangeCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
-		} catch (ChangeAbortException e) {
-			Throwable wrapped= e.getThrowable();
-			if (wrapped instanceof CoreException) {
-				ExceptionHandler.handle((CoreException) wrapped, CorrectionMessages.getString("ChangeCorrectionProposal.error.title"), CorrectionMessages.getString("ChangeCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
-			} else {
-				throw e;
-			}
 		} finally {
 			if (change != null) {
-				change.performed();
+				change.dispose();
 			}
 		}
 	}

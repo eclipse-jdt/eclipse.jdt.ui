@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003 International Business Machines Corp. and others.
+ * Copyright (c) 2000, 2004 International Business Machines Corp. and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v0.5 
  * which accompanies this distribution, and is available at
@@ -10,44 +10,44 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
+/**
+ * Abstract base class of all expression provided by the common
+ * expression language.
+ * <p>
+ * An expression is evaluated by calling {@link #evaluate(IVariablePool)}.
+ * </p>
+ * <p>
+ * This class may be subclassed by other plug-ins to provide their
+ * own specific expressions.
+ * </p>
+ * 
+ * @since 3.0
+ */
 public abstract class Expression {
 	
 	protected static final String ATT_VALUE= "value"; //$NON-NLS-1$
 	
+	/**
+	 * The expression corresponding to {@link TestResult#TRUE}.
+	 */
 	public static final Expression TRUE= new Expression() {
-		public TestResult evaluate(IVariablePool pool) throws CoreException {
+		public TestResult evaluate(IVariablePool pool) {
 			return TestResult.TRUE;
 		}	
 	};
 	
+	/**
+	 * The expression corresponding to {@link TestResult#FALSE}.
+	 */
 	public static final Expression FALSE= new Expression() {
-		public TestResult evaluate(IVariablePool pool) throws CoreException {
+		public TestResult evaluate(IVariablePool pool) {
 			return TestResult.FALSE;
 		}	
 	};
 	
-	public abstract TestResult evaluate(IVariablePool pool) throws CoreException;
+	public abstract TestResult evaluate(IVariablePool pool) throws ExpressionException;
 
-	protected void checkAttribute(String name, String value) throws CoreException {
-		if (value == null) {
-			throw new CoreException(new ExpressionStatus(IStatus.ERROR, 
-				IExpressionStatus.MISSING_ATTRIBUTE, "Missing attribute " + name));
-		}
-	}
-	
-	protected void checkAttribute(String name, String value, String[] validValues) throws CoreException {
-		checkAttribute(name, value);
-		for (int i= 0; i < validValues.length; i++) {
-			if (value.equals(validValues[i]))
-				return;
-		}
-		throw new CoreException(new ExpressionStatus(IStatus.ERROR,
-			IExpressionStatus.WRONG_ATTRIBUTE_VALUE, "Wrong attribute value"));
-	}
-	
 	
 	protected static boolean isInstanceOf(Object element, String type) {
 		// null isn't an instanceof of anything.

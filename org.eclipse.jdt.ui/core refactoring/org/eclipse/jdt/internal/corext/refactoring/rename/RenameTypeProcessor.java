@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
@@ -658,7 +658,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	 * non java-doc
 	 * @see IRefactoring#createChange
 	 */
-	public IChange createChange(IProgressMonitor pm) throws CoreException{
+	public Change createChange(IProgressMonitor pm) throws CoreException{
 		pm.beginTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.creating_change"), 4); //$NON-NLS-1$
 		final ValidationStateChange result= new ValidationStateChange(
 			RefactoringCoreMessages.getString("Change.javaChanges")); //$NON-NLS-1$

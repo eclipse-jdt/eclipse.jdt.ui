@@ -71,7 +71,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -345,7 +345,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
-    public IChange createChange(IProgressMonitor pm) throws CoreException {
+    public Change createChange(IProgressMonitor pm) throws CoreException {
         pm.beginTask("", 1); //$NON-NLS-1$
         try {
             ASTRewrite rewrite= new ASTRewrite(fCompilationUnitNode);
@@ -357,7 +357,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         }
     }
 
-    private IChange createChange(ASTRewrite rewrite) throws CoreException {
+    private Change createChange(ASTRewrite rewrite) throws CoreException {
         TextChange change= new CompilationUnitChange("", fCu); //$NON-NLS-1$
         TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
         TextEdit resultingEdits= new MultiTextEdit();

@@ -35,16 +35,13 @@ import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 /**
  * A text change is a special change object that applies a {@link TextEdit
  * text edit tree} to a document. The text change manages the text edit tree. 
  * Access to the document must be provided by concrete subclasses via the method
- * {@link #aquireDocument(IProgressMonitor) aquireDocument} and 
+ * {@link #aquireDocument(IProgressMonitor) aquireDocument}, {@link
+ * #commitDocument(IDocument document, IProgressMonitor pm) commitDocument}, and
  * {@link #releaseDocument(IDocument, IProgressMonitor) releaseDocument}.
  * <p>
  * A text change offers the ability to access the original content of
@@ -125,13 +122,12 @@ public abstract class TextChange extends Change {
 		public IRegion region;
 	}
 	
+	private String fName;
 	private List fTextEditChangeGroups;
 	private TextEditCopier fCopier;
 	private TextEdit fEdit;
 	private boolean fTrackEdits;
 	private String fTextType;
-	private IChange fUndoChange;
-	private String fName;
 
 	/**
 	 * A special object denoting all edits managed by the text change. This even 
@@ -153,9 +149,9 @@ public abstract class TextChange extends Change {
 	 */
 	protected TextChange(String name) {
 		Assert.isNotNull(name);
+		fName= name;
 		fTextEditChangeGroups= new ArrayList(5);
 		fTextType= "txt"; //$NON-NLS-1$
-		fName= name;
 	}
 	
 	/**
@@ -168,21 +164,14 @@ public abstract class TextChange extends Change {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setActive(boolean active) {
-		super.setActive(active);
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
 		for (Iterator iter= fTextEditChangeGroups.iterator(); iter.hasNext();) {
 			TextEditChangeGroup element= (TextEditChangeGroup) iter.next();
-			element.setActive(active);
+			element.setEnabled(enabled);
 		}
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public IChange getUndoChange() {
-		return fUndoChange;
-	}
-
 	/**
 	 * Sets the text type. The text type is used to determine the content
 	 * merge viewer used to present the difference between the original
@@ -210,14 +199,6 @@ public abstract class TextChange extends Change {
 		return fTextType;
 	}
 	
-	public final RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
-		try {
-			return isValid(pm);
-		} catch (CoreException e) {
-			return RefactoringStatus.createFatalErrorStatus(e.getMessage());
-		}
-	}
-
 	//---- Edit management -----------------------------------------------
 	
 	/**
@@ -280,8 +261,11 @@ public abstract class TextChange extends Change {
 	/**
 	 * Aquires a reference to the document to be changed by this text
 	 * change. A document aquired by this call <em>MUST</em> be released
-	 * via a call to {@link #releaseDocument(IDocument, IProgressMonitor)
-	 * releaseDocument}.
+	 * via a call to {@link #releaseDocument(IDocument, IProgressMonitor)}.
+	 * <p>
+	 * The method <code>releaseDocument</code> must be call as many times as 
+	 * <code>aquireDocument</code> has been called.
+	 * </p>
 	 * 
 	 * @param pm a progress monitor
 	 * 
@@ -292,17 +276,21 @@ public abstract class TextChange extends Change {
 	protected abstract IDocument aquireDocument(IProgressMonitor pm) throws CoreException;
 	
 	/**
-	 * Commits the document aquired vai a call to {@link #aquireDocument(IProgressMonitor)
+	 * Commits the document aquired via a call to {@link #aquireDocument(IProgressMonitor)
 	 * aquireDocument}. It is up to the implementors of this method to decide what committing
 	 * a document means. Typically, the content of the document is written back to the file
 	 * system.
+	 * <p>
+	 * This method can be called more than once and the number of calls doesn't have to match
+	 * the number of calls to <code>aquireDocument</code> or <code>releaseDocument</code>.
+	 * </p>
 	 * 
 	 * @param document the document to commit
 	 * @param pm a progress monitor
 	 * 
 	 * @throws CoreException if the document can't be committed
 	 */
-	protected abstract void commit(IProgressMonitor pm) throws CoreException;
+	protected abstract void commit(IDocument document, IProgressMonitor pm) throws CoreException;
 	
 	/**
 	 * Releases the document aquired via a call to {@link #aquireDocument(IProgressMonitor)
@@ -320,29 +308,28 @@ public abstract class TextChange extends Change {
 	 * gets called while performing the change to construct the corresponding 
 	 * undo change object.
 	 * 
-	 * @param edit the {@link UndoEdit undo edit} to create a undo change
-	 *  object for
+	 * @param edit the {@link UndoEdit} to create an undo change for
 	 * 
 	 * @return the undo change
 	 * 
 	 * @throws CoreException if an undo change can't be created
 	 */
-	protected abstract IChange createUndoChange(UndoEdit edit) throws CoreException;
+	protected abstract Change createUndoChange(UndoEdit edit) throws CoreException;
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+	public Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 3); //$NON-NLS-1$
 		IDocument document= null;
 		try {
 			document= aquireDocument(new SubProgressMonitor(pm, 1));
 			TextEditProcessor processor= createTextEditProcessor(document, TextEdit.CREATE_UNDO, false);
 			UndoEdit undo= processor.performEdits();
-			commit(new SubProgressMonitor(pm, 1));
-			fUndoChange= createUndoChange(undo);
+			commit(document, new SubProgressMonitor(pm, 1));
+			return createUndoChange(undo);
 		} catch (BadLocationException e) {
-			Changes.asCoreException(e);
+			throw Changes.asCoreException(e);
 		} finally {
 			if (document != null)
 				releaseDocument(document, new SubProgressMonitor(pm, 1));
@@ -573,7 +560,7 @@ public abstract class TextChange extends Change {
 		List excludes= new ArrayList(0);
 		for (Iterator iter= fTextEditChangeGroups.iterator(); iter.hasNext(); ) {
 			TextEditChangeGroup edit= (TextEditChangeGroup)iter.next();
-			if (!edit.isActive()) {
+			if (!edit.isEnabled()) {
 				excludes.addAll(Arrays.asList(edit.getTextEditGroup().getTextEdits()));
 			}
 		}
@@ -603,7 +590,7 @@ public abstract class TextChange extends Change {
 		for (int c= 0; c < changes.length; c++) {
 			TextEditChangeGroup change= changes[c];
 			Assert.isTrue(change.getTextChange() == this);
-			if (change.isActive()) {
+			if (change.isEnabled()) {
 				includes.addAll(Arrays.asList(change.getTextEditGroup().getTextEdits()));
 			}
 		}
@@ -621,8 +608,13 @@ public abstract class TextChange extends Change {
 	}
 	
 	private IDocument getDocument() throws CoreException {
-		IDocument result= aquireDocument(new NullProgressMonitor());
-		releaseDocument(result, new NullProgressMonitor());
+		IDocument result= null;
+		try{
+			result= aquireDocument(new NullProgressMonitor());
+		} finally {
+			if (result != null)
+				releaseDocument(result, new NullProgressMonitor());
+		}
 		return result;
 	}
 	

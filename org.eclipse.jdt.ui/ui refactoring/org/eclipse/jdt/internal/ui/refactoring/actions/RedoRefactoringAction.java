@@ -51,7 +51,7 @@ public class RedoRefactoringAction extends UndoManagerAction {
 		return new IRunnableWithProgress(){
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
-					setPreflightStatus(Refactoring.getUndoManager().performRedo(context, pm));
+					setPreflightStatus(Refactoring.getUndoManager().performRedo(pm));
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);			
 				} catch (ChangeAbortException e) {

@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
@@ -326,7 +326,7 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 	/* non java-doc
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		//renaming the file is taken care of in renameTypeRefactoring
 		if (fWillRenameType)
 			return fRenameTypeProcessor.createChange(pm);

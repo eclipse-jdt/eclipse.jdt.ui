@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import java.util.Collection;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 
@@ -52,12 +51,9 @@ public class CountExpression extends Expression {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see Expression#evaluate(IVariablePool)
-	 */
-	public TestResult evaluate(IVariablePool pool) throws CoreException {
+	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
 		Object var= pool.getDefaultVariable();
-		Expressions.checkCollection(var);
+		Expressions.checkCollection(var, this);
 		Collection collection= (Collection)var;
 		int size= collection.size();
 		switch (fMode) {

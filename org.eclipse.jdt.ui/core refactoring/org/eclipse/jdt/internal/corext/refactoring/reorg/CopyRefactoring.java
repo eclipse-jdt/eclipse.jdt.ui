@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
@@ -101,17 +101,18 @@ public final class CopyRefactoring extends Refactoring{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fNewNameQueries);
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() == null || fCopyPolicy.getResourceDestination() == null);
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() != null || fCopyPolicy.getResourceDestination() != null);		
 		try {
 			final ValidationStateChange result= new ValidationStateChange() {
-				public boolean isUndoable(){
-					return false; 
+				public Change perform(IProgressMonitor pm) throws CoreException {
+					super.perform(pm);
+					return null;
 				}
 			};
-			IChange change= fCopyPolicy.createChange(pm, fNewNameQueries);
+			Change change= fCopyPolicy.createChange(pm, fNewNameQueries);
 			if (change instanceof CompositeChange){
 				CompositeChange subComposite= (CompositeChange)change;
 				result.merge(subComposite);

@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**
@@ -32,7 +33,7 @@ public class ChangeContext {
 	private IFile[] fUnsavedFiles;
 	private List fHandledUnsavedFiles;
 	private IChangeExceptionHandler fExceptionHandler;
-	private IChange fFailedChange;
+	private Change fFailedChange;
 	private boolean fTryToUndo;
 	private List fPerformedChanges= new ArrayList();
 
@@ -101,7 +102,7 @@ public class ChangeContext {
 	 * 
 	 * @param change the change that caused an exception
 	 */
-	public void setFailedChange(IChange change) {
+	public void setFailedChange(Change change) {
 		fFailedChange= change;
 	}
 	
@@ -110,7 +111,7 @@ public class ChangeContext {
 	 * 
 	 * @return the change that caused an exception
 	 */
-	public IChange getFailedChange() {
+	public Change getFailedChange() {
 		return fFailedChange;
 	}
 	
@@ -142,8 +143,8 @@ public class ChangeContext {
 	 * 
 	 * @param the change executed successfully.
 	 */
-	public void addPerformedChange(IChange change) {
-		if (change instanceof ICompositeChange)
+	public void addPerformedChange(Change change) {
+		if (change instanceof CompositeChange)
 			return;
 			
 		fPerformedChanges.add(change);
@@ -154,8 +155,8 @@ public class ChangeContext {
 	 * 
 	 * @return the successfully performed changes.
 	 */
-	public IChange[] getPerformedChanges() {
-		return (IChange[])fPerformedChanges.toArray(new IChange[fPerformedChanges.size()]);
+	public Change[] getPerformedChanges() {
+		return (Change[])fPerformedChanges.toArray(new Change[fPerformedChanges.size()]);
 	}
 	
 	/**

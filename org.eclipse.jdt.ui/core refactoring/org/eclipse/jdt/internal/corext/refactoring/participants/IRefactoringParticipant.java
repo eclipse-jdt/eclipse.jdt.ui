@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 
@@ -29,5 +29,5 @@ public interface IRefactoringParticipant {
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException;
 	
-	public IChange createChange(IProgressMonitor pm) throws CoreException;
+	public Change createChange(IProgressMonitor pm) throws CoreException;
 }

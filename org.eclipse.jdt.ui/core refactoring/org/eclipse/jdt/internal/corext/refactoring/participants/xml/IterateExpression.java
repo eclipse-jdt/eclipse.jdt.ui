@@ -77,7 +77,7 @@ public class IterateExpression extends CompositeExpression {
 		if (opValue == null) {
 			fOperator= AND;
 		} else {
-			checkAttribute(ATT_OPERATOR, opValue, new String[] {"and", "or"});  //$NON-NLS-1$//$NON-NLS-2$
+			Expressions.checkAttribute(ATT_OPERATOR, opValue, new String[] {"and", "or"});  //$NON-NLS-1$//$NON-NLS-2$
 			if ("and".equals(opValue)) { //$NON-NLS-1$
 				fOperator= AND;
 			} else {
@@ -89,9 +89,9 @@ public class IterateExpression extends CompositeExpression {
 	/* (non-Javadoc)
 	 * @see Expression#evaluate(IVariablePool)
 	 */
-	public TestResult evaluate(IVariablePool pool) throws CoreException {
+	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
 		Object var= pool.getDefaultVariable();
-		Expressions.checkCollection(var);
+		Expressions.checkCollection(var, this);
 		Collection col= (Collection)var;
 		switch (col.size()) {
 			case 0:

@@ -10,8 +10,9 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtender;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
@@ -23,10 +24,14 @@ public class JavaTypeExtender extends TypeExtender  {
 	/**
 	 * @inheritDoc
 	 */
-	public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
+	public Object invoke(Object receiver, String method, Object[] args) {
 		IType type= (IType)receiver;
-		if (IS_TEST.equals(method)) 
-			return Boolean.valueOf(TestSearchEngine.isTestOrTestSuite(type));
+		try {
+			if (IS_TEST.equals(method)) 
+				return Boolean.valueOf(TestSearchEngine.isTestOrTestSuite(type));
+		} catch (JavaModelException e) {
+			return Boolean.FALSE;
+		}
 		return null;
 	}
 }

@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.internal.corext.Assert;
 
 
@@ -27,10 +25,7 @@ public class NotExpression extends Expression {
 		fExpression= expression;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
-	 */
-	public TestResult evaluate(IVariablePool pool) throws CoreException {
+	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
 		return fExpression.evaluate(pool).not();
 	}
 }

@@ -29,8 +29,8 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextEditChangeGroup;
@@ -114,9 +114,9 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 			return result;
 		
 		DefaultChangeElement changeElement= (DefaultChangeElement)object;
-		IChange change= changeElement.getChange();
-		if (change instanceof ICompositeChange) {
-			IChange[] children= ((ICompositeChange)change).getChildren();
+		Change change= changeElement.getChange();
+		if (change instanceof CompositeChange) {
+			Change[] children= ((CompositeChange)change).getChildren();
 			result= new ChangeElement[children.length];
 			for (int i= 0; i < children.length; i++) {
 				result[i]= new DefaultChangeElement(changeElement, children[i]);

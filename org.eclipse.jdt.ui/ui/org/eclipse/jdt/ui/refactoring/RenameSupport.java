@@ -99,6 +99,9 @@ public class RenameSupport {
 	 * additional user input (for example the new name of the <tt>IJavaElement</tt>).
 	 * Only an error dialog is shown (if necessary) to present the result
 	 * of the refactoring's full precondition checking.
+	 * <p>
+	 * The method has to be called from within the UI thread. 
+	 * </p>
 	 * 
 	 * @param parent a shell used as a parent for the error dialog.
 	 * @param context a <tt>IRunnableContext</tt> to execute the operation.

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 public class EnablementExpression extends CompositeExpression {
@@ -20,10 +19,7 @@ public class EnablementExpression extends CompositeExpression {
 	public EnablementExpression(IConfigurationElement configElement) {
 	}
 	
-	/* (non-Javadoc)
-	 * @see Expression#evaluate(IVariablePool)
-	 */
-	public TestResult evaluate(IVariablePool pool) throws CoreException {
+	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
 		return evaluateAnd(pool);
 	}
 }

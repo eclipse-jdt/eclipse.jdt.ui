@@ -82,7 +82,7 @@ public class PullUpTests extends RefactoringTest {
 								
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
-			performChange(ref.createChange(new NullProgressMonitor()));
+			performChange(ref);
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
@@ -154,7 +154,7 @@ public class PullUpTests extends RefactoringTest {
 		
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
-			performChange(ref.createChange(new NullProgressMonitor()));
+			performChange(ref);
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
@@ -253,7 +253,7 @@ public class PullUpTests extends RefactoringTest {
 
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
-			performChange(ref.createChange(new NullProgressMonitor()));
+			performChange(ref);
 
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
@@ -281,7 +281,7 @@ public class PullUpTests extends RefactoringTest {
 		
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
-			performChange(ref.createChange(new NullProgressMonitor()));
+			performChange(ref);
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();

@@ -266,7 +266,7 @@ public class LocalCorrectionsSubProcessor {
 		if (refactoring == null)
 			return;
 		
-		refactoring.setSaveChanges(false);
+		refactoring.setLeaveDirty(true);
 		if (refactoring.checkActivationBasics(astRoot, null).isOK()) {
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.surroundwith.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);

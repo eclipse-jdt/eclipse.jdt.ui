@@ -87,7 +87,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 	
-		performChange(ref.createChange(new NullProgressMonitor()));	
+		performChange(ref);	
 		
 		String newSource= cu.getSource();
 	

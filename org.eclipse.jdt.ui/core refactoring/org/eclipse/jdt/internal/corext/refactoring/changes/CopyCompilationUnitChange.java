@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
 public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
@@ -29,22 +29,9 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 	/* non java-doc
 	 * @see CompilationUnitReorgChange#doPeform(IProgressMonitor)
 	 */
-	void doPeform(IProgressMonitor pm) throws JavaModelException{
+	Change doPerformReorg(IProgressMonitor pm) throws JavaModelException{
 		getCu().copy(getDestinationPackage(), null, getNewName(), true, pm);
-	}
-
-	/* non java-doc
-	 * @see IChange#getUndoChange()
-	 */
-	public IChange getUndoChange() {
 		return null;
-	}
-
-	/* non java-doc
-	 * @see IChange#isUndoable()
-	 */	
-	public boolean isUndoable(){
-		return false;
 	}
 
 	/* non java-doc

@@ -12,8 +12,7 @@ package org.eclipse.jdt.ui.tests.xml;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.runtime.CoreException;
-
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionException;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Method;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtension;
 
@@ -41,7 +40,7 @@ public class TypeExtenderTests extends TestCase {
 	public void testUnknown() throws Exception {
 		try {
 			call(a, "unknown", null);
-		} catch (CoreException e) {
+		} catch (ExpressionException e) {
 			return;
 		}
 		assertTrue(false);
@@ -71,7 +70,7 @@ public class TypeExtenderTests extends TestCase {
 		assertTrue(call(a, "chainOrdering", null).equals("A"));
 	}
 	
-	private Object call(Object receiver, String method, Object[] args) throws CoreException {
+	private Object call(Object receiver, String method, Object[] args) throws ExpressionException {
 		Method m= TypeExtension.getMethod(receiver, method);
 		return m.invoke(receiver, args);
 	}	

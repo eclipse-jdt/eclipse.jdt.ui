@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -84,7 +84,6 @@ public class InlineMethodRefactoring extends Refactoring {
 	private TextChangeManager fChangeManager;
 	private SourceProvider fSourceProvider;
 	private TargetProvider fTargetProvider;
-	private boolean fSaveChanges;
 	private boolean fDeleteSource;
 	private int fCurrentMode;
 	
@@ -96,7 +95,6 @@ public class InlineMethodRefactoring extends Refactoring {
 		fInitialNode= node;
 		fCurrentMode= node.getNodeType();
 		fCodeGenerationSettings= settings;
-		fSaveChanges= true;
 	}
 
 	private InlineMethodRefactoring(ICompilationUnit unit, MethodInvocation node, CodeGenerationSettings settings) {
@@ -146,10 +144,6 @@ public class InlineMethodRefactoring extends Refactoring {
 	
 	public String getName() {
 		return RefactoringCoreMessages.getString("InlineMethodRefactoring.name"); //$NON-NLS-1$
-	}
-	
-	public void setSaveChanges(boolean save) {
-		fSaveChanges= save;
 	}
 	
 	public boolean getDeleteSource() {
@@ -211,7 +205,6 @@ public class InlineMethodRefactoring extends Refactoring {
 				boolean added= false;
 				MultiTextEdit root= new MultiTextEdit();
 				CompilationUnitChange change= (CompilationUnitChange)fChangeManager.get(unit);
-				change.setSave(fSaveChanges);
 				change.setEdit(root);
 				inliner= new CallInliner(unit, fSourceProvider, fCodeGenerationSettings);
 				BodyDeclaration[] bodies= fTargetProvider.getAffectedBodyDeclarations(unit, new SubProgressMonitor(pm, 1));
@@ -257,7 +250,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		return result;
 	}
 
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		if (fDeleteSource && fCurrentMode == INLINE_ALL) {
 			TextChange change= fChangeManager.get(fSourceProvider.getCompilationUnit());
 			TextEdit delete= fSourceProvider.getDeleteEdit();

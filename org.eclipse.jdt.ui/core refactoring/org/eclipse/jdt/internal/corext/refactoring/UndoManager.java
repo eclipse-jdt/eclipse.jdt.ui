@@ -25,8 +25,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManagerListener;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -83,7 +82,7 @@ public class UndoManager implements IUndoManager {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void aboutToPerformChange(IChange change) {
+	public void aboutToPerformChange(Change change) {
 		sendAboutToPerformChange(fUndoChanges, change);
 		sendAboutToPerformChange(fRedoChanges, change);
 	}
@@ -91,9 +90,9 @@ public class UndoManager implements IUndoManager {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void changePerformed(IChange change, Exception e) {
-		sendChangePerformed(fUndoChanges, change, e);
-		sendChangePerformed(fRedoChanges, change, e);
+	public void changePerformed(Change change, Change undo, Exception e) {
+		sendChangePerformed(fUndoChanges, undo, change, e);
+		sendChangePerformed(fRedoChanges, undo, change, e);
 	}
 
 	/*
@@ -127,6 +126,7 @@ public class UndoManager implements IUndoManager {
 	private void flushUndo() {
 		if (fUndoChanges != null) {
 			removeValidationStateListener(fUndoChanges);
+			sendDispose(fUndoChanges);
 		}
 		fUndoChanges= new Stack();
 		fUndoNames= new Stack();
@@ -136,6 +136,7 @@ public class UndoManager implements IUndoManager {
 	private void flushRedo() {
 		if (fRedoChanges != null) {
 			removeValidationStateListener(fRedoChanges);
+			sendDispose(fRedoChanges);
 		}
 		fRedoChanges= new Stack();
 		fRedoNames= new Stack();
@@ -145,7 +146,7 @@ public class UndoManager implements IUndoManager {
 	/*
 	 * (Non-Javadoc) Method declared in IUndoManager.
 	 */
-	public void addUndo(String refactoringName, IChange change) {
+	public void addUndo(String refactoringName, Change change) {
 		Assert.isNotNull(refactoringName, "refactoring"); //$NON-NLS-1$
 		Assert.isNotNull(change, "change"); //$NON-NLS-1$
 		fUndoNames.push(refactoringName);
@@ -158,20 +159,19 @@ public class UndoManager implements IUndoManager {
 	/*
 	 * (Non-Javadoc) Method declared in IUndoManager.
 	 */
-	public RefactoringStatus performUndo(ChangeContext context, IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus performUndo(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 
 		if (fUndoChanges.empty())
 			return result;
 
-		IChange change= (IChange)fUndoChanges.pop();
+		Change change= (Change)fUndoChanges.pop();
 		removeValidationStateListener(change);
 
-		executeChange(result, context, change, pm);
+		Change redo= executeChange(result, change, pm);
 
-		if (!result.hasError()) {
-			IChange redo= null;
-			if (change.isUndoable() && (redo= change.getUndoChange()) != null && !fUndoNames.isEmpty()) {
+		if (!result.hasFatalError()) {
+			if (redo != null && !fUndoNames.isEmpty()) {
 				addValidationStateListener(redo);
 				fRedoNames.push(fUndoNames.pop());
 				fRedoChanges.push(redo);
@@ -189,21 +189,20 @@ public class UndoManager implements IUndoManager {
 	/*
 	 * (Non-Javadoc) Method declared in IUndoManager.
 	 */
-	public RefactoringStatus performRedo(ChangeContext context, IProgressMonitor pm) throws CoreException {
+	public RefactoringStatus performRedo(IProgressMonitor pm) throws CoreException {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		RefactoringStatus result= new RefactoringStatus();
 
 		if (fRedoChanges.empty())
 			return result;
 
-		IChange change= (IChange)fRedoChanges.pop();
+		Change change= (Change)fRedoChanges.pop();
 		removeValidationStateListener(change);
 
-		executeChange(result, context, change, pm);
+		Change undo= executeChange(result, change, pm);
 
-		if (!result.hasError()) {
-			IChange undo= null;
-			if (change.isUndoable() && (undo= change.getUndoChange()) != null && !fRedoNames.isEmpty()) {
+		if (!result.hasFatalError()) {
+			if (undo != null && !fRedoNames.isEmpty()) {
 				addValidationStateListener(undo);
 				fUndoNames.push(fRedoNames.pop());
 				fUndoChanges.push(undo);
@@ -217,21 +216,20 @@ public class UndoManager implements IUndoManager {
 		return result;
 	}
 
-	private void executeChange(RefactoringStatus status, final ChangeContext context, final IChange change, IProgressMonitor pm) throws CoreException {
+	private Change executeChange(RefactoringStatus status, final Change change, IProgressMonitor pm) throws CoreException {
+		// TODO @@@ should use change perform operation.
 		Exception exception= null;
+		final Change[] undo= new Change[1];
 		try {
-			pm.beginTask("", 10); //$NON-NLS-1$
-			status.merge(change.aboutToPerform(context, new SubProgressMonitor(pm, 2)));
-			if (status.hasError())
-				return;
+			pm.beginTask("", 11); //$NON-NLS-1$
 			status.merge(change.isValid(new SubProgressMonitor(pm, 2)));
 			if (status.hasFatalError())
-				return;
+				return null;
 
 			aboutToPerformChange(change);
 			JavaCore.run(new IWorkspaceRunnable() {
 				public void run(IProgressMonitor innerPM) throws CoreException {
-					change.perform(context, innerPM);
+					undo[0]= change.perform(innerPM);
 				}
 			}, new SubProgressMonitor(pm, 8));
 		} catch (RuntimeException e) {
@@ -241,10 +239,14 @@ public class UndoManager implements IUndoManager {
 			exception= e;
 			throw e;
 		} finally {
-			changePerformed(change, exception);
-			change.performed();
+			change.dispose();
+			changePerformed(change, undo[0], exception);
 			pm.done();
 		}
+		if (undo[0] != null) {
+			undo[0].initializeValidationData(new SubProgressMonitor(pm, 1));
+		}
+		return undo[0];
 	}
 
 	/*
@@ -297,7 +299,7 @@ public class UndoManager implements IUndoManager {
 		}
 	}
 	
-	private void sendAboutToPerformChange(Collection collection, IChange change) {
+	private void sendAboutToPerformChange(Collection collection, Change change) {
 		for (Iterator iter= collection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IDynamicValidationStateChange) {
@@ -307,22 +309,29 @@ public class UndoManager implements IUndoManager {
 		}
 	}
 	
-	private void sendChangePerformed(Collection collection, IChange change, Exception e) {
+	private void sendChangePerformed(Collection collection, Change change, Change undo, Exception e) {
 		for (Iterator iter= collection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IDynamicValidationStateChange) {
-				((IDynamicValidationStateChange)element).changePerformed(change, e);
+				((IDynamicValidationStateChange)element).changePerformed(change, undo, e);
 			}
 			
 		}
 	}
 	
-	private void removeValidationStateListener(IChange change) {
+	private void sendDispose(Collection collection) {
+		for (Iterator iter= collection.iterator(); iter.hasNext();) {
+			Change change= (Change)iter.next();
+			change.dispose();
+		}
+	}
+	
+	private void removeValidationStateListener(Change change) {
 		if (change instanceof IDynamicValidationStateChange)
 			((IDynamicValidationStateChange)change).removeValidationStateListener(fValidationListener);
 	}
 	
-	private void addValidationStateListener(IChange change) {
+	private void addValidationStateListener(Change change) {
 		if (change instanceof IDynamicValidationStateChange)
 			((IDynamicValidationStateChange)change).addValidationStateListener(fValidationListener);
 	}
@@ -337,7 +346,7 @@ public class UndoManager implements IUndoManager {
 		}
 	}
 
-	private void validationStateChanged(IChange change) {
+	private void validationStateChanged(Change change) {
 		try {
 			if (!change.isValid(new NullProgressMonitor()).isOK())
 				flush();
@@ -345,4 +354,15 @@ public class UndoManager implements IUndoManager {
 			flush();
 		}
 	}
+	
+	//---- testing methods ---------------------------------------------
+	
+	public boolean testHasNumberOfUndos(int number) {
+		return fUndoChanges.size() == number;
+	}
+	
+	public boolean testHasNumberOfRedos(int number) {
+		return fRedoChanges.size() == number;
+	}
+	
 }

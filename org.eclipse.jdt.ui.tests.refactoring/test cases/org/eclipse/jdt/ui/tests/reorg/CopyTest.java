@@ -111,7 +111,7 @@ public class CopyTest extends RefactoringTest {
 	private void verifyCopyingOfSubCuElements(ICompilationUnit[] cus, Object destination, IJavaElement[] javaElements) throws JavaModelException, Exception, IOException {
 		CopyRefactoring ref= verifyEnabled(new IResource[0], javaElements, new MockNewNameQueries(), createReorgQueries());
 		verifyValidDestination(ref, destination);
-		RefactoringStatus status= performRefactoring(ref);
+		RefactoringStatus status= performRefactoring(ref, false);
 		assertNull("failed precondition", status);
 		for (int i= 0; i < cus.length; i++) {
 			assertEqualLines("different source in " + cus[i].getElementName(), getFileContents(getOutputTestFileName(removeExtension(cus[i].getElementName()))), cus[i].getSource());
@@ -1537,7 +1537,7 @@ public class CopyTest extends RefactoringTest {
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 			verifyValidDestination(ref, destination);
 			assertTrue("source cu does not exist before copying", cu.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("source cu does not exist after copying", cu.exists());
 			newCu= getPackageP().getCompilationUnit(MockNewNameQueries.NEW_CU_NAME + ".java");
@@ -1564,7 +1564,7 @@ public class CopyTest extends RefactoringTest {
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 			verifyValidDestination(ref, destination);
 			assertTrue("source cu does not exist before copying", cu.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			assertTrue("source cu does not exist after copying", cu.exists());
 			newCu= otherPackage.getCompilationUnit(cu.getElementName());
@@ -1716,7 +1716,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", file.exists());
@@ -1753,7 +1753,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", file.exists());
@@ -1787,7 +1787,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", file.exists());
@@ -1824,7 +1824,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", file.exists());
@@ -1860,7 +1860,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", file.exists());
@@ -1898,7 +1898,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", file.exists());
@@ -1932,7 +1932,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", file.exists());
@@ -1966,7 +1966,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", file.exists());
@@ -2001,7 +2001,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", file.exists());
@@ -2039,7 +2039,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", file.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", file.exists());
@@ -2076,7 +2076,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source cu does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source cu does not exist after copying", cu.exists());
@@ -2109,7 +2109,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source cu does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source cu does not exist after copying", cu.exists());
@@ -2142,7 +2142,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source cu does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source cu does not exist after copying", cu.exists());
@@ -2178,7 +2178,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", cu.exists());
@@ -2211,7 +2211,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", cu.exists());
@@ -2244,7 +2244,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", cu.exists());
@@ -2274,7 +2274,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", cu.exists());
@@ -2304,7 +2304,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", cu.exists());
@@ -2341,7 +2341,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", cu.exists());
@@ -2382,7 +2382,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", cu.exists());
@@ -2418,7 +2418,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist before copying", cu.exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source file does not exist after copying", cu.exists());
@@ -2447,7 +2447,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source package does not exist before copying", getPackageP().exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source package does not exist after copying", getPackageP().exists());
@@ -2474,7 +2474,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source package does not exist before copying", getPackageP().exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source package does not exist after copying", getPackageP().exists());
@@ -2504,7 +2504,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source package does not exist before copying", getPackageP().exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source package does not exist after copying", getPackageP().exists());
@@ -2533,7 +2533,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source package does not exist before copying", getPackageP().exists());
 			
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source package does not exist after copying", getPackageP().exists());
@@ -2572,7 +2572,7 @@ public class CopyTest extends RefactoringTest {
 
 			assertTrue("source does not exist before copying", folder.exists());
 								
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source does not exist after copying", folder.exists());
@@ -2600,7 +2600,7 @@ public class CopyTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);						
 
 			assertTrue("source does not exist before copying", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source does not exist after copying", folder.exists());
@@ -2627,7 +2627,7 @@ public class CopyTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);						
 
 			assertTrue("source does not exist before copying", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source does not exist after copying", folder.exists());
@@ -2653,7 +2653,7 @@ public class CopyTest extends RefactoringTest {
 			IPackageFragment destination= getPackageP();
 			verifyValidDestination(ref, destination);						
 			assertTrue("source does not exist before copying", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source does not exist after copying", folder.exists());			
@@ -2683,7 +2683,7 @@ public class CopyTest extends RefactoringTest {
 			Object destination= fileInAnotherFolder;
 			verifyValidDestination(ref, destination);						
 			assertTrue("source does not exist before copying", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source does not exist after copying", folder.exists());			
@@ -2710,7 +2710,7 @@ public class CopyTest extends RefactoringTest {
 			Object destination= cu;
 			verifyValidDestination(ref, destination);						
 			assertTrue("source does not exist before copying", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source does not exist after copying", folder.exists());			
@@ -2739,7 +2739,7 @@ public class CopyTest extends RefactoringTest {
 			Object destination= simpleProject;
 			verifyValidDestination(ref, destination);						
 			assertTrue("source does not exist before copying", folder.exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 			
 			assertTrue("source does not exist after copying", folder.exists());			
@@ -2761,7 +2761,7 @@ public class CopyTest extends RefactoringTest {
 			Object destination= getRoot().getJavaProject();
 			verifyValidDestination(ref, destination);
 			assertTrue("source does not exist before copying", getRoot().exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 
 			assertTrue("source does not exist after copying", getRoot().exists());
@@ -2786,7 +2786,7 @@ public class CopyTest extends RefactoringTest {
 			Object destination= otherJavaProject;
 			verifyValidDestination(ref, destination);
 			assertTrue("source does not exist before copying", getRoot().exists());
-			RefactoringStatus status= performRefactoring(ref);
+			RefactoringStatus status= performRefactoring(ref, false);
 			assertEquals(null, status);
 
 			assertTrue("source does not exist after copying", getRoot().exists());

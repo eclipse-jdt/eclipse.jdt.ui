@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 
@@ -39,9 +39,9 @@ interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdatingRef
 	public boolean canUpdateQualifiedNames();
 	
 	static interface ICopyPolicy extends IReorgPolicy{
-		public IChange createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException;
+		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException;
 	}
 	static interface IMovePolicy extends IReorgPolicy{
-		public IChange createChange(IProgressMonitor pm) throws JavaModelException;
+		public Change createChange(IProgressMonitor pm) throws JavaModelException;
 	}
 }

@@ -25,13 +25,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 /**
@@ -92,33 +90,24 @@ public class LineColumnSelectionTestCase extends AbstractCUTestCase {
 	}
 
 	/** @require refactoring.checkActivation().isOK() */
-	protected void performTest(ICompilationUnit unit, Refactoring refactoring, String out) throws Exception {
-		IProgressMonitor pm= new NullProgressMonitor();
-		String original= unit.getSource();
-		final IChange change= refactoring.createChange(pm);
-		assertNotNull(change);
-		final ChangeContext context= new ChangeContext(new TestExceptionHandler());
-		change.aboutToPerform(context, pm);
+	protected void performTest(final ICompilationUnit unit, final Refactoring refactoring, final String out) throws Exception {
 		JavaCore.run(new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
-				change.perform(context, monitor);
+				String original= unit.getSource();
+				final Change change= refactoring.createChange(monitor);
+				assertNotNull(change);
+				change.initializeValidationData(new NullProgressMonitor());
+				assertTrue(!change.isValid(new NullProgressMonitor()).hasFatalError());
+				Change undo= change.perform(monitor);
+				change.dispose();
+				assertNotNull(undo);
+				compareSource(unit.getSource(), out);
+				undo.initializeValidationData(new NullProgressMonitor());
+				assertTrue(!undo.isValid(new NullProgressMonitor()).hasFatalError());
+				undo.perform(monitor);
+				undo.dispose();
+				compareSource(unit.getSource(), original);
 			}
-		}, pm);
-		change.performed();
-		
-		final IChange undo= change.getUndoChange();
-		assertNotNull(undo);
-		compareSource(unit.getSource(), out);
-		final ChangeContext context2= new ChangeContext(new TestExceptionHandler());
-		undo.aboutToPerform(context, pm);
-		JavaCore.run(new IWorkspaceRunnable() {
-			public void run(IProgressMonitor monitor) throws CoreException {
-				undo.perform(context2, monitor);
-			}
-		}, pm);
-		undo.performed();
-		
-		compareSource(unit.getSource(), original);
+		}, new NullProgressMonitor());
 	}
-
 }

@@ -111,7 +111,7 @@ public class PushDownTests extends RefactoringTest {
 
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass but got " + checkInputResult.toString(), checkInputResult.isOK());	
-			performChange(ref.createChange(new NullProgressMonitor()));
+			performChange(ref);
 
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cuA.getSource();

@@ -26,17 +26,35 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.internal.refactoring.core.BufferValidationState;
 
-public class TextFileChange extends TextChange  {
+/**
+ * A special {@link TextChange} that operates on <code>IFile</code>s. 
+ */
+public class TextFileChange extends TextChange {
 	
+	/** Flag indicating that the file's save state has to be kept. This means an unsaved file is still
+	 *  unsaved after performing the change and a saved one will be saved. */
+	public static final int KEEP_SAVE_STATE= 1 << 0;
+	/** Flag indicating that the file is to be saved after the change has been applied. */
+	public static final int FORCE_SAVE= 1 << 1;
+	/** Flag indicating that the file will not be saved after the change has been applied. */
+	public static final int LEAVE_DIRTY= 1 << 2;
+	
+	
+	// the file to change
 	private IFile fFile;
-	private boolean fSave= true;
+	private int fSaveMode= KEEP_SAVE_STATE;
 	
+	// the mapped text buffer
 	private int fAquireCount;
 	private ITextFileBuffer fBuffer;
-
+	
+	private boolean fDirty;
+	private BufferValidationState fValidationState;
+	
 	/**
 	 * Creates a new <code>TextFileChange</code> for the given file.
 	 * s
@@ -55,8 +73,19 @@ public class TextFileChange extends TextChange  {
 	 * 
 	 * @param save whether or not the changes should be saved to disk
 	 */
-	public void setSave(boolean save) {
-		fSave= save;
+	public void setSaveMode(int saveMode) {
+		fSaveMode= saveMode;
+	}
+	
+	/**
+	 * Returns whether the change saves the changes back to disk.
+	 * 
+	 * @return <code>true</code> if the change saves the modified
+	 *  content back to disk; otherwise <code>false</code> is
+	 *  returned
+	 */
+	public int getSaveMode() {
+		return fSaveMode;
 	}
 	
 	/**
@@ -71,17 +100,41 @@ public class TextFileChange extends TextChange  {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getModifiedLanguageElement(){
+	public Object getModifiedElement(){
 		return fFile;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void initializeValidationData(IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", 1); //$NON-NLS-1$
+		fValidationState= BufferValidationState.create(fFile);
+		ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(fFile.getFullPath());
+		fDirty= buffer != null && buffer.isDirty();
+		pm.worked(1);
+	}
 	
-	public RefactoringStatus isValid(IProgressMonitor pm) {
-		if (fSave) {
-			return Checks.validateModifiesFiles(new IFile[] {fFile});
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", 1); //$NON-NLS-1$
+		RefactoringStatus result= fValidationState.isValid();
+		if (needsSaving()) {
+			result.merge(Checks.validateModifiesFiles(new IFile[] {fFile}));
 		}
-		return new RefactoringStatus();
+		pm.worked(1);
+		return result;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public void dispose() {
+		fValidationState.dispose();
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -100,8 +153,8 @@ public class TextFileChange extends TextChange  {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void commit(IProgressMonitor pm) throws CoreException {
-		if (fSave) {
+	protected void commit(IDocument document, IProgressMonitor pm) throws CoreException {
+		if (needsSaving()) {
 			fBuffer.commit(pm, false);
 		}
 	}
@@ -121,8 +174,12 @@ public class TextFileChange extends TextChange  {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IChange createUndoChange(UndoEdit edit) throws CoreException {
-		return new UndoTextFileChange(getName(), fFile, edit);
+	protected Change createUndoChange(UndoEdit edit) throws CoreException {
+		return new UndoTextFileChange(getName(), fFile, edit, fSaveMode);
+	}
+	
+	private boolean needsSaving() {
+		return (fSaveMode & FORCE_SAVE) != 0 || (!fDirty && (fSaveMode & KEEP_SAVE_STATE) != 0);
 	}
 }
 

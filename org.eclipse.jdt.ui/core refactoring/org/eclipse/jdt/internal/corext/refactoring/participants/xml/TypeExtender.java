@@ -10,11 +10,12 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.IAdaptable;
 
 /**
  * Abstract superclass of all type extenders. 
  */
-public abstract class TypeExtender implements ITypeExtender {
+public abstract class TypeExtender implements ITypeExtender, IAdaptable {
 	
 	private String fProperties;
 	
@@ -38,5 +39,12 @@ public abstract class TypeExtender implements ITypeExtender {
 	 */
 	public final boolean canLoad() {
 		return true;
-	}	
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object getAdapter(Class adapter) {
+		return null;
+	}
 }

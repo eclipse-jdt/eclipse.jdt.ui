@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 
@@ -49,12 +49,12 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 	/* non java-doc
 	 * @see AbstractRenameChange#createUndoChange()
 	 */
-	protected IChange createUndoChange() throws JavaModelException{
+	protected Change createUndoChange() throws JavaModelException{
 		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName());
 	}
 	
 	protected void doRename(IProgressMonitor pm) throws CoreException {
-		ICompilationUnit cu= (ICompilationUnit)getModifiedLanguageElement();
+		ICompilationUnit cu= (ICompilationUnit)getModifiedElement();
 		if (cu != null)
 			cu.rename(getNewName(), false, pm);
 	}

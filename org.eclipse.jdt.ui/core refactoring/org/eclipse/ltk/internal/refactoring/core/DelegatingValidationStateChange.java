@@ -13,21 +13,19 @@ package org.eclipse.ltk.internal.refactoring.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.ltk.refactoring.core.IDynamicValidationStateChange;
 import org.eclipse.ltk.refactoring.core.IValidationStateListener;
-
 
 public class DelegatingValidationStateChange extends CompositeChange implements IDynamicValidationStateChange {
 
 	private IDynamicValidationStateChange[] fDynamicChanges;
 		
-	public DelegatingValidationStateChange(IChange[] changes) {
+	public DelegatingValidationStateChange(Change[] changes) {
 		List dynamic= new ArrayList();
 		addAll(changes);
 		for (int i= 0; i < changes.length; i++) {
@@ -41,7 +39,7 @@ public class DelegatingValidationStateChange extends CompositeChange implements 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IChange createUndoChange(IChange[] childUndos) throws CoreException {
+	protected Change createUndoChange(Change[] childUndos) {
 		return new DelegatingValidationStateChange(childUndos);
 	}
 	
@@ -88,7 +86,7 @@ public class DelegatingValidationStateChange extends CompositeChange implements 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void aboutToPerformChange(final IChange change) {
+	public void aboutToPerformChange(final Change change) {
 		for (int i= 0; i < fDynamicChanges.length; i++) {
 			final int index= i;
 			final IDynamicValidationStateChange dc= fDynamicChanges[i];
@@ -108,14 +106,14 @@ public class DelegatingValidationStateChange extends CompositeChange implements 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void changePerformed(final IChange change, final Exception e) {
+	public void changePerformed(final Change change, final Change undo, final Exception e) {
 		for (int i= 0; i < fDynamicChanges.length; i++) {
 			final int index= i;
 			final IDynamicValidationStateChange dc= fDynamicChanges[i];
 			Platform.run(new ISafeRunnable() {
 				public void run() throws Exception {
 					if (dc != null)
-						dc.changePerformed(change, e);
+						dc.changePerformed(change, undo, e);
 				}
 				public void handleException(Throwable e) {
 					fDynamicChanges[index]= null;

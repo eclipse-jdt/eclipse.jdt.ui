@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.compare.CompareUI;
+
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -31,18 +35,11 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.compare.CompareUI;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.PageBook;
 
+import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -55,29 +52,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  * Consists of a tree of changes and a compare viewer that shows the differences. 
  */
 public class PreviewWizardPage extends RefactoringWizardPage implements IPreviewWizardPage {
-
-	// Dummy root node if input element isn't a composite change.
-	private static class DummyRootNode extends Change implements ICompositeChange {
-		private IChange[] fChildren;
-		
-		public DummyRootNode(IChange change) {
-			fChildren= new IChange[] { change };
-		}
-		public IChange[] getChildren() {
-			return fChildren;
-		}
-		public String getName() {
-			return null;
-		}
-		public Object getModifiedLanguageElement() {
-			return null;
-		}
-		public IChange getUndoChange() {
-			return null;
-		}
-		public void perform(ChangeContext context, IProgressMonitor pm) throws CoreException {
-		}
-	}
 	
 	private static class NullPreviewer implements IChangePreviewViewer {
 		private Label fLabel;
@@ -120,7 +94,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		}
 	}
 	
-	private IChange fChange;		
+	private Change fChange;		
 	private ChangeElement fCurrentSelection;
 	private PageBook fPageContainer;
 	private Control fStandardPage;
@@ -144,7 +118,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 * the given change.
 	 * @param change the new change.
 	 */
-	public void setChange(IChange change) {
+	public void setChange(Change change) {
 		if (fChange == change)
 			return;
 		
@@ -295,27 +269,38 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	}
 	
 	private void setTreeViewerInput() {
-		ChangeElement input;
-		IChange change= computeChangeInput();
+		ChangeElement input= null;
+		Change change= computeChangeInput();
 		if (change == null) {
 			input= null;
-		} else if (change instanceof ICompositeChange && !(change instanceof TextChange)) {
+		} else if (change instanceof CompositeChange && !(change instanceof TextChange)) {
 			input= new DefaultChangeElement(null, change);
 		} else {
-			input= new DefaultChangeElement(null, new DummyRootNode(change));
+			Change parent= null;
+			while ((parent= change.getParent()) != null) {
+				if (parent instanceof CompositeChange) {
+					input= new DefaultChangeElement(null, parent);
+					break;
+				}
+			}
+			if (input == null) {
+				CompositeChange root= new CompositeChange();
+				root.add(change);
+				input= new DefaultChangeElement(null, root);
+			}
 		}
 		if (fTreeViewer != null) {
 			fTreeViewer.setInput(input);
 		}
 	}
 	
-	private IChange computeChangeInput() {
-		IChange result= fChange;
+	private Change computeChangeInput() {
+		Change result= fChange;
 		if (result == null)
 			return result;
 		while (true) {
-			if (result instanceof ICompositeChange) {
-				IChange[] children= ((ICompositeChange)result).getChildren();
+			if (result instanceof CompositeChange) {
+				Change[] children= ((CompositeChange)result).getChildren();
 				if (children.length == 1) {
 					result= children[0];
 				} else {
@@ -405,8 +390,8 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	public boolean hasChanges() {
 		if (fChange == null)
 			return false;
-		if (fChange instanceof ICompositeChange)
-			return ((ICompositeChange)fChange).getChildren().length > 0;
+		if (fChange instanceof CompositeChange)
+			return ((CompositeChange)fChange).getChildren().length > 0;
 		return true;
 	}
 }

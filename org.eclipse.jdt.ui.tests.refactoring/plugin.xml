@@ -25,9 +25,7 @@
       <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
    </requires>
 
-
-   <extension
-         point="org.eclipse.jdt.ui.typeExtenders">
+   <extension point="org.eclipse.jdt.ui.typeExtenders">
       <typeExtender
             methods="simple, overridden, ordering, chainOrdering"
             type="org.eclipse.jdt.ui.tests.xml.A"
@@ -53,5 +51,4 @@
             id="org.eclipse.jdt.ui.tests.I_TypeExtender">
       </typeExtender>
    </extension>
-
 </plugin>

@@ -16,17 +16,18 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameParticipant;
@@ -43,58 +44,57 @@ public class TypeRenameParticipant extends RenameParticipant {
 		private IType fType;
 		private ILaunchConfiguration fConfig;
 		private String fNewName;
-		private IChange fUndo;
 
 		public LaunchConfigChange(IType type, ILaunchConfiguration config, String newName) {
 			fType= type;
 			fConfig= config;
 			fNewName= newName;
 		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#perform(org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext, org.eclipse.core.runtime.IProgressMonitor)
-		 */
-		public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
-			pm.beginTask("", 1); //$NON-NLS-1$
-			try {
-				String current= fConfig.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
-				int index= current.lastIndexOf('.');
-				String newTypeName;
-				if (index == -1) {
-					newTypeName= fNewName;
-				} else {
-					newTypeName= current.substring(0, index + 1) + fNewName;
-				}
-				ILaunchConfigurationWorkingCopy copy= fConfig.getWorkingCopy();
-				copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, newTypeName);
-				if (fConfig.getName().equals(current))
-						copy.rename(fNewName);
-				copy.doSave();
-				fUndo= new LaunchConfigChange(fType, fConfig, (index == -1) ? current : current.substring(index + 1));
-			} catch (CoreException e) {
-				throw new JavaModelException(e);
-			}
-			pm.worked(1);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getUndoChange()
-		 */
-		public IChange getUndoChange() {
-			return fUndo;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getName()
+		
+		/**
+		 * {@inheritDoc}
 		 */
 		public String getName() {
 			return fConfig.getName();
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void initializeValidationData(IProgressMonitor pm) throws CoreException {
+			// must be implemented to decide correct value of isValid
+		}
+
+		public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+			return new RefactoringStatus();
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#perform(org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext, org.eclipse.core.runtime.IProgressMonitor)
+		 */
+		public Change perform(IProgressMonitor pm) throws CoreException {
+			pm.beginTask("", 1); //$NON-NLS-1$
+			String current= fConfig.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
+			int index= current.lastIndexOf('.');
+			String newTypeName;
+			if (index == -1) {
+				newTypeName= fNewName;
+			} else {
+				newTypeName= current.substring(0, index + 1) + fNewName;
+			}
+			ILaunchConfigurationWorkingCopy copy= fConfig.getWorkingCopy();
+			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, newTypeName);
+			if (fConfig.getName().equals(current))
+					copy.rename(fNewName);
+			copy.doSave();
+			pm.worked(1);
+			return new LaunchConfigChange(fType, fConfig, (index == -1) ? current : current.substring(index + 1));
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getModifiedLanguageElement()
 		 */
-		public Object getModifiedLanguageElement() {
+		public Object getModifiedElement() {
 			return fConfig;
 		}
 	}
@@ -139,7 +139,7 @@ public class TypeRenameParticipant extends RenameParticipant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		if (!getUpdateReferences()) 
 			return null;	
 		
@@ -154,6 +154,6 @@ public class TypeRenameParticipant extends RenameParticipant {
 				changes.add(new LaunchConfigChange(fType, configs[i], getNewName()));
 			}
 		}
-		return new CompositeChange(JUnitMessages.getString("TypeRenameParticipant.name"), (IChange[]) changes.toArray(new IChange[changes.size()]));
+		return new CompositeChange(JUnitMessages.getString("TypeRenameParticipant.name"), (Change[]) changes.toArray(new Change[changes.size()]));
 	}
 }

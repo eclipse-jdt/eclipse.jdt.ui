@@ -13,14 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.internal.corext.Assert;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TestExpression extends Expression {
 
@@ -76,22 +71,32 @@ public class TestExpression extends Expression {
 		fArgs= getArguments(element);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
-	 */
-	public TestResult evaluate(IVariablePool pool) throws CoreException {
+	public TestExpression(String property, Object[] args) {
+		fProperty= property;
+		fArgs= args;
+	}
+	
+	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
 		Object element= pool.getDefaultVariable();
 		// hard coded instanceof check to ensure it is evaluated fast.
 		if ("instanceof".equals(fProperty)) { //$NON-NLS-1$
 			return TestResult.valueOf(isInstanceOf(element, (String)fArgs[0]));
+		}
+		if (System.class.equals(element)) {
+			String str= System.getProperty(fProperty);
+			if (str == null) 
+				return TestResult.FALSE;
+			return TestResult.valueOf(str.equals(fArgs[0]));
 		}
 		Method method= TypeExtension.getMethod(element, fProperty);
 		if (!method.isLoaded())
 			return TestResult.NOT_LOADED;
 		Object returnValue= method.invoke(element, fArgs);
 		if (!(returnValue instanceof Boolean)) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-				"Expected result must be of type Boolean", null));
+			throw new ExpressionException(ExpressionException.TEST_EXPRESSION_NOT_A_BOOLEAN,
+				ExpressionMessages.getFormattedString(
+					"TestExpression.return_type.not_a_boolean", //$NON-NLS-1$
+					this.toString()));
 		}
 		return TestResult.valueOf((Boolean)returnValue);
 	}

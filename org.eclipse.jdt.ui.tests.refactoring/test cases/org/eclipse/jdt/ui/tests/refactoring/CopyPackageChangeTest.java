@@ -13,12 +13,13 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageChange;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public class CopyPackageChangeTest extends RefactoringTest {
 
@@ -44,6 +45,7 @@ public class CopyPackageChangeTest extends RefactoringTest {
 		
 		String packName= getPackageP().getElementName();
 		CopyPackageChange change= new CopyPackageChange(getPackageP(), newRoot, null);
+		change.initializeValidationData(new NullProgressMonitor());
 		performChange(change);
 		IPackageFragment copied= newRoot.getPackageFragment(packName);
 		assertTrue("copied.exists()", copied.exists());

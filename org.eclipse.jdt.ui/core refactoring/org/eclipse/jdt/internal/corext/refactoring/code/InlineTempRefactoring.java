@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -220,7 +220,7 @@ public class InlineTempRefactoring extends Refactoring {
 	/*
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("InlineTempRefactoring.preview"), 2); //$NON-NLS-1$
 			final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("InlineTempRefactoring.inline"), fCu); //$NON-NLS-1$

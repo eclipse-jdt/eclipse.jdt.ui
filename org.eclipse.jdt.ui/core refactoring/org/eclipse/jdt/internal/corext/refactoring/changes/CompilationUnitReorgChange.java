@@ -21,11 +21,10 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
-abstract class CompilationUnitReorgChange extends Change {
+abstract class CompilationUnitReorgChange extends JDTChange {
 
 	private String fCuHandle;
 	private String fOldPackageHandle;
@@ -53,26 +52,21 @@ abstract class CompilationUnitReorgChange extends Change {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public final void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+	public final Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 1);
 		try{
-			if (!isActive())
-				return;
-			doPeform(new SubProgressMonitor(pm, 1));
-		}catch (Exception e) {
-			handleException(context, e);
-			setActive(false);
+			return doPerformReorg(new SubProgressMonitor(pm, 1));
 		} finally {
 			pm.done();
 		}
 	}
 	
-	abstract void doPeform(IProgressMonitor pm) throws JavaModelException;
+	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException;
 	
 	/*
 	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return getCu();
 	}
 	

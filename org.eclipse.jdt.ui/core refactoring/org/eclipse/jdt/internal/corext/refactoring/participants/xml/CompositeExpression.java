@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 public abstract class CompositeExpression extends Expression {
 	
 	private static final Expression[] EMPTY_ARRAY= new Expression[0]; 
@@ -37,7 +35,7 @@ public abstract class CompositeExpression extends Expression {
 		return (Expression[])fExpressions.toArray(new Expression[fExpressions.size()]);
 	}
 	
-	protected TestResult evaluateAnd(IVariablePool scope) throws CoreException {
+	protected TestResult evaluateAnd(IVariablePool scope) throws ExpressionException {
 		if (fExpressions == null)
 			return TestResult.TRUE;
 		TestResult result= TestResult.TRUE;
@@ -52,7 +50,7 @@ public abstract class CompositeExpression extends Expression {
 		return result;
 	}
 	
-	protected TestResult evaluateOr(IVariablePool scope) throws CoreException {
+	protected TestResult evaluateOr(IVariablePool scope) throws ExpressionException {
 		if (fExpressions == null)
 			return TestResult.TRUE;
 		TestResult result= TestResult.FALSE;

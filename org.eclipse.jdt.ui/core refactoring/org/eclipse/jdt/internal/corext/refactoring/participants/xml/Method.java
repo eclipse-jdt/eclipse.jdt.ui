@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.internal.corext.Assert;
 
 
@@ -39,7 +37,7 @@ public class Method {
 		return fExtender.isLoaded();
 	}
  	
-	public Object invoke(Object receiver, Object[] args) throws CoreException {
+	public Object invoke(Object receiver, Object[] args) throws ExpressionException {
 		return fExtender.invoke(receiver, fName, args);
 	}
 	

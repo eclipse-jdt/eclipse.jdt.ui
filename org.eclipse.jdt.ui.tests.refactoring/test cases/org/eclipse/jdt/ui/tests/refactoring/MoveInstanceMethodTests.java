@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
@@ -144,8 +143,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 		assertTrue("precondition was supposed to pass",preconditionResult.isOK());
 
-		IChange change= ref.createChange(new NullProgressMonitor());
-		performChange(change);
+		performChange(ref);
 
 		for(int i= 0; i < cus.length; i++) {
 			String outputTestFileName= getOutputTestFileName(getSimpleName(cuQNames[i]));

@@ -24,7 +24,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextEditChangeGroup;
 
@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextEditChangeGroup;
 	public void feedInput(IChangePreviewViewer viewer) throws CoreException {
 		DefaultChangeElement element= getStandardChangeElement();
 		if (element != null) {
-			IChange change= element.getChange();
+			Change change= element.getChange();
 			if (change instanceof TextChange) {
 				List edits= collectTextEditChanges();
 				viewer.setInput(TextChangePreviewViewer.createInput(

@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 
 public interface IChangeElementChildrenCreator {
 
-	public ChangeElement[] create(ChangeElement parent, IChange change);
+	public ChangeElement[] create(ChangeElement parent, Change change);
 }
 

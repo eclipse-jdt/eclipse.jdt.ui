@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.refactoring.changes;
 
 import org.eclipse.swt.SWT;
@@ -29,7 +28,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -72,7 +71,7 @@ public class ChangeExceptionHandler implements IChangeExceptionHandler {
 		fParent= parent;
 	}
 	
-	public void handle(ChangeContext context, IChange change, Exception e) {
+	public void handle(ChangeContext context, Change change, Exception e) {
 		JavaPlugin.log(e);
 		IStatus status= null;
 		if (e instanceof CoreException) {

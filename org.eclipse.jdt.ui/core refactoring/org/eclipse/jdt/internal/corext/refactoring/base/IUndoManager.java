@@ -46,16 +46,18 @@ public interface IUndoManager {
 	 * 
 	 * @param change the change to be performed.
 	 */
-	public void aboutToPerformChange(IChange change);
+	public void aboutToPerformChange(Change change);
 	
 	/**
 	 * The infrastructure has performed the given change.
 	 * 
 	 * @param change the change that was performed
+	 * @param undo the corresponding undo change or <code>null</code>
+	 *  if no undo exists
 	 * @param e <code>null</code> if the change got executed
 	 *  successfully; otherwise the catched exception
 	 */
-	public void changePerformed(IChange change, Exception e);
+	public void changePerformed(Change change, Change undo, Exception e);
 
 	/**
 	 * Adds a new undo change to this undo manager.
@@ -64,7 +66,7 @@ public interface IUndoManager {
 	 *  for. The name must not be <code>null</code>
 	 * @param change the undo change. The change must not be <code>null</code>
 	 */
-	public void addUndo(String name, IChange change);
+	public void addUndo(String name, Change change);
 
 	/**
 	 * Returns <code>true</code> if there is anything to undo, otherwise
@@ -90,7 +92,7 @@ public interface IUndoManager {
 	 *  the undo change. The progress monitor must not be <code>null</code>
 	 * @return a status indicating if the undo preflight produced any error
 	 */	
-	public RefactoringStatus performUndo(ChangeContext context, IProgressMonitor pm) throws CoreException;
+	public RefactoringStatus performUndo(IProgressMonitor pm) throws CoreException;
 
 	/**
 	 * Returns <code>true</code> if there is anything to redo, otherwise
@@ -116,7 +118,7 @@ public interface IUndoManager {
 	 *  the redo change. The progress monitor must not be <code>null</code>
 	 * @return a status indicating if the undo preflight produced any error
 	 */	
-	public RefactoringStatus performRedo(ChangeContext context, IProgressMonitor pm) throws CoreException;
+	public RefactoringStatus performRedo(IProgressMonitor pm) throws CoreException;
 	
 	/**
 	 * Flushes the undo manager's undo and redo stacks.

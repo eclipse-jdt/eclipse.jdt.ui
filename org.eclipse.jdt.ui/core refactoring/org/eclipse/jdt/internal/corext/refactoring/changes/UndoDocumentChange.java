@@ -17,15 +17,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentListener;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.internal.refactoring.core.TextChanges;
 
 /**
  * TODO
@@ -35,26 +31,13 @@ public class UndoDocumentChange extends Change {
 	
 	private String fName;
 	private UndoEdit fUndo;
-	private IChange fUndoChange;
 	private IDocument fDocument;
-	private boolean fChanged;
-	private IDocumentListener fListner= new IDocumentListener() {
-		public void documentAboutToBeChanged(DocumentEvent event) {
-		}
-		public void documentChanged(DocumentEvent event) {
-			fChanged= true;
-			if (fListner != null) {
-				event.getDocument().removeDocumentListener(fListner);
-				fListner= null;
-			}
-		}
-	};
+	private int fLength;
 	
 	public UndoDocumentChange(String name, IDocument document, UndoEdit undo) {
 		fName= name;
 		fUndo= undo;
 		fDocument= document;
-		document.addDocumentListener(fListner);
 	}
 	
 	/**
@@ -67,37 +50,35 @@ public class UndoDocumentChange extends Change {
 	/**
 	 * {@inheritDoc}
 	 */
-	public IChange getUndoChange() {
-		return fUndoChange;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return null;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		if (fChanged)
-			return RefactoringStatus.createFatalErrorStatus("Buffer has changed");
-		return new RefactoringStatus();
+	public void initializeValidationData(IProgressMonitor pm) throws CoreException {
+		fLength= fDocument.getLength();
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		pm.beginTask("", 1); //$NON-NLS-1$
+		RefactoringStatus result= TextChanges.isValid(fDocument, fLength);
+		pm.worked(1);
+		return result;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public Change perform(IProgressMonitor pm) throws CoreException {
 		try {
 			UndoEdit redo= fUndo.apply(fDocument, TextEdit.CREATE_UNDO);
-			fUndoChange= new UndoDocumentChange(getName(), fDocument, redo);
-			if (fListner != null) {
-				fDocument.removeDocumentListener(fListner);
-				fListner= null;
-			}
+			Change result= new UndoDocumentChange(getName(), fDocument, redo);
+			return result;
 		} catch (BadLocationException e) {
 			throw Changes.asCoreException(e);
 		}

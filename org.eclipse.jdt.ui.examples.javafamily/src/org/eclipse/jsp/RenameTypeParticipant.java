@@ -27,7 +27,7 @@ import org.eclipse.core.indexsearch.ISearchResultCollector;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
@@ -75,7 +75,7 @@ public class RenameTypeParticipant extends RenameParticipant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		final Map changes= new HashMap();
 		final String newName= computeNewName();
 		ISearchResultCollector collector= new ISearchResultCollector() {
@@ -94,7 +94,7 @@ public class RenameTypeParticipant extends RenameParticipant {
 			return null;
 		CompositeChange result= new CompositeChange("JSP updates"); //$NON-NLS-1$
 		for (Iterator iter= changes.values().iterator(); iter.hasNext();) {
-			result.add((IChange)iter.next());
+			result.add((Change)iter.next());
 		}
 		return result;
 	}

@@ -10,16 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 
 public class DeleteFolderChange extends AbstractDeleteChange {
 	
@@ -51,14 +51,14 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 	/* non java-doc
 	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return getFolder(fPath);
 	}
 
 	/* non java-doc
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
-	protected void doDelete(ChangeContext context, IProgressMonitor pm) throws CoreException{
+	protected void doDelete(IProgressMonitor pm) throws CoreException{
 		IFolder folder= getFolder(fPath);
 		Assert.isTrue(folder.exists());
 		folder.delete(false, true, new SubProgressMonitor(pm, 1));

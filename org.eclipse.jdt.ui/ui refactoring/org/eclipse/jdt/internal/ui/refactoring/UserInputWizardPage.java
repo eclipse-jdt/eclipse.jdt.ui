@@ -114,7 +114,6 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 			create.setCheckPassedSeverity(threshold);
 			
 			PerformChangeOperation perform= new PerformChangeOperation(create);
-			perform.setCheckPassedSeverity(threshold);
 			
 			result= wizard.performFinish(perform);
 			wizard.setChange(create.getChange());

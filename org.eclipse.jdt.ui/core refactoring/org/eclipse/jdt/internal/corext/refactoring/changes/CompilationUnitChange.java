@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import org.eclipse.text.edits.UndoEdit;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,6 +22,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 
 public class CompilationUnitChange extends TextFileChange {
 
@@ -45,7 +48,7 @@ public class CompilationUnitChange extends TextFileChange {
 	/* non java-doc
 	 * Method declared in IChange.
 	 */
-	public Object getModifiedLanguageElement(){
+	public Object getModifiedElement(){
 		return fCUnit;
 	}
 	
@@ -73,6 +76,13 @@ public class CompilationUnitChange extends TextFileChange {
 	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
 		super.releaseDocument(document, pm);
 		fCUnit.discardWorkingCopy();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected Change createUndoChange(UndoEdit edit) throws CoreException {
+		return new UndoCompilationUnitChange(getName(), fCUnit, edit, getSaveMode());
 	}
 }
 

@@ -14,7 +14,7 @@ package org.eclipse.ltk.refactoring.core;
  * A listener which is notified when a change's validation state
  * changes.
  * 
- * @see IChange#isValid(IProgressMonitor)
+ * @see Change#isValid(IProgressMonitor)
  * 
  * @since 3.0
  */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,15 @@ import org.eclipse.core.runtime.CoreException;
  */
 public interface IVariablePool {
 
+	/** Variable name to denote a plug-in descriptor */
+	public static final String PLUGIN_DESCRIPTOR= "pluginDescriptor";  //$NON-NLS-1$
+	
+	/** Variable name to denote the current selection of elements */
+	public static final String SELECTION= "selection";  //$NON-NLS-1$
+	
+	/** Variable name to denote the java.lang.System class */
+	public static final String SYSTEM= "System";  //$NON-NLS-1$
+	
 	/**
 	 * Returns the parent pool or <code>null</code> if no
 	 * this is the root of the pool hierarchy.

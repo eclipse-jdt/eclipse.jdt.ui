@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.Assert;
  */
 public class TextEditChangeGroup {
 	
-	private boolean fIsActive;
+	private boolean fIsEnabled;
 	private TextChange fTextChange;
 	private TextEditGroup fTextEditGroup;
 	
@@ -42,7 +42,7 @@ public class TextEditChangeGroup {
 		Assert.isNotNull(change);
 		Assert.isNotNull(group);
 		fTextChange= change;
-		fIsActive= true;
+		fIsEnabled= true;
 		fTextEditGroup= group;
 	}
 	
@@ -57,26 +57,26 @@ public class TextEditChangeGroup {
 	}
 	
 	/**
-	 * Marks the group as active or inactive. If a group
-	 * is marked as inactive the text edits managed by the
+	 * Marks the group as enabled or disabled. If a group
+	 * is marked as disabled the text edits managed by the
 	 * underlying text edit group aren't executed when
 	 * performing the text change that owns this group.
 	 * 
-	 * @param active <code>true</code> to mark this group
-	 *  as active, <code>false</code> to mark it as inactive
+	 * @param enabled <code>true</code> to mark this group
+	 *  as enabled, <code>false</code> to mark it as disabled
 	 */
-	public void setActive(boolean active) {
-		fIsActive= active;
+	public void setEnabled(boolean enabled) {
+		fIsEnabled= enabled;
 	}
 	
 	/**
-	 * Returns whether the group is active or not.
+	 * Returns whether the group is enabled or not.
 	 * 
 	 * @return <code>true</code> if the group is marked as
-	 *  active; <code>false</code> otherwise
+	 *  enabled; <code>false</code> otherwise
 	 */
-	public boolean isActive() {
-		return fIsActive;
+	public boolean isEnabled() {
+		return fIsEnabled;
 	}
 	
 	/**

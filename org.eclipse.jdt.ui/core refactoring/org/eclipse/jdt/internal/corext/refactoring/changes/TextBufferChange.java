@@ -17,7 +17,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 /**
@@ -45,8 +46,22 @@ public class TextBufferChange extends TextChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getModifiedLanguageElement(){
+	public Object getModifiedElement(){
 		return fBuffer;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void initializeValidationData(IProgressMonitor pm) throws CoreException {
+		fChange.initializeValidationData(pm);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return fChange.isValid(pm);
 	}
 
 	/**
@@ -59,8 +74,8 @@ public class TextBufferChange extends TextChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void commit(IProgressMonitor pm) throws CoreException {
-		fChange.commit(pm);
+	protected void commit(IDocument document, IProgressMonitor pm) throws CoreException {
+		fChange.commit(document, pm);
 	}
 	
 	/**
@@ -73,8 +88,16 @@ public class TextBufferChange extends TextChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IChange createUndoChange(UndoEdit edit) throws CoreException {
+	protected Change createUndoChange(UndoEdit edit) throws CoreException {
 		return fChange.createUndoChange(edit);
-	}	
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		fChange.setEnabled(enabled);
+	}
 }
 

@@ -17,22 +17,24 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
+
+import org.eclipse.ltk.refactoring.core.PerformRefactoringOperation;
 
 public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 
@@ -97,48 +99,48 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
 	
-	protected void performTest(ICompilationUnit unit, Refactoring refactoring, int mode, String out) throws Exception {
+	protected void performTest(final ICompilationUnit unit, final Refactoring refactoring, int mode, final String out, boolean doUndo) throws Exception {
 		IProgressMonitor pm= new NullProgressMonitor();
-		RefactoringStatus status= checkPreconditions(refactoring, pm);
 		switch (mode) {
 			case VALID_SELECTION:
-				// System.out.println(status);
-				assertTrue(status.isOK());
+				assertTrue(checkPreconditions(refactoring, pm).isOK());
 				break;
 			case INVALID_SELECTION:
-				// System.out.println(status);
-				assertTrue(!status.isOK());
+				assertTrue(!checkPreconditions(refactoring, pm).isOK());
 				break;
 			case COMPARE_WITH_OUTPUT:
-				assertTrue(!status.hasFatalError());
+				IUndoManager undoManager= Refactoring.getUndoManager();
+				undoManager.flush();
 				String original= unit.getSource();
-				final IChange change= refactoring.createChange(pm);
-				assertNotNull(change);
-				final ChangeContext context= new ChangeContext(new TestExceptionHandler());
-				change.aboutToPerform(context, pm);
-				JavaCore.run(new IWorkspaceRunnable() {
-					public void run(IProgressMonitor monitor) throws CoreException {
-						change.perform(context, monitor);
-					}
-				}, pm);
-				change.performed();
-				final IChange undo= change.getUndoChange();
-				assertNotNull(undo);
-				compareSource(unit.getSource(), out);
-				final ChangeContext context2= new ChangeContext(new TestExceptionHandler());
-				undo.aboutToPerform(context, pm);
-				JavaCore.run(new IWorkspaceRunnable() {
-					public void run(IProgressMonitor monitor) throws CoreException {
-						undo.perform(context2, monitor);
-					}
-				}, pm);
-				undo.performed();
-				compareSource(unit.getSource(), original);
+				
+				PerformRefactoringOperation op= new PerformRefactoringOperation(
+					refactoring, getCheckingStyle());
+				ResourcesPlugin.getWorkspace().run(op, new NullProgressMonitor());
+				assertTrue("Precondition check failed", !op.getConditionStatus().hasFatalError());
+				assertTrue("Validation check failed", !op.getValidationStatus().hasFatalError());
+				assertNotNull("No Undo", op.getUndoChange());
+				compareSource(out, unit.getSource());
+				Change undo= op.getUndoChange();
+				assertNotNull("Undo doesn't exist", undo);
+				assertTrue("Undo manager is empty", undoManager.anythingToUndo());
+
+				if (doUndo) {
+					undoManager.performUndo(new NullProgressMonitor());
+					assertTrue("Undo manager still has undo", !undoManager.anythingToUndo());
+					assertTrue("Undo manager is empty", undoManager.anythingToRedo());
+					compareSource(original, unit.getSource());
+				}
 				break;		
 		}
 	}
 	
 	protected RefactoringStatus checkPreconditions(Refactoring refactoring, IProgressMonitor pm) throws CoreException {
-		return refactoring.checkPreconditions(pm);
+		CheckConditionsOperation op= new CheckConditionsOperation(refactoring, getCheckingStyle());
+		op.run(new NullProgressMonitor());
+		return op.getStatus();
+	}
+	
+	protected int getCheckingStyle() {
+		return PerformRefactoringOperation.CHECK_PRECONDITION;
 	}
 }

@@ -18,29 +18,12 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginRegistry;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-
-/**
- * A property interface adds additional test methods to an already
- * existing class. It is comparable to <code>IAdaptable<code> in the
- * sense that it extends existing class. However the major differences
- * are:
- * <ul>
- *   <li>more than one property tester can be added to a class.</li>
- *   <li>the contribution is done using the normal XML based
- *       extension mechanism.</li>
- *   <li>if the plug-in declaring a property isn't loaded yet during
- *       property testing this is singnal to the caller using the special
- *       return value <code>TestResult.NOT_LOADED</code>.
- * </ul>
- */
 public class TypeExtension {
 	
 	private static final String EXT_POINT= "typeExtenders"; //$NON-NLS-1$
@@ -59,14 +42,14 @@ public class TypeExtension {
 		public boolean canLoad() {
 			return false;
 		}
-		public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
+		public Object invoke(Object receiver, String method, Object[] args) {
 			return null;
 		}
 	};
 		
 	/* a special type extension instance that marks the end of an evaluation chain */
 	private static final TypeExtension END_POINT= new TypeExtension() {
-		/* package */ ITypeExtender find(Object o, String name) {
+		/* package */ ITypeExtender findTypeExtender(String name, boolean staticMethod) {
 			return CONTINUE;
 		}	
 	};
@@ -75,12 +58,12 @@ public class TypeExtension {
 	 * Map containing all already instanciated type extension object. Key is
 	 * of type <code>Class</code>, value is of type <code>TypeExtension</code>. 
 	 */
-	private static final Map fInterfaceMap= new HashMap();
+	private static final Map/*<Class, TypeExtension>*/ fgTypeExtensionMap= new HashMap();
 	
 	/*
-	 * A cache to give fast access to that 100 method invocations.
+	 * A cache to give fast access to the last 100 method invocations.
 	 */
-	private static final LRUCache fMethodCache= new LRUCache(100);
+	private static final LRUCache fgMethodCache= new LRUCache(100);
 	
 	/* debugging flag to enable tracing */
 	private static final boolean TRACING;
@@ -106,49 +89,51 @@ public class TypeExtension {
 	private TypeExtension(Class type) {
 		Assert.isNotNull(type);
 		fType= type;
-		synchronized (fInterfaceMap) {
-			fInterfaceMap.put(fType, this);
+		synchronized (fgTypeExtensionMap) {
+			fgTypeExtensionMap.put(fType, this);
 		}
 	}
 	
-	public static Method getMethod(Object receiver, String method) throws CoreException {
-		// TODO must synchronize access to method cache.
+	public static Method getMethod(Object receiver, String method) throws ExpressionException  {
 		long start= 0;
 		if (TRACING)
 			start= System.currentTimeMillis();
 		
-		Class clazz= receiver.getClass();
+		// if we call a static method than the receiver is the class object
+		Class clazz= receiver instanceof Class ? (Class)receiver : receiver.getClass();
 		Method result= new Method(clazz, method);
-		Object cached= fMethodCache.get(result);
+		Method cached= getCachedMethod(result);
 		if (cached != null) {
 			if (TRACING) {
-				System.out.println("[Type Extension] - method " +
-					clazz.getName() + "#" + method +
-					" found in cache: " + 
-					(System.currentTimeMillis() - start) + " ms.");
-				return (Method)cached;
+				System.out.println("[Type Extension] - method " + //$NON-NLS-1$
+					clazz.getName() + "#" + method + //$NON-NLS-1$
+					" found in cache: " +  //$NON-NLS-1$
+					(System.currentTimeMillis() - start) + " ms."); //$NON-NLS-1$
+				return cached;
 			}
 		}
 		TypeExtension extension= get(clazz);
-		ITypeExtender extender= extension.find(receiver, method);
+		ITypeExtender extender= extension.findTypeExtender(method, receiver instanceof Class);
 		if (extender == CONTINUE) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-				IStatus.ERROR, "Unknown method: " + method, null));
+			throw new ExpressionException(ExpressionException.TYPE_EXTENDER_UNKOWN_METHOD,
+				ExpressionMessages.getFormattedString(
+					"TypeExtender.unknownMethod",  //$NON-NLS-1$
+					new Object[] {method, clazz.toString()}));
 		}
 		result.setExtender(extender);
-		fMethodCache.put(result, result);
+		putMethodInCache(result);
 		if (TRACING) {
-			System.out.println("[Type Extension] - method " +
-				clazz.getName() + "#" + method +
-				" not found in cache: " + 
-				(System.currentTimeMillis() - start) + " ms.");
+			System.out.println("[Type Extension] - method " + //$NON-NLS-1$
+				clazz.getName() + "#" + method + //$NON-NLS-1$
+				" not found in cache: " +  //$NON-NLS-1$
+				(System.currentTimeMillis() - start) + " ms."); //$NON-NLS-1$
 		}
 		return result;
 	}
 	
 	private static TypeExtension get(Class clazz) {
-		synchronized(fInterfaceMap) {
-			TypeExtension result= (TypeExtension)fInterfaceMap.get(clazz);
+		synchronized(fgTypeExtensionMap) {
+			TypeExtension result= (TypeExtension)fgTypeExtensionMap.get(clazz);
 			if (result == null) {
 				result= new TypeExtension(clazz);
 			}
@@ -156,7 +141,19 @@ public class TypeExtension {
 		}
 	}
 	
-	/* package */ ITypeExtender find(Object element, String method) throws CoreException {
+	private static Method getCachedMethod(Method method) {
+		synchronized(fgMethodCache) {
+			return (Method)fgMethodCache.get(method);
+		}
+	}
+	
+	private static void putMethodInCache(Method method) {
+		synchronized(fgMethodCache) {
+			fgMethodCache.put(method, method);
+		}
+	}
+	
+	/* package */ ITypeExtender findTypeExtender(String method, boolean staticMethod) {
 		synchronized (this) {
 			if (fExtenders == null)
 				initialize();
@@ -191,6 +188,10 @@ public class TypeExtension {
 			}
 		}
 		
+		// there is no inheritance for static methods
+		if (staticMethod) 
+			return CONTINUE;
+		
 		// handle extends chain
 		synchronized (this) {
 			if (fExtends == null) {
@@ -202,7 +203,7 @@ public class TypeExtension {
 				}
 			}
 		}
-		result= fExtends.find(element, method);
+		result= fExtends.findTypeExtender(method, staticMethod);
 		if (result != CONTINUE)
 			return result;
 		
@@ -221,7 +222,7 @@ public class TypeExtension {
 			}
 		}
 		for (int i= 0; i < fImplements.length; i++) {
-			result= fImplements[i].find(element, method);
+			result= fImplements[i].findTypeExtender(method, staticMethod);
 			if (result != CONTINUE)
 				return result;
 		}

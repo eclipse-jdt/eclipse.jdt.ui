@@ -55,10 +55,11 @@ import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -81,7 +82,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private CodeGenerationSettings fSettings;
 	private ISurroundWithTryCatchQuery fQuery;
 	private SurroundWithTryCatchAnalyzer fAnalyzer;
-	private boolean fSaveChanges;
+	private boolean fLeaveDirty;
 
 	private ICompilationUnit fCUnit;
 	private CompilationUnit fRootNode;
@@ -97,6 +98,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		fSelection= selection;
 		fSettings= settings;
 		fQuery= query;
+		fLeaveDirty= false;
 	}
 
 	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
@@ -107,8 +109,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length), settings, query);
 	}
 
-	public void setSaveChanges(boolean saveChanges) {
-		fSaveChanges= saveChanges;
+	public void setLeaveDirty(boolean leaveDirty) {
+		fLeaveDirty= leaveDirty;
 	}
 	
 	public boolean stopExecution() {
@@ -154,12 +156,13 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	/* non Java-doc
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		final String NN= ""; //$NON-NLS-1$
 		TextBuffer buffer= null;
 		try {
 			final CompilationUnitChange result= new CompilationUnitChange(getName(), fCUnit);
-			result.setSave(fSaveChanges);
+			if (fLeaveDirty)
+				result.setSaveMode(TextFileChange.LEAVE_DIRTY);
 			MultiTextEdit root= new MultiTextEdit();
 			result.setEdit(root);
 			buffer= TextBuffer.acquire(getFile());

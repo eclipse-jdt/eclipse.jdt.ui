@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jface.util.Assert;
-
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 
 class DefaultChangeElement extends ChangeElement {
 	
-	private IChange fChange;
+	private Change fChange;
 	private ChangeElement[] fChildren;
 
 	/**
@@ -33,7 +33,7 @@ class DefaultChangeElement extends ChangeElement {
 	 * @param change the actual change. Argument must not be
 	 * 	<code>null</code>
 	 */
-	public DefaultChangeElement(ChangeElement parent, IChange change) {
+	public DefaultChangeElement(ChangeElement parent, Change change) {
 		super(parent);
 		fChange= change;
 		Assert.isNotNull(fChange);
@@ -44,7 +44,7 @@ class DefaultChangeElement extends ChangeElement {
 	 * 
 	 * @return the underlying change
 	 */
-	public IChange getChange() {
+	public Change getChange() {
 		return fChange;
 	}
 	
@@ -66,14 +66,14 @@ class DefaultChangeElement extends ChangeElement {
 	 * @see ChangeElement#setActive
 	 */
 	public void setActive(boolean active) {
-		fChange.setActive(active);
+		fChange.setEnabled(active);
 	}
 	
 	/* non Java-doc
 	 * @see ChangeElement.getActive
 	 */
 	public int getActive() {
-		if (fChange instanceof ICompositeChange || fChange instanceof CompilationUnitChange || fChange instanceof TextChange)
+		if (fChange instanceof CompositeChange || fChange instanceof CompilationUnitChange || fChange instanceof TextChange)
 			return getCompositeChangeActive();
 		else
 			return getDefaultChangeActive();
@@ -97,7 +97,7 @@ class DefaultChangeElement extends ChangeElement {
 	}
 
 	private int getDefaultChangeActive() {
-		int result= fChange.isActive() ? ACTIVE : INACTIVE;
+		int result= fChange.isEnabled() ? ACTIVE : INACTIVE;
 		if (fChildren != null) {
 			for (int i= 0; i < fChildren.length; i++) {
 				result= ACTIVATION_TABLE[fChildren[i].getActive()][result];

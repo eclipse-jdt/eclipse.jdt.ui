@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IProcessorBasedRefactoring;
@@ -170,7 +170,7 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", fElementParticipants.length + fDerivedParticipants.length + fResourceParticipants.length + 1); //$NON-NLS-1$
 		List changes= new ArrayList();
 		changes.add(fProcessor.createChange(new SubProgressMonitor(pm, 1)));
@@ -189,7 +189,7 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 			IRefactoringParticipant participant= fResourceParticipants[i];
 			changes.add(participant.createChange(new SubProgressMonitor(pm, fResourceParticipants.length)));
 		}
-		return new DelegatingValidationStateChange((IChange[]) changes.toArray(new IChange[changes.size()]));		
+		return new DelegatingValidationStateChange((Change[]) changes.toArray(new Change[changes.size()]));		
 	}
 	
 	private void initParticipants() throws CoreException {

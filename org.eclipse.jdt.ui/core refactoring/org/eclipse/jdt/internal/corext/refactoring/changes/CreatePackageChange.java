@@ -17,17 +17,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
+import org.eclipse.ltk.refactoring.core.NullChange;
 
-public class CreatePackageChange extends Change {
+public class CreatePackageChange extends JDTChange {
 	
 	private IPackageFragment fPackageFragment;
-	private IChange fUndoChange;
 	
 	public CreatePackageChange(IPackageFragment pack) {
 		fPackageFragment= pack;
@@ -36,32 +33,21 @@ public class CreatePackageChange extends Change {
 	/*
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public void perform(ChangeContext context, IProgressMonitor pm) throws ChangeAbortException, CoreException {
+	public Change perform(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("CreatePackageChange.Creating_package"), 1); //$NON-NLS-1$
 
-			if (!isActive() || fPackageFragment.exists()) {
-				fUndoChange= new NullChange();	
+			if (fPackageFragment.exists()) {
+				return new NullChange();	
 			} else {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) fPackageFragment.getParent();
 				root.createPackageFragment(fPackageFragment.getElementName(), false, pm);
 				
-				fUndoChange= new DeleteSourceManipulationChange(fPackageFragment);
+				return new DeleteSourceManipulationChange(fPackageFragment);
 			}		
-		} catch (CoreException e) {
-			handleException(context, e);
-			fUndoChange= new NullChange();
-			setActive(false);
 		} finally {
 			pm.done();
 		}
-	}
-
-	/*
-	 * @see IChange#getUndoChange()
-	 */
-	public IChange getUndoChange() {
-		return fUndoChange;
 	}
 
 	/*
@@ -74,8 +60,8 @@ public class CreatePackageChange extends Change {
 	/*
 	 * @see IChange#getModifiedLanguageElement()
 	 */
-	public Object getModifiedLanguageElement() {
-		return null;
+	public Object getModifiedElement() {
+		return fPackageFragment;
 	}
 
 }

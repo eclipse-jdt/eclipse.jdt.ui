@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-
 
 public class WithExpression extends CompositeExpression {
 
@@ -21,15 +19,12 @@ public class WithExpression extends CompositeExpression {
 	private String fVariable;
 	private static final String ATT_VARIABLE= "variable";  //$NON-NLS-1$
 	
-	public WithExpression(IConfigurationElement configElement) throws CoreException {
+	public WithExpression(IConfigurationElement configElement) throws ExpressionException {
 		fVariable= configElement.getAttribute(ATT_VARIABLE);
-		checkAttribute(ATT_VARIABLE, fVariable);
+		Expressions.checkAttribute(ATT_VARIABLE, fVariable);
 	}
 	
-	/* (non-Javadoc)
-	 * @see Expression#evaluate
-	 */
-	public TestResult evaluate(IVariablePool pool) throws CoreException {
+	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
 		return evaluateAnd(new VariablePool(pool, pool.getVariable(fVariable)));
 	}
 }

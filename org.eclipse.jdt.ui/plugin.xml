@@ -3820,8 +3820,7 @@
          </action>
       </editorContribution>
    </extension>
-   <extension
-         point="org.eclipse.jdt.ui.typeExtenders">
+   <extension point="org.eclipse.jdt.ui.typeExtenders">
       <typeExtender
             methods="matchesPattern, projectNature, canDelete"
             type="org.eclipse.core.resources.IResource"

@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -44,6 +46,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 			assertTrue("old folder should exist here", oldRoot.exists());
 			
 			RenameSourceFolderChange change= new RenameSourceFolderChange(oldRoot, newName);
+			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			
 			assertTrue("old folder should not exist", ! oldRoot.exists());
@@ -72,6 +75,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 			assertTrue("old folder 2 should exist here", oldRoot2.exists());
 			
 			RenameSourceFolderChange change= new RenameSourceFolderChange(oldRoot1, newName1);
+			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			
 			assertTrue("old folder should not exist", ! oldRoot1.exists());

@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 
 public interface IPreviewWizardPage extends IWizardPage {
 
@@ -24,6 +24,6 @@ public interface IPreviewWizardPage extends IWizardPage {
 	 * 
 	 * @param change the new change.
 	 */
-	public void setChange(IChange change);	
+	public void setChange(Change change);	
 }
 

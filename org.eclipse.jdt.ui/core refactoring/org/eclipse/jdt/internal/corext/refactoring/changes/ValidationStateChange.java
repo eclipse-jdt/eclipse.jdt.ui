@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -30,7 +31,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.ListenerList;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -128,36 +129,53 @@ public class ValidationStateChange extends CompositeChange implements IDynamicVa
 	
 	private int fInRefactoringCount;
 	private ListenerList fListeners= new ListenerList();
-	private RefactoringStatus fValidationState= new RefactoringStatus();
+	private RefactoringStatus fValidationState= null;
 	private FlushListener fFlushListener;
 	private SaveListener fSaveListener;
 	
 	public ValidationStateChange() {
 		super();
-		setSynthetic(true);
+		markAsGeneric();
 	}
 	
-	public ValidationStateChange(IChange change) {
+	public ValidationStateChange(Change change) {
 		super(change.getName());
 		add(change);
-		setSynthetic(true);
+		markAsGeneric();
 	}
 	
 	public ValidationStateChange(String name) {
 		super(name);
-		setSynthetic(true);
+		markAsGeneric();
 	}
 	
-	public ValidationStateChange(String name, IChange[] changes) {
+	public ValidationStateChange(String name, Change[] changes) {
 		super(name, changes);
-		setSynthetic(true);
+		markAsGeneric();
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		if (fValidationState == null) {
+			return super.isValid(pm);
+		}
 		return fValidationState;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public Change perform(IProgressMonitor pm) throws CoreException {
+		final Change[] result= new Change[1];
+		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				result[0]= ValidationStateChange.super.perform(monitor);
+			}
+		};
+		JavaCore.run(runnable, pm);
+		return result[0];
 	}
 
 	/**
@@ -181,26 +199,26 @@ public class ValidationStateChange extends CompositeChange implements IDynamicVa
 	/**
 	 * {@inheritDoc}
 	 */
-	public void aboutToPerformChange(IChange change) {
+	public void aboutToPerformChange(Change change) {
 		fInRefactoringCount++;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public void changePerformed(IChange change, Exception e) {
+	public void changePerformed(Change change, Change undo, Exception e) {
 		fInRefactoringCount--;
-		if (!change.isUndoable() || e != null) {
-			fireValidationStateChanged();
-		} else {
-			fValidationState= new RefactoringStatus();
+		if (fInRefactoringCount == 0) {
+			if ((undo == null || e != null) && fValidationState != null) {
+				fireValidationStateChanged();
+			}
 		}
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IChange createUndoChange(IChange[] childUndos) throws CoreException {
+	protected Change createUndoChange(Change[] childUndos) {
 		ValidationStateChange result= new ValidationStateChange();
 		for (int i= 0; i < childUndos.length; i++) {
 			result.add(childUndos[i]);
