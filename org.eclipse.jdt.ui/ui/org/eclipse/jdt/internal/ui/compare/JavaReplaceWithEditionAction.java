@@ -96,7 +96,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		} catch (JavaModelException ex) {
 		}
 		if (file == null) {
-			MessageDialog.openInformation(parent, fTitle, "Can't find underlying file");
+			MessageDialog.openError(parent, fTitle, "Can't find underlying file");
 			return;
 		}
 		
@@ -128,7 +128,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		try {
 			docManager= new DocumentManager(cu);
 		} catch(JavaModelException ex) {
-			MessageDialog.openInformation(parent, fTitle, "JavaModelException");
+			MessageDialog.openError(parent, fTitle, "JavaModelException");
 			return;
 		}
 		
@@ -157,42 +157,37 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			}
 
 		} catch(BadLocationException ex) {
-			MessageDialog.openInformation(parent, fTitle, "BadLocationException");
+			MessageDialog.openError(parent, fTitle, "BadLocationException");
 		} catch(CoreException ex) {
-			MessageDialog.openInformation(parent, fTitle, "CoreException");
+			MessageDialog.openError(parent, fTitle, "CoreException");
 		} finally {
 			docManager.disconnect();
 		}
 	}
 	
-	protected void updateLabel(ISelection selection) {
-		String text= "Replace";
-		IMember member= null;
+	protected String getLabelName(ISelection selection) {
 		if (!selection.isEmpty()) {
-			member= getEditionElement(selection);
-			if (member != null) {
-				int type= member.getElementType();
-				switch (type) {
-				case 7:
-					text+= " Class";
-					break;
-				case 8:
-					text+= " Field";
-					break;
-				case 9:
-					text+= " Method";
-					break;
-				case 10:
-					text+= " Initializer";
-					break;
-				default:
-					text+= " type("+type+")";
-					break;
-				}
-			}
+			IMember member= getEditionElement(selection);
+			if (member != null)
+				return member.getElementName();
 		}
-		setText(text + " from Local History...");
-		setEnabled(member != null);
+		return null;
 	}
+	
+//	protected void updateLabel(ISelection selection) {
+//		String name= null;
+//		if (!selection.isEmpty()) {
+//			IMember member= getEditionElement(selection);
+//			if (member != null)
+//				name= member.getElementName();
+//		}
+//		if (name != null) {
+//			setText("Replace \""+ name +"\" from Local History...");
+//			setEnabled(true);
+//		} else {
+//			setText("Replace from Local History...");
+//			setEnabled(false);
+//		}
+//	}
 }
 

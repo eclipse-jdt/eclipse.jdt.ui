@@ -2,6 +2,7 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.text.MessageFormat;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.*;
@@ -16,13 +17,17 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 	
 	protected ResourceBundle fBundle;
 	protected String fTitle;
+	private String fLabel;
+	private String fLabelWithArg;
 	protected ISelectionProvider fSelectionProvider;
 
 
 	public JavaHistoryAction(ISelectionProvider sp, String bundleName) {
 		
 		fBundle= ResourceBundle.getBundle(bundleName);
-		fTitle= getResourceString("title", "Xxxx from Local History");
+		fTitle= getResourceString("title", "title");
+		fLabel= getResourceString("actionLabel", "actionLabel");
+		fLabelWithArg= getResourceString("actionLabelWithArg", "actionLabelWithArg {0}");
 				
 		fSelectionProvider= sp;
 		
@@ -53,9 +58,7 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 	public final void selectionChanged(SelectionChangedEvent e) {
 		updateLabel(e.getSelection());
 	}
-	
-	abstract protected void updateLabel(ISelection selection);
-	
+		
 	IMember getEditionElement(ISelection selection) {
 		
 		if (selection instanceof IStructuredSelection) {
@@ -66,6 +69,21 @@ public abstract class JavaHistoryAction extends Action implements ISelectionChan
 					return m;
 			}
 		}
+		return null;
+	}
+	
+	void updateLabel(ISelection selection) {
+		String name= getLabelName(selection);
+		if (name != null) {
+			setText(MessageFormat.format(fLabelWithArg, new String[] { getLabelName(selection) }));
+			setEnabled(true);
+		} else {
+			setText(MessageFormat.format(fLabel, new String[0]));
+			setEnabled(false);
+		}
+	}
+	
+	protected String getLabelName(ISelection selection) {
 		return null;
 	}
 }

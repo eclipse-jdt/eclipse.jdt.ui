@@ -15,6 +15,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jdt.internal.ui.util.DocumentManager;
+
 import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.*;
@@ -23,6 +28,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.compare.*;
+import org.eclipse.compare.contentmergeviewer.IDocumentRange;;
 
 
 public class JavaAddElementFromHistory extends JavaHistoryAction {
@@ -35,7 +41,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		super(sp, BUNDLE_NAME);
 		fEditor= editor;
 	}
-			
+	
 	/**
 	 * @see Action#run
 	 */
@@ -47,6 +53,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		
 		ICompilationUnit cu= null;
 		IParent parent= null;
+		int insertPosition= -1;		// where to insert the element
 		
 		if (selection.isEmpty()) {
 			if (fEditor != null) {
@@ -69,8 +76,18 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 				parent= (IParent)input;
 			} else {
 				IJavaElement parentElement= input.getParent();
-				if (parentElement instanceof IParent)
-					parent= (IParent)parentElement; 
+				if (parentElement instanceof IParent) {
+					parent= (IParent)parentElement;
+					if (input instanceof ISourceReference) {
+						ISourceReference sr= (ISourceReference) input;
+						try {
+							ISourceRange range= sr.getSourceRange();
+							insertPosition= range.getOffset() + range.getLength();
+						} catch(JavaModelException ex) {
+							MessageDialog.openError(shell, fTitle, "Can't find range to replace");
+						}
+					}
+				}
 			}
 		}
 		
@@ -104,14 +121,90 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		ITypedElement[] editions= new ITypedElement[states.length];
 		for (int i= 0; i < states.length; i++)
 			editions[i]= new HistoryItem(target, states[i]);
+				
+		DocumentManager docManager= null;
+		try {
+			docManager= new DocumentManager(cu);
+		} catch(JavaModelException ex) {
+			MessageDialog.openError(shell, fTitle, "JavaModelException");
+			return;
+		}
 		
-		EditionSelectionDialog esd= new EditionSelectionDialog(shell, fBundle);
-		//esd.setAddMode(true);
-		esd.selectEdition(target, editions, parent);
+		try {
+			docManager.connect();
+		
+			EditionSelectionDialog d= new EditionSelectionDialog(shell, fBundle);
+			
+			IDocument document= docManager.getDocument();
+			String type= file.getFileExtension();
+			
+			ITypedElement ti= d.selectEdition(target, editions, parent);
+
+			if (ti instanceof IStreamContentAccessor) {
+				IStreamContentAccessor sca= (IStreamContentAccessor) ti;				
+					
+//				Position range= null;
+//				ITypedElement target2= d.getTarget();
+//				if (target2 instanceof IDocumentRange)
+//					range= ((IDocumentRange)target2).getRange();
+		
+				String text= JavaCompareUtilities.readString(sca.getContents());	
+				if (text != null && insertPosition >= 0) {
+					document.replace(insertPosition, 0, text);
+					//	docManager.save(null);	// should not be necesssary
+				}
+			}
+
+		} catch(BadLocationException ex) {
+			MessageDialog.openError(shell, fTitle, "BadLocationException");
+		} catch(CoreException ex) {
+			MessageDialog.openError(shell, fTitle, "CoreException");
+		} finally {
+			docManager.disconnect();
+		}
 	}
 	
-	protected void updateLabel(ISelection selection) {
-		setText("Add from Local History...");
-		setEnabled(true);
+	IParent getContainer(ISelection selection) {
+		if (selection.isEmpty()) {
+			if (fEditor != null) {
+				IEditorInput editorInput= fEditor.getEditorInput();
+				IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+				return manager.getWorkingCopy(editorInput);
+			}
+			return null;
+		}
+		
+		IMember input= getEditionElement(selection);
+		if (input instanceof IParent)
+			return (IParent)input;
+				
+		if (input != null) {
+			IJavaElement parentElement= input.getParent();
+			if (parentElement instanceof IParent)
+				return (IParent)parentElement;
+		}
+		
+		return null;
 	}
+	
+	protected String getLabelName(ISelection selection) {
+		IParent parent= getContainer(selection);
+		if (parent instanceof IJavaElement)
+			return ((IJavaElement)parent).getElementName();
+		return null;
+	}
+	
+//	protected void updateLabel(ISelection selection) {
+//		String name= null;
+//		IParent parent= getContainer(selection);
+//		if (parent instanceof IJavaElement)
+//			name= ((IJavaElement)parent).getElementName();
+//		if (name != null) {
+//			setText("Add to \"" + name + "\" from Local History...");
+//			setEnabled(true);
+//		} else {
+//			setText("Add from Local History...");
+//			setEnabled(false);
+//		}	
+//	}
 }

@@ -350,7 +350,15 @@
 		class="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator">
 	</structureCreator>
 </extension>
-	
+
+<extension
+	point="org.eclipse.compare.contentViewers">
+	<viewer
+		extensions="java,java2"
+		class="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator">
+	</viewer>
+</extension>
+
 <extension
 	point="org.eclipse.compare.contentMergeViewers">
 	<viewer
