@@ -144,7 +144,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return fVisibilityModifier;
 	}
 	
-	private void setGenerateComment(boolean comment) {
+	public void setGenerateComment(boolean comment) {
 		fGenerateComment= comment;
 	}
 	
