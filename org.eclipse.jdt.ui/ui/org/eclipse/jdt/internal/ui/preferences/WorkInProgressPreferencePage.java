@@ -55,12 +55,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 	public final static String PREF_BGSEARCH= "search_in_background"; //$NON-NLS-1$
 	public final static String PREF_SEARCH_MENU= "small_search_menu"; //$NON-NLS-1$
 	
-	/** 
-	 * All FieldEditors except <code>smartTyping</code>, whose enable state
-	 * is controlled by the smartTyping preference.
-	 */
-	private Set fSmartTypingItems= new HashSet();
-	
 	private List fCheckBoxes;
 	private List fRadioButtons;
 	private List fTextControls;
@@ -151,20 +145,20 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		group.setText(PreferencesMessages.getString(PREFIX + "editor")); //$NON-NLS-1$
 	
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "markOccurrences"), PreferenceConstants.EDITOR_MARK_OCCURRENCES); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.getString(PREFIX + "rollover"), PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER); //$NON-NLS-1$
 		createSpacer(group, 1);
 	
 		Label label= new Label(group, SWT.NONE);
 		label.setText(PreferencesMessages.getString(PREFIX + "smartTyping.label")); //$NON-NLS-1$
 	
-		Button button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartSemicolon"), PreferenceConstants.EDITOR_SMART_SEMICOLON); //$NON-NLS-1$
-		fSmartTypingItems.add(button);
+		addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartSemicolon"), PreferenceConstants.EDITOR_SMART_SEMICOLON); //$NON-NLS-1$
 		
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartOpeningBrace"), PreferenceConstants.EDITOR_SMART_OPENING_BRACE); //$NON-NLS-1$
-		fSmartTypingItems.add(button);
+		addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartOpeningBrace"), PreferenceConstants.EDITOR_SMART_OPENING_BRACE); //$NON-NLS-1$
 		
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartTab"), PreferenceConstants.EDITOR_SMART_TAB); //$NON-NLS-1$
-		fSmartTypingItems.add(button);
+		addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartTab"), PreferenceConstants.EDITOR_SMART_TAB); //$NON-NLS-1$
+	
 		
+
 		/* line change bar */
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
@@ -177,8 +171,8 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		l.setLayoutData(gd);
 	
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "showQuickDiffPerDefault"), ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON); //$NON-NLS-1$
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickdiff.characterMode"), ExtendedTextEditorPreferenceConstants.QUICK_DIFF_CHARACTER_MODE); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.getString(PREFIX + "showQuickDiffPerDefault"), ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickdiff.characterMode"), ExtendedTextEditorPreferenceConstants.QUICK_DIFF_CHARACTER_MODE); //$NON-NLS-1$
 		
 		l= new Label(group, SWT.LEFT );
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -279,15 +273,15 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.getString(PREFIX + "quickassist.group")); //$NON-NLS-1$
 		
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickassist.option"), PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB); //$NON-NLS-1$ //$NON-NLS-2$
+		addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickassist.option"), PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB); //$NON-NLS-1$ //$NON-NLS-2$
 	
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.getString(PREFIX + "search")); //$NON-NLS-1$
 		
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "search.small_menu"), PREF_SEARCH_MENU); //$NON-NLS-1$
-		button= addCheckBox(group, PreferencesMessages.getString(PREFIX+"newsearch.option"), PREF_BGSEARCH); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.getString(PREFIX + "search.small_menu"), PREF_SEARCH_MENU); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.getString(PREFIX+"newsearch.option"), PREF_BGSEARCH); //$NON-NLS-1$
 		return result;
 	}
 	

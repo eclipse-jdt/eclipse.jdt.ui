@@ -2078,7 +2078,18 @@ public class PreferenceConstants {
 	public static final String FORMATTER_PROFILE = "formatter_profile"; //$NON-NLS-1$
 	
 	
+	/**
+	 * A named preference that controls whether annotation roll over is used or not.
+	 * <p>
+	 * Value is of type <code>Boolean</code>. If <code>true<code> the annotation ruler column
+	 * uses a roll over to display multiple anntotations
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_ANNOTATION_ROLL_OVER= "editor_annotation_roll_over"; //$NON-NLS-1$
 	
+		
 	/**
 	 * Initializes the given preference store with the default values.
 	 * 
@@ -2280,6 +2291,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, SWT.MOD1);
 		
 		store.setDefault(PreferenceConstants.EDITOR_SMART_TAB, true);
+		store.setDefault(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, false);
 		
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMAT, true);
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, false);
