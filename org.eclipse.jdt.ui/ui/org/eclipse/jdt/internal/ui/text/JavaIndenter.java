@@ -348,7 +348,7 @@ public class JavaIndenter {
 	 * @return the reference statement relative to which <code>position</code>
 	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
-	private int findReferencePosition(int offset, boolean danglingElse, boolean matchBrace, boolean matchParen, boolean matchCase) {
+	public int findReferencePosition(int offset, boolean danglingElse, boolean matchBrace, boolean matchParen, boolean matchCase) {
 		fIndent= 0; // the indentation modification
 		fAlign= JavaHeuristicScanner.NOT_FOUND;
 		fPosition= offset;
@@ -492,9 +492,9 @@ public class JavaIndenter {
 					// usually it is the end of a previous block
 					int pos= fPreviousPos; // store state
 					if (skipScope() && looksLikeArrayInitializerIntro()) {
-						continue; // its an array
+						continue; // it's an array
 					} else
-						return pos; // its not - do as with all the above
+						return pos; // it's not - do as with all the above
 					
 				// scopes: skip them
 				case Symbols.TokenRPAREN:

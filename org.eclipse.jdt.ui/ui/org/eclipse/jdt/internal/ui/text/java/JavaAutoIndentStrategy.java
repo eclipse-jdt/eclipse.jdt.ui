@@ -87,27 +87,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		fPartitioning= partitioning;
  	}
 
-	/**
-	 * Evaluates the given line for the opening bracket that matches the closing bracket on the given line.
-	 */
-	private int findMatchingOpenBracket(IDocument d, int lineNumber, int endOffset, int closingBracketIncrease) throws BadLocationException {
-
-		int startOffset= d.getLineOffset(lineNumber);
-		int bracketCount= getBracketCount(d, startOffset, endOffset, false) - closingBracketIncrease;
-
-		// sum up the brackets counts of each line (closing brackets count negative,
-		// opening positive) until we find a line the brings the count to zero
-		while (bracketCount < 0) {
-			--lineNumber;
-			if (lineNumber < 0)
-				return -1;
-			startOffset= d.getLineOffset(lineNumber);
-			endOffset= startOffset + d.getLineLength(lineNumber) - 1;
-			bracketCount += getBracketCount(d, startOffset, endOffset, false);
-		}
-		return lineNumber;
-	}
-
 	private int getBracketCount(IDocument d, int startOffset, int endOffset, boolean ignoreCloseBrackets) throws BadLocationException {
 
 		int bracketCount= 0;
@@ -205,11 +184,15 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int line= d.getLineOfOffset(p);
 			int start= d.getLineOffset(line);
 			int whiteend= findEndOfWhiteSpace(d, start, c.offset);
+			
+			JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
+			JavaIndenter indenter= new JavaIndenter(d, scanner);
 
 			// shift only when line does not contain any text up to the closing bracket
 			if (whiteend == c.offset) {
 				// evaluate the line with the opening bracket that matches out closing bracket
-				int indLine= findMatchingOpenBracket(d, line, c.offset, 1);
+				int reference= indenter.findReferencePosition(c.offset, false, true, false, false);
+				int indLine= d.getLineOfOffset(reference);
 				if (indLine != -1 && indLine != line) {
 					// take the indent of the found line
 					StringBuffer replaceText= new StringBuffer(getIndentOfLine(d, indLine));
