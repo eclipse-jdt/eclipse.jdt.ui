@@ -108,8 +108,8 @@ public class JavaDocLocations {
 			Object old= getJavaDocLocations().remove(path);
 			needsSave= save && (old != null);
 		} else {
-			Object old= getJavaDocLocations().put(path, url);
-			needsSave= save && !url.equals(old);
+			URL old= (URL) getJavaDocLocations().put(path, url);
+			needsSave= save && (old == null || !url.toExternalForm().equals(old.toExternalForm()));
 		}
 		if (needsSave) {
 			try {
