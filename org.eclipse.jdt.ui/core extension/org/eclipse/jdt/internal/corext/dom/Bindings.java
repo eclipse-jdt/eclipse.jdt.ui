@@ -60,11 +60,8 @@ public class Bindings {
 		String k1= b1.getKey();
 		String k2= b2.getKey();
 		if (k1 == null || k2 == null)
-				return false;
-		if (k1 != null)
-			return k1.equals(k2);
-		else
-			return k2.equals(k1);
+			return false;
+		return k1.equals(k2);
 	}
 	
 	/**
@@ -174,7 +171,9 @@ public class Bindings {
 				break;
 			case IBinding.VARIABLE:
 				declaring= ((IVariableBinding) binding).getDeclaringClass();
-				break;			
+				break;
+			default:
+				return binding.getName();
 		}
 		return JavaModelUtil.concatenateName(declaring.getQualifiedName(), binding.getName());
 	}	

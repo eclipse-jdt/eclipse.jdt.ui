@@ -245,7 +245,7 @@ public class StubUtility {
 			buf.append(";\n\n"); //$NON-NLS-1$
 		} else {
 			buf.append(" {\n\t"); //$NON-NLS-1$
-			if ((bodyContent != null) && (bodyContent.length() > 0)) {
+			if (bodyContent.length() > 0) {
 				buf.append(bodyContent);
 				buf.append('\n');
 			}
