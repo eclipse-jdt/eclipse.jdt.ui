@@ -688,7 +688,7 @@ public class StubUtility {
 		ArrayList newMethods= new ArrayList(superMethods.length);
 		for (int i= 0; i < superMethods.length; i++) {
 			IMethod curr= superMethods[i];
-			if (curr.isConstructor() && (JavaModelUtil.isVisible(curr, type.getPackageFragment()) || Flags.isProtected(curr.getFlags()))) {
+			if (curr.isConstructor() && (JavaModelUtil.isVisibleInHierarchy(curr, type.getPackageFragment()))) {
 				if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null) {
 					String newStub= genStub(cu, typeName, curr, curr.getDeclaringType(), genStubSettings, imports);
 					newMethods.add(newStub);
@@ -720,7 +720,7 @@ public class StubUtility {
 				IMethod curr= superMethods[i];
 				if (curr.isConstructor())  {
 					constuctorFound= true;
-					if (JavaModelUtil.isVisible(curr, type.getPackageFragment()) || Flags.isProtected(curr.getFlags()))
+					if (JavaModelUtil.isVisibleInHierarchy(curr, type.getPackageFragment()))
 						if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null)
 							constructorMethods.add(curr);
 		

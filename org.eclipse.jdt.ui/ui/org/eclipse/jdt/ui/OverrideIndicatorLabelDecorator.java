@@ -143,7 +143,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 */
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
 		IMethod impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, name, paramTypes, false);
-		if (impl != null) {
+		if (impl != null && JavaModelUtil.isVisibleInHierarchy(impl, type.getPackageFragment())) {
 			IMethod overridden= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, name, paramTypes, false);
 			if (overridden != null) {
 				return JavaElementImageDescriptor.OVERRIDES;

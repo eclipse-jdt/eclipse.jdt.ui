@@ -299,6 +299,26 @@ public class JavaModelUtil {
 		IPackageFragment otherpack= (IPackageFragment) findParentOfKind(member, IJavaElement.PACKAGE_FRAGMENT);
 		return (pack != null && pack.equals(otherpack));
 	}
+	
+	/**
+	 * Evaluates if a member in the focus' element hierarchy is visible from
+	 * elements in a package.
+	 * @param member The member to test the visibility for
+	 * @param pack The package of the focus element focus
+	 */
+	public static boolean isVisibleInHierarchy(IMember member, IPackageFragment pack) throws JavaModelException {
+		int otherflags= member.getFlags();
+		
+		if (Flags.isPublic(otherflags) || Flags.isProtected(otherflags)) {
+			return true;
+		} else if (Flags.isPrivate(otherflags)) {
+			return false;
+		}		
+		
+		IPackageFragment otherpack= (IPackageFragment) findParentOfKind(member, IJavaElement.PACKAGE_FRAGMENT);
+		return (pack != null && pack.equals(otherpack));
+	}
+			
 		
 	/**
 	 * Returns the package fragment root of <code>IJavaElement</code>. If the given

@@ -68,7 +68,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 					IPackageFragment pack= (IPackageFragment) fFocus.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 					for (int i= 0; i < methods.length; i++) {
 						IMethod curr= methods[i];
-						if (Flags.isProtected(curr.getFlags()) || JavaModelUtil.isVisible(curr, pack)) {
+						if (JavaModelUtil.isVisibleInHierarchy(curr, pack)) {
 							return false;
 						}
 					}
