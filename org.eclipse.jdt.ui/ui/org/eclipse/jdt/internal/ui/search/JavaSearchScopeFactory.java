@@ -55,7 +55,7 @@ public class JavaSearchScopeFactory {
 	}
 
 	public IJavaSearchScope createJavaSearchScope(ISelection selection) {
-		if (!selection.isEmpty() && selection instanceof IStructuredSelection) {
+		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
 			Iterator iter= ((IStructuredSelection)selection).iterator();
 			Set javaElements= new HashSet(((IStructuredSelection)selection).size());
 			while (iter.hasNext()) {
