@@ -51,12 +51,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 			Position position0= (Position) object0;
 			Position position1= (Position) object1;
 			
-			if (position0.getOffset() < position1.getOffset())
-				return -1;
-			else if (position0.getOffset() > position1.getOffset())
-				return +1;
-			else
-				return 0;
+			return position0.getOffset() - position1.getOffset();
 		}
 	}
 	
