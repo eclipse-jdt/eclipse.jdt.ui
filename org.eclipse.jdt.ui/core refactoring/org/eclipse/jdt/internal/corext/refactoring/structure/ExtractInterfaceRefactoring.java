@@ -397,6 +397,25 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			}
 				
 		} else if (parentNode instanceof VariableDeclaration){
+			if (isMethodParameter(parentNode)){
+				MethodDeclaration methodDeclaration= (MethodDeclaration)parentNode.getParent();	
+				int parameterIndex= methodDeclaration.parameters().indexOf(parentNode);
+				IMethod[] methods= getAllRippleMethods(methodDeclaration, new SubProgressMonitor(pm, 1));
+				if (methods == null){ //XXX this can be null because of bug 22883
+					SingleVariableDeclaration svd= (SingleVariableDeclaration)methodDeclaration.parameters().get(parameterIndex);
+					nodesToRemove.add(svd.getType());
+					addToBadVarSet(svd);
+					return true;
+				}
+				if (isAnyParameterDeclarationExcluded(methods, parameterIndex, nodesToRemove)){
+					for (int i= 0; i < methods.length; i++) {
+						SingleVariableDeclaration svd= getParameterDeclarationNode(parameterIndex, methods[i]);
+						nodesToRemove.add(svd.getType());
+						addToBadVarSet(svd);
+						return true;
+					}
+				}
+			} 
 			if (hasIndirectProblems((VariableDeclaration)parentNode, nodesToRemove, new SubProgressMonitor(pm, 1)))
 				return true;
 		} else if (parentNode instanceof CastExpression){
@@ -405,23 +424,51 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		} else if (parentNode instanceof MethodDeclaration){
 			MethodDeclaration methodDeclaration= (MethodDeclaration)parentNode;
 			if (methodDeclaration.getReturnType() == node){
-				IMethodBinding methodBinding= methodDeclaration.resolveBinding();
-				if (methodBinding != null){
-					IMethod method= Binding2JavaModel.find(methodBinding, getCompilationUnit(methodDeclaration).getJavaProject());
-					if (method == null)
-						return true; //XXX
-					IMethod topMethod= getTopMethod(method, new SubProgressMonitor(pm, 1));
-					IMethod[] methods= RippleMethodFinder.getRelatedMethods(topMethod, new SubProgressMonitor(pm, 1), new ICompilationUnit[0]);
-					if (isAnyMethodReturnTypeNodeExcluded(methods, nodesToRemove)){
-						nodesToRemove.addAll(getAllReturnTypeNodes(methods));
-						return true;
-					}	
+				IMethod[] methods= getAllRippleMethods(methodDeclaration, new SubProgressMonitor(pm, 1));
+				if (methods == null){ //XXX this can be null because of bug 22883
+					nodesToRemove.add(methodDeclaration.getReturnType());
+					return true;
+				}	
+				if (isAnyMethodReturnTypeNodeExcluded(methods, nodesToRemove)){
+					nodesToRemove.addAll(getAllReturnTypeNodes(methods));
+					return true;
 				}	
 			}		
 		}
 		return false;
 	}
 
+	private static boolean isMethodParameter(ASTNode node){
+		return (node instanceof VariableDeclaration) && 
+		          (node.getParent() instanceof MethodDeclaration) &&
+		          ((MethodDeclaration)node.getParent()).parameters().indexOf(node) != -1;
+	}
+	
+	private IMethod[] getAllRippleMethods(MethodDeclaration methodDeclaration, IProgressMonitor pm) throws JavaModelException{
+		IMethodBinding methodBinding= methodDeclaration.resolveBinding();
+		if (methodBinding == null)
+			return new IMethod[0];
+		IMethod method= Binding2JavaModel.find(methodBinding, getCompilationUnit(methodDeclaration).getJavaProject());
+		if (method == null)
+			return null; //XXX this can be null because of bug 22883
+		return RippleMethodFinder.getRelatedMethods(getTopMethod(method, new SubProgressMonitor(pm, 1)), new SubProgressMonitor(pm, 1), new ICompilationUnit[0]);
+	}
+	
+	private boolean isAnyParameterDeclarationExcluded(IMethod[] methods, int parameterIndex, Collection nodesToRemove) throws JavaModelException{
+		for (int i= 0; i < methods.length; i++) {
+			SingleVariableDeclaration paramDecl= getParameterDeclarationNode(parameterIndex, methods[i]);
+			if (fBadVarSet.contains(paramDecl))
+				return true;
+			if (nodesToRemove.contains(paramDecl.getType()))
+				return true;							
+		}
+		return false;
+	}
+	
+	private SingleVariableDeclaration getParameterDeclarationNode(int parameterIndex, IMethod method) throws JavaModelException {
+		return (SingleVariableDeclaration)getMethodDeclarationNode(method).parameters().get(parameterIndex);
+	}
+	
 	private Collection getAllReturnTypeNodes(IMethod[] methods) throws JavaModelException {
 		List result= new ArrayList(methods.length);
 		for (int i= 0; i < methods.length; i++) {
