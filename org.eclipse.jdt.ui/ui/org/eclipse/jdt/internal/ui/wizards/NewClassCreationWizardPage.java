@@ -70,6 +70,10 @@ public class NewClassCreationWizardPage extends TypePage {
 		initContainerPage(jelem);
 		initTypePage(jelem);
 		updateStatus(findMostSevereStatus());
+		
+		fMethodStubsButtons.setSelection(0, false);
+		fMethodStubsButtons.setSelection(1, false);
+		fMethodStubsButtons.setSelection(2, true);
 	}
 
 	// ------ validation --------
