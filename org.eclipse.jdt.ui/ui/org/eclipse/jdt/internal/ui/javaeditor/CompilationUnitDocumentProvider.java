@@ -379,9 +379,15 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		 */
 		protected static class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor, IProblemRequestorExtension {
 			
-			private boolean fInsideReportingSequence= false;
+			private static class ProblemRequestorState {
+				boolean fInsideReportingSequence= false;
+				List fReportedProblems;
+			}
+			
+			private ThreadLocal fProblemRequestorState= new ThreadLocal();
+			private int fStateCount= 0;
+			
 			private ICompilationUnit fCompilationUnit;
-			private List fCollectedProblems;
 			private List fGeneratedAnnotations;
 			private IProgressMonitor fProgressMonitor;
 			private boolean fIsActive= false;
@@ -429,68 +435,92 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * @see IProblemRequestor#beginReporting()
 			 */
 			public void beginReporting() {
-				if (!fInsideReportingSequence)
-					internalBeginReporting();
+				ProblemRequestorState state= (ProblemRequestorState) fProblemRequestorState.get();
+				if (state == null)
+					internalBeginReporting(false);				
 			}
 			
 			/*
 			 * @see org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#beginReportingSequence()
 			 */
 			public void beginReportingSequence() {
-				fInsideReportingSequence= true;
-				internalBeginReporting();
+				ProblemRequestorState state= (ProblemRequestorState) fProblemRequestorState.get();
+				if (state == null)
+					internalBeginReporting(true);
 			}
 			
 			/**
-			 * Signals the beginning of problem reporting.
+			 * Sets up the infrastructure necessary for problem reporting.
+			 * 
+			 * @param insideReportingSequence <code>true</code> if this method
+			 *            call is issued from inside a reporting sequence
 			 */
-			private void internalBeginReporting() {
-				if (fCompilationUnit != null && fCompilationUnit.getJavaProject().isOnClasspath(fCompilationUnit))
-					fCollectedProblems= new ArrayList();
-				else
-					fCollectedProblems= null;
+			private void internalBeginReporting(boolean insideReportingSequence) {
+				if (fCompilationUnit != null && fCompilationUnit.getJavaProject().isOnClasspath(fCompilationUnit)) {
+					ProblemRequestorState state= new ProblemRequestorState();
+					state.fInsideReportingSequence= insideReportingSequence;
+					state.fReportedProblems= new ArrayList();
+					synchronized (getLockObject()) {
+						fProblemRequestorState.set(state);
+						++fStateCount;
+					}
+				}
 			}
 
 			/*
 			 * @see IProblemRequestor#acceptProblem(IProblem)
 			 */
 			public void acceptProblem(IProblem problem) {
-				if (isActive())
-					fCollectedProblems.add(problem);
+				if (isActive()) {
+					ProblemRequestorState state= (ProblemRequestorState) fProblemRequestorState.get();
+					if (state != null)
+						state.fReportedProblems.add(problem);
+				}
 			}
 			
 			/*
 			 * @see IProblemRequestor#endReporting()
 			 */
 			public void endReporting() {
-				if (!fInsideReportingSequence)
-					internalEndReporting();
+				ProblemRequestorState state= (ProblemRequestorState) fProblemRequestorState.get();
+				if (state != null && !state.fInsideReportingSequence)
+					internalEndReporting(state);
 			}
 			
 			/*
 			 * @see org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#endReportingSequence()
 			 */
 			public void endReportingSequence() {
-				internalEndReporting();
-				fInsideReportingSequence= false;
+				ProblemRequestorState state= (ProblemRequestorState) fProblemRequestorState.get();
+				if (state != null && state.fInsideReportingSequence)
+					internalEndReporting(state);
+			}
+			
+			private void internalEndReporting(ProblemRequestorState state) {
+				int stateCount= 0;
+				synchronized(getLockObject()) {
+					-- fStateCount;
+					stateCount= fStateCount;
+					fProblemRequestorState.set(null);
+				}
+				
+				if (stateCount == 0 && isActive())
+					reportProblems(state.fReportedProblems);
 			}
 			
 			/**
 			 * Signals the end of problem reporting.
 			 */
-			private void internalEndReporting() {
-				if (!isActive())
-					return;
-					
+			private void reportProblems(List reportedProblems) {
 				if (fProgressMonitor != null && fProgressMonitor.isCanceled())
 					return;
 					
-				
-				boolean isCanceled= false;
 				boolean temporaryProblemsChanged= false;
 				
 				synchronized (getLockObject()) {
 					
+					boolean isCanceled= false;
+
 					fPreviouslyOverlaid= fCurrentlyOverlaid;
 					fCurrentlyOverlaid= new ArrayList();
 
@@ -500,18 +530,17 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 						fGeneratedAnnotations.clear();
 					}
 					
-					if (fCollectedProblems != null && fCollectedProblems.size() > 0) {
+					if (reportedProblems != null && reportedProblems.size() > 0) {
 												
-						Iterator e= fCollectedProblems.iterator();
+						Iterator e= reportedProblems.iterator();
 						while (e.hasNext()) {
-							
-							IProblem problem= (IProblem) e.next();
 							
 							if (fProgressMonitor != null && fProgressMonitor.isCanceled()) {
 								isCanceled= true;
 								break;
 							}
 								
+							IProblem problem= (IProblem) e.next();
 							Position position= createPositionFromProblem(problem);
 							if (position != null) {
 								
@@ -527,12 +556,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 								}
 							}
 						}
-						
-						fCollectedProblems.clear();
 					}
 					
 					removeMarkerOverlays(isCanceled);
-					fPreviouslyOverlaid.clear();
 					fPreviouslyOverlaid= null;
 				}
 					
@@ -583,7 +609,6 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * Tells this annotation model to collect temporary problems from now on.
 			 */
 			private void startCollectingProblems() {
-				fCollectedProblems= new ArrayList();
 				fGeneratedAnnotations= new ArrayList();  
 			}
 			
@@ -591,11 +616,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * Tells this annotation model to no longer collect temporary problems.
 			 */
 			private void stopCollectingProblems() {
-				if (fGeneratedAnnotations != null) {
+				if (fGeneratedAnnotations != null)
 					removeAnnotations(fGeneratedAnnotations, true, true);
-					fGeneratedAnnotations.clear();
-				}
-				fCollectedProblems= null;
 				fGeneratedAnnotations= null;
 			}
 			
@@ -603,7 +625,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * @see IProblemRequestor#isActive()
 			 */
 			public boolean isActive() {
-				return fIsActive && (fCollectedProblems != null);
+				return fIsActive;
 			}
 			
 			/*
