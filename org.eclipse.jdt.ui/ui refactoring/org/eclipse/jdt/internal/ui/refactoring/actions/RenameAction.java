@@ -13,7 +13,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class RenameAction extends SelectionDispatchAction {
 
-	private RenameJavaElementAction fRename1;
+	private RenameJavaElementAction fRenameJavaElement;
 	private RenameTempAction fRenameTemp;
 
 	private CompilationUnitEditor fEditor;
@@ -21,24 +21,22 @@ public class RenameAction extends SelectionDispatchAction {
 	public RenameAction(UnifiedSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("RenameAction.text")); //$NON-NLS-1$
-		fRename1= new RenameJavaElementAction(site);
-		fRename1.setText(getText());
+		fRenameJavaElement= new RenameJavaElementAction(site);
+		fRenameJavaElement.setText(getText());
 	}
 	
 	public RenameAction(CompilationUnitEditor editor) {
 		this(UnifiedSite.create(editor.getEditorSite()));
 		fEditor= editor;
 		fRenameTemp= new RenameTempAction(fEditor);
-		
-		fRename1= new RenameJavaElementAction(editor);
-		
+		fRenameJavaElement= new RenameJavaElementAction(editor);
 	}
 	
 	/*
 	 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
 	 */
 	public void selectionChanged(SelectionChangedEvent event) {
-		fRename1.selectionChanged(event);
+		fRenameJavaElement.selectionChanged(event);
 		if (fRenameTemp != null)
 			fRenameTemp.selectionChanged(event);
 		setEnabled(computeEnabledState());		
@@ -48,7 +46,7 @@ public class RenameAction extends SelectionDispatchAction {
 	 * @see IUpdate#update()
 	 */
 	public void update() {
-		fRename1.update();
+		fRenameJavaElement.update();
 		
 		if (fRenameTemp != null)
 			fRenameTemp.update();
@@ -58,21 +56,21 @@ public class RenameAction extends SelectionDispatchAction {
 	
 	private boolean computeEnabledState(){
 		if (fRenameTemp != null)	
-			return fRenameTemp.isEnabled() || fRename1.isEnabled();
+			return fRenameTemp.isEnabled() || fRenameJavaElement.isEnabled();
 		else
-			return fRename1.isEnabled();
+			return fRenameJavaElement.isEnabled();
 	}
 	
 	protected void run(IStructuredSelection selection) {
-		 if (fRename1.isEnabled())
-			fRename1.run(selection);
+		 if (fRenameJavaElement.isEnabled())
+			fRenameJavaElement.run(selection);
 	}
 
 	protected void run(ITextSelection selection) {
 		if (fRenameTemp != null && fRenameTemp.canRun(selection))
 			fRenameTemp.run(selection);
-		else if (fRename1.canRun(selection))
-			fRename1.run(selection);
+		else if (fRenameJavaElement.canRun(selection))
+			fRenameJavaElement.run(selection);
 		else
 			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("RenameAction.rename"), RefactoringMessages.getString("RenameAction.unavailable"));  //$NON-NLS-1$ //$NON-NLS-2$
 	}
