@@ -258,7 +258,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 			initializeAST();
 			pm.worked(1);
 	
-			return checkSelection(new SubProgressMonitor(pm, 5));
+			result.merge(checkSelection(new SubProgressMonitor(pm, 5)));
+			if ((! result.hasFatalError()) && isLiteralNodeSelected())
+				fReplaceAllOccurrences= false;
+			return result;
 		} finally {
 			pm.done();
 		}
@@ -323,8 +326,28 @@ public class ExtractConstantRefactoring extends Refactoring {
 		}		
 	}
 
+	//	 !!! -- same as in ExtractTempRefactoring
+	private boolean isLiteralNodeSelected() throws JavaModelException {
+		IExpressionFragment fragment= getSelectedExpression();
+		if (fragment == null)
+			return false;
+		Expression expression= fragment.getAssociatedExpression();
+		if (expression == null)
+			return false;
+		switch (expression.getNodeType()) {
+			case ASTNode.BOOLEAN_LITERAL :
+			case ASTNode.CHARACTER_LITERAL :
+			case ASTNode.NULL_LITERAL :
+			case ASTNode.NUMBER_LITERAL :
+				return true;
+			
+			default :
+				return false;
+		}
+	}
+
 	// !!! --
-	private void initializeAST() throws JavaModelException {
+	private void initializeAST() {
 		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
 	}
 
@@ -497,7 +520,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return false;
 	}
 	
-	private boolean isOnSameLine(int firstOffset, int secondOffset) throws JavaModelException {
+	private boolean isOnSameLine(int firstOffset, int secondOffset) {
 		return lineNumber(firstOffset) == lineNumber(secondOffset);
 	}
 	
@@ -599,21 +622,21 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	// !!!
 	private void addConstantDeclaration(TextChange change) throws CoreException {
-		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.declare_constant"), createConstantDeclarationEdit());
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.declare_constant"), createConstantDeclarationEdit()); //$NON-NLS-1$
 	}
 
 	// !!! very similar to equivalent in ExtractTempRefactoring
 	private void addImportIfNeeded(TextChange change, TextBuffer buffer) throws CoreException {
 		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.update_imports"), importEdit);
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.update_imports"), importEdit); //$NON-NLS-1$
 	}
 
 	// !!! very similar to equivalent in ExtractTempRefactoring
 	private void addReplaceExpressionWithConstant(TextChange change) throws JavaModelException {
 		TextEdit[] edits= createReplaceExpressionWithConstantEdits();
 		for (int i= 0; i < edits.length; i++) {
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.replace"), edits[i]);
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.replace"), edits[i]); //$NON-NLS-1$
 		}
 	}
 

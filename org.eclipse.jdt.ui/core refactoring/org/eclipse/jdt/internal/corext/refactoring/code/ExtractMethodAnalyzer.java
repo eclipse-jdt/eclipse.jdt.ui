@@ -231,6 +231,24 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 			fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
 	}
 	
+	//	 !!! -- +/- same as in ExtractTempRefactoring
+	public boolean isLiteralNodeSelected() {
+		ASTNode[] nodes= getSelectedNodes();
+		if (nodes.length != 1)
+			return false;
+		ASTNode node= nodes[0];
+		switch (node.getNodeType()) {
+			case ASTNode.BOOLEAN_LITERAL :
+			case ASTNode.CHARACTER_LITERAL :
+			case ASTNode.NULL_LITERAL :
+			case ASTNode.NUMBER_LITERAL :
+				return true;
+			
+			default :
+				return false;
+		}
+	}
+
 	//---- Input checking -----------------------------------------------------------------------------------
 		
 	public void checkInput(RefactoringStatus status, String methodName, IJavaProject scope, AST ast) {

@@ -481,6 +481,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return result;
 	}
 	
+	public boolean getReplaceDuplicates() {
+		return fReplaceDuplicates;
+	}
+
 	public void setReplaceDuplicates(boolean replace) {
 		fReplaceDuplicates= replace;
 	}
@@ -522,7 +526,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fDuplicates= SnippetFinder.perform(
 			(TypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingBodyDeclaration(), TypeDeclaration.class), 
 			fAnalyzer.getSelectedNodes());
-		fReplaceDuplicates= fDuplicates.length > 0;
+		fReplaceDuplicates= fDuplicates.length > 0 && ! fAnalyzer.isLiteralNodeSelected();
 	}
 	
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {

@@ -245,7 +245,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		
 			initializeAST();
 		
-			return checkSelection(new SubProgressMonitor(pm, 5));
+			result.merge(checkSelection(new SubProgressMonitor(pm, 5)));
+			if ((! result.hasFatalError()) && isLiteralNodeSelected())
+				fReplaceAllOccurrences= false;
+			return result;
 		} finally{
 			pm.done();
 		}	
@@ -320,7 +323,26 @@ public class ExtractTempRefactoring extends Refactoring {
 		}		
 	}	
 	
-	private void initializeAST() throws JavaModelException {
+	private boolean isLiteralNodeSelected() throws JavaModelException {
+		IExpressionFragment fragment= getSelectedExpression();
+		if (fragment == null)
+			return false;
+		Expression expression= fragment.getAssociatedExpression();
+		if (expression == null)
+			return false;
+		switch (expression.getNodeType()) {
+			case ASTNode.BOOLEAN_LITERAL :
+			case ASTNode.CHARACTER_LITERAL :
+			case ASTNode.NULL_LITERAL :
+			case ASTNode.NUMBER_LITERAL :
+				return true;
+			
+			default :
+				return false;
+		}
+	}
+
+	private void initializeAST() {
 		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
 	}
 
@@ -571,19 +593,19 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private void addTempDeclaration(TextChange change) throws CoreException {
-		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.declare_local_variable"), createTempDeclarationEdit());
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.declare_local_variable"), createTempDeclarationEdit()); //$NON-NLS-1$
 	}
 
 	private void addImportIfNeeded(TextChange change, TextBuffer buffer) throws CoreException {
 		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.update_imports"), importEdit);
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.update_imports"), importEdit); //$NON-NLS-1$
 	}
 
 	private void addReplaceExpressionWithTemp(TextChange change) throws JavaModelException {
 		TextEdit[] edits= createReplaceExpressionWithTempEdits();
 		for (int i= 0; i < edits.length; i++) {
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.replace"), edits[i]);
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.replace"), edits[i]); //$NON-NLS-1$
 		}
 	}
 			
@@ -847,7 +869,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		return fSelectedExpression;
 	}
 
-	private IFile getFile() throws JavaModelException {
+	private IFile getFile() {
 		return ResourceUtil.getFile(fCu);
 	}
 }

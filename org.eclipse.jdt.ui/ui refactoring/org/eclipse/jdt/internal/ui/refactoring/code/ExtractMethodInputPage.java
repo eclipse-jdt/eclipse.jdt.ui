@@ -160,19 +160,19 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		});
 		layouter.perform(checkBox);
 		
-		int dupliactes= fRefactoring.getNumberOfDuplicates();
+		int duplicates= fRefactoring.getNumberOfDuplicates();
 		checkBox= new Button(result, SWT.CHECK);
-		if (dupliactes == 0) {
+		if (duplicates == 0) {
 			checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.duplicates.none")); //$NON-NLS-1$
-		} else  if (dupliactes == 1) {
+		} else  if (duplicates == 1) {
 			checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.duplicates.single")); //$NON-NLS-1$
 		} else {
 			checkBox.setText(RefactoringMessages.getFormattedString(
 				"ExtractMethodInputPage.duplicates.multi", //$NON-NLS-1$
-				new Integer(dupliactes))); 
+				new Integer(duplicates))); 
 		}
-		checkBox.setSelection(dupliactes > 0);
-		checkBox.setEnabled(dupliactes > 0);
+		checkBox.setSelection(fRefactoring.getReplaceDuplicates());
+		checkBox.setEnabled(duplicates > 0);
 		checkBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setReplaceDuplicates(((Button)e.widget).getSelection());
