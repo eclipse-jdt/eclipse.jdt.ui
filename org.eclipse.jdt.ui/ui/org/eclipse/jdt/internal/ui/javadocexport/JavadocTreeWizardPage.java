@@ -49,7 +49,6 @@ import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -601,11 +600,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			
 		IJavaProject project= null;
 		for (int i= 0; i < items.length; i++) {
-			if (items[i] instanceof JavaProject) {
+			if (items[i] instanceof IJavaProject) {
 				if (project != null) {
 					return null;
 				}
-				project= (JavaProject)items[i];
+				project= (IJavaProject)items[i];
 			}
 		}
 		return project;
