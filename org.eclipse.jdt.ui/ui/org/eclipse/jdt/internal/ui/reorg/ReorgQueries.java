@@ -39,13 +39,13 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class ReorgQueries implements ICopyQueries {
+public class ReorgQueries implements INewNameQueries {
 
 	private static final String INVALID_NAME_NO_MESSAGE= "";//$NON-NLS-1$
 	private final Wizard fWizard;

@@ -15,7 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 
-public interface ICopyQueries {
+public interface INewNameQueries {
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu);
 	public INewNameQuery createNewResourceNameQuery(IResource res);
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack);
