@@ -252,7 +252,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performExpressionTest();
 	}
 	
-	/************************ Expression Tests ********************************/
+	/************************ Control Statements Tests ********************************/
 		
 	private void performControlStatementTest() throws Exception {
 		performTest(fgTestSetup.getControlStatementPackage(), getName(), COMPARE_WITH_OUTPUT, "controlStatement_out");
@@ -267,6 +267,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testForTwo() throws Exception {
+		performControlStatementTest();
+	}
+	
+	public void testIfThenTwo() throws Exception {
+		performControlStatementTest();
+	}
+	
+	public void testIfElseTwo() throws Exception {
 		performControlStatementTest();
 	}
 	

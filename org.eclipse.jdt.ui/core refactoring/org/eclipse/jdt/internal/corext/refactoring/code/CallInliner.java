@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -317,7 +318,13 @@ public class CallInliner {
 						currentStatement= ((DoStatement)container).getBody();
 						break;
 					case ASTNode.IF_STATEMENT:
-						currentStatement= ((ForStatement)container).getBody();
+						IfStatement node= (IfStatement)container;
+						Statement thenPart= node.getThenStatement();
+						if (fTargetNode == thenPart || ASTNodes.isParent(fTargetNode, thenPart)) {
+							currentStatement= thenPart;
+						} else {
+							currentStatement= node.getElseStatement();
+						}
 						break;
 				}
 				Assert.isNotNull(currentStatement);
