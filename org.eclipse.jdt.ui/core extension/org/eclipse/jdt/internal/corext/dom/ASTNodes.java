@@ -180,6 +180,8 @@ public class ASTNodes {
 	}
 	
 	public static boolean isLiteral(Expression expression) {
+		if (expression == null)
+			return false;
 		int type= expression.getNodeType();
 		return type == ASTNode.CHARACTER_LITERAL || type == ASTNode.NULL_LITERAL || type == ASTNode.NUMBER_LITERAL ||
 					type == ASTNode.STRING_LITERAL || type == ASTNode.TYPE_LITERAL;

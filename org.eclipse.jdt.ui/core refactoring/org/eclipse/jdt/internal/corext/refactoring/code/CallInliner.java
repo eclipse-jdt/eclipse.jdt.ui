@@ -178,13 +178,16 @@ public class CallInliner {
 			if ((ASTNodes.isLiteral(expression) && parameter.isReadOnly()) || canInline(expression)) {
 				newArgs[i]= getContent(expression);
 			} else {
-				String name= proposeName(parameter);
+				String name= proposeName(parameter.getName());
 				newArgs[i]= name;
-				locals.add(createLocalDeclaration(parameter, name, expression));
+				locals.add(createLocalDeclaration(
+								parameter.getTypeBinding(), name, 
+								(Expression)fRewriter.createCopy(expression)));
 			}
 		}
+		int callType= fTargetNode.getNodeType();
 		CallContext context= new CallContext(newArgs, fRewriter, fUsedNames, fTargetNode.getNodeType());
-		ASTNode[] nodes= fSourceProvider.getInlineNodes(context);
+		String[] blocks= fSourceProvider.getCodeBlocks(context);
 		initializeInsertionPoint(fSourceProvider.getNumberOfStatements() + locals.size());
 		// Add new locals
 		for (Iterator iter= locals.iterator(); iter.hasNext();) {
@@ -193,22 +196,48 @@ public class CallInliner {
 			fStatements.add(fInsertionIndex++, element);
 		}
 		// Inline empty body
-		if (nodes.length == 0) {
+		if (blocks.length == 0) {
 			if (fNeedsStatement) {
 				fRewriter.markAsReplaced(fTargetNode, fTargetNode.getAST().newEmptyStatement());
 			} else {
 				fRewriter.markAsRemoved(fTargetNode);
 			}
 		} else {
-			int end= fTargetNode == null ? nodes.length : nodes.length - 1;
-			for (int i= 0; i < end; i++) {
-				ASTNode node= nodes[i];
+			ASTNode node= null;
+			for (int i= 0; i < blocks.length - 1; i++) {
+				node= fRewriter.createPlaceholder(blocks[i], ASTRewrite.STATEMENT);
 				fRewriter.markAsInserted(node);
 				fStatements.add(fInsertionIndex++, node);
 			}
-			if (end < nodes.length) {
-				ASTNode last= nodes[nodes.length - 1];
-				fRewriter.markAsReplaced(fTargetNode, last);
+			String block= blocks[blocks.length - 1];
+			// We can inline a call where the declaration is a function and the call itself
+			// is a statement. In this case we have to create a temporary variable if the
+			// returned expression must be evaluated.
+			if (callType == ASTNode.EXPRESSION_STATEMENT && fSourceProvider.hasReturnValue()) {
+				if (fSourceProvider.mustEvaluateReturnValue()) {
+					node= createLocalDeclaration(
+						fSourceProvider.getReturnType(), 
+						proposeName(fSourceProvider.getMethodName()), 
+						(Expression)fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION));
+				} else {
+					node= null;
+				}
+			} else {
+				node= fRewriter.createPlaceholder(
+					block, 
+					fTargetNode instanceof Expression ? ASTRewrite.EXPRESSION : ASTRewrite.STATEMENT);
+			}
+			if (node != null) {
+				if (fTargetNode == null) {
+					fRewriter.markAsInserted(node);
+					fStatements.add(fInsertionIndex++, node);
+				} else {
+					fRewriter.markAsReplaced(fTargetNode, node);
+				}
+			} else {
+				if (fTargetNode != null) {
+					fRewriter.markAsRemoved(fTargetNode);
+				}
 			}
 		}
 		MultiTextEdit result= new MultiTextEdit();
@@ -220,8 +249,7 @@ public class CallInliner {
 		fRewriter.removeModifications();
 	}
 	
-	private VariableDeclarationStatement createLocalDeclaration(ParameterData parameter, String name, Expression initializer) {
-		ITypeBinding type= parameter.getTypeBinding();
+	private VariableDeclarationStatement createLocalDeclaration(ITypeBinding type, String name, Expression initializer) {
 		String typeName;
 		if (type.isPrimitive()) {
 			typeName= type.getName();
@@ -237,7 +265,7 @@ public class CallInliner {
 		}
 		VariableDeclarationStatement decl= (VariableDeclarationStatement)ASTNodeFactory.newStatement(
 			fInvocation.getAST(), typeName + " " + name + ";");
-		((VariableDeclarationFragment)decl.fragments().get(0)).setInitializer((Expression)fRewriter.createCopy(initializer));
+		((VariableDeclarationFragment)decl.fragments().get(0)).setInitializer(initializer);
 		return decl;
 	}
 
@@ -281,8 +309,8 @@ public class CallInliner {
 		return false;
 	}
 	
-	private String proposeName(ParameterData parameter) {
-		String result= parameter.getName();
+	private String proposeName(String defaultName) {
+		String result= defaultName;
 		int i= 1;
 		while (fUsedNames.contains(result)) {
 			result= result + i++;
@@ -356,7 +384,9 @@ public class CallInliner {
 		BodyDeclaration decl= (BodyDeclaration)ASTNodes.getParent(fInvocation, BodyDeclaration.class);
 		NameCollector collector= new NameCollector(fInvocation);
 		decl.accept(collector);
-		return collector.names;
+		List result= collector.names;
+		result.remove(fInvocation.getName().getIdentifier());
+		return result;
 	}
 	
 	private boolean isControlStatement(ASTNode node) {

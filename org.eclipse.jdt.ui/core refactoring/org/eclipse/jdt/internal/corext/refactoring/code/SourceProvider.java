@@ -20,12 +20,17 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
@@ -44,6 +49,18 @@ public class SourceProvider {
 	private MethodDeclaration fDeclaration;
 	private ASTRewrite fRewriter;
 	private SourceAnalyzer fAnalyzer;
+	private boolean fEvaluateReturnValue;
+	
+	private static class ReturnAnalyzer extends ASTVisitor {
+		public boolean evalReturnValue= false;
+		public boolean visit(ReturnStatement node) {
+			Expression expression= node.getExpression();
+			if (!(ASTNodes.isLiteral(expression) || expression instanceof Name)) {
+				evalReturnValue= true;
+			}
+			return false;
+		}
+	}
 
 	public SourceProvider(ICompilationUnit unit, MethodDeclaration declaration) throws JavaModelException {
 		super();
@@ -66,10 +83,27 @@ public class SourceProvider {
 	
 	public void initialize() {
 		fAnalyzer.analyzeParameters();
+		if (hasReturnValue()) {
+			ASTNode last= getLastStatement();
+			if (last != null) {
+				ReturnAnalyzer analyzer= new ReturnAnalyzer();
+				last.accept(analyzer);
+				fEvaluateReturnValue= analyzer.evalReturnValue;
+			}
+		}
 	}
 
 	public boolean isExecutionFlowInterrupted() {
 		return fAnalyzer.isExecutionFlowInterrupted();
+	}
+	
+	public boolean hasReturnValue() {
+		IMethodBinding binding= fDeclaration.resolveBinding();
+		return binding.getReturnType() != fDeclaration.getAST().resolveWellKnownType("void");
+	}
+	
+	public boolean mustEvaluateReturnValue() {
+		return fEvaluateReturnValue;
 	}
 	
 	public int getNumberOfStatements() {
@@ -78,6 +112,14 @@ public class SourceProvider {
 	
 	public MethodDeclaration getDeclaration() {
 		return fDeclaration;
+	}
+	
+	public String getMethodName() {
+		return fDeclaration.getName().getIdentifier();
+	}
+	
+	public ITypeBinding getReturnType() {
+		return fDeclaration.resolveBinding().getReturnType();
 	}
 	
 	public ParameterData getParameterData(int index) {
@@ -89,23 +131,28 @@ public class SourceProvider {
 		return fCUnit;
 	}
 	
-	public ASTNode[] getInlineNodes(CallContext context) throws CoreException {
+	public String[] getCodeBlocks(CallContext context) throws CoreException {
 		List result= new ArrayList(1);
 		
 		replaceParameterWithExpression(context.expressions);
 		makeNamesUnique(context.usedCallerNames);
 		
 		List ranges= null;
-		switch (context.callMode) {
-			case ASTNode.EXPRESSION_STATEMENT:
-				removeLastReturnStatement();
-			case ASTNode.RETURN_STATEMENT:
+		if (hasReturnValue()) {
+			if (context.callMode == ASTNode.RETURN_STATEMENT) {
 				ranges= getStatementRanges();
-				break;
-			case ASTNode.METHOD_INVOCATION:
+			} else {
 				ranges= getExpressionRanges();
-				break;
+			}
+		} else {
+			ASTNode last= getLastStatement();
+			if (last != null && last.getNodeType() == ASTNode.RETURN_STATEMENT) {
+				ranges= getReturnStatementRanges();
+			} else {
+				ranges= getStatementRanges();
+			}
 		}
+		
 		MultiTextEdit dummy= new MultiTextEdit();
 		fRewriter.rewriteNode(fBuffer, dummy, null);
 
@@ -128,7 +175,7 @@ public class SourceProvider {
 		editor.performEdits(null);
 		fRewriter.removeModifications();
 		
-		return getNodes(context, ranges);
+		return getBlocks(ranges);
 	}
 
 	public void replaceParameterWithExpression(String[] expressions) {
@@ -159,15 +206,12 @@ public class SourceProvider {
 			}
 		}
 	}
-
-	private void removeLastReturnStatement() {
+	
+	private ASTNode getLastStatement() {
 		List statements= fDeclaration.getBody().statements();
-		if (statements.size() == 0)
-			return;
-		ASTNode last= (ASTNode)statements.get(statements.size() - 1);
-		if (last.getNodeType() == ASTNode.RETURN_STATEMENT) {
-			fRewriter.markAsRemoved(last);
-		}
+		if (statements.isEmpty())
+			return null;
+		return (ASTNode)statements.get(statements.size() - 1);
 	}
 
 	private String proposeName(List used, String start) {
@@ -176,6 +220,16 @@ public class SourceProvider {
 		while (used.contains(result)) {
 			result= start + i++;
 		}
+		return result;
+	}
+
+	private List getReturnStatementRanges() {
+		List result= new ArrayList(1);
+		List statements= fDeclaration.getBody().statements();
+		int size= statements.size();
+		if (size <= 1)
+			return result;
+		result.add(createRange(statements, size - 2));
 		return result;
 	}
 
@@ -232,17 +286,16 @@ public class SourceProvider {
 		return range;
 	}
 	
-	private ASTNode[] getNodes(CallContext context, List ranges) {
+	private String[] getBlocks(List ranges) {
 		int size= ranges.size();
 		List result= new ArrayList(size);
-		ASTRewrite targetFactory= context.targetFactory;
 		for (int i= 0; i < size; i++) {
 			TextRange range= (TextRange)ranges.get(i);
 			String content= fBuffer.getContent(range.getOffset(), range.getLength());
 			String lines[]= Strings.convertIntoLines(content);
 			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
-			result.add(targetFactory.createPlaceholder(Strings.concatenate(lines, fBuffer.getLineDelimiter()), ASTRewrite.STATEMENT));
+			result.add(Strings.concatenate(lines, fBuffer.getLineDelimiter()));
 		}
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
+		return (String[]) result.toArray(new String[result.size()]);
 	}
 }

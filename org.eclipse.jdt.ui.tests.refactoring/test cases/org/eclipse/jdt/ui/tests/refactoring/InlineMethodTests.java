@@ -226,6 +226,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performCallTest();
 	}
 	
+	public void TestStatementWithFunction1() throws Exception {
+		performCallTest();
+	}
+	
+	public void TestStatementWithFunction2() throws Exception {
+		performCallTest();
+	}
+	
 	/************************ Expression Tests ********************************/
 		
 	private void performExpressionTest() throws Exception {
