@@ -50,7 +50,7 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 	
 	public OpenExternalJavadocAction(StructuredSelectionProvider provider) {
 		super();
-		setText("Open External Javadoc@Shift+F2");
+		setText("Open E&xternal Javadoc@Shift+F2");
 		setDescription("Opens the Javadoc of the selected element in an external browser");
 		setToolTipText("Opens the Javadoc of the selected element in an external browser");
 		fSelectionProvider= provider;

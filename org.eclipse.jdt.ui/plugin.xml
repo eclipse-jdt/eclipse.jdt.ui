@@ -409,7 +409,24 @@
 			class="org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction"
 			enablesFor="1">
 		</action>
-	</objectContribution>	
+	</objectContribution>
+	
+	<objectContribution
+		id="org.eclipse.jdt.internal.ui.corrections.MarkerResolutionAction"
+		objectClass="org.eclipse.core.resources.IMarker">
+		<visibility> 
+			<objectState name="type" value="org.eclipse.jdt.core.problem"/>
+		</visibility> 		
+		<action
+			id="org.eclipse.jdt.internal.ui.corrections.MarkerResolutionAction"
+			label="Fix Problem..."
+			tooltip="Fix Problem..."
+			menubarPath="group.open"
+			class="org.eclipse.jdt.internal.ui.corrections.MarkerResolutionAction"
+			enablesFor="1">
+		</action>
+	</objectContribution>
+			
 	
 </extension>
 
