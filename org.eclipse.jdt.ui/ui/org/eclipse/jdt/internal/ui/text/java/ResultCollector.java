@@ -6,14 +6,14 @@ package org.eclipse.jdt.internal.ui.text.java;
  */
   
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.text.contentassist.ContextInformation;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContextInformation;
-
 import org.eclipse.core.resources.IMarker;
+
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICodeCompletionRequestor;
@@ -29,7 +29,14 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
  */
 public class ResultCollector implements ICodeCompletionRequestor {
 	
-	
+	private class ProposalComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			ICompletionProposal c1= (ICompletionProposal) o1;
+			ICompletionProposal c2= (ICompletionProposal) o2;
+			return c1.getDisplayString().compareTo(c2.getDisplayString());
+		}
+	}
+
 	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-' };
 	private final static char[] GENERAL_TRIGGERS= new char[] { ';', ',', '.', '\t', '(', '{', '[' };
 	
@@ -131,7 +138,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		StringBuffer buf= new StringBuffer();
 		buf.append(name);
 		if (typeName != null) {
-			buf.append("    ");
+			buf.append("    "); //$NON-NLS-1$
 			buf.append(typeName);
 		}	
 		fVariables.add(createCompletion(start, end, new String(name), null, buf.toString()));
@@ -229,7 +236,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		StringBuffer buf= new StringBuffer();
 		buf.append(name);
 		if (typeName != null && typeName.length > 0) {
-			buf.append(" - ");
+			buf.append(" - "); //$NON-NLS-1$
 			buf.append(typeName);
 		}	
 		fVariables.add(createCompletion(start, end, new String(completionName), null, buf.toString()));
@@ -243,6 +250,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 
 	public ICompletionProposal[] getResults() {
 		ArrayList result= new ArrayList();
+		ProposalComparator comperator= new ProposalComparator();
 		for (int i= 0; i < fResults.length; i++) {
 			ArrayList bucket = fResults[i];
 			int size= bucket.size();
@@ -251,7 +259,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 			} else if (size > 1) {
 				Object[] sortedBucket = new Object[size];
 				bucket.toArray(sortedBucket);
-				quickSort(sortedBucket, 0, size - 1);
+				Arrays.sort(sortedBucket, comperator);
 				for (int j= 0; j < sortedBucket.length; j++)
 					result.add(sortedBucket[j]);
 			}
@@ -298,7 +306,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		}
 		StringBuffer buf= new StringBuffer(typeName);
 		if (containerName != null) {
-			buf.append(" - ");
+			buf.append(" - "); //$NON-NLS-1$
 			buf.append(containerName);
 		}
 		String name= buf.toString();
@@ -327,43 +335,6 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		return new JavaCompletionProposal(completion, start, length, icon, name);
 	}
 		
-	protected int compare(Object o1, Object o2) {
-		ICompletionProposal c1= (ICompletionProposal) o1;
-		ICompletionProposal c2= (ICompletionProposal) o2;
-		return c2.getDisplayString().compareTo(c1.getDisplayString());
-	}
-	
-	protected Object[] quickSort(Object[] collection, int left, int right) {
-		int original_left= left;
-		int original_right= right;
-		Object mid= collection[(left + right) / 2];
-		
-		do {
-			
-			while (compare(collection[left], mid) > 0) // s[left] >= mid
-				left++;
-			
-			while (compare(collection[right], mid) < 0) // s[right] <= mid
-				right--;
-			
-			if (left <= right) {
-				Object tmp= collection[left];
-				collection[left]= collection[right];
-				collection[right]= tmp;
-				left++;
-				right--;
-			}
-		} while (left <= right);
-		
-		if (original_left < right)
-			collection= quickSort(collection, original_left, right);
-		
-		if (left < original_right)
-			collection= quickSort(collection, left, original_right);
-		
-		return collection;
-	}
-	
 	/**
 	 * Specifies the context of the code assist operation.
 	 * @param jproject The Java project to which the underlying source belongs.
@@ -385,7 +356,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	}
 	
 	/**
-	 * If the replacement length is set, this overrides the length returned from
+	 * If the replacement length is set, it overrides the length returned from
 	 * the content assist infrastructure.
 	 * Use this setting if code assist is called with a none empty selection.
 	 */
@@ -394,7 +365,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	}
 
 	/**
-	 * If the replacement offset is set this overrides the offset used for the content assist.
+	 * If the replacement offset is set, it overrides the offset used for the content assist.
 	 * Use this setting if the code assist proposals generated will be applied on a document different than
 	 * the one used for evaluating the code assist.
 	 */
