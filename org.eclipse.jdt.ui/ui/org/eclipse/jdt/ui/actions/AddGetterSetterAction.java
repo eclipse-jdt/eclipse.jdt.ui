@@ -529,7 +529,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			target.beginCompoundChange();
 		}
 		try {
-			AddGetterSetterOperation op= new AddGetterSetterOperation(type, getterFields, setterFields, getterSetterFields, skipSetterForFinalQuery(), skipReplaceQuery(), elementPosition, false);
+			AddGetterSetterOperation op= new AddGetterSetterOperation(type, getterFields, setterFields, getterSetterFields, skipSetterForFinalQuery(), skipReplaceQuery(), elementPosition, true, false);
 			setOperationStatusFields(op);
 
 			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
@@ -537,7 +537,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				context= new BusyIndicatorRunnableContext();
 			}
 
-			PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
+			PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(op, op.getSchedulingRule()), op.getSchedulingRule());
 
 		} catch (InvocationTargetException e) {
 			String message= ActionMessages.getString("AddGetterSetterAction.error.actionfailed"); //$NON-NLS-1$
