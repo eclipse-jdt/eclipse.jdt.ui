@@ -29,6 +29,7 @@ import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -86,8 +87,11 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 	 */
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 1;
+		composite.setLayout(layout);
 		
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fEntryField }, true);
+		fEntryField.doFillIntoGrid(composite, 2);
 		LayoutUtil.setHorizontalGrabbing(fEntryField.getTextControl(null));
 		
 		fEntryField.setFocus();
