@@ -674,21 +674,42 @@ public class JavaElementLabels {
 	
 	private static void getTypeSignatureLabel(String typeSig, long flags, StringBuffer buf) {
 		int sigKind= Signature.getTypeSignatureKind(typeSig);
-		if (sigKind == Signature.BASE_TYPE_SIGNATURE) {
-			buf.append(Signature.toString(typeSig));
-		} else if (sigKind == Signature.ARRAY_TYPE_SIGNATURE) {
-			getTypeSignatureLabel(Signature.getElementType(typeSig), flags, buf);
-			for (int dim= Signature.getArrayCount(typeSig); dim > 0; dim--) {
-				buf.append('[').append(']');
-			}
-		} else if (sigKind == Signature.CLASS_TYPE_SIGNATURE) {
-			String baseType= Signature.toString(Signature.getTypeErasure(typeSig));
-			buf.append(Signature.getSimpleName(baseType));
-			
-			String[] typeArguments= Signature.getTypeArguments(typeSig);
-			getTypeArgumentSignaturesLabel(typeArguments, flags, buf);
-		} else if (sigKind == Signature.TYPE_VARIABLE_SIGNATURE) {
-			buf.append(Signature.toString(typeSig));
+		switch (sigKind) {
+			case Signature.BASE_TYPE_SIGNATURE:
+				buf.append(Signature.toString(typeSig));
+				break;
+			case Signature.ARRAY_TYPE_SIGNATURE:
+				getTypeSignatureLabel(Signature.getElementType(typeSig), flags, buf);
+				for (int dim= Signature.getArrayCount(typeSig); dim > 0; dim--) {
+					buf.append('[').append(']');
+				}
+				break;
+			case Signature.CLASS_TYPE_SIGNATURE:
+				String baseType= Signature.toString(Signature.getTypeErasure(typeSig));
+				buf.append(Signature.getSimpleName(baseType));
+				
+				String[] typeArguments= Signature.getTypeArguments(typeSig);
+				getTypeArgumentSignaturesLabel(typeArguments, flags, buf);
+				break;
+			case Signature.TYPE_VARIABLE_SIGNATURE:
+				buf.append(Signature.toString(typeSig));
+				break;
+			case Signature.WILDCARD_TYPE_SIGNATURE:
+				char ch= typeSig.charAt(0);
+				if (ch == Signature.C_STAR) { //workaround for bug 85713
+					buf.append('?');
+				} else {
+					if (ch == Signature.C_EXTENDS) {
+						buf.append("? extends "); //$NON-NLS-1$
+						getTypeSignatureLabel(typeSig.substring(1), flags, buf);
+					} else if (ch == Signature.C_SUPER) {
+						buf.append("? super "); //$NON-NLS-1$
+						getTypeSignatureLabel(typeSig.substring(1), flags, buf);
+					}
+				}
+				break;
+			default:
+				// unknown
 		}
 	}
 	
@@ -699,20 +720,7 @@ public class JavaElementLabels {
 				if (i > 0) {
 					buf.append(COMMA_STRING);
 				}
-				String sig= typeArgsSig[i];
-				char ch= sig.charAt(0);
-				if (ch == Signature.C_STAR) { //workaround for bug 85713
-					buf.append("?"); //$NON-NLS-1$
-				} else {
-					if (ch == Signature.C_EXTENDS) {
-						buf.append("? extends "); //$NON-NLS-1$
-						sig= sig.substring(1);
-					} else if (ch == Signature.C_SUPER) {
-						buf.append("? super "); //$NON-NLS-1$
-						sig= sig.substring(1);
-					}
-					getTypeSignatureLabel(sig, flags, buf);
-				}
+				getTypeSignatureLabel(typeArgsSig[i], flags, buf);
 			}
 			buf.append('>');
 		}

@@ -517,16 +517,6 @@ public final class ImportsStructure implements IImportsStructure {
 		if (typeSig == null || typeSig.length() == 0) {
 			throw new IllegalArgumentException("Invalid type signature: empty or null"); //$NON-NLS-1$
 		}
-		char ch= typeSig.charAt(0);  //workaround for bug 85713
-		if (ch == Signature.C_STAR || ch == Signature.C_EXTENDS || ch == Signature.C_SUPER) {
-			WildcardType wildcardType= ast.newWildcardType();
-			if (ch != Signature.C_STAR) {
-				Type bound= addImportFromSignature(typeSig.substring(1), ast);
-				wildcardType.setBound(bound, ch == Signature.C_EXTENDS);
-			}
-			return wildcardType;
-		}
-		
 		int sigKind= Signature.getTypeSignatureKind(typeSig);
 		switch (sigKind) {
 			case Signature.BASE_TYPE_SIGNATURE:
@@ -554,6 +544,14 @@ public final class ImportsStructure implements IImportsStructure {
 				return baseType;
 			case Signature.TYPE_VARIABLE_SIGNATURE:
 				return ast.newSimpleType(ast.newSimpleName(Signature.toString(typeSig)));
+			case Signature.WILDCARD_TYPE_SIGNATURE:
+				WildcardType wildcardType= ast.newWildcardType();
+				char ch= typeSig.charAt(0);
+				if (ch != Signature.C_STAR) {
+					Type bound= addImportFromSignature(typeSig.substring(1), ast);
+					wildcardType.setBound(bound, ch == Signature.C_EXTENDS);
+				}
+				return wildcardType;
 			default:
 				JavaPlugin.logErrorMessage("Unknown type signature kind: " + typeSig); //$NON-NLS-1$
 		}
