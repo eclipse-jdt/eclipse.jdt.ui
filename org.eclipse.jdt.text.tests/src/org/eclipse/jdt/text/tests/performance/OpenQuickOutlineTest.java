@@ -60,7 +60,7 @@ public class OpenQuickOutlineTest extends TextPerformanceTestCase {
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 		fWasOutlineViewShown= EditorTestHelper.hideView(OUTLINE_VIEW);
-		ResourceTestHelper.replicate(ORIG_FILE, PATH + ORIG_NAME, ".java", getWarmUpRuns() + getMeasuredRuns(), ORIG_NAME, ORIG_NAME, ResourceTestHelper.FAIL_IF_EXISTS);
+		ResourceTestHelper.replicate(ORIG_FILE, PATH + ORIG_NAME, ".java", getWarmUpRuns() + getMeasuredRuns(), ORIG_NAME, ORIG_NAME, ResourceTestHelper.OVERWRITE_IF_EXISTS);
 		ResourceTestHelper.incrementalBuild();
 		EditorTestHelper.bringToTop();
 		EditorTestHelper.joinJobs(1000, 10000, 100);
@@ -73,7 +73,7 @@ public class OpenQuickOutlineTest extends TextPerformanceTestCase {
 			EditorTestHelper.showView(OUTLINE_VIEW);
 	}
 
-	public void testOpenQuickOutline1() throws IOException, CoreException {
+	public void testOpenQuickOutline1() throws Exception {
 		measureOpenQuickOutline(getNullPerformanceMeter(), getNullPerformanceMeter(), 0, getWarmUpRuns());
 		PerformanceMeter coldMeter= createPerformanceMeterForSummary(getDefaultScenarioId() + "-cold", SHORT_NAME_COLD, Dimension.ELAPSED_PROCESS);
 		PerformanceMeter warmMeter= createPerformanceMeter(getDefaultScenarioId() + "-warm");
