@@ -9,6 +9,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IInitializer;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -53,6 +55,10 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		fEditor= editor;
 		fIsGotoNext= isGotoNext;
 		update();
+		if (isGotoNext)
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_NEXT_MEMBER_ACTION);
+		else
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_PREVIOUS_MEMBER_ACTION);
 	}
 	
 	/*

@@ -15,7 +15,9 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 public class LocalHistoryActionGroup extends ActionGroup {
@@ -34,18 +36,25 @@ public class LocalHistoryActionGroup extends ActionGroup {
 			CompareMessages.getString("LocalHistoryActionGroup.action.compare_with"), //$NON-NLS-1$
 			CompareMessages.getString("LocalHistoryActionGroup.action.compare_with.title"), //$NON-NLS-1$
 			CompareMessages.getString("LocalHistoryActionGroup.action.compare_with.message")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(fCompareWith, IJavaHelpContextIds.COMPARE_WITH_HISTORY_ACTION);
+
 		fReplaceWithPrevious= new JavaHistoryEditorAction(editor, new JavaReplaceWithPreviousEditionAction(), 
 			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with_previous"), //$NON-NLS-1$
 			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with_previous.title"), //$NON-NLS-1$
 			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with_previous.message")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(fReplaceWithPrevious, IJavaHelpContextIds.REPLACE_WITH_PREVIOUS_FROM_HISTORY_ACTION);
+		
 		fReplaceWith= new JavaHistoryEditorAction(editor, new JavaReplaceWithEditionAction(), 
 			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with"), //$NON-NLS-1$
 			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with.title"), //$NON-NLS-1$
 			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with.message")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(fReplaceWith, IJavaHelpContextIds.REPLACE_WITH_HISTORY_ACTION);
+
 		fAddFrom= new JavaHistoryEditorAction(editor, new JavaAddElementFromHistory(), 
 			CompareMessages.getString("LocalHistoryActionGroup.action.add"), //$NON-NLS-1$
 			CompareMessages.getString("LocalHistoryActionGroup.action.add.title"), //$NON-NLS-1$
 			CompareMessages.getString("LocalHistoryActionGroup.action.add.message")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(fAddFrom, IJavaHelpContextIds.ADD_FROM_HISTORY_ACTION);
 	}
 
 	public void fillContextMenu(IMenuManager menu) {

@@ -14,6 +14,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -24,6 +25,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -36,6 +38,7 @@ class GotoTypeAction extends Action {
 		setText(PackagesMessages.getString("GotoType.action.label")); //$NON-NLS-1$
 		setDescription(PackagesMessages.getString("GotoType.action.description")); //$NON-NLS-1$
 		fPackageExplorer= part;
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_TYPE_ACTION);
 	}
 
 

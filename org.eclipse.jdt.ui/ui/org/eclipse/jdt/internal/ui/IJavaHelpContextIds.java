@@ -56,6 +56,10 @@ public interface IJavaHelpContextIds {
 	public static final String CLEAR_WORKING_SET_ACTION= 									PREFIX + "clear_working_set_action"; //$NON-NLS-1$
 	public static final String GOTO_MARKER_ACTION= 											PREFIX + "goto_marker_action"; //$NON-NLS-1$
 	public static final String GOTO_PACKAGE_ACTION= 											PREFIX + "goto_package_action"; //$NON-NLS-1$
+	public static final String GOTO_TYPE_ACTION= 											PREFIX + "goto_type_action"; //$NON-NLS-1$
+	public static final String GOTO_MATCHING_BRACKET_ACTION=							PREFIX + "goto_matching_bracket_action"; 	 //$NON-NLS-1$
+	public static final String GOTO_NEXT_MEMBER_ACTION=							PREFIX + "goto_next_member_action"; 	 //$NON-NLS-1$
+	public static final String GOTO_PREVIOUS_MEMBER_ACTION=							PREFIX + "goto_previous_member_action"; 	 //$NON-NLS-1$
 	public static final String HISTORY_ACTION= 													PREFIX + "history_action"; //$NON-NLS-1$
 	public static final String HISTORY_LIST_ACTION= 											PREFIX + "history_list_action"; //$NON-NLS-1$
 	public static final String LEXICAL_SORTING_OUTLINE_ACTION= 							PREFIX + "lexical_sorting_outline_action"; //$NON-NLS-1$
@@ -119,7 +123,12 @@ public interface IJavaHelpContextIds {
 	public static final String COLLAPSE_ALL_ACTION= 								PREFIX + "open_type_hierarchy_action"; //$NON-NLS-1$
 	public static final String GOTO_RESOURCE_ACTION=							PREFIX + "goto_resource_action"; 	 //$NON-NLS-1$
 	public static final String LINK_EDITOR_ACTION=							PREFIX + "link_editor_action"; 	 //$NON-NLS-1$
-
+	public static final String GO_INTO_TOP_LEVEL_TYPE_ACTION=							PREFIX + "go_into_top_level_type_action"; 	 //$NON-NLS-1$
+	public static final String COMPARE_WITH_HISTORY_ACTION=							PREFIX + "compare_with_history_action"; 	 //$NON-NLS-1$
+	public static final String REPLACE_WITH_PREVIOUS_FROM_HISTORY_ACTION=							PREFIX + "replace_with_previous_from_history_action"; 	 //$NON-NLS-1$
+	public static final String REPLACE_WITH_HISTORY_ACTION=							PREFIX + "replace_with_history_action"; 	 //$NON-NLS-1$
+	public static final String ADD_FROM_HISTORY_ACTION=							PREFIX + "add_from_history_action"; 	 //$NON-NLS-1$
+	
 	// Dialogs
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_DIALOG= PREFIX + "open_type_dialog_context"; //$NON-NLS-1$
