@@ -34,9 +34,16 @@ public class HTMLPrinter {
 		
 		return null;
 	}	
+
+	public static void insertPageProlog(StringBuffer buffer, int position) {
+		buffer.insert(position, "<html><body text=\"#000000\" bgcolor=\"#FFFF88\"><font size=-1>");
+	}
 	
+	/**
+	 * @deprecated use insertPageProlog instead
+	 */
 	public static void addPageProlog(StringBuffer buffer) {
-		buffer.append("<html><body text=\"#000000\" bgcolor=\"#FFFF88\"><font size=-1>");
+		insertPageProlog(buffer, buffer.length());
 	}
 	
 	public static void addPageEpilog(StringBuffer buffer) {

@@ -91,7 +91,6 @@ public class JavaTypeHover implements ITextHover {
 					return null;
 					
 				StringBuffer buffer= new StringBuffer();
-				HTMLPrinter.addPageProlog(buffer);
 				
 				if (nResults > 1) {
 					
@@ -113,9 +112,11 @@ public class JavaTypeHover implements ITextHover {
 					}
 				}
 				
-				HTMLPrinter.addPageEpilog(buffer);
-				
-				return buffer.toString();
+				if (buffer.length() > 0) {
+					HTMLPrinter.insertPageProlog(buffer, 0);
+					HTMLPrinter.addPageEpilog(buffer);
+					return buffer.toString();
+				}
 				
 			} catch (JavaModelException x) {
 				JavaPlugin.log(x.getStatus());
