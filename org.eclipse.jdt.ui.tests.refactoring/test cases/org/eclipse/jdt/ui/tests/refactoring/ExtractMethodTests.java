@@ -1526,6 +1526,14 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		duplicatesTest();
 	}
 	
+	public void test955() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test956() throws Exception {
+		duplicatesTest();
+	}
+	
 	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod
 	
 	public void test2001() throws Exception {
