@@ -245,7 +245,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			// only shift if the last java line is further up and is a braceless block candidate
 			if (lastLine < line) {
 			
-				JavaIndenter indenter= new JavaIndenter(d, scanner);
+				JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 				StringBuffer indent= indenter.computeIndentation(p, true);
 				String toDelete= d.get(lineOffset, c.offset - lineOffset);
 				if (indent != null && !indent.toString().equals(toDelete)) {
@@ -263,7 +263,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	private void smartIndentAfterNewLine(IDocument d, DocumentCommand c) {
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
-		JavaIndenter indenter= new JavaIndenter(d, scanner);
+		JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 		StringBuffer indent= indenter.computeIndentation(c.offset);
 		if (indent == null)
 			indent= new StringBuffer(); //$NON-NLS-1$
@@ -621,7 +621,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		
 		try {
 			JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
-			JavaIndenter indenter= new JavaIndenter(document, scanner);
+			JavaIndenter indenter= new JavaIndenter(document, scanner, fProject);
 			int offset= newOffset;
 			
 			// reference position to get the indent from
@@ -649,7 +649,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			// handle the indentation computation inside a temporary document
 			Document temp= new Document(prefix + newText);
 			scanner= new JavaHeuristicScanner(temp);
-			indenter= new JavaIndenter(temp, scanner);
+			indenter= new JavaIndenter(temp, scanner, fProject);
 			installJavaStuff(temp);
 			
 			// indent the first and second line
@@ -892,7 +892,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		}
 	}
 
-	private static int getPeerPosition(IDocument document, DocumentCommand command) {
+	private int getPeerPosition(IDocument document, DocumentCommand command) {
 		if (document.getLength() == 0)
 			return 0;
     	/*
@@ -961,7 +961,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
     				break; // keep searching
     			case Symbols.TokenCASE:
     			case Symbols.TokenDEFAULT:
-    				JavaIndenter indenter= new JavaIndenter(document, dScanner);
+    				JavaIndenter indenter= new JavaIndenter(document, dScanner, fProject);
     				peer= indenter.findReferencePosition(dPos, false, false, false, true);
     				if (peer == JavaHeuristicScanner.NOT_FOUND)
     					return firstPeer;
@@ -1068,7 +1068,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				// only shift if the last java line is further up and is a braceless block candidate
 				if (lastLine < line) {
 					
-					JavaIndenter indenter= new JavaIndenter(d, scanner);
+					JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 					int ref= indenter.findReferencePosition(p, true, false, false, false);
 					if (ref == JavaHeuristicScanner.NOT_FOUND)
 						return;
@@ -1106,7 +1106,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				// only shift if the last java line is further up and is a braceless block candidate
 				if (lastLine < line) {
 					
-					JavaIndenter indenter= new JavaIndenter(d, scanner);
+					JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 					int ref= indenter.findReferencePosition(p, false, false, false, true);
 					if (ref == JavaHeuristicScanner.NOT_FOUND)
 						return;
