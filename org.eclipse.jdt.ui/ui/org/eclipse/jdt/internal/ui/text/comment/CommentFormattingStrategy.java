@@ -150,17 +150,16 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		int level= 0;
 		for (int i= 0, n= reference.length(), spaces= 0; i < n; i++) {
 			char ch= reference.charAt(i);
-			if (ch == ' ') {
+			if (ch == '\t') {
+				spaces= 0;
+				level++;
+			} else {
 				spaces++;
 				if (spaces >= tabSize) {
 					spaces= 0;
 					level++;
 				}
-			} else if (ch == '\t') {
-				spaces= 0;
-				level++;
-			} else
-				throw new IllegalArgumentException();
+			}
 		}
 		return level;
 	}
