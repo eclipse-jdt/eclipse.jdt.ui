@@ -11,9 +11,16 @@
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.information.IInformationProvider;
+import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
@@ -24,10 +31,11 @@ import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
-public class JavaInformationProvider implements IInformationProvider {
+public class JavaInformationProvider implements IInformationProvider, IInformationProviderExtension2 {
 
 	class EditorWatcher implements IPartListener {
 		
@@ -128,5 +136,22 @@ public class JavaInformationProvider implements IInformationProvider {
 		}
 		
 		return null;
+	}
+	
+	/*
+	 * @see IInformationProviderExtension2#getInformationPresenterControlCreator()
+	 * @since 3.1
+	 */
+	public IInformationControlCreator getInformationPresenterControlCreator() {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				int shellStyle= SWT.RESIZE;
+				int style= SWT.V_SCROLL | SWT.H_SCROLL;
+				if (BrowserInformationControl.isAvailable(parent))
+					return new BrowserInformationControl(parent, shellStyle, style);
+				else
+					return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
+			}
+		};
 	}
 }
