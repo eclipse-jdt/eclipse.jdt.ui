@@ -9,29 +9,33 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProvider;
+
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.search.ui.ISearchResultViewEntry;
+
+import org.eclipse.search.internal.ui.SearchPlugin;
 
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 
-public class JavaSearchResultLabelProvider extends LabelProvider {
-
+public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
 	public static final int SHOW_CONTAINER_ELEMENT= 2;
 	public static final int SHOW_PATH= 3;
 	public static final String POTENTIAL_MATCH= SearchMessages.getString("JavaSearchResultLabelProvider.potentialMatch"); //$NON-NLS-1$
-
-	private JavaElementLabelProvider fLabelProvider;
 	private int fTextFlags= 0;
 	
 	// Cache
@@ -40,11 +44,26 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	private StringBuffer fBufffer= new StringBuffer(50);
 	
 	public static final JavaSearchResultLabelProvider INSTANCE= new JavaSearchResultLabelProvider();
-
 	public JavaSearchResultLabelProvider() {
-		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_ROOT | JavaElementLabelProvider.SHOW_QUALIFIED);
+		super(getJavaElementLabelProvider(), getDecoratorManager());
 	}	
 
+	private static ILabelDecorator getDecoratorManager() {
+		if (getSite() != null)
+			return getSite().getDecoratorManager();
+		else
+			return null;
+	}
+	
+	private static ILabelProvider getJavaElementLabelProvider() {	
+		return
+			new StandardJavaUILabelProvider(
+				StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
+				StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
+				null
+			);
+	}
+	
 	public String getText(Object o) {
 		fLastMarker= null;
 		IJavaElement javaElement= getJavaElement(o); // sets fLastMarker as side effect
@@ -54,45 +73,43 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		if (javaElement == null) {
 			if (fLastMarker != null) {
 				if (isAccurate) 
-					return fLabelProvider.getText(fLastMarker.getResource());
+					return super.getText(fLastMarker.getResource());
 				else
-					return fLabelProvider.getText(fLastMarker.getResource()) + POTENTIAL_MATCH;
+					return super.getText(fLastMarker.getResource()) + POTENTIAL_MATCH;
 			}
 			else
 				return ""; //$NON-NLS-1$
 		}
 		if (javaElement instanceof IImportDeclaration)
 			javaElement= ((IImportDeclaration)javaElement).getParent().getParent();
-
 		fBufffer.setLength(0);
-		JavaElementLabels.getElementLabel(javaElement, fTextFlags, fBufffer);
 		if (!isAccurate) 
-			fBufffer.append(POTENTIAL_MATCH);
-		return fBufffer.toString();
+			return super.getText(javaElement) + POTENTIAL_MATCH;
+		else
+			return super.getText(javaElement);
 	}
-
 	public Image getImage(Object o) {
 		IJavaElement javaElement= getJavaElement(o);
 		if (javaElement == null)
 			return null;
-		return fLabelProvider.getImage(javaElement);
+		return super.getImage(javaElement);
 	}
-
 	public void setOrder(int orderFlag) {
+		int flags= StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS;
 		if (orderFlag == SHOW_ELEMENT_CONTAINER)
-			fTextFlags = JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
+			flags |= JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
 							| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED;
 			
 		else if (orderFlag == SHOW_CONTAINER_ELEMENT)
-			fTextFlags= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
+			flags |= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
 				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
 		else if (orderFlag == SHOW_PATH) {
-			fTextFlags= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
+			flags |= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES
 				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
-			fTextFlags |= JavaElementLabels.PREPEND_ROOT_PATH;
+			flags |= JavaElementLabels.PREPEND_ROOT_PATH;
 		}
+		((StandardJavaUILabelProvider)getLabelProvider()).setTextFlags(flags);
 	}
-
 	private IJavaElement getJavaElement(Object o) {
 		if (o instanceof IJavaElement)
 			return (IJavaElement)o;
@@ -103,7 +120,6 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 			return null;
 		return getJavaElement(marker);
 	}
-
 	private IMarker getMarker(Object o) {
 		if (!(o instanceof ISearchResultViewEntry))
 			return null;
@@ -144,4 +160,14 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		handle= handle.substring(0, start + 1) + resourceName + handle.substring(end + 5);
 		return handle;
 	}
+
+	private static IWorkbenchPartSite getSite() {
+		IWorkbenchPage page= SearchPlugin.getActivePage();
+		if (page != null) {
+			IWorkbenchPart part= page.getActivePart();
+			if (part != null)
+				return part.getSite();
+		}
+		return null;
+	}		
 }
