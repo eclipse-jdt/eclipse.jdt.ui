@@ -70,7 +70,7 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 
 	protected void openResource(final IResource resource) {
 		if (resource.getType() == IResource.FILE) {
-			final IWorkbenchPage activePage= JUnitPlugin.getDefault().getActivePage();
+			final IWorkbenchPage activePage= JUnitPlugin.getActivePage();
 			if (activePage != null) {
 				final Display display= getShell().getDisplay();
 				if (display != null) {

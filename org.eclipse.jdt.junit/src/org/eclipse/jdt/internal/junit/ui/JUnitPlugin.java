@@ -7,8 +7,8 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Julien Ruaux: jruaux@octo.com
- *     Vincent Massol: vmassol@octo.com
+ *   Julien Ruaux: jruaux@octo.com
+ * 	 Vincent Massol: vmassol@octo.com
  ******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.ui;
@@ -66,20 +66,20 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 /**
  * The plug-in runtime class for the JUnit plug-in.
  */
-public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {	
+public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	/**
 	 * The single instance of this plug-in runtime class.
 	 */
 	private static JUnitPlugin fgPlugin= null;
-	
-	public static final String PLUGIN_ID = "org.eclipse.jdt.junit" ; //$NON-NLS-1$
+
+	public static final String PLUGIN_ID= "org.eclipse.jdt.junit"; //$NON-NLS-1$
 	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS= PLUGIN_ID + "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	public final static String TEST_SUPERCLASS_NAME= "junit.framework.TestCase"; //$NON-NLS-1$
 	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$
 
 	private static URL fgIconBaseURL;
-	
+
 	/**
 	 * Use to track new launches. We need to do this
 	 * so that we only attach a TestRunner once to a launch.
@@ -91,7 +91,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * Vector storing the registered test run listeners
 	 */
 	private Vector testRunListeners;
-		
+
 	public JUnitPlugin(IPluginDescriptor desc) {
 		super(desc);
 		fgPlugin= this;
@@ -102,56 +102,59 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			// do nothing
 		}
 	}
-		
+
 	public static JUnitPlugin getDefault() {
 		return fgPlugin;
 	}
-	
+
 	public static Shell getActiveWorkbenchShell() {
 		IWorkbenchWindow workBenchWindow= getActiveWorkbenchWindow();
-		if (workBenchWindow == null) 
+		if (workBenchWindow == null)
 			return null;
 		return workBenchWindow.getShell();
 	}
-	
+
 	/**
 	 * Returns the active workbench window
 	 * 
 	 * @return the active workbench window
 	 */
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
-		if (fgPlugin == null) 
+		if (fgPlugin == null)
 			return null;
 		IWorkbench workBench= fgPlugin.getWorkbench();
-		if (workBench == null) 
+		if (workBench == null)
 			return null;
 		return workBench.getActiveWorkbenchWindow();
-	}	
-	
-	public IWorkbenchPage getActivePage() {
-		return getActiveWorkbenchWindow().getActivePage();
+	}
+
+	public static IWorkbenchPage getActivePage() {
+		IWorkbenchWindow activeWorkbenchWindow= getActiveWorkbenchWindow();
+		if (activeWorkbenchWindow == null)
+			return null;
+		return activeWorkbenchWindow.getActivePage();
 	}
 
 	public static String getPluginId() {
 		return getDefault().getDescriptor().getUniqueIdentifier();
 	}
-	
+
 	/*
 	 * @see AbstractUIPlugin#initializeDefaultPreferences
 	 */
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
-		super.initializeDefaultPreferences(store);	
+		super.initializeDefaultPreferences(store);
 		JUnitPreferencePage.initializeDefaults(store);
 	}
-	
+
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Error", e));  //$NON-NLS-1$
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Error", e)); //$NON-NLS-1$
 	}
 
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static URL makeIconFileURL(String name) throws MalformedURLException {
 		if (JUnitPlugin.fgIconBaseURL == null)
 			throw new MalformedURLException();
@@ -159,7 +162,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	static ImageDescriptor getImageDescriptor(String relativePath) {
-		try { 
+		try {
 			return ImageDescriptor.createFromURL(makeIconFileURL(relativePath));
 		} catch (MalformedURLException e) {
 			// should not happen
@@ -172,8 +175,8 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 */
 	public void launchRemoved(ILaunch launch) {
 		fTrackedLaunches.remove(launch);
-		TestRunnerViewPart testRunnerViewPart= findAndShowTestRunnerViewPart();
-		if (testRunnerViewPart != null && launch.equals(testRunnerViewPart.getLastLaunch()))
+		TestRunnerViewPart testRunnerViewPart= findTestRunnerViewPartInActivePage();
+		if (testRunnerViewPart != null && testRunnerViewPart.isCreated() && launch.equals(testRunnerViewPart.getLastLaunch()))
 			testRunnerViewPart.reset();
 	}
 
@@ -185,48 +188,49 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	public void connectTestRunner(ILaunch launch, IType launchedType, int port) {
-		TestRunnerViewPart testRunnerViewPart= findAndShowTestRunnerViewPart();
+		TestRunnerViewPart testRunnerViewPart= showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
 		if (testRunnerViewPart != null)
-			testRunnerViewPart.startTestRunListening(launchedType, port, launch);	
+			testRunnerViewPart.startTestRunListening(launchedType, port, launch);
 	}
 
-	private TestRunnerViewPart findAndShowTestRunnerViewPart(){
-		IWorkbench workbench= getWorkbench();
-		if (workbench == null)
-			return null;
-			
-		IWorkbenchWindow activeWorkbenchWindow= workbench.getActiveWorkbenchWindow();
-		if (activeWorkbenchWindow == null)
-			return null;
-			
-		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
-		if (page == null)
-			return null;
-			
-		try { // show the result view if it isn't shown yet
-			TestRunnerViewPart  testRunner= (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
+	private TestRunnerViewPart showTestRunnerViewPartInActivePage(TestRunnerViewPart testRunner) {
+		IWorkbenchPart activePart= null;
+		IWorkbenchPage page= null;
+		try {
 			// TODO: have to force the creation of view part contents 
 			// otherwise the UI will not be updated
-			if(testRunner == null || ! testRunner.isCreated()) {
-				IWorkbenchPart activePart= page.getActivePart();
-				testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
-				//restore focus stolen by the creation of the result view
-				page.activate(activePart);
-			} 
-			return testRunner;
+			if (testRunner != null && testRunner.isCreated())
+				return testRunner;
+			page= getActivePage();
+			if (page == null)
+				return null;
+			activePart= page.getActivePart();
+			//	show the result view if it isn't shown yet
+			return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME);
 		} catch (PartInitException pie) {
 			log(pie);
 			return null;
+		} finally{
+			//restore focus stolen by the creation of the result view
+			if (page != null && activePart != null)
+				page.activate(activePart);
 		}
 	}
-	
+
+	private TestRunnerViewPart findTestRunnerViewPartInActivePage() {
+		IWorkbenchPage page= getActivePage();
+		if (page == null)
+			return null;
+		return (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
+	}
+
 	/*
 	 * @see ILaunchListener#launchChanged(ILaunch)
 	 */
 	public void launchChanged(final ILaunch launch) {
 		if (!fTrackedLaunches.contains(launch))
 			return;
-			
+
 		ILaunchConfiguration config= launch.getLaunchConfiguration();
 		IType launchedType= null;
 		int port= -1;
@@ -237,10 +241,10 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			if (portStr != null && typeStr != null) {
 				port= Integer.parseInt(portStr);
 				IJavaElement element= JavaCore.create(typeStr);
-				if (element instanceof IType) 
-					launchedType= (IType)element; 
+				if (element instanceof IType)
+					launchedType= (IType) element;
 			}
-		}	
+		}
 		if (launchedType != null) {
 			fTrackedLaunches.remove(launch);
 			final int finalPort= port;
@@ -249,17 +253,17 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 				public void run() {
 					connectTestRunner(launch, finalType, finalPort);
 				}
-			});		
-		}	
+			});
+		}
 	}
-	
+
 	/*
 	 * @see Plugin#startup()
 	 */
 	public void startup() throws CoreException {
 		super.startup();
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
-		launchManager.addLaunchListener(this);	
+		launchManager.addLaunchListener(this);
 	}
 
 	/*
@@ -281,7 +285,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			display= Display.getDefault();
 		}
 		return display;
-	}		
+	}
 	/**
 	 * Utility method to create and return a selection dialog that allows
 	 * selection of a specific Java package.  Empty packages are not returned.
@@ -289,7 +293,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * are included.  If no Java projects are provided, all Java projects in the
 	 * workspace are considered.
 	 */
-	public static ElementListSelectionDialog createAllPackagesDialog(Shell shell,	IJavaProject[] originals, final boolean includeDefaultPackage) throws JavaModelException {
+	public static ElementListSelectionDialog createAllPackagesDialog(Shell shell, IJavaProject[] originals, final boolean includeDefaultPackage) throws JavaModelException {
 		final List packageList= new ArrayList();
 		if (originals == null) {
 			IWorkspaceRoot wsroot= ResourcesPlugin.getWorkspace().getRoot();
@@ -342,7 +346,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		dialog.setElements(packageList.toArray()); // XXX inefficient
 		return dialog;
 	}
-	
+
 	/**
 	 * Initializes TestRun Listener extensions
 	 */
@@ -386,5 +390,5 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			loadTestRunListeners();
 		}
 		testRunListeners.add(newListener);
-	}	
+	}
 }
