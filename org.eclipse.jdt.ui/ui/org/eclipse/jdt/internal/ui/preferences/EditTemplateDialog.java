@@ -73,6 +73,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
@@ -229,8 +230,8 @@ public class EditTemplateDialog extends StatusDialog {
 		
 		fContextTypes= contextTypes;
 		
-		if (fContextTypes.length > 0)
-			fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType(fContextTypes[0]));
+		ContextType type= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName());
+		fProcessor.setContextType(type);
 	}
 	
 	

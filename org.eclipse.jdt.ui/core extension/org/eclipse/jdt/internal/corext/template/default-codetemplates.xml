@@ -2,13 +2,13 @@
 <templates>
 
 <codetemplate name="newtype" description="New classes and interfaces" 
-context="codetemplate" enabled="true">/**
+context="newtype_context" enabled="true">/**
  * Date ${date}
  */</codetemplate>
 
 <codetemplate name="catchblock" description="Code in new catch blocks" 
-context="codetemplate" enabled="true">//TODO</codetemplate>
+context="catchblock_context" enabled="true">//TODO</codetemplate>
 
 <codetemplate name="methodbody" description="Code in new method bodies" 
-context="codetemplate" enabled="true">// TODO</codetemplate>
+context="methodbody_context" enabled="true">// TODO</codetemplate>
 </templates>

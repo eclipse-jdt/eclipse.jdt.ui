@@ -17,6 +17,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -36,7 +37,6 @@ import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -69,6 +69,21 @@ public class JavaContext extends CompilationUnitContext {
 		super(type, document, completionOffset, completionLength, compilationUnit);
 	}
 	
+	/**
+	 * Returns the indentation level at the position of code completion.
+	 */
+	private int getIndentation() {
+		int start= getStart();
+		IDocument document= getDocument();
+		try {
+			IRegion region= document.getLineInformationOfOffset(start);
+			String lineContent= document.get(region.getOffset(), region.getLength());
+			return Strings.computeIndent(lineContent, CodeFormatterUtil.getTabWidth());
+		} catch (BadLocationException e) {
+			return 0;
+		}
+	}	
+	
 	/*
 	 * @see TemplateContext#evaluate(Template template)
 	 */
@@ -94,7 +109,7 @@ public class JavaContext extends CompilationUnitContext {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);			
 		
-		ITemplateEditor formatter= new JavaFormatter(lineDelimiter, useCodeFormatter);
+		ITemplateEditor formatter= new JavaFormatter(lineDelimiter, getIndentation(), useCodeFormatter);
 		formatter.edit(buffer, this);
 
 		return buffer;
@@ -215,18 +230,6 @@ public class JavaContext extends CompilationUnitContext {
 		} catch (BadLocationException e) {
 			return ' ';
 		}
-	}
-
-	/**
-	 * Returns the indentation level at the position of code completion.
-	 */
-	public int getIndentationLevel() {
-		int start= getStart();
-
-		TextBuffer textBuffer= TextBuffer.create(getDocument().get());
-	    String lineContent= textBuffer.getLineContentOfOffset(start);
-
-		return Strings.computeIndent(lineContent, CodeFormatterUtil.getTabWidth());
 	}
 
 	private CompilationUnitCompletion guessVariableNames() {

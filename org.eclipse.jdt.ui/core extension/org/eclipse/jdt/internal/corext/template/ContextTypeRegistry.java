@@ -65,7 +65,10 @@ public class ContextTypeRegistry {
 	private ContextTypeRegistry() {
 		add(new JavaContextType());
 		add(new JavaDocContextType());
-		add(new CodeTemplateContextType());
+
+		add(new CodeTemplateContextType(CodeTemplateContextType.CATCHBLOCK_CONTEXTTYPE));
+		add(new CodeTemplateContextType(CodeTemplateContextType.METHODBODY_CONTEXTTYPE));
+		add(new CodeTemplateContextType(CodeTemplateContextType.NEWTYPE_CONTEXTTYPE));
 	}
 
 }

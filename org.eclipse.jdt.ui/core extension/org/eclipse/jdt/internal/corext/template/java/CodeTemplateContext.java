@@ -1,19 +1,16 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
@@ -25,15 +22,22 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
   */
-public class CodeTemplateTemplateContext extends TemplateContext {
+public class CodeTemplateContext extends TemplateContext {
 	
 	private String fLineDelimiter;
+	private int fInitialIndentLevel;
+	private Map fMappedValues;
 	
-	public CodeTemplateTemplateContext(ContextType type, String lineDelim) {
+	public CodeTemplateContext(ContextType type, Map mappedValues, String lineDelim, int initialIndentLevel) {
 		super(type);
 		fLineDelimiter= lineDelim;
+		fInitialIndentLevel= initialIndentLevel;
+		fMappedValues= mappedValues;
 	}
-	
+
+	public String getVariableValue(String variableName) {
+		return (String) fMappedValues.get(variableName);
+	}	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.TemplateContext#evaluate(org.eclipse.jdt.internal.corext.template.Template)
@@ -51,7 +55,7 @@ public class CodeTemplateTemplateContext extends TemplateContext {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);			
 
-		ITemplateEditor formatter= new JavaFormatter(fLineDelimiter, useCodeFormatter);
+		ITemplateEditor formatter= new JavaFormatter(fLineDelimiter, fInitialIndentLevel, useCodeFormatter);
 		formatter.edit(buffer, this);
 
 		return buffer;
@@ -67,20 +71,16 @@ public class CodeTemplateTemplateContext extends TemplateContext {
 	/**
 	 * Evaluates a codetemplate in the context of a compilation unit
 	 */
-	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException {
-
-		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("codetemplate"); //$NON-NLS-1$
+	public static String evaluateTemplate(Template template, Map mappedValues, String lineDelimiter, int initialIndentLevel) throws CoreException {
+		ContextType contextType= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName()); //$NON-NLS-1$
 		if (contextType == null)
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("CodeTemplateTemplateContext.error.message"), null)); //$NON-NLS-1$
 
-		IDocument document= new Document();
-		if (compilationUnit != null && compilationUnit.exists())
-			document.set(compilationUnit.getSource());
-
-		CodeTemplateTemplateContext context= new CodeTemplateTemplateContext(contextType, StubUtility.getLineDelimiterUsed(compilationUnit));
-
+		CodeTemplateContext context= new CodeTemplateContext(contextType, mappedValues, lineDelimiter, initialIndentLevel);
 		TemplateBuffer buffer= context.evaluate(template);
 		return buffer.getString();
 	}
+
+
 
 }

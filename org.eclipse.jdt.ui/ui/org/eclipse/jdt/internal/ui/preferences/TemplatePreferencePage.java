@@ -58,8 +58,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplateSet;
@@ -425,18 +423,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	private void add() {		
 		
 		Template template= new Template();
-
-		ContextTypeRegistry registry=ContextTypeRegistry.getInstance();
-		ContextType type= registry.getContextType("java"); //$NON-NLS-1$
-		
-		String contextTypeName;
-		if (type != null)
-			contextTypeName= type.getName();
-		else {
-			Iterator iterator= registry.iterator();
-			contextTypeName= (String) iterator.next();
-		}
-		template.setContext(contextTypeName); //$NON-NLS-1$
+		template.setContext(CONTEXTS[0]);
 		
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, false, true, CONTEXTS);
 		if (dialog.open() == EditTemplateDialog.OK) {

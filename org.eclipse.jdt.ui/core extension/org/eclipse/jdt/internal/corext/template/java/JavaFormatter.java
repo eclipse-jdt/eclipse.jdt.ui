@@ -42,6 +42,9 @@ public class JavaFormatter implements ITemplateEditor {
 
 	/** The line delimiter to use if code formatter is not used. */
 	private final String fLineDelimiter;
+	/** The initial indent level */
+	private final int fInitialIndentLevel;
+	
 	/** The java partitioner */
 	private final IDocumentPartitioner fPartitioner= JavaPlugin.getDefault().getJavaTextTools().createDocumentPartitioner(); 
 	private boolean fUseCodeFormatter;
@@ -49,21 +52,20 @@ public class JavaFormatter implements ITemplateEditor {
 	/**
 	 * Creates a JavaFormatter with the target line delimiter.
 	 */
-	public JavaFormatter(String lineDelimiter, boolean useCodeFormatter) {
+	public JavaFormatter(String lineDelimiter, int initialIndentLevel, boolean useCodeFormatter) {
 		fLineDelimiter= lineDelimiter;
 		fUseCodeFormatter= useCodeFormatter;
+		fInitialIndentLevel= initialIndentLevel;
 	}
 
 	/*
 	 * @see ITemplateEditor#edit(TemplateBuffer, TemplateContext)
 	 */
 	public void edit(TemplateBuffer buffer, TemplateContext context) throws CoreException {
-		int indentationLevel= ((JavaContext) context).getIndentationLevel();
-		
 		if (fUseCodeFormatter)
-			format(buffer, indentationLevel);
+			format(buffer);
 		else
-			indentate(buffer, indentationLevel);
+			indentate(buffer);
 			
 		trimBegin(buffer);
 	}
@@ -102,7 +104,7 @@ public class JavaFormatter implements ITemplateEditor {
 		}
 	}
 
-	private void format(TemplateBuffer templateBuffer, int indentationLevel) throws CoreException {
+	private void format(TemplateBuffer templateBuffer) throws CoreException {
 		// XXX 4360, 15247
 		// workaround for code formatter limitations
 		// handle a special case where cursor position is surrounded by whitespaces		
@@ -124,7 +126,7 @@ public class JavaFormatter implements ITemplateEditor {
 			positionsToVariables(positions, variables);
 		    templateBuffer.setContent(string, variables);
 
-			plainFormat(templateBuffer, indentationLevel);			
+			plainFormat(templateBuffer);			
 
 			string= templateBuffer.getString();
 			variables= templateBuffer.getVariables();
@@ -137,11 +139,11 @@ public class JavaFormatter implements ITemplateEditor {
 		    templateBuffer.setContent(string, variables);
 	
 		} else {
-			plainFormat(templateBuffer, indentationLevel);			
+			plainFormat(templateBuffer);			
 		}	    
 	}
 	
-	private void plainFormat(TemplateBuffer templateBuffer, int indentationLevel) throws CoreException {
+	private void plainFormat(TemplateBuffer templateBuffer) throws CoreException {
 
 		String string= templateBuffer.getString();
 		TemplatePosition[] variables= templateBuffer.getVariables();
@@ -149,18 +151,17 @@ public class JavaFormatter implements ITemplateEditor {
 		int[] offsets= variablesToOffsets(variables);
 		
 		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
-		string= formatter.format(string, indentationLevel, offsets, fLineDelimiter);
+		string= formatter.format(string, fInitialIndentLevel, offsets, fLineDelimiter);
 		
 		offsetsToVariables(offsets, variables);
 
 		templateBuffer.setContent(string, variables);	    
 	}
 
-	private void indentate(TemplateBuffer templateBuffer, int indentationLevel) throws CoreException {
+	private void indentate(TemplateBuffer templateBuffer) throws CoreException {
 
 		String string= templateBuffer.getString();
 		TemplatePosition[] variables= templateBuffer.getVariables();
-   		String indentation= CodeFormatterUtil.createIndentString(indentationLevel);   		
 
 		List positions= variablesToPositions(variables);
 		List edits= new ArrayList(5);
@@ -169,7 +170,7 @@ public class JavaFormatter implements ITemplateEditor {
 	    int lineCount= textBuffer.getNumberOfLines();
 	    for (int i= 0; i < lineCount; i++) {
 	    	TextRegion region= textBuffer.getLineInformation(i);
-			edits.add(SimpleTextEdit.createInsert(region.getOffset(), indentation));
+			edits.add(SimpleTextEdit.createInsert(region.getOffset(), CodeFormatterUtil.createIndentString(fInitialIndentLevel)));
 
 			String lineDelimiter= textBuffer.getLineDelimiter(i);
 			if (lineDelimiter != null)
