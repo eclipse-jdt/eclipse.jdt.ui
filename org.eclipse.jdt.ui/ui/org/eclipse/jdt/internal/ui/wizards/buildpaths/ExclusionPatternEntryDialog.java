@@ -218,7 +218,7 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 
 		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			IPath path= ((IResource)dialog.getFirstResult()).getFullPath();
-			return path.removeFirstSegments(fCurrSourceFolder.getFullPath().segmentCount()).makeRelative();
+			return path.removeFirstSegments(fCurrSourceFolder.getFullPath().segmentCount()).makeRelative().addTrailingSeparator();
 		}
 		return null;
 	}
