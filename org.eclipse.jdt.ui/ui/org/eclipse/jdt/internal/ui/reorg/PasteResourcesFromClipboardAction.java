@@ -6,21 +6,28 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.FileTransfer;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
 import org.eclipse.ui.actions.CopyProjectAction;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 
@@ -32,17 +39,48 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		fClipboard= clipboard;
 	}
 	
+    /*
+     * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
+     */
 	protected void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canOperateOn(selection));
 	}
 	
+    /*
+     * @see SelectionDispatchAction#run(IStructuredSelection)
+     */
 	public void run(IStructuredSelection selection) {
 		IResource[] resourceData = getClipboardResources();		
-		if (resourceData == null || resourceData.length == 0)
+		if (resourceData == null || resourceData.length == 0){
+			if (canPasteFiles(selection))
+				pasteFiles(selection.getFirstElement());
 			return;
+		}	
 			 
 		pasteResources(selection, resourceData);
 	}
+
+    private void pasteFiles(Object target) {
+    	String[] fileData= getClipboardFiles();
+    	if (fileData == null)
+    		return;
+		IContainer container= convertToContainer(target);
+		if (container == null)
+			return;
+				
+		new CopyFilesAndFoldersOperation(getShell()).copyFiles(fileData, container);
+    }
+    
+    private IContainer convertToContainer(Object target){
+		if (target instanceof IContainer) 
+			return (IContainer)target;
+		try {
+			return (IContainer)((IJavaElement)target).getCorrespondingResource();	
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, "Paste", "Internal error occurred. Please see log for details.");
+			return null;
+		}
+    }
 
 	private void pasteResources(IStructuredSelection selection, IResource[] resourceData) {
 		if (resourceData[0].getType() == IResource.PROJECT)
@@ -60,17 +98,17 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 	}
 
 	//- enablement ---
-	private boolean canOperateOn(IStructuredSelection selection){
+	private boolean canOperateOn(IStructuredSelection selection){		
 		IResource[] resourceData= getClipboardResources();
 		if (resourceData == null || resourceData.length == 0)
-			return false;
+			return canPasteFiles(selection);
 			
 		if (ClipboardActionUtil.isOneOpenProject(resourceData))
 			return true;
 			
 		if (selection.size() != 1) //only after we checked the 'one project' case
 			return false;
-		
+				
 		/*
 		 * special case: if both source references and resources are in clipboard - disable this action
 		 * if a compilation unit is selected.
@@ -89,6 +127,31 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		return canActivateCopyRefactoring(resourceData, ClipboardActionUtil.getFirstResource(selection));
 	}
 
+    private boolean canPasteFiles(IStructuredSelection selection) {
+		return (getClipboardFiles() != null) && canPasteFilesOn(selection.getFirstElement());
+    }
+
+    private static boolean canPasteFilesOn(Object target) {
+    	boolean isPackageFragment= target instanceof IPackageFragment;
+		boolean isJavaProject= target instanceof IJavaProject;
+		boolean isPackageFragmentRoot= target instanceof IPackageFragmentRoot;
+		boolean isContainer= target instanceof IContainer;
+		
+		if (!(isPackageFragment || isJavaProject || isPackageFragmentRoot || isContainer)) 
+			return false;
+			
+		if (isContainer) {
+			IContainer container= (IContainer)target;
+			if (!container.isReadOnly())
+				return true;
+		} else {
+			IJavaElement element= (IJavaElement)target;
+			if (!element.isReadOnly()) 
+				return true;
+		}
+		return false;	
+    }
+
 	private static boolean canActivateCopyRefactoring(IResource[] resourceData, IResource selectedResource) {
 		try{
 			CopyRefactoring ref= createCopyRefactoring(resourceData);
@@ -106,6 +169,10 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 	
 	private IResource getFirstSelectedResource(IStructuredSelection selection){
 		return ClipboardActionUtil.getFirstResource(selection);
+	}
+
+	private String[] getClipboardFiles() {
+		return ((String[])fClipboard.getContents(FileTransfer.getInstance()));
 	}
 	
 	private IResource[] getClipboardResources() {
