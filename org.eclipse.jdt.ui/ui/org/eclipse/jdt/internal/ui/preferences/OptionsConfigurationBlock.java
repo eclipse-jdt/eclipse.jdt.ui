@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.GoToBackProgressMonitorDialog;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
@@ -425,7 +426,7 @@ public abstract class OptionsConfigurationBlock {
 	protected abstract String[] getFullBuildDialogStrings(boolean workspaceSettings);
 		
 	protected void doFullBuild() {
-		ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
+		GoToBackProgressMonitorDialog dialog= new GoToBackProgressMonitorDialog(getShell());
 		try {
 			dialog.run(true, true, new IRunnableWithProgress() { 
 				public void run(IProgressMonitor monitor) throws InvocationTargetException {
