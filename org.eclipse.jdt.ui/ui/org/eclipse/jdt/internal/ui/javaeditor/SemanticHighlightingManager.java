@@ -197,12 +197,12 @@ public class SemanticHighlightingManager {
 	/**
 	 * Install the semantic highlighting on the given editor infrastructure
 	 * 
-	 * @param editor The compilation unit editor
+	 * @param editor The Java editor
 	 * @param sourceViewer The source viewer 
 	 * @param colorManager The color manager
 	 * @param preferenceStore The preference store
 	 */
-	public void install(CompilationUnitEditor editor, ISourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, PresentationReconciler backgroundPresentationReconciler) {
+	public void install(JavaEditor editor, ISourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, PresentationReconciler backgroundPresentationReconciler) {
 		if (sourceViewer instanceof ITextViewerExtension2 && sourceViewer instanceof ITextViewerExtension4 && backgroundPresentationReconciler instanceof JavaPresentationReconciler) {
 			fColorManager= colorManager;
 			fPreferenceStore= preferenceStore;
@@ -213,7 +213,7 @@ public class SemanticHighlightingManager {
 			fPresenter.install(editor, sourceViewer, backgroundPresentationReconciler);
 			
 			fReconciler= new SemanticHighlightingReconciler();
-			fReconciler.install(editor, fPresenter, fSemanticHighlightings, fHighlightings);
+			fReconciler.install(editor, sourceViewer, fPresenter, fSemanticHighlightings, fHighlightings);
 		}
 	}
 	

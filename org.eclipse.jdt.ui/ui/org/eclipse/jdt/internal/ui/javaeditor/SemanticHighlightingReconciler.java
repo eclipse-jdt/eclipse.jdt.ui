@@ -15,16 +15,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highlighting;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -35,7 +43,7 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
  * 
  * @since 3.0
  */
-public class SemanticHighlightingReconciler implements IJavaReconcilingListener {
+public class SemanticHighlightingReconciler implements IJavaReconcilingListener, ITextInputListener {
 
 	/**
 	 * Collects positions from the AST.
@@ -119,8 +127,10 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener 
 	/** Position collector */
 	private PositionCollector fCollector= new PositionCollector();
 	
-	/** The compilation unit editor this semantic highlighting reconciler is installed on */
-	private CompilationUnitEditor fEditor;
+	/** The Java editor this semantic highlighting reconciler is installed on */
+	private JavaEditor fEditor;
+	/** The source viewer this semantic highlighting reconciler is installed on */
+	private ISourceViewer fSourceViewer;
 	/** The semantic highlighting presenter */
 	private SemanticHighlightingPresenter fPresenter;
 	/** Semantic highlightings */
@@ -134,6 +144,12 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener 
 	private List fRemovedPositions= new ArrayList();
 	/** Number of removed positions */
 	private int fNOfRemovedPositions;
+	/** Background job */
+	private Job fJob;
+	/** Cancel scheduled background jobs */
+	private boolean fCancelJobs;
+	/** Background job lock */
+	private Object fJobLock= new Object();
 	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
@@ -218,13 +234,20 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener 
 	 * @param semanticHighlightings The semantic highlightings
 	 * @param highlightings The highlightings
 	 */
-	public void install(CompilationUnitEditor editor, SemanticHighlightingPresenter presenter, SemanticHighlighting[] semanticHighlightings, Highlighting[] highlightings) {
+	public void install(JavaEditor editor, ISourceViewer sourceViewer, SemanticHighlightingPresenter presenter, SemanticHighlighting[] semanticHighlightings, Highlighting[] highlightings) {
 		fPresenter= presenter;
 		fSemanticHighlightings= semanticHighlightings;
 		fHighlightings= highlightings;
 		
 		fEditor= editor;
-		fEditor.addReconcileListener(this);
+		fSourceViewer= sourceViewer;
+		
+		if (fEditor instanceof CompilationUnitEditor)
+			((CompilationUnitEditor)fEditor).addReconcileListener(this);
+		else {
+			fSourceViewer.addTextInputListener(this);
+			scheduleJob();
+		}
 	}
 	
 	/**
@@ -232,12 +255,72 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener 
 	 */
 	public void uninstall() {
 		if (fEditor != null) {
-			fEditor.removeReconcileListener(this);
+			if (fEditor instanceof CompilationUnitEditor)
+				((CompilationUnitEditor)fEditor).removeReconcileListener(this);
+			else
+				fSourceViewer.removeTextInputListener(this);
 			fEditor= null;
 		}
 		
+		fSourceViewer= null;
 		fSemanticHighlightings= null;
 		fHighlightings= null;
 		fPresenter= null;
+	}
+
+	/**
+	 * Schedule a background job for retrieving the AST and reconciling the Semantic Highlighting model.
+	 */
+	private void scheduleJob() {
+		final IJavaElement element= fEditor.getInputJavaElement();
+		if (element != null) {
+			Job job= new Job(JavaEditorMessages.getString("SemanticHighlighting.job")) { //$NON-NLS-1$
+				protected IStatus run(IProgressMonitor monitor) {
+					synchronized (fJobLock) {
+						if (fJob != null)
+							try {
+								fJobLock.wait();
+							} catch (InterruptedException e) {
+								JavaPlugin.log(e);
+							}
+						if (fCancelJobs || fJob != null)
+							return Status.CANCEL_STATUS;
+						fJob= this;
+					}
+					CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(element, true, monitor);
+					reconciled(ast, false, monitor);
+					synchronized (fJobLock) {
+						fJob= null;
+						fJobLock.notifyAll();
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			job.setSystem(true);
+			job.setPriority(Job.DECORATE);
+			job.schedule();
+		}
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentAboutToBeChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
+	 */
+	public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
+		synchronized (fJobLock) {
+			fCancelJobs= true;
+			if (fJob != null)
+				fJob.cancel();
+		}
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
+	 */
+	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
+		synchronized (fJobLock) {
+			fCancelJobs= false;
+		}
+		if (newInput != null)
+			scheduleJob();
 	}
 }

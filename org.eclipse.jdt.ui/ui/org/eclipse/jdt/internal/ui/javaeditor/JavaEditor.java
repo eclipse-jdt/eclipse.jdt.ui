@@ -112,8 +112,6 @@ import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.link.LinkedModeModel;
-import org.eclipse.jface.text.presentation.IPresentationReconciler;
-import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
@@ -218,6 +216,7 @@ import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaExpandHover;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
@@ -3739,7 +3738,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private boolean isSemanticHighlightingEnabled() {
-		return this instanceof CompilationUnitEditor && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
+		return getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED);
 	}
 	
 	/**
@@ -3750,8 +3749,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	private void installSemanticReconciler() {
 		if (fSemanticManager == null) {
 			fSemanticManager= new SemanticHighlightingManager();
-			IPresentationReconciler backgroundPresentationReconciler= getSourceViewerConfiguration().getPresentationReconciler(getSourceViewer());
-			fSemanticManager.install((CompilationUnitEditor)this, getSourceViewer(), JavaPlugin.getDefault().getJavaTextTools().getColorManager(), getPreferenceStore(), (PresentationReconciler)backgroundPresentationReconciler);
+			JavaPresentationReconciler backgroundPresentationReconciler= (JavaPresentationReconciler) getSourceViewerConfiguration().getPresentationReconciler(getSourceViewer());
+			fSemanticManager.install(this, getSourceViewer(), JavaPlugin.getDefault().getJavaTextTools().getColorManager(), getPreferenceStore(), backgroundPresentationReconciler);
 		}
 	}
 	
