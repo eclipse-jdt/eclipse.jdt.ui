@@ -1679,6 +1679,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						final String type= targetRewrite.getImportRewrite().addImport(declaring);
 						declaration.setType(ASTNodeFactory.newType(ast, type));
 						declaration.setName(ast.newSimpleName(fTargetName));
+						declaration.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.FINAL_KEYWORD));
 					}
 				}
 				return declaration;
