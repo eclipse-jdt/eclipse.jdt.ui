@@ -60,6 +60,7 @@ public class JavaPluginImages {
 	public static final String IMG_FIELD_PRIVATE= NAME_PREFIX + "field_private_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_FIELD_DEFAULT= NAME_PREFIX + "field_default_obj.gif"; 		//$NON-NLS-1$
 
+	public static final String IMG_VIEW_MENU= NAME_PREFIX + "view_menu.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_OBJS_GHOST= NAME_PREFIX + "ghost.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_SEARCH_TSK= NAME_PREFIX + "search_tsk.gif"; 		//$NON-NLS-1$
@@ -143,9 +144,9 @@ public class JavaPluginImages {
 	
 	public static final ImageDescriptor DESC_CLCL_FILTER= create(T_CLCL, "filter_ps.gif"); //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_CLCL_CODE_ASSIST= create(T_CLCL, "metharg_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_CLCL_CODE_ASSIST= createManaged(T_CLCL, IMG_VIEW_MENU); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_DLCL_CODE_ASSIST= create(T_DLCL, "metharg_obj.gif"); //$NON-NLS-1$
-
+	
 	public static final ImageDescriptor DESC_MISC_PUBLIC= createManaged(T_OBJ, IMG_MISC_PUBLIC);
 	public static final ImageDescriptor DESC_MISC_PROTECTED= createManaged(T_OBJ, IMG_MISC_PROTECTED);
 	public static final ImageDescriptor DESC_MISC_PRIVATE= createManaged(T_OBJ, IMG_MISC_PRIVATE);

@@ -98,16 +98,27 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 		return fKeyAdapter;		
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean hasHeader() {
+		return true;
+	}
 	
-
-
-	protected Text createFilterText(Composite parent) {
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void createHeader(Composite parent) {
 		fHeaderLabel= new Label(parent, SWT.NONE);
 		// text set later
 		fHeaderLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fHeaderLabel.setFont(JFaceResources.getBannerFont());
+	}	
+
+	protected Text createFilterText(Composite parent) {
+		// text set later
 		Text text= super.createFilterText(parent);
-		
 		text.addKeyListener(getKeyAdapter());
 		return text;
 	}	
@@ -339,6 +350,13 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		} else {
 			return TypeHierarchyMessages.getFormattedString("HierarchyInformationControl.toggle.superhierarchy.label", keyName); //$NON-NLS-1$
 		}
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#getId()
+	 */
+	protected String getId() {
+		return "org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"; //$NON-NLS-1$
 	}
 
 	/**

@@ -324,6 +324,14 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		else
 			return JavaUIMessages.getFormattedString("JavaOutlineControl.statusFieldText.showInheritedMembers", keySequence); //$NON-NLS-1$
 	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#getId()
+	 * @since 3.0
+	 */
+	protected String getId() {
+		return "org.eclipse.jdt.internal.ui.text.QuickOutline"; //$NON-NLS-1$
+	}
 
 	/**
 	 * {@inheritDoc}

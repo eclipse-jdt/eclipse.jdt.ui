@@ -3806,6 +3806,80 @@
             class="org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
             id="org.eclipse.jdt.ui.MembersView.ImportDeclarationFilter">
       </filter>
+<!-- Quick Outline -->
+      <filter
+            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            name="%HidePackageDeclaration.label"
+            enabled="false"
+            description="%HidePackageDeclaration.description"
+            class="org.eclipse.jdt.internal.ui.filters.PackageDeclarationFilter"
+            id="org.eclipse.jdt.internal.ui.text.QuickOutline.PackageDeclarationFilter">
+      </filter>
+      <filter
+            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            name="%HideImportDeclaration.label"
+            enabled="false"
+            description="%HideImportDeclaration.description"
+            class="org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
+            id="org.eclipse.jdt.internal.ui.text.QuickOutline.ImportDeclarationFilter">
+      </filter>
+      <filter
+            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            name="%HideFields.label"
+            enabled="false"
+            description="%HideFields.description"
+            class="org.eclipse.jdt.internal.ui.filters.FieldsFilter"
+            id="org.eclipse.jdt.internal.ui.text.QuickOutline.FieldsFilter">
+      </filter>
+      <filter
+            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            name="%HideStatics.label"
+            enabled="false"
+            description="%HideStatics.description"
+            class="org.eclipse.jdt.internal.ui.filters.StaticsFilter"
+            id="org.eclipse.jdt.internal.ui.text.QuickOutline.StaticsFilter">
+      </filter>
+      <filter
+            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            name="%HideNonPublic.label"
+            enabled="false"
+            description="%HideNonPublic.description"
+            class="org.eclipse.jdt.internal.ui.filters.NonPublicFilter"
+            id="org.eclipse.jdt.internal.ui.text.QuickOutline.NonPublicFilter">
+      </filter>
+      <filter
+            viewId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            name="%HideLocalTypes.label"
+            enabled="false"
+            description="%HideLocalTypes.description"
+            class="org.eclipse.jdt.internal.ui.filters.LocalTypesFilter"
+            id="org.eclipse.jdt.internal.ui.text.QuickOutline.LocalTypesFilter">
+      </filter>
+<!-- Quick Hierarchy -->
+      <filter
+            viewId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
+            name="%HideStatics.label"
+            enabled="false"
+            description="%HideStatics.description"
+            class="org.eclipse.jdt.internal.ui.filters.StaticsFilter"
+            id="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy.StaticsFilter">
+      </filter>
+      <filter
+            viewId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
+            name="%HideNonPublic.label"
+            enabled="false"
+            description="%HideNonPublic.description"
+            class="org.eclipse.jdt.internal.ui.filters.NonPublicFilter"
+            id="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy.NonPublicFilter">
+      </filter>
+      <filter
+            viewId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
+            name="%HideLocalTypes.label"
+            enabled="false"
+            description="%HideLocalTypes.description"
+            class="org.eclipse.jdt.internal.ui.filters.LocalTypesFilter"
+            id="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy.LocalTypesFilter">
+      </filter>
    </extension>
 <!-- =========================================================================== -->
 <!-- Call Hierarchy                                                              -->
