@@ -201,6 +201,9 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 		}
 		String name= buf.toString();
 		
+		if ("java.lang".equals(containerName) && typeName.equals(completion)) //$NON-NLS-1$
+			completion= containerName + '.' + completion; //since JDT core swallows java.lang
+		
 		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, null, start, end-start,
 			getImage(descriptor), name, relevance, typeName, containerName);
 		proposal.setProposalInfo(proposalInfo);
