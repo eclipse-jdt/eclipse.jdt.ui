@@ -645,6 +645,10 @@ public class ExtractMethodTests extends RefactoringTest {
 		validSelectionTest();
 	}
 	
+	public void test283() throws Exception {
+		validSelectionTest();
+	}
+	
 	//---- try / catch / finally
 	
 	public void test300() throws Exception {
@@ -763,6 +767,10 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test507() throws Exception {
+		localsTest();
+	}
+	
+	public void test508() throws Exception {
 		localsTest();
 	}
 }
