@@ -67,8 +67,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getPickOutStringProposals(context, coveringNode, null)
 					|| getReplaceIfElseReturnWithReturnConditionalProposals(context, coveringNode, null)
 					|| getReplaceIfElseAssignWithReturnConditionalProposals(context, coveringNode, null)
-					|| getReplaceReturnConditionalWithIfElseReturnProposals(context, coveringNode, null)
-					|| getReplaceAssignConditionalWithIfElseAssignProposals(context, coveringNode, null);
+					|| getReplaceConditionalWithIfElseAssignProposals(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -100,8 +99,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getPickOutStringProposals(context, coveringNode, resultingCollections);
 				getReplaceIfElseReturnWithReturnConditionalProposals(context, coveringNode, resultingCollections);
 				getReplaceIfElseAssignWithReturnConditionalProposals(context, coveringNode, resultingCollections);
-				getReplaceReturnConditionalWithIfElseReturnProposals(context, coveringNode, resultingCollections);
-				getReplaceAssignConditionalWithIfElseAssignProposals(context, coveringNode, resultingCollections);
+				getReplaceConditionalWithIfElseAssignProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -1615,67 +1613,47 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 	}
-	private static boolean getReplaceReturnConditionalWithIfElseReturnProposals(IInvocationContext context,
-			ASTNode covering, Collection resultingCollections) {
-		// check that parent statement is 'return'
-		Statement statement= ASTResolving.findParentStatement(covering);
-		if (!(statement instanceof ReturnStatement)) {
-			return false;
-		}
-		ReturnStatement returnStatement= (ReturnStatement) statement;
-		// check that reutrn expression is conditional expression
-		if (!(returnStatement.getExpression() instanceof ConditionalExpression)) {
-			return false;
-		}
-		ConditionalExpression conditional= (ConditionalExpression) returnStatement.getExpression();
-		// ok, we could produce quick assist
-		if (resultingCollections == null) {
-			return true;
-		}
-		//
-		AST ast= covering.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		// prepare new 'if' statement
-		IfStatement ifStatement = ast.newIfStatement();
-		ifStatement.setExpression((Expression) rewrite.createCopyTarget(conditional.getExpression()));
-		//
-		ReturnStatement thenReturn= createReturnExpression(ast, rewrite, conditional.getThenExpression());
-		ifStatement.setThenStatement(thenReturn);
-		//
-		ReturnStatement elseReturn= createReturnExpression(ast, rewrite, conditional.getThenExpression());
-		ifStatement.setElseStatement(elseReturn);
-		//
-		// replace return conditional expression with if/then/else/return
-		rewrite.replace(statement, ifStatement, null);
-		// add correction proposal
-		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.replaceConditionalWithIfReturn"); //$NON-NLS-1$
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
-		resultingCollections.add(proposal);
-		return true;
-	}
-	private static ReturnStatement createReturnExpression(AST ast, ASTRewrite rewrite, Expression expression) {
+
+	private static ReturnStatement createReturnExpression(ASTRewrite rewrite, Expression expression) {
+		AST ast= rewrite.getAST();
 		ReturnStatement thenReturn = ast.newReturnStatement();
 		thenReturn.setExpression((Expression) rewrite.createCopyTarget(expression));
 		return thenReturn;
 	}
-	private static boolean getReplaceAssignConditionalWithIfElseAssignProposals(IInvocationContext context,
-			ASTNode covering, Collection resultingCollections) {
+	
+	private static Statement createAssignmentStatement(ASTRewrite rewrite, Expression origAssignee, Expression origAssigned) {
+		AST ast= rewrite.getAST();
+		Assignment elseAssignment= ast.newAssignment();
+		elseAssignment.setLeftHandSide((Expression) rewrite.createCopyTarget(origAssignee));
+		elseAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(origAssigned));
+		ExpressionStatement statement = ast.newExpressionStatement(elseAssignment);
+		return statement;
+	}
+	
+	private static boolean getReplaceConditionalWithIfElseAssignProposals(IInvocationContext context, ASTNode covering, Collection resultingCollections) {
 		// check that parent statement is assignment
-		Statement statement= ASTResolving.findParentStatement(covering);
-		if (!(statement instanceof ExpressionStatement)) {
+		while (!(covering instanceof ConditionalExpression) && covering instanceof Expression) {
+			covering= covering.getParent();
+		}
+		if (!(covering instanceof ConditionalExpression)) {
 			return false;
 		}
-		ExpressionStatement expressionStatement= (ExpressionStatement) statement;
-		if (!(expressionStatement.getExpression() instanceof Assignment)) {
+		
+		StructuralPropertyDescriptor locationInParent= covering.getLocationInParent();
+		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			if (covering.getParent().getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+				return false;
+			}
+		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			ASTNode statement= covering.getParent().getParent();
+			if (!(statement instanceof VariableDeclarationStatement) || statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+				return false;
+			}
+		} else if (locationInParent != ReturnStatement.EXPRESSION_PROPERTY) {
 			return false;
 		}
-		Assignment assignment= (Assignment) expressionStatement.getExpression();
-		// check that reutrn expression is conditional expression
-		if (!(assignment.getRightHandSide() instanceof ConditionalExpression)) {
-			return false;
-		}
-		ConditionalExpression conditional= (ConditionalExpression) assignment.getRightHandSide();
+
+		ConditionalExpression conditional= (ConditionalExpression) covering;
 		// ok, we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
@@ -1684,22 +1662,42 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= covering.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		// prepare new 'if' statement
+		Expression expression= conditional.getExpression();
+		while (expression instanceof ParenthesizedExpression) {
+			expression= ((ParenthesizedExpression) expression).getExpression();
+		}
 		IfStatement ifStatement= ast.newIfStatement();
-		ifStatement.setExpression((Expression) rewrite.createCopyTarget(conditional.getExpression()));
-		//
-		Assignment thenAssignment= ast.newAssignment();
-		thenAssignment.setLeftHandSide((Expression) rewrite.createCopyTarget(assignment.getLeftHandSide()));
-		thenAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(conditional.getThenExpression()));
-		ExpressionStatement thenStatement = ast.newExpressionStatement(thenAssignment);
-		ifStatement.setThenStatement(thenStatement);
-		//
-		Assignment elseAssignment= ast.newAssignment();
-		elseAssignment.setLeftHandSide((Expression) rewrite.createCopyTarget(assignment.getLeftHandSide()));
-		elseAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(conditional.getElseExpression()));
-		ExpressionStatement elseStatement = ast.newExpressionStatement(elseAssignment);
-		ifStatement.setElseStatement(elseStatement);
-		// replace return conditional expression with if/then/else/return
-		rewrite.replace(statement, ifStatement, null);
+		ifStatement.setExpression((Expression) rewrite.createCopyTarget(expression));
+		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Expression assignee= ((Assignment) covering.getParent()).getLeftHandSide();
+			ifStatement.setThenStatement(createAssignmentStatement(rewrite, assignee, conditional.getThenExpression()));
+			ifStatement.setElseStatement(createAssignmentStatement(rewrite, assignee, conditional.getElseExpression()));
+			
+			// replace return conditional expression with if/then/else/return
+			rewrite.replace(covering.getParent().getParent(), ifStatement, null);
+			
+		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
+			//
+			ReturnStatement thenReturn= createReturnExpression(rewrite, conditional.getThenExpression());
+			ifStatement.setThenStatement(thenReturn);
+			//
+			ReturnStatement elseReturn= createReturnExpression(rewrite, conditional.getElseExpression());
+			ifStatement.setElseStatement(elseReturn);
+			//
+			// replace return conditional expression with if/then/else/return
+			rewrite.replace(conditional.getParent(), ifStatement, null);
+		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment frag= (VariableDeclarationFragment) covering.getParent();
+			Expression assignee= frag.getName();
+			ifStatement.setThenStatement(createAssignmentStatement(rewrite, assignee, conditional.getThenExpression()));
+			ifStatement.setElseStatement(createAssignmentStatement(rewrite, assignee, conditional.getElseExpression()));
+			
+			rewrite.set(frag, VariableDeclarationFragment.INITIALIZER_PROPERTY, null, null); // remove initializer
+			
+			ASTNode statement= frag.getParent();
+			rewrite.getListRewrite(statement.getParent(), Block.STATEMENTS_PROPERTY).insertAfter(ifStatement, statement, null);
+		}
+
 		// add correction proposal
 		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.replaceConditionalWithIfAssign"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
