@@ -710,7 +710,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			title= " "; //$NON-NLS-1$
 		else	
 			title= type.getElementName();
-		setTitle(title);
+		setContentDescription(title);
 	}
 
 	protected void aboutToLaunch() {
@@ -877,9 +877,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	}
 
 	protected void doShowStatus() {
-		setTitle(fStatus);
-//		getStatusLine().setErrorMessage(null);
-//		getStatusLine().setMessage(fStatus);
+		setContentDescription(fStatus);
 	}
 
 	protected void setInfoMessage(final String message) {
