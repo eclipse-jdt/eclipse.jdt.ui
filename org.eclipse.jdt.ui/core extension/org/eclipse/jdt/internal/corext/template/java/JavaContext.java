@@ -597,20 +597,24 @@ public class JavaContext extends CompilationUnitContext {
 			document.addPositionUpdater(updater);
 			document.addPosition(position);
 
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			ImportsStructure structure= new ImportsStructure(cu, settings.importOrder, settings.importThreshold, true);
-			structure.addImport("java.util.Iterator"); //$NON-NLS-1$
-			structure.create(false, null);
-
-			document.removePosition(position);
-			document.removePositionUpdater(updater);
-			document.removePositionCategory(category);
+			try {
+				
+				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+				ImportsStructure structure= new ImportsStructure(cu, settings.importOrder, settings.importThreshold, true);
+				structure.addImport("java.util.Iterator"); //$NON-NLS-1$
+				structure.create(false, null);
+				
+				setCompletionOffset(position.getOffset());
+				setCompletionLength(position.getLength());
+				
+			} catch (CoreException e) {
+				handleException(null, e);
+			} finally {
+				document.removePosition(position);
+				document.removePositionUpdater(updater);
+				document.removePositionCategory(category);
+			}
 			
-			setCompletionOffset(position.getOffset());
-			setCompletionLength(position.getLength());
-			
-		} catch (CoreException e) {
-			handleException(null, e);
 		} catch (BadLocationException e) {
 			handleException(null, e);
 		} catch (BadPositionCategoryException e) {
