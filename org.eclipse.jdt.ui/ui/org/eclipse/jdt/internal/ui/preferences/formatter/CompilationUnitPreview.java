@@ -1,9 +1,14 @@
-/*
- * Created on 23.01.2004
- *
- * To change the template for this generated file go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.Map;
@@ -24,12 +29,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
 
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
 public class CompilationUnitPreview extends JavaPreview {
 
     private String fPreviewText;
@@ -41,7 +40,6 @@ public class CompilationUnitPreview extends JavaPreview {
     public CompilationUnitPreview(Map workingValues, Composite parent) {
 
         super(workingValues, parent);
-        // TODO Auto-generated constructor stub
     }
 
     protected void doFormatPreview() {
