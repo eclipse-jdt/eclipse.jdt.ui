@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
@@ -90,7 +91,7 @@ class JavaEditorHoverConfigurationBlock {
 	}
 	
 	
-	private static class JavaEditorTextHoverDescriptorLabelProvider implements ITableLabelProvider {
+	private class JavaEditorTextHoverDescriptorLabelProvider implements ITableLabelProvider {
 
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
@@ -102,11 +103,14 @@ class JavaEditorHoverConfigurationBlock {
 				return ((JavaEditorTextHoverDescriptor)element).getLabel();
 
 			case MODIFIER_PROP:
-				return ((JavaEditorTextHoverDescriptor)element).getModifierString();
+				TableItem item= (TableItem)fHoverTableViewer.testFindItem(element);
+				int index= fHoverTable.indexOf(item);
+				return fHoverConfigs[index].fModifierString;
 
 			default:
 				break;
 			}
+			
 			return null;
 		}
 
@@ -389,11 +393,14 @@ class JavaEditorHoverConfigurationBlock {
 	void initialize() {
 		JavaEditorTextHoverDescriptor[] hoverDescs= getContributedHovers();
 		fHoverConfigs= new HoverConfig[hoverDescs.length];
-		fHoverTableViewer.setInput(hoverDescs);
-		for (int i= 0; i < hoverDescs.length; i++) {
+		for (int i= 0; i < hoverDescs.length; i++)
 			fHoverConfigs[i]= new HoverConfig(hoverDescs[i].getModifierString(), hoverDescs[i].getStateMask(), hoverDescs[i].isEnabled());
+
+		fHoverTableViewer.setInput(hoverDescs);
+		
+		for (int i= 0; i < hoverDescs.length; i++)
 			fHoverTable.getItem(i).setChecked(hoverDescs[i].isEnabled());
-		}
+
 		initializeFields();
 	}
 
@@ -503,6 +510,10 @@ class JavaEditorHoverConfigurationBlock {
 			fStatus= new StatusInfo(IStatus.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.modifierIsNotValid", fHoverConfigs[i].fModifierString)); //$NON-NLS-1$
 		else
 			fStatus= new StatusInfo();
+		
+		// update table
+		fHoverTableViewer.refresh(getContributedHovers()[i]);
+		
 		updateStatus();
 	}
 
