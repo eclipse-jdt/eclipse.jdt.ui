@@ -36,6 +36,7 @@ import org.eclipse.jface.text.source.IAnnotationModelExtension;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IDocumentProviderExtension4;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -88,8 +89,12 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 					dictionaryMatch= ((JavaSpellingProblem)problem).isDictionaryMatch();
 					sentenceStart= ((JavaSpellingProblem) problem).isSentenceStart();
 				}
-				CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word, dictionaryMatch, sentenceStart, fDocument, fEditor.getEditorInput().getName());
-				fAddAnnotations.put(new ProblemAnnotation(iProblem, null), new Position(problem.getOffset(), problem.getLength()));
+				// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=81514
+				IEditorInput editorInput= fEditor.getEditorInput();
+				if (editorInput != null) {
+					CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word, dictionaryMatch, sentenceStart, fDocument, editorInput.getName());
+					fAddAnnotations.put(new ProblemAnnotation(iProblem, null), new Position(problem.getOffset(), problem.getLength()));
+				}
 			} catch (BadLocationException x) {
 				// drop this SpellingProblem
 			}
