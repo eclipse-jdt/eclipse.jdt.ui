@@ -318,6 +318,13 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	
 		if (kind == IJavaElementDelta.REMOVED) {
 			Object parent= internalGetParent(element);			
+			if (element instanceof IPackageFragment) {
+				// refresh package fragment root to allow filtering empty (parent) packages: bug 72923
+				if (fViewer.testFindItem(parent) != null)
+					postRefresh(parent);
+				return;
+			}
+			
 			postRemove(element);
 			if (parent instanceof IPackageFragment) 
 				postUpdateIcon((IPackageFragment)parent);
