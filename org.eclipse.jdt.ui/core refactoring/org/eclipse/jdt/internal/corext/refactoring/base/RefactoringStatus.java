@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 
@@ -102,6 +104,25 @@ public class RefactoringStatus {
 	 */
 	public static RefactoringStatus createFatalErrorStatus(String msg, Context context){
 		return createStatus(FATAL, msg, context); 
+	}
+
+	/**
+	 * Creates a <code>RefactorngStatus</code> from the given <code>IStatus</code>
+	 */	
+	public static RefactoringStatus create(IStatus status){
+		if (status.isOK())
+			return new RefactoringStatus();
+		
+		switch (status.getSeverity()){
+			case IStatus.INFO:
+				return RefactoringStatus.createWarningStatus(status.getMessage());
+			case IStatus.WARNING:
+				return RefactoringStatus.createErrorStatus(status.getMessage());
+			case IStatus.ERROR:
+				return RefactoringStatus.createFatalErrorStatus(status.getMessage());
+			default:	
+				return new RefactoringStatus();
+		}
 	}
 	
 	private static RefactoringStatus createStatus(int severity, String msg, Context context) {
