@@ -1,10 +1,6 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
-
 package org.eclipse.jdt.internal.ui.reorg;
-
+
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -21,7 +17,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
@@ -30,32 +25,43 @@ import org.eclipse.ui.actions.MoveProjectAction;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementContentProvider;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
+
 public class JdtMoveAction extends ReorgDestinationAction {
 
 	private boolean fShowPreview= false;
 
-	public JdtMoveAction(String name, ISelectionProvider provider) {
-		super(name, provider);
-		setDescription(ReorgMessages.getString("moveAction.description")); //$NON-NLS-1$
+	public JdtMoveAction(UnifiedSite site) {
+		super(site);
+		setText(ReorgMessages.getString("moveAction.label"));//$NON-NLS-1$
+	}
+
+	public boolean canOperateOn(IStructuredSelection selection) {
+		if (ClipboardActionUtil.hasOnlyProjects(selection))
+			return selection.size() == 1;
+		else
+			return super.canOperateOn(selection);
 	}
 	
-	public JdtMoveAction(StructuredSelectionProvider provider) {
-		super(ReorgMessages.getString("moveAction.label"), provider); //$NON-NLS-1$
+	protected void run(IStructuredSelection selection) {
+		if (ClipboardActionUtil.hasOnlyProjects(selection)){
+			moveProject(selection);
+		}	else {
+			super.run(selection);
+		}
 	}
-	
+
 	/* non java-doc
 	 * see @ReorgDestinationAction#isOkToProceed
 	 */
@@ -152,28 +158,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		}
 		return false;
 	}
-	
-	/* non java-doc
-	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
-	 */
-	public boolean canOperateOn(IStructuredSelection selection) {
-		if (hasOnlyProjects())
-			return selection.size() == 1;
-		else
-			return super.canOperateOn(selection);
-	}
-	
-	/*
-	 * @see Action#run()
-	 */
-	public void run() {
-		if (hasOnlyProjects()){
-			moveProject();
-		}	else {
-			super.run();
-		}
-	}
-	
+		
 	/* non java-doc
 	 * @see ReorgDestinationAction#doReorg(ReorgRefactoring) 
 	 */
@@ -187,9 +172,9 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();	
 	}
 	
-	private void moveProject(){
+	private void moveProject(IStructuredSelection selection){
 		MoveProjectAction action= new MoveProjectAction(JavaPlugin.getActiveWorkbenchShell());
-		action.selectionChanged(getStructuredSelection());
+		action.selectionChanged(selection);
 		action.run();
 	}
 	

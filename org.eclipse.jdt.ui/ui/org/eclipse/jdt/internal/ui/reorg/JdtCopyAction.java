@@ -1,31 +1,23 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
 package org.eclipse.jdt.internal.ui.reorg;
 
 import java.util.List;
 
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.actions.CopyProjectAction;
 
+import org.eclipse.jdt.ui.actions.UnifiedSite;
+
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 
 public class JdtCopyAction extends ReorgDestinationAction {
-	
-	public JdtCopyAction(String name, StructuredSelectionProvider provider) {
-		super(name, provider);
+
+	protected JdtCopyAction(UnifiedSite site) {
+		super(site);
 	}
-	
-	public JdtCopyAction(String name, ISelectionProvider provider) {
-		super(name, provider);
-	}
-	
+
 	ReorgRefactoring createRefactoring(List elements){
 		return new CopyRefactoring(elements);
 	}
@@ -42,26 +34,24 @@ public class JdtCopyAction extends ReorgDestinationAction {
 	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
 	 */
 	public boolean canOperateOn(IStructuredSelection selection) {
-		if (hasOnlyProjects())
+		if (ClipboardActionUtil.hasOnlyProjects(selection))
 			return selection.size() == 1;
 		else
 			return super.canOperateOn(selection);
 	}
 	
-	/*
-	 * @see Action#run()
-	 */
-	public void run() {
-		if (hasOnlyProjects()){
-			copyProject();
+	protected  void run(IStructuredSelection selection) {
+		if (ClipboardActionUtil.hasOnlyProjects(selection)){
+			copyProject(selection);
 		}	else {
-			super.run();
+			super.run(selection);
 		}
 	}
 
-	private void copyProject(){
+	private void copyProject(IStructuredSelection selection){
 		CopyProjectAction action= new CopyProjectAction(JavaPlugin.getActiveWorkbenchShell());
-		action.selectionChanged(getStructuredSelection());
+		action.selectionChanged(selection);
 		action.run();
 	}
+
 }
