@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -267,6 +268,12 @@ class AstMatchingNodeFinder {
 				return matches(node);
 			return super.visit(node);
 		}
+
+        public boolean visit(InstanceofExpression node) {
+			if (node.subtreeMatch(fMatcher, fNodeToMatch))
+				return matches(node);
+			return super.visit(node);
+        }
 
 		public boolean visit(Javadoc node) {
 			if (node.subtreeMatch(fMatcher, fNodeToMatch))
