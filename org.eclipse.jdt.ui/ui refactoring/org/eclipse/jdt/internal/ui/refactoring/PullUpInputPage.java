@@ -58,7 +58,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -241,7 +240,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 	}
 
 	private void updateTypeHierarchyLabel(){
-		fTypeHierarchyLabel.setText("Type Hierarchy. Selected: " + getCheckedMethods().length + " method(s) to delete");
+		fTypeHierarchyLabel.setText("&Type Hierarchy. Selected " + getCheckedMethods().length + " method(s) to delete.");
 	}	
 	
 	private void createTreeAndSourceViewer(Composite superComposite) {
@@ -427,9 +426,9 @@ public class PullUpInputPage extends UserInputWizardPage {
 
 	private static String createLabelText(ISourceReference entry) {
 		if (entry instanceof IMethod)
-			return "Source of method: '" + ((IMethod)entry).getElementName()+ "' declared in type '" + JavaModelUtil.getFullyQualifiedName(((IMethod)entry).getDeclaringType()) + "'";
+			return "&Source of method: '" + ((IMethod)entry).getElementName()+ "' declared in type '" + JavaModelUtil.getFullyQualifiedName(((IMethod)entry).getDeclaringType()) + "'";
 		else if (entry instanceof IType)	
-			return  "Source of type: '" + ((IType)entry).getElementName()+ "' declared in package '" + ((IType)entry).getPackageFragment().getElementName()+ "'";
+			return  "&Source of type: '" + JavaModelUtil.getFullyQualifiedName((IType)entry) + "'";
 		else
 			return "";
 	}
