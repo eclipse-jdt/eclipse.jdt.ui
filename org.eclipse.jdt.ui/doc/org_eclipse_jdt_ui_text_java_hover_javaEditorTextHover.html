@@ -1,0 +1,38 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+   <meta name="Author" content="Build">
+   <title>Eclipse Workbench Extension Point: Java Editor Text Hover Extension</title>
+</head>
+<body link="#0000FF" vlink="#800080" bgcolor="white">
+
+<center>
+<h1>
+Java Editor Text Hover Extension</h1></center>
+<b><i>Identifier: </i></b>org.eclipse.jdt.ui.javaEditorTextHovers
+<p><b><i>Description: </i></b>This extension point is used to plug-in text hovers
+in a Java editor.
+<p><b><i>Configuration Markup:</i></b>
+<p><tt>&nbsp;&nbsp; &lt;!ELEMENT hover EMPTY&gt;</tt><br>
+<tt>&nbsp;&nbsp; &lt;!ATTLIST hover</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id CDATA #REQUIRED</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class CDATA #REQUIRED</tt><br>
+<tt>&nbsp;&nbsp; &gt;</tt>
+<ul>
+  <li><b>id</b> - the id, typically the same as the fully qualified class name
+  <li><b>class</b> - the fully qualified class name implementing the
+    interface <b>org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover</b>.
+</ul>
+<b><i>Examples:</i></b>
+<p>The following is an example of a hover defintion:
+<p><tt>&nbsp;&nbsp; &lt;extension point=&quot;org.eclipse.jdt.ui.javaEditorTextHover&quot;&gt;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;hover</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id=&quot;org.eclipse.example.jdt.internal.debug.ui.JavaDebugHover&quot;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class=&quot;org.eclipse.example.jdt.internal.debug.ui.JavaDebugHover&quot;&gt;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/hover&gt;</tt><br>
+<tt>&nbsp;&nbsp; &lt;/extension&gt;</tt>
+<p><a href="hglegal.htm"><img SRC="ngibmcpy.gif" ALT="Copyright IBM Corp. 2000, 2001.  All Rights Reserved." BORDER=0 height=12 width=195></a>
+</body>
+</html>

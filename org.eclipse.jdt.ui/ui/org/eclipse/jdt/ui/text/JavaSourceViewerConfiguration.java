@@ -7,20 +7,19 @@ package org.eclipse.jdt.ui.text;
 
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
-import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.ContentFormatter;
@@ -29,17 +28,17 @@ import org.eclipse.jface.text.formatter.IFormattingStrategy;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
-import org.eclipse.jface.text.internal.html.HoverBrowserControl;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.RuleBasedDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
-import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -53,6 +52,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
@@ -65,7 +65,47 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
  * </p>
  */
 public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
-	
+
+	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
+
+	private static class PreferenceListener implements IPropertyChangeListener, DisposeListener {
+
+		private final ISourceViewer fSourceViewer;
+		private final IPreferenceStore fPreferenceStore;
+
+		public PreferenceListener(ISourceViewer viewer, IPreferenceStore store) {
+
+			fSourceViewer= viewer;
+			fPreferenceStore= store;
+			
+			fSourceViewer.getTextWidget().addDisposeListener(this);
+			fPreferenceStore.addPropertyChangeListener(this);
+		}
+
+		/*
+		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+		 */
+		public void propertyChange(PropertyChangeEvent event) {
+			if (event.getProperty().equals(PREF_TAB_SIZE)) {
+				Object value= event.getNewValue();
+				
+				if (value instanceof Integer) {
+					Integer tabWidth= (Integer) value;
+					fSourceViewer.getTextWidget().setTabs(tabWidth.intValue());
+
+				} else if (value instanceof String) {
+					fSourceViewer.getTextWidget().setTabs(Integer.parseInt((String)value));
+				}
+			}
+		}
+
+		/*
+		 * @see DisposeListener#widgetDisposed(DisposeEvent)
+		 */
+		public void widgetDisposed(DisposeEvent e) {
+			fPreferenceStore.removePropertyChangeListener(this);
+		}
+	}	
 	
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
@@ -245,7 +285,13 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		return 4;
+		IPreferenceStore store= getPreferenceStore();
+		
+		new PreferenceListener(sourceViewer, store);
+		
+		return store.getInt(PREF_TAB_SIZE);
+		
+//		return 4;
 	}
 
 	/*
@@ -306,7 +352,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
 		InformationPresenter presenter= new InformationPresenter(getInformationControlCreator(sourceViewer, false));
-		IInformationProvider provider= new JavaTextHover(getEditor());
+		IInformationProvider provider= new JavaInformationProvider(getEditor());
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);
 		presenter.setSizeConstraints(60, 10, true, true);		

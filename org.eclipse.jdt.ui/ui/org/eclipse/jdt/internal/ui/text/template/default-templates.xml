@@ -110,7 +110,7 @@ public ${return_type} ${name}(${arguments}) {
 
   <template description="dynamic type test and cast" name="instanceof" context="java"
 >if (${name} instanceof ${type}) {
-	${type} ${new_name} = (${type}) ${name};
+	${type} ${new_name} = (${type})${name};
 	${cursor}
 }</template>
 

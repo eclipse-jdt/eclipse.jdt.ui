@@ -960,25 +960,29 @@ public class CompilationUnitEditor extends JavaEditor {
 		
 		try {
 			
-			String p= event.getProperty();		
-			
-			if (MATCHING_BRACKETS.equals(p)) {
-				if (isBracketHighlightingEnabled())
-					startBracketHighlighting();
-				else
-					stopBracketHighlighting();
-				return;
-			}
-			if (MATCHING_BRACKETS_COLOR.equals(p)) {
-				if (fBracketHighlighter != null)
-					fBracketHighlighter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
-				return;
-			} 
-			
 			InternalSourceViewer isv= (InternalSourceViewer) getSourceViewer();
-			IContentAssistant c= isv.getContentAssistant();
-			if (c instanceof ContentAssistant)
-				ContentAssistPreference.changeConfiguration((ContentAssistant) c, getPreferenceStore(), event);
+			if (isv != null) {
+					
+				String p= event.getProperty();		
+				
+				if (MATCHING_BRACKETS.equals(p)) {
+					if (isBracketHighlightingEnabled())
+						startBracketHighlighting();
+					else
+						stopBracketHighlighting();
+					return;
+				}
+				
+				if (MATCHING_BRACKETS_COLOR.equals(p)) {
+					if (fBracketHighlighter != null)
+						fBracketHighlighter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
+					return;
+				} 
+				
+				IContentAssistant c= isv.getContentAssistant();
+				if (c instanceof ContentAssistant)
+					ContentAssistPreference.changeConfiguration((ContentAssistant) c, getPreferenceStore(), event);
+			}
 				
 		} finally {
 			super.handlePreferenceStoreChanged(event);

@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
  */
 
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorInput;
@@ -18,7 +17,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
@@ -27,7 +26,7 @@ import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
-public class JavaTypeHover implements ITextHover {
+public class JavaTypeHover implements IJavaEditorTextHover {
 	
 	private IEditorPart fEditor;
 	
@@ -35,7 +34,13 @@ public class JavaTypeHover implements ITextHover {
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 	
-	public JavaTypeHover(IEditorPart editor) {
+	public JavaTypeHover() {
+	}
+	
+	/**
+	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
+	 */
+	public void setEditor(IEditorPart editor) {
 		fEditor= editor;
 	}
 	

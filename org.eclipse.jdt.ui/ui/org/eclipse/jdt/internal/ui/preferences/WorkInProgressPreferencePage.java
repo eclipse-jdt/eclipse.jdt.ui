@@ -33,7 +33,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, false);
+		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, true);
 	}
 	
 	/*
