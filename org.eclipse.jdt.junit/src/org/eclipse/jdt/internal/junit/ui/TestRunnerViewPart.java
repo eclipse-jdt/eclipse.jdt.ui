@@ -35,9 +35,12 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -925,6 +928,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
     public void createPartControl(Composite parent) {	
     	fParent= parent;
+    	addResizeListener(parent);
 		fClipboard= new Clipboard(parent.getDisplay());
 
 		GridLayout gridLayout= new GridLayout();
@@ -952,6 +956,22 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			restoreLayoutState(fMemento);
 		}
 		fMemento= null;
+	}
+
+	private void addResizeListener(Composite parent) {
+		parent.addControlListener(new ControlListener() {
+			public void controlMoved(ControlEvent e) {
+			}
+			public void controlResized(ControlEvent e) {
+				Point size= fParent.getSize();
+				if (size.x != 0 && size.y != 0) {
+					if (size.x > size.y) 
+						setOrientation(VIEW_ORIENTATION_HORIZONTAL);
+					else 
+						setOrientation(VIEW_ORIENTATION_VERTICAL);
+				}
+			}
+		});
 	}
 
 	public void saveState(IMemento memento) {
