@@ -26,9 +26,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
-import org.eclipse.jdt.text.tests.performance.eval.IEvaluator;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class JavaIndenterTest extends TestCase {
@@ -45,7 +42,7 @@ public class JavaIndenterTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		EditorTestHelper.runEventQueue();
-		fPerformanceMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this);
+		fPerformanceMeter= Performance.getDefault().createPerformanceMeter(this);
 		
 		EditorTestHelper.bringToTop();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);

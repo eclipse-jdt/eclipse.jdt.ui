@@ -26,9 +26,6 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
-import org.eclipse.jdt.text.tests.performance.eval.IEvaluator;
-
 /**
  * Measures the time to type in one single method into a large Java class
  * @since 3.1
@@ -36,8 +33,6 @@ import org.eclipse.jdt.text.tests.performance.eval.IEvaluator;
 public class NonInitialTypingTest extends TestCase {
 	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
-
-	private PerformanceMeterFactory fPerformanceMeterFactory= Performance.createPerformanceMeterFactory();
 
 	private ITextEditor fEditor;
 	
@@ -55,7 +50,7 @@ public class NonInitialTypingTest extends TestCase {
 		// dirty editor to avoid initial dirtying / validate edit costs
 		fKeyboardProbe= new KeyboardProbe();
 		dirtyEditor();
-		fMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
+		fMeter= Performance.getDefault().createPerformanceMeter(this);
 
 		int offset= getInsertPosition();
 		fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));

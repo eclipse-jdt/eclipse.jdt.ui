@@ -28,13 +28,9 @@ import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 
 import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.ui.internal.IWorkbenchHelpContextIds;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
-
-import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
-import org.eclipse.jdt.text.tests.performance.eval.IEvaluator;
 
 
 /**
@@ -101,7 +97,7 @@ public class OpenPreferencePageTest extends TestCase {
 	}
 
 	protected void setUp() throws Exception {
-		fMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this, "cold");
+		fMeter= Performance.getDefault().createPerformanceMeter(this, "cold");
 		EditorTestHelper.calmDown(1000, 10000, 100);
 	}
 	

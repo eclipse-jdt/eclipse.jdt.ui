@@ -11,6 +11,8 @@
 
 package org.eclipse.test.performance;
 
+import junit.framework.TestCase;
+
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
@@ -27,6 +29,8 @@ public class Performance {
 	private static final String PERFORMANCE_METER_FACTORY_PROPERTY= "PerformanceMeterFactory";
 
 	private static Performance fgDefault;
+	
+	private PerformanceMeterFactory fPerformanceMeterFactory;
 	
 	/**
 	 * Returns the singleton of <code>Performance</code>
@@ -53,7 +57,25 @@ public class Performance {
 		Evaluator.getDefaultEvaluator().evaluate(performanceMeter.getSample());
 	}
 	
-	public static PerformanceMeterFactory createPerformanceMeterFactory() {
+	public PerformanceMeter createPerformanceMeter(TestCase testCase) {
+		return getPeformanceMeterFactory().createPerformanceMeter(testCase);
+	}
+	
+	public PerformanceMeter createPerformanceMeter(TestCase testCase, String meterId) {
+		return getPeformanceMeterFactory().createPerformanceMeter(testCase, meterId);
+	}
+
+	public PerformanceMeter createPerformanceMeter(String scenario) {
+		return getPeformanceMeterFactory().createPerformanceMeter(scenario);
+	}
+
+	private PerformanceMeterFactory getPeformanceMeterFactory() {
+		if (fPerformanceMeterFactory == null)
+			fPerformanceMeterFactory= createPerformanceMeterFactory();
+		return fPerformanceMeterFactory;
+	}
+	
+	private PerformanceMeterFactory createPerformanceMeterFactory() {
 		PerformanceMeterFactory factory;
 		factory= tryInstantiate(System.getProperty(PERFORMANCE_METER_FACTORY_PROPERTY));
 		if (factory != null)
@@ -66,7 +88,7 @@ public class Performance {
 		return createDefaultPerformanceMeterFactory();
 	}
 	
-	private static PerformanceMeterFactory tryInstantiate(String className) {
+	private PerformanceMeterFactory tryInstantiate(String className) {
 		PerformanceMeterFactory instance= null;
 		if (className != null && className.length() > 0) {
 			try {
@@ -85,7 +107,7 @@ public class Performance {
 		return instance;
 	}
 
-	private static PerformanceMeterFactory createDefaultPerformanceMeterFactory() {
+	private PerformanceMeterFactory createDefaultPerformanceMeterFactory() {
 		return new OSPerformanceMeterFactory();
 	}
 }

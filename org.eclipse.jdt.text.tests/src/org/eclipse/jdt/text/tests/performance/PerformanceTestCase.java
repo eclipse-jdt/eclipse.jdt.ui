@@ -18,14 +18,11 @@ import junit.framework.TestCase;
 public class PerformanceTestCase extends TestCase {
 	
 	protected void runTest() throws Throwable {
-		PerformanceMeter meter= createPerformanceMeterFactory().createPerformanceMeter(this);
+		PerformanceMeter meter= Performance.getDefault().createPerformanceMeter(this);
 		meter.start();
 		super.runTest();
 		meter.stop();
 		meter.commit();
-	}
-
-	protected PerformanceMeterFactory createPerformanceMeterFactory() {
-		return Performance.createPerformanceMeterFactory();
+		Performance.getDefault().assertPerformance(meter);
 	}
 }

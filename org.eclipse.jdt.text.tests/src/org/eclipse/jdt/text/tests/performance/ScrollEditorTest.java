@@ -25,9 +25,6 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.IEditorPart;
 
-import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
-import org.eclipse.jdt.text.tests.performance.eval.IEvaluator;
-
 public abstract class ScrollEditorTest extends TestCase {
 
 	private static final int[] CTRL_HOME= new int[] { SWT.CTRL, SWT.HOME };
@@ -105,7 +102,7 @@ public abstract class ScrollEditorTest extends TestCase {
 	}
 
 	protected PerformanceMeter createPerformanceMeter() {
-		return Performance.createPerformanceMeterFactory().createPerformanceMeter(this);
+		return Performance.getDefault().createPerformanceMeter(this);
 	}
 
 	protected abstract IFile getFile();

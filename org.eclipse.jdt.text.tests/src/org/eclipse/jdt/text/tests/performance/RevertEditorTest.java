@@ -24,18 +24,14 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
-import org.eclipse.jdt.text.tests.performance.eval.IEvaluator;
-
 public abstract class RevertEditorTest extends TestCase {
 	private static final int RUNS= 20;
 	private static final String REPLACE_TEXT= "XXX"; //$NON-NLS-1$
 	
-	private PerformanceMeterFactory fPerformanceMeterFactory= Performance.createPerformanceMeterFactory();
 	private PerformanceMeter fPerformanceMeter;
 	
 	protected void setUp() throws Exception {
-		fPerformanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
+		fPerformanceMeter= Performance.getDefault().createPerformanceMeter(this);
 	}
 	
 	protected void measureRevert(IFile file) throws PartInitException, BadLocationException {
