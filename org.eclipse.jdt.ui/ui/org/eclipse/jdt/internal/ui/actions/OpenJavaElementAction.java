@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 public abstract class OpenJavaElementAction extends JavaUIAction {
 
 	/**
-	 * @deprecated	Use OpenJavaElementAction(String, ImageDescriptor) or OpenJavaElementAction(String) instead
+	 * @deprecated Use OpenJavaElementAction(String, ImageDescriptor) or OpenJavaElementAction(String) instead
 	 */
 	public OpenJavaElementAction(ResourceBundle bundle, String prefix) {
 		super(bundle, prefix);

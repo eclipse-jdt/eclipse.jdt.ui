@@ -44,7 +44,7 @@ public abstract class JavaUIAction extends Action {
 	 *  <li> tooltip: for the action's tooltip text.
 	 * </ul>
 	 * 
-	 * @deprecated	Use JavaUIAction(String, ImageDescriptor) or JavaUIAction(String) instead
+	 * @deprecated Use JavaUIAction(String, ImageDescriptor) or JavaUIAction(String) instead
 	 */
 	public JavaUIAction(ResourceBundle bundle, String prefix) {
 		this(bundle.getString(prefix + LABEL_KEY));
