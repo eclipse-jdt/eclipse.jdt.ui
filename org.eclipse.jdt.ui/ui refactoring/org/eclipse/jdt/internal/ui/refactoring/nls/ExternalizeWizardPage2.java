@@ -20,6 +20,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -36,9 +38,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -357,6 +357,8 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	
 	private Object[] createFileListInput(){
 		try{
+			if (fPkgFragment == null)
+				return new Object[0];
 			List result= new ArrayList(1);
 			Object[] nonjava= fPkgFragment.getNonJavaResources();
 			for (int i= 0; i < nonjava.length; i++){
