@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.reorg;
 
+import java.io.File;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -18,23 +20,21 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.DeleteRefactoring2;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 
 public class DeleteTest extends RefactoringTest{
@@ -636,4 +636,26 @@ public class DeleteTest extends RefactoringTest{
 		assertEquals("expected to pass", null, status);
 		assertTrue("not deleted", ! fredRoot.exists());
 	}
+	
+	public void testDeleteInternalJAR() throws Exception{
+		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
+		assertTrue("lib does not exist",  lib != null && lib.exists());
+		IPackageFragmentRoot internalJAR= JavaProjectHelper.addLibraryWithImport(MySetup.getProject(), new Path(lib.getPath()), null, null);
+
+		IJavaElement[] javaElements= {internalJAR};
+		IResource[] resources= {};
+		verifyEnabled(resources, javaElements);			
+		performDummySearch();			
+
+		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		ref.setQueries(createReorgQueries());
+		RefactoringStatus status= performRefactoring(ref);
+		assertEquals("expected to pass", null, status);
+		assertTrue("not deleted", ! internalJAR.exists());		
+	}
+	
+	public void testDeleteClassFile() throws Exception{
+		//TODO implement me - how do i get a handle to a class file?
+	}	
+	
 }
