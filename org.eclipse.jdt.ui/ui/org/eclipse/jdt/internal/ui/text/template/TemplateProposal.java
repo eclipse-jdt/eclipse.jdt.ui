@@ -19,6 +19,7 @@ import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -74,6 +75,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
 	public void apply(IDocument document) {
+
 	    try {
 			Position position= new Position(fRegion.getOffset(), fRegion.getLength());
 			final String category= "__template_position_" + System.currentTimeMillis(); // $NON-NLS-1$
@@ -120,14 +122,17 @@ public class TemplateProposal implements IJavaCompletionProposal {
 			
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);	
-			openErrorDialog(e);		    	
+			openErrorDialog(e);		    
+			fSelectedRegion= fRegion;
 			
 	    } catch (BadPositionCategoryException e) {    
 			JavaPlugin.log(e);	
 			openErrorDialog(e);		    	
+			fSelectedRegion= fRegion;
 
 	    } catch (CoreException e) {
 			handleException(e);
+			fSelectedRegion= fRegion;
 	    }	    
 	}
 	
