@@ -61,9 +61,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class RenameTypeRefactoring extends Refactoring implements IRenameRefactoring, ITextUpdatingRefactoring, IReferenceUpdatingRefactoring{
@@ -793,39 +790,6 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 				manager.get(wc).addTextEdit(name, new UpdateTypeReferenceEdit(offset, length, fNewName, fType.getElementName()));
 			}
 			pm.worked(1);
-		}
-	}
-
-	//-----------------
-	private static class UpdateTypeReferenceEdit extends SimpleTextEdit {
-	
-		private String fOldName;
-		
-		UpdateTypeReferenceEdit(int offset, int length, String newName, String oldName) {
-			super(offset, length, newName);
-			Assert.isNotNull(oldName);
-			fOldName= oldName;			
-		}
-		
-		private UpdateTypeReferenceEdit(TextRange range, String newName, String oldName) {
-			super(range, newName);
-			Assert.isNotNull(oldName);
-			fOldName= oldName;			
-		}
-
-		/* non Java-doc
-		 * @see TextEdit#copy
-		 */
-		public TextEdit copy() {
-			return new UpdateTypeReferenceEdit(getTextRange().copy(), getText(), fOldName);
-		}
-
-		/* non Java-doc
-		 * @see TextEdit#connect(TextBufferEditor)
-		 */
-		public void connect(TextBufferEditor editor) throws CoreException {
-			int offset= getTextRange().getOffset() + getTextRange().getLength() - fOldName.length();
-			setTextRange(new TextRange(offset, fOldName.length()));
 		}
 	}
 }
