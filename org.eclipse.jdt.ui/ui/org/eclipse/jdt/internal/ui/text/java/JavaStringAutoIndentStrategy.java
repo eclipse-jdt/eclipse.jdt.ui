@@ -33,7 +33,19 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Auto indent strategy for java strings
  */
 public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
-
+	
+	private String fPartitioning;
+	
+	/**
+	 * Creates a new Java string auto indent strategy for the given document partitioning.
+	 * 
+	 * @param partitioning the document partitioning
+	 */
+	public JavaStringAutoIndentStrategy(String partitioning) {
+		super();
+		fPartitioning= partitioning;
+	}
+	
 	private boolean isLineDelimiters(IDocument document, String text) throws BadLocationException {
 		String[] delimiters= document.getLegalLineDelimiters();
 		if (delimiters != null)
@@ -83,7 +95,10 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	private void javaStringIndentAfterNewLine(IDocument document, DocumentCommand command) throws BadLocationException {
 
-		ITypedRegion partition= document.getPartition(command.offset);
+		ITypedRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset);
+		if (partition == null)
+			return;
+		
 		int offset= partition.getOffset();
 		int length= partition.getLength();
 

@@ -37,7 +37,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -280,11 +279,9 @@ public class CodeTemplateBlock {
 		label.setLayoutData(data);
 		
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		IDocument document= new Document();
-		IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
-		document.setDocumentPartitioner(partitioner);
-		partitioner.connect(document);		
+		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+		tools.setupDocument(document);
 		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		viewer.setEditable(false);
 		viewer.setDocument(document);

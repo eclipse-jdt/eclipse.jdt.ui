@@ -58,15 +58,6 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -87,6 +78,7 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.jface.text.information.InformationPresenter;
@@ -108,6 +100,15 @@ import org.eclipse.jface.text.source.LineNumberChangeRulerColumn;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.IPostSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
@@ -123,16 +124,12 @@ import org.eclipse.ui.editors.quickdiff.IQuickDiffProviderImplementation;
 import org.eclipse.ui.editors.text.DefaultEncodingSupport;
 import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.internal.editors.quickdiff.DocumentLineDiffer;
-import org.eclipse.ui.internal.editors.quickdiff.ReferenceProviderDescriptor;
-import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AddTaskAction;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -146,6 +143,10 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.tasklist.TaskList;
+
+import org.eclipse.ui.internal.editors.quickdiff.DocumentLineDiffer;
+import org.eclipse.ui.internal.editors.quickdiff.ReferenceProviderDescriptor;
+import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -184,9 +185,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNe
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
@@ -1023,8 +1024,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 			try {
 				// get the text hover content
-				IDocument document= sourceViewer.getDocument();
-				String contentType= document.getContentType(offset);
+				String contentType= TextUtilities.getContentType(sourceViewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, offset);
 
 				IRegion hoverRegion= textHover.getHoverRegion(sourceViewer, offset);						
 				if (hoverRegion == null)
@@ -1232,7 +1232,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		super();
 		fAnnotationPreferences= new MarkerAnnotationPreferences();
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this));
+		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this, IJavaPartitions.JAVA_PARTITIONING));
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
@@ -2132,18 +2132,23 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	}
 	
 	/**
-	 * Returns a segmentation of the line of the given document appropriate for bidi rendering.
-	 * The default implementation returns only the string literals of a java code line as segments.
+	 * Returns a segmentation of the line of the given viewer's input document appropriate for
+	 * bidi rendering. The default implementation returns only the string literals of a java code
+	 * line as segments.
 	 * 
-	 * @param document the document
+	 * @param viewer the text viewer
 	 * @param lineOffset the offset of the line
 	 * @return the line's bidi segmentation
 	 * @throws BadLocationException in case lineOffset is not valid in document
 	 */
-	public static int[] getBidiLineSegments(IDocument document, int lineOffset) throws BadLocationException {
+	public static int[] getBidiLineSegments(ITextViewer viewer, int lineOffset) throws BadLocationException {
+		
+		IDocument document= viewer.getDocument();
+		if (document == null)
+			return null;
 			
 		IRegion line= document.getLineInformationOfOffset(lineOffset);
-		ITypedRegion[] linePartitioning= document.computePartitioning(lineOffset, line.getLength());
+		ITypedRegion[] linePartitioning= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, lineOffset, line.getLength());
 		
 		List segmentation= new ArrayList();
 		for (int i= 0; i < linePartitioning.length; i++) {
@@ -2193,28 +2198,23 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * @return the line's bidi segmentation
 	 */
 	protected int[] getBidiLineSegments(int widgetLineOffset, String line) {
-		IDocumentProvider provider= getDocumentProvider();
-		if (provider != null && line != null && line.length() > 0) {
-			IDocument document= provider.getDocument(getEditorInput());
-			if (document != null)
-				try {
-					
-					int lineOffset;
-					
-					ISourceViewer sourceViewer= getSourceViewer();
-					if (sourceViewer instanceof ITextViewerExtension3) {
-						ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
-						lineOffset= extension.widgetOffset2ModelOffset(widgetLineOffset);
-					} else {
-						IRegion visible= sourceViewer.getVisibleRegion();
-						lineOffset= visible.getOffset() + widgetLineOffset;
-					}
-					
-					return getBidiLineSegments(document, lineOffset);
-					
-				} catch (BadLocationException x) {
-					// ignore
+		if (line != null && line.length() > 0) {
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer != null) {
+				int lineOffset;
+				if (sourceViewer instanceof ITextViewerExtension3) {
+					ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
+					lineOffset= extension.widgetOffset2ModelOffset(widgetLineOffset);
+				} else {
+					IRegion visible= sourceViewer.getVisibleRegion();
+					lineOffset= visible.getOffset() + widgetLineOffset;
 				}
+				try {
+					return getBidiLineSegments(sourceViewer, lineOffset);
+				} catch (BadLocationException x) {
+					// don't segment line in this case
+				}
+			}
 		}
 		return null;
 	}
@@ -2265,7 +2265,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected IVerticalRulerColumn createLineNumberRulerColumn() {
 		if (isQuickDiffAlwaysOn() || isChangeInformationShowing()) {
 			LineNumberChangeRulerColumn column= new LineNumberChangeRulerColumn();
-			column.setHover(new JavaChangeHover());
+			column.setHover(new JavaChangeHover(IJavaPartitions.JAVA_PARTITIONING));
 			initializeChangeRulerColumn(column);
 			fLineNumberRulerColumn= column;
 		} else {
@@ -2343,7 +2343,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	protected IChangeRulerColumn createChangeRulerColumn() {
 		IChangeRulerColumn column= new ChangeRulerColumn();
-		column.setHover(new JavaChangeHover());
+		column.setHover(new JavaChangeHover(IJavaPartitions.JAVA_PARTITIONING));
 		fChangeRulerColumn= column;
 		initializeChangeRulerColumn(fChangeRulerColumn);
 		return fChangeRulerColumn;

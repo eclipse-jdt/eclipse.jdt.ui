@@ -12,6 +12,13 @@ package org.eclipse.jdt.internal.ui.text;
 
 
 public interface IJavaPartitions {
+	
+	/**
+	 * The name of the Java partitioning.
+	 * @since 3.0
+	 */
+	public final static String JAVA_PARTITIONING= "___java_partitioning";  //$NON-NLS-1$
+	
 	public final static String JAVA_SINGLE_LINE_COMMENT= "__java_singleline_comment"; //$NON-NLS-1$
 	public final static String JAVA_MULTI_LINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
 	public final static String JAVA_DOC= "__java_javadoc"; //$NON-NLS-1$

@@ -23,10 +23,10 @@ import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -125,8 +125,15 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	private boolean fIsSmartMode;
 
 	private boolean fHasTypedBrace;
+	private String fPartitioning;
 	
-	public JavaAutoIndentStrategy() {
+	/**
+	 * Creates a new Java auto indent strategy for the given document partitioning.
+	 * 
+	 * @param partitioning the document partitioning
+	 */
+	public JavaAutoIndentStrategy(String partitioning) {
+		fPartitioning= partitioning;
  	}
 
 	/**
@@ -288,13 +295,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				buf.append(getIndentOfLine(d, indLine));
 			} else {
 				int start= d.getLineOffset(line);
-				// if line just ended a javadoc comment, take the indent from the comment's begin line
-				IDocumentPartitioner partitioner= d.getDocumentPartitioner();
-				if (partitioner != null) {
-					ITypedRegion region= partitioner.getPartition(start);
-					if (IJavaPartitions.JAVA_DOC.equals(region.getType()))
-						start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
-				}
+
+				ITypedRegion region= TextUtilities.getPartition(d, fPartitioning, start);
+				if (region != null && IJavaPartitions.JAVA_DOC.equals(region.getType()))
+					start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
+
 				int whiteend= findEndOfWhiteSpace(d, start, c.offset);
 				int length= whiteend - start;
 				buf.append(d.get(start, length));
@@ -310,7 +315,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 						// unless we think we are inserting an anonymous type definition
 						IRegion reg= d.getLineInformation(line);
 						int lineEnd= reg.getOffset() + reg.getLength();
-						if (!(computeAnonymousPosition(d, c.offset - 1, lineEnd) != -1)) {
+						if (!(computeAnonymousPosition(d, c.offset - 1, fPartitioning, lineEnd) != -1)) {
 							int contentStart= findEndOfWhiteSpace(d, c.offset, lineEnd);
 							if (lineEnd - contentStart > 0) {
 								c.length=  lineEnd - c.offset;
@@ -337,27 +342,29 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param offset the offset of the caret position, relative to the line start.
+	 * @param partitioning the document partitioning
+	 * @param max the max position
 	 * @return an insert position relative to the line start if <code>line</code> contains a parenthesized expression that can be followed by a block, -1 otherwise
 	 */
-	private static int computeAnonymousPosition(IDocument document, int offset, int max) {
+	private static int computeAnonymousPosition(IDocument document, int offset, String partitioning,  int max) {
 		// find the opening parenthesis for every closing parenthesis on the current line after offset
 		// return the position behind the closing parenthesis if it looks like a method declaration
 		// or an expression for an if, while, for, catch statement
 		int pos= offset;
 		int length= max;
-		int scanTo= scanForward(document, pos, length, '}');
+		int scanTo= scanForward(document, pos, partitioning, length, '}');
 		if (scanTo == -1)
 			scanTo= length;
 			
-		int closingParen= findClosingParenToLeft(document, pos) - 1;
+		int closingParen= findClosingParenToLeft(document, pos, partitioning) - 1;
 
 		while (true) {
 			int startScan= closingParen + 1;
-			closingParen= scanForward(document, startScan, scanTo, ')');
+			closingParen= scanForward(document, startScan, partitioning, scanTo, ')');
 			if (closingParen == -1)
 				break;
 
-			int openingParen= findOpeningParenMatch(document, closingParen);
+			int openingParen= findOpeningParenMatch(document, closingParen, partitioning);
 
 			// no way an expression at the beginning of the document can mean anything
 			if (openingParen < 1)
@@ -367,7 +374,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			if (openingParen > pos)
 				continue;
 
-			if (looksLikeAnonymousClassDef(document, openingParen - 1))
+			if (looksLikeAnonymousClassDef(document, openingParen - 1, partitioning))
 				return closingParen + 1;
 
 		}
@@ -381,15 +388,16 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @return the position of a closing parenthesis left to <code>position</code> separated only by whitespace, or <code>position</code> if no parenthesis can be found
 	 */
-	private static int findClosingParenToLeft(IDocument document, int position) {
+	private static int findClosingParenToLeft(IDocument document, int position, String partitioning) {
 		final char CLOSING_PAREN= ')';
 		try {
 			if (position < 1)
 				return position;
 
-			int nonWS= firstNonWhitespaceBackward(document, position - 1, -1);
+			int nonWS= firstNonWhitespaceBackward(document, position - 1, partitioning, -1);
 			if (nonWS != -1 && document.getChar(nonWS) == CLOSING_PAREN)
 				return nonWS;
 		} catch (BadLocationException e1) {
@@ -404,17 +412,18 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>bound</code> &gt; <code>position</code>
 	 * @return the highest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
-	private static int firstNonWhitespaceBackward(IDocument document, int position, int bound) {
+	private static int firstNonWhitespaceBackward(IDocument document, int position, String partitioning, int bound) {
 		Assert.isTrue(position < document.getLength());
 		Assert.isTrue(bound >= -1);
 
 		try {
 			while (position > bound) {
 				char ch= document.getChar(position);
-				if (!Character.isWhitespace(ch) && isDefaultPartition(document, position))
+				if (!Character.isWhitespace(ch) && isDefaultPartition(document, position, partitioning))
 					return position;
 				position--;
 			}
@@ -430,11 +439,12 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
 	 * @param chars an array of <code>char</code> to search for
 	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
-	private static int scanForward(IDocument document, int position, int bound, char[] chars) {
+	private static int scanForward(IDocument document, int position, String partitioning, int bound, char[] chars) {
 		Assert.isTrue(position >= 0);
 		Assert.isTrue(bound <= document.getLength());
 		
@@ -443,7 +453,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		try {
 			while (position < bound) {
 
-				if (Arrays.binarySearch(chars, document.getChar(position)) >= 0 && isDefaultPartition(document, position))
+				if (Arrays.binarySearch(chars, document.getChar(position)) >= 0 && isDefaultPartition(document, position, partitioning))
 					return position;
 
 				position++;
@@ -460,12 +470,13 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
 	 * @param ch the <code>char</code> to search for
 	 * @return the lowest position of <code>ch</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
-	private static int scanForward(IDocument document, int position, int bound, char ch) {
-		return scanForward(document, position, bound, new char[] {ch});
+	private static int scanForward(IDocument document, int position, String partitioning, int bound, char ch) {
+		return scanForward(document, position, partitioning, bound, new char[] {ch});
 	}
 
 	/**
@@ -475,9 +486,10 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @param document the document being modified
 	 * @param offset the first character position in <code>document</code> to be considered
 	 * @param length the length of the character range to be considered
+	 * @param partitioning the document partitioning
 	 * @return <code>true</code> if the specified character range contains a <code>new</code> keyword, <code>false</code> otherwise.
 	 */
-	private static boolean isNewMatch(IDocument document, int offset, int length) {
+	private static boolean isNewMatch(IDocument document, int offset, int length, String partitioning) {
 		Assert.isTrue(length >= 0);
 		Assert.isTrue(offset >= 0);
 		Assert.isTrue(offset + length < document.getLength() + 1);
@@ -486,7 +498,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			String text= document.get(offset, length);
 			int pos= text.indexOf("new"); //$NON-NLS-1$
 			
-			while (pos != -1 && !isDefaultPartition(document, pos + offset))
+			while (pos != -1 && !isDefaultPartition(document, pos + offset, partitioning))
 				pos= text.indexOf("new", pos + 2); //$NON-NLS-1$
 
 			if (pos < 0)
@@ -512,14 +524,15 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @return <code>true</code> if the content of <code>document</code> looks like an anonymous class definition, <code>false</code> otherwise
 	 */
-	private static boolean looksLikeAnonymousClassDef(IDocument document, int position) {
-		int previousCommaOrParen= scanBackward(document, position - 1, -1, new char[] {',', '('});
+	private static boolean looksLikeAnonymousClassDef(IDocument document, int position, String partitioning) {
+		int previousCommaOrParen= scanBackward(document, position - 1, partitioning, -1, new char[] {',', '('});
 		if (previousCommaOrParen == -1 || position < previousCommaOrParen + 5) // 2 for borders, 3 for "new"
 			return false;
 
-		if (isNewMatch(document, previousCommaOrParen + 1, position - previousCommaOrParen - 2))
+		if (isNewMatch(document, previousCommaOrParen + 1, position - previousCommaOrParen - 2, partitioning))
 			return true;
 
 		return false;
@@ -530,14 +543,15 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the position to be checked
+	 * @param partitioning the document partitioning
 	 * @return <code>true</code> if <code>position</code> is in the default partition of <code>document</code>, <code>false</code> otherwise
 	 */
-	private static boolean isDefaultPartition(IDocument document, int position) {
+	private static boolean isDefaultPartition(IDocument document, int position, String partitioning) {
 		Assert.isTrue(position >= 0);
 		Assert.isTrue(position <= document.getLength());
 		
 		try {
-			ITypedRegion region= document.getPartition(position);
+			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position);
 			return region != null && region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
 			
 		} catch (BadLocationException e) {
@@ -551,15 +565,16 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the position in <code>document</code> of a closing parenthesis
+	 * @param partitioning the document partitioning
 	 * @return the position in <code>document</code> of the matching parenthesis, or -1 if none can be found
 	 */
-	private static int findOpeningParenMatch(IDocument document, int position) {
+	private static int findOpeningParenMatch(IDocument document, int position, String partitioning) {
 		final char CLOSING_PAREN= ')';
 		final char OPENING_PAREN= '(';
 
 		Assert.isTrue(position < document.getLength());
 		Assert.isTrue(position >= 0);
-		Assert.isTrue(isDefaultPartition(document, position));
+		Assert.isTrue(isDefaultPartition(document, position, partitioning));
 
 		try {
 
@@ -567,7 +582,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			
 			int depth= 1;
 			while (true) {
-				position= scanBackward(document, position - 1, -1, new char[] {CLOSING_PAREN, OPENING_PAREN});
+				position= scanBackward(document, position - 1, partitioning, -1, new char[] {CLOSING_PAREN, OPENING_PAREN});
 				if (position == -1)
 					return -1;
 					
@@ -592,11 +607,12 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
 	 * @param chars an array of <code>char</code> to search for
 	 * @return the highest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
-	private static int scanBackward(IDocument document, int position, int bound, char[] chars) {
+	private static int scanBackward(IDocument document, int position, String partitioning, int bound, char[] chars) {
 		Assert.isTrue(bound >= -1);
 		Assert.isTrue(position < document.getLength() );
 		
@@ -605,7 +621,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		try {
 			while (position > bound) {
 
-				if (Arrays.binarySearch(chars, document.getChar(position)) >= 0 && isDefaultPartition(document, position))
+				if (Arrays.binarySearch(chars, document.getChar(position)) >= 0 && isDefaultPartition(document, position, partitioning))
 					return position;
 
 				position--;
@@ -617,7 +633,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	
 	private boolean isClosed(IDocument document, int offset, int length) {
 		
-		CompilationUnitInfo info= getCompilationUnitForMethod(document, offset);
+		CompilationUnitInfo info= getCompilationUnitForMethod(document, offset, fPartitioning);
 		if (info == null)
 			return false;
 			
@@ -648,7 +664,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		
 		switch (node.getNodeType()) {
 		case ASTNode.BLOCK:
-			return areBlocksConsistent(document, offset);
+			return areBlocksConsistent(document, offset, fPartitioning);
 
 		case ASTNode.IF_STATEMENT: 
 			{
@@ -918,17 +934,16 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int start= document.getLineOffset(line);
 			
 			// if line is at end of a javadoc comment, take the indent from the comment's begin line
-			IDocumentPartitioner partitioner= document.getDocumentPartitioner();
-			if (partitioner != null) {
-				ITypedRegion typedRegion= partitioner.getPartition(start);
-				if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType()))
+			ITypedRegion typedRegion= TextUtilities.getPartition(document, fPartitioning, start);
+			if (typedRegion != null) {
+				if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType())) {
 					start= document.getLineInformationOfOffset(typedRegion.getOffset()).getOffset();
-
-				else if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(typedRegion.getType())) {
+				} else if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(typedRegion.getType())) {
 					buffer.append(COMMENT);
 					start += 2;
 				}
 			}
+			
 			int whiteend= findEndOfWhiteSpace(document, start, command.offset);
 			buffer.append(document.get(start, whiteend - start));
 			if (getBracketCount(document, start, command.offset, true) > 0) {
@@ -1149,7 +1164,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return false;
 	}
 
-	private static int searchForClosingPeer(IDocument document, int position, final char openingPeer, final char closingPeer) {
+	private static int searchForClosingPeer(IDocument document, int position, String partitioning, final char openingPeer, final char closingPeer) {
 		Assert.isTrue(position >= 0);
 
 		try {
@@ -1157,7 +1172,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int depth= 1;
 			position -= 1;
 			while (true) {
-				position= scanForward(document, position + 1, length, new char[] {openingPeer, closingPeer});
+				position= scanForward(document, position + 1, partitioning, length, new char[] {openingPeer, closingPeer});
 				if (position == -1)
 					return -1;
 					
@@ -1175,14 +1190,14 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}
 	}
 
-	private static int searchForOpeningPeer(IDocument document, int position, final char openingPeer, final char closingPeer) {
+	private static int searchForOpeningPeer(IDocument document, int position, String partitioning, final char openingPeer, final char closingPeer) {
 		Assert.isTrue(position < document.getLength());
 
 		try {
 			int depth= 1;
 			position += 1;
 			while (true) {
-				position= scanBackward(document, position - 1, -1, new char[] {openingPeer, closingPeer});
+				position= scanBackward(document, position - 1, partitioning, -1, new char[] {openingPeer, closingPeer});
 				if (position == -1)
 					return -1;
 					
@@ -1200,21 +1215,21 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}
 	}
 
-	private static IRegion getSurroundingBlock(IDocument document, int offset) {
+	private static IRegion getSurroundingBlock(IDocument document, int offset, String partitioning) {
 		if (offset < 1 || offset >= document.getLength())
 			return null;
 			
-		int begin= searchForOpeningPeer(document, offset - 1, '{', '}');
-		int end= searchForClosingPeer(document, offset, '{', '}');
+		int begin= searchForOpeningPeer(document, offset - 1, partitioning, '{', '}');
+		int end= searchForClosingPeer(document, offset, partitioning, '{', '}');
 		if (begin == -1 || end == -1)
 			return null;
 		return new Region(begin, end + 1 - begin);
 	}
 
-	private static CompilationUnitInfo getCompilationUnitForMethod(IDocument document, int offset) {
+	private static CompilationUnitInfo getCompilationUnitForMethod(IDocument document, int offset, String partitioning) {
 		try {	
 			
-			IRegion sourceRange= getSurroundingBlock(document, offset);
+			IRegion sourceRange= getSurroundingBlock(document, offset, partitioning);
 			if (sourceRange == null)
 				return null;
 			String source= document.get(sourceRange.getOffset(), sourceRange.getLength());
@@ -1236,7 +1251,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return null;
 	}
 	
-	private static boolean areBlocksConsistent(IDocument document, int offset) {
+	private static boolean areBlocksConsistent(IDocument document, int offset, String partitioning) {
 		if (offset < 1 || offset >= document.getLength())
 			return false;
 		
@@ -1244,8 +1259,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		int end= offset - 1;
 		
 		while (true) {
-			begin= searchForOpeningPeer(document, begin - 1, '{', '}');
-			end= searchForClosingPeer(document, end + 1, '{', '}');
+			begin= searchForOpeningPeer(document, begin - 1, partitioning, '{', '}');
+			end= searchForClosingPeer(document, end + 1, partitioning, '{', '}');
 			if (begin == -1 && end == -1)
 				return true;
 			if (begin == -1 || end == -1)

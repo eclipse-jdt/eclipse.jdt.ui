@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -248,11 +247,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		}
 				
 		IDocument doc= new Document(content);
-		IDocumentPartitioner dp= JavaPlugin.getDefault().getJavaTextTools().createDocumentPartitioner();
-		if (dp != null) {
-			doc.setDocumentPartitioner(dp);
-			dp.connect(doc);
-		}
+		JavaPlugin.getDefault().getJavaTextTools().setupDocument(doc);
 		fViewer.setInput(doc);
 	}
 	

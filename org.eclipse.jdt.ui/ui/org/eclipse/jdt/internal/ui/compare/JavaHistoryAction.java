@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.*;
 
 import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
@@ -38,8 +39,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
-
 import org.eclipse.compare.*;
 
 /**
@@ -152,7 +151,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 	 * Returns true if the given file is open in an editor.
 	 */
 	boolean beingEdited(IFile file) {
-		CompilationUnitDocumentProvider dp= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+		IDocumentProvider dp= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 		FileEditorInput input= new FileEditorInput(file);	
 		return dp.getDocument(input) != null;
 	}

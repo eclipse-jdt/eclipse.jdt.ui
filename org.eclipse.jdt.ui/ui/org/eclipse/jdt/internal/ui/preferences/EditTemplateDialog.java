@@ -56,7 +56,6 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextListener;
@@ -434,11 +433,9 @@ public class EditTemplateDialog extends StatusDialog {
 
 	private SourceViewer createEditor(Composite parent) {
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		IDocument document= new Document(fTemplate.getPattern());
-		IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
-		document.setDocumentPartitioner(partitioner);
-		partitioner.connect(document);		
+		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+		tools.setupDocument(document);
 		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null, fProcessor));
 		viewer.setEditable(true);
 		viewer.setDocument(document);

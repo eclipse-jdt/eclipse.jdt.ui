@@ -40,6 +40,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -362,8 +363,8 @@ public class JavadocView extends AbstractInfoView {
 				if (document == null)
 					return null;
 				
-				ITypedRegion typedRegion= document.getPartition(textSelection.getOffset());
-				if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType()))
+				ITypedRegion typedRegion= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, textSelection.getOffset());
+				if (typedRegion != null && IJavaPartitions.JAVA_DOC.equals(typedRegion.getType()))
 					return TextSelectionConverter.getElementAtOffset((JavaEditor)part, textSelection);
 				else
 					return null;

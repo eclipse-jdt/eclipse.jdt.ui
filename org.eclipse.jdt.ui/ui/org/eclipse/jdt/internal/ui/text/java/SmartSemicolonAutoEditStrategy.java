@@ -22,6 +22,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -58,11 +59,15 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	private static final char BRACECHAR= '{';
 
 	private char fCharacter;
+	private String fPartitioning;
 
 	/**
 	 * Creates a new SmartSemicolonAutoEditStrategy.
+	 * 
+	 * @param partitioning the document partitioning
 	 */
-	public SmartSemicolonAutoEditStrategy() {
+	public SmartSemicolonAutoEditStrategy(String partitioning) {
+		fPartitioning= partitioning;
 	}
 
 	/*
@@ -115,7 +120,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 		// 2: choose action based on findings (is for-Statement?)
 		// for now: compute the best position to insert the new character
-		int positionInLine= computeCharacterPosition(document, line, pos - line.getOffset(), fCharacter);
+		int positionInLine= computeCharacterPosition(document, line, pos - line.getOffset(), fCharacter, fPartitioning);
 		int position= positionInLine + line.getOffset();
 
 		// never position before the current position!
@@ -172,7 +177,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @return <code>true</code> if <code>ch</code> is already present at <code>location</code>, <code>false</code> otherwise
 	 */
 	private boolean alreadyPresent(IDocument document, char ch, int position) {
-		int pos= firstNonWhitespaceForward(document, position, document.getLength());
+		int pos= firstNonWhitespaceForward(document, position, fPartitioning, document.getLength());
 		try {
 			if (pos != -1 && document.getChar(pos) == ch)
 				return true;
@@ -189,9 +194,10 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param line the line where the change is being made
 	 * @param offset the position of the caret in the line when <code>character</code> was typed
 	 * @param character the character to look for
+	 * @param partitioning the document partitioning
 	 * @return the position where <code>character</code> should be inserted / replaced
 	 */
-	protected static int computeCharacterPosition(IDocument document, ITextSelection line, int offset, char character) {
+	protected static int computeCharacterPosition(IDocument document, ITextSelection line, int offset, char character, String partitioning) {
 		String text= line.getText();
 		if (text == null)
 			return 0;
@@ -199,19 +205,19 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		int insertPos;
 		if (character == BRACECHAR) {
 
-			insertPos= computeArrayInitializationPos(document, line, offset);
+			insertPos= computeArrayInitializationPos(document, line, offset, partitioning);
 
 			if (insertPos == -1) {
 				insertPos= computeAfterTryDoElse(document, line, offset);
 			}
 
 			if (insertPos == -1) {
-				insertPos= computeAfterParenthesis(document, line, offset);
+				insertPos= computeAfterParenthesis(document, line, offset, partitioning);
 			}
 
 		} else if (character == SEMICHAR) {
 
-			int nextPartitionPos= nextPartitionOrLineEnd(document, line, offset);
+			int nextPartitionPos= nextPartitionOrLineEnd(document, line, offset, partitioning);
 			insertPos= offset;
 			if (!isForStatement(text, offset)) {
 				insertPos= startOfWhitespaceBeforeOffset(text, nextPartitionPos);
@@ -232,16 +238,17 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param document the document being modified
 	 * @param line the current line under investigation
 	 * @param offset the offset of the caret position, relative to the line start.
+	 * @param partitioning the document partitioning
 	 * @return an insert position  relative to the line start if <code>line</code> looks like being an array initialization at <code>offset</code>, -1 otherwise
 	 */
-	private static int computeArrayInitializationPos(IDocument document, ITextSelection line, int offset) {
+	private static int computeArrayInitializationPos(IDocument document, ITextSelection line, int offset, String partitioning) {
 		// search backward while WS, find = (not != <= >= ==) in default partition
 		int pos= offset + line.getOffset();
 
 		if (pos == 0)
 			return -1;
 			
-		int p= firstNonWhitespaceBackward(document, pos - 1, -1);
+		int p= firstNonWhitespaceBackward(document, pos - 1, partitioning, -1);
 		
 		if (p == -1)
 			return -1;
@@ -255,7 +262,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			if (p == 0)
 				return offset;
 				
-			p= firstNonWhitespaceBackward(document, p - 1, -1);
+			p= firstNonWhitespaceBackward(document, p - 1, partitioning, -1);
 			if (p == -1)
 				return -1;
 			
@@ -303,27 +310,28 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param document the document being modified
 	 * @param line the current line under investigation
 	 * @param offset the offset of the caret position, relative to the line start.
+	 * @param partitioning the document partitioning
 	 * @return an insert position relative to the line start if <code>line</code> contains a parenthesized expression that can be followed by a block, -1 otherwise
 	 */
-	private static int computeAfterParenthesis(IDocument document, ITextSelection line, int offset) {
+	private static int computeAfterParenthesis(IDocument document, ITextSelection line, int offset, String partitioning) {
 		// find the opening parenthesis for every closing parenthesis on the current line after offset
 		// return the position behind the closing parenthesis if it looks like a method declaration
 		// or an expression for an if, while, for, catch statement
 		int pos= offset + line.getOffset();
 		int length= line.getOffset() + line.getLength();
-		int scanTo= scanForward(document, pos, length, '}');
+		int scanTo= scanForward(document, pos, partitioning, length, '}');
 		if (scanTo == -1)
 			scanTo= length;
 			
-		int closingParen= findClosingParenToLeft(document, pos) - 1;
+		int closingParen= findClosingParenToLeft(document, pos, partitioning) - 1;
 
 		while (true) {
 			int startScan= closingParen + 1;
-			closingParen= scanForward(document, startScan, scanTo, ')');
+			closingParen= scanForward(document, startScan, partitioning, scanTo, ')');
 			if (closingParen == -1)
 				break;
 
-			int openingParen= findOpeningParenMatch(document, closingParen);
+			int openingParen= findOpeningParenMatch(document, closingParen, partitioning);
 
 			// no way an expression at the beginning of the document can mean anything
 			if (openingParen < 1)
@@ -333,13 +341,13 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			if (openingParen > pos)
 				continue;
 
-			if (looksLikeAnonymousClassDef(document, openingParen - 1))
+			if (looksLikeAnonymousClassDef(document, openingParen - 1, partitioning))
 				return closingParen + 1 - line.getOffset();
 
-			if (looksLikeIfWhileForCatch(document, openingParen - 1))
+			if (looksLikeIfWhileForCatch(document, openingParen - 1, partitioning))
 				return closingParen + 1 - line.getOffset();
 
-			if (looksLikeMethodDecl(document, openingParen - 1))
+			if (looksLikeMethodDecl(document, openingParen - 1, partitioning))
 				return closingParen + 1 - line.getOffset();
 
 		}
@@ -353,15 +361,16 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @return the position of a closing parenthesis left to <code>position</code> separated only by whitespace, or <code>position</code> if no parenthesis can be found
 	 */
-	private static int findClosingParenToLeft(IDocument document, int position) {
+	private static int findClosingParenToLeft(IDocument document, int position, String partitioning) {
 		final char CLOSING_PAREN= ')';
 		try {
 			if (position < 1)
 				return position;
 
-			int nonWS= firstNonWhitespaceBackward(document, position - 1, -1);
+			int nonWS= firstNonWhitespaceBackward(document, position - 1, partitioning, -1);
 			if (nonWS != -1 && document.getChar(nonWS) == CLOSING_PAREN)
 				return nonWS;
 		} catch (BadLocationException e1) {
@@ -401,17 +410,18 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>bound</code> &gt; <code>position</code>
 	 * @return the highest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
-	private static int firstNonWhitespaceBackward(IDocument document, int position, int bound) {
+	private static int firstNonWhitespaceBackward(IDocument document, int position, String partitioning, int bound) {
 		Assert.isTrue(position < document.getLength());
 		Assert.isTrue(bound >= -1);
 
 		try {
 			while (position > bound) {
 				char ch= document.getChar(position);
-				if (!Character.isWhitespace(ch) && isDefaultPartition(document, position))
+				if (!Character.isWhitespace(ch) && isDefaultPartition(document, position, partitioning))
 					return position;
 				position--;
 			}
@@ -427,17 +437,18 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>bound</code> &gt; <code>position</code>
 	 * @return the smallest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
-	private static int firstNonWhitespaceForward(IDocument document, int position, int bound) {
+	private static int firstNonWhitespaceForward(IDocument document, int position, String partitioning, int bound) {
 		Assert.isTrue(position >= 0);
 		Assert.isTrue(bound <= document.getLength());
 
 		try {
 			while (position < bound) {
 				char ch= document.getChar(position);
-				if (!Character.isWhitespace(ch) && isDefaultPartition(document, position))
+				if (!Character.isWhitespace(ch) && isDefaultPartition(document, position, partitioning))
 					return position;
 				position++;
 			}
@@ -453,11 +464,12 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
 	 * @param chars an array of <code>char</code> to search for
 	 * @return the highest position of one element in <code>chars</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
-	private static int scanBackward(IDocument document, int position, int bound, char[] chars) {
+	private static int scanBackward(IDocument document, int position, String partitioning, int bound, char[] chars) {
 		Assert.isTrue(bound >= -1);
 		Assert.isTrue(position < document.getLength() );
 		
@@ -466,7 +478,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		try {
 			while (position > bound) {
 
-				if (Arrays.binarySearch(chars, document.getChar(position)) >= 0 && isDefaultPartition(document, position))
+				if (Arrays.binarySearch(chars, document.getChar(position)) >= 0 && isDefaultPartition(document, position, partitioning))
 					return position;
 
 				position--;
@@ -498,11 +510,12 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
 	 * @param chars an array of <code>char</code> to search for
 	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
-	private static int scanForward(IDocument document, int position, int bound, char[] chars) {
+	private static int scanForward(IDocument document, int position, String partitioning, int bound, char[] chars) {
 		Assert.isTrue(position >= 0);
 		Assert.isTrue(bound <= document.getLength());
 		
@@ -511,7 +524,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		try {
 			while (position < bound) {
 
-				if (Arrays.binarySearch(chars, document.getChar(position)) >= 0 && isDefaultPartition(document, position))
+				if (Arrays.binarySearch(chars, document.getChar(position)) >= 0 && isDefaultPartition(document, position, partitioning))
 					return position;
 
 				position++;
@@ -528,12 +541,13 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
 	 * @param chars an array of <code>char</code> to search for
 	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
-	private static int scanForward(IDocument document, int position, int bound, char ch) {
-		return scanForward(document, position, bound, new char[] {ch});
+	private static int scanForward(IDocument document, int position, String partitioning, int bound, char ch) {
+		return scanForward(document, position, partitioning, bound, new char[] {ch});
 	}
 
 	/**
@@ -543,9 +557,10 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param document the document being modified
 	 * @param offset the first character position in <code>document</code> to be considered
 	 * @param length the length of the character range to be considered
+	 * @param partitioning the document partitioning
 	 * @return <code>true</code> if the specified character range contains a <code>new</code> keyword, <code>false</code> otherwise.
 	 */
-	private static boolean isNewMatch(IDocument document, int offset, int length) {
+	private static boolean isNewMatch(IDocument document, int offset, int length, String partitioning) {
 		Assert.isTrue(length >= 0);
 		Assert.isTrue(offset >= 0);
 		Assert.isTrue(offset + length < document.getLength() + 1);
@@ -554,7 +569,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			String text= document.get(offset, length);
 			int pos= text.indexOf("new"); //$NON-NLS-1$
 			
-			while (pos != -1 && !isDefaultPartition(document, pos + offset))
+			while (pos != -1 && !isDefaultPartition(document, pos + offset, partitioning))
 				pos= text.indexOf("new", pos + 2); //$NON-NLS-1$
 
 			if (pos < 0)
@@ -580,14 +595,15 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @return <code>true</code> if the content of <code>document</code> looks like an anonymous class definition, <code>false</code> otherwise
 	 */
-	private static boolean looksLikeAnonymousClassDef(IDocument document, int position) {
-		int previousCommaOrParen= scanBackward(document, position - 1, -1, new char[] {',', '('});
+	private static boolean looksLikeAnonymousClassDef(IDocument document, int position, String partitioning) {
+		int previousCommaOrParen= scanBackward(document, position - 1, partitioning, -1, new char[] {',', '('});
 		if (previousCommaOrParen == -1 || position < previousCommaOrParen + 5) // 2 for borders, 3 for "new"
 			return false;
 
-		if (isNewMatch(document, previousCommaOrParen + 1, position - previousCommaOrParen - 2))
+		if (isNewMatch(document, previousCommaOrParen + 1, position - previousCommaOrParen - 2, partitioning))
 			return true;
 
 		return false;
@@ -598,14 +614,15 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the position to be checked
+	 * @param partitioning the document partitioning
 	 * @return <code>true</code> if <code>position</code> is in the default partition of <code>document</code>, <code>false</code> otherwise
 	 */
-	private static boolean isDefaultPartition(IDocument document, int position) {
+	private static boolean isDefaultPartition(IDocument document, int position, String partitioning) {
 		Assert.isTrue(position >= 0);
 		Assert.isTrue(position <= document.getLength());
 		
 		try {
-			ITypedRegion region= document.getPartition(position);
+			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position);
 			return region != null && region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
 			
 		} catch (BadLocationException e) {
@@ -619,15 +636,16 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the position in <code>document</code> of a closing parenthesis
+	 * @param partitioning the document partitioning
 	 * @return the position in <code>document</code> of the matching parenthesis, or -1 if none can be found
 	 */
-	private static int findOpeningParenMatch(IDocument document, int position) {
+	private static int findOpeningParenMatch(IDocument document, int position, String partitioning) {
 		final char CLOSING_PAREN= ')';
 		final char OPENING_PAREN= '(';
 
 		Assert.isTrue(position < document.getLength());
 		Assert.isTrue(position >= 0);
-		Assert.isTrue(isDefaultPartition(document, position));
+		Assert.isTrue(isDefaultPartition(document, position, partitioning));
 
 		try {
 
@@ -635,7 +653,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			
 			int depth= 1;
 			while (true) {
-				position= scanBackward(document, position - 1, -1, new char[] {CLOSING_PAREN, OPENING_PAREN});
+				position= scanBackward(document, position - 1, partitioning, -1, new char[] {CLOSING_PAREN, OPENING_PAREN});
 				if (position == -1)
 					return -1;
 					
@@ -660,10 +678,11 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @return <code>true</code> if <code>document</code> contains any of the above keywords to the left of <code>position</code>, <code>false</code> otherwise
 	 */
-	private static boolean looksLikeIfWhileForCatch(IDocument document, int position) {
-		position= firstNonWhitespaceBackward(document, position, -1);
+	private static boolean looksLikeIfWhileForCatch(IDocument document, int position, String partitioning) {
+		position= firstNonWhitespaceBackward(document, position, partitioning, -1);
 		if (position == -1)
 			return false;
 
@@ -712,20 +731,21 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @return <code>true</code> if the content of <code>document</code> looks like a method definition, <code>false</code> otherwise
 	 */
-	private static boolean looksLikeMethodDecl(IDocument document, int position) {
+	private static boolean looksLikeMethodDecl(IDocument document, int position, String partitioning) {
 		
 		// method name
-		position= eatIdentToLeft(document, position);
+		position= eatIdentToLeft(document, position, partitioning);
 		if (position < 1)
 			return false;
 			
-		position= eatBrackets(document, position - 1);
+		position= eatBrackets(document, position - 1, partitioning);
 		if (position < 1)
 			return false;
 		
-		position= eatIdentToLeft(document, position - 1);
+		position= eatIdentToLeft(document, position - 1, partitioning);
 
 		return position != -1;
 	}
@@ -738,14 +758,15 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @return the smallest character position of bracket pair or <code>position</code>
 	 */
-	private static int eatBrackets(IDocument document, int position) {
+	private static int eatBrackets(IDocument document, int position, String partitioning) {
 		// accept array return type
-		int pos= firstNonWhitespaceBackward(document, position, -1);
+		int pos= firstNonWhitespaceBackward(document, position, partitioning, -1);
 		try {
 			if (pos > 1 && document.getChar(pos) == ']') {
-				pos= firstNonWhitespaceBackward(document, pos - 1, -1);
+				pos= firstNonWhitespaceBackward(document, pos - 1, partitioning, -1);
 				if (pos > 0 && document.getChar(pos) == '[')
 					return pos;
 			}
@@ -764,14 +785,15 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
+	 * @param partitioning the document partitioning
 	 * @return the smallest character position of an identifier or -1 if none can be found; always &lt;= <code>position</code>
 	 */
-	private static int eatIdentToLeft(IDocument document, int position) {
+	private static int eatIdentToLeft(IDocument document, int position, String partitioning) {
 		if (position < 0)
 			return -1;
 		Assert.isTrue(position < document.getLength());
 		
-		int p= firstNonWhitespaceBackward(document, position, -1);
+		int p= firstNonWhitespaceBackward(document, position, partitioning, -1);
 		if (p == -1)
 			return -1;
 
@@ -807,9 +829,10 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param document the document being modified
 	 * @param line the line under investigation
 	 * @param offset the caret offset into <code>line</code>
+	 * @param partitioning the document partitioning
 	 * @return the position of the next Java partition, or the end of <code>line</code>
 	 */
-	private static int nextPartitionOrLineEnd(IDocument document, ITextSelection line, int offset) {
+	private static int nextPartitionOrLineEnd(IDocument document, ITextSelection line, int offset, String partitioning) {
 		// run relative to document
 		final int docOffset= offset + line.getOffset();
 		final int eol= line.getOffset() + line.getLength();
@@ -817,7 +840,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		int validPosition= docOffset;
 
 		try {
-			ITypedRegion partition= document.getPartition(nextPartitionPos);
+			ITypedRegion partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos);
 			validPosition= getValidPositionForPartition(document, partition, eol);
 			while (validPosition == -1) {
 				nextPartitionPos= partition.getOffset() - 1;
@@ -825,7 +848,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 					validPosition= docOffset;
 					break;
 				}
-				partition= document.getPartition(nextPartitionPos);
+				partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos);
 				validPosition= getValidPositionForPartition(document, partition, eol);
 			}
 		} catch (BadLocationException e) {

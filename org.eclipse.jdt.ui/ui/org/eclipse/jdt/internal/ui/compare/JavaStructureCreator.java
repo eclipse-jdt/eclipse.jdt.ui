@@ -154,12 +154,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				
 				doc= new Document(contents);
 				DocumentManager.put(input, doc);
-				IDocumentPartitioner dp= JavaCompareUtilities.createJavaPartitioner();
-				if (dp != null) {
-					doc.setDocumentPartitioner(dp);
-					dp.connect(doc);
-				}
-				
+				JavaCompareUtilities.setupDocument(doc);				
 			}
 		}
 		

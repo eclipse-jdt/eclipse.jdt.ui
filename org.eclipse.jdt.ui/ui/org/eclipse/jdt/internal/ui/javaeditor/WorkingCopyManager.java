@@ -33,7 +33,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManagerExtension;
  */
 public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyManagerExtension {
 	
-	private CompilationUnitDocumentProvider fDocumentProvider;
+	private ICompilationUnitDocumentProvider fDocumentProvider;
 	private Map fMap;
 	private boolean fIsShuttingDown;
 
@@ -43,7 +43,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	 * 
 	 * @param provider the provider
 	 */
-	public WorkingCopyManager(CompilationUnitDocumentProvider provider) {
+	public WorkingCopyManager(ICompilationUnitDocumentProvider provider) {
 		Assert.isNotNull(provider);
 		fDocumentProvider= provider;
 	}
@@ -92,7 +92,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IWorkingCopyManagerExtension#setWorkingCopy(org.eclipse.ui.IEditorInput, org.eclipse.jdt.core.ICompilationUnit)
 	 */
 	public void setWorkingCopy(IEditorInput input, ICompilationUnit workingCopy) {
-		if (fDocumentProvider.isConnected(input)) {
+		if (fDocumentProvider.getDocument(input) != null) {
 			if (fMap == null)
 				fMap= new HashMap();
 			fMap.put(input, workingCopy);

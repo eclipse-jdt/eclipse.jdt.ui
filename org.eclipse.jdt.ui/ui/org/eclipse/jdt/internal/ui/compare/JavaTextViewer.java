@@ -20,7 +20,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.text.IDocumentPartitioner;
 
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
@@ -52,13 +51,7 @@ public class JavaTextViewer extends Viewer {
 		
 		if (input instanceof IStreamContentAccessor) {
 			Document document= new Document(getString(input));
-			
-			IDocumentPartitioner partitioner= JavaCompareUtilities.createJavaPartitioner();
-			if (partitioner != null) {
-				document.setDocumentPartitioner(partitioner);
-				partitioner.connect(document);
-			}
-
+			JavaCompareUtilities.setupDocument(document);
 			fSourceViewer.setDocument(document);
 		}
 		fInput= input;

@@ -31,6 +31,8 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.ui.IFileEditorInput;
+
 import org.eclipse.jdt.core.BufferChangedEvent;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferChangedListener;
@@ -45,70 +47,30 @@ import org.eclipse.jdt.core.JavaModelException;
  * This class is <code>public</code> for test purposes only.
  */
 public class DocumentAdapter implements IBuffer, IDocumentListener {
-	
+		
 		/**
 		 * Internal implementation of a NULL instanceof IBuffer.
 		 */
 		static private class NullBuffer implements IBuffer {
-			
 			public void addBufferChangedListener(IBufferChangedListener listener) {}
-		
 			public void append(char[] text) {}
-		
 			public void append(String text) {}
-		
 			public void close() {}
-		
-			public char getChar(int position) {
-				return 0;
-			}
-		
-			public char[] getCharacters() {
-				return null;
-			}
-		
-			public String getContents() {
-				return null;
-			}
-		
-			public int getLength() {
-				return 0;
-			}
-		
-			public IOpenable getOwner() {
-				return null;
-			}
-		
-			public String getText(int offset, int length) {
-				return null;
-			}
-		
-			public IResource getUnderlyingResource() {
-				return null;
-			}
-		
-			public boolean hasUnsavedChanges() {
-				return false;
-			}
-		
-			public boolean isClosed() {
-				return false;
-			}
-		
-			public boolean isReadOnly() {
-				return true;
-			}
-		
+			public char getChar(int position) { return 0; }
+			public char[] getCharacters() { return null; }
+			public String getContents() { return null; }
+			public int getLength() { return 0; }
+			public IOpenable getOwner() { return null; }
+			public String getText(int offset, int length) { return null; }
+			public IResource getUnderlyingResource() { return null; }
+			public boolean hasUnsavedChanges() { return false; }
+			public boolean isClosed() { return false; }
+			public boolean isReadOnly() { return true; }
 			public void removeBufferChangedListener(IBufferChangedListener listener) {}
-		
 			public void replace(int position, int length, char[] text) {}
-		
 			public void replace(int position, int length, String text) {}
-		
 			public void save(IProgressMonitor progress, boolean force) throws JavaModelException {}
-		
 			public void setContents(char[] contents) {}
-		
 			public void setContents(String contents) {}
 		}
 		
@@ -164,8 +126,8 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	private DocumentSetCommand fSetCmd= new DocumentSetCommand();
 	private DocumentReplaceCommand fReplaceCmd= new DocumentReplaceCommand();
 	
-	private Object fProviderKey;
-	private CompilationUnitDocumentProvider fProvider;
+	private IFileEditorInput fProviderKey;
+	private ICompilationUnitDocumentProvider fProvider;
 	private String fLineDelimiter;
 	private ILineTracker fLineTracker;
 	
@@ -176,7 +138,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	/**
 	 * This method is <code>public</code> for test purposes only.
 	 */
-	public DocumentAdapter(IOpenable owner, IDocument document, ILineTracker lineTracker, CompilationUnitDocumentProvider provider, Object providerKey) {
+	public DocumentAdapter(IOpenable owner, IDocument document, ILineTracker lineTracker, ICompilationUnitDocumentProvider provider, IFileEditorInput providerKey) {
 		
 		Assert.isNotNull(document);
 		Assert.isNotNull(lineTracker);
@@ -388,7 +350,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#getUnderlyingResource()
 	 */
 	public IResource getUnderlyingResource() {
-		return fProvider != null ? fProvider.getUnderlyingResource(fProviderKey) : null;
+		return fProviderKey.getFile();
 	}
 	
 	/*

@@ -18,6 +18,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.LineChangeHover;
 
@@ -33,6 +34,17 @@ public class JavaChangeHover extends LineChangeHover  {
 	String fPartition;
 	/** The last created information control. */
 	CustomSourceInformationControl fInformationControl;
+	/** The document partitioning to be used by this hover. */
+	private String fPartitioning;
+	
+	/**
+	 * Creates a new change hover for the given document partitioning.
+	 * 
+	 * @param partitioning the document partitioning
+	 */
+	public JavaChangeHover(String partitioning) {
+		fPartitioning= partitioning;
+	}
 	
 	/*
 	 * @see org.eclipse.ui.internal.editors.text.LineChangeHover#formatSource(java.lang.String)
@@ -84,7 +96,7 @@ public class JavaChangeHover extends LineChangeHover  {
 		if (startLine <= 0)
 			return IDocument.DEFAULT_CONTENT_TYPE;
 		try {
-			ITypedRegion region= doc.getPartition(doc.getLineOffset(startLine) - 1);
+			ITypedRegion region= TextUtilities.getPartition(doc, fPartitioning, doc.getLineOffset(startLine) - 1);
 			if (region != null)
 				return region.getType();
 		} catch (BadLocationException e) {

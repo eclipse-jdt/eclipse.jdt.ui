@@ -49,6 +49,7 @@ import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextEvent;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -59,6 +60,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.link.contentassist.ContentAssistant2;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -282,7 +284,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 		fgStore.addPropertyChangeListener(this);
 
 		try {
-			fContentType= document.getContentType(fFramePosition.offset);
+			fContentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, fFramePosition.offset);
 			if (fViewer instanceof ITextViewerExtension2) {
 				((ITextViewerExtension2) fViewer).prependAutoEditStrategy(fManager, fContentType);
 			} else {
@@ -466,6 +468,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 		if (fAssistant != null)
 			return;
 		fAssistant= new ContentAssistant2();
+		fAssistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
 		fAssistant.install(fViewer);
 	}
 

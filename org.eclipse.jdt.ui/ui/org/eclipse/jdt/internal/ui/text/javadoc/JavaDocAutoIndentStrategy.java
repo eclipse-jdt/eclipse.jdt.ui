@@ -56,7 +56,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
-	public JavaDocAutoIndentStrategy() {
+	private String fPartitioning;
+
+	/**
+	 * Creates a new Javadoc auto indent strategy for the given document partitioning.
+	 * 
+	 * @param partitioning the document partitioning
+	 */
+	public JavaDocAutoIndentStrategy(String partitioning) {
+		fPartitioning= partitioning;
 	}
 	
 	private static String getLineDelimiter(IDocument document) {
@@ -102,9 +110,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 						// javadoc started on this line
 						buf.append(" * "); //$NON-NLS-1$
 
-						if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CLOSE_JAVADOCS) &&
-							isNewComment(d, c.offset))
-						{
+						if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CLOSE_JAVADOCS) && isNewComment(d, c.offset, fPartitioning)) {
 							String lineDelimiter= getLineDelimiter(d);
 
 							c.doit= false;
@@ -189,7 +195,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	private String createMethodTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IMethod method)
 		throws CoreException, BadLocationException
 	{
-		IRegion partition= document.getPartition(command.offset);
+		IRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset);
 		ISourceRange sourceRange= method.getSourceRange();
 		if (sourceRange == null || sourceRange.getOffset() != partition.getOffset())
 			return null;
@@ -236,7 +242,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * Guesses if the command operates within a newly created javadoc comment or not.
 	 * If in doubt, it will assume that the javadoc is new.
 	 */
-	private static boolean isNewComment(IDocument document, int commandOffset) {
+	private static boolean isNewComment(IDocument document, int commandOffset, String partitioning) {
 
 		try {
 			int lineIndex= document.getLineOfOffset(commandOffset) + 1;
@@ -244,7 +250,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				return true;
 
 			IRegion line= document.getLineInformation(lineIndex);
-			ITypedRegion partition= document.getPartition(commandOffset);
+			ITypedRegion partition= TextUtilities.getPartition(document, partitioning, commandOffset);
 			if (document.getLineOffset(lineIndex) >= partition.getOffset() + partition.getLength())
 				return false;
 
@@ -298,7 +304,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				return;
 			}
 
-			ITypedRegion partition= document.getPartition(command.offset);			
+			ITypedRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset);			
 			int partitionStart= partition.getOffset();
 			int partitionEnd= partition.getLength() + partitionStart;			
 			

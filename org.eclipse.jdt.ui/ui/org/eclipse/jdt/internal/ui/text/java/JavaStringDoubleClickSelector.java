@@ -15,12 +15,25 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.TextUtilities;
 
 /**
  * Double click strategy aware of Java string and character syntax rules.
  */
 public class JavaStringDoubleClickSelector extends JavaDoubleClickSelector {
+	
+	private String fPartitioning;
 
+	/**
+	 * Creates a new Java string double click selector for the given document partitioning.
+	 * 
+	 * @param partitioning the document partitioning
+	 */
+	public JavaStringDoubleClickSelector(String partitioning) {
+		super();
+		fPartitioning= partitioning;
+	}
+	
 	/*
 	 * @see ITextDoubleClickStrategy#doubleClicked(ITextViewer)
 	 */
@@ -45,7 +58,7 @@ public class JavaStringDoubleClickSelector extends JavaDoubleClickSelector {
 			if ((document.getChar(offset) == '"') || (document.getChar(offset) == '\'') ||
 				(document.getChar(offset - 1) == '"') || (document.getChar(offset - 1) == '\''))		
 			{
-				return document.getPartition(offset);
+				return TextUtilities.getPartition(document, fPartitioning, offset);
 			}
 		} catch (BadLocationException e) {
 		}

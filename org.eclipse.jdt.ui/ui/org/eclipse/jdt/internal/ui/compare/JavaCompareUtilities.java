@@ -19,6 +19,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.util.Assert;
 
@@ -239,6 +241,12 @@ class JavaCompareUtilities {
 		if (tools != null)
 			return tools.createDocumentPartitioner();
 		return null;
+	}
+	
+	static void setupDocument(IDocument document) {
+		JavaTextTools tools= getJavaTextTools();
+		if (tools != null)
+			tools.setupDocument(document);
 	}
 
 	/**

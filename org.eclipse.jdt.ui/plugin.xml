@@ -19,6 +19,7 @@
   <import plugin="org.eclipse.jdt.launching"/>
   <import plugin="org.eclipse.compare"/>
   <import plugin="org.eclipse.team.core"/>
+  <import plugin="org.eclipse.core.filebuffers"/>
 </requires>
 
 <runtime>
@@ -411,6 +412,26 @@
 		class="org.eclipse.jdt.internal.ui.search.JavaSearchMarkerUpdater"
 		markerType="org.eclipse.search.searchmarker">
 	</updater>
+</extension>
+
+<extension
+    id="org.eclipse.jdt.ui.JavaDocumentSetupParticipant"
+    name="%javaDocumentSetupParticipant"
+    point="org.eclipse.core.filebuffers.documentSetup">
+    <participant
+        extensions="java"
+        class="org.eclipse.jdt.internal.ui.javaeditor.filebuffers.JavaDocumentSetupParticipant">
+    </participant>
+</extension>
+
+<extension
+	id="org.eclipse.jdt.ui.JavaDocumentFactory"
+	name="%javaDocumentFactory"
+	point="org.eclipse.core.filebuffers.documentCreation">
+	<factory
+		extensions="java"
+		class="org.eclipse.jdt.internal.ui.javaeditor.filebuffers.JavaDocumentFactory">
+	</factory>
 </extension>
 
 <extension

@@ -34,7 +34,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
@@ -370,11 +369,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		source= Strings.concatenate(sourceLines, delim);
 
 		IDocument doc= new Document(source);
-		IDocumentPartitioner dp= JavaPlugin.getDefault().getJavaTextTools().createDocumentPartitioner();
-		if (dp != null) {
-			doc.setDocumentPartitioner(dp);
-			dp.connect(doc);
-		}
+		JavaPlugin.getDefault().getJavaTextTools().setupDocument(doc);
 		return doc;
 	}
 
