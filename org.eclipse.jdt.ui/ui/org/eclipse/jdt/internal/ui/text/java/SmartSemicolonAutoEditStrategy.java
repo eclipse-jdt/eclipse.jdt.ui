@@ -455,7 +455,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
 	 * @param chars an array of <code>char</code> to search for
-	 * @return the highest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @return the highest position of one element in <code>chars</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
 	private static int scanBackward(IDocument document, int position, int bound, char[] chars) {
 		Assert.isTrue(bound >= -1);
@@ -500,7 +500,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
 	 * @param chars an array of <code>char</code> to search for
-	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
 	private static int scanForward(IDocument document, int position, int bound, char[] chars) {
 		Assert.isTrue(position >= 0);
@@ -530,7 +530,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
 	 * @param chars an array of <code>char</code> to search for
-	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
 	private static int scanForward(IDocument document, int position, int bound, char ch) {
 		return scanForward(document, position, bound, new char[] {ch});
