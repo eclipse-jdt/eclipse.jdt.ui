@@ -53,7 +53,7 @@ import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
-
+import org.eclipse.jface.text.source.IVerticalRulerInfo;
 
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * 
  */
-public class OverviewRuler {
+public class OverviewRuler implements IVerticalRulerInfo {
 	
 	/**
 	 * Internal listener class.
@@ -182,6 +182,12 @@ public class OverviewRuler {
 	private Cursor fHitDetectionCursor;
 	/** The last cursor */
 	private Cursor fLastCursor;
+	/** Cache for the actual scroll position in pixels */
+	private int fScrollPos;
+	/** The line of the last mouse button activity */
+	private int fLastMouseButtonActivityLine= -1;
+	/** The actual problem height */
+	private int fProblemHeight= -1;
 	
 	private Set fAnnotationSet= new HashSet();
 	private Map fLayers= new HashMap();
@@ -337,6 +343,7 @@ public class OverviewRuler {
 		
 		StyledText textWidget= fTextViewer.getTextWidget();
 		int maxLines= textWidget.getLineCount();
+		fScrollPos= textWidget.getTopPixel();		
 				
 		Point size= fCanvas.getSize();
 		int writable= maxLines * textWidget.getLineHeight();
@@ -374,16 +381,16 @@ public class OverviewRuler {
 					int problemLength= problemEnd - problemOffset;				
 					
 					try {
-						
-						int startLine= textWidget.getLineAtOffset(problemOffset - visible.getOffset());
-						yy= (startLine * size.y) / maxLines;
-						
 						if (PROBLEM_HEIGHT_SCALABLE) {
 							int numbersOfLines= document.getNumberOfLines(problemOffset, problemLength);
 							hh= (numbersOfLines * size.y) / maxLines;
 							if (hh < PROBLEM_HEIGHT_MIN)
 								hh= PROBLEM_HEIGHT_MIN;
 						}
+						fProblemHeight= hh;
+
+						int startLine= textWidget.getLineAtOffset(problemOffset - visible.getOffset());
+						yy= Math.min((startLine * size.y) / maxLines, size.y - hh);
 							
 						if (fill != null) {
 							gc.setBackground(fill);
@@ -417,6 +424,7 @@ public class OverviewRuler {
 		ITextViewerExtension3 extension= (ITextViewerExtension3) fTextViewer;
 		IDocument document= fTextViewer.getDocument();		
 		StyledText textWidget= fTextViewer.getTextWidget();
+		fScrollPos= textWidget.getTopPixel();
 		
 		int maxLines= textWidget.getLineCount();
 		Point size= fCanvas.getSize();
@@ -454,16 +462,16 @@ public class OverviewRuler {
 						continue;
 						
 					try {
-
-						int startLine= textWidget.getLineAtOffset(widgetRegion.getOffset());
-						yy= (startLine * size.y) / maxLines;
-
 						if (PROBLEM_HEIGHT_SCALABLE) {
 							int numbersOfLines= document.getNumberOfLines(p.getOffset(), p.getLength());
 							hh= (numbersOfLines * size.y) / maxLines;
 							if (hh < PROBLEM_HEIGHT_MIN)
 								hh= PROBLEM_HEIGHT_MIN;
 						}
+						fProblemHeight= hh;
+
+						int startLine= textWidget.getLineAtOffset(widgetRegion.getOffset());						
+						yy= Math.min((startLine * size.y) / maxLines, size.y - hh);
 
 						if (fill != null) {
 							gc.setBackground(fill);
@@ -515,23 +523,26 @@ public class OverviewRuler {
 	}
 	
 	private int[] toLineNumbers(int y_coordinate) {
-		
 					
 		StyledText textWidget=  fTextViewer.getTextWidget();
 		int maxLines= textWidget.getContent().getLineCount();
 		
-		Point size= fCanvas.getSize();
+		int rulerLength= fCanvas.getSize().y;
 		int writable= maxLines * textWidget.getLineHeight();
-		if (size.y > writable)
-			size.y= writable;
-		
+
+		if (rulerLength > writable)
+			rulerLength= writable;
+
+		if (y_coordinate >= writable)
+			return new int[] {-1, -1};
+
 		int[] lines= new int[2];
 		
 		int pixel= Math.max(y_coordinate - 1, 0);
-		lines[0]= (pixel * maxLines) / size.y;
+		lines[0]= (pixel * maxLines) / rulerLength;
 		
-		pixel= Math.min(size.y, y_coordinate + 1);
-		lines[1]= (pixel * maxLines) / size.y;
+		pixel= Math.min(rulerLength, y_coordinate + 1);
+		lines[1]= (pixel * maxLines) / rulerLength;
 		
 		if (fTextViewer instanceof ITextViewerExtension3) {
 			ITextViewerExtension3 extension= (ITextViewerExtension3) fTextViewer;
@@ -550,13 +561,20 @@ public class OverviewRuler {
 		return lines;
 	}
 	
+	boolean hasAnnotationAt(int y_coordinate) {
+		return findBestMatchingLineNumber(toLineNumbers(y_coordinate)) != -1;
+	}
+	
 	private Position getProblemPositionAt(int[] lineNumbers) {
+		if (lineNumbers[0] == -1)
+			return null;
 		
 		Position found= null;
 		
 		try {
 			IDocument d= fTextViewer.getDocument();
 			IRegion line= d.getLineInformation(lineNumbers[0]);
+
 			int start= line.getOffset();
 			
 			line= d.getLineInformation(lineNumbers[lineNumbers.length - 1]);
@@ -577,7 +595,29 @@ public class OverviewRuler {
 		
 		return found;
 	}
-	
+
+	/**
+	 * Returns the line which best corresponds to one of
+	 * the underlying problem annotations at the given
+	 * y ruler coordinate.
+	 * 
+	 * @return the best matching line or <code>-1</code> if no such line can be found
+	 * @since 2.1
+	 */
+	private int findBestMatchingLineNumber(int[] lineNumbers) {
+		if (lineNumbers == null || lineNumbers.length < 1)
+			return -1;
+
+		try {
+			Position pos= getProblemPositionAt(lineNumbers);
+			if (pos == null)
+				return -1;
+			return fTextViewer.getDocument().getLineOfOffset(pos.getOffset());
+		} catch (BadLocationException ex) {
+			return -1;
+		}
+	}
+
 	private void handleMouseDown(MouseEvent event) {
 		if (fTextViewer != null) {
 			int[] lines= toLineNumbers(event.y);
@@ -588,6 +628,7 @@ public class OverviewRuler {
 			}
 			fTextViewer.getTextWidget().setFocus();
 		}
+		fLastMouseButtonActivityLine= toDocumentLineNumber(event.y);
 	}
 	
 	private void handleMouseMove(MouseEvent event) {
@@ -600,6 +641,10 @@ public class OverviewRuler {
 				fLastCursor= cursor;
 			}
 		}				
+	}
+	
+	private void handleMouseDoubleClick(MouseEvent event) {
+		fLastMouseButtonActivityLine= toDocumentLineNumber(event.y);
 	}
 	
 	public void showAnnotation(AnnotationType annotationType, boolean show) {
@@ -683,5 +728,39 @@ public class OverviewRuler {
 	
 	private Color getFillColor(AnnotationType annotationType, boolean temporary) {
 		return getColor(annotationType, temporary ? 0.9 : 0.6);
+	}
+	
+	/**
+	 * @see IVerticalRulerInfo#getLineOfLastMouseButtonActivity()
+	 * @since 2.1
+	 */
+	public int getLineOfLastMouseButtonActivity() {
+		return fLastMouseButtonActivityLine;
+	}
+
+	/**
+	 * @see IVerticalRulerInfo#toDocumentLineNumber(int)
+	 * @since 2.1
+	 */
+	public int toDocumentLineNumber(int y_coordinate) {
+		
+		if (fTextViewer == null || y_coordinate == -1)
+			return -1;
+
+		int[] lineNumbers= toLineNumbers(y_coordinate);
+		int bestLine= findBestMatchingLineNumber(lineNumbers);
+		if (bestLine == -1 && lineNumbers.length > 0)
+			return lineNumbers[0];
+		return	bestLine;
+	}
+
+	/**
+	 * Returns the height of the problem rectangle.
+	 * 
+	 * @return the height of the problem rectangle
+	 * @since 2.1
+	 */
+	int getAnnotationHeight() {
+		return fProblemHeight;
 	}
 }

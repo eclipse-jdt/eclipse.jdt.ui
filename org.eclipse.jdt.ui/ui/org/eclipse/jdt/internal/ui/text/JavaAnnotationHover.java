@@ -12,15 +12,16 @@ import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
 
 
 /**
@@ -36,10 +37,10 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		
 		if (position.getOffset() > -1 && position.getLength() > -1) {
 			try {
-				int markerLine= document.getLineOfOffset(position.getOffset());
-				if (line == markerLine)
+				int problemAnnotationLine= document.getLineOfOffset(position.getOffset());
+				if (line == problemAnnotationLine)
 					return 1;
-				if (markerLine <= line && line <= document.getLineOfOffset(position.getOffset() + position.getLength()))
+				if (problemAnnotationLine <= line && line <= document.getLineOfOffset(position.getOffset() + position.getLength()))
 					return 2;
 			} catch (BadLocationException x) {
 			}
@@ -59,7 +60,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	/**
 	 * Returns one marker which includes the ruler's line of activity.
 	 */
-	protected List getMarkersForLine(ISourceViewer viewer, int line) {
+	protected List getProblemAnnotationsForLine(ISourceViewer viewer, int line) {
 		
 		IDocument document= viewer.getDocument();
 		IAnnotationModel model= viewer.getAnnotationModel();
@@ -73,14 +74,14 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		Iterator e= model.getAnnotationIterator();
 		while (e.hasNext()) {
 			Object o= e.next();
-			if (o instanceof MarkerAnnotation) {
-				MarkerAnnotation a= (MarkerAnnotation) o;
-				switch (compareRulerLine(model.getPosition(a), document, line)) {
+			if (o instanceof IProblemAnnotation) {
+				IProblemAnnotation a= (IProblemAnnotation)o;
+				switch (compareRulerLine(model.getPosition((Annotation)a), document, line)) {
 					case 1:
-						exact.add(a.getMarker());
+						exact.add(a);
 						break;
 					case 2:
-						including.add(a.getMarker());
+						including.add(a);
 						break;
 				}
 			}
@@ -94,14 +95,14 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	 * @see IVerticalRulerHover#getHoverInfo(ISourceViewer, int)
 	 */
 	public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
-		List markers= getMarkersForLine(sourceViewer, lineNumber);
-		if (markers != null) {
+		List problemAnnotations= getProblemAnnotationsForLine(sourceViewer, lineNumber);
+		if (problemAnnotations != null) {
 			
-			if (markers.size() == 1) {
+			if (problemAnnotations.size() == 1) {
 				
 				// optimization
-				IMarker marker= (IMarker) markers.get(0);
-				String message= marker.getAttribute(IMarker.MESSAGE, (String) null);
+				IProblemAnnotation problemAnnotation= (IProblemAnnotation)problemAnnotations.get(0);
+				String message= problemAnnotation.getMessage();
 				if (message != null && message.trim().length() > 0)
 					return formatSingleMessage(message);
 					
@@ -109,10 +110,10 @@ public class JavaAnnotationHover implements IAnnotationHover {
 					
 				List messages= new ArrayList();
 				
-				Iterator e= markers.iterator();
+				Iterator e= problemAnnotations.iterator();
 				while (e.hasNext()) {
-					IMarker marker= (IMarker) e.next();
-					String message= marker.getAttribute(IMarker.MESSAGE, (String) null);
+					IProblemAnnotation problemAnnotation= (IProblemAnnotation)e.next();
+					String message= problemAnnotation.getMessage();
 					if (message != null && message.trim().length() > 0)
 						messages.add(message.trim());
 				}

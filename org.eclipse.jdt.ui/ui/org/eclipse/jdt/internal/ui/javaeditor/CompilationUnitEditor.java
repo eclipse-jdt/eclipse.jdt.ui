@@ -20,6 +20,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -33,16 +43,16 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
-
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.text.AbstractHoverInformationControlManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
@@ -64,16 +74,6 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -197,8 +197,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	class AdaptedSourceViewer extends JavaCorrectionSourceViewer  {
 		
 		private List fTextConverters;
+
 		private OverviewRuler fOverviewRuler;
 		private boolean fIsOverviewRulerVisible;
+		/** The viewer's overview ruler hovering controller */
+		private AbstractHoverInformationControlManager fOverviewRulerHoveringController;
+
 		private boolean fIgnoreTextConverters= false;
 		
 		private IVerticalRuler fCachedVerticalRuler;
@@ -314,12 +318,23 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}
 		}
 		
+		private void ensureOverviewHoverManagerInstalled() {
+			if (fOverviewRulerHoveringController == null && fAnnotationHover != null && fHoverControlCreator != null)	{
+				fOverviewRulerHoveringController= new OverviewRulerHoverManager(fOverviewRuler, this, fAnnotationHover, fHoverControlCreator);
+				fOverviewRulerHoveringController.install(fOverviewRuler.getControl());
+			}
+		}
+		
 		public void hideOverviewRuler() {
 			fIsOverviewRulerVisible= false;
 			Control control= getControl();
 			if (control instanceof Composite) {
 				Composite composite= (Composite) control;
 				composite.layout();
+			}
+			if (fOverviewRulerHoveringController != null) {
+				fOverviewRulerHoveringController.dispose();
+				fOverviewRulerHoveringController= null;
 			}
 		}
 		
@@ -330,6 +345,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				Composite composite= (Composite) control;
 				composite.layout();
 			}
+			ensureOverviewHoverManagerInstalled();
 		}
 		
 		public boolean isOverviewRulerVisible() {
@@ -370,6 +386,17 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		public void configure(SourceViewerConfiguration configuration) {
 			super.configure(configuration);
 			prependAutoEditStrategy(new SmartBracesAutoEditStrategy(this), IDocument.DEFAULT_CONTENT_TYPE);
+		}
+
+		protected void handleDispose() {
+			fOverviewRuler= null;
+					
+			if (fOverviewRulerHoveringController != null) {
+				fOverviewRulerHoveringController.dispose();
+				fOverviewRulerHoveringController= null;
+			}
+			
+			super.handleDispose();
 		}
 
 	};
@@ -1506,6 +1533,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			
 		if (isTabConversionEnabled())
 			startTabConversion();
+
 		if (isOverviewRulerVisible())
 			showOverviewRuler();
 			
