@@ -273,25 +273,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		for (int i= 0; i < checkedProjects.length; i++) {
 			IJavaProject project= checkedProjects[i];
 			try {
-				IRuntimeClasspathEntry[] unresolved = JavaRuntime.computeUnresolvedRuntimeClasspath(project);
-				// 1. remove bootpath entries
-				// 2. resolve & translate to local file system paths
-				for (int n = 0; n < unresolved.length; n++) {
-					IRuntimeClasspathEntry entry= unresolved[n];
-					if (entry.getType() == IRuntimeClasspathEntry.PROJECT) {
-						result.add(new JavadocLinkRef(JavaCore.create((IProject) entry.getResource())));
-					} else {
-						IRuntimeClasspathEntry[] entries= JavaRuntime.resolveRuntimeClasspathEntry(entry, project);
-						for (int k = 0; k < entries.length; k++) {
-							entry= entries[n];
-							if (entry.getType() == IRuntimeClasspathEntry.PROJECT) {
-								result.add(new JavadocLinkRef(JavaCore.create((IProject) entry.getResource())));
-							} else if (entry.getType() == IRuntimeClasspathEntry.ARCHIVE) {
-								result.add(new JavadocLinkRef(entry.getPath()));
-							}
-						}
-					}
-				}
+				collectReferencedElements(project, result);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 				// ignore
@@ -300,8 +282,26 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		return (JavadocLinkRef[]) result.toArray(new JavadocLinkRef[result.size()]);	
 	}
 	
-
-
+	private void collectReferencedElements(IJavaProject project, HashSet result) throws CoreException {
+		IRuntimeClasspathEntry[] unresolved = JavaRuntime.computeUnresolvedRuntimeClasspath(project);
+		for (int i= 0; i < unresolved.length; i++) {
+			IRuntimeClasspathEntry curr= unresolved[i];
+			if (curr.getType() == IRuntimeClasspathEntry.PROJECT) {
+				result.add(new JavadocLinkRef(JavaCore.create((IProject) curr.getResource())));
+			} else {
+				IRuntimeClasspathEntry[] entries= JavaRuntime.resolveRuntimeClasspathEntry(curr, project);
+				for (int k = 0; k < entries.length; k++) {
+					IRuntimeClasspathEntry entry= entries[k];
+					if (entry.getType() == IRuntimeClasspathEntry.PROJECT) {
+						result.add(new JavadocLinkRef(JavaCore.create((IProject) entry.getResource())));
+					} else if (entry.getType() == IRuntimeClasspathEntry.ARCHIVE) {
+						result.add(new JavadocLinkRef(entry.getPath()));
+					}
+				}
+			}
+		}
+	}
+	
 	final void doValidation(int VALIDATE) {
 		File file= null;
 		String ext= null;
@@ -330,6 +330,9 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 					if (url == null) {
 						fLinkRefStatus.setWarning(JavadocExportMessages.getString("JavadocStandardWizardPage.nolinkref.error")); //$NON-NLS-1$
 						break;
+					} else if ("jar".equals(url.getProtocol())) { //$NON-NLS-1$
+						fLinkRefStatus.setWarning(JavadocExportMessages.getString("JavadocStandardWizardPage.nojarlinkref.error")); //$NON-NLS-1$
+						break;					
 					}
 				}
 				break;
@@ -504,8 +507,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 			fElement= selection;
 			URL initialLocation= selection.getURL();
-			boolean forProject= selection instanceof IJavaProject;
-			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation, forProject);
+			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation, selection.isProjectRef());
 		}
 
 		protected Control createDialogArea(Composite parent) {
