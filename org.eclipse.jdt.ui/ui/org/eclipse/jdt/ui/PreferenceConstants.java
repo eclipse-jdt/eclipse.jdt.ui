@@ -694,6 +694,7 @@ public class PreferenceConstants {
 	 * in the editor. If <code>false</code> the editor inserts a tab character when pressing the tab
 	 * key.
 	 * </p>
+	 * @deprecated As of 3.1 replaced by the formatter setting defined in {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_TAB_CHAR}
 	 */
 	public final static String EDITOR_SPACES_FOR_TABS= "spacesForTabs"; //$NON-NLS-1$
 
@@ -1974,6 +1975,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
+	 * @deprecated as of 3.1 replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_DISABLE_OVERWRITE_MODE}
 	 */	
 	public static final String EDITOR_DISABLE_OVERWRITE_MODE= "disable_overwrite_mode"; //$NON-NLS-1$
 
@@ -2978,7 +2980,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_ESCAPE_STRINGS, false);
 		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, false);
-		store.setDefault(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE, false);
 		
 		String mod1Name= Action.findModifierString(SWT.MOD1);	// SWT.COMMAND on Mac; SWT.CONTROL elsewhere
 		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + mod1Name); //$NON-NLS-1$
@@ -3086,6 +3087,7 @@ public class PreferenceConstants {
 		store.setToDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER); // global
 		store.setToDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK); // global
 		store.setToDefault(PreferenceConstants.EDITOR_LINK_COLOR); // global
+		store.setToDefault(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE); // global
 	}
 
 	/**

@@ -13,18 +13,17 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -32,12 +31,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 
@@ -47,40 +43,26 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
 import org.eclipse.ui.internal.editors.text.CHyperLink;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
 /**
  * The page for setting the editor options.
  */
-public class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+public final class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
 	private OverlayPreferenceStore fOverlayStore;
 	
-	private FoldingConfigurationBlock fFoldingConfigurationBlock;
-	private MarkOccurrencesConfigurationBlock fOccurrencesBlock;
-	private JavaEditorAppearanceConfigurationBlock fAppearanceBlock;
-	
-	private Map fColorButtons= new HashMap();
-	
-	private Map fCheckBoxes= new HashMap();
-	private SelectionListener fCheckBoxListener= new SelectionListener() {
-		public void widgetDefaultSelected(SelectionEvent e) {
-		}
-		public void widgetSelected(SelectionEvent e) {
-			Button button= (Button) e.widget;
-			fOverlayStore.setValue((String) fCheckBoxes.get(button), button.getSelection());
-		}
-	};
-	
-	private Map fTextFields= new HashMap();
+	private final IPreferenceConfigurationBlock[] fConfigurationBlocks;
+	private final String[] fBlockLabels;
 	
 	/**
 	 * Tells whether the fields are initialized.
@@ -104,45 +86,26 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		setDescription(PreferencesMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 
-		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), createOverlayStoreKeys());
+		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), new OverlayPreferenceStore.OverlayKey[0]);
+		
+		fConfigurationBlocks= new IPreferenceConfigurationBlock[] {
+				new JavaEditorAppearanceConfigurationBlock(this, fOverlayStore),
+				new SmartTypingConfigurationBlock(fOverlayStore),
+				new MarkOccurrencesConfigurationBlock(fOverlayStore),
+				new JavaEditorNavigationConfigurationBlock(fOverlayStore),
+				new FoldingConfigurationBlock(fOverlayStore),
+		};
+		fBlockLabels= new String[] {
+				PreferencesMessages.getString("JavaEditorPreferencePage.general"), //$NON-NLS-1$
+				PreferencesMessages.getString("JavaEditorPreferencePage.typing.tabTitle"), //$NON-NLS-1$
+				PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.title"), //$NON-NLS-1$
+				PreferencesMessages.getString("JavaEditorPreferencePage.navigationTab.title"), //$NON-NLS-1$
+				PreferencesMessages.getString("JavaEditorPreferencePage.folding.title"), //$NON-NLS-1$
+		};
 	}
-	
 	
 	protected Label createDescriptionLabel(Composite parent) {
 		return null; // no description since we add a hyperlinked text
-	}
-	
-	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
-		
-		ArrayList overlayKeys= new ArrayList();
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SPACES_FOR_TABS));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_PASTE));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_IMPORTS_ON_PASTE));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_STRINGS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_BRACKETS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_BRACES));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_JAVADOCS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_WRAP_STRINGS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ESCAPE_STRINGS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_SEMICOLON));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE));
-		
-		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
-		overlayKeys.toArray(keys);
-		return keys;
 	}
 	
 	/*
@@ -188,14 +151,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 //		}
 	}
 	
-	private void makeScrollableCompositeAware(Control control) {
-		ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(control);
-		if (parentScrolledComposite != null) {
-			parentScrolledComposite.adaptChild(control);
-		}
-	}
-	
-	private Composite createExpandableList(Composite parent) {
+	private Control createExpandableList(Composite parent) {
 		final ScrolledPageContent content = new ScrolledPageContent(parent);
 		class StyleSectionManager {
 			private Set fSections= new HashSet();
@@ -218,6 +174,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 							fIsBeingManaged= false;
 						}
 					}
+					
 					ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(source);
 					if (parentScrolledComposite != null) {
 						parentScrolledComposite.reflow(true);
@@ -237,122 +194,30 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Composite body= content.getBody();
 		body.setLayout(new GridLayout(nColumns, false));
 		
-		String label;
-		ExpandableComposite excomposite;
-		Composite composite;
-		GridLayout layout;
-		Control client;
+		for (int i= 0; i < fConfigurationBlocks.length; i++) {
+			ExpandableComposite excomposite= createManagedStyleSection(body, fBlockLabels[i], nColumns);
+			mgr.manage(excomposite);
+			Control client= fConfigurationBlocks[i].createControl(excomposite);
+			excomposite.setClient(client);
+		}
 		
-		// appearance
-		label= "Appearance"; //$NON-NLS-1$
-		excomposite= createManagedStyleSection(body, label, nColumns);
-		mgr.manage(excomposite);
-		
-		client= fAppearanceBlock.createControl(excomposite);
-		excomposite.setClient(client);
-		
-		// misc
-		label= "Miscellaneous"; //$NON-NLS-1$
-		excomposite= createManagedStyleSection(body, label, nColumns);
-		mgr.manage(excomposite);
-		
-		composite= new Composite(excomposite, SWT.NONE);
-		excomposite.setClient(composite);
-		
-		layout= new GridLayout(nColumns, false);
-		composite.setLayout(layout);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.analyseAnnotationsWhileTyping"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.overwriteMode"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE, 1);
-
-		// smart typing
-		label= "Smart Typing"; //$NON-NLS-1$
-		excomposite= createManagedStyleSection(body, label, nColumns);
-		mgr.manage(excomposite);
-		composite= new Composite(excomposite, SWT.NONE);
-		excomposite.setClient(composite);
-		
-		layout= new GridLayout(nColumns, false);
-		composite.setLayout(layout);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
-		Button master= addCheckBox(composite, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 1);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.escapeStrings"); //$NON-NLS-1$
-		Button slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, 1);
-		createDependency(master, PreferenceConstants.EDITOR_WRAP_STRINGS, slave);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.smartPaste"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_PASTE, 1);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.importsOnPaste"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, 1);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SPACES_FOR_TABS, 1);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeStrings"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_STRINGS, 1);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeBrackets"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACKETS, 1);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeBraces"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACES, 1);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
-		master= addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 1);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 1);
-		createDependency(master, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, slave);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.typing.smartSemicolon"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_SEMICOLON, 1);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.typing.smartOpeningBrace"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_OPENING_BRACE, 1);
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.typing.smartTab"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_TAB, 1);
-		
-		// mark occurrences
-		label= "Mark Occurrences";
-		excomposite= createManagedStyleSection(body, label, nColumns);
-		mgr.manage(excomposite);
-		
-		client= fOccurrencesBlock.createControl(excomposite);
-		excomposite.setClient(client);
-
-		// navigation
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.navigationTab.title"); //$NON-NLS-1$
-		excomposite= createManagedStyleSection(body, label, nColumns);
-		mgr.manage(excomposite);
-		client= createNavigationPage(excomposite);
-		excomposite.setClient(client);
-		
-		// folding
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.folding.title");  //$NON-NLS-1$
-		excomposite= createManagedStyleSection(body, label, nColumns);
-		mgr.manage(excomposite);
-		client= fFoldingConfigurationBlock.createControl(excomposite);
-		excomposite.setClient(client);
-		
-
 		return content;
 	}
-
-	private void addFiller(Composite composite) {
-		Label filler= new Label(composite, SWT.LEFT );
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
-		filler.setLayoutData(gd);
-	}
 	
+	private Control createTabSection(Composite parent) {
+		TabFolder folder= new TabFolder(parent, SWT.TOP);
+		folder.setLayout(new TabFolderLayout());
+		
+		for (int i= 0; i < fConfigurationBlocks.length; i++) {
+			TabItem item= new TabItem(folder, SWT.NONE);
+			item.setText(fBlockLabels[i]);
+			Control control= fConfigurationBlocks[i].createControl(folder);
+			item.setControl(control);
+		}
+		
+		return folder;
+	}
+
 	private static void indent(Control control) {
 		GridData gridData= new GridData();
 		gridData.horizontalIndent= 20;
@@ -374,30 +239,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fMasterSlaveListeners.add(listener);
 	}
 
-	private Control createNavigationPage(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NULL);
-		GridLayout layout= new GridLayout(); layout.numColumns= 2;
-		composite.setLayout(layout);
-		
-		String label= PreferencesMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_HOME_END, 1);
-
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.subWordNavigation"); //$NON-NLS-1$
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 1);
-
-		return composite;
-	}
-
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		
-		
-		fFoldingConfigurationBlock= new FoldingConfigurationBlock(fOverlayStore);
-		fOccurrencesBlock= new MarkOccurrencesConfigurationBlock(fOverlayStore);
-		fAppearanceBlock= new JavaEditorAppearanceConfigurationBlock(this, fOverlayStore);
-		
 		fOverlayStore.load();
 		fOverlayStore.start();
 		
@@ -407,25 +252,54 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		layout.marginWidth= 0;
 		contents.setLayout(layout);
 		
+		createHeader(contents);
+
+		Control main;
+		if (true)
+			main= createExpandableList(contents);
+		else
+			main= createTabSection(contents);
+		main.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		initialize();
+		applyDialogFont(contents);
+		contents.layout(false);
+		
+		return contents;
+	}
+	
+	void foo(int i,
+			int y) {
+			
+	}
+	
+	private void createHeader(Composite contents) {
+		String before= PreferencesMessages.getString("JavaEditorPreferencePage.link.before"); //$NON-NLS-1$
+		String linktext= PreferencesMessages.getString("JavaEditorPreferencePage.link.linktext"); //$NON-NLS-1$
+		String linktooltip= PreferencesMessages.getString("JavaEditorPreferencePage.link.linktooltip"); //$NON-NLS-1$
+		String after= PreferencesMessages.getString("JavaEditorPreferencePage.link.after"); //$NON-NLS-1$
 		Control description= createLinkText(contents, new Object[] {
-				"Java editor preferences. Note that some settings are configured on the ", 
-				new String[] {"general text editor preference page", "org.eclipse.ui.preferencePages.GeneralTextEditor", "Go to the text editor preferences" },
-				"."});
+				before, 
+				new String[] {linktext, "org.eclipse.ui.preferencePages.GeneralTextEditor", linktooltip }, //$NON-NLS-1$
+				after});
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint= 150; // only expand further if anyone else requires it
 		description.setLayoutData(gridData);
 		
-		createHBar(contents);
-
-		Composite expandableSection= createExpandableList(contents);
-		expandableSection.setLayoutData(new GridData(GridData.FILL_BOTH));
-
-		initialize();
-		
-		Dialog.applyDialogFont(contents);
-		return contents;
+//		createHBar(contents);
+		addFiller(contents);
 	}
-	
+
+	private void addFiller(Composite composite) {
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		
+		Label filler= new Label(composite, SWT.LEFT );
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
+		filler.setLayoutData(gd);
+	}
+
 	private Control createLinkText(Composite contents, Object[] tokens) {
 		Composite description= new Composite(contents, SWT.NONE);
 		RowLayout rowLayout= new RowLayout(SWT.HORIZONTAL);
@@ -463,7 +337,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			while (tokenizer.hasMoreTokens()) {
 				Label label= new Label(description, SWT.NONE);
 				String token= tokenizer.nextToken();
-				label.setText(token + " ");
+				label.setText(token + " "); //$NON-NLS-1$
 			}
 		}
 		
@@ -471,70 +345,29 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	}
 
 
-	private void createHBar(Composite contents) {
-		GridLayout layout;
-		Composite separator= new Composite(contents, SWT.NONE);
-		layout= new GridLayout(1, false);
-		layout.marginWidth= 50;
-		layout.marginHeight= 5;
-		separator.setLayout(layout);
-		Label bar= new Label(separator, SWT.SEPARATOR | SWT.HORIZONTAL);
-		bar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	}
-
-
 	private void initialize() {
-		
 		initializeFields();
-		
-		fFoldingConfigurationBlock.initialize();
 	}
 	
 	private void initializeFields() {
-		fOccurrencesBlock.initialize();
-		fAppearanceBlock.initialize();
-
-		Iterator e= fColorButtons.keySet().iterator();
-		while (e.hasNext()) {
-			ColorEditor c= (ColorEditor) e.next();
-			String key= (String) fColorButtons.get(c);
-			RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
-			c.setColorValue(rgb);
-		}
-		
-		e= fCheckBoxes.keySet().iterator();
-		while (e.hasNext()) {
-			Button b= (Button) e.next();
-			String key= (String) fCheckBoxes.get(b);
-			b.setSelection(fOverlayStore.getBoolean(key));
-		}
-		
-		e= fTextFields.keySet().iterator();
-		while (e.hasNext()) {
-			Text t= (Text) e.next();
-			String key= (String) fTextFields.get(t);
-			t.setText(fOverlayStore.getString(key));
+		for (int i= 0; i < fConfigurationBlocks.length; i++) {
+			fConfigurationBlocks[i].initialize();
 		}
 		
         fFieldsInitialized= true;
-        updateStatus(validatePositiveNumber("0")); //$NON-NLS-1$
         
-        // Update slaves
-        Iterator iter= fMasterSlaveListeners.iterator();
-        while (iter.hasNext()) {
-            SelectionListener listener= (SelectionListener)iter.next();
-            listener.widgetSelected(null);
-        }
+        updateStatus(new StatusInfo()); //$NON-NLS-1$
+        
 	}
 	
 	/*
 	 * @see PreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		fOccurrencesBlock.performOk();
-		fFoldingConfigurationBlock.performOk();
-		fAppearanceBlock.performOk();
+		for (int i= 0; i < fConfigurationBlocks.length; i++) {
+			fConfigurationBlocks[i].performOk();
+		}
+
 		fOverlayStore.propagate();
 		JavaPlugin.getDefault().savePluginPreferences();
 		return true;
@@ -545,11 +378,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 */
 	protected void performDefaults() {
 		fOverlayStore.loadDefaults();
-
-		fOccurrencesBlock.performDefaults();
-		fFoldingConfigurationBlock.performDefaults();
-		fAppearanceBlock.performDefaults();
-
+		
+		for (int i= 0; i < fConfigurationBlocks.length; i++) {
+			fConfigurationBlocks[i].performDefaults();
+		}
 		initializeFields();
 
 		super.performDefaults();
@@ -559,47 +391,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 * @see DialogPage#dispose()
 	 */
 	public void dispose() {
-		fOccurrencesBlock.dispose();
-		fAppearanceBlock.dispose();
-		fFoldingConfigurationBlock.dispose();
+		for (int i= 0; i < fConfigurationBlocks.length; i++) {
+			fConfigurationBlocks[i].dispose();
+		}
 		
 		if (fOverlayStore != null) {
 			fOverlayStore.stop();
 			fOverlayStore= null;
 		}
 		super.dispose();
-	}
-	
-	private Button addCheckBox(Composite parent, String label, String key, int indentation) {		
-		Button checkBox= new Button(parent, SWT.CHECK);
-		checkBox.setText(label);
-		
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= indentation;
-		gd.horizontalSpan= 2;
-		checkBox.setLayoutData(gd);
-		checkBox.addSelectionListener(fCheckBoxListener);
-		makeScrollableCompositeAware(checkBox);
-		
-		fCheckBoxes.put(checkBox, key);
-		
-		return checkBox;
-	}
-	
-	private IStatus validatePositiveNumber(String number) {
-		StatusInfo status= new StatusInfo();
-		if (number.length() == 0) {
-			status.setError(PreferencesMessages.getString("JavaEditorPreferencePage.empty_input")); //$NON-NLS-1$
-		} else {
-			try {
-				int value= Integer.parseInt(number);
-				if (value < 0)
-					status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
-			} catch (NumberFormatException e) {
-				status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
-			}
-		}
-		return status;
 	}
 	
 	void updateStatus(IStatus status) {

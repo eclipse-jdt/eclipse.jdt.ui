@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
  * 
  * @since 3.0
  */
-class FoldingConfigurationBlock {
+class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 	
 	private static class ErrorPreferences implements IJavaFoldingPreferenceBlock {
 		private String fMessage;
@@ -148,7 +148,7 @@ class FoldingConfigurationBlock {
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
-	Control createControl(Composite parent) {
+	public Control createControl(Composite parent) {
 
 		Composite composite= new Composite(parent, SWT.NULL);
 		// assume parent page uses griddata
@@ -322,18 +322,18 @@ class FoldingConfigurationBlock {
 		prefs.initialize();
 	}
 
-	void initialize() {
+	public void initialize() {
 		restoreFromPreferences();
 	}
 
-	void performOk() {
+	public void performOk() {
 		for (Iterator it= fProviderPreferences.values().iterator(); it.hasNext();) {
 			IJavaFoldingPreferenceBlock prefs= (IJavaFoldingPreferenceBlock) it.next();
 			prefs.performOk();
 		}
 	}
 	
-	void performDefaults() {
+	public void performDefaults() {
 		restoreFromPreferences();
 		for (Iterator it= fProviderPreferences.values().iterator(); it.hasNext();) {
 			IJavaFoldingPreferenceBlock prefs= (IJavaFoldingPreferenceBlock) it.next();
@@ -341,7 +341,7 @@ class FoldingConfigurationBlock {
 		}
 	}
 	
-	void dispose() {
+	public void dispose() {
 		for (Iterator it= fProviderPreferences.values().iterator(); it.hasNext();) {
 			IJavaFoldingPreferenceBlock prefs= (IJavaFoldingPreferenceBlock) it.next();
 			prefs.dispose();

@@ -274,6 +274,8 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 			}
 		});
 		
+		contentAssistComposite.layout(false);
+		
 		return contentAssistComposite;
 	}
 	

@@ -19,8 +19,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.FontMetrics;
@@ -33,7 +31,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -41,8 +38,6 @@ import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Assert;
-
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -79,24 +74,7 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 		}
 	};
 	
-	private Map fTextFields= new HashMap();
-	private ModifyListener fTextFieldListener= new ModifyListener() {
-		public void modifyText(ModifyEvent e) {
-			Text text= (Text) e.widget;
-			fStore.setValue((String) fTextFields.get(text), text.getText());
-		}
-	};
-
-	private ArrayList fNumberFields= new ArrayList();
-	private ModifyListener fNumberFieldListener= new ModifyListener() {
-		public void modifyText(ModifyEvent e) {
-			numberFieldChanged((Text) e.widget);
-		}
-	};
-	
 	private FontMetrics fFontMetrics;
-
-
 
 	public JavaEditorAppearanceConfigurationBlock(PreferencePage mainPreferencePage, OverlayPreferenceStore store) {
 		Assert.isNotNull(mainPreferencePage);
@@ -111,7 +89,6 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 		
 		ArrayList overlayKeys= new ArrayList();
 
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB));
@@ -191,9 +168,8 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		spacer.setLayoutData(gd);
 		
-		String label= PreferencesMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
-		addTextField(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 3, 0, true);
-
+		String label;
+		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
 
@@ -337,13 +313,6 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 			b.setSelection(fStore.getBoolean(key));
 		}
 		
-		e= fTextFields.keySet().iterator();
-		while (e.hasNext()) {
-			Text t= (Text) e.next();
-			String key= (String) fTextFields.get(t);
-			t.setText(fStore.getString(key));
-		}
-		
 	}
 
 	public void performOk() {
@@ -412,74 +381,4 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
         gc.dispose();
     }
     
-	private Text addTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
-		return getTextControl(addLabelledTextField(composite, label, key, textLimit, indentation, isNumber));
-	}
-	
-	private static Text getTextControl(Control[] labelledTextField){
-		return (Text)labelledTextField[1];
-	}
-	
-	/**
-	 * Returns an array of size 2:
-	 *  - first element is of type <code>Label</code>
-	 *  - second element is of type <code>Text</code>
-	 * Use <code>getLabelControl</code> and <code>getTextControl</code> to get the 2 controls.
-	 * 
-	 * @param composite 	the parent composite
-	 * @param label			the text field's label
-	 * @param key			the preference key
-	 * @param textLimit		the text limit
-	 * @param indentation	the field's indentation
-	 * @param isNumber		<code>true</code> iff this text field is used to e4dit a number
-	 * @return the array containing the label and text controls
-	 */
-	private Control[] addLabelledTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
-		Label labelControl= new Label(composite, SWT.NONE);
-		labelControl.setText(label);
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= indentation;
-		labelControl.setLayoutData(gd);
-		
-		Text textControl= new Text(composite, SWT.BORDER | SWT.SINGLE);		
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.widthHint= convertWidthInCharsToPixels(textLimit + 1);
-		textControl.setLayoutData(gd);
-		textControl.setTextLimit(textLimit);
-		fTextFields.put(textControl, key);
-		if (isNumber) {
-			fNumberFields.add(textControl);
-			textControl.addModifyListener(fNumberFieldListener);
-		} else {
-			textControl.addModifyListener(fTextFieldListener);
-		}
-			
-		return new Control[]{labelControl, textControl};
-	}
-	
-	private void numberFieldChanged(Text textControl) {
-		String number= textControl.getText();
-		fStatus= validatePositiveNumber(number);
-		if (!fStatus.matches(IStatus.ERROR))
-			fStore.setValue((String) fTextFields.get(textControl), number);
-		updateStatus();
-	}
-	
-	private IStatus validatePositiveNumber(String number) {
-		StatusInfo status= new StatusInfo();
-		if (number.length() == 0) {
-			status.setError(PreferencesMessages.getString("JavaEditorPreferencePage.empty_input")); //$NON-NLS-1$
-		} else {
-			try {
-				int value= Integer.parseInt(number);
-				if (value < 0)
-					status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
-			} catch (NumberFormatException e) {
-				status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
-			}
-		}
-		return status;
-	}
-	
-
 }

@@ -104,8 +104,10 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 		composite.setLayout(layout);
-
-		String label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markOccurrences"); //$NON-NLS-1$
+		
+		String label;
+		
+		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markOccurrences"); //$NON-NLS-1$
 		Button master= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_OCCURRENCES, 0); //$NON-NLS-1$
 		
 		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markTypeOccurrences"); //$NON-NLS-1$

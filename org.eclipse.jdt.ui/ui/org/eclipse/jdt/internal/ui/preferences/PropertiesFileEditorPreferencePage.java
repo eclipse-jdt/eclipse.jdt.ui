@@ -383,7 +383,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		fHighlightingColorListViewer.setLabelProvider(new ColorListLabelProvider());
 		fHighlightingColorListViewer.setContentProvider(new ColorListContentProvider());
 		fHighlightingColorListViewer.setSorter(new WorkbenchViewerSorter());
-		gd= new GridData(GridData.FILL_BOTH);
+		gd= new GridData(SWT.BEGINNING, SWT.FILL, false, true);
 		gd.heightHint= convertHeightInCharsToPixels(5);
 		fHighlightingColorListViewer.getControl().setLayoutData(gd);
 						
@@ -393,7 +393,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		stylesComposite.setLayout(layout);
-		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		stylesComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
 		
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
@@ -470,7 +470,9 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 				fOverlayStore.setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
 			}
 		});
-				
+		
+		colorComposite.layout();
+		
 		return colorComposite;
 	}
 	

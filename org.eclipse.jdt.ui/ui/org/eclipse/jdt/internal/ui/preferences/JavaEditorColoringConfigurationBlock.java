@@ -584,8 +584,9 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 	
 		addCheckBox(colorComposite, PreferencesMessages.getString("JavaEditorPreferencePage.semanticHighlighting.option"), PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, 0); //$NON-NLS-1$
 		
-		Label label= new Label(colorComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.foreground")); //$NON-NLS-1$
+		Label label;
+		label= new Label(colorComposite, SWT.LEFT);
+		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.element")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	
 		Composite editorComposite= new Composite(colorComposite, SWT.NONE);
@@ -601,7 +602,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		fHighlightingColorListViewer.setLabelProvider(new ColorListLabelProvider());
 		fHighlightingColorListViewer.setContentProvider(new ColorListContentProvider());
 		fHighlightingColorListViewer.setSorter(new WorkbenchViewerSorter());
-		gd= new GridData(GridData.FILL_BOTH);
+		gd= new GridData(SWT.BEGINNING, SWT.FILL, false, true);
 		gd.heightHint= convertHeightInCharsToPixels(5);
 		fHighlightingColorListViewer.getControl().setLayoutData(gd);
 						
@@ -709,6 +710,8 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 				}
 			}
 		});
+		
+		colorComposite.layout(false);
 				
 		return colorComposite;
 	}
