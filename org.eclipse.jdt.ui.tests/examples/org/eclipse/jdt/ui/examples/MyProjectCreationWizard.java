@@ -12,6 +12,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.Wizard;
+
+import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
@@ -39,13 +44,16 @@ import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
  */   
 
 
-public class MyProjectCreationWizard extends BasicNewResourceWizard implements IExecutableExtension {
+public class MyProjectCreationWizard extends Wizard implements IExecutableExtension, INewWizard {
 
 	private WizardNewProjectCreationPage fMainPage;
 	private JavaCapabilityConfigurationPage fJavaPage;
 	
 	private IConfigurationElement fConfigElement;
 
+	private IWorkbench fWorkbench;
+	private IStructuredSelection fSelection;
+	
 	public MyProjectCreationWizard() {
 		setWindowTitle("New");
 	}
@@ -99,7 +107,7 @@ public class MyProjectCreationWizard extends BasicNewResourceWizard implements I
 	
 			// change to the perspective specified in the plugin.xml		
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-			selectAndReveal(project);
+			BasicNewResourceWizard.selectAndReveal(project, fWorkbench.getActiveWorkbenchWindow());
 			
 		} finally {
 			if (monitor != null) {
@@ -133,6 +141,14 @@ public class MyProjectCreationWizard extends BasicNewResourceWizard implements I
 	 */
 	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
 		fConfigElement= cfig;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
+	 */
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		fWorkbench= workbench;
+		fSelection= selection; 
 	}
 
 }
