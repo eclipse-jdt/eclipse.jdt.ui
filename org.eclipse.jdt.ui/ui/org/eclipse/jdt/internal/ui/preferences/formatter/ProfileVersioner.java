@@ -22,13 +22,14 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 
 public class ProfileVersioner {
 	
-	public static final int VERSION_1= 1; // < 20040113 (incl. M6)
+	public static final int VERSION_1= 1; // < 20040113 (includes M6)
 	public static final int VERSION_2= 2; // before renaming almost all
 	public static final int VERSION_3= 3; // after renaming almost all
 	public static final int VERSION_4= 4; 
 	public static final int VERSION_5= 5; // after splitting of FORMATTER_INDENT_BLOCK_STATEMENTS
+	public static final int VERSION_6= 6; // after splitting of new_line_in_control_statements
 	
-	public static final int CURRENT_VERSION= VERSION_5;
+	public static final int CURRENT_VERSION= VERSION_6;
 	
 	public static void updateAndComplete(CustomProfile profile) {
 		final Map oldSettings= profile.getSettings();
@@ -47,6 +48,9 @@ public class ProfileVersioner {
 		    
 		case VERSION_4:
 		    version4to5(oldSettings);
+		    
+		case VERSION_5:
+		    version5to6(oldSettings);
 		    
 		default:
 		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -491,6 +495,17 @@ public class ProfileVersioner {
 		checkAndReplace(oldSettings,
 			"org.eclipse.jdt.core.formatter.indent_block_statements", //$NON-NLS-1$
 			new String[] { DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BODY, DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BLOCK });
+	}
+	
+	private static void version5to6(Map oldSettings) {
+		checkAndReplace(oldSettings,
+			"org.eclipse.jdt.core.formatter.insert_new_line_in_control_statements", //$NON-NLS-1$
+			new String[] {
+					DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_ELSE_IN_IF_STATEMENT,
+					DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CATCH_IN_TRY_STATEMENT,
+					DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_FINALLY_IN_TRY_STATEMENT,
+					DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_WHILE_IN_DO_STATEMENT
+				});
 	}
 	
 	

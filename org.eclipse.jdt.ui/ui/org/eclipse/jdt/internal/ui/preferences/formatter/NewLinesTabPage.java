@@ -59,8 +59,11 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_anonymous_class_body", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANONYMOUS_TYPE_DECLARATION, NOTINSERT_INSERT); //$NON-NLS-1$
 		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_method_body", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_METHOD_BODY, NOTINSERT_INSERT); //$NON-NLS-1$
 		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_block", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK, NOTINSERT_INSERT); //$NON-NLS-1$
-		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.after_opening_brace_of_array_initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, NOTINSERT_INSERT); //$NON-NLS-1$
-		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.before_closing_brace_of_array_initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, NOTINSERT_INSERT); //$NON-NLS-1$
+
+		final Group arrayInitializerGroup= createGroup(numColumns, composite, FormatterMessages.getString("NewLinesTabPage.arrayInitializer_group.title")); //$NON-NLS-1$
+		createPref(arrayInitializerGroup, numColumns, "NewLinesTabPage.array_group.option.after_opening_brace_of_array_initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, NOTINSERT_INSERT); //$NON-NLS-1$
+		createPref(arrayInitializerGroup, numColumns, "NewLinesTabPage.array_group.option.before_closing_brace_of_array_initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, NOTINSERT_INSERT); //$NON-NLS-1$
+
 		
 		final Group emptyStatementsGroup= createGroup(numColumns, composite, FormatterMessages.getString("NewLinesTabPage.empty_statement_group.title")); //$NON-NLS-1$
 		createPref(emptyStatementsGroup, numColumns, "NewLinesTabPage.emtpy_statement_group.option.empty_statement_on_new_line", DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, FALSE_TRUE); //$NON-NLS-1$

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
  
 import java.util.Map;
 
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
@@ -28,6 +29,7 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	"  SomeClass fField= new SomeClass() {" + //$NON-NLS-1$
 	"  };" + //$NON-NLS-1$
 	"  int [] myArray= {1,2,3,4,5,6};" + //$NON-NLS-1$
+	"  int [] emptyArray= new int[] {};" + //$NON-NLS-1$
 	"  Example() {" + //$NON-NLS-1$
 	"  }" + //$NON-NLS-1$
 	"  void bar(int p) {" + //$NON-NLS-1$
@@ -37,6 +39,9 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	"      case 0:" + //$NON-NLS-1$
 	"        fField.set(0);" + //$NON-NLS-1$
 	"        break;" + //$NON-NLS-1$
+	"      case 1: {" + //$NON-NLS-1$
+	"        break;" + //$NON-NLS-1$
+	"        }" + //$NON-NLS-1$
 	"      default:" + //$NON-NLS-1$
 	"        fField.reset();" + //$NON-NLS-1$
 	"    }" + //$NON-NLS-1$
@@ -91,8 +96,11 @@ public class BracesTabPage extends ModifyDialogTabPage {
 		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.constructor_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_CONSTRUCTOR_DECLARATION); //$NON-NLS-1$
 		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.method_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION); //$NON-NLS-1$
 		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.blocks", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.blocks_in_case", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK_IN_CASE); //$NON-NLS-1$
 		createBracesCombo(group, numColumns, "BracesTabPage.option.switch_case", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH); //$NON-NLS-1$
 		createBracesCombo(group, numColumns, "BracesTabPage.option.array_initializer", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER); //$NON-NLS-1$
+		createIndentedCheckboxPref(group, numColumns, "BracesTabPage.option.keep_empty_array_initializer_on_one_line", DefaultCodeFormatterConstants.FORMATTER_KEEP_EMPTY_ARRAY_INITIALIZER_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
+
 	}
 	
 	protected void initializePage() {
@@ -111,6 +119,14 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	private void createExtendedBracesCombo(Composite composite, int numColumns, String messagesKey, String key) {
 		createComboPref(composite, numColumns, FormatterMessages.getString(messagesKey), key, fExtendedBracePositions, fExtendedBracePositionNames);
 	}
+	
+	private CheckboxPreference createIndentedCheckboxPref(Composite composite, int numColumns, String messagesKey, String key, String [] values) {
+		CheckboxPreference pref= createCheckboxPref(composite, numColumns, FormatterMessages.getString(messagesKey), key, values);
+		GridData data= (GridData) pref.getControl().getLayoutData();
+		data.horizontalIndent= fPixelConverter.convertWidthInCharsToPixels(1);
+		return pref;
+	}
+	
 
     protected void doUpdatePreview() {
         fPreview.update();
