@@ -27,6 +27,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 /**
  * Helper class for the nls-tests.
  * 
@@ -62,7 +65,12 @@ public class NlsRefactoringTestHelper {
 
         createFile("/TestSetupProject/src2/p", "test.properties", ""); 
         createCu("/TestSetupProject/src1/p", "WithStrings.java", "package p;class WithStrings {String s1=\"test1\";String s2=\"test2\";}");
-        createCu("/TestSetupProject/src1/p", "WithoutStrings.java", "package p;class WithoutStrings {}");         
+        createCu("/TestSetupProject/src1/p", "WithoutStrings.java", "package p;class WithoutStrings {}");
+        
+		String newFileTemplate= "${package_declaration}\n\n${type_declaration}";
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(newFileTemplate);
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.TYPECOMMENT).setPattern("");
+
     }
 
     private void createFile(String packageFragmentName, String fileName, String content) throws Exception {

@@ -60,7 +60,7 @@ public class NLSHintTest extends TestCase {
     }
     
     public static Test allTests() {
-    	if (false) {
+    	if (true) {
     		return new ProjectTestSetup(new TestSuite(NLSHintTest.class));
     	} else {
 			TestSuite suite= new TestSuite();
