@@ -57,6 +57,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -75,6 +76,25 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 
 	/** Symbolic Java editor font name. */ 
 	private static final String SYMBOLIC_FONT_NAME= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
+
+	/**
+	 * Internal property change listener for handling changes in the editor's preferences.
+	 * 
+	 * @since 3.0
+	 */
+	class PropertyChangeListener implements IPropertyChangeListener {
+		/*
+		 * @see IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+		 */
+		public void propertyChange(PropertyChangeEvent event) {
+			if (fViewer == null)
+				return;
+			
+			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+			if (textTools.affectsBehavior(event))
+				fViewer.invalidateTextPresentation();
+		}
+	}
 
 	/**
 	 * Internal property change listener for handling workbench font changes.
@@ -129,6 +149,11 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	private SourceViewer fViewer;
 	/** The viewer's font properties change listener. */
 	private IPropertyChangeListener fFontPropertyChangeListener= new FontPropertyChangeListener();
+	/**
+	 * The editor's property change listener.
+	 * @since 3.0
+	 */
+	private IPropertyChangeListener fPropertyChangeListener= new PropertyChangeListener();
 	/** The open action */
 	private OpenAction fOpen;
 	/** The number of removed leading comment lines. */
@@ -149,6 +174,8 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 
 		setViewerFont();
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
+		
+		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 
 		getViewSite().setSelectionProvider(fViewer);
 	}
@@ -311,6 +338,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	protected void internalDispose() {
 		fViewer= null;
 		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
+		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 	}
 
 	/*
