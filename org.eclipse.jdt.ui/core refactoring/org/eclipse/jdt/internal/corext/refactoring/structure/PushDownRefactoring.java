@@ -233,17 +233,16 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 		}
 		return new PushDownRefactoring(members, preferenceSettings);
 	}
-	
-	public static boolean isAvailable(IMember[] members) throws JavaModelException{
+
+	public static boolean isAvailable(IMember[] members) throws JavaModelException {
 		if (isOneTypeWithPushableMembers(members))
 			return true;
-
-		return 	members != null &&
-				members.length != 0 &&
-				areAllPushable(members) &&
-				haveCommonDeclaringType(members);
+		final IType type= getSingleTopLevelType(members);
+		if (type != null && JdtFlags.isEnum(type))
+			return false;
+		return members != null && members.length != 0 && areAllPushable(members) && haveCommonDeclaringType(members);
 	}
-	
+
 	private static boolean isOneTypeWithPushableMembers(IMember[] members) throws JavaModelException {
 		IType singleTopLevelType= getSingleTopLevelType(members);
 		return (singleTopLevelType != null && getPushableMembers(singleTopLevelType).length != 0);
@@ -333,17 +332,15 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 	}
 
 	private static boolean isPushable(IMember member) throws JavaModelException {
-		if (member.getElementType() != IJavaElement.METHOD && 
-			member.getElementType() != IJavaElement.FIELD)
+		if (member.getElementType() != IJavaElement.METHOD && member.getElementType() != IJavaElement.FIELD)
 			return false;
-
-		if (! Checks.isAvailable(member))
+		if (JdtFlags.isEnum(member))
 			return false;
-		
+		if (!Checks.isAvailable(member))
+			return false;
 		if (JdtFlags.isStatic(member))
 			return false;
-			
-		if (member.getElementType() == IJavaElement.METHOD){
+		if (member.getElementType() == IJavaElement.METHOD) {
 			IMethod method= (IMethod) member;
 			if (method.isConstructor())
 				return false;
