@@ -97,13 +97,13 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		} catch (InterruptedException e) {
 			return CANCEL;
 		} catch (InvocationTargetException e) {
-			MessageDialog.openError(getShell(), JUnitMessages.getString("TestMethodSelectionDialog.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
+			MessageDialog.openError(getParentShell(), JUnitMessages.getString("TestMethodSelectionDialog.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
 			return CANCEL;
 		}
 		
 		if (elements.length == 0) {
 			String msg= JUnitMessages.getFormattedString("TestMethodSelectionDialog.notfound_message", fElement.getElementName()); //$NON-NLS-1$
-			MessageDialog.openInformation(getShell(), JUnitMessages.getString("TestMethodSelectionDialog.no_tests.title"), msg); //$NON-NLS-1$
+			MessageDialog.openInformation(getParentShell(), JUnitMessages.getString("TestMethodSelectionDialog.no_tests.title"), msg); //$NON-NLS-1$
 			return CANCEL;
 		}
 		setElements(elements);
@@ -123,12 +123,12 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 					result.add(type);
 			}
 		} catch (JavaModelException e) {
-			ErrorDialog.openError(getShell(), JUnitMessages.getString("TestMethodSelectionDialog.error.notfound.title"), JUnitMessages.getString("TestMethodSelectionDialog.error.notfound.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
+			ErrorDialog.openError(getParentShell(), JUnitMessages.getString("TestMethodSelectionDialog.error.notfound.title"), JUnitMessages.getString("TestMethodSelectionDialog.error.notfound.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 		if (result.size() == 0) {
 			String msg= JUnitMessages.getFormattedString("TestMethodSelectionDialog.test_not_found", JUnitPlugin.TEST_INTERFACE_NAME); //$NON-NLS-1$
-			MessageDialog.openError(getShell(), JUnitMessages.getString("TestMethodSelectionDialog.select_dialog.title"), msg); //$NON-NLS-1$
+			MessageDialog.openError(getParentShell(), JUnitMessages.getString("TestMethodSelectionDialog.select_dialog.title"), msg); //$NON-NLS-1$
 			return null;
 		}
 		if (result.size() == 1)
@@ -139,7 +139,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	
 	private IType selectTestType(Set result) {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_ROOT);
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(null, labelProvider);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getParentShell(), labelProvider);
 		dialog.setTitle(JUnitMessages.getString("TestMethodSelectionDialog.dialog.title"));  //$NON-NLS-1$
 		String msg= JUnitMessages.getFormattedString("TestMethodSelectionDialog.testproject", "junit.framework.Test"); //$NON-NLS-1$ //$NON-NLS-2$
 		dialog.setMessage(msg);
