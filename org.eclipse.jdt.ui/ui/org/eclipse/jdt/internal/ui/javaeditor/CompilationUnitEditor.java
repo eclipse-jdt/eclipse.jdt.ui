@@ -68,9 +68,9 @@ import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -89,8 +89,8 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -122,6 +122,7 @@ import org.eclipse.jdt.internal.ui.actions.RemoveBlockCommentAction;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -288,6 +289,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fCorrectionAssistant.install(this);
 			IAutoEditStrategy smartSemi= new SmartSemicolonAutoEditStrategy(IJavaPartitions.JAVA_PARTITIONING);
 			prependAutoEditStrategy(smartSemi, IDocument.DEFAULT_CONTENT_TYPE);
+			prependAutoEditStrategy(smartSemi, IJavaPartitions.JAVA_STRING);
 		}
 		
 		/*
@@ -416,8 +418,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					if (level.fSecondPosition.offset == offset && length == 0)
 						// don't enter the character if if its the closing peer
 						return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
-					else
-						return new ExitFlags(ILinkedModeListener.UPDATE_CARET, true);
 				}
 			}
 			return null;
@@ -1841,6 +1841,19 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		// to disable the change bar for the class file (attached source) java editor.
 		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getAdapter(java.lang.Class)
+	 */
+	public Object getAdapter(Class required) {
+		if (SmartBackspaceManager.class.equals(required)) {
+			if (getSourceViewer() instanceof JavaSourceViewer) {
+				return ((JavaSourceViewer) getSourceViewer()).getBackspaceManager();
+			}
+		}
+
+		return super.getAdapter(required);
 	}
 
 }

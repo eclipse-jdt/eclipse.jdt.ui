@@ -12,6 +12,11 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.Arrays;
 
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -21,6 +26,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 
@@ -35,6 +41,8 @@ import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
+import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager.UndoSpec;
 
 /**
  * Modifies <code>DocumentCommand</code>s inserting semicolons and opening braces to place them
@@ -94,6 +102,16 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			return;
 		if (fCharacter == BRACECHAR && !store.getBoolean(PreferenceConstants.EDITOR_SMART_OPENING_BRACE))
 			return;
+		
+		// TODO replace with preference
+		if (!Boolean.getBoolean("org.eclipse.jdt.smart_backspace")) {
+			try {
+				if (!TextUtilities.getContentType(document, fPartitioning, command.offset, true).equals(IDocument.DEFAULT_CONTENT_TYPE))
+					return;
+			} catch (BadLocationException e1) {
+				// ignore
+			}
+		}
 
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page == null)
@@ -132,14 +150,47 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		// never double already existing content 
 		if (alreadyPresent(document, fCharacter, position))
 			return;
+		
+		// don't do special processing if what we do is actually the normal behaviour
+		String insertion= adjustSpacing(document, position, fCharacter);
+		if (command.offset == position && insertion.equals(command.text))
+			return;
 
-		// 3: modify command
-		command.offset= position;
-		command.length= 0;
-		command.caretOffset= position;
-		command.text= adjustSpacing(document, position, fCharacter);
-		command.doit= true;
-		command.owner= null;
+		try {
+			
+			final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);
+			if (manager != null) {
+				TextEdit e1= new ReplaceEdit(command.offset, command.text.length(), document.get(command.offset, command.length));
+				UndoSpec s1= new UndoSpec(command.offset + command.text.length(),
+						new Region(command.offset, 0),
+						new TextEdit[] {e1},
+						0,
+						null);
+
+				DeleteEdit smart= new DeleteEdit(position, insertion.length());
+				ReplaceEdit raw= new ReplaceEdit(command.offset, command.length, command.text);
+				UndoSpec s2= new UndoSpec(position + insertion.length(),
+						new Region(command.offset + command.text.length(), 0),
+						new TextEdit[] {smart, raw},
+						2,
+						s1);
+				manager.register(s2);
+			}
+			
+			// 3: modify command
+			command.offset= position;
+			command.length= 0;
+			command.caretOffset= position;
+			command.text= insertion;
+			command.doit= true;
+			command.owner= null;
+		} catch (MalformedTreeException e) {
+			JavaPlugin.log(e);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
+
+		
 	}
 
 	/**

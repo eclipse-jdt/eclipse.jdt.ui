@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
+import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
 
@@ -98,7 +99,13 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @since 3.0
 	 */
 	private boolean fIsConfigured;
-
+	/**
+	 * The backspace manager of this viewer.
+	 * 
+	 * @since 3.0
+	 */
+	private SmartBackspaceManager fBackspaceManager;
+	
 	public JavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
 		super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
 		setPreferenceStore(store);
@@ -342,5 +349,42 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fPreferenceStore.addPropertyChangeListener(this);
 			initializeViewerColors();
 		}
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewer#createControl(org.eclipse.swt.widgets.Composite, int)
+	 */
+	protected void createControl(Composite parent, int styles) {
+		super.createControl(parent, styles);
+
+		// TODO replace w/ preference
+		if (Boolean.getBoolean("org.eclipse.jdt.smart_backspace")) {
+			fBackspaceManager= new SmartBackspaceManager();
+			fBackspaceManager.install(this);
+		}
+
+	}
+	
+	/**
+	 * Returns the backspace manager for this viewer.
+	 * 
+	 * @return the backspace manager for this viewer, or <code>null</code> if
+	 *         there is none
+	 * @since 3.0
+	 */
+	public SmartBackspaceManager getBackspaceManager() {
+		return fBackspaceManager;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewer#handleDispose()
+	 */
+	protected void handleDispose() {
+		if (fBackspaceManager != null) {
+			fBackspaceManager.uninstall();
+			fBackspaceManager= null;
+		}
+
+		super.handleDispose();
 	}
 }

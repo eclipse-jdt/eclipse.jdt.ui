@@ -12,6 +12,10 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -51,11 +55,14 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.JavaIndenter;
+import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.jdt.internal.ui.text.Symbols;
+import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager.UndoSpec;
 
 /**
  * Auto indent strategy sensitive to brackets.
@@ -242,7 +249,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			
 				JavaIndenter indenter= new JavaIndenter(d, scanner);
 				StringBuffer indent= indenter.computeIndentation(p, true);
-				if (indent != null) {
+				String toDelete= d.get(lineOffset, c.offset - lineOffset);
+				if (indent != null && !indent.toString().equals(toDelete)) {
 					c.text= indent.append(c.text).toString();
 					c.length += c.offset - lineOffset;
 					c.offset= lineOffset;
@@ -589,10 +597,14 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 
 	private static void smartPaste(IDocument document, DocumentCommand command) {
+		int newOffset= command.offset;
+		int newLength= command.length;
+		String newText= command.text;
+		
 		try {
 			JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 			JavaIndenter indenter= new JavaIndenter(document, scanner);
-			int offset= command.offset;
+			int offset= newOffset;
 			
 			// reference position to get the indent from
 			int refOffset= indenter.findReferencePosition(offset);
@@ -607,17 +619,17 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			IRegion line= document.getLineInformationOfOffset(offset);
 			String notSelected= document.get(line.getOffset(), offset - line.getOffset());
 			if (notSelected.trim().length() == 0) {
-				command.length += notSelected.length();
-				command.offset= line.getOffset();
+				newLength += notSelected.length();
+				newOffset= line.getOffset();
 				firstLine= 0;
 			}
 			
 			// prefix: the part we need for formatting but won't paste
 			IRegion refLine= document.getLineInformationOfOffset(refOffset);
-			String prefix= document.get(refLine.getOffset(), command.offset - refLine.getOffset());
+			String prefix= document.get(refLine.getOffset(), newOffset - refLine.getOffset());
 			
 			// handle the indentation computation inside a temporary document
-			Document temp= new Document(prefix + command.text);
+			Document temp= new Document(prefix + newText);
 			scanner= new JavaHeuristicScanner(temp);
 			indenter= new JavaIndenter(temp, scanner);
 			installJavaStuff(temp);
@@ -661,8 +673,19 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				
 			}
 			
-			// modify the command
-			command.text= temp.get(prefix.length(), temp.getLength() - prefix.length());
+			newText= temp.get(prefix.length(), temp.getLength() - prefix.length());
+			
+			// only modify the command if it will be different from what
+			// the normal insertion would produce
+			String orig= document.get(newOffset, command.offset - newOffset);
+			orig += command.text;
+			orig += document.get(command.offset + command.length, newLength - command.length - command.offset + newOffset);
+
+			if (!orig.equals(newText)) {
+				command.offset= newOffset;
+				command.length= newLength;
+				command.text= newText;
+			}
 			
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
@@ -993,6 +1016,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			return;
 		}
 		
+		int offset= c.offset;
+		int length= c.length;
+		String text= c.text;
+		if (text == null)
+			text= new String();
 		
 		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
@@ -1001,6 +1029,43 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
 			smartPaste(d, c);
 		
+		int newOffset= c.offset;
+		int newLength= c.length;
+		String newText= c.text;
+		
+		if (newLength != length || newOffset != offset || !text.equals(newText)) {
+			
+			IWorkbenchPage page= JavaPlugin.getActivePage();
+			if (page == null)
+				return;
+			IEditorPart part= page.getActiveEditor();
+			if (!(part instanceof CompilationUnitEditor))
+				return;
+			CompilationUnitEditor editor= (CompilationUnitEditor)part;
+			
+			try {
+				final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);
+				if (manager != null) {
+					String deletedText= d.get(newOffset, newLength);
+					// restore smart portion
+					ReplaceEdit smart= new ReplaceEdit(newOffset, newText.length(), deletedText);
+					// restore raw text
+					ReplaceEdit raw= new ReplaceEdit(offset, length, text);
+					
+					final UndoSpec s2= new UndoSpec(
+							c.caretOffset != -1 ? c.caretOffset : newOffset + newText.length(),
+							new Region(offset + text.length(), 0),
+							new TextEdit[] { smart, raw },
+							3,
+							null);
+					manager.register(s2);
+				}
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			} catch (MalformedTreeException e) {
+				JavaPlugin.log(e);
+			}
+		}			
 	}
 	
 	private static IPreferenceStore getPreferenceStore() {
