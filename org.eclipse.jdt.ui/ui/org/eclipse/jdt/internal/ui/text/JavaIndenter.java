@@ -379,14 +379,28 @@ public class JavaIndenter {
 		// an unindentation happens sometimes if the next token is special, namely on braces, parens and case labels
 		// align braces
 		if (matchBrace) {
-			skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
-			return skipToStatementStart(true, true);
-		}
+			if (skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE))
+				return skipToStatementStart(true, true);
+			else {
+				// if we can't find the matching brace, the heuristic is to unindent
+				// by one against the normal position
+				int pos= findReferencePosition(offset, danglingElse, false, matchParen, matchCase);
+				fIndent--;
+				return pos;
+			}
+			}
 		
 		// align parenthesis'
 		if (matchParen) {
-			skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN);
-			return fPosition;
+			if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN))
+				return fPosition;
+			else {
+				// if we can't find the matching paren, the heuristic is to unindent
+				// by one against the normal position
+				int pos= findReferencePosition(offset, danglingElse, matchBrace, false, matchCase);
+				fIndent--;
+				return pos;
+			}
 		}
 		
 		// the only reliable way to get case labels aligned (due to many different styles of using braces in a block)
@@ -399,7 +413,10 @@ public class JavaIndenter {
 		switch (fToken) {
 			case Symbols.TokenRBRACE:
 				// skip the block and fall through
-				skipScope();
+				// if we can't complete the scope, reset the scan position
+				int pos= fPosition;
+				if (!skipScope())
+					fPosition= pos;
 			case Symbols.TokenSEMICOLON:
 				// this is the 90% case: after a statement block 
 				// the end of the previous statement / block previous.end
