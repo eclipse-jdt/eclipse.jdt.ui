@@ -38,6 +38,8 @@ public class RenamePackageTests extends RefactoringTest {
 	private static final Class clazz= RenamePackageTests.class;
 	private static final String REFACTORING_PATH= "RenamePackage/";
 	
+	private boolean fUpdateTextualMatches;
+	
 	public RenamePackageTests(String name) {
 		super(name);
 	}
@@ -49,6 +51,11 @@ public class RenamePackageTests extends RefactoringTest {
 	/** See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=47316">Bug 47316</a>. */
 	public static Test setUpTest(Test someTest) {
 		return new MySetup(someTest);
+	}
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+		fUpdateTextualMatches= false;
 	}
 	
 	protected String getRefactoringPath() {
@@ -135,6 +142,7 @@ public class RenamePackageTests extends RefactoringTest {
 			IPackageFragment thisPackage= packages[0];
 			RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
 			((RenamePackageProcessor)ref.getProcessor()).setUpdateReferences(updateReferences);
+			((RenamePackageProcessor) ref.getProcessor()).setUpdateTextualMatches(fUpdateTextualMatches);
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("preconditions were supposed to pass", null, result);
 			
@@ -203,6 +211,7 @@ public class RenamePackageTests extends RefactoringTest {
 		
 		RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
 		((RenamePackageProcessor) ref.getProcessor()).setUpdateReferences(true);
+		((RenamePackageProcessor) ref.getProcessor()).setUpdateTextualMatches(fUpdateTextualMatches);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("preconditions were supposed to pass", null, result);
 		
@@ -331,7 +340,9 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	//-------
 	public void test0() throws Exception{
-		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
+		printTestDisabledMessage("bug 54962");
+		if (false)
+			helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
 	public void test1() throws Exception{
@@ -384,6 +395,7 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void testImportFromMultiRoots1() throws Exception {
+		fUpdateTextualMatches= true;
 		helperProjectsPrgTest(
 			new String[][] {
 				new String[] { "p.p" }, new String[] { "p.p", "tests" }
@@ -396,7 +408,7 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void testImportFromMultiRoots2() throws Exception {
-		/*helperProjectsPrgTest(
+		helperProjectsPrgTest(
 				new String[][] {
 							new String[]{"p.p"},
 							new String[]{"p.p", "tests"}
@@ -407,8 +419,6 @@ public class RenamePackageTests extends RefactoringTest {
 							  new String[][] {new String[]{"ATest", "TestHelper"}, new String[]{"AllTests", "QualifiedTests"}}
 							  }
 			);
-			*/
-		// TODO: ma reenable after I20040302
 	}
 
 	public void testImportFromMultiRoots3() throws Exception {

@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -24,77 +26,55 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public class RefactoringScanner {
 
-	private boolean fAnalyzeJavaDoc;
-	private boolean fAnalyzeComments;
-	private boolean fAnalyzeStrings;
-	
 	private String fPattern;
 	
-	private Set fJavaDocResults;
-	private Set fCommentResults;
-	private Set fStringResults;
+	private IScanner fScanner;
+	private ISourceRange fNoFlyZone; // don't scan in ImportContainer (sometimes edited by ImportStructure)
+	private Set fMatches; //Set<Integer>, start positions
 	
-	public RefactoringScanner() {
-		this(true, true, true);
-	}
-	
-	public RefactoringScanner(boolean analyzeJavaDoc, boolean analyzeComments, boolean analyzeStrings){
-		fAnalyzeComments= analyzeComments;
-		fAnalyzeJavaDoc= analyzeJavaDoc;
-		fAnalyzeStrings= analyzeStrings;
+	public RefactoringScanner(String pattern) {
+		Assert.isNotNull(pattern);
+		fPattern= pattern;
 	}
 	
 	public void scan(ICompilationUnit cu)	throws JavaModelException {
-		try{
-			scan(cu.getBuffer().getCharacters());		
-		} catch (InvalidInputException e){
-			//ignore
-		}	
-	}
-	
-	public void scan(String text) throws JavaModelException {
-		try{
-			scan(text.toCharArray());
-		} catch (InvalidInputException e){
-			//ignore
-		}	
-	}
+		char[] chars= cu.getBuffer().getCharacters();
+		fMatches= new HashSet();
+		fScanner= ToolFactory.createScanner(true, true, false, true);
+		fScanner.setSource(chars);
 
-	private void scan(char[] content)	throws JavaModelException, InvalidInputException {
-		fJavaDocResults= new HashSet();
-		fCommentResults= new HashSet();
-		fStringResults= new HashSet();
+		IImportContainer importContainer= cu.getImportContainer();
+		if (importContainer.exists())
+			fNoFlyZone= importContainer.getSourceRange();
 		
-		//Scanner scanner = new Scanner(true, true);
-		IScanner scanner= ToolFactory.createScanner(true, true, false, true);
-		scanner.setSource(content);
-		int token = scanner.getNextToken();
+		doScan();
+	}
 
-		while (token != ITerminalSymbols.TokenNameEOF) {
-			switch (token) {
-				case ITerminalSymbols.TokenNameStringLiteral :
-					if (!fAnalyzeStrings)
-						break;
-					parseCurrentToken(fStringResults, scanner);	
-					break;
-				case ITerminalSymbols.TokenNameCOMMENT_JAVADOC :
-					if (!fAnalyzeJavaDoc)
-						break;
-					parseCurrentToken(fJavaDocResults, scanner);	
-					break;
-				case ITerminalSymbols.TokenNameCOMMENT_LINE :
-					if (!fAnalyzeComments)
-						break;
-					parseCurrentToken(fCommentResults, scanner);	
-					break;
-				case ITerminalSymbols.TokenNameCOMMENT_BLOCK :
-					if (!fAnalyzeComments)
-						break;
-					parseCurrentToken(fCommentResults, scanner);	
-					break;
+	/** only for testing */
+	public void scan(String text) {
+		char[] chars= text.toCharArray();
+		fMatches= new HashSet();
+		fScanner= ToolFactory.createScanner(true, true, false, true);
+		fScanner.setSource(chars);
+		doScan();
+	}
+
+	private void doScan() {
+		try{
+			int token = fScanner.getNextToken();
+			while (token != ITerminalSymbols.TokenNameEOF) {
+				switch (token) {
+					case ITerminalSymbols.TokenNameStringLiteral :
+					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC :
+					case ITerminalSymbols.TokenNameCOMMENT_LINE :
+					case ITerminalSymbols.TokenNameCOMMENT_BLOCK :
+						parseCurrentToken();
+				}
+				token = fScanner.getNextToken();
 			}
-			token = scanner.getNextToken();
-		}
+		} catch (InvalidInputException e){
+			//ignore
+		}	
 	}
 
 	private static boolean isWholeWord(String value, int from, int to){
@@ -113,60 +93,30 @@ public class RefactoringScanner {
 		return true;
 	}
 	
-	private void parseCurrentToken(Set result, final IScanner scanner) throws  InvalidInputException {
-		String value = new String(scanner.getRawTokenSource());
-		int start= scanner.getCurrentTokenStartPosition();
+	private void parseCurrentToken() {
+		String value = new String(fScanner.getRawTokenSource());
+		int start= fScanner.getCurrentTokenStartPosition();
 		int index= value.indexOf(fPattern);
 		while (index != -1) {
 			if (isWholeWord(value, index, index + fPattern.length()))			
-				result.add(new Integer(start + index));
+				addMatch(start + index);
 			index= value.indexOf(fPattern, index + 1);
 		}
 	}
 
-	public boolean getAnalyzeJavaDoc() {
-		return fAnalyzeJavaDoc;
+	private void addMatch(int matchStart) {
+		if (fNoFlyZone != null 
+				&& fNoFlyZone.getOffset() <= matchStart
+				&& matchStart < fNoFlyZone.getOffset() + fNoFlyZone.getLength())
+			return;
+		fMatches.add(new Integer(matchStart));		
 	}
 
-	public void setAnalyzeJavaDoc(boolean analyzeJavaDoc) {
-		fAnalyzeJavaDoc = analyzeJavaDoc;
-	}
-
-	public boolean getAnalyzeComments() {
-		return fAnalyzeComments;
-	}
-
-	public void setAnalyzeComments(boolean analyzeComments) {
-		fAnalyzeComments= analyzeComments;
-	}
-
-	public boolean getAnalyzeStrings() {
-		return fAnalyzeStrings;
-	}
-
-	public void setAnalyzeStrings(boolean analyzeStrings) {
-		fAnalyzeStrings = analyzeStrings;
-	}
-
-	public String getPattern() {
-		return fPattern;
-	}
-
-	public void setPattern(String pattern) {
-		Assert.isNotNull(pattern);
-		fPattern = pattern;
-	}
-
-	public Set getJavaDocResults() {
-		return fJavaDocResults;
-	}
-
-	public Set getCommentResults() {
-		return fCommentResults;
-	}
-
-	public Set getStringResults() {
-		return fStringResults;
+	/**
+	 * @return Set of Integer (start positions of matches)
+	 */
+	public Set getMatches() {
+		return fMatches;
 	}
 }
 

@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModific
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating2;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-public class RenameFieldProcessor extends RenameProcessor implements IReferenceUpdating, ITextUpdating2 {
+public class RenameFieldProcessor extends RenameProcessor implements IReferenceUpdating, ITextUpdating {
 	
 	private static final String DECLARED_SUPERTYPE= RefactoringCoreMessages.getString("RenameFieldRefactoring.declared_in_supertype"); //$NON-NLS-1$
 	private IField fField;

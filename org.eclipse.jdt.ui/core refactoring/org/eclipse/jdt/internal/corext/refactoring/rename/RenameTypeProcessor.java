@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating2;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
@@ -77,7 +77,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
-public class RenameTypeProcessor extends RenameProcessor implements ITextUpdating2, IReferenceUpdating, IQualifiedNameUpdating {
+public class RenameTypeProcessor extends RenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating {
 	
 	private IType fType;
 	private SearchResultGroup[] fReferences;

@@ -106,9 +106,7 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 	private QualifiedNameSearchResult fQualifiedNameSearchResult;
 	
 	private boolean fUpdateReferences;
-	private boolean fUpdateJavaDoc;
-	private boolean fUpdateComments;
-	private boolean fUpdateStrings;
+	private boolean fUpdateTextualMatches;
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 	
@@ -130,9 +128,7 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 		fPackage= fragment;
 		setNewElementName(fPackage.getElementName());
 		fUpdateReferences= true;
-		fUpdateJavaDoc= false;
-		fUpdateComments= false;
-		fUpdateStrings= false;
+		fUpdateTextualMatches= false;
 	}
 
 	public boolean isAvailable() throws CoreException {
@@ -191,30 +187,14 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 		return true;
 	}
 	
-	public boolean getUpdateJavaDoc() {
-		return fUpdateJavaDoc;
+	public boolean getUpdateTextualMatches() {
+		return fUpdateTextualMatches;
 	}
 
-	public boolean getUpdateComments() {
-		return fUpdateComments;
+	public void setUpdateTextualMatches(boolean update) {
+		fUpdateTextualMatches= update;
 	}
 
-	public boolean getUpdateStrings() {
-		return fUpdateStrings;
-	}
-
-	public void setUpdateJavaDoc(boolean update) {
-		fUpdateJavaDoc= update;
-	}
-
-	public void setUpdateComments(boolean update) {
-		fUpdateComments= update;
-	}
-
-	public void setUpdateStrings(boolean update) {
-		fUpdateStrings= update;
-	}
-	
 	//---- IReferenceUpdating --------------------------------------
 		
 	public boolean canEnableUpdateReferences() {
@@ -612,7 +592,8 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 	}
 	
 	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
-		TextMatchFinder.findTextMatches(pm, RefactoringScopeFactory.create(fPackage), this, manager);
+		//fOccurrences is enough; the others are only import statements
+		TextMatchUpdater.perform(pm, RefactoringScopeFactory.create(fPackage), this, manager, fOccurrences);
 	}
 	
 	private TextEdit createTextChange(SearchResult searchResult) {
@@ -623,11 +604,13 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 		pm.beginTask("", 2); //$NON-NLS-1$
 		TextChangeManager manager= new TextChangeManager();
 		
-		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching_text")); //$NON-NLS-1$
-		addTextMatches(manager, new SubProgressMonitor(pm, 1));
-		
 		if (fUpdateReferences)
 			addReferenceUpdates(manager, new SubProgressMonitor(pm, 1));
+		
+		if (fUpdateTextualMatches) {
+			pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching_text")); //$NON-NLS-1$
+			addTextMatches(manager, new SubProgressMonitor(pm, 1));
+		}
 		
 		pm.done();
 		return manager;

@@ -146,14 +146,22 @@ public class RenameSupport {
 	/** Flag indicating that references are to be updated as well. */
 	public static final int UPDATE_REFERENCES= 1 << 0;
 	
-	/** Flag indicating that Java doc comments are to be updated as well. */
+	/** Flag indicating that Java doc comments are to be updated as well.
+	 * @deprecated use UPDATE_REFERENCES or UPDATE_TEXTUAL_MATCHES or both. */
 	public static final int UPDATE_JAVADOC_COMMENTS= 1 << 1;
-	
-	/** Flag indicating that regular comments are to be updated as well. */
+	/** Flag indicating that regular comments are to be updated as well.
+	 * @deprecated use UPDATE_TEXTUAL_MATCHES */
 	public static final int UPDATE_REGULAR_COMMENTS= 1 << 2;
-	
-	/** Flag indicating that string literals are to be updated as well. */
+	/** Flag indicating that string literals are to be updated as well.
+	 * @deprecated use UPDATE_TEXTUAL_MATCHES */
 	public static final int UPDATE_STRING_LITERALS= 1 << 3;
+
+	/**
+	 * Flag indicating that textual matches in comments and in string literals
+	 * are to be updated as well.
+	 * @since 3.0
+	 */
+	public static final int UPDATE_TEXTUAL_MATCHES= 1 << 6;
 
 	/** Flag indicating that the getter method is to be updated as well. */
 	public static final int UPDATE_GETTER_METHOD= 1 << 4;
@@ -205,10 +213,8 @@ public class RenameSupport {
 	 * @param newName the package fragement's new name. <code>null</code> is a
 	 * valid value indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
-	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_JAVADOC_COMMENTS</code>,
-	 * <code>UPDATE_REGULAR_COMMENTS</code> and
-	 * <code>UPDATE_STRING_LITERALS</code>, or their bitwise OR, or
-	 * <code>NONE</code>.
+	 * <code>UPDATE_REFERENCES</code>, and <code>UPDATE_TEXTUAL_MATCHES</code>,
+	 * or their bitwise OR, or <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
 	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
@@ -225,10 +231,8 @@ public class RenameSupport {
 	 * @param newName the compilation unit's new name. <code>null</code> is a
 	 * valid value indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
-	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_JAVADOC_COMMENTS</code>,
-	 * <code>UPDATE_REGULAR_COMMENTS</code> and
-	 * <code>UPDATE_STRING_LITERALS</code>, or their bitwise OR, or
-	 * <code>NONE</code>.
+	 * <code>UPDATE_REFERENCES</code>, and <code>UPDATE_TEXTUAL_MATCHES</code>,
+	 * or their bitwise OR, or <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
 	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
@@ -245,10 +249,9 @@ public class RenameSupport {
 	 * @param newName the type's new name. <code>null</code> is a valid value
 	 * indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
-	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_JAVADOC_COMMENTS</code>,
-	 * <code>UPDATE_REGULAR_COMMENTS</code> and
-	 * <code>UPDATE_STRING_LITERALS</code>, or their bitwise OR, or
-	 * <code>NONE</code>.
+	 * @param flags flags controlling additional parameters. Valid flags are
+	 * <code>UPDATE_REFERENCES</code>, and <code>UPDATE_TEXTUAL_MATCHES</code>,
+	 * or their bitwise OR, or <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
 	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
@@ -287,11 +290,9 @@ public class RenameSupport {
 	 * @param newName the field's new name. <code>null</code> is a valid value
 	 * indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
-	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_JAVADOC_COMMENTS</code>,
-	 * <code>UPDATE_REGULAR_COMMENTS</code>,
-	 * <code>UPDATE_STRING_LITERALS</code>, </code>UPDATE_GETTER_METHOD</code>
-	 * and </code>UPDATE_SETTER_METHOD</code>, or their bitwise OR, or
-	 * <code>NONE</code>.
+	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_TEXTUAL_MATCHES</code>,
+	 * </code>UPDATE_GETTER_METHOD</code>, and </code>UPDATE_SETTER_METHOD</code>,
+	 * or their bitwise OR, or <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
 	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
@@ -313,9 +314,7 @@ public class RenameSupport {
 		}
 		ITextUpdating text= (ITextUpdating)refactoring.getAdapter(ITextUpdating.class);
 		if (text != null) {
-			text.setUpdateJavaDoc(updateJavadocComments(flags));
-			text.setUpdateComments(updateRegularComments(flags));
-			text.setUpdateStrings(updateStringLiterals(flags));
+			text.setUpdateTextualMatches(updateTextualMatches(flags));
 		}
 	}
 	
@@ -328,16 +327,9 @@ public class RenameSupport {
 		return (flags & UPDATE_REFERENCES) != 0;
 	}
 	
-	private static boolean updateJavadocComments(int flags) {
-		return (flags & UPDATE_JAVADOC_COMMENTS) != 0;
-	}
-	
-	private static boolean updateRegularComments(int flags) {
-		return (flags & UPDATE_REGULAR_COMMENTS) != 0;
-	}
-	
-	private static boolean updateStringLiterals(int flags) {
-		return (flags & UPDATE_STRING_LITERALS) != 0;
+	private static boolean updateTextualMatches(int flags) {
+		int TEXT_UPDATES= UPDATE_TEXTUAL_MATCHES | UPDATE_REGULAR_COMMENTS | UPDATE_STRING_LITERALS;
+		return (flags & TEXT_UPDATES) != 0;
 	}
 	
 	private static boolean updateGetterMethod(int flags) {

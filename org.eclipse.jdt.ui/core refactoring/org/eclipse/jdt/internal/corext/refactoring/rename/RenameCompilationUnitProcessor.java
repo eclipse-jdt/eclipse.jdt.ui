@@ -37,14 +37,14 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating2;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
-public class RenameCompilationUnitProcessor extends RenameProcessor implements IReferenceUpdating, ITextUpdating2, IQualifiedNameUpdating {
+public class RenameCompilationUnitProcessor extends RenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
 
 	private RenameTypeProcessor fRenameTypeProcessor;
 	private boolean fWillRenameType;

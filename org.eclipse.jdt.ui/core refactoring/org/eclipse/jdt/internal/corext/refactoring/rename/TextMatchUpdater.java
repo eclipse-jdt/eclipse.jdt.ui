@@ -40,12 +40,9 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating2;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
-/**
- * @todo work in progress
- */
 class TextMatchUpdater {
 	
 	private static final String TEXT_EDIT_LABEL= RefactoringCoreMessages.getString("TextMatchUpdater.update"); //$NON-NLS-1$
@@ -54,22 +51,21 @@ class TextMatchUpdater {
 	private TextChangeManager fManager;
 	private SearchResultGroup[] fReferences;
 
-	private RefactoringScanner2 fScanner;
+	private RefactoringScanner fScanner;
 	private String fNewName;
 	private int fCurrentNameLength;
 	
-	private TextMatchUpdater(TextChangeManager manager, IJavaSearchScope scope, ITextUpdating2 processor, SearchResultGroup[] references){
+	private TextMatchUpdater(TextChangeManager manager, IJavaSearchScope scope, ITextUpdating processor, SearchResultGroup[] references){
 		fManager= manager;
 		fScope= scope;
 		fReferences= references;
 
 		fNewName= processor.getNewElementName();
 		fCurrentNameLength= processor.getCurrentElementName().length();
-		fScanner= new RefactoringScanner2();
-		fScanner.setPattern(processor.getCurrentElementName());
+		fScanner= new RefactoringScanner(processor.getCurrentElementName());
 	}
 
-	static void perform(IProgressMonitor pm, IJavaSearchScope scope, ITextUpdating2 processor, TextChangeManager manager, SearchResultGroup[] references) throws JavaModelException{
+	static void perform(IProgressMonitor pm, IJavaSearchScope scope, ITextUpdating processor, TextChangeManager manager, SearchResultGroup[] references) throws JavaModelException{
 		new TextMatchUpdater(manager, scope, processor, references).updateTextMatches(pm);
 	}
 
