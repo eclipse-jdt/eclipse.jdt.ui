@@ -12,14 +12,10 @@ package org.eclipse.jdt.ui.tests.reorg;
 
 import junit.framework.Assert;
 
-import org.eclipse.swt.dnd.Clipboard;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
-import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgActionFactory;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CutSourceReferencesToClipboardAction.DeleteSourceReferencesAction;
 
 class SourceReferenceTestUtil {
@@ -46,28 +42,4 @@ class SourceReferenceTestUtil {
 		Assert.assertTrue("delete action incorrectly disabled", deleteAction.isEnabled());
 		deleteAction.run();
 	}
-
-//	static void cut(Object[] elems) {
-//		ISelectionProvider provider= new FakeSelectionProvider(elems);
-//		CutSourceReferencesToClipboardAction cutAction= new CutSourceReferencesToClipboardAction(provider);
-//		cutAction.update();
-//		Assert.assertTrue("cut enabled", cutAction.isEnabled());
-//		cutAction.run();
-//	}	
-
-	static void copy(Object[] elems, Clipboard clipboard) {
-		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elems), clipboard);
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elems), clipboard, pasteAction);
-		copyAction.update(copyAction.getSelection());
-		Assert.assertTrue("copy incorrectly disabled", copyAction.isEnabled());
-		copyAction.run();
-	}	
-
-	static void paste(Object[] elems, Clipboard clipboard) {
-		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elems), clipboard);
-		pasteAction.update(pasteAction.getSelection());
-		Assert.assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
-		pasteAction.run();
-	}
-
 }
