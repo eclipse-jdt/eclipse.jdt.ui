@@ -42,6 +42,9 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 
 	private static class TypeFilterMatcher implements FilteredList.FilterMatcher {
 
+		private static final char END_SYMBOL= '<';
+		private static final char ANY_STRING= '*';
+
 		private StringMatcher fMatcher;
 		private StringMatcher fQualifierMatcher;
 		
@@ -82,10 +85,19 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		}
 		
 		private String adjustPattern(String pattern) {
-			if (pattern.length() != 0 && pattern.indexOf('*') == -1 && pattern.indexOf('?') == -1)
-				return pattern + '*';
-			else
-				return pattern;
+			int length= pattern.length();
+			if (length > 0) {
+				switch (pattern.charAt(length - 1)) {
+					case END_SYMBOL:
+						pattern= pattern.substring(0, length - 1);
+						break;
+					case ANY_STRING:
+						break;
+					default:
+						pattern= pattern + ANY_STRING;
+				}
+			}
+			return pattern;
 		}
 	}
 	

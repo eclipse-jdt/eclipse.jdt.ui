@@ -928,6 +928,19 @@
 			menubarPath="project/additions"
 			label="%GenerateJavadocAction.label"
 			class="org.eclipse.jdt.internal.ui.actions.GenerateJavadocAction"/>
+		<action id="editBuildPath"
+			definitionId="org.eclipse.jdt.ui.edit.build.path"
+			menubarPath="project/additions"
+			label="%OpenBuildPathDialogAction.label"
+			enablesFor="1"
+			class="org.eclipse.jdt.internal.ui.actions.OpenBuildPathDialogAction">
+			<enablement>
+				<or>
+					<objectClass name="org.eclipse.jdt.core.ICompilationUnit"/>
+					<objectClass name="org.eclipse.core.resources.IResource"/>
+				</or>
+			</enablement>
+		</action>
 	</actionSet>
 </extension>
 
@@ -1864,6 +1877,12 @@
 		id="org.eclipse.jdt.ui.generate.javadoc"
 		name= "%ActionDefinition.generateJavadoc.name"
 		description="%ActionDefinition.generateJavadoc.description"
+	/>
+
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.build.path"
+		name= "%ActionDefinition.editBuildPath.name"
+		description="%ActionDefinition.editBuildPath.description"
 	/>
 
 	<!-- miscellaenous -->
