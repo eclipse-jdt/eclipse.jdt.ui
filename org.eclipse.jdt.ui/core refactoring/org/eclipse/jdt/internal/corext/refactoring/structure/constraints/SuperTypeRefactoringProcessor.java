@@ -253,7 +253,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			}
 			final SuperTypeConstraintsSolver solver= new SuperTypeConstraintsSolver(model);
 			solver.solveConstraints();
-			fTypeMatches= solver.getTypeOccurrences();
+			fTypeMatches= solver.getTypeMatches();
 			fObsoleteCasts= solver.getObsoleteCasts();
 		} finally {
 			monitor.done();
