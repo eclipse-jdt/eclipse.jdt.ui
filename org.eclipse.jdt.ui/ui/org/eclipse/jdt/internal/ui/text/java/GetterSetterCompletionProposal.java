@@ -33,34 +33,36 @@ import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
-	
-	
+
 	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Set suggestedMethods, Collection result) throws CoreException {
 		if (prefix.length() == 0) {
 			relevance--;
 		}
-		
+
 		IField[] fields= type.getFields();
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < fields.length; i++) {
 			IField curr= fields[i];
-			String getterName= GetterSetterUtil.getGetterName(curr, null);
-			if (getterName.startsWith(prefix) && !hasMethod(methods, getterName) && suggestedMethods.add(getterName)) {
-				result.add(new GetterSetterCompletionProposal(curr, offset, length, true, relevance));
-			}
-				
-			String setterName= GetterSetterUtil.getSetterName(curr, null);
-			if (setterName.startsWith(prefix) && !hasMethod(methods, setterName) && suggestedMethods.add(setterName)) {
-				result.add(new GetterSetterCompletionProposal(curr, offset, length, false, relevance));
+			if (!JdtFlags.isEnum(curr)) {
+				String getterName= GetterSetterUtil.getGetterName(curr, null);
+				if (getterName.startsWith(prefix) && !hasMethod(methods, getterName) && suggestedMethods.add(getterName)) {
+					result.add(new GetterSetterCompletionProposal(curr, offset, length, true, relevance));
+				}
+
+				String setterName= GetterSetterUtil.getSetterName(curr, null);
+				if (setterName.startsWith(prefix) && !hasMethod(methods, setterName) && suggestedMethods.add(setterName)) {
+					result.add(new GetterSetterCompletionProposal(curr, offset, length, false, relevance));
+				}
 			}
 		}
 	}
-	
+
 	private static boolean hasMethod(IMethod[] methods, String name) {
 		for (int i= 0; i < methods.length; i++) {
 			if (methods[i].getElementName().equals(name)) {
