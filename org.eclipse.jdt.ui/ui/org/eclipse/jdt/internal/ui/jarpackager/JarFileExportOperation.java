@@ -133,27 +133,18 @@
 	 * @param	javaProject		the javaProject that contains the file
 	 * @return	the iterator over the corresponding classpath files for the given file
 	 */
-	protected Iterator filesOnClasspath(IFile file, IPath pathInJar, IJavaProject javaProject, IProgressMonitor progressMonitor) throws CoreException {
-		IPath outputPath= javaProject.getOutputLocation();		IContainer outputContainer;				if (javaProject.getProject().getFullPath().equals(outputPath))			outputContainer= javaProject.getProject();		else {			outputContainer= createFolderHandle(outputPath);
+	protected Iterator filesOnClasspath(IFile file, IPath pathInJar, IJavaProject javaProject, IProgressMonitor progressMonitor) throws CoreException {		// Allow JAR Package to provide its own strategy		IFile[] classFiles= fJarPackage.findClassfilesFor(file);		if (classFiles != null)			return Arrays.asList(classFiles).iterator();		if (!isJavaFile(file))			return Collections.EMPTY_LIST.iterator();				IPath outputPath= javaProject.getOutputLocation();		IContainer outputContainer;				if (javaProject.getProject().getFullPath().equals(outputPath))			outputContainer= javaProject.getProject();		else {			outputContainer= createFolderHandle(outputPath);
 			if (outputContainer == null || !outputContainer.isAccessible()) {
 				String msg= JarPackagerMessages.getString("JarFileExportOperation.outputContainerNotAccessible"); //$NON-NLS-1$				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, msg, null));			}		}
-		if (isJavaFile(file)) {
-			// Java CU - search files with .class ending			boolean hasErrors= hasCompileErrors(file);			boolean hasWarnings= hasCompileWarnings(file);			boolean canBeExported= canBeExported(hasErrors, hasWarnings);			if (!canBeExported)				return Collections.EMPTY_LIST.iterator();			reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);			IContainer classContainer= outputContainer;			if (pathInJar.segmentCount() > 1)				classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));							if (fExportedClassContainers.contains(classContainer))				return Collections.EMPTY_LIST.iterator();				
-			if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
-				fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer);				if (fJavaNameToClassFilesMap == null) {					// Could not fully build map. fallback is to export whole directory					String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.missingSourceFileAttributeExportedAll", classContainer.getLocation().toFile()); //$NON-NLS-1$					addWarning(msg, null);					fExportedClassContainers.add(classContainer);					return getClassesIn(classContainer);				}				fClassFilesMapContainer= classContainer;
-			}
-			ArrayList classFiles= (ArrayList)fJavaNameToClassFilesMap.get(file.getName());
-			if (classFiles == null || classFiles.isEmpty()) {
-				String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.classFileOnClasspathNotAccessible", file.getFullPath()); //$NON-NLS-1$				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, msg, null));			}
-			return classFiles.iterator();
+
+		// Java CU - search files with .class ending		boolean hasErrors= hasCompileErrors(file);		boolean hasWarnings= hasCompileWarnings(file);		boolean canBeExported= canBeExported(hasErrors, hasWarnings);		if (!canBeExported)			return Collections.EMPTY_LIST.iterator();		reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);		IContainer classContainer= outputContainer;		if (pathInJar.segmentCount() > 1)			classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));					if (fExportedClassContainers.contains(classContainer))			return Collections.EMPTY_LIST.iterator();			
+		if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
+			fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer);			if (fJavaNameToClassFilesMap == null) {				// Could not fully build map. fallback is to export whole directory				String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.missingSourceFileAttributeExportedAll", classContainer.getLocation().toFile()); //$NON-NLS-1$				addWarning(msg, null);				fExportedClassContainers.add(classContainer);				return getClassesIn(classContainer);			}			fClassFilesMapContainer= classContainer;
 		}
-		else {
-			// resource  - search file with same name
-			List binaryFiles= new ArrayList(1);			IFile cpFile= outputContainer.getFile(pathInJar);
-			if (cpFile.isAccessible()) {				if (!cpFile.isLocal(IResource.DEPTH_ZERO))					cpFile.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);				binaryFiles.add(cpFile);			}
-			else {				String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.resourceOnCasspathNotAccessible", cpFile.getFullPath()); //$NON-NLS-1$				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, msg, null));			}
-			return binaryFiles.iterator();
-		}
+		ArrayList classFileList= (ArrayList)fJavaNameToClassFilesMap.get(file.getName());
+		if (classFileList == null || classFileList.isEmpty()) {
+			String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.classFileOnClasspathNotAccessible", file.getFullPath()); //$NON-NLS-1$			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, msg, null));		}
+		return classFileList.iterator();
 	}
 
 	private Iterator getClassesIn(IContainer classContainer) throws CoreException {
