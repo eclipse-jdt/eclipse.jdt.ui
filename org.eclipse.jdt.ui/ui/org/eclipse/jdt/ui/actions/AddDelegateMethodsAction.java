@@ -147,7 +147,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			IField[] selectedFields = getSelectedFields(selection);
-			if (canEnableOn(selectedFields)) {
+			if (canRunOn(selectedFields)) {
 				run(selectedFields[0].getDeclaringType(), selectedFields, false);
 				return;
 			}
@@ -163,26 +163,28 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	}
 
 	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
-		if (canEnableOn(getSelectedFields(selection)))
+		if (getSelectedFields(selection) != null)
 			return true;
 
-		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType))
-			return canEnableOn((IType) selection.getFirstElement());
+		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
+			IType type= (IType) selection.getFirstElement();
+			return type.getCompilationUnit() != null;
+		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
-			return canEnableOn(JavaElementUtil.getMainType((ICompilationUnit) selection.getFirstElement()));
+			return true;
 
 		return false;
 	}
 
-	private static boolean canEnableOn(IType type) throws JavaModelException {
+	private static boolean canRunOn(IType type) throws JavaModelException {
 		if (type == null || type.getCompilationUnit() == null)
 			return false;
 
-		return canEnableOn(type.getFields());
+		return canRunOn(type.getFields());
 	}
 
-	private static boolean canEnableOn(IField[] fields) throws JavaModelException {
+	private static boolean canRunOn(IField[] fields) throws JavaModelException {
 		if (fields == null) {
 			return false;
 		}
@@ -245,7 +247,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return;
 		if (!ActionUtil.isProcessable(getShell(), type))
 			return;
-		if(!canEnableOn(type)){
+		if(!canRunOn(type)){
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
 			return;
 		}			
