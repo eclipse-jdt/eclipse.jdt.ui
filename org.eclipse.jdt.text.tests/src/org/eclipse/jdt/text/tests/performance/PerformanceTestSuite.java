@@ -32,6 +32,7 @@ public class PerformanceTestSuite extends TestSuite {
 		addTestSuite(UndoJavaEditorTest.class);
 		addTestSuite(UndoTextEditorTest.class);
 		addTestSuite(ScrollJavaEditorTest.class);
+		addTestSuite(ScrollTextEditorTest.class);
 		addTestSuite(JavaIndenterTest.class);
 	}
 }

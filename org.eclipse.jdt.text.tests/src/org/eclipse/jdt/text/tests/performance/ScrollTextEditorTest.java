@@ -13,17 +13,31 @@ package org.eclipse.jdt.text.tests.performance;
 
 import org.eclipse.ui.PartInitException;
 
-public class ScrollJavaEditorTest extends ScrollEditorTest {
+public class ScrollTextEditorTest extends ScrollEditorTest {
 	
-	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
+	private static final String FILE_PREFIX= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText";
+	
+	private static final String ORIG_FILE= FILE_PREFIX + ".java";
+
+	private static final String FILE= FILE_PREFIX + ".txt";
 
 	private static final int N_OF_RUNS= 10;
 
-	public void testScrollJavaEditor1() throws PartInitException {
+	protected void setUp() throws Exception {
+		ResourceTestHelper.copy(ORIG_FILE, FILE);
+		super.setUp();
+	}
+	
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		ResourceTestHelper.delete(FILE);
+	}
+	
+	public void testScrollTextEditor1() throws PartInitException {
 		measureScrolling(ResourceTestHelper.findFile(FILE), N_OF_RUNS);
 	}
 
-	public void testScrollJavaEditor2() throws PartInitException {
+	public void testScrollTextEditor2() throws PartInitException {
 		measureScrolling(ResourceTestHelper.findFile(FILE), N_OF_RUNS);
 	}
 }
