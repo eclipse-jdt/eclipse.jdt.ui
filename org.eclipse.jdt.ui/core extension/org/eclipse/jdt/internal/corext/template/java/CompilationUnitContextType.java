@@ -80,13 +80,13 @@ public abstract class CompilationUnitContextType extends ContextType {
 	
 	protected static class Method extends EnclosingJavaElement {
 		public Method() {
-			super("method", TemplateMessages.getString("JavaContextType.variable.description.method"), IJavaElement.METHOD);
+			super("enclosing_method", TemplateMessages.getString("JavaContextType.variable.description.enclosing.method"), IJavaElement.METHOD);
 		}
 	}
 
 	protected static class Type extends EnclosingJavaElement {
 		public Type() {
-			super("type", TemplateMessages.getString("JavaContextType.variable.description.type"), IJavaElement.TYPE);
+			super("enclosing_type", TemplateMessages.getString("JavaContextType.variable.description.enclosing.type"), IJavaElement.TYPE);
 		}
 	}
 /*
@@ -98,13 +98,13 @@ public abstract class CompilationUnitContextType extends ContextType {
 */
 	protected static class Package extends EnclosingJavaElement {
 		public Package() {
-			super("package", TemplateMessages.getString("JavaContextType.variable.description.package"), IJavaElement.PACKAGE_FRAGMENT);
+			super("enclosing_package", TemplateMessages.getString("JavaContextType.variable.description.enclosing.package"), IJavaElement.PACKAGE_FRAGMENT);
 		}
 	}	
 
 	protected static class Project extends EnclosingJavaElement {
 		public Project() {
-			super("project", TemplateMessages.getString("JavaContextType.variable.description.project"), IJavaElement.JAVA_PROJECT);
+			super("enclosing_project", TemplateMessages.getString("JavaContextType.variable.description.enclosing.project"), IJavaElement.JAVA_PROJECT);
 		}
 	}	
 /*
@@ -120,7 +120,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 */
 	protected static class Arguments extends TemplateVariable {
 		public Arguments() {
-			super("arguments", TemplateMessages.getString("JavaContextType.variable.description.arguments"));
+			super("enclosing_method_arguments", TemplateMessages.getString("JavaContextType.variable.description.enclosing.method.arguments"));
 		}
 		public String evaluate(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
