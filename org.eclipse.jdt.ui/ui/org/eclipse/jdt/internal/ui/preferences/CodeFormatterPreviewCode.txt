@@ -1,17 +1,21 @@
 /**
 * class Foo 
 */
- 
+
+String UNIX="\n";
+String MAC="\r";
+String DOS="\r\n";
+
 public static void bar()
 {
-int k=0;
-if (k > 0)
+String k=System.getProperty("line.separator");
+if (k.equals(UNIX))
 {
 }
-else if (k==0)
+else if (k.equals(MAC))
 {
 }
-else if (k <0)
+else if (k.equals(DOS))
 {
 }
 

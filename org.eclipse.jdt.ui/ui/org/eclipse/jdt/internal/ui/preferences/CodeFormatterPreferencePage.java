@@ -214,6 +214,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		fMainPanel= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
+		layout.marginWidth=0;
 		fMainPanel.setLayout(layout);
 		//createSimpleLayout(fMainPanel);
 		//createCategoryLayout(fMainPanel);
@@ -258,30 +259,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		updatePreview(fNewOptions);
 	}
 
-	private void createCategoryLayout(Composite parent)
-	{
-	Composite panel= new Composite(parent, SWT.NONE);
-		GridLayout gl= new GridLayout();
-		gl.numColumns= 1;
-		GridData gd= new GridData();
-		gd.grabExcessHorizontalSpace= true;
-		gd.grabExcessVerticalSpace= true;
-		gd.horizontalAlignment= GridData.FILL;
-		gd.verticalAlignment= GridData.FILL;
-		panel.setLayoutData(gd);
-		panel.setLayout(gl);
-		Hashtable OptionCategories=  findCategories(fNewOptions);
-		String[] SortedOptionCategories =  sortCategories(OptionCategories);
-		ArrayList checkOptions= new ArrayList();
-		ArrayList textOptions= new ArrayList();
-		for (int cat= 0; cat < SortedOptionCategories.length; cat++) {
-			String category= (String) SortedOptionCategories[cat];
-			createSingleCategory(panel, (ConfigurableOption[])OptionCategories.get(category), textOptions, checkOptions, category);
-		}
-		fCheckOptions= (Button[]) checkOptions.toArray(new Button[checkOptions.size()]);
-		fTextOptions= (Text[]) textOptions.toArray(new Text[textOptions.size()]);
-	
-	}
 	
 	private void createOptimizedCategoryLayout(Composite parent)
 	{
@@ -293,6 +270,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		Composite panel= new Composite(parent, SWT.NONE);
 		GridLayout gl= new GridLayout();
 		gl.numColumns= 2;
+		gl.marginWidth=0;
 		GridData gd= new GridData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.grabExcessVerticalSpace= true;
@@ -305,6 +283,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		Composite panel1= new Composite(panel, SWT.NONE);
 		GridLayout gl1= new GridLayout();
 		gl1.numColumns= 1;
+		gl1.marginWidth=0;
 		GridData gd1= new GridData();
 		gd1.grabExcessHorizontalSpace= true;
 		gd1.grabExcessVerticalSpace= true;
@@ -319,6 +298,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		Composite panel2= new Composite(panel, SWT.NONE);
 		GridLayout gl2= new GridLayout();
 		gl2.numColumns= 1;
+		gl2.marginWidth=0;
 		GridData gd2= new GridData();
 		gd2.grabExcessHorizontalSpace= true;
 		gd2.grabExcessVerticalSpace= true;
@@ -333,52 +313,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 
 	}
 	
-	private void createCustomLayout(Composite parent) {
-		Hashtable OptionCategories=  findCategories(fNewOptions);
-		
-		ArrayList checkOptions= new ArrayList();
-		ArrayList textOptions= new ArrayList();
-		Composite panel= new Composite(parent, SWT.NONE);
-		GridLayout gl= new GridLayout();
-		gl.numColumns= 2;
-		GridData gd= new GridData();
-		gd.grabExcessHorizontalSpace= true;
-		gd.grabExcessVerticalSpace= true;
-		gd.horizontalAlignment= GridData.FILL;
-		gd.verticalAlignment= GridData.FILL;
-		panel.setLayoutData(gd);
-		panel.setLayout(gl);
-
-		// panel1
-		Composite panel1= new Composite(panel, SWT.NONE);
-		GridLayout gl1= new GridLayout();
-		gl1.numColumns= 1;
-		GridData gd1= new GridData();
-		gd1.grabExcessHorizontalSpace= true;
-		gd1.grabExcessVerticalSpace= true;
-		gd1.horizontalAlignment= GridData.FILL;
-		gd1.verticalAlignment= GridData.FILL;
-		panel1.setLayoutData(gd1);
-		panel1.setLayout(gl1);
-		createSingleCategory(panel1, (ConfigurableOption[])OptionCategories.get("Newline"), textOptions, checkOptions,  "Newline");
-
-		//panel 2
-		Composite panel2= new Composite(panel, SWT.NONE);
-		GridLayout gl2= new GridLayout();
-		gl2.numColumns= 1;
-		GridData gd2= new GridData();
-		gd2.grabExcessHorizontalSpace= true;
-		gd2.grabExcessVerticalSpace= true;
-		gd2.horizontalAlignment= GridData.FILL;
-		gd2.verticalAlignment= GridData.FILL;
-		panel2.setLayoutData(gd2);
-		panel2.setLayout(gl2);
-		createSingleCategory(panel2, (ConfigurableOption[])OptionCategories.get("Style"), textOptions, checkOptions,  "Style");
-		createSingleCategory(panel2, (ConfigurableOption[])OptionCategories.get("Line splitting"), textOptions, checkOptions,  "Line splitting");	
-		fCheckOptions= (Button[]) checkOptions.toArray(new Button[checkOptions.size()]);
-		fTextOptions= (Text[]) textOptions.toArray(new Text[textOptions.size()]);
-	}
-
+	
 	private void createSingleCategory(Composite parent,ConfigurableOption[] options, ArrayList textOptions, ArrayList checkOptions,  String category)
 	{	
 			Group group= new Group(parent, SWT.NONE);
@@ -395,7 +330,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			for (int i= 0; i < options.length; i++) {
 				ConfigurableOption opt= options[i];
 				if (opt.getPossibleValues() == ConfigurableOption.NoDiscreteValue)
-					textOptions.add(createTextOption(opt.getName(), opt.getDescription(), opt, group, fTextfieldListener));
+					textOptions.add(createTextOption(opt.getName(), opt.getDescription(), opt, group, fTextListener));
 				else
 					if (opt.getPossibleValues().length == 2)
 						checkOptions.add(createCheckOption(opt.getName(), opt.getDescription(), opt, group, fCheckboxListener));
@@ -403,32 +338,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			}						;
 	}
 	
-	private void createSimpleLayout(Composite parent) {
-		Composite panel= new Composite(parent, SWT.NONE);
-		GridLayout gl= new GridLayout();
-		gl.numColumns= 1;
-		GridData gd= new GridData();
-		gd.grabExcessHorizontalSpace= true;
-		gd.horizontalAlignment= GridData.FILL;
-		panel.setLayoutData(gd);
-		panel.setLayout(gl);
-		ArrayList checkOptions= new ArrayList();
-		ArrayList textOptions= new ArrayList();
-		for (int i= 0; i <  getCurrentOptions().length; i++) {
-			ConfigurableOption opt=  getCurrentOptions()[i];
-			if (opt.getPossibleValues() == ConfigurableOption.NoDiscreteValue)
-				textOptions.add(createTextOption(opt.getName(), opt.getDescription(), fNewOptions[i], panel, fTextfieldListener));
-			else
-				if (opt.getPossibleValues().length == 2)
-					checkOptions.add(createCheckOption(opt.getName(), opt.getDescription(), fNewOptions[i], panel, fCheckboxListener));
-				else
-					;
-		}
-		System.out.println("ok");
-		fCheckOptions= (Button[]) checkOptions.toArray(new Button[checkOptions.size()]);
-		fTextOptions= (Text[]) textOptions.toArray(new Text[textOptions.size()]);
-	}
-
+	
 	private void createMainControls(Composite parent) {
 		Composite pan= new Composite(parent, SWT.RIGHT);
 		pan.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
@@ -460,56 +370,42 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		return check;
 	}
 
-	private Text createTextOption(String name, String description, ConfigurableOption option, Composite parent, FocusListener con) {
+	private Text createTextOption(String name, String description, ConfigurableOption option, Composite parent, ModifyListener con) {
 		Composite pan= new Composite(parent, SWT.NONE);
 		GridLayout gl= new GridLayout();
-		gl.numColumns= 2;
+		gl.numColumns= 1;
 		pan.setLayout(gl);
 		GridData lgd= new GridData();
 		lgd.horizontalAlignment= GridData.FILL;
 		lgd.grabExcessHorizontalSpace= true;
 		pan.setLayoutData(lgd);
+		pan.setToolTipText(description);
 		Label flabel= new Label(pan, SWT.NONE);
 		flabel.setText(name);
 		Text text= new Text(pan, SWT.BORDER | SWT.SINGLE);
-		text.setToolTipText(description);
+//		text.setToolTipText(description);
 		text.setData("OPTION", option);
 		GridData gd= new GridData();
 		gd.widthHint= 25;
 		gd.horizontalAlignment= GridData.BEGINNING;
 		text.setLayoutData(gd);
-		text.addFocusListener(con);
-		// TESTING text.addModifyListener(con); 
+		text.addModifyListener(con); 
 		text.setText(String.valueOf(option.getCurrentValueIndex()));
 		return text;
 	}
 
 	private void createPreview(Composite parent) {
-		Composite pan= new Composite(parent, SWT.BORDER);
-		GridLayout gl= new GridLayout();
-		gl.numColumns= 1;
-		pan.setLayout(gl);
-		GridData gd0= new GridData();
-		gd0.grabExcessHorizontalSpace= true;
-		gd0.horizontalAlignment= GridData.FILL;
-		gd0.verticalAlignment= GridData.FILL;
-		pan.setLayoutData(gd0);
-		
-		fPreviewText= new StyledText(pan, SWT.MULTI| SWT.V_SCROLL);
+		fPreviewText= new StyledText(parent, SWT.BORDER| SWT.MULTI| SWT.V_SCROLL);
 		GridData gd= new GridData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.horizontalAlignment= GridData.FILL;
 		gd.verticalAlignment= GridData.FILL;
+		gd.horizontalSpan=1;
 		gd.heightHint= 200;
-		gd.widthHint= 400;
+		//gd.widthHint= 400;
 		fPreviewText.setLayoutData(gd);
 		fPreviewText.setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
 		updatePreview(fNewOptions);
-		Label ltxt= new Label(pan, SWT.CENTER);
-		GridData lgd= new GridData();
-		lgd.horizontalAlignment= GridData.FILL;
-		ltxt.setLayoutData(lgd);
-		ltxt.setText("Preview");
 	}
 
 	public void updatePreview(final ConfigurableOption[] options) {
@@ -538,34 +434,10 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		}
 	};
 
-	//private ModifyListener textListener = new ModifyListener()
-	//{
-	//	public void modifyText(ModifyEvent e)
-	//	{
-	//		int val;
-	//		Text src= (Text) e.widget;
-	//		ConfigurableOption option= retrieveOption(src);
-	//		try {
-	//			val= Integer.parseInt(src.getText());
-	//			if (val < 0)
-	//				throw new NumberFormatException("Negative number");
-	//		} catch (NumberFormatException nex) {
-	//			//seterrorMessage Message status line
-	//			MessageBox msg= new MessageBox(fMainPanel.getShell());
-	//			msg.setMessage("Error : " + src.getText() + " is NaN");
-	//			msg.open();
-	//			src.setText((String) String.valueOf(option.getCurrentValueIndex()));
-	//			return;
-	//		}
-	//		option.setValueIndex(val);
-	//		updatePreview(fNewOptions);
-	//	}
-//
-//	};
-
-	private FocusListener fTextfieldListener= new FocusAdapter() {
-
-		public void focusLost(FocusEvent e) {
+	private ModifyListener fTextListener = new ModifyListener()
+	{
+		public void modifyText(ModifyEvent e)
+		{
 			int val;
 			Text src= (Text) e.widget;
 			ConfigurableOption option= retrieveOption(src);
@@ -575,9 +447,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 					throw new NumberFormatException("Negative number");
 			} catch (NumberFormatException nex) {
 				//seterrorMessage Message status line
-				MessageBox msg= new MessageBox(fMainPanel.getShell());
-				msg.setMessage("Error : " + src.getText() + " is NaN");
-				msg.open();
+				setErrorMessage("Error : " + src.getText() + " is not a valid Number");
 				src.setText((String) String.valueOf(option.getCurrentValueIndex()));
 				return;
 			}
@@ -586,6 +456,30 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		}
 
 	};
+
+//	private FocusListener fTextfieldListener= new FocusAdapter() {
+//
+//		public void focusLost(FocusEvent e) {
+//			int val;
+//			Text src= (Text) e.widget;
+//			ConfigurableOption option= retrieveOption(src);
+//			try {
+//				val= Integer.parseInt(src.getText());
+//				if (val < 0)
+//					throw new NumberFormatException("Negative number");
+//			} catch (NumberFormatException nex) {
+//				//seterrorMessage Message status line
+//				MessageBox msg= new MessageBox(fMainPanel.getShell());
+//				msg.setMessage("Error : " + src.getText() + " is NaN");
+//				msg.open();
+//				src.setText((String) String.valueOf(option.getCurrentValueIndex()));
+//				return;
+//			}
+//			option.setValueIndex(val);
+//			updatePreview(fNewOptions);
+//		}
+//
+//	};
 
 	private SelectionListener fCheckboxListener= new SelectionAdapter() {
 
