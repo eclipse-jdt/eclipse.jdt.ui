@@ -65,8 +65,7 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 	
 	private StatusInfo fStatus;
 
-	public MarkOccurrencesConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, OverlayPreferenceStore store) {
-		Assert.isNotNull(mainPreferencePage);
+	public MarkOccurrencesConfigurationBlock(OverlayPreferenceStore store) {
 		Assert.isNotNull(store);
 		fStore= store;
 		

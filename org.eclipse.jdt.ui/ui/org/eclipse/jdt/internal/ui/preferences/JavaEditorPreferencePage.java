@@ -276,14 +276,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	private OverlayPreferenceStore fOverlayStore;
 	private JavaEditorHoverConfigurationBlock fJavaEditorHoverConfigurationBlock;
-	private MarkOccurrencesConfigurationBlock fOccurrencesConfigurationBlock;
 	private FoldingConfigurationBlock fFoldingConfigurationBlock;
-	
-	/**
-	 * Quick diff preferences. 
-	 * @since 3.0
-	 */
-	private QuickdiffConfigurationBlock fQuickDiffBlock;
 	
 	private Map fColorButtons= new HashMap();
 	
@@ -1286,9 +1279,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		initializeDefaultColors();
 		
 		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(this, fOverlayStore);
-		fOccurrencesConfigurationBlock= new MarkOccurrencesConfigurationBlock(this, fOverlayStore);
 		fFoldingConfigurationBlock= new FoldingConfigurationBlock(fOverlayStore);
-		fQuickDiffBlock= new QuickdiffConfigurationBlock(fOverlayStore); //$NON-NLS-1$
 		
 		fOverlayStore.load();
 		fOverlayStore.start();
@@ -1318,16 +1309,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item.setControl(fJavaEditorHoverConfigurationBlock.createControl(folder));
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.occurrencesTab.title")); //$NON-NLS-1$
-		item.setControl(fOccurrencesConfigurationBlock.createControl(folder));
-		
-		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.navigationTab.title")); //$NON-NLS-1$
 		item.setControl(createNavigationPage(folder));
-		
-		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("QuickdiffConfigurationBlock.title")); //$NON-NLS-1$
-		item.setControl(fQuickDiffBlock.createControl(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.folding.title")); //$NON-NLS-1$
@@ -1372,8 +1355,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		});
 		
-		fQuickDiffBlock.initialize();
-		fOccurrencesConfigurationBlock.initialize();
 		fFoldingConfigurationBlock.initialize();
 	}
 	
@@ -1426,8 +1407,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
             SelectionListener listener= (SelectionListener)iter.next();
             listener.widgetSelected(null);
         }
-        
-        fQuickDiffBlock.initializeFields();
 	}
 
 	private void initializeDefaultColors() {	
@@ -1470,8 +1449,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 */
 	public boolean performOk() {
 		fJavaEditorHoverConfigurationBlock.performOk();
-		fOccurrencesConfigurationBlock.performOk();
-		fQuickDiffBlock.performOk();
 		fFoldingConfigurationBlock.performOk();
 		fOverlayStore.setValue(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, computeStateMask(fBrowserLikeLinksKeyModifierText.getText()));
 		fOverlayStore.propagate();
@@ -1493,8 +1470,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		handleContentAssistColorListSelection();
 
 		fJavaEditorHoverConfigurationBlock.performDefaults();
-		fOccurrencesConfigurationBlock.performDefaults();
-		fQuickDiffBlock.performDefaults();
 		fFoldingConfigurationBlock.performDefaults();
 
 		super.performDefaults();
@@ -1641,7 +1616,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				status= StatusUtil.getMoreSevere(s, status);
 			}
 		}	
-		status= StatusUtil.getMoreSevere(fOccurrencesConfigurationBlock.getStatus(), status);
 		status= StatusUtil.getMoreSevere(fJavaEditorHoverConfigurationBlock.getStatus(), status);
 		status= StatusUtil.getMoreSevere(getBrowserLikeLinksKeyModifierStatus(), status);
 		setValid(!status.matches(IStatus.ERROR));
