@@ -53,13 +53,14 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		return setUpTest(new TestSuite(THIS));
 	}
 	
-	public static Test suite() {
-		return allTests();
-	}
-	
 	public static Test setUpTest(Test test) {
 		return new ProjectTestSetup(test);
 	}
+	
+	public static Test suite() {
+		return allTests();
+	}
+
 
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getFormatterOptions();
@@ -305,8 +306,16 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	
 	
 	public void testTypeMismatchForInterface1() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("test0", false, null);
 		StringBuffer buf= new StringBuffer();
+		buf.append("package test0;\n");
+		buf.append("public interface PrimaryContainer {\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("PrimaryContainer.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class Container {\n");
 		buf.append("    public static Container getContainer() {\n");
@@ -317,10 +326,10 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");				
+		buf.append("import test0.PrimaryContainer;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("         List list= Container.getContainer();\n");
+		buf.append("         PrimaryContainer list= Container.getContainer();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -335,7 +344,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");				
+		buf.append("import test0.PrimaryContainer;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("         Container list= Container.getContainer();\n");
@@ -348,10 +357,10 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");				
+		buf.append("import test0.PrimaryContainer;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("         List list= (List) Container.getContainer();\n");
+		buf.append("         PrimaryContainer list= (PrimaryContainer) Container.getContainer();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -362,10 +371,10 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
-		buf.append("import java.util.List;\n");
+		buf.append("import test0.PrimaryContainer;\n");
 		buf.append("\n");
 		buf.append("public class Container {\n");
-		buf.append("    public static List getContainer() {\n");
+		buf.append("    public static PrimaryContainer getContainer() {\n");
 		buf.append("        return null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -377,9 +386,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");	
-		buf.append("import java.util.List;\n");
+		buf.append("import test0.PrimaryContainer;\n");
 		buf.append("\n");
-		buf.append("public class Container implements List {\n");
+		buf.append("public class Container implements PrimaryContainer {\n");
 		buf.append("    public static Container getContainer() {\n");
 		buf.append("        return null;\n");
 		buf.append("    }\n");
@@ -391,8 +400,17 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	}
 	
 	public void testTypeMismatchForInterface2() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("test0", false, null);
 		StringBuffer buf= new StringBuffer();
+		buf.append("package test0;\n");
+		buf.append("public interface PrimaryContainer {\n");
+		buf.append("    PrimaryContainer duplicate(PrimaryContainer container);\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("PrimaryContainer.java", buf.toString(), false, null);
+		
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class Container {\n");
 		buf.append("    public static Container getContainer() {\n");
@@ -403,17 +421,17 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.Collections;\n");				
+		buf.append("import test0.PrimaryContainer;\n");		
 		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         Collections.reverse(Container.getContainer());\n");
+		buf.append("    public void foo(PrimaryContainer primary) {\n");
+		buf.append("         primary.duplicate(Container.getContainer());\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -421,11 +439,10 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.Collections;\n");
-		buf.append("import java.util.List;\n");	
+		buf.append("import test0.PrimaryContainer;\n");		
 		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         Collections.reverse((List) Container.getContainer());\n");
+		buf.append("    public void foo(PrimaryContainer primary) {\n");
+		buf.append("         primary.duplicate((PrimaryContainer) Container.getContainer());\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -436,10 +453,10 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
-		buf.append("import java.util.List;\n");
+		buf.append("import test0.PrimaryContainer;\n");
 		buf.append("\n");
 		buf.append("public class Container {\n");
-		buf.append("    public static List getContainer() {\n");
+		buf.append("    public static PrimaryContainer getContainer() {\n");
 		buf.append("        return null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -451,16 +468,44 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");	
-		buf.append("import java.util.List;\n");
+		buf.append("import test0.PrimaryContainer;\n");
 		buf.append("\n");
-		buf.append("public class Container implements List {\n");
+		buf.append("public class Container implements PrimaryContainer {\n");
 		buf.append("    public static Container getContainer() {\n");
 		buf.append("        return null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(3);
+		String preview4= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test0;\n");
+		buf.append("\n");	
+		buf.append("import test1.Container;\n");
+		buf.append("\n");
+		buf.append("public interface PrimaryContainer {\n");
+		buf.append("    PrimaryContainer duplicate(Container container);\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(4);
+		String preview5= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test0;\n");
+		buf.append("\n");	
+		buf.append("import test1.Container;\n");
+		buf.append("\n");
+		buf.append("public interface PrimaryContainer {\n");
+		buf.append("    PrimaryContainer duplicate(PrimaryContainer container);\n");
+		buf.append("\n");
+		buf.append("    void duplicate(Container container);\n");
+		buf.append("}\n");
+		String expected5= buf.toString();
 				
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });		
 	}
 
 	public void testTypeMismatchInFieldDecl() throws Exception {
@@ -602,20 +647,32 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	}
 	
 	public void testTypeMismatchInExpression() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("test0", false, null);
 		StringBuffer buf= new StringBuffer();
+		buf.append("package test0;\n");
+		buf.append("public class Other {\n");
+		buf.append("    public Object[] toArray() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("Other.java", buf.toString(), false, null);
+
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");		
+		buf.append("import test0.Other;\n");		
 		buf.append("public class E {\n");
-		buf.append("    public String[] foo(List list) {\n");
-		buf.append("        return list.toArray(new List[list.size()]);\n");
+		buf.append("    public String[] foo(Other other) {\n");
+		buf.append("        return other.toArray();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2); // 2nd is type safety warning for toArray
-		assertNumberOfProposals(proposals, 2);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -623,10 +680,10 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
+		buf.append("import test0.Other;\n");	
 		buf.append("public class E {\n");
-		buf.append("    public String[] foo(List list) {\n");
-		buf.append("        return (String[]) list.toArray(new List[list.size()]);\n");
+		buf.append("    public String[] foo(Other other) {\n");
+		buf.append("        return (String[]) other.toArray();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -636,15 +693,27 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
+		buf.append("import test0.Other;\n");	
 		buf.append("public class E {\n");
-		buf.append("    public Object[] foo(List list) {\n");
-		buf.append("        return list.toArray(new List[list.size()]);\n");
+		buf.append("    public Object[] foo(Other other) {\n");
+		buf.append("        return other.toArray();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+		buf= new StringBuffer();
+		buf.append("package test0;\n");
+		buf.append("public class Other {\n");
+		buf.append("    public String[] toArray() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
 	
 	public void testCastOnCastExpression() throws Exception {
