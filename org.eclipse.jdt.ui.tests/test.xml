@@ -62,7 +62,7 @@
 
   
   
-  <target name=" checkOS">
+  <target name="checkOS">
    	<condition property="os.isWindows">
     	<os family="windows"/>
   	</condition>
