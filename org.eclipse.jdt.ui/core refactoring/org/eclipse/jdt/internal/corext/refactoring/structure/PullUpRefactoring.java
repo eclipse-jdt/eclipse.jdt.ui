@@ -713,7 +713,8 @@ public class PullUpRefactoring extends Refactoring {
 			IType iType= referencedTypes[i];
 			importEdit.addImport(JavaModelUtil.getFullyQualifiedName(iType));
 		}
-		manager.get(cu).addTextEdit("Update imports", importEdit);
+		if (! importEdit.isEmpty())
+			manager.get(cu).addTextEdit("Update imports", importEdit);
 	}
 
 	private static int getTabWidth() {
