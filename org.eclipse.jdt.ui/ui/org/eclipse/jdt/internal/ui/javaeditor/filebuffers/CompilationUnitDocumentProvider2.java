@@ -55,7 +55,6 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -815,13 +814,6 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 		
 		if (fileInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) fileInfo;
-
-			// Workaround for bug 41583: [misc] Eclipse cannot save or compile files in non-Java project anymore
-			IJavaProject jProject= info.fCopy.getJavaProject();
-			if (jProject == null || !jProject.getProject().hasNature(JavaCore.NATURE_ID)) {
-				super.saveDocument(monitor, element, ignore, overwrite);
-				return;
-			}
 
 			synchronized (info.fCopy) {
 				info.fCopy.reconcile();
