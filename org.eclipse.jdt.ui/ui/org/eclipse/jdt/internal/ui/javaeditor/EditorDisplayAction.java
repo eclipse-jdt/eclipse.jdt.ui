@@ -26,8 +26,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class EditorDisplayAction extends DisplayAction {
 
-	public EditorDisplayAction(IWorkbenchPart part) {
-		super(part);
+	public EditorDisplayAction(IWorkbenchPart part, boolean usedInEditor) {
+		super(part, usedInEditor);
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.DISPLAY_ACTION });	
 	}
 	

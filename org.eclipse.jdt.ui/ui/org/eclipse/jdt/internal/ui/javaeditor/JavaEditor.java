@@ -327,9 +327,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		setAction("ShowJavaDoc", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION));
 		
-		setAction("Display", new EditorDisplayAction(this)); //$NON-NLS-1$
+		setAction("Display", new EditorDisplayAction(this, true)); //$NON-NLS-1$
 		setAction("RunToLine", new RunToLineAction(this)); //$NON-NLS-1$
-		setAction("Inspect", new InspectAction(this)); //$NON-NLS-1$
+		setAction("Inspect", new InspectAction(this, true)); //$NON-NLS-1$
 	}
 	
 	private boolean isTextSelectionEmpty() {

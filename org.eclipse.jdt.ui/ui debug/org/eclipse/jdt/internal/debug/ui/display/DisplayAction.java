@@ -22,8 +22,8 @@ import org.eclipse.ui.IWorkbenchPart;
  */
 public class DisplayAction extends EvaluateAction {
 	
-	public DisplayAction(IWorkbenchPart workbenchPart) {
-		super(workbenchPart);
+	public DisplayAction(IWorkbenchPart workbenchPart, boolean usedInEditor) {
+		super(workbenchPart, usedInEditor);
 		
 		setText(DisplayMessages.getString("Display.label")); //$NON-NLS-1$
 		setToolTipText(DisplayMessages.getString("Display.tooltip")); //$NON-NLS-1$

@@ -21,8 +21,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class InspectAction extends EvaluateAction {
 
-	public InspectAction(IWorkbenchPart workbenchPart) {
-		super(workbenchPart);
+	public InspectAction(IWorkbenchPart workbenchPart, boolean usedInEditor) {
+		super(workbenchPart, usedInEditor);
 		
 		setText(DisplayMessages.getString("Inspect.label")); //$NON-NLS-1$
 		setToolTipText(DisplayMessages.getString("Inspect.tooltip")); //$NON-NLS-1$

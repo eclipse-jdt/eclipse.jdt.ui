@@ -11,10 +11,14 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.*;
 import org.eclipse.debug.core.*;
 import org.eclipse.debug.core.model.*;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.debug.core.*;
+import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.debug.ui.JDIModelPresentation;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.ITextSelection;
@@ -37,76 +41,25 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 	protected IWorkbenchPart fWorkbenchPart;
 	protected String fExpression;
 	
-	
-	public EvaluateAction(IWorkbenchPart workbenchPart) {
+	/**
+	 * Indicates whether this action is used from within an editor.  If so,
+	 * then this action is enabled only when the editor's input matches the
+	 * editor input corresponding to the currently selected stack frame.
+	 * If this flag is false, then this action is enabled whenever there is
+	 * a stack frame selected in the UI.
+	 */
+	private boolean fUsedInEditor;
+		
+	public EvaluateAction(IWorkbenchPart workbenchPart, boolean usedInEditor) {
 		super();
 		fWorkbenchPart= workbenchPart;
+		fUsedInEditor = usedInEditor;
 	}
 	
 	/**
-	 * Resolves the stack frame context for the evaluation
+	 * Finds the currently selected stack frame in the UI
 	 */
 	protected IStackFrame getContext() {
-		IStackFrame frame= getContextFromUI();
-		if (frame == null) {
-			frame= getContextFromModel();
-		}
-		return frame;
-	}
-	
-	/**
-	 * Resolves a stack frame context from the model
-	 */
-	protected IStackFrame getContextFromDebugTarget(IDebugTarget dt) {
-		if (!dt.isTerminated()) {
-			try {
-				IThread[] threads= dt.getThreads();
-				for (int i= 0; i < threads.length; i++) {
-					IThread thread= threads[i];
-					if (thread.isSuspended()) {
-						return thread.getTopStackFrame();
-					}
-				}
-			} catch(DebugException x) {
-				JavaPlugin.log(x.getStatus());
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Resolves a stack frame context from the model
-	 */
-	protected IStackFrame getContextFromModel() {
-		IDebugTarget[] dts= DebugPlugin.getDefault().getLaunchManager().getDebugTargets();
-		for (int i= 0; i < dts.length; i++) {
-			IDebugTarget dt= dts[i];
-			IStackFrame frame = getContextFromDebugTarget(dt);
-			if (frame != null) {
-				return frame;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Resolves a stack frame context from the model
-	 */
-	protected IStackFrame getContextFromThread(IThread thread) {
-		try {
-			if (thread.isSuspended()) {
-				return thread.getTopStackFrame();
-			}
-		} catch(DebugException x) {
-			JavaPlugin.log(x.getStatus());
-		}
-		return null;
-	}
-	
-	/**
-	 * Resolves a stack frame context from the UI
-	 */
-	protected IStackFrame getContextFromUI() {
 		IWorkbenchPage page = fWorkbenchPart.getSite().getWorkbenchWindow().getActivePage();
 		if (page == null) {
 			return null;
@@ -121,12 +74,6 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 					Object item = ss.getFirstElement();
 					if (item instanceof IStackFrame) {
 						return (IStackFrame)item;
-					}
-					if (item instanceof IThread) {
-						return getContextFromThread((IThread)item);
-					}
-					if (item instanceof IDebugTarget) {
-						return getContextFromDebugTarget((IDebugTarget)item);
 					}
 				}
 			}
@@ -193,8 +140,46 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 	 * @see IUpdate
 	 */
 	public void update() {
-		setEnabled(getContext() != null && 
-			textHasContent(((ITextSelection)fWorkbenchPart.getSite().getSelectionProvider().getSelection()).getText()));
+		boolean enabled = false;
+		if (isValidStackFrame()) {
+			if (textHasContent(((ITextSelection)fWorkbenchPart.getSite().getSelectionProvider().getSelection()).getText())) {
+				enabled = true;
+			}
+		}
+		setEnabled(enabled);
+	}
+	
+	/**
+	 * Returns true if the current stack frame context can be used for an
+	 * evaluation, false otherwise.
+	 */
+	protected boolean isValidStackFrame() {
+		IStackFrame stackFrame = getContext();
+		if (stackFrame == null) {
+			return false;
+		}
+		if (isUsedInEditor()) {
+			return compareToEditorInput(stackFrame);
+		} else {
+			return true;
+		}
+	}
+	
+	/**
+	 * Resolve an editor input from the source element of the stack frame
+	 * argument, and return whether it's equal to the editor input for the
+	 * editor that owns this action.
+	 */
+	protected boolean compareToEditorInput(IStackFrame stackFrame) {
+		ILaunch launch = stackFrame.getLaunch();
+		ISourceLocator sourceLocator = launch.getSourceLocator();
+		Object sourceElement = sourceLocator.getSourceElement(stackFrame);
+		JDIModelPresentation presentation = new JDIModelPresentation();
+		IEditorInput sfEditorInput = presentation.getEditorInput(sourceElement);
+		if (fWorkbenchPart instanceof IEditorPart) {
+			return ((IEditorPart)fWorkbenchPart).getEditorInput().equals(sfEditorInput);
+		}
+		return false;
 	}
 	
 	protected Shell getShell() {
@@ -298,5 +283,9 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 	 */
 	protected boolean displayExpression() {
 		return true;
+	}
+	
+	protected boolean isUsedInEditor() {
+		return fUsedInEditor;
 	}
 }
