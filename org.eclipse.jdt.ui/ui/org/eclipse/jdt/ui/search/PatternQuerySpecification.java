@@ -38,9 +38,9 @@ public class PatternQuerySpecification extends QuerySpecification {
 	 *                should search for. (@see
 	 *                org.eclipse.jdt.core.search.IJavaSearchConstants#TYPE, for
 	 *                example).
-	 * @param caseSensitive Whether the query shoudl be case sensitive.
+	 * @param caseSensitive Whether the query shoudl be case sensitive
 	 * @param limitTo The kind of occurrence the query should search for
-	 * @param scope The scope to search in.
+	 * @param scope The scope to search in
 	 * @param scopeDescription A human readable description of the search
 	 *                scope.
 	 */

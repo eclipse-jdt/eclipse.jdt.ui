@@ -42,7 +42,7 @@ public abstract class QuerySpecification {
 
 	/**
 	 * Returns the search scope to be used in the query.
-	 * @return The search scope.
+	 * @return The search scope
 	 */
 	public IJavaSearchScope getScope() {
 		return fScope;
@@ -50,7 +50,7 @@ public abstract class QuerySpecification {
 	
 	/**
 	 * Returns a human readable description of the search scope.
-	 * @return A description of the search scope. 
+	 * @return A description of the search scope
 	 * @see QuerySpecification#getScope()
 	 */
 	public String getScopeDescription() {
@@ -59,7 +59,7 @@ public abstract class QuerySpecification {
 	
 	/**
 	 * Returns what kind of occurences the query should look for.
-	 * @return Whether to search for reference, declaration, etc
+	 * @return Whether to search for reference, declaration, etc.
 	 * @see org.eclipse.jdt.core.search.IJavaSearchConstants
 	 */
 	public int getLimitTo() {

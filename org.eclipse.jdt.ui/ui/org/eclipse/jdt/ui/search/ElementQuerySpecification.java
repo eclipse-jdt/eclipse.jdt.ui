@@ -33,14 +33,18 @@ public class ElementQuerySpecification extends QuerySpecification {
 	 * A constructor.
 	 * @param javaElement The java element the query should search for.
 	 * @param limitTo		  The kind of occurrence the query should search for
-	 * @param scope		  The scope to search in.
-	 * @param scopeDescription A human readable description of the search scope.
+	 * @param scope		  The scope to search in
+	 * @param scopeDescription A human readable description of the search scope
 	 */
 	public ElementQuerySpecification(IJavaElement javaElement, int limitTo, IJavaSearchScope scope, String scopeDescription) {
 		super(limitTo, scope, scopeDescription);
 		fElement= javaElement;
 	}
 	
+	/**
+	 * Returns the element to be searched for.
+	 * @return the element to search for
+	 */
 	public IJavaElement getElement() {
 		return fElement;
 	}

@@ -35,7 +35,7 @@ public interface IMatchPresentation {
 	 * will call this method when it needs to render elements and will dipose the 
 	 * label providers when it is done with them. This method may therefore be called
 	 * multiple times.
-	 * @return A label provider for elements found by the corresponding query participant.
+	 * @return A label provider for elements found by the corresponding query participant
 	 */
 	ILabelProvider createLabelProvider();
 	/**
@@ -54,9 +54,9 @@ public interface IMatchPresentation {
 	 * @param currentLength
 	 *            The current length of the selection
 	 * @param activate
-	 * 			  Whether to activate the editor the match is shown in.
+	 * 			  Whether to activate the editor the match is shown in
 	 * @throws PartInitException
-	 *             If an editor can't be opened.
+	 *             If an editor can't be opened
 	 */
 	void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException;
 }

@@ -25,7 +25,7 @@ import org.eclipse.search.ui.text.Match;
 public interface ISearchRequestor {
 	/**
 	 * Adds a match to the search that issued this particular <code>ISearchRequestor</code>.
-	 * @param match The match to be reported.
+	 * @param match The match to be reported
 	 */
 	void reportMatch(Match match);
 }

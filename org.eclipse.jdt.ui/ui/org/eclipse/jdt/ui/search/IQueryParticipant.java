@@ -33,9 +33,9 @@ public interface IQueryParticipant {
 	 * any matches through the given <code>requestor</code>.
 	 * The interpretation of what a given Java search (e.g. "References to class Foo" means is up to the 
 	 * participant).
-	 * @param requestor The requestor to report matches to.
-	 * @param querySpecification The specification of the query to run.
-	 * @param monitor A monitor to report progress on.
+	 * @param requestor The requestor to report matches to
+	 * @param querySpecification The specification of the query to run
+	 * @param monitor A monitor to report progress on
 	 * @throws CoreException
 	 */
 	void search(ISearchRequestor requestor, QuerySpecification querySpecification, IProgressMonitor monitor) throws CoreException;
@@ -54,7 +54,7 @@ public interface IQueryParticipant {
 	 * be handled by the java serach UI, i.e. elements that are not implementors if <code>IJavaElement</code>
 	 * of <code>IResource</code>.
 	 * A participant may return null if matches are only reported against <code>IResources</code> or <code>IJavaElements</code>.
-	 * @return The UI participant for this query participant or <code>null</code>.
+	 * @return The UI participant for this query participant or <code>null</code>
 	 */
 	IMatchPresentation getUIParticipant();
 }
