@@ -656,7 +656,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 	 */
 	public void preVisit(ASTNode node) {
-		Assert.isTrue(node.getStartPosition() != -1, "Node inserted but not marked as inserted: " + node.toString());
 		TextEdit edit= fRewrite.getCopySourceEdit(node);
 		if (edit != null && edit.getTextRange().getOffset() == node.getStartPosition()) {
 			fCurrentEdit.add(edit);
