@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 public abstract class TypeSet implements ITypeSet {
 	
-	public static class TypeUniverse extends TypeSet {
+	private static class TypeUniverse extends TypeSet {
 		
 		public ITypeSet restrictedTo(ITypeSet restrictionSet) {
 			return restrictionSet;
@@ -89,7 +89,7 @@ public abstract class TypeSet implements ITypeSet {
 		}
 	}
 	
-	public static class EmptyTypeSet extends TypeSet {
+	private static class EmptyTypeSet extends TypeSet {
 
 		public String toString() {
 			return "EMPTY"; //$NON-NLS-1$
