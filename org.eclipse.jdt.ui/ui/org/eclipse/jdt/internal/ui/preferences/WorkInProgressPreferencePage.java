@@ -20,8 +20,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
-import org.eclipse.jdt.internal.ui.text.java.ExperimentalPreference;
-	
 /*
  * The page for setting 'work in progress' features preferences.
  */
@@ -40,6 +38,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
+		store.setDefault(PREF_SHOW_TEMP_PROBLEMS, false);
 	}
 	
 	/*
@@ -53,11 +52,17 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	
 	protected void createFieldEditors() {
 		Composite parent= getFieldEditorParent();
-
-		BooleanFieldEditor boolEditor;
-		boolEditor= new BooleanFieldEditor(
+		 		
+		BooleanFieldEditor boolEditor= new BooleanFieldEditor(
 			PREF_SYNC_OUTLINE_ON_CURSOR_MOVE,
 			"Synchronize &outline selection on cursor move", //$NON-NLS-1$
+			parent
+        );
+		addField(boolEditor);
+		
+		boolEditor= new BooleanFieldEditor(
+			PREF_SHOW_TEMP_PROBLEMS,
+			"Show &temporary problems solvable with Quick Fix in vertical ruler", //$NON-NLS-1$
 			parent
         );
 		addField(boolEditor);
@@ -69,22 +74,13 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	public void init(IWorkbench workbench) {
 	}
 	
-	public static boolean synchronizeOutlineOnCursorMove() {
+	static public boolean synchronizeOutlineOnCursorMove() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE);
 	}
 	
-	public static boolean showTempProblems() {
+	static public boolean showTempProblems() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SHOW_TEMP_PROBLEMS);
 	}
-	
-	/*
-	 * @see IPreferencePage#performOk()
-	 */
-	public boolean performOk() {
-		JavaPlugin.getDefault().savePluginPreferences();
-		return super.performOk();
-	}
-
 }
 
 

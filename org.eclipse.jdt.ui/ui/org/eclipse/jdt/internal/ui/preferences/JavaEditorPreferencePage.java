@@ -68,7 +68,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
-import org.eclipse.jdt.internal.ui.text.java.ExperimentalPreference;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
 
@@ -156,7 +155,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ORDER_PROPOSALS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.CASE_SENSITIVITY),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ADD_IMPORT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL)
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.FILL_METHOD_ARGUMENTS)
 	};
 	
 	private final String[][] fSyntaxColorListModel= new String[][] {
@@ -339,7 +338,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(ContentAssistPreference.CASE_SENSITIVITY, false);
 		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
 		store.setDefault(ContentAssistPreference.ADD_IMPORT, true);
-		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, false);
+		store.setDefault(ContentAssistPreference.FILL_METHOD_ARGUMENTS, false);
 	}
 
 	/*
@@ -730,8 +729,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ADD_IMPORT, 0);
 		
-		label= "&Fill argument names on method completion";
-		addCheckBox(contentAssistComposite, label, ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, 0);
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
+		addCheckBox(contentAssistComposite, label, ContentAssistPreference.FILL_METHOD_ARGUMENTS, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
 		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_DELAY, 4, 0, true);

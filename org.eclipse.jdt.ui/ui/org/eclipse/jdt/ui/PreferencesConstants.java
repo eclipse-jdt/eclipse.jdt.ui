@@ -21,7 +21,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
-import org.eclipse.jdt.internal.ui.text.java.ExperimentalPreference;
 
 /**
  * Preference constants used in the JDT-UI preference store.
@@ -442,7 +441,7 @@ public class PreferencesConstants {
 	/**
 	 * Enable / Disable filling argument names for method completions. Boolean value.
 	 */
-	public final static String CODEASSIST_FILL_ARGUMENT_NAMES= ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL;
+	public final static String CODEASSIST_FILL_ARGUMENT_NAMES= ContentAssistPreference.FILL_METHOD_ARGUMENTS;
 
 	/**
 	 * The characters that select an entry in the code assist selection dialog on Java code. String value. String containing all characters.

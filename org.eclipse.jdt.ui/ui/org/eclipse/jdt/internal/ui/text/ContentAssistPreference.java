@@ -52,6 +52,9 @@ public class ContentAssistPreference {
 	public final static String CASE_SENSITIVITY= "content_assist_case_sensitivity"; //$NON-NLS-1$
 	/** Preference key for adding imports on code assist */
 	public final static String ADD_IMPORT= "content_assist_add_import";	 //$NON-NLS-1$
+	/** Preference key for filling arguments on method completion */
+	public static final String FILL_METHOD_ARGUMENTS= "content_assist_fill_method_arguments"; //$NON-NLS-1$
+
 	
 	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
 		RGB rgb= PreferenceConverter.getColor(store, key);
@@ -229,6 +232,10 @@ public class ContentAssistPreference {
 		
 		changeJavaProcessor(assistant, store, p);
 		changeJavaDocProcessor(assistant, store, p);
+	}
+
+	public static boolean fillArgumentsOnMethodCompletion(IPreferenceStore store) {
+		return store.getBoolean(FILL_METHOD_ARGUMENTS);
 	}
 }
 
