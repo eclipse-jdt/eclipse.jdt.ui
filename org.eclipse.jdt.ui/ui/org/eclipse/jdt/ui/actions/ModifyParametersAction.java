@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.refactoring.ModifyParametersWizard;
+import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
@@ -168,7 +168,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	private RefactoringWizard createWizard(){
 		String title= RefactoringMessages.getString("RefactoringGroup.modify_method_parameters"); //$NON-NLS-1$
 		String helpId= IJavaHelpContextIds.MODIFY_PARAMETERS_ERROR_WIZARD_PAGE;
-		return new ModifyParametersWizard(fRefactoring, title, helpId);
+		return new ChangeSignatureWizard(fRefactoring, title, helpId);
 	}
 	
 	private void startRefactoring() {

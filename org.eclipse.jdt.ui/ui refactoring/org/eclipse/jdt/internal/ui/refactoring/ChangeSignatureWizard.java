@@ -2,9 +2,9 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 
-public class ModifyParametersWizard extends RefactoringWizard {
+public class ChangeSignatureWizard extends RefactoringWizard {
 
-	public ModifyParametersWizard(ChangeSignatureRefactoring ref, String pageTitle, String errorPageContextHelpId) {
+	public ChangeSignatureWizard(ChangeSignatureRefactoring ref, String pageTitle, String errorPageContextHelpId) {
 		super(ref, pageTitle, errorPageContextHelpId);
 	}
 

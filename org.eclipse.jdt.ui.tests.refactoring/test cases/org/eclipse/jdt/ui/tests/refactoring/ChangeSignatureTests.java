@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
@@ -87,7 +87,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(method);
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method);
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -106,7 +106,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method does not exist", method.exists());
-		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(method);
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method);
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
 			ref.setVisibility(newVisibility);
@@ -131,7 +131,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(method);
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method);
 		modifyInfos(ref.getParameterInfos(), newOrder, oldNames, newNames);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -217,7 +217,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private void helperFail(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(classA.getMethod("m", signature));
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(classA.getMethod("m", signature));
 		modifyInfos(ref.getParameterInfos(), newOrder, null, null);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
@@ -226,7 +226,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private void helperAddFail(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(classA.getMethod("m", signature));
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(classA.getMethod("m", signature));
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
