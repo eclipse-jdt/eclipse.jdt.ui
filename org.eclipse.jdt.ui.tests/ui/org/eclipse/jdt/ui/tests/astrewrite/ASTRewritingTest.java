@@ -115,8 +115,7 @@ public class ASTRewritingTest extends TestCase {
 	
 	
 	protected void clearRewrite(ASTRewrite rewrite) {
-		ASTRewriteClear clearer= new ASTRewriteClear(rewrite);
-		rewrite.getRootNode().accept(clearer);
+		rewrite.removeModifications();
 	}
 	
 

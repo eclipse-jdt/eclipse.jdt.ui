@@ -102,6 +102,12 @@ public class ASTRewrite {
 	}
 	
 	/**
+	 * Removes all modifications applied to the given AST.	 */
+	public void removeModifications() {
+		fRootNode.accept(new ASTRewriteClear(this));
+	}
+	
+	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
 	 * create a copy target first and insert this target node. ({@link createCopy})
 	 * @param node The node to be marked as inserted.
