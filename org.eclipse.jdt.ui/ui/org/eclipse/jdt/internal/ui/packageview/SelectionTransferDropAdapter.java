@@ -34,8 +34,8 @@ import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.reorg.CopyAction;
-import org.eclipse.jdt.internal.ui.reorg.MoveAction;
+import org.eclipse.jdt.internal.ui.reorg.JdtCopyAction;
+import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -173,7 +173,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}		
 	
 	private void handleDropCopy(final Object target, DropTargetEvent event) throws JavaModelException{
-		CopyAction action= new CopyAction("#COPY", StructuredSelectionProvider.createFrom(getViewer())){
+		JdtCopyAction action= new JdtCopyAction("#COPY", StructuredSelectionProvider.createFrom(getViewer())){
 			protected Object selectDestination(ReorgRefactoring ref) {
 				return target;
 			}
@@ -182,7 +182,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 	
 	//--
-	private static class DragNDropMoveAction extends MoveAction{
+	private static class DragNDropMoveAction extends JdtMoveAction{
 		private Object fTarget;
 		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
 		
