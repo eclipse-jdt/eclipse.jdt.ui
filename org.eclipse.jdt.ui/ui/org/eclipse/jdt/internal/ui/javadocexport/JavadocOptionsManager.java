@@ -770,7 +770,7 @@ public class JavadocOptionsManager {
 				}
 			}
 
-			String hrefs= (String) fDependencies;
+			String hrefs= fDependencies;
 			StringTokenizer tokenizer= new StringTokenizer(hrefs, ";"); //$NON-NLS-1$
 			while (tokenizer.hasMoreElements()) {
 				String href= (String) tokenizer.nextElement();

@@ -56,7 +56,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 					IJavaProject javaProject= jprojects[i];
 					IPackageFragment[] els= javaProject.getPackageFragments();
 					for (int j= 0; j < els.length; j++) {
-						IPackageFragment iPackageFragment= (IPackageFragment) els[j];
+						IPackageFragment iPackageFragment= els[j];
 						if (iPackageFragment.getCompilationUnits().length > 0) {
 							list.add(javaProject);
 							break;

@@ -126,10 +126,10 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 
 		public void widgetSelected(SelectionEvent e) {
 			for (int i= 0; i < fEnable.length; i++) {
-				((Control) fEnable[i]).setEnabled(true);
+				fEnable[i].setEnabled(true);
 			}
 			for (int i= 0; i < fDisable.length; i++) {
-				((Control) fDisable[i]).setEnabled(false);
+				fDisable[i].setEnabled(false);
 			}
 			validate();
 		}

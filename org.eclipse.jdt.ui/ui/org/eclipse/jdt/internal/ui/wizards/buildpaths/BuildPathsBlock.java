@@ -649,7 +649,7 @@ public class BuildPathsBlock {
 				IPath folderOutput= (IPath) entry.getAttribute(CPListElement.OUTPUT);
 				if (folderOutput != null && folderOutput.segmentCount() > 1) {
 					IFolder folder= fWorkspaceRoot.getFolder(folderOutput);
-					CoreUtility.createFolder((IFolder)folder, true, true, null);
+					CoreUtility.createFolder(folder, true, true, null);
 				}
 			}
 			

@@ -760,7 +760,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 
 			if (! l.isEmpty())
-				result.put(fields[i], (GetterSetterEntry[]) l.toArray(new GetterSetterEntry[l.size()]));
+				result.put(fields[i], l.toArray(new GetterSetterEntry[l.size()]));
 		}
 		return result;
 	}

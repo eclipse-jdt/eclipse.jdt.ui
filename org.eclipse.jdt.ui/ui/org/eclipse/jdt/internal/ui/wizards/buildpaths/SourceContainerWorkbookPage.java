@@ -328,7 +328,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
 		if (key.equals(CPListElement.OUTPUT)) {
-			CPListElement selElement= (CPListElement) elem.getParent();
+			CPListElement selElement=  elem.getParent();
 			OutputLocationDialog dialog= new OutputLocationDialog(getShell(), selElement);
 			if (dialog.open() == OutputLocationDialog.OK) {
 				selElement.setAttribute(CPListElement.OUTPUT, dialog.getOutputLocation());
@@ -336,7 +336,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				fClassPathList.dialogFieldChanged(); // validate
 			}
 		} else if (key.equals(CPListElement.EXCLUSION)) {
-			CPListElement selElement= (CPListElement) elem.getParent();
+			CPListElement selElement= elem.getParent();
 			ExclusionPatternDialog dialog= new ExclusionPatternDialog(getShell(), selElement);
 			if (dialog.open() == OutputLocationDialog.OK) {
 				selElement.setAttribute(CPListElement.EXCLUSION, dialog.getExclusionPattern());
@@ -379,7 +379,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return false;
 		}
 		for (int i= 0; i < selElements.size(); i++) {
-			Object elem= (Object) selElements.get(i);
+			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				if (attrib.getKey().equals(CPListElement.EXCLUSION)) {

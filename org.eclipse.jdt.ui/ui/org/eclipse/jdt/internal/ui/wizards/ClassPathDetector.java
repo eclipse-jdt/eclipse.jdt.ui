@@ -272,7 +272,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			if (hasExtension(name, ".java") && isValidCUName(name)) { //$NON-NLS-1$
 				visitCompilationUnit((IFile) proxy.requestResource());
 			} else if (hasExtension(name, ".class")) { //$NON-NLS-1$
-				fClassFiles.add((IFile) proxy.requestResource());
+				fClassFiles.add(proxy.requestResource());
 			} else if (hasExtension(name, ".jar")) { //$NON-NLS-1$
 				fJARFiles.add(proxy.requestFullPath());
 			}

@@ -125,7 +125,7 @@ public class SuperTypeHierarchyCache {
 	}
 	
 	public static int getAvgCreationTime() {
-		return (int) fgTotCreationTime / fgCacheMisses;
+		return fgTotCreationTime / fgCacheMisses;
 	}			
 
 }

@@ -87,7 +87,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		if (selection.isEmpty())
 			return true;
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			Object element= (Object) iter.next();
+			Object element= iter.next();
 			if (element instanceof IAdaptable) {
 				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
 				if (resource == null)
@@ -151,7 +151,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		
 		List result= new ArrayList(selection.size());
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			Object element= (Object) iter.next();
+			Object element= iter.next();
 			if (element instanceof IAdaptable) {
 				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
 				if (resource != null)

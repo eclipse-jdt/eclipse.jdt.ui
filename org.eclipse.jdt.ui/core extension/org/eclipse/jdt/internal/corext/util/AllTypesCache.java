@@ -70,7 +70,7 @@ public class AllTypesCache {
 		boolean isInterface= (kind == IJavaSearchConstants.INTERFACE);
 		
 		for (int i= 0; i < allTypes.length; i++) {
-			TypeInfo info= (TypeInfo) fgTypeCache[i];
+			TypeInfo info= fgTypeCache[i];
 			if (isWorkspaceScope || info.isEnclosed(scope)) {
 				if (isBoth || (isInterface == info.isInterface())) {
 					typesFound.add(info);

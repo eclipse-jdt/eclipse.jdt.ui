@@ -79,7 +79,7 @@ public class SelectionConverter {
 			IJavaElement[] result= new IJavaElement[selection.size()];
 			int i= 0;
 			for (Iterator iter= selection.iterator(); iter.hasNext(); i++) {
-				Object element= (Object) iter.next();
+				Object element= iter.next();
 				if (!(element instanceof IJavaElement))
 					return EMPTY_RESULT;
 				result[i]= (IJavaElement)element;

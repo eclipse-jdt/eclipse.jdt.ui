@@ -141,7 +141,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			return new JavaElementProperties(element);
 		if (resource.getType() == IResource.FILE)
 			return new FilePropertySource((IFile) resource);
-		return new ResourcePropertySource((IResource) resource);
+		return new ResourcePropertySource(resource);
 	}
 
 	private void updateLazyLoadedAdapters() {

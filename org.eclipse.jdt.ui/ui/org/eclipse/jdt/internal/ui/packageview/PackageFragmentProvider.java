@@ -387,7 +387,7 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 						Control ctrl = fViewer.getControl();
 						if (ctrl != null && !ctrl.isDisposed()) {
 							if (!fFoldPackages)
-								 ((TreeViewer) fViewer).remove(element);
+								 fViewer.remove(element);
 							else
 								refreshGrandParent(element);
 						}
@@ -404,7 +404,7 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 							Control ctrl = fViewer.getControl();
 							if (ctrl != null && !ctrl.isDisposed()) {
 								if (!fFoldPackages)
-									 ((TreeViewer) fViewer).add(parent, element);
+									 fViewer.add(parent, element);
 								else
 									refreshGrandParent(element);
 							}

@@ -301,7 +301,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return false;
 		}
 		for (int i= 0; i < selElements.size(); i++) {
-			Object elem= (Object) selElements.get(i);
+			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				if (((CPListElementAttribute)elem).getValue() == null) {
 					return false;
@@ -335,7 +335,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
-			CPListElement selElement= (CPListElement) elem.getParent();
+			CPListElement selElement= elem.getParent();
 			
 			IPath containerPath= null;
 			boolean applyChanges= false;
@@ -351,7 +351,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				fClassPathList.refresh(); // images
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
-			CPListElement selElement= (CPListElement) elem.getParent();
+			CPListElement selElement= elem.getParent();
 			JavadocPropertyDialog dialog= new JavadocPropertyDialog(getShell(), selElement);
 			if (dialog.open() == JavadocPropertyDialog.OK) {
 				selElement.setAttribute(CPListElement.JAVADOC, dialog.getJavaDocLocation());

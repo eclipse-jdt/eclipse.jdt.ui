@@ -133,7 +133,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 				workingCopyMembers= new IMember[members.length];
 				for (int i= 0; i < members.length; i++) {
 					IMember member= members[i];
-					IMember workingCopyMember= (IMember) JavaModelUtil.findMemberInCompilationUnit(workingCopyCU, member);
+					IMember workingCopyMember= JavaModelUtil.findMemberInCompilationUnit(workingCopyCU, member);
 					if (workingCopyMember == null) {
 						showError(ActionMessages.getFormattedString("AddJavaDocStubsAction.error.memberNotExisting", member.getElementName())); //$NON-NLS-1$
 						return;
