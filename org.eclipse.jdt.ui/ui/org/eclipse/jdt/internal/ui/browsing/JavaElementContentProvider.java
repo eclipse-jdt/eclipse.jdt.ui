@@ -236,18 +236,6 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 				} else
 					postRemove(element);
 			}
-			if (parent instanceof IPackageFragment) 
-				updatePackageIcon((IPackageFragment)parent);
-			// we are filtering out empty subpackages, so we
-			// a package becomes empty we remove it from the viewer. 
-			if (isPackageFragmentEmpty(element.getParent())) {
-				if (fViewer.testFindItem(parent) != null)
-					postRefresh(internalGetParent(parent));
-			}  
-			
-			// XXX: Instance check for MembersView will go away once we have a content provider for each view
-//			if (element instanceof ICompilationUnit && fBrowsingPart instanceof MembersView)
-//				postRefresh(null);
 				
 			if (fBrowsingPart.isAncestorOf(element, fInput))
 				postAdjustInputAndSetSelection(null);
