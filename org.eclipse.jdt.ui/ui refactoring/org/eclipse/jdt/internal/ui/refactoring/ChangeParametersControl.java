@@ -149,7 +149,7 @@ public class ChangeParametersControl extends Composite {
 		}
 	};
 
-	private static final String[] PROPERTIES= { "type", "new", "default" }; //$NON-NLS-2$ //$NON-NLS-1$
+	private static final String[] PROPERTIES= { "type", "new", "default" }; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 	private static final int TYPE_PROP= 0;
 	private static final int NEWNAME_PROP= 1;
 	private static final int DEFAULT_PROP= 2;
@@ -228,7 +228,7 @@ public class ChangeParametersControl extends Composite {
 		if (fCanAddParameters){
 			tc= new TableColumn(table, SWT.NONE, DEFAULT_PROP);
 			tc.setResizable(true);
-			tc.setText("Default value");
+			tc.setText(RefactoringMessages.getString("ChangeParametersControl.table.defaultValue")); //$NON-NLS-1$
 		}	
 		
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
@@ -415,7 +415,7 @@ public class ChangeParametersControl extends Composite {
 
 	private Button createAddButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText("&Add");
+		button.setText(RefactoringMessages.getString("ChangeParametersControl.buttons.add")); //$NON-NLS-1$
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -425,9 +425,11 @@ public class ChangeParametersControl extends Composite {
 				fListener.parameterAdded(newInfo);
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
-				getTable().setSelection(getTableItemCount() - 1);
+				int row= getTableItemCount() - 1;
+				getTable().setSelection(row);
 				updateButtonsEnabledState();
-				ChangeParametersControl.this.showTableCursor(false);
+				ChangeParametersControl.this.showTableCursor(true);
+				ChangeParametersControl.this.setSelection(row, 0);
 			}
 		});	
 		return button;
@@ -435,7 +437,7 @@ public class ChangeParametersControl extends Composite {
 
 	private Button createRemoveButton(Composite buttonComposite) {
 		final Button button= new Button(buttonComposite, SWT.PUSH);
-		button.setText("Re&move");
+		button.setText(RefactoringMessages.getString("ChangeParametersControl.buttons.remove")); //$NON-NLS-1$
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -501,6 +503,11 @@ public class ChangeParametersControl extends Composite {
 	private void showTableCursor(boolean show){
 		if (fTableCursor != null)
 			fTableCursor.setVisible(show);
+	}
+	
+	private void setSelection(int row, int column) {
+		if (fTableCursor != null)
+			fTableCursor.setSelection(row, column);
 	}
 
 	//---- editing -----------------------------------------------------------------------------------------------
