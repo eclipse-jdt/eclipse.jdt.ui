@@ -133,7 +133,7 @@ public class NameProposer {
 			if (arrIndex != -1) {
 				nameBuffer.append('s');
 			}
-			if (JavaConventions.validateFieldName(name).isOK()) {
+			if (JavaConventions.validateFieldName(nameBuffer.toString()).isOK()) {
 				return nameBuffer.toString();
 			}
 		}

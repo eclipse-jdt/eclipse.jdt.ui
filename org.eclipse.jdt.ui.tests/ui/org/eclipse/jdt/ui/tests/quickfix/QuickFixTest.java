@@ -21,6 +21,8 @@ public class QuickFixTest extends TestCase {
 		TestSuite suite= new TestSuite();
 		suite.addTest(new TestSuite(UnresolvedTypesQuickFixTest.class));
 		suite.addTest(new TestSuite(UnresolvedVariablesQuickFixTest.class));
+		suite.addTest(new TestSuite(UnresolvedMethodsQuickFixTest.class));
+		suite.addTest(new TestSuite(MarkerResolutionTest.class));
 		return suite;
 	}
 

@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.ITextViewer;
@@ -30,16 +31,19 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
+import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
@@ -66,7 +70,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.TypeMismatch:
 			case IProblem.UnhandledException:
 			case IProblem.VoidMethodReturnsValue:
-			case IProblem.MissingReturnType:			
+			case IProblem.MissingReturnType:
 			case IProblem.NonExternalizedStringLiteral:
             case IProblem.NonStaticAccessToStaticField:
             case IProblem.NonStaticAccessToStaticMethod:			
@@ -81,8 +85,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		private static Collator fgCollator= Collator.getInstance();
 		
 		public int compare(Object o1, Object o2) {
-			ChangeCorrectionProposal e1= (ChangeCorrectionProposal) o1;
-			ChangeCorrectionProposal e2= (ChangeCorrectionProposal) o2;
+			IJavaCompletionProposal e1= (IJavaCompletionProposal) o1;
+			IJavaCompletionProposal e2= (IJavaCompletionProposal) o2;
 			int del= e2.getRelevance() - e1.getRelevance();
 			if (del != 0) {
 				return del;
@@ -106,42 +110,55 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ICompilationUnit cu= manager.getWorkingCopy(fEditor.getEditorInput());
-		
-		IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-		IAnnotationModel model= provider.getAnnotationModel(fEditor.getEditorInput());
+		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
+		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 
 		ArrayList proposals= new ArrayList();
-		HashSet idsProcessed= new HashSet();
-		
 		if (model != null) {
-			for (Iterator iter= new ProblemAnnotationIterator(model, true); iter.hasNext();) {
-				IProblemAnnotation annot= (IProblemAnnotation) iter.next();
-				Position pos= model.getPosition((Annotation) annot);
-				if (pos != null) {
-					int start= pos.getOffset();
-					if (documentOffset >= start && documentOffset <= (start +  pos.getLength())) {
-						Integer probId= new Integer(annot.getId());
-						if (!idsProcessed.contains(probId)) {
-							ProblemPosition pp = new ProblemPosition(pos, annot, cu);
-							idsProcessed.add(probId);
-							collectCorrections(pp, proposals);
-							if (proposals.isEmpty()) {
-								//proposals.add(new NoCorrectionProposal(pp, annot.getMessage()));
-							}
-						}
-					}
-				}
-			}
+			processProblemAnnotations(cu, model, documentOffset, proposals);
 		}
 		
 		if (proposals.isEmpty()) {
 			proposals.add(new NoCorrectionProposal(null, null));
 		}
-		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+		IJavaCompletionProposal[] res= (IJavaCompletionProposal[]) proposals.toArray(new IJavaCompletionProposal[proposals.size()]);
 		Arrays.sort(res, new CorrectionsComparator());
 		return res;
+	}
+	
+	private boolean isAtPosition(int offset, Position pos) {
+		return (pos != null) && (offset >= pos.getOffset() && offset <= (pos.getOffset() +  pos.getLength()));
+	}
+	
+
+	private void processProblemAnnotations(ICompilationUnit cu, IAnnotationModel model, int documentOffset, ArrayList proposals) {
+		HashSet idsProcessed= new HashSet();
+		Iterator iter= new ProblemAnnotationIterator(model, true);
+		while (iter.hasNext()) {
+			IProblemAnnotation annot= (IProblemAnnotation) iter.next();
+			Position pos= model.getPosition((Annotation) annot);
+			if (isAtPosition(documentOffset, pos)) {
+				if (annot.isProblem()) {
+					Integer probId= new Integer(annot.getId());
+					if (!idsProcessed.contains(probId)) {
+						ProblemPosition pp = new ProblemPosition(pos, annot, cu);
+						idsProcessed.add(probId);
+						collectCorrections(pp, proposals);
+						if (proposals.isEmpty()) {
+							//proposals.add(new NoCorrectionProposal(pp, annot.getMessage()));
+						}
+					}
+				} else {
+					if (annot instanceof MarkerAnnotation) {
+						IMarker marker= ((MarkerAnnotation) annot).getMarker();
+						IMarkerResolution[] res= PlatformUI.getWorkbench().getMarkerHelpRegistry().getResolutions(marker);
+						for (int i= 0; i < res.length; i++) {
+							proposals.add(new MarkerResolutionProposal(res[i], marker));
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	public static void collectCorrections(ProblemPosition problemPos, ArrayList proposals) {
@@ -256,9 +273,4 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	public String getErrorMessage() {
 		return null;
 	}
-	
-
-	
-	
-
 }

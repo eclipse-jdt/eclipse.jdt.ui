@@ -43,4 +43,17 @@
          </decorator> 
 	</extension>    
 
+<!-- **************** TEST MARKER for quick fix ******************* -->
+
+<extension id="testmarker" point="org.eclipse.core.resources.markers" name="jdt-test-problem">
+	<super type="org.eclipse.core.resources.problemmarker"/>
+	<super type="org.eclipse.core.resources.textmarker"/>
+</extension>
+<extension point="org.eclipse.ui.markerResolution"> 
+   <markerResolutionGenerator 
+      class="org.eclipse.jdt.ui.tests.quickfix.MarkerResolutionGenerator" 
+      markerType="org.eclipse.jdt.ui.tests.testmarker"> 
+   </markerResolutionGenerator> 
+</extension> 
+
 </plugin>

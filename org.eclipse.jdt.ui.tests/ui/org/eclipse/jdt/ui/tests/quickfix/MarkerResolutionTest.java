@@ -1,0 +1,175 @@
+package org.eclipse.jdt.ui.tests.quickfix;
+
+import java.util.Hashtable;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+
+public class MarkerResolutionTest extends QuickFixTest {
+	
+	private static final Class THIS= MarkerResolutionTest.class;
+	
+	private IJavaProject fJProject1;
+	private IPackageFragmentRoot fSourceFolder;
+
+	public MarkerResolutionTest(String name) {
+		super(name);
+	}
+
+	public static Test suite() {
+		if (true) {
+			return new TestSuite(THIS);
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new MarkerResolutionTest("testQuickFixAfterModification"));
+			return suite;
+		}
+	}
+
+
+	protected void setUp() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
+		JavaCore.setOptions(options);			
+
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);
+		store.setValue(PreferenceConstants.CODEGEN__JAVADOC_STUBS, false);
+		
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+	}
+
+
+	protected void tearDown() throws Exception {
+		JavaProjectHelper.delete(fJProject1);
+	}
+
+
+	private IMarker createMarker(ICompilationUnit cu, int line, int offset, int len) throws CoreException, BadLocationException {
+		IFile file= (IFile) ((ICompilationUnit) cu).getResource();
+		IMarker marker= file.createMarker("org.eclipse.jdt.ui.tests.testmarker");
+		marker.setAttribute(IMarker.LOCATION, cu.getElementName());
+		marker.setAttribute(IMarker.MESSAGE, "Test marker");
+		marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+		marker.setAttribute(IMarker.LINE_NUMBER, line);
+		marker.setAttribute(IMarker.CHAR_START, offset);
+		marker.setAttribute(IMarker.CHAR_END, offset + len);
+		return marker;
+	}
+
+	
+	public void testQuickFix() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        goo(true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		IMarker marker= createMarker(cu, 0, 0, 7);
+		
+		IEditorPart part= EditorUtility.openInEditor(cu);
+		
+		try {
+			JavaCorrectionProcessor processor= new JavaCorrectionProcessor(part);
+			ICompletionProposal[] proposals= processor.computeCompletionProposals(null, 0);
+			
+			assertNumberOf("proposals", proposals.length, 1);
+			
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			
+			proposals[0].apply(doc);
+			
+			buf= new StringBuffer();
+			buf.append("PACKAGE test1;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(Vector vec) {\n");
+			buf.append("        goo(true);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEqualString(doc.get(), buf.toString());
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
+	
+	public void testQuickFixAfterModification() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        goo(true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		int markerPos= 8;
+		IMarker marker= createMarker(cu, 0, markerPos, 5);
+		
+		IEditorPart part= EditorUtility.openInEditor(cu);
+		try {
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			doc.replace(0, 0, "\n"); // insert new line
+			
+			JavaCorrectionProcessor processor= new JavaCorrectionProcessor(part);
+			ICompletionProposal[] proposals= processor.computeCompletionProposals(null, markerPos + 1);
+			
+			assertNumberOf("proposals", proposals.length, 1);
+			
+			proposals[0].apply(doc);
+			
+			buf= new StringBuffer();
+			buf.append("\n");		
+			buf.append("package TEST1;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("public class E {\n");
+			buf.append("    void foo(Vector vec) {\n");
+			buf.append("        goo(true);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEqualString(doc.get(), buf.toString());
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}	
+	
+}
