@@ -462,6 +462,20 @@ public class ExtractMethodTests extends RefactoringTest {
 	public void test115() throws Exception {
 		invalidSelectionTest();
 	}
+
+	//---- invalid local var selection
+	
+	public void test120() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test121() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test122() throws Exception {
+		invalidSelectionTest();
+	}
 	
 	//====================================================================================
 	// Testing valid selections
