@@ -18,6 +18,7 @@ import junit.framework.TestSuite;
 
 
 /**
+ * JDT Text Test Suite.
  * 
  * @since 3.0
  */
