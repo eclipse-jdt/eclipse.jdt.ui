@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.internal.plugins.PluginDescriptor;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -22,7 +23,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -158,16 +161,26 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 				return;
 			}
 		
-			ZipFile zipFile= getZipFileFromPluginDir(importPath);
+			ZipFile zipFile= getZipFileFromPluginDir(importPath, getContributingPlugin(curr));
 			importFilesFromZip(zipFile, destPath, new SubProgressMonitor(monitor, 1));
 		} catch (CoreException e) {
 			throw new InvocationTargetException(e);
 		}
 	}
 	
-	private ZipFile getZipFileFromPluginDir(String pluginRelativePath) throws CoreException {
+	private IPluginDescriptor getContributingPlugin(IConfigurationElement configurationElement) {
+		Object parent= configurationElement;
+		while(parent != null) {
+			if (parent instanceof IExtension)
+				return ((IExtension)parent).getDeclaringPluginDescriptor();
+			parent= ((IConfigurationElement)parent).getParent();
+		}
+		return null;
+	}
+
+	private ZipFile getZipFileFromPluginDir(String pluginRelativePath, IPluginDescriptor pluginDescriptor) throws CoreException {
 		try {
-			URL starterURL= new URL(ExampleProjectsPlugin.getDefault().getDescriptor().getInstallURL(), pluginRelativePath);
+			URL starterURL= new URL(pluginDescriptor.getInstallURL(), pluginRelativePath);
 			return new ZipFile(Platform.asLocalURL(starterURL).getFile());
 		} catch (IOException e) {
 			String message= pluginRelativePath + ": " + e.getMessage(); //$NON-NLS-1$
