@@ -11,13 +11,13 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 
 public class DeleteAction extends RefactoringAction {
 	
-	private DeleteResourceAction fDeleteResource;
+	private JdtDeleteResourceAction fDeleteResource;
 	private DeleteSourceReferencesAction fDeleteSourceReference;
 	
 	public DeleteAction(ISelectionProvider provider) {
 		super("&Delete", provider);
 		setDescription(ReorgMessages.getString("deleteAction.description")); //$NON-NLS-1$
-		fDeleteResource= new DeleteResourceAction(provider);
+		fDeleteResource= new JdtDeleteResourceAction(provider);
 		fDeleteSourceReference= new DeleteSourceReferencesAction(provider);
 	}
 
