@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 /**
@@ -23,8 +22,6 @@ public final class ImmutableTypeVariable2 extends ConstraintVariable2 {
 
 	public ImmutableTypeVariable2(TType type) {
 		super(type);
-		Assert.isTrue(! type.isWildcardType());
-		Assert.isTrue(! type.isTypeVariable());
 	}
 
 	/*
