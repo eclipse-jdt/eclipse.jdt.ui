@@ -82,8 +82,6 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 			result.addFatalError("not applicable to private methods");
 		if (Flags.isStatic(getMethod().getFlags()))
 			result.addFatalError("not applicable to static methods");	
-		//if (getMethod().isConstructor())
-		//	result.addFatalError("not applicable to contructors");
 		if (! getMethod().getDeclaringType().isClass())
 			result.addFatalError("only applicable to class methods");
 		return result;
