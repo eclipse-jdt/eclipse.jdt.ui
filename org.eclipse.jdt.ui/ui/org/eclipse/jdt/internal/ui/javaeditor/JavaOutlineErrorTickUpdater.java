@@ -7,8 +7,10 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IWorkingCopy;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -24,12 +26,16 @@ public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
 	private IAnnotationModel fAnnotationModel;
 
 	/**
-	 * @param viewer The viewer of the outliner
-	 * @param labelProvider The label provider used by the outliner
+	 * @param viewer The viewer of the outliner.
+	 * The label provider has to be a <code>JavaElementLabelProvider</code>,
+	 * otherwise no error ticks wil be updated.
 	 */
-	public JavaOutlineErrorTickUpdater(TreeViewer viewer, JavaElementLabelProvider labelProvider) {
+	public JavaOutlineErrorTickUpdater(TreeViewer viewer) {
 		fViewer= viewer;
-		fLabelProvider= labelProvider;
+		IBaseLabelProvider lprovider= viewer.getLabelProvider();
+		if (lprovider instanceof JavaElementLabelProvider) {
+			fLabelProvider= (JavaElementLabelProvider) lprovider;
+		}
 	}
 
 	/**
@@ -39,6 +45,10 @@ public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
 	 * to uninstall.
 	 */
 	public void setAnnotationModel(IAnnotationModel model) {
+		if (fLabelProvider == null) {
+			return;
+		}
+		
 		if (fAnnotationModel != null) {
 			fAnnotationModel.removeAnnotationModelListener(this);
 		}
@@ -87,14 +97,16 @@ public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
 	
 	private void updateItem(TreeItem item) {
 		Object data= item.getData();
-		Image old= item.getImage();
-		Image image= fLabelProvider.getImage(data);
-		if (image != null && image != old) {
-			item.setImage(image);
-		}
-		TreeItem[] children= item.getItems();
-		for (int i= 0; i < children.length; i++) {
-			updateItem(children[i]);
+		if (data instanceof IJavaElement && ((IJavaElement)data).exists()) {
+			Image old= item.getImage();
+			Image image= fLabelProvider.getImage(data);
+			if (image != null && image != old) {
+				item.setImage(image);
+			}
+			TreeItem[] children= item.getItems();
+			for (int i= 0; i < children.length; i++) {
+				updateItem(children[i]);
+			}
 		}
 	}	
 	

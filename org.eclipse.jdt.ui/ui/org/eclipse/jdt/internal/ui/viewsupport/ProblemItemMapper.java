@@ -85,10 +85,12 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 	private void refreshIcon(ILabelProvider lprovider, Item item) {
 		if (!item.isDisposed()) { // defensive code
 			Object data= item.getData();
-			Image old= item.getImage();
-			Image image= lprovider.getImage(data);
-			if (image != null && image != old) {
-				item.setImage(image);
+			if (data instanceof IJavaElement && ((IJavaElement)data).exists()) {
+				Image old= item.getImage();
+				Image image= lprovider.getImage(data);
+				if (image != null && image != old) {
+					item.setImage(image);
+				}
 			}
 		}
 	}

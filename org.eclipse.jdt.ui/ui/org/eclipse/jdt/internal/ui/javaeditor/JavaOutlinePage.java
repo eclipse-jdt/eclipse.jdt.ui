@@ -140,7 +140,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			 */
 			class ChildrenProvider implements ITreeContentProvider {
 				
-				protected ElementChangedListener fListener;
+				private ElementChangedListener fListener;
+				private JavaOutlineErrorTickUpdater fErrorTickUpdater;
 				
 				protected boolean matches(IJavaElement element) {
 					if (element.getElementType() == IJavaElement.METHOD) {
@@ -220,6 +221,10 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 						JavaCore.removeElementChangedListener(fListener);
 						fListener= null;
 					}
+					if (fErrorTickUpdater != null) {
+						fErrorTickUpdater.setAnnotationModel(null);
+						fErrorTickUpdater= null;
+					}					
 				}
 				
 				/**
@@ -227,21 +232,22 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				 */
 				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 					
-					boolean remove= (oldInput instanceof ICompilationUnit && fListener != null);
-					boolean add= (newInput instanceof ICompilationUnit);
-					
-					if (remove && add)
-						return;
-						
-					if (remove) {
-						JavaCore.removeElementChangedListener(fListener);
-						fListener= null;
-					}
-					
-					if (add) {
+					if (oldInput == null && newInput != null) {
 						if (fListener == null)
 							fListener= new ElementChangedListener();
 						JavaCore.addElementChangedListener(fListener);
+						if (fErrorTickUpdater == null) {
+							fErrorTickUpdater= new JavaOutlineErrorTickUpdater(fOutlineViewer);
+						}
+						fErrorTickUpdater.setAnnotationModel(fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput()));
+					} else if (oldInput != null && newInput != null) {
+						fErrorTickUpdater.setAnnotationModel(fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput()));
+					} else if (oldInput != null && newInput == null) {
+						JavaCore.removeElementChangedListener(fListener);
+						fListener= null;
+						
+						fErrorTickUpdater.setAnnotationModel(null);
+						fErrorTickUpdater= null;
 					}
 				}
 			};
@@ -703,9 +709,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private Hashtable fActions= new Hashtable();
 	private ContextMenuGroup[] fActionGroups;
 	
-	private JavaOutlineErrorTickUpdater fErrorTickUpdater;
-	
-
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
 		
@@ -734,10 +737,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fOutlineViewer= new JavaOutlineViewer(tree);		
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
 		fOutlineViewer.setLabelProvider(lprovider);
-
-		fErrorTickUpdater= new JavaOutlineErrorTickUpdater(fOutlineViewer, lprovider);
-		fErrorTickUpdater.setAnnotationModel(fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput()));
-				
+			
 		MenuManager manager= new MenuManager(fContextMenuID, fContextMenuID);
 		manager.setRemoveAllWhenShown(true);
 		manager.addMenuListener(new IMenuListener() {
@@ -769,9 +769,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		if (fEditor == null)
 			return;
-		
-		if (fErrorTickUpdater != null)
-			fErrorTickUpdater.setAnnotationModel(null);			
 			
 		fEditor.outlinePageClosed();
 		fEditor= null;
@@ -801,8 +798,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fInput= inputElement;	
 		if (fOutlineViewer != null)
 			fOutlineViewer.setInput(fInput);
-		if (fErrorTickUpdater != null)
-			fErrorTickUpdater.setAnnotationModel(fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput()));
 	}
 		
 	public void select(ISourceReference reference) {
