@@ -32,9 +32,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * <p>
- * FIXME: Work in progress
- * </p>
  * 
  * @since 3.1
  */
@@ -70,7 +67,7 @@ public class OpenAction extends SelectionDispatchAction {
 		if (selection == null || selection.isEmpty())
 			return false;
 		
-		 // XXX: Must be changed to IStorageEditorInput once support for	JARs is available (see class Javadoc for details)
+		// XXX: Must be changed to IStorageEditorInput once support for JARs is available (see class Javadoc for details)
 		return fEditor.getEditorInput() instanceof IFileEditorInput;
 	}
 	
