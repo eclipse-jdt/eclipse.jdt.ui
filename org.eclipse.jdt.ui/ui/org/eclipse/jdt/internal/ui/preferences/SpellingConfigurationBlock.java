@@ -308,31 +308,35 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		final Group engine= new Group(composite, SWT.NONE);
 		engine.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.engine")); //$NON-NLS-1$
 		layout= new GridLayout();
-		layout.numColumns= 3;
-		engine.setLayout(layout);		
+		layout.numColumns= 4;
+		engine.setLayout(layout);
 		engine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+		label= PreferencesMessages.getString("SpellingPreferencePage.dictionary.label"); //$NON-NLS-1$
 		final Set locales= SpellCheckEngine.getAvailableLocales();
 
-		label= PreferencesMessages.getString("SpellingPreferencePage.dictionary.label"); //$NON-NLS-1$
 		Combo combo= addComboBox(engine, label, PREF_SPELLING_LOCALE, getDictionaryCodes(locales), getDictionaryLabels(locales), 0);
 		combo.setEnabled(locales.size() > 1);
 		
+		new Label(engine, SWT.NONE); // placeholder
+
 		label= PreferencesMessages.getString("SpellingPreferencePage.workspace.dictionary.label"); //$NON-NLS-1$
 		fDictionaryPath= addTextField(engine, label, PREF_SPELLING_USER_DICTIONARY, 0, 0);
-		((GridData)fDictionaryPath.getLayoutData()).horizontalSpan= 1;
 
+		
 		Button button= new Button(engine, SWT.PUSH);
 		button.setText(PreferencesMessages.getString("SpellingPreferencePage.browse.label")); //$NON-NLS-1$
 		button.addSelectionListener(new SelectionAdapter() {
 
-		public void widgetSelected(final SelectionEvent event) {
+			public void widgetSelected(final SelectionEvent event) {
 				handleBrowseButtonSelected();
 			}
 		});
-		button.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		button.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		SWTUtil.setButtonDimensionHint(button);
 		
+		layout= new GridLayout();
+		layout.numColumns= 3;
 
 		Group advanced= new Group(composite, SWT.NONE);
 		advanced.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.advanced")); //$NON-NLS-1$
