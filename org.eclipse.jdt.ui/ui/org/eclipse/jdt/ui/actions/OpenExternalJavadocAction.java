@@ -24,7 +24,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -72,7 +72,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("OpenExternalJavadocAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OpenExternalJavadocAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("OpenExternalJavadocAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_EXTERNAL_JAVADOC_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_EXTERNAL_JAVADOC_ACTION);
 	}
 	
 	/**

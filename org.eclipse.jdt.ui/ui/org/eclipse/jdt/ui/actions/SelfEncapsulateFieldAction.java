@@ -19,7 +19,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
@@ -60,7 +60,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	public SelfEncapsulateFieldAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("SelfEncapsulateFieldAction.label")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SELF_ENCAPSULATE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SELF_ENCAPSULATE_ACTION);
 	}
 	
 	/**

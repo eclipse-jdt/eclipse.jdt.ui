@@ -17,7 +17,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -60,7 +60,7 @@ public class RenameAction extends SelectionDispatchAction {
 		fRenameJavaElement.setText(getText());
 		fRenameResource= new RenameResourceAction(site);
 		fRenameResource.setText(getText());
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.RENAME_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.RENAME_ACTION);
 	}
 	
 	/**

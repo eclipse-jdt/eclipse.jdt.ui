@@ -20,7 +20,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
@@ -50,7 +50,7 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 		super(JavaEditorMessages.getResourceBundle(), "TogglePresentation.", null, IAction.AS_CHECK_BOX); //$NON-NLS-1$
 		JavaPluginImages.setToolImageDescriptors(this, "segment_edit.gif"); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("TogglePresentation.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);		
 		update();
 	}
 	

@@ -47,7 +47,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -105,7 +105,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		setTitle(FilterMessages.getString("CustomFiltersDialog.title"));  //$NON-NLS-1$
 		setMessage(FilterMessages.getString("CustomFiltersDialog.filterList.label")); //$NON-NLS-1$
 		super.configureShell(shell);
-		WorkbenchHelp.setHelp(shell, IJavaHelpContextIds.CUSTOM_FILTERS_DIALOG);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.CUSTOM_FILTERS_DIALOG);
 	}
 
 	/**

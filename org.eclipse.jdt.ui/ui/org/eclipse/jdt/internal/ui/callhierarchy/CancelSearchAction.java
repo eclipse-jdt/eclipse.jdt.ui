@@ -15,7 +15,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jface.action.Action;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * This class is copied from the org.eclipse.search2.internal.ui.CancelSearchAction class. 
@@ -30,7 +30,7 @@ public class CancelSearchAction extends Action {
 		setToolTipText(CallHierarchyMessages.getString("CancelSearchAction.tooltip")); //$NON-NLS-1$
         JavaPluginImages.setLocalImageDescriptors(this, "ch_cancel.gif"); //$NON-NLS-1$
 
-        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_CANCEL_SEARCH_ACTION);
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_CANCEL_SEARCH_ACTION);
 }
 	
 	public void run() {

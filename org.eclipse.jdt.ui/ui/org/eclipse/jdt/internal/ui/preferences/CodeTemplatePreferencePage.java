@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -48,7 +48,7 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 		fCodeTemplateConfigurationBlock= new CodeTemplateBlock(getProject());
 		
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CODE_MANIPULATION_PREFERENCE_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODE_MANIPULATION_PREFERENCE_PAGE);
 	}	
 
 	/* (non-Javadoc)

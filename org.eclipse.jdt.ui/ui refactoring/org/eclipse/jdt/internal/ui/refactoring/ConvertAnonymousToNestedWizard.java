@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 
@@ -73,7 +73,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			textField.setFocus();
 			setPageComplete(false);
 			Dialog.applyDialogFont(result);
-			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_WIZARD_PAGE);		
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_WIZARD_PAGE);		
 		}
 
 		private Text addFieldNameField(Composite result) {

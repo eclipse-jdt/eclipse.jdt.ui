@@ -20,7 +20,7 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
 import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
@@ -58,7 +58,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 		fAnnotationPreferenceLookup= EditorsUI.getAnnotationPreferenceLookup();
 		fStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.JAVA_SELECT_MARKER_RULER_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.JAVA_SELECT_MARKER_RULER_ACTION);
 	}
 	
 	public void run() {

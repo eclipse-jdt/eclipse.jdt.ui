@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.swt.custom.BusyIndicator;
 
@@ -36,7 +36,7 @@ public class ShowQualifiedTypeNamesAction extends Action {
 		fView= v;
 		setChecked(initValue);
 		
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SHOW_QUALIFIED_NAMES_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SHOW_QUALIFIED_NAMES_ACTION);
 	}
 
 	/*

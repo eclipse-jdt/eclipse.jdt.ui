@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -91,7 +91,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		setControl(fLowerComposite);
 		Dialog.applyDialogFont(fLowerComposite);
-		WorkbenchHelp.setHelp(fLowerComposite, IJavaHelpContextIds.JAVADOC_SPECIFICS_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(fLowerComposite, IJavaHelpContextIds.JAVADOC_SPECIFICS_PAGE);
 
 	} //end method createControl
 

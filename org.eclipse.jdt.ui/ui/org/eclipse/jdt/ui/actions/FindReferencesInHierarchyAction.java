@@ -11,7 +11,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -49,7 +49,7 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 	public FindReferencesInHierarchyAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {ICompilationUnit.class, IType.class, IMethod.class, IField.class, ILocalVariable.class }); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyReferencesAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
 	/**
@@ -58,17 +58,17 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 	public FindReferencesInHierarchyAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindHierarchyReferencesAction.label"), new Class[] {ICompilationUnit.class, IType.class, IMethod.class, IField.class, ILocalVariable.class }); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyReferencesAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
 	FindReferencesInHierarchyAction(IWorkbenchSite site, String label, Class[] validTypes) {
 		super(site, label, validTypes);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
 	FindReferencesInHierarchyAction(JavaEditor editor, String label, Class[] validTypes) {
 		super(editor, label, validTypes);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
 	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {

@@ -30,7 +30,6 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -175,7 +174,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		createPropertyPart(parent, nOfColumns, convertWidthInCharsToPixels(40));
 
 		Dialog.applyDialogFont(parent);
-		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.EXTERNALIZE_WIZARD_PROPERTIES_FILE_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.EXTERNALIZE_WIZARD_PROPERTIES_FILE_PAGE);
 		validateAll();
 		return parent;
 	}

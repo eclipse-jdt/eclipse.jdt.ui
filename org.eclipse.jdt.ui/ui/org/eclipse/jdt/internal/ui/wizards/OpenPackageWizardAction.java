@@ -12,19 +12,19 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.jface.wizard.Wizard;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class OpenPackageWizardAction extends AbstractOpenWizardAction {
 	
 	public OpenPackageWizardAction() {
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_PACKAGE_WIZARD_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_PACKAGE_WIZARD_ACTION);
 	}
 	
 	public OpenPackageWizardAction(String label, Class[] acceptedTypes) {
 		super(label, acceptedTypes, false);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_PACKAGE_WIZARD_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_PACKAGE_WIZARD_ACTION);
 	}
 	
 	protected Wizard createWizard() { 

@@ -19,7 +19,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
@@ -63,7 +63,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	/* package */ InlineTempAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("InlineTempAction.label"));//$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 	
 	//---- text selection ----------------------------------------------------------

@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.jface.action.Action;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -27,7 +27,7 @@ class RefreshAction extends Action {
 		setToolTipText(CallHierarchyMessages.getString("RefreshAction.tooltip")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
 		setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
-        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_ACTION);
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_ACTION);
     }
 
     /**

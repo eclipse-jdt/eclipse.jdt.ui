@@ -12,7 +12,7 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.ILocalVariable;
@@ -46,7 +46,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	public FindWriteReferencesInWorkingSetAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.label"), new Class[] {IField.class, ILocalVariable.class } ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	 */
 	public FindWriteReferencesInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets) {
 		super(site, workingSets, new Class[] {IField.class, ILocalVariable.class });
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	public FindWriteReferencesInWorkingSetAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.label"), new Class[] {IField.class, ILocalVariable.class } ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	 */
 	public FindWriteReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
 		super(editor, workingSets, new Class[] {IField.class, ILocalVariable.class });
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
 	int getLimitTo() {

@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.infoviews;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -35,7 +35,7 @@ class GotoInputAction extends Action {
 		setToolTipText(InfoViewMessages.getString("GotoInputAction.tooltip")); //$NON-NLS-1$
 		setDescription(InfoViewMessages.getString("GotoInputAction.description")); //$NON-NLS-1$
 
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_INPUT_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_INPUT_ACTION);
 	}
 	
 	public void run() {

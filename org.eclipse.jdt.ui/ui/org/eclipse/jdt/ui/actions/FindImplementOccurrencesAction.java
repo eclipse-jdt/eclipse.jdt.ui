@@ -19,7 +19,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -65,7 +65,7 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 		if (selection instanceof IStructuredSelection) {
 			setEnabled(getMember((IStructuredSelection)selection) != null);		
 		}
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENT_OCCURRENCES);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENT_OCCURRENCES);
 	}
 	
 	//---- Text Selection ----------------------------------------------------------------------

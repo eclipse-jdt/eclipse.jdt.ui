@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -74,7 +74,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	public ExtractInterfaceAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("ExtractInterfaceAction.Extract_Interface")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_INTERFACE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_INTERFACE_ACTION);
 	}
 	
 	//---- structured selection -------------------------------------------

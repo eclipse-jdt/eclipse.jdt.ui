@@ -41,7 +41,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -93,7 +92,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		super(site);
 		setText(ActionMessages.getString("FindStringsToExternalizeAction.label")); //$NON-NLS-1$
 		fElements= new NonNLSElement[0];
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_STRINGS_TO_EXTERNALIZE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_STRINGS_TO_EXTERNALIZE_ACTION);
 	}
 		
 	/* (non-Javadoc)
@@ -431,7 +430,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		 */
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
-			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.NONNLS_DIALOG);		
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.NONNLS_DIALOG);		
 		}
 
 

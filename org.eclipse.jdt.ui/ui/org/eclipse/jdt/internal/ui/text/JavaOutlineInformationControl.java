@@ -45,7 +45,6 @@ import org.eclipse.ui.IDecoratorManager;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
@@ -374,7 +373,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			
 			JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.gif"); //$NON-NLS-1$
 			
-			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GO_INTO_TOP_LEVEL_TYPE_ACTION);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GO_INTO_TOP_LEVEL_TYPE_ACTION);
 			
 			fOutlineViewer= outlineViewer;
 
@@ -557,7 +556,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			
 			boolean checked=getDialogSettings().getBoolean(STORE_LEXICAL_SORTING_CHECKED);
 			setChecked(checked);
-			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);
 		}
 
 		public void run() {
@@ -598,7 +597,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			
 			fOutlineViewer= outlineViewer;
 			
-			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SORT_BY_DEFINING_TYPE_ACTION);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SORT_BY_DEFINING_TYPE_ACTION);
 	 
 			boolean state= getDialogSettings().getBoolean(STORE_SORT_BY_DEFINING_TYPE_CHECKED);
 			setChecked(state);

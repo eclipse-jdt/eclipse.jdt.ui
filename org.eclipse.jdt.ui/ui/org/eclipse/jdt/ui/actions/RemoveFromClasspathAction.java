@@ -25,7 +25,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -61,7 +60,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 		super(site);
 		setText(ActionMessages.getString("RemoveFromClasspathAction.Remove")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("RemoveFromClasspathAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.REMOVE_FROM_CLASSPATH_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.REMOVE_FROM_CLASSPATH_ACTION);
 	}
 	
 	/* (non-Javadoc)

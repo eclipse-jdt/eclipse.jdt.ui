@@ -18,7 +18,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -81,7 +81,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("ChangeTypeAction.label")); //$NON-NLS-1$
 		setToolTipText(RefactoringMessages.getString("ChangeTypeAction.tooltipText")); //$NON-NLS-1$
 		setDescription(RefactoringMessages.getString("ChangeTypeAction.description")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CHANGE_TYPE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CHANGE_TYPE_ACTION);
 		fDialogMessageTitle= RefactoringMessages.getString("ChangeTypeAction.dialog.title"); //$NON-NLS-1$
 	}
 	

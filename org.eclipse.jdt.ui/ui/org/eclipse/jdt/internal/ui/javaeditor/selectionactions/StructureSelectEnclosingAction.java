@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -29,7 +29,7 @@ public class StructureSelectEnclosingAction extends StructureSelectionAction {
 		super(JavaEditorMessages.getString("StructureSelectEnclosing.label"), editor, history); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("StructureSelectEnclosing.tooltip")); //$NON-NLS-1$
 		setDescription(JavaEditorMessages.getString("StructureSelectEnclosing.description")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECT_ENCLOSING_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECT_ENCLOSING_ACTION);
 	}
 	
 	/*

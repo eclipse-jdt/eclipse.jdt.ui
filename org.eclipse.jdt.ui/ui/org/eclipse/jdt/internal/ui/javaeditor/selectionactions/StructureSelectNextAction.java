@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -54,7 +54,7 @@ public class StructureSelectNextAction extends StructureSelectionAction{
 		super(JavaEditorMessages.getString("StructureSelectNext.label"), editor, history); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("StructureSelectNext.tooltip")); //$NON-NLS-1$
 		setDescription(JavaEditorMessages.getString("StructureSelectNext.description")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECT_NEXT_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECT_NEXT_ACTION);
 	}
 	
 	/*

@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
@@ -31,7 +31,7 @@ public class ClearWorkingSetAction extends Action {
 		Assert.isNotNull(actionGroup);
 		setToolTipText(WorkingSetMessages.getString("ClearWorkingSetAction.toolTip")); //$NON-NLS-1$
 		setEnabled(actionGroup.getWorkingSet() != null);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CLEAR_WORKING_SET_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CLEAR_WORKING_SET_ACTION);
 		fActionGroup= actionGroup;
 	}
 

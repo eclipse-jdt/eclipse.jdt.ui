@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -121,7 +121,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		Control control= getBuildPathsBlock().createControl(parent);
 		setControl(control);
 		Dialog.applyDialogFont(control);
-		WorkbenchHelp.setHelp(control, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(control, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
 	}
 		
 	/**

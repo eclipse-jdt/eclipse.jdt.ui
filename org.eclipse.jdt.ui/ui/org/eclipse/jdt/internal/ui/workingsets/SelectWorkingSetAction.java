@@ -20,7 +20,6 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -42,7 +41,7 @@ public class SelectWorkingSetAction extends Action {
 		
 		fShell= shell;
 		fActionGroup= actionGroup;
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SELECT_WORKING_SET_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SELECT_WORKING_SET_ACTION);
 	}
 	
 	/*

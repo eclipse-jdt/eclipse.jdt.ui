@@ -19,7 +19,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -62,7 +62,7 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 		super(site);
 		setText(ActionMessages.getString("FindExceptionOccurrences.text")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("FindExceptionOccurrences.toolTip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_EXCEPTION_OCCURRENCES);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_EXCEPTION_OCCURRENCES);
 		
 		ISelection selection= getSelection();
 		if (selection instanceof IStructuredSelection) {

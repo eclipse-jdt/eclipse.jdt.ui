@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
@@ -26,9 +26,9 @@ public class GotoAnnotationAction extends TextEditorAction {
 		super(JavaEditorMessages.getResourceBundle(), prefix, null);
 		fForward= forward;
 		if (forward)
-			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_NEXT_ERROR_ACTION);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_NEXT_ERROR_ACTION);
 		else
-			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_PREVIOUS_ERROR_ACTION);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_PREVIOUS_ERROR_ACTION);
 	}
 	
 	public void run() {

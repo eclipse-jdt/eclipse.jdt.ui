@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -369,7 +369,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 		fAllControls= (Control[]) allControls.toArray(new Control[allControls.size()]);
 		
-		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
 		return composite;
 	}
 

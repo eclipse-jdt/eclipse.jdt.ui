@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
@@ -54,7 +54,7 @@ class FiltersDialog extends StatusDialog {
     protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
         newShell.setText(CallHierarchyMessages.getString("FiltersDialog.filter")); //$NON-NLS-1$
-        WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
     }
 
     /* (non-Javadoc)

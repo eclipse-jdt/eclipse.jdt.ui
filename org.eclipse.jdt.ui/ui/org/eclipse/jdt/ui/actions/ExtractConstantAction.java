@@ -12,7 +12,7 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -54,7 +54,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("ExtractConstantAction.label")); //$NON-NLS-1$
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_CONSTANT_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_CONSTANT_ACTION);
 	}
 	
 	/* (non-Javadoc)

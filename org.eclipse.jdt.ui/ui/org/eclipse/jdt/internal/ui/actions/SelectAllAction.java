@@ -14,7 +14,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.TableViewer;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
  
@@ -32,7 +32,7 @@ public class SelectAllAction extends Action {
 		super("selectAll"); //$NON-NLS-1$
 		setText(ActionMessages.getString("SelectAllAction.label")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("SelectAllAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SELECT_ALL_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SELECT_ALL_ACTION);
 		Assert.isNotNull(viewer);
 		fViewer= viewer;
 	}

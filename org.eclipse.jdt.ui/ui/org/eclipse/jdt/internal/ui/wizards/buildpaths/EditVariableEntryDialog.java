@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -122,7 +122,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 	
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
 				
-		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK);
 		applyDialogFont(composite);		
 		return composite;
 	}

@@ -14,7 +14,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 
 import org.eclipse.jface.action.Action;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -38,7 +38,7 @@ public class SortByDefiningTypeAction extends Action {
 
 		fMethodsViewer= viewer;
 		
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SORT_BY_DEFINING_TYPE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SORT_BY_DEFINING_TYPE_ACTION);
  
 		setChecked(initValue);
 	}

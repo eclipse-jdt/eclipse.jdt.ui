@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -68,7 +68,7 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	public UseSupertypeAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("UseSupertypeAction.use_Supertype")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.USE_SUPERTYPE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.USE_SUPERTYPE_ACTION);
 	}
 	
 	//---- structured selection ---------------------------------------------------

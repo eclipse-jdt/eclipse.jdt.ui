@@ -18,7 +18,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -77,7 +77,7 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("IntroduceFactoryAction.label")); //$NON-NLS-1$
 		setToolTipText(RefactoringMessages.getString("IntroduceFactoryAction.tooltipText")); //$NON-NLS-1$
 		setDescription(RefactoringMessages.getString("IntroduceFactoryAction.description")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INTRODUCE_FACTORY_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INTRODUCE_FACTORY_ACTION);
 	}
 	
 	//---- structured selection --------------------------------------------------

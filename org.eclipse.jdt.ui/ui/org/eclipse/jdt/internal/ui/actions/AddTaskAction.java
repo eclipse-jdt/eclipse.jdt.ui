@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.tasklist.TaskPropertiesDialog;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -28,7 +28,7 @@ public class AddTaskAction extends SelectionDispatchAction {
 	public AddTaskAction(IWorkbenchSite site) {
 		super(site);
 		setEnabled(false);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_TASK_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_TASK_ACTION);
 	}
 
 	public void selectionChanged(IStructuredSelection selection) {

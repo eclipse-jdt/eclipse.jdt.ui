@@ -30,7 +30,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -46,7 +46,7 @@ class CopyCallHierarchyAction extends Action {
 	public CopyCallHierarchyAction(CallHierarchyViewPart view, Clipboard clipboard, CallHierarchyViewer viewer) {
 		super(CallHierarchyMessages.getString("CopyCallHierarchyAction.label"));  //$NON-NLS-1$
 		Assert.isNotNull(clipboard);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_COPY_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_COPY_ACTION);
 		fView= view;
 		fClipboard= clipboard;
         fViewer= viewer;

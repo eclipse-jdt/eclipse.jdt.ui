@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 
@@ -56,7 +56,7 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("ConvertLocalToField.label")); //$NON-NLS-1$
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_ACTION);
 	}
 
 	private static PromoteTempToFieldRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {

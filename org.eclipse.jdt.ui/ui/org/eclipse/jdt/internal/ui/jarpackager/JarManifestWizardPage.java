@@ -57,7 +57,7 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -188,7 +188,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		update();
 
 		Dialog.applyDialogFont(composite);
-		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JARMANIFEST_WIZARD_PAGE);								
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JARMANIFEST_WIZARD_PAGE);								
 			
 	}
 	/**

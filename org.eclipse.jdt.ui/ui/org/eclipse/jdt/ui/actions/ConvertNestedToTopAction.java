@@ -20,7 +20,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
@@ -76,7 +76,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	public ConvertNestedToTopAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("ConvertNestedToTopAction.Convert")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_INNER_TO_TOP_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_INNER_TO_TOP_ACTION);
 	}
 
 	//---- Structured selection ------------------------------------------------

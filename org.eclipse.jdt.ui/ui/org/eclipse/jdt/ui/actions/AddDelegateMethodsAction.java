@@ -50,7 +50,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -121,7 +120,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		setDescription(ActionMessages.getString("AddDelegateMethodsAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("AddDelegateMethodsAction.tooltip")); //$NON-NLS-1$
 
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_DELEGATE_METHODS_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_DELEGATE_METHODS_ACTION);
 	}
 
 	/**

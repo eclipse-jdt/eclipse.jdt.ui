@@ -15,7 +15,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 
@@ -43,7 +43,7 @@ public class LexicalSortingAction extends Action {
 		setDescription(JavaBrowsingMessages.getString("LexicalSortingAction.description")); //$NON-NLS-1$
 		boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fPreferenceKey); //$NON-NLS-1$
 		valueChanged(checked, false);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);
 	}
 
 	public void run() {

@@ -25,7 +25,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
@@ -71,7 +71,7 @@ public class PullUpAction extends SelectionDispatchAction {
 	public PullUpAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("RefactoringGroup.pull_Up_label"));//$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.PULL_UP_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PULL_UP_ACTION);
 	}
 
 	/**

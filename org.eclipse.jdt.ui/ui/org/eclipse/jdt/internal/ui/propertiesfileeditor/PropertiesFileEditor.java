@@ -28,7 +28,7 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.editors.text.TextEditor;
 
 import org.eclipse.ui.IPageLayout;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
@@ -151,7 +151,7 @@ public class PropertiesFileEditor extends TextEditor {
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);		
 		setAction("CorrectionAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.QUICK_FIX_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.QUICK_FIX_ACTION);
 	}
 	
 	/*

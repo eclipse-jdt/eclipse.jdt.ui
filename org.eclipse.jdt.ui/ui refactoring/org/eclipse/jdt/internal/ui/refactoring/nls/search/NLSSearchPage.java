@@ -62,7 +62,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -305,7 +305,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		setControl(result);
 
 		Dialog.applyDialogFont(result);
-		WorkbenchHelp.setHelp(result, IJavaHelpContextIds.NLS_SEARCH_PAGE);	
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(result, IJavaHelpContextIds.NLS_SEARCH_PAGE);	
 	}
 	/**
 	 * Creates the control for the wrapper class

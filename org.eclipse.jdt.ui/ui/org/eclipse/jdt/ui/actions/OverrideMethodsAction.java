@@ -29,7 +29,6 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
@@ -102,7 +101,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("OverrideMethodsAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OverrideMethodsAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("OverrideMethodsAction.tooltip")); //$NON-NLS-1$		
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION);
 	}
 
 	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {

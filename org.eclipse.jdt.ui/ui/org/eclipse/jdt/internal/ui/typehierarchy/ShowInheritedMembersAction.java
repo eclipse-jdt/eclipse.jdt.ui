@@ -14,7 +14,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 
 import org.eclipse.jface.action.Action;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -39,7 +39,7 @@ public class ShowInheritedMembersAction extends Action {
 
 		fMethodsViewer= viewer;
 		
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SHOW_INHERITED_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SHOW_INHERITED_ACTION);
  
 		setChecked(initValue);
 	}

@@ -23,7 +23,6 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -46,7 +45,7 @@ class CopyToClipboardAction extends SelectionDispatchAction{
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_HOVER));
 
-		WorkbenchHelp.setHelp(this, IAbstractTextEditorHelpContextIds.COPY_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IAbstractTextEditorHelpContextIds.COPY_ACTION);
 
 		update(getSelection());
 	}

@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.Assert;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
@@ -30,7 +30,7 @@ public class GotoMatchingBracketAction extends Action {
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		setEnabled(true);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_MATCHING_BRACKET_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_MATCHING_BRACKET_ACTION);
 	}
 	
 	public void run() {

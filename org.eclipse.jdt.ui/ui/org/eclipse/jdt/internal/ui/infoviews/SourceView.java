@@ -43,7 +43,7 @@ import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 
 import org.eclipse.jdt.core.ICodeAssist;
@@ -136,7 +136,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			setToolTipText(InfoViewMessages.getString("SelectAllAction.tooltip")); //$NON-NLS-1$
 			setDescription(InfoViewMessages.getString("SelectAllAction.description")); //$NON-NLS-1$
 
-			WorkbenchHelp.setHelp(this, IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IAbstractTextEditorHelpContextIds.SELECT_ALL_ACTION);
 		}
 
 		/**

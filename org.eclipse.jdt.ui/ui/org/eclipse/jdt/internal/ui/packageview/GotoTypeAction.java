@@ -20,7 +20,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -45,7 +45,7 @@ class GotoTypeAction extends Action {
 		setText(PackagesMessages.getString("GotoType.action.label")); //$NON-NLS-1$
 		setDescription(PackagesMessages.getString("GotoType.action.description")); //$NON-NLS-1$
 		fPackageExplorer= part;
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_TYPE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_TYPE_ACTION);
 	}
 
 

@@ -28,7 +28,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -51,7 +51,7 @@ class GotoPackageAction extends Action {
 		super(PackagesMessages.getString("GotoPackage.action.label")); //$NON-NLS-1$
 		setDescription(PackagesMessages.getString("GotoPackage.action.description")); //$NON-NLS-1$
 		fPackageExplorer= part;
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_PACKAGE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_PACKAGE_ACTION);
 	}
  
 	public void run() { 

@@ -22,7 +22,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -62,7 +62,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	public ShowInNavigatorViewAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("ShowInNavigatorView.label")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SHOW_IN_NAVIGATOR_VIEW_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SHOW_IN_NAVIGATOR_VIEW_ACTION);
 	}
 
 	/**

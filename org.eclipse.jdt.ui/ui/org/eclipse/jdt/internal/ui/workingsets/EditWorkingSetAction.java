@@ -22,7 +22,6 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetEditWizard;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -43,7 +42,7 @@ public class EditWorkingSetAction extends Action {
 		setEnabled(actionGroup.getWorkingSet() != null);
 		fShell= shell;
 		fActionGroup= actionGroup;
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EDIT_WORKING_SET_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EDIT_WORKING_SET_ACTION);
 	}
 	
 	/*

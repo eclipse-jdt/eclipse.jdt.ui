@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -54,7 +54,7 @@ public class ToggleViewAction extends Action {
 		fViewPart= v;
 		fViewerIndex= viewerIndex;
 		
-		WorkbenchHelp.setHelp(this, contextHelpId);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, contextHelpId);
 	}
 				
 	public int getViewerIndex() {

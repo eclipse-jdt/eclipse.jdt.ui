@@ -25,7 +25,7 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ResourceListSelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 public class GotoResourceAction extends Action {
 
@@ -37,7 +37,7 @@ public class GotoResourceAction extends Action {
 			super(parentShell, container, IResource.FILE | IResource.FOLDER | IResource.PROJECT);
 			fJavaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 			setTitle(PackagesMessages.getString("GotoResource.dialog.title")); //$NON-NLS-1$
-			WorkbenchHelp.setHelp(parentShell, IJavaHelpContextIds.GOTO_RESOURCE_DIALOG);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(parentShell, IJavaHelpContextIds.GOTO_RESOURCE_DIALOG);
 		}
 		protected boolean select(IResource resource) {
 			IProject project= resource.getProject();
@@ -53,7 +53,7 @@ public class GotoResourceAction extends Action {
 
 	public GotoResourceAction(PackageExplorerPart explorer) {
 		setText(PackagesMessages.getString("GotoResource.action.label")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_RESOURCE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_RESOURCE_ACTION);
 		fPackageExplorer= explorer;
 	}
 	

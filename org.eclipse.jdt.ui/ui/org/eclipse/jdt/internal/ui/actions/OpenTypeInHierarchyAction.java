@@ -20,7 +20,7 @@ import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -40,7 +40,7 @@ public class OpenTypeInHierarchyAction extends Action implements IWorkbenchWindo
 		setText(ActionMessages.getString("OpenTypeInHierarchyAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OpenTypeInHierarchyAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("OpenTypeInHierarchyAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_TYPE_IN_HIERARCHY_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_IN_HIERARCHY_ACTION);
 	}
 
 	public void run() {

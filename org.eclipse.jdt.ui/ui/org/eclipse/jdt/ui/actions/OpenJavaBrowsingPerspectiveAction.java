@@ -19,7 +19,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -43,7 +43,7 @@ public class OpenJavaBrowsingPerspectiveAction extends Action {
 	 * Create a new <code>OpenJavaBrowsingPerspectiveAction</code>.
 	 */
 	public OpenJavaBrowsingPerspectiveAction() {
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_JAVA_BROWSING_PERSPECTIVE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_JAVA_BROWSING_PERSPECTIVE_ACTION);
 	}
 
 	public void run() {

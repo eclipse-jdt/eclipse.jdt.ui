@@ -18,7 +18,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
@@ -65,7 +65,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("OpenSuperImplementationAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OpenSuperImplementationAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("OpenSuperImplementationAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_SUPER_IMPLEMENTATION_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SUPER_IMPLEMENTATION_ACTION);
 	}
 	
 	/**

@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 
@@ -118,7 +118,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			validateTextField(text.getText());
 		
 			Dialog.applyDialogFont(result);
-			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_CONSTANT_WIZARD_PAGE);		
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_CONSTANT_WIZARD_PAGE);		
 		}
 	
 		private void addAccessModifierGroup(Composite result, RowLayouter layouter) {

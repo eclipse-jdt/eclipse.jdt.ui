@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -106,7 +106,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			initializeDialogUnits(parent);
 			Composite newControl= new Composite(parent, SWT.NONE);
 			setControl(newControl);
-			WorkbenchHelp.setHelp(newControl, IJavaHelpContextIds.MOVE_INNER_TO_TOP_WIZARD_PAGE);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(newControl, IJavaHelpContextIds.MOVE_INNER_TO_TOP_WIZARD_PAGE);
 			newControl.setLayout(new GridLayout());
 			Dialog.applyDialogFont(newControl);
 

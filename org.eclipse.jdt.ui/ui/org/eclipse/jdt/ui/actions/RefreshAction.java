@@ -36,7 +36,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -72,7 +71,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("RefreshAction.label")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("RefreshAction.toolTip")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.REFRESH_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.REFRESH_ACTION);
 	}
 	
 	/* (non-Javadoc)

@@ -32,7 +32,6 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddMethodStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -64,7 +63,7 @@ public class AddMethodStubAction extends Action {
 		setDescription(JavaUIMessages.getString("AddMethodStubAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("AddMethodStubAction.tooltip")); //$NON-NLS-1$
 		
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_METHODSTUB_ACTION);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_METHODSTUB_ACTION);		
 	}
 
 	

@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
@@ -66,7 +66,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			
 			updateStatus();
 			Dialog.applyDialogFont(result);
-			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_PARAMETER_WIZARD_PAGE);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_PARAMETER_WIZARD_PAGE);
 		}
 
 		private void updateStatus() {

@@ -73,7 +73,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
@@ -744,13 +743,13 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		return new JavaSourceViewer(parent, ruler, null, false, styles, store) {
 			
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
-				if (WorkbenchHelp.isContextHelpDisplayed())
+				if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
 					return false;
 				return super.requestWidgetToken(requester);
 			}
 			
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester, int priority) {
-				if (WorkbenchHelp.isContextHelpDisplayed())
+				if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
 					return false;
 				return super.requestWidgetToken(requester, priority);
 			}

@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -124,7 +124,7 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 		setControl(composite);
 		
 		Dialog.applyDialogFont(composite);
-		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_ANNOTATION_WIZARD_PAGE);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_ANNOTATION_WIZARD_PAGE);		
 	}
 
 	/*

@@ -50,7 +50,6 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.progress.IProgressService;
 
@@ -135,7 +134,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		setToolTipText(ActionMessages.getString("OrganizeImportsAction.tooltip")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OrganizeImportsAction.description")); //$NON-NLS-1$
 
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);					
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);					
 	}
 	
 	/**

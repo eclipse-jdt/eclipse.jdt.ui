@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
@@ -89,7 +89,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 			addDeclareFinalCheckbox(result);
 				
 			Dialog.applyDialogFont(result);
-			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_WIZARD_PAGE);		
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_WIZARD_PAGE);		
 		}
 
 		private void addFieldNameField(Composite result) {

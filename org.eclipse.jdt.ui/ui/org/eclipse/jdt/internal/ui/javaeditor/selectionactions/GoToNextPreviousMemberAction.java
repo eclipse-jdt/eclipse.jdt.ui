@@ -19,7 +19,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IInitializer;
@@ -66,9 +66,9 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		fIsGotoNext= isGotoNext;
 		update();
 		if (isGotoNext)
-			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_NEXT_MEMBER_ACTION);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_NEXT_MEMBER_ACTION);
 		else
-			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_PREVIOUS_MEMBER_ACTION);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GOTO_PREVIOUS_MEMBER_ACTION);
 	}
 	
 	/*

@@ -188,7 +188,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		 */
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
-			//WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.IMPORT_ORGANIZE_INPUT_DIALOG);
+			//PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.IMPORT_ORGANIZE_INPUT_DIALOG);
 		}
 	}	
 	

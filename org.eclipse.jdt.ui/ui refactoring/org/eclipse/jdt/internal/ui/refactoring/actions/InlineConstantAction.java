@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -67,7 +67,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 	public InlineConstantAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("InlineConstantAction.inline_Constant")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);		
 	}
 	
 	//---- structured selection ---------------------------------------------

@@ -14,13 +14,8 @@ import java.net.URL;
 
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-
-import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.ui.PlatformUI;
 
 public class OpenBrowserUtil {
 	
@@ -33,16 +28,10 @@ public class OpenBrowserUtil {
 	}
 	
 	private static void internalOpen(final URL url, String title) {
-		if (WorkbenchHelp.getHelpSupport() != null) {	// filed bug 57435 to avoid deprecation
-			BusyIndicator.showWhile(null, new Runnable() {
-				public void run() {
-					WorkbenchHelp.displayHelpResource(url.toExternalForm() + "?noframes=true"); //$NON-NLS-1$
-				}
-			});			
-		} else {
-			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			String message= ActionMessages.getString("OpenBrowserUtil.help_not_available"); //$NON-NLS-1$
-			MessageDialog.openInformation(shell, title, message);
-		}
+		BusyIndicator.showWhile(null, new Runnable() {
+			public void run() {
+				PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(url.toExternalForm() + "?noframes=true"); //$NON-NLS-1$
+			}
+		});			
 	}
 }

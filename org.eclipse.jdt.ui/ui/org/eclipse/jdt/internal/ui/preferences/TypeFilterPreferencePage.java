@@ -141,7 +141,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		//WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.TYPE_FILTER_PREFERENCE_PAGE);
+		//PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.TYPE_FILTER_PREFERENCE_PAGE);
 	}
 	
 	protected Control createContents(Composite parent) {

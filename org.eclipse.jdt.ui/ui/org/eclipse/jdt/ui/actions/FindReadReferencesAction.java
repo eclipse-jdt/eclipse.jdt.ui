@@ -11,7 +11,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.ILocalVariable;
@@ -43,7 +43,7 @@ public class FindReadReferencesAction extends FindReferencesAction {
 	public FindReadReferencesAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindReadReferencesAction.label"), new Class[] {IField.class, ILocalVariable.class } ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class FindReadReferencesAction extends FindReferencesAction {
 	public FindReadReferencesAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindReadReferencesAction.label"), new Class[] {IField.class, ILocalVariable.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
 	}
 
 	int getLimitTo() {

@@ -14,7 +14,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 
 import org.eclipse.jface.action.Action;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -36,7 +36,7 @@ public class EnableMemberFilterAction extends Action {
 		fView= v;
 		setChecked(initValue);
 		
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ENABLE_METHODFILTER_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ENABLE_METHODFILTER_ACTION);
 		
 	}
 

@@ -33,7 +33,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
@@ -100,7 +100,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, RefactoringMessages.getString("ChangeSignatureInputPage.Change_Signature"), RefactoringMessages.getString("ChangeSignatureInputPage.Internal_Error")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
 		}
 
 		private void createHeadControls(Composite parent) throws JavaModelException {

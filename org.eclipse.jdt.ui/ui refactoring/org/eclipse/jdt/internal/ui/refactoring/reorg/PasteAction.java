@@ -47,7 +47,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
 import org.eclipse.ui.actions.CopyProjectOperation;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -111,7 +111,7 @@ public class PasteAction extends SelectionDispatchAction{
 		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE));
 
 		update(getSelection());
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.PASTE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PASTE_ACTION);
 	}
 	
 	/* (non-Javadoc)

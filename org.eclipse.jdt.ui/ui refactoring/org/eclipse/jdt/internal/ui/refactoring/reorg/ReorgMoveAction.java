@@ -20,7 +20,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.MoveProjectAction;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -47,7 +47,7 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		setText(ReorgMessages.getString("ReorgMoveAction.3")); //$NON-NLS-1$
 		setDescription(ReorgMessages.getString("ReorgMoveAction.4")); //$NON-NLS-1$
 		update(getSelection());
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
 
 	public void selectionChanged(IStructuredSelection selection) {

@@ -20,7 +20,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -64,7 +64,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	public InlineMethodAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("InlineMethodAction.inline_Method")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 
 	//---- structured selection ----------------------------------------------

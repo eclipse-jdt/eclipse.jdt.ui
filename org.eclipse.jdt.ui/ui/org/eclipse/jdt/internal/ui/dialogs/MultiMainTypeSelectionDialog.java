@@ -19,7 +19,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -85,7 +85,7 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.MULTI_MAIN_TYPE_SELECTION_DIALOG);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.MULTI_MAIN_TYPE_SELECTION_DIALOG);		
 	}
 
 

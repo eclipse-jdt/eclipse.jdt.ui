@@ -26,7 +26,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -149,7 +149,7 @@ public class HistoryListAction extends Action {
 		 */
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
-			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.HISTORY_LIST_DIALOG);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.HISTORY_LIST_DIALOG);
 		}
 
 		/* (non-Javadoc)
@@ -168,7 +168,7 @@ public class HistoryListAction extends Action {
 		fView= view;
 		setText(TypeHierarchyMessages.getString("HistoryListAction.label")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.HISTORY_LIST_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.HISTORY_LIST_ACTION);
 	}
 		
 	/*

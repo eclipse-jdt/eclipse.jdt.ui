@@ -58,7 +58,6 @@ import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
@@ -224,7 +223,7 @@ public class PushDownWizard extends RefactoringWizard {
 		
 			setControl(composite);
 			Dialog.applyDialogFont(composite);
-			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PUSH_DOWN_WIZARD_PAGE);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PUSH_DOWN_WIZARD_PAGE);
 		}
 
 		private void createStatusLine(Composite composite) {

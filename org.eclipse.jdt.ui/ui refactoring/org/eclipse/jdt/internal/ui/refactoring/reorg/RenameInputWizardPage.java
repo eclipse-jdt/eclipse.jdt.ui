@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
@@ -92,7 +92,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		updateForcePreview();
 		
 		Dialog.applyDialogFont(superComposite);
-		WorkbenchHelp.setHelp(getControl(), fHelpContextID);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), fHelpContextID);
 	}
 	
 	protected boolean saveSettings() {

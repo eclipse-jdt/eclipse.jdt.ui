@@ -22,7 +22,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
@@ -100,7 +100,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		}
 		setText(SearchMessages.getString("Search.FindOccurrencesInFile.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindOccurrencesInFile.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_OCCURRENCES_IN_FILE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_OCCURRENCES_IN_FILE_ACTION);
 	}
 	
 	//---- Structured Selection -------------------------------------------------------------

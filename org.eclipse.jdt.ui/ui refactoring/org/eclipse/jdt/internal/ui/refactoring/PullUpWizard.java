@@ -81,7 +81,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo;
@@ -363,7 +362,7 @@ public class PullUpWizard extends RefactoringWizard {
 				
 			setControl(composite);
 			Dialog.applyDialogFont(composite);
-			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
 		}
 	
 		private void createStatusLine(Composite composite) {
@@ -1034,7 +1033,7 @@ public class PullUpWizard extends RefactoringWizard {
 		setControl(composite);
 		
 		Dialog.applyDialogFont(composite);
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
 	  }
 
 		private void createButtonComposite(Composite superComposite) {

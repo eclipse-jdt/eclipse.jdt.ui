@@ -32,7 +32,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.SortMembersOperation;
 
@@ -89,7 +88,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 		setDescription(ActionMessages.getString("SortMembersAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("SortMembersAction.tooltip")); //$NON-NLS-1$		
 		
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SORT_MEMBERS_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SORT_MEMBERS_ACTION);
 	}
 
 	/**

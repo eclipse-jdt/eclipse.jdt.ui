@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -88,7 +88,7 @@ public class MoveAction extends SelectionDispatchAction{
 		fMoveStaticMembersAction= new MoveStaticMembersAction(site);
 		fMoveInstanceMethodAction= new MoveInstanceMethodAction(site);
 		fReorgMoveAction= new ReorgMoveAction(site);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
 	
 	/**
@@ -102,7 +102,7 @@ public class MoveAction extends SelectionDispatchAction{
 		fMoveStaticMembersAction= new MoveStaticMembersAction(editor);
 		fMoveInstanceMethodAction= new MoveInstanceMethodAction(editor);
 		fReorgMoveAction= new ReorgMoveAction(editor.getEditorSite());
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}	
 
 	/*

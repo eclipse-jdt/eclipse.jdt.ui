@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -54,7 +54,7 @@ class ToggleOrientationAction extends Action {
         }
         fView= v;
         fActionOrientation= orientation;
-        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_TOGGLE_ORIENTATION_ACTION);
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_TOGGLE_ORIENTATION_ACTION);
     }
     
     public int getOrientation() {

@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.CopyProjectAction;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -47,7 +47,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		setDescription(ReorgMessages.getString("ReorgCopyAction.4")); //$NON-NLS-1$
 
 		update(getSelection());
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.COPY_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.COPY_ACTION);
 	}
 
 	public void selectionChanged(IStructuredSelection selection) {

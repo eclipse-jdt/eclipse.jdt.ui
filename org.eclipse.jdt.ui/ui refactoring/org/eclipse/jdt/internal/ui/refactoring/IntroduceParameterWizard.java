@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.text.Assert;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
 
@@ -84,7 +84,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 
 			updateStatus();
 			Dialog.applyDialogFont(result);
-			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_PARAMETER_WIZARD_PAGE);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_PARAMETER_WIZARD_PAGE);
 		}
 
 		private Text addParameterNameField(Composite parent) {

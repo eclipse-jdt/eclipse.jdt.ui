@@ -24,7 +24,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -46,7 +45,7 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		setDescription(JavaUIMessages.getString("OpenTypeAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("OpenTypeAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_OPENTYPE);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_TYPE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_ACTION);
 	}
 
 	public void run() {

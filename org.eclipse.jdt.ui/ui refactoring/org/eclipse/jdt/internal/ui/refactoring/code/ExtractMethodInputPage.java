@@ -35,7 +35,7 @@ import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Document;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -229,7 +229,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		createSignaturePreview(result, layouter);
 		
 		Dialog.applyDialogFont(result);
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_METHOD_WIZARD_PAGE);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_METHOD_WIZARD_PAGE);		
 	}
 	
 	private String getLabel(ASTNode node) {

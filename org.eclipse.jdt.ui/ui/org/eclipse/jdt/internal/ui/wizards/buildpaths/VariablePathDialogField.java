@@ -31,7 +31,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -107,7 +107,7 @@ public class VariablePathDialogField extends StringButtonDialogField {
 		 */
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
-			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.CHOOSE_VARIABLE_DIALOG);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CHOOSE_VARIABLE_DIALOG);
 		}
 	}
 

@@ -23,7 +23,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -61,7 +61,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
         setText(CallHierarchyMessages.getString("OpenCallHierarchyAction.label")); //$NON-NLS-1$
         setToolTipText(CallHierarchyMessages.getString("OpenCallHierarchyAction.tooltip")); //$NON-NLS-1$
         setDescription(CallHierarchyMessages.getString("OpenCallHierarchyAction.description")); //$NON-NLS-1$
-        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_OPEN_ACTION);
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_OPEN_ACTION);
     }
     
     /**

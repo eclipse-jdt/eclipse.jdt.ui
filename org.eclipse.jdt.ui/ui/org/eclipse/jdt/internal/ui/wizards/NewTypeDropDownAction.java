@@ -28,7 +28,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.internal.IWorkbenchConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -63,7 +62,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	public NewTypeDropDownAction() {
 		fMenu= null;
 		setMenuCreator(this);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_CLASS_WIZARD_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_CLASS_WIZARD_ACTION);
 	}
 
 	public void dispose() {

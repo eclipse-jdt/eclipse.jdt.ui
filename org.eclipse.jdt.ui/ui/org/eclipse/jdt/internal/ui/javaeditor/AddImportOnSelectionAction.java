@@ -37,7 +37,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -67,7 +66,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		setToolTipText(JavaEditorMessages.getString("AddImportOnSelection.tooltip")); //$NON-NLS-1$
 		setDescription(JavaEditorMessages.getString("AddImportOnSelection.description")); //$NON-NLS-1$
 		fEditor= editor;
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION);
 		setEnabled(getCompilationUnit() != null);	
 	}
 	

@@ -24,7 +24,7 @@ import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
 import org.eclipse.help.IHelpResource;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -51,7 +51,7 @@ public class JavadocHelpContext implements IContext {
 			if (selected != null && selected.length > 0) {
 				context= new JavadocHelpContext(context, selected);
 			}
-			WorkbenchHelp.displayHelp(context);
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp(context);
 		}
 	}
 	

@@ -21,7 +21,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -70,7 +70,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	public PushDownAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("PushDownAction.Push_Down")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.PUSH_DOWN_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PUSH_DOWN_ACTION);
 	}
 
 	/**

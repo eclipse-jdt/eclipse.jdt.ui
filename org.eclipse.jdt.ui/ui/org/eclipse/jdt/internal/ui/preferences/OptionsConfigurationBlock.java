@@ -54,7 +54,7 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -436,7 +436,7 @@ public abstract class OptionsConfigurationBlock {
 		info.setImage(image);
 		info.addHyperlinkListener(new HyperlinkAdapter() {
 			public void linkActivated(HyperlinkEvent e) {
-				WorkbenchHelp.displayHelpResource(link);
+				PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(link);
 			}
 		});
 		return info;

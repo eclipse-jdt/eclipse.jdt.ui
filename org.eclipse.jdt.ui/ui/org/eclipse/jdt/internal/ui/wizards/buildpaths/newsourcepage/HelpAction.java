@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import org.eclipse.jface.action.Action;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -31,6 +31,6 @@ public class HelpAction extends Action {
     }
     
     public void run() {
-        WorkbenchHelp.displayHelpResource(NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Help.link")); //$NON-NLS-1$
+        PlatformUI.getWorkbench().getHelpSystem().displayHelpResource(NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Help.link")); //$NON-NLS-1$
     }
 }

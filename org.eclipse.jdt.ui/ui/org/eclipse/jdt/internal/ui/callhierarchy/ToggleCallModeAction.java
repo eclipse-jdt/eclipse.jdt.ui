@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -44,7 +44,7 @@ class ToggleCallModeAction extends Action {
         }
         fView= v;
         fMode= mode;
-        WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_TOGGLE_CALL_MODE_ACTION);
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_TOGGLE_CALL_MODE_ACTION);
     }
     
     public int getMode() {

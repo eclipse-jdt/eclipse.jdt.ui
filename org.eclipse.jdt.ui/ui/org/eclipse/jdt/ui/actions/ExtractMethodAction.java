@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -56,7 +56,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("ExtractMethodAction.label"));//$NON-NLS-1$
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_METHOD_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.EXTRACT_METHOD_ACTION);
 	}
 
 	/* (non-Javadoc)

@@ -11,7 +11,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -48,7 +48,7 @@ public class FindImplementorsAction extends FindAction {
 	public FindImplementorsAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {ICompilationUnit.class, IType.class}); //$NON-NLS-1$
 		init();
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION);
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class FindImplementorsAction extends FindAction {
 	public FindImplementorsAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindImplementorsAction.label"), new Class[] {ICompilationUnit.class, IType.class}); //$NON-NLS-1$
 		init();
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION);
 	}
 
 	private void init() {

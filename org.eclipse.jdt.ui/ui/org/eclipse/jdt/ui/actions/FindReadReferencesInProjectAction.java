@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Finds field read accesses of the selected element in the enclosing project.
@@ -56,7 +56,7 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 	private void init() {
 		setText(SearchMessages.getString("Search.FindReadReferencesInProjectAction.label")); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesInProjectAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_PROJECT_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_PROJECT_ACTION);
 	}
 	
 	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {

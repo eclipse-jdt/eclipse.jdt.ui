@@ -52,7 +52,6 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -127,7 +126,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 		setToolTipText(ActionMessages.getString("FormatAllAction.tooltip")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("FormatAllAction.description")); //$NON-NLS-1$
 
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FORMAT_ALL);					
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FORMAT_ALL);					
 	}
 	
 	

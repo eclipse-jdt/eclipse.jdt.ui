@@ -19,7 +19,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 
@@ -58,7 +58,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("ConvertAnonymousToNestedAction.Convert_Anonymous")); //$NON-NLS-1$
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		super(site);
 		fEditor= null;
 		setText(RefactoringMessages.getString("ConvertAnonymousToNestedAction.Convert_Anonymous")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
 	}
 	
 	//---- Structured selection -----------------------------------------------------

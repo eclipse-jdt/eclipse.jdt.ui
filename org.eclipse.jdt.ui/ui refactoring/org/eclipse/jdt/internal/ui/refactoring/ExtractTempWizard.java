@@ -25,7 +25,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jface.text.Assert;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -106,7 +106,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 			validateTextField(text.getText());
 			
 			Dialog.applyDialogFont(result);
-			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_TEMP_WIZARD_PAGE);		
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_TEMP_WIZARD_PAGE);		
 		}
 
 		private void loadSettings() {

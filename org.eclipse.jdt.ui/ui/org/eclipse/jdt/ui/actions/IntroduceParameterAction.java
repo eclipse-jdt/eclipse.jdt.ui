@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
 
@@ -54,7 +54,7 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("IntroduceParameterAction.label"));//$NON-NLS-1$
 		fEditor= editor;
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INTRODUCE_PARAMETER_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INTRODUCE_PARAMETER_ACTION);
 	}
 
 	/* (non-Javadoc)

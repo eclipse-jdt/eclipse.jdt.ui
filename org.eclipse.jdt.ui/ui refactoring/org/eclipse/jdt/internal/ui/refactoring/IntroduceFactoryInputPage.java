@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 
@@ -180,7 +180,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		}
 		factoryTypeName.setText(getUseFactoryRefactoring().getFactoryClassName());
 
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_FACTORY_WIZARD_PAGE);		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_FACTORY_WIZARD_PAGE);		
 	}
 
 	private IType chooseFactoryClass() {

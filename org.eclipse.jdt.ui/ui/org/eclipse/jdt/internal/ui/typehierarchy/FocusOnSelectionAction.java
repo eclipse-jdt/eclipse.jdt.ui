@@ -18,7 +18,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -36,7 +36,7 @@ public class FocusOnSelectionAction extends Action {
 		setToolTipText(TypeHierarchyMessages.getString("FocusOnSelectionAction.tooltip")); //$NON-NLS-1$
 		fViewPart= part;
 		
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FOCUS_ON_SELECTION_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FOCUS_ON_SELECTION_ACTION);
 	}
 	
 	private ISelection getSelection() {

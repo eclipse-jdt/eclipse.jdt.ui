@@ -26,7 +26,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
@@ -96,7 +95,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("SurroundWithTryCatchAction.label")); //$NON-NLS-1$);
 		fEditor= editor;
 		setEnabled(checkEditor());
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SURROUND_WITH_TRY_CATCH_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SURROUND_WITH_TRY_CATCH_ACTION);
 	}
 
 	public void run(ITextSelection selection) {

@@ -13,7 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -47,7 +47,7 @@ public class WorkingSetFindAction extends FindAction {
 		fAction= action;
 		setImageDescriptor(action.getImageDescriptor());
 		setToolTipText(action.getToolTipText());
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class WorkingSetFindAction extends FindAction {
 		fAction= action;
 		setImageDescriptor(action.getImageDescriptor());
 		setToolTipText(action.getToolTipText());
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
 	}
 
 	public void run(IJavaElement element) {

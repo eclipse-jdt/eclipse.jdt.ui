@@ -43,7 +43,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ViewerSorter;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -125,7 +125,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 		setControl(fUpperComposite);
 		Dialog.applyDialogFont(fUpperComposite);
-		WorkbenchHelp.setHelp(fUpperComposite, IJavaHelpContextIds.JAVADOC_STANDARD_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(fUpperComposite, IJavaHelpContextIds.JAVADOC_STANDARD_PAGE);
 	}
 	private void createBasicOptionsGroup(Composite composite) {
 
@@ -539,7 +539,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		 */
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
-			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.JAVADOC_PROPERTY_DIALOG);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.JAVADOC_PROPERTY_DIALOG);
 		}
 	}
 }

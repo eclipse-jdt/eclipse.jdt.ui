@@ -48,7 +48,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -488,7 +487,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		setControl(result);
 
 		Dialog.applyDialogFont(result);
-		WorkbenchHelp.setHelp(result, IJavaHelpContextIds.JAVA_SEARCH_PAGE);	
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(result, IJavaHelpContextIds.JAVA_SEARCH_PAGE);	
 	}
 
 	private Control createSearchJRE(Composite result) {

@@ -17,7 +17,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -63,7 +63,7 @@ public class InlineAction extends SelectionDispatchAction {
 		fInlineTemp		= new InlineTempAction(site);
 		fInlineConstant	= new InlineConstantAction(site);
 		fInlineMethod	= new InlineMethodAction(site);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class InlineAction extends SelectionDispatchAction {
 		fInlineTemp		= new InlineTempAction(editor);
 		fInlineConstant	= new InlineConstantAction(editor);
 		fInlineMethod	= new InlineMethodAction(editor);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 		setEnabled(getCompilationUnit() != null);
 	}
 

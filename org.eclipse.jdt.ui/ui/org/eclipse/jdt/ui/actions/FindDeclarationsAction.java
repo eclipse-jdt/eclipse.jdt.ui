@@ -11,7 +11,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -69,13 +69,13 @@ public class FindDeclarationsAction extends FindAction {
 	FindDeclarationsAction(IWorkbenchSite site, String label, Class[] validTypes) {
 		super(site, label, validTypes);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKSPACE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKSPACE_ACTION);
 	}
 
 	FindDeclarationsAction(JavaEditor editor, String label, Class[] validTypes) {
 		super(editor, label, validTypes);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKSPACE_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKSPACE_ACTION);
 	}
 	
 	int getLimitTo() {

@@ -38,7 +38,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
@@ -113,7 +113,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 		update();
 
 		Dialog.applyDialogFont(composite);
-		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAROPTIONS_WIZARD_PAGE);								
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JAROPTIONS_WIZARD_PAGE);								
 	}
 
 	/**

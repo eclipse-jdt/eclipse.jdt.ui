@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.jface.action.Action;
 
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.actions.*;
 
@@ -29,7 +29,7 @@ public class MemberFilterAction extends Action {
 		fFilterActionGroup= actionGroup;
 		fFilterProperty= property;
 		
-		WorkbenchHelp.setHelp(this, contextHelpId);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, contextHelpId);
 
 		setChecked(initValue);
 	}

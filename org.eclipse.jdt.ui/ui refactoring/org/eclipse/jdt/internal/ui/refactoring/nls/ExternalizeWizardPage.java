@@ -102,7 +102,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 class ExternalizeWizardPage extends UserInputWizardPage {
 
@@ -533,7 +532,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		// promote control
 		setControl(supercomposite);
 		Dialog.applyDialogFont(supercomposite);
-		WorkbenchHelp.setHelp(supercomposite, IJavaHelpContextIds.EXTERNALIZE_WIZARD_KEYVALUE_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(supercomposite, IJavaHelpContextIds.EXTERNALIZE_WIZARD_KEYVALUE_PAGE);
 	}
 
 	/**

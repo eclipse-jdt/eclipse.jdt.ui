@@ -41,7 +41,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -80,7 +80,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		update(getSelection());
 
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.COPY_ACTION);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.COPY_ACTION);
 	}
 
 	public void setAutoRepeatOnFailure(boolean autorepeatOnFailure){
