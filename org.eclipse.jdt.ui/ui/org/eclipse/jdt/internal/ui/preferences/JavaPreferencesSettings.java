@@ -69,7 +69,7 @@ public class JavaPreferencesSettings  {
 		int nTokens= tok.countTokens();
 		String[] res= new String[nTokens];
 		for (int i= 0; i < nTokens; i++) {
-			res[i]= tok.nextToken();
+			res[i]= tok.nextToken().trim();
 		}
 		return res;
 	}
