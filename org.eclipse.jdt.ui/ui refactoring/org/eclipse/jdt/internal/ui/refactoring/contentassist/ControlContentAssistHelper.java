@@ -14,14 +14,20 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
@@ -50,19 +56,29 @@ import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
  */
 public class ControlContentAssistHelper {
 	
-	public static ContentAssistant createComboContentAssistant(final Combo combo, IContentAssistProcessor processor, DialogPage dialogPage) {
-		final ContentAssistant contentAssistant= createContentAssistant(combo, processor, dialogPage);
+	/**
+	 * @param combo the combo box to install ContentAssist
+	 * @param processor the IContentAssistProcessor
+	 * @return the installed ContentAssistant
+	 */
+	public static ContentAssistant createComboContentAssistant(final Combo combo, IContentAssistProcessor processor) {
+		final ContentAssistant contentAssistant= createContentAssistant(combo, processor);
 		contentAssistant.install(new ComboContentAssistSubjectAdapter(combo));
 		return contentAssistant;
 	}
 	
-	public static ContentAssistant createTextContentAssistant(final Text text, IContentAssistProcessor processor, DialogPage dialogPage) {
-		final ContentAssistant contentAssistant= createContentAssistant(text, processor, dialogPage);
+	/**
+	 * @param text the text field to install ContentAssist
+	 * @param processor the IContentAssistProcessor
+	 * @return the installed ContentAssistant
+	 */
+	public static ContentAssistant createTextContentAssistant(final Text text, IContentAssistProcessor processor) {
+		final ContentAssistant contentAssistant= createContentAssistant(text, processor);
 		contentAssistant.install(new TextContentAssistSubjectAdapter(text));
 		return contentAssistant;
 	}
 
-	private static ContentAssistant createContentAssistant(final Control control, IContentAssistProcessor processor, DialogPage dialogPage) {
+	private static ContentAssistant createContentAssistant(final Control control, IContentAssistProcessor processor) {
 		final ContentAssistant contentAssistant= new ContentAssistant();
 					
 		contentAssistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
@@ -75,11 +91,12 @@ public class ControlContentAssistHelper {
 			}
 		});
 	
-		control.addKeyListener(getContentAssistKeyAdapter(contentAssistant, dialogPage));
+		control.addKeyListener(getContentAssistKeyAdapter(contentAssistant));
+		hookForSmartCue(control);
 		return contentAssistant;
 	}
 
-	private static KeyAdapter getContentAssistKeyAdapter(final ContentAssistant contentAssistant, final DialogPage dialogPage) {
+	private static KeyAdapter getContentAssistKeyAdapter(final ContentAssistant contentAssistant) {
 		return new KeyAdapter() {
 			KeySequence[] fKeySequences;
 			
@@ -116,13 +133,66 @@ public class ControlContentAssistHelper {
 					if (sequences[i].equals(keySequence)) {
 						e.doit= false;
 						String errorMessage= contentAssistant.showPossibleCompletions();
-						if (errorMessage != null && dialogPage != null)
-							dialogPage.setErrorMessage(errorMessage);
-						return;
+						if (errorMessage != null) {
+							System.err.println(errorMessage);
+						}
 					}
 				}
 			}};
 	}
 
-
+	/**
+	 * Installs a visual cue indicating availability of content assist on the given control.
+	 */
+	public static void hookForSmartCue(final Control control) {
+		
+		if (!(control instanceof Text) && !(control instanceof Combo))
+			return;
+		
+		class Handler implements FocusListener, PaintListener {
+			Image fBulb;
+			ImageDescriptor fBulbID= ImageDescriptor.createFromFile(ControlContentAssistHelper.class, "bulb.gif"); //$NON-NLS-1$
+			
+			public void paintControl(PaintEvent e) {
+				if (control.isDisposed())
+					return;
+				int dx, dy;
+				if (control instanceof Combo || control instanceof Text) { //TODO: original was w/o || control instanceof Text
+					if (SWT.getPlatform().equals("carbon"))	//$NON-NLS-1$
+						dx= -9;
+					else
+						dx= -8;
+					dy= 0;
+				} else {
+					dx= -5;
+					dy= 3;
+				}
+				Point global= control.toDisplay(dx, dy);
+				Point p= ((Control) e.widget).toControl(global);
+				if (fBulb == null)
+					fBulb= fBulbID.createImage();
+				e.gc.drawImage(fBulb, p.x, p.y);
+			}
+			
+			public void focusGained(FocusEvent e) {
+				for (Control c= ((Control)e.widget).getParent(); c != null; c= c.getParent()) {
+					c.addPaintListener(this);
+					c.redraw();
+				}
+			}
+			
+			public void focusLost(FocusEvent e) {
+				for (Control c= ((Control)e.widget).getParent(); c != null; c= c.getParent()) {
+					c.removePaintListener(this);
+					c.redraw();
+				}
+				if (fBulb != null) {
+					fBulb.dispose();
+					fBulb= null;
+				}
+			}
+		}
+		
+		control.addFocusListener(new Handler());
+	}
 }

@@ -13,6 +13,9 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaConventions;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -24,13 +27,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
-
-import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 
 public class ParameterEditDialog extends StatusDialog {
 	
@@ -39,11 +42,17 @@ public class ParameterEditDialog extends StatusDialog {
 	private Text fType;
 	private Text fName;
 	private Text fDefaultValue;
-
-	public ParameterEditDialog(Shell parentShell, ParameterInfo parameter, boolean canEditType) {
+	private IPackageFragment fContext;
+	
+	/**
+	 * @param context the <code>IPackageFragment</code> for type ContentAssist.
+	 * Can be <code>null</code> if <code>canEditType</code> is <code>false</code>.
+	 */
+	public ParameterEditDialog(Shell parentShell, ParameterInfo parameter, boolean canEditType, IPackageFragment context) {
 		super(parentShell);
 		fParameter= parameter;
 		fEditType= canEditType;
+		fContext= context;
 	}
 	
 	protected void configureShell(Shell newShell) {
@@ -81,6 +90,8 @@ public class ParameterEditDialog extends StatusDialog {
 						validate((Text)e.widget);
 					}
 				});
+			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(fContext, true, false);
+			ControlContentAssistHelper.createTextContentAssistant(fType, processor);
 		}
 
 		label= new Label(result, SWT.NONE);

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.SWT;
@@ -39,6 +41,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
@@ -131,6 +135,9 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 						update(true);
 					}
 				});
+				
+				JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(getPackageFragment(), true, true);
+				ControlContentAssistHelper.createTextContentAssistant(text, processor);
 		}
 
 		private void createParameterExceptionsFolder(Composite composite) {
@@ -164,7 +171,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				public void parameterAdded(ParameterInfo parameter) {
 					update(true);
 				}
-			}, true, true, true);
+			}, true, true, true, getPackageFragment());
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getChangeMethodSignatureRefactoring().getParameterInfos());
 			return cp;
@@ -214,6 +221,10 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 		private ChangeSignatureRefactoring getChangeMethodSignatureRefactoring(){
 			return	(ChangeSignatureRefactoring)getRefactoring();
+		}
+
+		private IPackageFragment getPackageFragment() {
+			return (IPackageFragment) getChangeMethodSignatureRefactoring().getMethod().getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		}
 
 		private void update(boolean displayErrorMessage){

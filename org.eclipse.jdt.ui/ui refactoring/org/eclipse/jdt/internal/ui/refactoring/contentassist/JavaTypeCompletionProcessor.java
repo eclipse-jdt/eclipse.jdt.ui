@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -39,6 +39,7 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -55,18 +56,27 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class JavaTypeCompletionProcessor implements IContentAssistProcessor, IContentAssistProcessorExtension {
 	
+	private static final ImageDescriptorRegistry IMAGE_DESC_REGISTRY= JavaPlugin.getImageDescriptorRegistry();
 	private static final String CLASS_NAME= "$$__$$"; //$NON-NLS-1$
 	private static final String CU_NAME= CLASS_NAME + ".java"; //$NON-NLS-1$
 	private static final String CU_START= "public class " + CLASS_NAME + " { ";  //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String CU_END= " }"; //$NON-NLS-1$
+	private static final String VOID= "void"; //$NON-NLS-1$
+	private static final List BASE_TYPES= Arrays.asList(
+		new String[] {"boolean", "byte", "char", "double", "float", "int", "long", "short"});  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 	
-	private IPackageFragmentRoot fRoot;
+	private IPackageFragment fPackageFragment;
+	private boolean fEnableBaseTypes;
+	private boolean fEnableVoid;
 	private JavaCompletionProposalComparator fComparator;
+
 	private String fErrorMessage;
 	private char[] fProposalAutoActivationSet;
 	
-	public JavaTypeCompletionProcessor(IPackageFragmentRoot root) {
-		fRoot= root;
+	public JavaTypeCompletionProcessor(IPackageFragment packageFragment, boolean enableBaseTypes, boolean enableVoid) {
+		fPackageFragment= packageFragment;
+		fEnableBaseTypes= enableBaseTypes;
+		fEnableVoid= enableVoid;
 		fComparator= new JavaCompletionProposalComparator();
 		
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getJavaTextTools().getPreferenceStore();
@@ -136,11 +146,39 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 			JavaPlugin.log(e);
 		}
 		if (input.length() == 0)
-			return null;
-		
+			return createPackageTypesProposals();
+		else
+			return internalComputeCompletionProposals(documentOffset, input);
+	}
+
+	private ICompletionProposal[] createPackageTypesProposals() {
+		ArrayList proposals= new ArrayList();
+		IJavaProject javaProject= fPackageFragment.getJavaProject();
+		String packageName= fPackageFragment.getElementName();
+		char[] pack= packageName.toCharArray();
+		try {
+			ICompilationUnit[] cus= fPackageFragment.getCompilationUnits();
+			for (int i= 0; i < cus.length; i++) {
+				ICompilationUnit unit= cus[i];
+				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(unit);
+				IType[] types= wc.getTypes();
+				for (int t= 0; t < types.length; t++) {
+					IType type= types[t];
+					String typeName= type.getTypeQualifiedName('.');
+					ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(type.isInterface(), type.isMember(), type.getFlags());
+					ProposalInfo info= new ProposalInfo(javaProject, pack, typeName.toCharArray());
+					proposals.add(createTypeCompletion(0, 0, type.getFullyQualifiedName(), descriptor, typeName, packageName, info, 0));
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+	}
+
+	private ICompletionProposal[] internalComputeCompletionProposals(int documentOffset, String input) {
 		String cuString= CU_START + input + CU_END;
-		IPackageFragment defaultPackage= fRoot.getPackageFragment(""); //$NON-NLS-1$
-		ICompilationUnit cu= defaultPackage.getCompilationUnit(CU_NAME);
+		ICompilationUnit cu= fPackageFragment.getCompilationUnit(CU_NAME);
 		try {
 			/*
 			 * Explicitly create a new non-shared working copy.
@@ -148,7 +186,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 			cu= (ICompilationUnit) cu.getWorkingCopy();
 			cu.getBuffer().setContents(cuString);
 			int cuOffset= CU_START.length() + input.length();
-			TypeCompletionCollector collector= new TypeCompletionCollector(cuOffset - documentOffset, fRoot.getJavaProject());
+			TypeCompletionCollector collector= new TypeCompletionCollector(cuOffset - documentOffset, fPackageFragment.getJavaProject(), fEnableBaseTypes, fEnableVoid);
 			cu.codeComplete(cuOffset, collector);
 			
 			JavaCompletionProposal[] proposals= collector.getResults();
@@ -170,16 +208,43 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 		}
 	}
 
+	protected static JavaCompletionProposal createTypeCompletion(int start, int end, String completion, ImageDescriptor descriptor, String typeName, String containerName, ProposalInfo proposalInfo, int relevance) {
+		String fullName= JavaModelUtil.concatenateName(containerName, typeName); // containername can be null
+		
+		StringBuffer buf= new StringBuffer(Signature.getSimpleName(fullName));
+		String typeQualifier= Signature.getQualifier(fullName);
+		buf.append(" - "); //$NON-NLS-1$
+		if (typeQualifier.length() > 0) {
+			buf.append(typeQualifier);
+		} else if (containerName != null) {
+			buf.append("(default package)");
+		}
+		String name= buf.toString();
+		
+		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, null, start, end-start,
+			getImage(descriptor), name, relevance, typeName, containerName);
+		proposal.setProposalInfo(proposalInfo);
+		return proposal;
+	}
+
+	private static Image getImage(ImageDescriptor descriptor) {
+		return (descriptor == null) ? null : JavaTypeCompletionProcessor.IMAGE_DESC_REGISTRY.get(descriptor);
+	}
+
 	private static class TypeCompletionCollector extends CompletionRequestorAdapter {
-		private final ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
-		private List fProposals = new ArrayList();
 		private int fOffsetReduction;
 		private IJavaProject fJavaProject;
-		private String fErrorMessage2;
+		private boolean fEnableBaseTypes2;
+		private boolean fEnableVoid2;
 		
-		public TypeCompletionCollector(int offsetReduction, IJavaProject javaProject) {
+		private List fProposals = new ArrayList();
+		private String fErrorMessage2;
+
+		public TypeCompletionCollector(int offsetReduction, IJavaProject javaProject, boolean enableBaseTypes, boolean enableVoid) {
 			fOffsetReduction= offsetReduction;
 			fJavaProject= javaProject;
+			fEnableBaseTypes2= enableBaseTypes;
+			fEnableVoid2= enableVoid;
 		}
 
 		public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
@@ -187,7 +252,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 				return;
 			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers);
 			ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-			fProposals.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
+			fProposals.add(createAdjustedTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
 		}
 		
 		public void acceptError(IProblem error) {
@@ -199,18 +264,26 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 				return;
 			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(true, false, modifiers);
 			ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-			fProposals.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
+			fProposals.add(createAdjustedTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
+		}
+		
+		public void acceptKeyword(char[] keywordName, int start, int end, int relevance) {
+			if (! fEnableBaseTypes2)
+				return;
+			String keyword= new String(keywordName);
+			if ( (fEnableVoid2 && VOID.equals(keyword)) || (fEnableBaseTypes2 && BASE_TYPES.contains(keyword)) )
+				fProposals.add(createAdjustedCompletion(start, end, keyword, null, keyword, relevance));
+		}
+		
+		public void acceptPackage(char[] packageName, char[] completionName, int start, int end, int relevance) {
+			fProposals.add(createAdjustedCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_PACKAGE, new String(packageName), relevance));
 		}
 		
 		public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int relevance) {
 			if (isDummyClass(typeName))
 				return;
 			ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-			fProposals.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_CLASS, new String(typeName), new String(packageName), info, relevance));
-		}
-		
-		public void acceptPackage(char[] packageName, char[] completionName, int start, int end, int relevance) {
-			fProposals.add(createCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_PACKAGE, new String(packageName), relevance));
+			fProposals.add(createAdjustedTypeCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_CLASS, new String(typeName), new String(packageName), info, relevance));
 		}
 		
 		private static boolean isDummyClass(char[] typeName) {
@@ -225,33 +298,12 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 			return fErrorMessage2;
 		}
 		
-		protected JavaCompletionProposal createCompletion(int start, int end, String completion, ImageDescriptor descriptor, String name, int relevance) {
+		protected JavaCompletionProposal createAdjustedCompletion(int start, int end, String completion, ImageDescriptor descriptor, String name, int relevance) {
 			return new JavaCompletionProposal(completion, start - fOffsetReduction, end-start, getImage(descriptor), name, relevance);
 		}
 		
-		protected JavaCompletionProposal createTypeCompletion(int start, int end, String completion, ImageDescriptor descriptor, String typeName, String containerName, ProposalInfo proposalInfo, int relevance) {
-			String fullName= JavaModelUtil.concatenateName(containerName, typeName); // containername can be null
-			
-			StringBuffer buf= new StringBuffer(Signature.getSimpleName(fullName));
-			String typeQualifier= Signature.getQualifier(fullName);
-			buf.append(" - "); //$NON-NLS-1$
-			if (typeQualifier.length() > 0) {
-				buf.append(typeQualifier);
-			} else if (containerName != null) {
-				buf.append("(default package)");
-			}
-			String name= buf.toString();
-			
-			JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, null,
-				start - fOffsetReduction, end-start,
-				getImage(descriptor), name, relevance, typeName, containerName);
-			proposal.setProposalInfo(proposalInfo);
-			return proposal;
-		}
-
-		private Image getImage(ImageDescriptor descriptor) {
-			return (descriptor == null) ? null : fRegistry.get(descriptor);
+		protected JavaCompletionProposal createAdjustedTypeCompletion(int start, int end, String completion, ImageDescriptor descriptor, String typeName, String containerName, ProposalInfo proposalInfo, int relevance) {
+			return createTypeCompletion(start - fOffsetReduction, end - fOffsetReduction, completion, descriptor, typeName, containerName, proposalInfo, relevance);
 		}
 	}
-		
 }

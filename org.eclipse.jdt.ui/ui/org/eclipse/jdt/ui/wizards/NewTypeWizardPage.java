@@ -520,8 +520,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperClassDialogField.doFillIntoGrid(composite, nColumns);
 		Text text= fSuperClassDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
-		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(getPackageFragmentRoot());
-		ControlContentAssistHelper.createTextContentAssistant(text, processor, this);
+		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(getPackageFragmentRoot().getPackageFragment(""), false, false); //$NON-NLS-1$
+		ControlContentAssistHelper.createTextContentAssistant(text, processor);
 	}
 
 	/**

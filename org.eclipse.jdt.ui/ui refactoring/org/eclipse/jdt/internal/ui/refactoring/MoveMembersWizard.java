@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
@@ -168,9 +168,9 @@ public class MoveMembersWizard extends RefactoringWizard {
 			} else {
 				setPageComplete(false);
 			}
-			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(getMoveRefactoring().getDeclaringType());
-			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(root);
-			fContentAssistant= ControlContentAssistHelper.createComboContentAssistant(fDestinationField, processor, this);
+			IPackageFragment root= (IPackageFragment) getMoveRefactoring().getDeclaringType().getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(root, false, false);
+			fContentAssistant= ControlContentAssistHelper.createComboContentAssistant(fDestinationField, processor);
 			
 			Button button= new Button(composite, SWT.PUSH);
 			button.setText(RefactoringMessages.getString("MoveMembersInputPage.browse")); //$NON-NLS-1$

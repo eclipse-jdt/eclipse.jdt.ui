@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.IPackageFragment;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -28,10 +30,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -51,6 +55,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
@@ -94,7 +100,7 @@ public class ChangeParametersControl extends Composite {
 			    if (info.isAdded())
 			        return info.getDefaultValue();
 			    else
-			        return "-";
+			        return "-"; //$NON-NLS-1$
 			}
 			Assert.isTrue(false);
 			return ""; //$NON-NLS-1$
@@ -163,17 +169,28 @@ public class ChangeParametersControl extends Composite {
 	private Button fAddButton;
 	private Button fRemoveButton;
 	private List fParameterInfos;
+	private IPackageFragment fTypeContext;
 
 	/**
-	 * @param label no label is created if <code>label</code> is <code>null</code>.
+	 * @param label the label before the table or <code>null</code>
 	 */
 	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters) {
+		this(parent, style, label, listener, canChangeParameterNames, canChangeTypesOfOldParameters, canAddParameters, null);
+	}
+	
+	/**
+	 * @param label the label before the table or <code>null</code>
+	 * @param typeContext the package in which to complete types
+	 */
+	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters, IPackageFragment typeContext) {
 		super(parent, style);
 		Assert.isNotNull(listener);
 		fListener= listener;
 		fCanChangeParameterNames= canChangeParameterNames;
 		fCanChangeTypesOfOldParameters= canChangeTypesOfOldParameters;
 		fCanAddParameters= canAddParameters;
+		fTypeContext= typeContext;
+
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0;
@@ -396,7 +413,7 @@ public class ChangeParametersControl extends Composite {
 					ParameterInfo[] selected= getSelectedElements();
 					Assert.isTrue(selected.length == 1);
 					ParameterInfo parameterInfo= selected[0];
-					ParameterEditDialog dialog= new ParameterEditDialog(getShell(), parameterInfo, fCanChangeTypesOfOldParameters);
+					ParameterEditDialog dialog= new ParameterEditDialog(getShell(), parameterInfo, fCanChangeTypesOfOldParameters, fTypeContext);
 					dialog.open();
 					fListener.parameterChanged(parameterInfo);
 					fTableViewer.update(parameterInfo, PROPERTIES);
@@ -492,11 +509,13 @@ public class ChangeParametersControl extends Composite {
 	//---- editing -----------------------------------------------------------------------------------------------
 
 	private void addCellEditors() {
-		final CellEditor editors[]= new CellEditor[PROPERTIES.length];
+		final TextCellEditor editors[]= new TextCellEditor[PROPERTIES.length];
 
 		editors[TYPE_PROP]= new TextCellEditor(getTable());
 		editors[NEWNAME_PROP]= new TextCellEditor(getTable());
 		editors[DEFAULT_PROP]= new TextCellEditor(getTable());
+		
+		installParameterTypeContentAssist(editors[TYPE_PROP].getControl());
 		
 		for (int i = 0; i < editors.length; i++) {
 			final int editorColumn= i;
@@ -576,6 +595,14 @@ public class ChangeParametersControl extends Composite {
 		fTableViewer.setCellEditors(editors);
 		fTableViewer.setColumnProperties(PROPERTIES);
 		fTableViewer.setCellModifier(new ParametersCellModifier());
+	}
+
+	private void installParameterTypeContentAssist(Control control) {
+		if (! (control instanceof Text))
+			return;
+		Text text= (Text) control;
+		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(fTypeContext, true, false);
+		ControlContentAssistHelper.createTextContentAssistant(text, processor);
 	}
 
 	//---- change order ----------------------------------------------------------------------------------------
