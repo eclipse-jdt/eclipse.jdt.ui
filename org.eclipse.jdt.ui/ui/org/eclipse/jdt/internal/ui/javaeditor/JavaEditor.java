@@ -166,6 +166,8 @@ public abstract class JavaEditor extends StatusTextEditor {
 		
 	/**
 	 * Returns the most narrow java element including the given offset
+	 * 
+	 * @param offset the offset inside of the requested element
 	 */
 	abstract protected IJavaElement getElementAt(int offset);
 	
@@ -489,6 +491,7 @@ public abstract class JavaEditor extends StatusTextEditor {
 			}
 			
 		} catch (JavaModelException x) {
+			JavaPlugin.getDefault().log(x.getStatus());
 		}
 		
 		resetHighlightRange();
@@ -571,7 +574,7 @@ public abstract class JavaEditor extends StatusTextEditor {
 		
 		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
-		setAction("ShowJavaDoc", action);				 //$NON-NLS-1$
+		setAction("ShowJavaDoc", action); //$NON-NLS-1$
 	
 		fEncodingSupport= new DefaultEncodingSupport();
 		fEncodingSupport.initialize(this);

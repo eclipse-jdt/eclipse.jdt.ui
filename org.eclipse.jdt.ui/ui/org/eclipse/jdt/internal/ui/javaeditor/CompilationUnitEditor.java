@@ -84,6 +84,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -531,16 +532,35 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @see JavaEditor#getElementAt(int)
 	 */
 	protected IJavaElement getElementAt(int offset) {
+		return getElementAt(offset, true);
+	}
+	
+	/**
+	 * Returns the most narrow element including the given offset.  If <code>reconcile</code>
+	 * is <code>true</code> the editor's input element is reconciled in advance. If it is 
+	 * <code>false</code> this method only returns a result if the editor's input element
+	 * does not need to be reconciled.
+	 * 
+	 * @param offset the offset included by the retrieved element
+	 * @param reconcile <code>true</code> if working copy should be reconciled
+	 */
+	protected IJavaElement getElementAt(int offset, boolean reconcile) {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
 		
 		if (unit != null) {
-			synchronized (unit) {
-				try {
-					unit.reconcile();
+			try {
+				if (reconcile) {
+					synchronized (unit) {
+						unit.reconcile();
+					}
 					return unit.getElementAt(offset);
-				} catch (JavaModelException x) {
-				}
+				} else if (unit.isConsistent())
+					return unit.getElementAt(offset);
+					
+			} catch (JavaModelException x) {
+				JavaPlugin.getDefault().log(x.getStatus());
+				// nothing found, be tolerant and go on
 			}
 		}
 		
@@ -554,6 +574,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		try {
 			return EditorUtility.getWorkingCopy(element, true);
 		} catch (JavaModelException x) {
+			JavaPlugin.getDefault().log(x.getStatus());
 			// nothing found, be tolerant and go on
 		}
 		return null;
@@ -1288,6 +1309,30 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 		return new AdaptedSourceViewer(parent, ruler, styles);
+	}
+	
+	/*
+	 * @see JavaEditor#synchronizeOutlinePageSelection()
+	 */
+	public void synchronizeOutlinePageSelection() {
+		
+		if (isEditingScriptRunning())
+			return;
+		
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (sourceViewer == null || fOutlinePage == null)
+			return;
+			
+		StyledText styledText= sourceViewer.getTextWidget();
+		if (styledText == null)
+			return;
+		
+		int offset= sourceViewer.getVisibleRegion().getOffset();
+		int caret= offset + styledText.getCaretOffset();
+		
+		IJavaElement element= getElementAt(caret, false);
+		if (element instanceof ISourceReference)
+			fOutlinePage.select((ISourceReference) element);
 	}
 		
 	/*

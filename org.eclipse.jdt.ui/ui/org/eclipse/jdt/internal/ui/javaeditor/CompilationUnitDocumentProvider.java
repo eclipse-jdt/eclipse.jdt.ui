@@ -378,6 +378,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					return;
 					
 				
+				boolean isCanceled= false;
 				boolean temporaryProblemsChanged= false;
 				fPreviouslyShadowed= fCurrentlyShadowed;
 				fCurrentlyShadowed= new ArrayList();
@@ -396,6 +397,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 						while (e.hasNext()) {
 							
 							IProblem problem= (IProblem) e.next();
+							
+							if (fProgressMonitor != null && fProgressMonitor.isCanceled()) {
+								isCanceled= true;
+								break;
+							}
+								
 							Position position= createPositionFromProblem(problem);
 							if (position != null) {
 								
@@ -411,7 +418,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 						fCollectedProblems.clear();
 					}
 					
-					removeMarkerOverlays();
+					removeMarkerOverlays(isCanceled);
 					fPreviouslyShadowed.clear();
 					fPreviouslyShadowed= null;
 				}
@@ -420,12 +427,16 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					fireModelChanged(new CompilationUnitAnnotationModelEvent(this, getResource(), false));
 			}
 			
-			private void removeMarkerOverlays() {
-				Iterator e= fPreviouslyShadowed.iterator();
-				while (e.hasNext()) {
-					JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) e.next();
-					annotation.setOverlay(null);
-				}						
+			private void removeMarkerOverlays(boolean isCanceled) {
+				if (isCanceled) {
+					fCurrentlyShadowed.addAll(fPreviouslyShadowed);
+				} else {
+					Iterator e= fPreviouslyShadowed.iterator();
+					while (e.hasNext()) {
+						JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) e.next();
+						annotation.setOverlay(null);
+					}
+				}			
 			}
 			
 			private void setOverlay(Object value, ProblemAnnotation problemAnnotation) {

@@ -74,7 +74,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 					if (extension != null)
 						extension.setProgressMonitor(null);
 					
-					if (fEditor instanceof IReconcilingParticipant) {
+					if (fEditor instanceof IReconcilingParticipant && !fProgressMonitor.isCanceled()) {
 						IReconcilingParticipant p= (IReconcilingParticipant) fEditor;
 						p.reconciled();
 					}
