@@ -367,39 +367,33 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
 
-		boolean doNew= true, doChange= true;
-		for (int i= 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
-			if (curr instanceof NewVariableCompletionProposal) {
-				assertTrue("2 new proposals", doNew);
-				doNew= false;
-				NewVariableCompletionProposal proposal= (NewVariableCompletionProposal) curr;
-				String preview= getPreviewContent(proposal);
-	
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("    protected int var1;\n");
-				buf.append("    public int var2;\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-			} else if (curr instanceof CUCorrectionProposal) {
-				assertTrue("2 replace proposals", doChange);
-				doChange= false;
-				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
-				String preview= getPreviewContent(proposal);
-	
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class F {\n");
-				buf.append("    void foo(E e) {\n");
-				buf.append("         e.var1= 2;\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-			}
-		}
+		buf= new StringBuffer();
+		
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    protected int var1;\n");
+		buf.append("    public int var2;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    void foo(E e) {\n");
+		buf.append("         e.var1= 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
 	
 	public void testVarInSuperFieldAccess() throws Exception {
@@ -843,6 +837,66 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		}		
 	
 	}
+	
+	public void testVarWithGenricType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class F {\n");
+		buf.append("    void foo(E e) {\n");
+		buf.append("         e.var2= new ArrayList<String>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("F.java", buf.toString(), false, null);		
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    protected int var1;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList proposals= collectCorrections(cu1, astRoot);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    protected int var1;\n");
+		buf.append("    public ArrayList<String> var2;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class F {\n");
+		buf.append("    void foo(E e) {\n");
+		buf.append("         e.var1= new ArrayList<String>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+
+	}
+
 
 	public void testSimilarVariableNames1() throws Exception {
 		StringBuffer buf= new StringBuffer();
