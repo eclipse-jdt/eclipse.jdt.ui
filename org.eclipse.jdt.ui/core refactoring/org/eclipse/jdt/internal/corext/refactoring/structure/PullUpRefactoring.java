@@ -499,7 +499,10 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 					return false;
 				if (JavaModelUtil.isSamePackage(((IType) member).getPackageFragment(), target.getPackageFragment()))
 					return true;
-				return hierarchy.contains(member.getDeclaringType());
+				IType type= member.getDeclaringType();
+				if (type != null)
+					return hierarchy.contains(type);
+				return false;
 			}
 			final IType declaringType= member.getDeclaringType();
 			if (!canBeAccessedFrom(declaringType, target, hierarchy))
