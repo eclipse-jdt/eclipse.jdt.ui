@@ -31,7 +31,7 @@ public class RevertTextEditorTest extends RevertEditorTest {
 
 	public void testRevertTextEditor() throws PartInitException, BadLocationException {
 		// cold run
-		measureRevert(EditorTestHelper.findFile(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX + FILE_SUFFIX));
+		measureRevert(ResourceTestHelper.findFile(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX + FILE_SUFFIX));
 	}
 
 }
