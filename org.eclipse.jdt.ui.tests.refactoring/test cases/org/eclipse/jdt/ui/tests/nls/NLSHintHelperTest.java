@@ -18,7 +18,17 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -65,7 +75,7 @@ public class NLSHintHelperTest extends TestCase {
 		fLibrary= JavaProjectHelper.addLibrary(fJProject, Path.fromOSString(lib.getPath())); // add library to project
 	}
 	
-	public void testFind() {
+	public void testFindInJAR() {
 		try {
 			assertNotNull(NLSHintHelper.getResourceBundle(fLibrary, "pkg", "Messages.properties"));
 		} catch (JavaModelException e) {
@@ -88,11 +98,140 @@ public class NLSHintHelperTest extends TestCase {
 		
 	}
 	
-	public void testDoNotFind() {
+	public void testDoNotFindInJAR() {
 		try {
 			assertNull(NLSHintHelper.getResourceBundle(fJProject, "pkg", "Messages.properties"));
 		} catch (JavaModelException e) {
 			fail();
+		}
+	}
+	
+	public void testFindInDirtyBuffer() {
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		assertNotNull(manager);
+		
+		IPath nonExistentPath= fJProject.getProject().getFullPath().append("" + System.currentTimeMillis());
+		try {
+			manager.connect(nonExistentPath, null);
+		} catch (CoreException e) {
+			fail();
+		}
+		try {
+			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentPath);
+			buffer.getDocument().set("newKey= newValue");
+			
+			IFile nonExistentFile= ResourcesPlugin.getWorkspace().getRoot().getFile(nonExistentPath);
+	
+			Properties properties= NLSHintHelper.getProperties(nonExistentFile);
+			String newValue= properties.getProperty("newKey");
+			assertEquals("newValue", newValue);
+		} finally {
+			try {
+				manager.disconnect(nonExistentPath, null);
+			} catch (CoreException e1) {
+				// ignore: test itself was already successful
+			}
+		}
+	}
+	
+	public void testDoNotFindDirtyBuffer() {
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		assertNotNull(manager);
+		
+		IPath nonExistentPath= fJProject.getProject().getFullPath().append("" + System.currentTimeMillis());
+		try {
+			manager.connect(nonExistentPath, null);
+		} catch (CoreException e) {
+			fail();
+		}
+		try {
+			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentPath);
+			buffer.getDocument().set("newKey= newValue");
+			
+			IFile nonExistentFile= ResourcesPlugin.getWorkspace().getRoot().getFile(nonExistentPath);
+	
+			Properties properties= NLSHintHelper.getProperties(nonExistentFile);
+			String newValue= properties.getProperty("nonExistingValue");
+			assertEquals(newValue, null);
+		} finally {
+			try {
+				manager.disconnect(nonExistentPath, null);
+			} catch (CoreException e1) {
+				// ignore: test itself was already successful
+			}
+		}
+	}
+	
+	public void testFindInFile() {
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		assertNotNull(manager);
+		
+		String fileName= "" + System.currentTimeMillis();
+		IPath nonExistentPath= fJProject.getProject().getFullPath().append(fileName);
+		IPath nonExistentLocation= fJProject.getProject().getLocation().append(fileName);
+		
+		try {
+			manager.connect(nonExistentLocation, null);
+		} catch (CoreException e) {
+			fail();
+		}
+		try {
+			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentLocation);
+			buffer.getDocument().set("newKey= newValue");
+			buffer.commit(null, false);
+			
+			fJProject.getProject().refreshLocal(IResource.DEPTH_ONE, null);
+			
+			IFile existentFile= ResourcesPlugin.getWorkspace().getRoot().getFile(nonExistentPath);
+			assertEquals(true, existentFile.exists());
+	
+			Properties properties= NLSHintHelper.getProperties(existentFile);
+			String newValue= properties.getProperty("newKey");
+			assertEquals("newValue", newValue);
+		} catch (CoreException ex) {
+			fail();
+		} finally {
+			try {
+				manager.disconnect(nonExistentPath, null);
+			} catch (CoreException e1) {
+				// ignore: test itself was already successful
+			}
+		}
+	}
+	
+	public void testDoNotFindInFile() {
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		assertNotNull(manager);
+		
+		String fileName= "" + System.currentTimeMillis();
+		IPath nonExistentPath= fJProject.getProject().getFullPath().append(fileName);
+		IPath nonExistentLocation= fJProject.getProject().getLocation().append(fileName);
+		try {
+			manager.connect(nonExistentLocation, null);
+		} catch (CoreException e) {
+			fail();
+		}
+		try {
+			ITextFileBuffer buffer= manager.getTextFileBuffer(nonExistentLocation);
+			buffer.getDocument().set("newKey= newValue");
+			buffer.commit(null, false);
+			
+			fJProject.getProject().refreshLocal(IResource.DEPTH_ONE, null);
+			
+			IFile existentFile= ResourcesPlugin.getWorkspace().getRoot().getFile(nonExistentPath);
+			assertEquals(true, existentFile.exists());
+	
+			Properties properties= NLSHintHelper.getProperties(existentFile);
+			String newValue= properties.getProperty("nonExistingValue");
+			assertEquals(newValue, null);
+		} catch (CoreException ex) {
+			fail();
+		} finally {
+			try {
+				manager.disconnect(nonExistentPath, null);
+			} catch (CoreException e1) {
+				// ignore: test itself was already successful
+			}
 		}
 	}
 
