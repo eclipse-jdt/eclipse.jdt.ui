@@ -917,7 +917,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 	
 	private boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
-		if (!(node instanceof ForStatement))
+		ForStatement forStatement= getEnclosingForStatementHeader(node);
+		if (forStatement == null)
 			return false;
 		
 		if (resultingCollections == null)
@@ -926,7 +927,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ConvertForLoopProposal convertForLoopProposal= new ConvertForLoopProposal(
 				CorrectionMessages.getString("QuickAssistProcessor.forLoop.description"),  //$NON-NLS-1$
 				context.getCompilationUnit(),
-				((ForStatement) node), 1, 
+				forStatement, 1, 
 				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		
 		if (!convertForLoopProposal.satisfiesPreconditions())
@@ -934,5 +935,25 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		resultingCollections.add(convertForLoopProposal);
 		return true;
-	}	
+	}
+
+	private ForStatement getEnclosingForStatementHeader(ASTNode node) {
+		if (node instanceof ForStatement)
+			return (ForStatement) node;
+		
+		while (node != null) {
+			ASTNode parent= node.getParent();
+			if (parent instanceof ForStatement) {
+				StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
+				if (locationInParent == ForStatement.EXPRESSION_PROPERTY
+						|| locationInParent == ForStatement.INITIALIZERS_PROPERTY
+						|| locationInParent == ForStatement.UPDATERS_PROPERTY)
+					return (ForStatement) parent;
+				else
+					return null;
+			}
+			node= parent;
+		}
+		return null;
+	}
 }
