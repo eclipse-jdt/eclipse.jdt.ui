@@ -130,35 +130,35 @@ public class RefactoringSupport {
 			}
 		}
 
-		/* package */ IRenameRefactoring fRefactoring;
-
+		private IRenameRefactoring fRefactoring;
+		
 		protected AbstractRenameSupport(IRenameRefactoring refactoring) {
-			fRefactoring= refactoring;
+			fRefactoring= refactoring;//can be null
 		}
 
-		public RefactoringStatus lightCheck() throws JavaModelException {
-			return lightCheck(fRefactoring);
+		public final RefactoringStatus lightCheck() throws JavaModelException {
+			if (fRefactoring == null)
+				return RefactoringStatus.createFatalErrorStatus("This refactoring is not enabled.");
+			return new RefactoringStatus();
 		}
 
-		public abstract RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException; 
-			
-		public IRenameRefactoring getRefactoring() {
+		public final IRenameRefactoring getRefactoring() {
 			return fRefactoring;
 		}
-
-		public boolean canRename(Object element) throws JavaModelException{
+		
+		public final boolean canRename(Object element) throws JavaModelException{
 			// TODO This is a workaround to create the right refactoring when renaming a virtual method.
 			// This should be moved to a factory with a call back in 2.2
 			if (fRefactoring instanceof RenameMethodRefactoring && element instanceof IMethod) {
-				fRefactoring= RenameMethodRefactoring.createInstance((IMethod)element, (RenameMethodRefactoring)fRefactoring);
+				fRefactoring= RenameMethodRefactoring.create((IMethod)element, (RenameMethodRefactoring)fRefactoring);
 			}
-			boolean canRename= lightCheck().isOK();
+			boolean canRename= lightCheck().isOK();//TODO change to fRefactoring != null
 			 if (!canRename)	
 			 	fRefactoring= null;
 			 return canRename;	
 		}
 		
-		public void rename(Shell parent, Object element) throws JavaModelException{
+		public final void rename(Shell parent, Object element) throws JavaModelException{
 			Assert.isNotNull(fRefactoring);
 			RefactoringWizard wizard= createWizard(fRefactoring);
 			RefactoringStarter starter= new RefactoringStarter();
@@ -191,14 +191,11 @@ public class RefactoringSupport {
 	}
 	
 	public static class JavaProject extends AbstractRenameSupport {
-		public JavaProject(IJavaProject project) {
-			super(new RenameJavaProjectRefactoring(project));
+		public JavaProject(IJavaProject project) throws JavaModelException {
+			super(RenameJavaProjectRefactoring.create(project));
 		}
 		public RenameJavaProjectRefactoring getSpecificRefactoring() {
-			return (RenameJavaProjectRefactoring)fRefactoring;
-		}
-		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameJavaProjectRefactoring)refactoring).checkActivation(new NullProgressMonitor());
+			return (RenameJavaProjectRefactoring)getRefactoring();
 		}
 		String getNameEntryMessage(){
 			return RefactoringMessages.getString("RefactoringSupportFactory.project_name"); //$NON-NLS-1$
@@ -206,14 +203,11 @@ public class RefactoringSupport {
 	}
 
 	public static class SourceFolder extends AbstractRenameSupport {
-		public SourceFolder(IPackageFragmentRoot root) {
-			super(new RenameSourceFolderRefactoring(root));
+		public SourceFolder(IPackageFragmentRoot root) throws JavaModelException {
+			super(RenameSourceFolderRefactoring.create(root));
 		}
 		public RenameSourceFolderRefactoring getSpecificRefactoring() {
-			return (RenameSourceFolderRefactoring)fRefactoring;
-		}
-		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameSourceFolderRefactoring)refactoring).checkActivation(new NullProgressMonitor());
+			return (RenameSourceFolderRefactoring)getRefactoring();
 		}
 		String getNameEntryMessage(){
 			return RefactoringMessages.getString("RefactoringSupportFactory.source_folder_name"); //$NON-NLS-1$
@@ -221,14 +215,11 @@ public class RefactoringSupport {
 	}
 	
 	public static class PackageFragment extends AbstractRenameSupport {
-		public PackageFragment(IPackageFragment element) {
-			super(new RenamePackageRefactoring(element));
+		public PackageFragment(IPackageFragment element) throws JavaModelException {
+			super(RenamePackageRefactoring.create(element));
 		}
 		public RenamePackageRefactoring getSpecificRefactoring() {
-			return (RenamePackageRefactoring)fRefactoring;
-		}
-		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenamePackageRefactoring)refactoring).checkActivation(new NullProgressMonitor());
+			return (RenamePackageRefactoring)getRefactoring();
 		}
 		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringSupportFactory.rename_Package"); //$NON-NLS-1$
@@ -241,14 +232,11 @@ public class RefactoringSupport {
 	}
 	
 	public static class CompilationUnit extends AbstractRenameSupport {
-		public CompilationUnit(ICompilationUnit unit) {
+		public CompilationUnit(ICompilationUnit unit) throws JavaModelException {
 			super(createRefactoring(unit));
 		}
 		public RenameCompilationUnitRefactoring getSpecificRefactoring() {
-			return (RenameCompilationUnitRefactoring)fRefactoring;
-		}
-		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameCompilationUnitRefactoring)refactoring).checkPreactivation();
+			return (RenameCompilationUnitRefactoring)getRefactoring();
 		}
 		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringSupportFactory.rename_Cu"); //$NON-NLS-1$
@@ -258,23 +246,20 @@ public class RefactoringSupport {
 			ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_CU;
 			return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
 		}
-		private static IRenameRefactoring createRefactoring(ICompilationUnit element) {
+		private static IRenameRefactoring createRefactoring(ICompilationUnit element) throws JavaModelException {
 			ICompilationUnit cu= (ICompilationUnit)element;
 			if (cu.isWorkingCopy())
-				return new RenameCompilationUnitRefactoring((ICompilationUnit)cu.getOriginalElement());
-			return new RenameCompilationUnitRefactoring(cu);	
+				return RenameCompilationUnitRefactoring.create((ICompilationUnit)cu.getOriginalElement());
+			return RenameCompilationUnitRefactoring.create(cu);	
 		}
 	}
 	
 	public static class Type extends AbstractRenameSupport {
-		public Type(IType element) {
-			super(new RenameTypeRefactoring(element));
+		public Type(IType element) throws JavaModelException {
+			super(RenameTypeRefactoring.create(element));
 		}
 		public RenameTypeRefactoring getSpecificRefactoring() {
-			return (RenameTypeRefactoring)fRefactoring;
-		}
-		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameTypeRefactoring)refactoring).checkPreactivation();
+			return (RenameTypeRefactoring)getRefactoring();
 		}
 		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringGroup.rename_type_title"); //$NON-NLS-1$
@@ -288,13 +273,10 @@ public class RefactoringSupport {
 	
 	public static class Method extends AbstractRenameSupport {
 		public Method(IMethod element) throws JavaModelException {
-			super(RenameMethodRefactoring.createInstance(element));
+			super(RenameMethodRefactoring.create(element));
 		}
 		public RenameMethodRefactoring getSpecificRefactoring() {
-			return (RenameMethodRefactoring)fRefactoring;
-		}
-		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameMethodRefactoring)refactoring).checkPreactivation();
+			return (RenameMethodRefactoring)getRefactoring();
 		}
 		public RefactoringWizard createWizard(IRenameRefactoring refactoring) {
 			String title= RefactoringMessages.getString("RefactoringGroup.rename_method_title"); //$NON-NLS-1$
@@ -307,14 +289,11 @@ public class RefactoringSupport {
 	}
 	
 	public static class Field extends AbstractRenameSupport {
-		public Field(IField element) {
-			super(new RenameFieldRefactoring(element));
+		public Field(IField element) throws JavaModelException {
+			super(RenameFieldRefactoring.create(element));
 		}
 		public RenameFieldRefactoring getSpecificRefactoring() {
-			return (RenameFieldRefactoring)fRefactoring;
-		}
-		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameFieldRefactoring)refactoring).checkPreactivation();
+			return (RenameFieldRefactoring)getRefactoring();
 		}
 		public RefactoringWizard createWizard(IRenameRefactoring refactoring){
 			String title= RefactoringMessages.getString("RefactoringGroup.rename_field_title"); //$NON-NLS-1$
@@ -330,11 +309,8 @@ public class RefactoringSupport {
 	}
 	
 	public static class Resource extends AbstractRenameSupport {
-		public Resource(IResource element) {
-			super(new RenameResourceRefactoring(element));
-		}
-		public RefactoringStatus lightCheck(IRenameRefactoring refactoring) throws JavaModelException{
-			return ((RenameResourceRefactoring)refactoring).checkActivation(new NullProgressMonitor());
+		public Resource(IResource element) throws JavaModelException {
+			super(RenameResourceRefactoring.create(element));
 		}
 		String getNameEntryMessage(){
 			return RefactoringMessages.getString("RefactoringSupportFactory.resource_name"); //$NON-NLS-1$
