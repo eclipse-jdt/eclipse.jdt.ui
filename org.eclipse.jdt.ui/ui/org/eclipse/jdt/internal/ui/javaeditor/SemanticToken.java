@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -25,6 +26,9 @@ public final class SemanticToken {
 	/** Binding */
 	private IBinding fBinding;
 	
+	/** AST root */
+	private CompilationUnit fRoot;
+	
 	/**
 	 * @return Returns the binding, can be <code>null</code>.
 	 */
@@ -36,10 +40,20 @@ public final class SemanticToken {
 	}
 	
 	/**
-	 * @return Returns the AST node.
+	 * @return the AST node
 	 */
 	public SimpleName getNode() {
 		return fNode;
+	}
+	
+	/**
+	 * @return the AST root
+	 */
+	public CompilationUnit getRoot() {
+		if (fRoot == null)
+			fRoot= (CompilationUnit) fNode.getRoot();
+		
+		return fRoot;
 	}
 	
 	/**
@@ -53,6 +67,7 @@ public final class SemanticToken {
 	protected void update(SimpleName node) {
 		fNode= node;
 		fBinding= null;
+		fRoot= null;
 	}
 	
 	/**
@@ -64,5 +79,6 @@ public final class SemanticToken {
 	protected void clear() {
 		fNode= null;
 		fBinding= null;
+		fRoot= null;
 	}
 }

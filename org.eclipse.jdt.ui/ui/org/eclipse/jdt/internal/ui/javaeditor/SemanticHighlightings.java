@@ -230,20 +230,20 @@ public class SemanticHighlightings {
 	}
 	
 	/**
-	 * Semantic highlighting for local and parameter variables.
+	 * Semantic highlighting for local variables.
 	 */
-	private static class LocalParameterHighlighting extends SemanticHighlighting {
+	private static class LocalVariableHighlighting extends SemanticHighlighting {
 		
 		/**
-		 * A named preference part that controls the highlighting of local and parameter variables.
+		 * A named preference part that controls the highlighting of local variables.
 		 */
-		public static final String EDITOR_LOCAL_PARAMETER_COLOR="localParameter"; //$NON-NLS-1$
+		private static final String EDITOR_LOCAL_VARIABLE="localVariable"; //$NON-NLS-1$
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
 		public String getPreferenceKey() {
-			return EDITOR_LOCAL_PARAMETER_COLOR;
+			return EDITOR_LOCAL_VARIABLE;
 		}
 
 		/*
@@ -264,7 +264,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString(PREFIX + "localParameter"); //$NON-NLS-1$
+			return JavaEditorMessages.getString(PREFIX + "localVariable"); //$NON-NLS-1$
 		}
 
 		/*
@@ -272,7 +272,63 @@ public class SemanticHighlightings {
 		 */
 		public boolean consumes(SemanticToken token) {
 			IBinding binding= token.getBinding();
-			return binding != null && binding.getKind() == IBinding.VARIABLE && !((IVariableBinding)binding).isField();
+			if (binding != null && binding.getKind() == IBinding.VARIABLE && !((IVariableBinding)binding).isField() ) {
+				ASTNode decl= token.getRoot().findDeclaringNode(binding);
+				return decl != null && decl.getNodeType() != ASTNode.SINGLE_VARIABLE_DECLARATION;
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Semantic highlighting for parameter variables.
+	 */
+	private static class ParameterVariableHighlighting extends SemanticHighlighting {
+		
+		/**
+		 * A named preference part that controls the highlighting of parameter variables.
+		 */
+		private static final String EDITOR_PARAMETER_VARIABLE="parameterVariable"; //$NON-NLS-1$
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return EDITOR_PARAMETER_VARIABLE;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(0, 192, 192);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.getString(PREFIX + "parameterVariable"); //$NON-NLS-1$
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumes(SemanticToken token) {
+			IBinding binding= token.getBinding();
+			ASTNode parent= token.getNode().getParent();
+			if (binding != null && binding.getKind() == IBinding.VARIABLE && !((IVariableBinding)binding).isField() && (parent == null || parent.getNodeType() != ASTNode.TAG_ELEMENT)) {
+				ASTNode decl= token.getRoot().findDeclaringNode(binding);
+				return decl != null && decl.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION;
+			}
+			return false;
 		}
 	}
 
@@ -306,7 +362,8 @@ public class SemanticHighlightings {
 				new StaticFieldHighlighting(),
 				new FieldHighlighting(),
 				new MethodDeclarationNameHighlighting(),
-				new LocalParameterHighlighting(),
+				new LocalVariableHighlighting(),
+				new ParameterVariableHighlighting(),
 			};
 		return sfSemanticHighlightings;
 	}
