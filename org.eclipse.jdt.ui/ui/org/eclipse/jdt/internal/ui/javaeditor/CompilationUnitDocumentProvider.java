@@ -175,6 +175,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				
 			try {
 				
+				try {
+					input.getFile().refreshLocal(IResource.DEPTH_INFINITE, null);
+				} catch (CoreException x) {
+					handleCoreException(x, "CompilationUnitDocumentProvider.createElementInfo");
+				}
+				
 				ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy();
 				IDocument d= createCompilationUnitDocument(c);
 				IAnnotationModel m= createCompilationUnitAnnotationModel(element);
