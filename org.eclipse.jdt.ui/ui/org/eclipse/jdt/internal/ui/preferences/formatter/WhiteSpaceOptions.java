@@ -160,7 +160,7 @@ public final class WhiteSpaceOptions {
 
     private final static PreviewSnippet WHILE_PREVIEW= new PreviewSnippet(
     CodeFormatter.K_STATEMENTS, 
-    "while (condition) {}" //$NON-NLS-1$
+    "while (condition) {}; do {} while (condition);" //$NON-NLS-1$
     );
 
     private final static PreviewSnippet CATCH_PREVIEW= new PreviewSnippet(
