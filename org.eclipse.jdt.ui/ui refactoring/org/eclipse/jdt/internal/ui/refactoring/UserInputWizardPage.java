@@ -49,6 +49,15 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		fIsLastUserPage= isLastUserPage;
 	}
 	
+	/* (non-Javadoc)
+	 * Method declared in WizardPage
+	 */
+	public void setVisible(boolean visible) {
+		if (visible)
+			getRefactoringWizard().setChange(null);
+		super.setVisible(visible);
+	}
+	
 	/* (non-JavaDoc)
 	 * Method declared in IWizardPage.
 	 */
@@ -57,7 +66,7 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 			if (!saveOpenEditors())
 				return this;
 			else 
-				return getRefactoringWizard().computeUserInputSuccessorPage();
+				return getRefactoringWizard().computeUserInputSuccessorPage(this);
 		} else {
 			return super.getNextPage();
 		}

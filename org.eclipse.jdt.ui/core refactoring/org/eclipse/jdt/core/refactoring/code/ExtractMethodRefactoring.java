@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
  * this early stage to solicit feedback from pioneering adopters on the understanding that any 
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
-public class ExtractMethodRefactoring extends Refactoring{
+public class ExtractMethodRefactoring extends Refactoring {
 
 	private ICompilationUnit fCUnit;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
@@ -175,6 +175,7 @@ public class ExtractMethodRefactoring extends Refactoring{
 		AbstractMethodDeclaration node= fStatementAnalyzer.getEnclosingMethod();
 		if (node != null) {
 			pm.beginTask("Checking new method name", 4);
+			pm.subTask("");
 		
 			result= Checks.checkMethodName(fMethodName);
 			pm.worked(1);

@@ -20,6 +20,7 @@ public class ExtractMethodTests extends RefactoringTest {
 	private IPackageFragment fTryPackage;
 	private IPackageFragment fLocalsPackage;
 	private IPackageFragment fExpressionPackage;
+	private IPackageFragment fNestedPackage;
 	
 	private static final int VALID_SELECTION=     1;
 	private static final int INVALID_SELECTION=   2;
@@ -222,6 +223,17 @@ public class ExtractMethodTests extends RefactoringTest {
 			fExpressionPackage= getRoot().createPackageFragment("expression_in", true, null);
 					
 		return fExpressionPackage;
+	}
+	
+	protected void nestedTest() throws Exception {
+		performTest(getNestedPackage(), "A", COMPARE_WITH_OUTPUT, "nested_out");
+	}
+	
+	private IPackageFragment getNestedPackage() throws JavaModelException {
+		if (fNestedPackage == null)
+			fNestedPackage= getRoot().createPackageFragment("nested_in", true, null);
+					
+		return fNestedPackage;
 	}
 	
 	//=====================================================================================
@@ -938,4 +950,22 @@ public class ExtractMethodTests extends RefactoringTest {
 	public void test607() throws Exception {
 		expressionTest();
 	}
+	
+	//---- Test nested methods and constructor
+	
+	public void test650() throws Exception {
+		nestedTest();
+	}
+	
+	public void test651() throws Exception {
+		nestedTest();
+	}
+	
+	public void test652() throws Exception {
+		nestedTest();
+	}
+
+	public void test653() throws Exception {
+		nestedTest();
+	}	
 }

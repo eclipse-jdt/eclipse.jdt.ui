@@ -174,11 +174,18 @@ public class RefactoringWizard extends Wizard {
 	 * @return the wizard page that should be shown after the last user input
 	 *  page.
 	 */
-	public IWizardPage computeUserInputSuccessorPage() {
+	public IWizardPage computeUserInputSuccessorPage(IWizardPage caller) {
 		IChange change= createChange(CheckConditionsOperation.INPUT, RefactoringStatus.OK, true);
+		// Status has been updated since we have passed true
 		RefactoringStatus status= getStatus();
 		
-		// Set change if we don't have errors.
+		// Creating the change has been canceled
+		if (change == null && status == null) {		
+			setChange(change);
+			return caller;
+		}
+			
+		// Set change if we don't have fatal errors.
 		if (!status.hasFatalError())
 			setChange(change);
 		
@@ -215,15 +222,16 @@ public class RefactoringWizard extends Wizard {
 	 *  with the status returned from the <code>CreateChangeOperation</code>.
 	 *  if <code>false</code> no status updating is performed.
 	 */
-	IChange createChange(int style, int checkPassedSeverity, boolean updateStatus){
+	IChange createChange(int style, int checkPassedSeverity, boolean updateStatus) {
 		CreateChangeOperation op= new CreateChangeOperation(fRefactoring, style);
 		op.setCheckPassedSeverity(checkPassedSeverity); 
 
 		Exception exception= null;
 		try {
-			getContainer().run(true, false, op);
+			getContainer().run(true, true, op);
 		} catch (InterruptedException e) {
-			exception= e;
+			setStatus(null);
+			return null;
 		} catch (InvocationTargetException e) {
 			exception= e;
 		}
@@ -232,11 +240,14 @@ public class RefactoringWizard extends Wizard {
 			RefactoringStatus status= null;
 			if (exception != null) {
 				status= new RefactoringStatus();
-				status.addFatalError(exception.getMessage() != null ? exception.getMessage(): exception.getClass().getName());
+				status.addFatalError(exception.getMessage() != null ? exception.getMessage() + ". See log for details." : "Internal error while creating a change object. See log for details.");
+				JavaPlugin.log(exception);
 			} else {
 				status= op.getStatus();
 			}
 			setStatus(status, style);
+		} else {
+			ExceptionHandler.handle(exception, "Refactoring", "Unexpected exception while creating a change object. See log for a detailed error description.");
 		}
 		IChange change= op.getChange();	
 		return change;
@@ -303,7 +314,7 @@ public class RefactoringWizard extends Wizard {
 	}
 	
 	private void handleUnexpectedException(InvocationTargetException e) {
-		ExceptionHandler.handle(e, "Refactoring", "Unexpected exception while performing the refactoring");
+		ExceptionHandler.handle(e, "Refactoring", "Unexpected exception while performing the refactoring. See log for a detailed error description.");
 	}
 
 	//---- Condition checking ------------------------------------------------------------

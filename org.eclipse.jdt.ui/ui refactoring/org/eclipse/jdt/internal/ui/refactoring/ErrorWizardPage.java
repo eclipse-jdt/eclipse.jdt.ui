@@ -185,8 +185,14 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 	 */
 	public IWizardPage getNextPage() {
 		RefactoringWizard wizard= getRefactoringWizard();
-		wizard.setChange(wizard.createChange(CreateChangeOperation.CHECK_NONE, 
-			RefactoringStatus.ERROR, false));
+		IChange change= wizard.getChange();
+		if (change == null) {
+			change= wizard.createChange(CreateChangeOperation.CHECK_NONE, RefactoringStatus.ERROR, false);
+			wizard.setChange(change);
+		}
+		if (change == null)
+			return this;
+			
 		return super.getNextPage();
 	}	
 }

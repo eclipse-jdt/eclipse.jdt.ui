@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.operation.ModalContext;import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 /**
@@ -107,8 +107,7 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 		Thread thread= Thread.currentThread();
 		// Do not spawn another thread if we are already in a modal context
 		// thread or inside a busy context thread.
-		JdtHackFinder.fixme("1GDRCUC: ITPJUI:WINNT - SEVERE: Deadlock in type hierarchy after catchup");
-		if (thread instanceof ThreadContext || thread.getClass().getName().equals("org.eclipse.jface.operation.ModalContext$ModalContextThread"))
+		if (thread instanceof ThreadContext || ModalContext.isModalContextThread(thread))
 			fork= false;
 			
 		if (fork) {
