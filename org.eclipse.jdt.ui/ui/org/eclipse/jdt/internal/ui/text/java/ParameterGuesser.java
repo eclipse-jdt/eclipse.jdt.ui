@@ -414,7 +414,7 @@ public class ParameterGuesser {
 			
 			final char[] triggers= new char[v.triggerChars.length + 1];
 			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
-			String displayString= v.isAutoboxingMatch ? "[" + v.name + "]" : v.name;  //$NON-NLS-1$//$NON-NLS-2$
+			String displayString= v.isAutoboxingMatch ? v.name : v.name;
 			triggers[triggers.length - 1]= ';';
 			ICompletionProposal proposal= new PositionBasedCompletionProposal(v.name, pos, replacementLength, getImage(v.descriptor), displayString, null, null) {
 				public char[] getTriggerCharacters() {
