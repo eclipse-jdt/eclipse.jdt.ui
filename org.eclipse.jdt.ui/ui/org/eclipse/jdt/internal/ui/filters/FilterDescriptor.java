@@ -17,24 +17,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginRegistry;
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Represents a custom filter which is provided by the
@@ -108,40 +100,24 @@ public class FilterDescriptor implements Comparable {
 	/**
 	 * Creates a new <code>ViewerFilter</code>.
 	 * This method is only valid for viewer filters.
-	 * 
-	 * @throws AssertionFailedException if this is a pattern filter
-	 * 
 	 */
 	public ViewerFilter createViewerFilter() {
 		if (!isCustomFilter())
 			return null;
 		
-		ViewerFilter result= null;
-		try {
-			result= (ViewerFilter)fElement.createExecutableExtension(CLASS_ATTRIBUTE);
-		} catch (CoreException ex) {
-			handleError(ex.getStatus());
-		} catch (ClassCastException ex) {
-			handleError(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
-
-
-		// Workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=37215
-		} catch (NoClassDefFoundError ex) {
-			handleError(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
-
-
-		}
-		return result;
-	}
-
-	private void handleError(IStatus status) {
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();		
-		if (shell != null) {
-			String title= FilterMessages.getString("FilterDescriptor.filterCreationError.title"); //$NON-NLS-1$
-			String message= FilterMessages.getFormattedString("FilterDescriptor.filterCreationError.message", getId()); //$NON-NLS-1$
-			ErrorDialog.openError(shell, title, message, status);
-		}
-		JavaPlugin.log(status);
+		final ViewerFilter[] result= new ViewerFilter[1];
+		String message= FilterMessages.getFormattedString("FilterDescriptor.filterCreationError.message", getId()); //$NON-NLS-1$
+		ISafeRunnable code= new SafeRunnable(message) {
+			/*
+			 * @see org.eclipse.core.runtime.ISafeRunnable#run()
+			 */
+			public void run() throws Exception {
+				result[0]= (ViewerFilter)fElement.createExecutableExtension(CLASS_ATTRIBUTE);
+			}
+			
+		};
+		Platform.run(code);
+		return result[0];
 	}
 	
 	//---- XML Attribute accessors ---------------------------------------------
