@@ -45,15 +45,15 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		fCollector= new ResultCollector();
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 	}
-		
-	/**
+	
+	/*
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
 		return fCollector.getErrorMessage();
 	}
 
-	/**
+	/*
 	 * @see IContentAssistProcessor#getContextInformationValidator()
 	 */
 	public IContextInformationValidator getContextInformationValidator() {
@@ -62,28 +62,28 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		return fValidator;
 	}
 
-	/**
+	/*
 	 * @see IContentAssistProcessor#getContextInformationAutoActivationCharacters()
 	 */
 	public char[] getContextInformationAutoActivationCharacters() {
 		return null;
 	}
 
-	/**
+	/*
 	 * @see IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
 	 */
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		return new char[] { '.', '(' };
 	}
 
-	/**
+	/*
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
 	 */
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
 		return null;
 	}
 
-	/**
+	/*
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {

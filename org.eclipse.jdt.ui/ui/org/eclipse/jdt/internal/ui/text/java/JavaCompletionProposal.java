@@ -24,10 +24,11 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 
-public class JavaCompletionProposal implements ICompletionProposal {
+public class JavaCompletionProposal implements ICompletionProposal, ICompletionProposalExtension {
 
 	private String fDisplayString;
 	private String fReplacementString;
@@ -36,8 +37,10 @@ public class JavaCompletionProposal implements ICompletionProposal {
 	private int fCursorPosition;
 	private Image fImage;
 	private IContextInformation fContextInformation;
+	private int fContextInformationPosition;
 	private ProposalInfo fProposalInfo;
 	private IImportDeclaration fImportDeclaration;
+	private char[] fTriggerCharacters;
 
 	/**
 	 * Creates a new completion proposal based on the provided information.  The replacement string is
@@ -67,6 +70,25 @@ public class JavaCompletionProposal implements ICompletionProposal {
 	 * @param additionalProposalInfo the additional information associated with this proposal or <code>null</code>
 	 */
 	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, IImportDeclaration importDeclaration, ProposalInfo proposalInfo) {
+		this(replacementString, replacementOffset, replacementLength, cursorPosition, image, displayString,  contextInformation,  importDeclaration,  null, proposalInfo);
+	}
+	
+	/**
+	 * Creates a new completion proposal. All fields are initialized based on the provided information.
+	 *
+	 * @param replacementString the actual string to be inserted into the document
+	 * @param replacementOffset the offset of the text to be replaced
+	 * @param replacementLength the length of the text to be replaced
+	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
+	 * @param image the image to display for this proposal
+	 * @param displayString the string to be displayed for the proposal
+	 * @param contentInformation the context information associated with this proposal
+	 * @param optional import declaration to be added. Can be <code>null</code>. The underlying compilation unit
+	 * is assumed to be compatible with the document passed in <code>apply</code>.
+	 * @param triggerCharacters the set of characters which can trigger the application of this completion proposal
+	 * @param additionalProposalInfo the additional information associated with this proposal or <code>null</code>
+	 */
+	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, IImportDeclaration importDeclaration, char[] triggerCharacters, ProposalInfo proposalInfo) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
@@ -79,22 +101,10 @@ public class JavaCompletionProposal implements ICompletionProposal {
 		fImage= image;
 		fDisplayString= displayString;
 		fContextInformation= contextInformation;
-		fProposalInfo= proposalInfo;
+		fContextInformationPosition= (fContextInformation != null ? fCursorPosition : -1);
 		fImportDeclaration= importDeclaration;
-	}
-
-	/*
-	 * @see ICompletionProposal#apply
-	 */
-	public void apply(IDocument document) {
-		try {
-			document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
-			if (fImportDeclaration != null) {
-				applyImport(document);
-			}
-		} catch (BadLocationException x) {
-			// ignore
-		}
+		fTriggerCharacters= triggerCharacters;
+		fProposalInfo= proposalInfo;
 	}
 	
 	private void applyImport(IDocument document) {
@@ -121,7 +131,36 @@ public class JavaCompletionProposal implements ICompletionProposal {
 		}
 	}
 	
+	/*
+	 * @see ICompletionProposalExtension#apply(IDocument, char)
+	 */
+	public void apply(IDocument document, char trigger) {
+		try {
+			
+			if (trigger == (char) 0)
+				document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
+			else {
+				StringBuffer buffer= new StringBuffer(fReplacementString);
+				buffer.insert(fCursorPosition, trigger);
+				++fCursorPosition;
+				document.replace(fReplacementOffset, fReplacementLength, buffer.toString());
+			}
+			
+			if (fImportDeclaration != null) {
+				applyImport(document);
+			}
+			
+		} catch (BadLocationException x) {
+			// ignore
+		}	
+	}
 	
+	/*
+	 * @see ICompletionProposal#apply
+	 */
+	public void apply(IDocument document) {
+		apply(document, (char) 0);
+	}
 	
 	/*
 	 * @see ICompletionProposal#getSelection
@@ -162,6 +201,18 @@ public class JavaCompletionProposal implements ICompletionProposal {
 		}
 		return null;
 	}
+	
+	/*
+	 * @see ICompletionProposalExtension#getTriggerCharacters()
+	 */
+	public char[] getTriggerCharacters() {
+		return fTriggerCharacters;
+	}
 
-
+	/*
+	 * @see ICompletionProposalExtension#getContextInformationPosition()
+	 */
+	public int getContextInformationPosition() {
+		return fReplacementOffset + fContextInformationPosition;
+	}
 }

@@ -29,6 +29,10 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
  */
 public class ResultCollector implements ICodeCompletionRequestor {
 	
+	
+	protected final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-' };
+	protected final static char[] GENERAL_TRIGGERS= new char[] { ';', ',', '.', '\t', '(', '{', '[' };
+	
 	protected ArrayList fFields= new ArrayList(), fKeywords= new ArrayList(), 
 						fLabels= new ArrayList(), fMethods= new ArrayList(), 
 						fModifiers= new ArrayList(), fPackages= new ArrayList(),
@@ -146,7 +150,6 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		} else if (Flags.isPrivate(modifiers)) {
 			iconName= JavaPluginImages.IMG_MISC_PRIVATE;
 		}
-	
 		
 		ProposalContextInformation contextInformation= null;
 		StringBuffer nameBuffer= new StringBuffer();
@@ -158,8 +161,12 @@ public class ResultCollector implements ICodeCompletionRequestor {
 				StringBuffer paramBuffer= new StringBuffer();
 				for (int i= 0; i < length; i++) {
 					if (i != 0) 
-						paramBuffer.append(',');
+						paramBuffer.append(", ");
 					paramBuffer.append(parameterTypeNames[i]);
+					if (parameterNames[i] != null) {
+						paramBuffer.append(' ');
+						paramBuffer.append(parameterNames[i]);
+					}
 				}
 				contextInformation= new ProposalContextInformation();
 				String parameters= paramBuffer.toString();
@@ -181,9 +188,10 @@ public class ResultCollector implements ICodeCompletionRequestor {
 			// it's just a method name and no parameter list
 			contextInformation= null;
 		}
-			
+		
 		boolean userMustCompleteParameters= (contextInformation != null && completionName.length > 0);
-		fMethods.add(createCompletion(start, end, new String(completionName), iconName, signature, new String(declaringTypeName), false, !userMustCompleteParameters, contextInformation, null, info));
+		char[] triggers= userMustCompleteParameters ? METHOD_WITH_ARGUMENTS_TRIGGERS : GENERAL_TRIGGERS;
+		fMethods.add(createCompletion(start, end, new String(completionName), iconName, signature, new String(declaringTypeName), false, !userMustCompleteParameters, contextInformation, null, triggers, info));
 	}
 	
 	/**
@@ -258,10 +266,14 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	}
 	
 	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, ProposalInfo proposalInfo) {
-		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true, null, null, proposalInfo);
+		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true, null, null, GENERAL_TRIGGERS, proposalInfo);
 	}
-		
-	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, IImportDeclaration importDeclaration, ProposalInfo proposalInfo) {
+	
+	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, IImportDeclaration importDeclaration,  ProposalInfo proposalInfo) {
+		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, placeCursorBehindInsertion, contextInformation, importDeclaration, GENERAL_TRIGGERS, proposalInfo);
+	}
+	
+	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, IImportDeclaration importDeclaration, char[] triggers, ProposalInfo proposalInfo) {
 
 		if (qualification != null)
 			name += (" - " + qualification); //$NON-NLS-1$
@@ -278,9 +290,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		if (contextInformation != null)
 			contextInformation.setImage(icon);
 		
-		return new JavaCompletionProposal(completion, start, length, cursorPosition, icon, name, contextInformation, importDeclaration, proposalInfo);
-
-	
+		return new JavaCompletionProposal(completion, start, length, cursorPosition, icon, name, contextInformation, importDeclaration, triggers, proposalInfo);
 	} 
 		
 	protected int compare(Object o1, Object o2) {
@@ -348,8 +358,4 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		fOffset= offset;
 		fLength= length;
 	}
-
-
-
-
 }
