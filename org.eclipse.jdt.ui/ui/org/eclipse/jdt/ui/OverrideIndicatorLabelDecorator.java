@@ -114,7 +114,11 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 				}
 				int flags= method.getFlags();
 				if (method.getDeclaringType().isClass() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
-					return getOverrideIndicators(method);
+					int res= getOverrideIndicators(method);
+					if (res != 0 && Flags.isSynchronized(flags)) {
+						return res | JavaElementImageDescriptor.SYNCHRONIZED;
+					}
+					return res;
 				}
 			} catch (JavaModelException e) {
 				if (!e.isDoesNotExist()) {
@@ -134,15 +138,6 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
 		IType type= method.getDeclaringType();
-		
-//		if (type.isAnonymous() && !SuperTypeHierarchyCache.hasInCache(type)) {
-//			int flags= method.getFlags();
-//			// for performance reasons: cheat
-//			if (!Flags.isPublic(flags) || type.getSuperclassName().endsWith("Adapter")) { //$NON-NLS-1$
-//				return JavaElementImageDescriptor.OVERRIDES;
-//			}
-//			return JavaElementImageDescriptor.IMPLEMENTS;
-//		}
 		
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
 		if (hierarchy != null) {
@@ -207,9 +202,17 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	public void decorate(Object element, IDecoration decoration) { 
 		int adornmentFlags= computeAdornmentFlags(element);
 		if ((adornmentFlags & JavaElementImageDescriptor.IMPLEMENTS) != 0) {
-			decoration.addOverlay(JavaPluginImages.DESC_OVR_IMPLEMENTS);
+			if ((adornmentFlags & JavaElementImageDescriptor.SYNCHRONIZED) != 0) {
+				decoration.addOverlay(JavaPluginImages.DESC_OVR_SYNCH_AND_IMPLEMENTS);
+			} else {
+				decoration.addOverlay(JavaPluginImages.DESC_OVR_IMPLEMENTS);
+			}
 		} else if ((adornmentFlags & JavaElementImageDescriptor.OVERRIDES) != 0) {
-			decoration.addOverlay(JavaPluginImages.DESC_OVR_OVERRIDES);
+			if ((adornmentFlags & JavaElementImageDescriptor.SYNCHRONIZED) != 0) {
+				decoration.addOverlay(JavaPluginImages.DESC_OVR_SYNCH_AND_OVERRIDES);
+			} else {
+				decoration.addOverlay(JavaPluginImages.DESC_OVR_OVERRIDES);
+			}
 		}
 	}
 

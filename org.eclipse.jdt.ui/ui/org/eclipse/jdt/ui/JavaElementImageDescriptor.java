@@ -62,7 +62,13 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	public final static int IMPLEMENTS= 		0x100;
 	
 	/** Flag to render the 'constructor' adornment */
-	public final static int CONSTRUCTOR= 	0x200;	
+	public final static int CONSTRUCTOR= 	0x200;
+	
+	/**
+	 * Flag to render the 'deprecated' adornment
+	 * @since 3.0
+	 */
+	public final static int DEPRECATED= 	0x400;	
 
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -90,7 +96,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * Sets the descriptors adornments. Valid values are: <code>ABSTRACT</code>, <code>FINAL</code>,
 	 * <code>SYNCHRONIZED</code>, </code>STATIC<code>, </code>RUNNABLE<code>, </code>WARNING<code>, 
 	 * </code>ERROR<code>, </code>OVERRIDDES<code>, <code>IMPLEMENTS</code>, <code>CONSTRUCTOR</code>,
-	 * or any combination of those.
+	 * <code>DEPRECATED</code>,  or any combination of those.
 	 * 
 	 * @param adornments the image descritpors adornments
 	 */
@@ -162,6 +168,13 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		ImageData bg= getImageData(fBaseImage);
 			
 		drawImage(bg, 0, 0);
+		
+		if ((fFlags & DEPRECATED) != 0) { // over the full image
+			Point size= getSize();
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_DEPRECATED);
+			drawImage(data, 0, size.y - data.height);
+		}
+		
 		drawTopRight();
 		drawBottomRight();
 		drawBottomLeft();
@@ -179,24 +192,23 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	
 	private void drawTopRight() {		
 		int x= getSize().x;
-		ImageData data= null;
 		if ((fFlags & ABSTRACT) != 0) {
-			data= getImageData(JavaPluginImages.DESC_OVR_ABSTRACT);
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_ABSTRACT);
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
 		if ((fFlags & CONSTRUCTOR) != 0) {
-			data= getImageData(JavaPluginImages.DESC_OVR_CONSTRUCTOR);
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_CONSTRUCTOR);
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
 		if ((fFlags & FINAL) != 0) {
-			data= getImageData(JavaPluginImages.DESC_OVR_FINAL);
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_FINAL);
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
 		if ((fFlags & STATIC) != 0) {
-			data= getImageData(JavaPluginImages.DESC_OVR_STATIC);
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_STATIC);
 			x-= data.width;
 			drawImage(data, x, 0);
 		}
@@ -205,24 +217,39 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	private void drawBottomRight() {
 		Point size= getSize();
 		int x= size.x;
-		ImageData data= null;
-		if ((fFlags & OVERRIDES) != 0) {
-			data= getImageData(JavaPluginImages.DESC_OVR_OVERRIDES);
+		int flags= fFlags;
+		
+		int syncAndOver= SYNCHRONIZED | OVERRIDES;
+		int syncAndImpl= SYNCHRONIZED | IMPLEMENTS;
+		
+		if ((flags & syncAndOver) == syncAndOver) { // both flags set: merged overlay image
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_SYNCH_AND_OVERRIDES);
+			x-= data.width;
+			drawImage(data, x, size.y - data.height);
+			flags &= ~syncAndOver; // clear to not render again
+		} else if ((flags & syncAndImpl) == syncAndImpl) { // both flags set: merged overlay image
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_SYNCH_AND_IMPLEMENTS);
+			x-= data.width;
+			drawImage(data, x, size.y - data.height);
+			flags &= ~syncAndImpl; // clear to not render again
+		}
+		if ((flags & OVERRIDES) != 0) {
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_OVERRIDES);
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}
-		if ((fFlags & IMPLEMENTS) != 0) {
-			data= getImageData(JavaPluginImages.DESC_OVR_IMPLEMENTS);
-			x-= data.width;
-			drawImage(data, x, size.y - data.height);
-		}			
-		if ((fFlags & SYNCHRONIZED) != 0) {
-			data= getImageData(JavaPluginImages.DESC_OVR_SYNCH);
+		if ((flags & IMPLEMENTS) != 0) {
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_IMPLEMENTS);
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}
-		if ((fFlags & RUNNABLE) != 0) {
-			data= getImageData(JavaPluginImages.DESC_OVR_RUN);
+		if ((flags & SYNCHRONIZED) != 0) {
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_SYNCH);
+			x-= data.width;
+			drawImage(data, x, size.y - data.height);
+		}
+		if ((flags & RUNNABLE) != 0) {
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_RUN);
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}
@@ -231,16 +258,16 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	private void drawBottomLeft() {
 		Point size= getSize();
 		int x= 0;
-		ImageData data= null;
 		if ((fFlags & ERROR) != 0) {
-			data= getImageData(JavaPluginImages.DESC_OVR_ERROR);
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_ERROR);
 			drawImage(data, x, size.y - data.height);
 			x+= data.width;
 		}
 		if ((fFlags & WARNING) != 0) {
-			data= getImageData(JavaPluginImages.DESC_OVR_WARNING);
+			ImageData data= getImageData(JavaPluginImages.DESC_OVR_WARNING);
 			drawImage(data, x, size.y - data.height);
 			x+= data.width;
 		}
+
 	}		
 }

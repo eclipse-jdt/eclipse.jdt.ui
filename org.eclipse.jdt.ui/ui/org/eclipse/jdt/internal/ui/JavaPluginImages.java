@@ -278,7 +278,10 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_ERROR= create(T_OVR, "error_co.gif"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_OVERRIDES= create(T_OVR, "over_co.gif");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_IMPLEMENTS= create(T_OVR, "implm_co.gif");  				//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_SYNCH_AND_OVERRIDES= create(T_OVR, "sync_over.gif");  	//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_SYNCH_AND_IMPLEMENTS= create(T_OVR, "sync_impl.gif");   //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_CONSTRUCTOR= create(T_OVR, "constr_ovr.gif");			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_DEPRECATED= create(T_OVR, "deprecated.gif");			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_FOCUS= create(T_OVR, "focus_ovr.gif"); //$NON-NLS-1$
 
     // Call Hierarchy
