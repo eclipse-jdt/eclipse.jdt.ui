@@ -446,7 +446,7 @@ public class Bindings {
 		if (candidate.isArray() || candidate.isPrimitive()) {
 			return false;
 		}
-		if (candidate == type) {
+		if (Bindings.equals(candidate, type)) {
 			return true;
 		}
 		ITypeBinding superClass= candidate.getSuperclass();
