@@ -40,10 +40,14 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 			ArrayList createdMethods= new ArrayList();
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit());
 			
+			String lineDelim= StubUtility.getLineDelimiterUsed(fType);
+			int indent= StubUtility.getIndentUsed(fType) + 1;			
+			
 			for (int i= 0; i < fInheritedMethods.length; i++) {
 				IMethod inheritedMethod= fInheritedMethods[i];
 				String content= StubUtility.genStub(fType, inheritedMethod, imports);
-				IMethod newMethod= fType.createMethod(content, null, true, null);
+				String formattedContent= StubUtility.codeFormat(content, indent, lineDelim) + lineDelim;
+				IMethod newMethod= fType.createMethod(formattedContent, null, true, null);
 				createdMethods.add(newMethod);
 				monitor.worked(1);
 			}

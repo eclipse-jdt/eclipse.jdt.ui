@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * For a given field, method stubs for getter and setters are created
@@ -74,6 +74,9 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 			
 			IType parentType= fField.getDeclaringType();
 			
+			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
+			int indent= StubUtility.getIndentUsed(parentType) + 1;
+			
 			// test if the getter already exists
 			String getterName= "get" + accessorName;
 			if (StubUtility.findMethod(getterName, new String[0], false, parentType) == null) {
@@ -89,7 +92,9 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 				}
 				buf.append(typeName);
 				buf.append(' '); buf.append(getterName);
-				buf.append("() {\n\t\treturn "); buf.append(fieldName); buf.append(";\n\t}\n\n");
+				buf.append("() {\n\t\treturn "); buf.append(fieldName); buf.append(";\n\t}\n");
+				
+				String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;					
 				
 				fCreatedGetter= parentType.createMethod(buf.toString(), null, true, null);
 			}
@@ -117,9 +122,11 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 				if (argname.equals(fieldName)) {
 					buf.append("this.");
 				}
-				buf.append(fieldName); buf.append("= "); buf.append(argname); buf.append(";\n\t}\n\n");
+				buf.append(fieldName); buf.append("= "); buf.append(argname); buf.append(";\n\t}\n");
 				
-				fCreatedSetter= parentType.createMethod(buf.toString(), null, true, null);
+				String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;				
+				
+				fCreatedSetter= parentType.createMethod(formattedContent, null, true, null);
 			}
 			
 			monitor.worked(1);
@@ -127,6 +134,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 			monitor.done();
 		}
 	}
+	
 	
 	public IMethod getCreatedSetter() {
 		return fCreatedSetter;

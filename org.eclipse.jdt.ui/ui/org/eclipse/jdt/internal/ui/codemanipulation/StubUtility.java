@@ -4,25 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
-import org.eclipse.jdt.internal.ui.util.TypeRef;
-import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
+import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IBuffer;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.core.search.IJavaSearchConstants;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.ITypeNameRequestor;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
 
 public class StubUtility {
 
@@ -447,8 +429,9 @@ public class StubUtility {
 	/**
 	 * Examines a string and returns the indention used
 	 */	
-	public static int getIndentUsed(IJavaElement elem, int tabWidth) throws JavaModelException {
+	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof ISourceReference) {
+			int tabWidth= CodeFormatterPreferencePage.getTabSize();
 			ICompilationUnit cu= (ICompilationUnit)JavaModelUtility.getParent(elem, IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				IBuffer buf= cu.getBuffer();
@@ -477,6 +460,16 @@ public class StubUtility {
 			}
 		}
 		return 0;
-	}	
+	}
+	
+	public static String codeFormat(String sourceString, int initialIndentationLevel, String lineDelim) {
+		// code formatter does not offer all options we need
+		
+		ConfigurableOption[] options= JavaPlugin.getDefault().getCodeFormatterOptions();
+		CodeFormatter formatter= new CodeFormatter(options);
+		formatter.options.setLineSeparator(lineDelim);
+		formatter.setInitialIndentationLevel(initialIndentationLevel);
+		return formatter.formatSourceString(sourceString) + lineDelim;
+	}		
 
 }

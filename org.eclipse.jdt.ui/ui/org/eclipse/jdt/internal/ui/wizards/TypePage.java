@@ -1029,7 +1029,7 @@ public abstract class TypePage extends ContainerPage {
 			String content= createTypeBody(imports);
 			createdType= enclosingType.createType(content, null, false, new SubProgressMonitor(monitor, 1));
 		
-			indent= StubUtility.getIndentUsed(enclosingType, 4) + 1;
+			indent= StubUtility.getIndentUsed(enclosingType) + 1;
 		}
 		
 		// add imports for superclass/interfaces, so the type can be parsed correctly
