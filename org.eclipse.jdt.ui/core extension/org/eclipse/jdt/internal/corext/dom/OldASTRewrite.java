@@ -40,8 +40,9 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Original version of the ASTRewrite: Mix of modifying an decribing API.
- * Will be removed soon, please adapt to ASTRewrite.
+ * Original version of the ASTRewrite: Mix of modifying and describing API.
+ * 
+ * @deprecated Will be removed soon, please adapt to {@link org.eclipse.jdt.core.dom.rewrite.ASTRewrite}.
  */
 public final class OldASTRewrite extends ASTRewrite { // illegal subclassing
 		
