@@ -512,8 +512,13 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		fFormatButton.setSelection(prefs.getDefaultBoolean(PREF_FORMAT_TEMPLATES));
 
-		TemplateSet.getInstance().restoreDefaults();		
+		TemplateSet.getInstance().restoreDefaults();
+		
 		fTableViewer.refresh();
+
+		// manually refresh checks
+		fTableViewer.setAllChecked(false);
+		fTableViewer.setCheckedElements(getEnabledTemplates());
 	}
 
 	/*
