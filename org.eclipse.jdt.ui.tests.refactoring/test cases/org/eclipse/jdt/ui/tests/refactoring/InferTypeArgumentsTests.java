@@ -147,7 +147,7 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 					while ( (count = zis.read(data, 0, data.length)) != -1) {
 						bout.write(data, 0, count);
 					}
-			        String zipContents= bout.toString();
+			        String zipContents= bout.toString(JavaProjectHelper.JUNIT_SRC_ENCODING);
 					
 					IPackageFragment pack= src.getPackageFragment(packageName);
 					ICompilationUnit cu= pack.getCompilationUnit(sourceFileName);
