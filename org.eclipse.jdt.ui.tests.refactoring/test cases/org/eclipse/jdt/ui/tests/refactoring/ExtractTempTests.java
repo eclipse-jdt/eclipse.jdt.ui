@@ -706,4 +706,18 @@ public class ExtractTempTests extends RefactoringTest {
 		failHelper1(9, 20, 9, 24, true, false, "temp", RefactoringStatus.FATAL);
 	}
 
+	public void testFail35() throws Exception {
+//		printTestDisabledMessage("test for bug 45007: QualifiedName");
+		failHelper1(6, 33, 6, 38, true, false, "temp", RefactoringStatus.FATAL);
+	}
+
+	public void testFail36() throws Exception {
+//		printTestDisabledMessage("test for bug 45007: FieldAccess");
+		failHelper1(6, 33, 6, 38, true, false, "temp", RefactoringStatus.FATAL);
+	}
+
+	public void testFail37() throws Exception {
+//		printTestDisabledMessage("test for bug 45007: QualifiedName (nested)");
+		failHelper1(5, 40, 5, 51, true, false, "temp", RefactoringStatus.FATAL);
+	}
 }
