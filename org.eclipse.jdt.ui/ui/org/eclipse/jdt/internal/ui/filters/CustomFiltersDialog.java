@@ -160,7 +160,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		new Label(parent, SWT.NONE);
 		
 		Label info= new Label(parent, SWT.LEFT);
-		info.setText(FilterMessages.getString("CustomFiltersDialog.filterList.label"));
+		info.setText(FilterMessages.getString("CustomFiltersDialog.filterList.label"));  //$NON-NLS-1$
 		
 		fCheckBoxList= CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_BOTH);
