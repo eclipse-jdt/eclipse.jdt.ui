@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -63,7 +64,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class NLSAccessorConfigurationDialog extends StatusDialog {
 
-	private OrderedMap fErrorMap= new OrderedMap();
+
 	private SourceFirstPackageSelectionDialogField fResourceBundlePackage;
 	private StringButtonDialogField fResourceBundleFile;
 	private SourceFirstPackageSelectionDialogField fAccessorPackage;
@@ -71,21 +72,40 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private StringDialogField fSubstitutionPattern;
 
 	private NLSRefactoring fRefactoring;
+	
+	private IStatus[] fStati;
+	
+	private static final int IDX_ACCESSOR_CLASS= 0;
+	private static final int IDX_ACCESSOR_PACKAGE= 1;
+	private static final int IDX_SUBST_PATTERN= 2;
+	private static final int IDX_BUNDLE_NAME= 3;
+	private static final int IDX_BUNDLE_PACKAGE= 4;
 
+	private class AccessorAdapter implements IDialogFieldListener, IStringButtonAdapter {
+		public void dialogFieldChanged(DialogField field) {
+			validateAll();
+		}
+
+		public void changeControlPressed(DialogField field) {
+			if (field == fResourceBundleFile) {
+				browseForPropertyFile();
+			} else if (field == fAccessorClassName) {
+				browseForAccessorClass();
+			}
+		}
+	}
+	
+	
 	public NLSAccessorConfigurationDialog(Shell parent, NLSRefactoring refactoring) {
 		super(parent);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-
+		
 		fRefactoring= refactoring;
-
+		fStati= new IStatus[] { StatusInfo.OK_STATUS, StatusInfo.OK_STATUS, StatusInfo.OK_STATUS, StatusInfo.OK_STATUS, StatusInfo.OK_STATUS };
+		
 		setTitle(NLSUIMessages.getString("NLSAccessorConfigurationDialog.title")); //$NON-NLS-1$
 
-		IDialogFieldListener updateListener= new IDialogFieldListener() {
-
-			public void dialogFieldChanged(DialogField field) {
-				validateAll();
-			}
-		};
+		AccessorAdapter updateListener= new AccessorAdapter();
 
 		ICompilationUnit cu= refactoring.getCu();
 
@@ -100,8 +120,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 				cu, updateListener, refactoring.getAccessorClassPackage());
 
 		fAccessorClassName= createStringButtonField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.className"), //$NON-NLS-1$
-				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse6"), createAccessorFileBrowseAdapter()); //$NON-NLS-1$
-		fSubstitutionPattern= createStringField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.substitutionPattern")); //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse6"), updateListener); //$NON-NLS-1$
+		fSubstitutionPattern= createStringField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.substitutionPattern"), updateListener); //$NON-NLS-1$
 
 		fResourceBundlePackage= new SourceFirstPackageSelectionDialogField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.path"), //$NON-NLS-1$ 
 				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.package"), //$NON-NLS-1$
@@ -114,7 +134,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 				cu, updateListener, fRefactoring.getResourceBundlePackage());
 
 		fResourceBundleFile= createStringButtonField(NLSUIMessages.getString("NLSAccessorConfigurationDialog.property_file_name"), //$NON-NLS-1$
-				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse5"), createPropertyFileBrowseAdapter()); //$NON-NLS-1$
+				NLSUIMessages.getString("NLSAccessorConfigurationDialog.browse5"), updateListener); //$NON-NLS-1$
 
 		initFields();
 	}
@@ -168,12 +188,6 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 		fAccessorClassName.doFillIntoGrid(parent, nOfColumns);
 		LayoutUtil.setWidthHint(fAccessorClassName.getTextControl(null), convertWidthInCharsToPixels(60));
-		fAccessorClassName.setDialogFieldListener(new IDialogFieldListener() {
-
-			public void dialogFieldChanged(DialogField field) {
-				validateAccessorClassName();
-			}
-		});
 
 		fSubstitutionPattern.doFillIntoGrid(parent, nOfColumns);
 		LayoutUtil.setWidthHint(fSubstitutionPattern.getTextControl(null), convertWidthInCharsToPixels(60));
@@ -187,13 +201,6 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 		fResourceBundleFile.doFillIntoGrid(parent, nOfColumns);
 		LayoutUtil.setWidthHint(fResourceBundleFile.getTextControl(null), convertWidthInCharsToPixels(60));
-
-		fResourceBundleFile.setDialogFieldListener(new IDialogFieldListener() {
-
-			public void dialogFieldChanged(DialogField field) {
-				validatePropertyFilename();
-			}
-		});
 	}
 
 	private void createLabel(Composite parent, final String text, final int N_OF_COLUMNS) {
@@ -271,65 +278,68 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	 * update the refactoring
 	 */
 	private void validateAll() {
-		updateStatus(StatusInfo.OK_STATUS);
 		validateSubstitutionPattern();
 
 		validateAccessorClassName();
-		checkPackageFragment(fAccessorPackage, NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.package.root.invalid"), //$NON-NLS-1$
-				NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.package.invalid")); //$NON-NLS-1$
+		checkPackageFragment();
 
 		validatePropertyFilename();
 		validatePropertyPackage();
+		
+		updateStatus(StatusUtil.getMostSevere(fStati));
 	}
 
 	private void validateAccessorClassName() {
-		if (fAccessorClassName != null) {
-			String className= fAccessorClassName.getText();
+		String className= fAccessorClassName.getText();
 
-			IStatus status= JavaConventions.validateJavaTypeName(className);
-			if (status.getSeverity() == IStatus.ERROR) {
-				setInvalid(fAccessorClassName, status.getMessage());
-				return;
-			}
-
-			if (className.indexOf('.') != -1) {
-				setInvalid(fAccessorClassName, NLSUIMessages.getString("NLSAccessorConfigurationDialog.no_dot")); //$NON-NLS-1$
-				return;
-			}
-
-			setValid(fAccessorClassName);
-		}
-	}
-
-	private void validatePropertyFilename() {
-		if (fResourceBundleFile != null) {
-			String fileName= fResourceBundleFile.getText();
-			if ((fileName == null) || (fileName.length() == 0)) {
-				setInvalid(fResourceBundleFile, NLSUIMessages.getString("NLSAccessorConfigurationDialog.enter_name")); //$NON-NLS-1$
-				return;
-			}
-
-			if (!fileName.endsWith(NLSRefactoring.PROPERTY_FILE_EXT)) {
-				setInvalid(fResourceBundleFile, NLSUIMessages.getFormattedString("NLSAccessorConfigurationDialog.file_name_must_end", NLSRefactoring.PROPERTY_FILE_EXT)); //$NON-NLS-1$
-				return;
-			}
-
-			setValid(fResourceBundleFile);
-		}
-	}
-
-	private void validatePropertyPackage() {
-		if (!checkPackageFragment(fResourceBundlePackage, NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.package.root.invalid"), //$NON-NLS-1$
-				NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.package.invalid"))) { //$NON-NLS-1$
+		IStatus status= JavaConventions.validateJavaTypeName(className);
+		if (status.getSeverity() == IStatus.ERROR) {
+			setInvalid(IDX_ACCESSOR_CLASS, status.getMessage());
 			return;
 		}
 
-		IPackageFragment help= fResourceBundlePackage.getSelected();
-		String pkgName= help.getElementName();
+		if (className.indexOf('.') != -1) {
+			setInvalid(IDX_ACCESSOR_CLASS, NLSUIMessages.getString("NLSAccessorConfigurationDialog.no_dot")); //$NON-NLS-1$
+			return;
+		}
+
+		setValid(IDX_ACCESSOR_CLASS);
+	}
+
+	private void validatePropertyFilename() {
+		String fileName= fResourceBundleFile.getText();
+		if ((fileName == null) || (fileName.length() == 0)) {
+			setInvalid(IDX_BUNDLE_NAME, NLSUIMessages.getString("NLSAccessorConfigurationDialog.enter_name")); //$NON-NLS-1$
+			return;
+		}
+
+		if (!fileName.endsWith(NLSRefactoring.PROPERTY_FILE_EXT)) {
+			setInvalid(IDX_BUNDLE_NAME, NLSUIMessages.getFormattedString("NLSAccessorConfigurationDialog.file_name_must_end", NLSRefactoring.PROPERTY_FILE_EXT)); //$NON-NLS-1$
+			return;
+		}
+
+		setValid(IDX_BUNDLE_NAME);
+	}
+
+	private void validatePropertyPackage() {
+		
+		IPackageFragmentRoot root= fResourceBundlePackage.getSelectedFragmentRoot();
+		if ((root == null) || !root.exists()) {
+			setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.package.root.invalid")); //$NON-NLS-1$
+			return;
+		}
+
+		IPackageFragment fragment= fResourceBundlePackage.getSelected();
+		if ((fragment == null) || !fragment.exists()) {
+			setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.getString("NLSAccessorConfigurationDialog.property.package.invalid")); //$NON-NLS-1$
+			return;
+		}
+		
+		String pkgName= fragment.getElementName();
 
 		IStatus status= JavaConventions.validatePackageName(pkgName);
 		if ((pkgName.length() > 0) && (status.getSeverity() == IStatus.ERROR)) {
-			setInvalid(fResourceBundlePackage, status.getMessage());
+			setInvalid(IDX_BUNDLE_PACKAGE, status.getMessage());
 			return;
 		}
 
@@ -339,65 +349,56 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		try {
 			IJavaElement element= project.findElement(pkgPath);
 			if (element == null || !element.exists()) {
-				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("NLSAccessorConfigurationDialog.must_exist")); //$NON-NLS-1$
+				setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.getString("NLSAccessorConfigurationDialog.must_exist")); //$NON-NLS-1$
 				return;
 			}
 			IPackageFragment fPkgFragment= (IPackageFragment) element;
 			if (!PackageBrowseAdapter.canAddPackage(fPkgFragment)) {
-				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("NLSAccessorConfigurationDialog.incorrect_package")); //$NON-NLS-1$
+				setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.getString("NLSAccessorConfigurationDialog.incorrect_package")); //$NON-NLS-1$
 				return;
 			}
 			if (!PackageBrowseAdapter.canAddPackageRoot((IPackageFragmentRoot) fPkgFragment.getParent())) {
-				setInvalid(fResourceBundlePackage, NLSUIMessages.getString("NLSAccessorConfigurationDialog.incorrect_package")); //$NON-NLS-1$
+				setInvalid(IDX_BUNDLE_PACKAGE, NLSUIMessages.getString("NLSAccessorConfigurationDialog.incorrect_package")); //$NON-NLS-1$
 				return;
 			}
 		} catch (JavaModelException e) {
-			setInvalid(fResourceBundlePackage, e.getStatus().getMessage());
+			setInvalid(IDX_BUNDLE_PACKAGE, e.getStatus().getMessage());
 			return;
 		}
 
-		setValid(fResourceBundlePackage);
+		setValid(IDX_BUNDLE_PACKAGE);
 	}
 
-	private boolean checkPackageFragment(SourceFirstPackageSelectionDialogField selector, String invalidRoot, String invalidFragment) {
-		IPackageFragmentRoot root= selector.getSelectedFragmentRoot();
+	private void checkPackageFragment() {
+		IPackageFragmentRoot root= fAccessorPackage.getSelectedFragmentRoot();
 		if ((root == null) || !root.exists()) {
-			setInvalid(selector, invalidRoot);
-			return false;
+			setInvalid(IDX_ACCESSOR_PACKAGE, NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.package.root.invalid")); //$NON-NLS-1$
+			return;
 		}
 
-		IPackageFragment fragment= selector.getSelected();
+		IPackageFragment fragment= fAccessorPackage.getSelected();
 		if ((fragment == null) || !fragment.exists()) {
-			setInvalid(selector, invalidFragment);
-			return false;
-		} else {
-			setValid(selector);
-			return true;
+			setInvalid(IDX_ACCESSOR_PACKAGE, NLSUIMessages.getString("NLSAccessorConfigurationDialog.accessor.package.invalid")); //$NON-NLS-1$
+			return;
 		}
+		setValid(IDX_ACCESSOR_PACKAGE);
 	}
 
 	private void validateSubstitutionPattern() {
 		if ((fSubstitutionPattern.getText() == null) || (fSubstitutionPattern.getText().length() == 0)) {
-			setInvalid(fSubstitutionPattern, NLSUIMessages.getString("NLSAccessorConfigurationDialog.substitution.pattern.missing")); //$NON-NLS-1$
+			setInvalid(IDX_SUBST_PATTERN, NLSUIMessages.getString("NLSAccessorConfigurationDialog.substitution.pattern.missing")); //$NON-NLS-1$
 		} else {
-			setValid(fSubstitutionPattern);
+			setValid(IDX_SUBST_PATTERN);
 		}
 	}
 
-	private void setInvalid(Object field, String msg) {
-		fErrorMap.push(field, msg);
-		updateErrorMessage();
+	private void setInvalid(int idx, String msg) {
+		fStati[idx]= new StatusInfo(IStatus.ERROR, msg);
 	}
 
-	private void setValid(Object field) {
-		fErrorMap.remove(field);
+	private void setValid(int idx) {
+		fStati[idx]= StatusInfo.OK_STATUS;
 	}
-
-	private void updateErrorMessage() {
-		String msg= (String) fErrorMap.peek();
-		updateStatus(new StatusInfo(IStatus.ERROR, msg));
-	}
-
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
@@ -420,35 +421,19 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		refactoring.setSubstitutionPattern(fSubstitutionPattern.getText());
 	}
 
-	private StringDialogField createStringField(String label) {
+	private StringDialogField createStringField(String label, AccessorAdapter updateListener) {
 		StringDialogField field= new StringDialogField();
+		field.setDialogFieldListener(updateListener);
 		field.setLabelText(label);
 		return field;
 	}
 
-	private StringButtonDialogField createStringButtonField(String label, String button, IStringButtonAdapter adapter) {
+	private StringButtonDialogField createStringButtonField(String label, String button, AccessorAdapter adapter) {
 		StringButtonDialogField field= new StringButtonDialogField(adapter);
+		field.setDialogFieldListener(adapter);
 		field.setLabelText(label);
 		field.setButtonLabel(button);
 		return field;
-	}
-
-	private IStringButtonAdapter createPropertyFileBrowseAdapter() {
-		return new IStringButtonAdapter() {
-
-			public void changeControlPressed(DialogField field) {
-				browseForPropertyFile();
-			}
-		};
-	}
-
-	private IStringButtonAdapter createAccessorFileBrowseAdapter() {
-		return new IStringButtonAdapter() {
-
-			public void changeControlPressed(DialogField field) {
-				browseForAccessorClass();
-			}
-		};
 	}
 
 
