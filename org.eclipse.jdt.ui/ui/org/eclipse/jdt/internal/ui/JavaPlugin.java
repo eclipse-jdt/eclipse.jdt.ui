@@ -359,6 +359,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fImageDescriptorRegistry.dispose();
 		
 		unregisterAdapters();
+
+		if (fASTProvider != null) {
+			fASTProvider.dispose();
+			fASTProvider= null;
+		}
 		
 		super.shutdown();
 		
@@ -383,11 +388,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		uninstallPreferenceStoreBackwardsCompatibility();
 		
 		RefactoringCore.getUndoManager().shutdown();
-		
-		if (fASTProvider != null) {
-			fASTProvider.dispose();
-			fASTProvider= null;
-		}
 	}
 		
 	private IWorkbenchPage internalGetActivePage() {
