@@ -209,7 +209,8 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 				break;
 			}
 		}
-		
+		if (!isActivePart() && JavaPlugin.getActivePage() != null)
+			JavaPlugin.getActivePage().bringToTop(this);
 		setSelection(reference, !isActivePart());
 	}
 			
