@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.text.edits.DeleteEdit;
@@ -29,13 +28,14 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.templates.*;
+import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.ITemplateEditor;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplatePosition;
 
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
@@ -73,7 +73,7 @@ public class JavaFormatter implements ITemplateEditor {
 	public void edit(TemplateBuffer buffer, TemplateContext context) throws BadLocationException {
 		try {
 			if (fUseCodeFormatter)
-				format(buffer);
+				format(buffer, (JavaContext) context);
 			else
 				indentate(buffer);
 
@@ -116,7 +116,7 @@ public class JavaFormatter implements ITemplateEditor {
 		}
 	}
 
-	private void format(TemplateBuffer templateBuffer) throws CoreException {
+	private void format(TemplateBuffer templateBuffer, JavaContext context) throws CoreException {
 		// XXX 4360, 15247
 		// workaround for code formatter limitations
 		// handle a special case where cursor position is surrounded by whitespaces		
@@ -136,7 +136,7 @@ public class JavaFormatter implements ITemplateEditor {
 			positionsToVariables(positions, variables);
 		    templateBuffer.setContent(string, variables);
 
-			plainFormat(templateBuffer);			
+			plainFormat(templateBuffer, context);			
 
 			string= templateBuffer.getString();
 			variables= templateBuffer.getVariables();
@@ -149,20 +149,29 @@ public class JavaFormatter implements ITemplateEditor {
 		    templateBuffer.setContent(string, variables);
 	
 		} else {
-			plainFormat(templateBuffer);			
+			plainFormat(templateBuffer, context);			
 		}	    
 	}
 	
-	private void plainFormat(TemplateBuffer templateBuffer) {
-
+	private void plainFormat(TemplateBuffer templateBuffer, JavaContext context) {
+		
 		String string= templateBuffer.getString();
+		IDocument doc= new Document(context.getDocument().get());
+		
+		int start= context.getStart();
+		try {
+			doc.replace(start, context.getEnd() - start, string);
+		} catch (BadLocationException e) {
+			return; // don't format if the document has changed
+		}
+
 		TemplatePosition[] variables= templateBuffer.getVariables();
 
-		int[] offsets= variablesToOffsets(variables);
+		int[] offsets= variablesToOffsets(variables, start);
 		
-		string= CodeFormatterUtil.format(CodeFormatter.K_UNKNOWN, string, fInitialIndentLevel, offsets, fLineDelimiter, (Map) null);
-				
-		offsetsToVariables(offsets, variables);
+		string= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, doc.get(), start, string.length(), 0, offsets, fLineDelimiter, context.getCompilationUnit().getJavaProject().getOptions(true));
+		
+		offsetsToVariables(offsets, variables, start);
 
 		templateBuffer.setContent(string, variables);	    
 	}
@@ -228,7 +237,7 @@ public class JavaFormatter implements ITemplateEditor {
 		return textBuffer.getContent();
 	}
 		
-	private static int[] variablesToOffsets(TemplatePosition[] variables) {
+	private static int[] variablesToOffsets(TemplatePosition[] variables, int start) {
 		Vector vector= new Vector();
 		for (int i= 0; i != variables.length; i++) {
 		    int[] offsets= variables[i].getOffsets();
@@ -238,19 +247,19 @@ public class JavaFormatter implements ITemplateEditor {
 		
 		int[] offsets= new int[vector.size()];
 		for (int i= 0; i != offsets.length; i++)
-			offsets[i]= ((Integer) vector.get(i)).intValue();
+			offsets[i]= ((Integer) vector.get(i)).intValue() + start;
 
 		Arrays.sort(offsets);
 
 		return offsets;	    
 	}
 	
-	private static void offsetsToVariables(int[] allOffsets, TemplatePosition[] variables) {
+	private static void offsetsToVariables(int[] allOffsets, TemplatePosition[] variables, int start) {
 		int[] currentIndices= new int[variables.length];
 		for (int i= 0; i != currentIndices.length; i++)
 			currentIndices[i]= 0;
 
-		int[][] offsets= new int[variables.length][];		
+		int[][] offsets= new int[variables.length][];
 		for (int i= 0; i != variables.length; i++)
 			offsets[i]= variables[i].getOffsets();
 		
@@ -273,7 +282,7 @@ public class JavaFormatter implements ITemplateEditor {
 				}		
 			}
 
-			offsets[minVariableIndex][currentIndices[minVariableIndex]]= allOffsets[i];
+			offsets[minVariableIndex][currentIndices[minVariableIndex]]= allOffsets[i] - start;
 			currentIndices[minVariableIndex]++;
 		}
 
