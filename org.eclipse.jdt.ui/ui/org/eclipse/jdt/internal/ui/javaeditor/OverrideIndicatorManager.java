@@ -250,7 +250,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 
 					}
 				}
-				return false;
+				return true;
 			}
 		});
 		
