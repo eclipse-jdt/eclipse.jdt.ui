@@ -23,8 +23,6 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 	private RefactoringAction[] fPossibleTargets;
 	private RefactoringAction fTargetAction;
 	
-	private static ITextBufferChangeCreator fgChangeCreator;
-
 	protected RefactoringActionDelegate() {
 	}
 
@@ -32,12 +30,6 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 		fPossibleTargets= possibleTargets;
 	}
 	
-	protected ITextBufferChangeCreator getChangeCreator() {
-		if (fgChangeCreator == null)
-			fgChangeCreator= RefactoringGroup.createChangeCreator();
-		return fgChangeCreator;
-	}
-		
 	/* (non-Javadoc)
 	 * Method declared in IActionDelegate
 	 */
