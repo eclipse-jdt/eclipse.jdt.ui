@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  */
 public class StatusBarUpdater implements ISelectionChangedListener {
 	
-	private final int LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH |
+	private final int LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.ROOT_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH |
 			JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS | 
 		 	JavaElementLabels.F_APP_TYPE_SIGNATURE;
 		 	
