@@ -393,7 +393,7 @@ public class JavaPluginImages {
 	 * @return the image descriptor for the given key
 	 */ 
 	public static ImageDescriptor getDescriptor(String key) {
-		if (fgAvoidSWTErrorMap != null && fgImageRegistry == null) {
+		if (fgImageRegistry == null) {
 			return (ImageDescriptor) fgAvoidSWTErrorMap.get(key);
 		}
 		return getImageRegistry().getDescriptor(key);
