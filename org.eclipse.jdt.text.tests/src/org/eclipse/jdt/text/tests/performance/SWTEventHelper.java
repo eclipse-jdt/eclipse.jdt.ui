@@ -42,16 +42,16 @@ public class SWTEventHelper {
 			keyCodeUp(display, keyCodes[i], runEventQueue);
 	}
 
-	private static void keyCodeDown(Display display, int keyCode, boolean runEventQueue) {
+	public static void keyCodeDown(Display display, int keyCode, boolean runEventQueue) {
 		keyCodeEvent(display, SWT.KeyDown, keyCode, runEventQueue);
 	}
 
-	private static void keyCodeUp(Display display, int keyCode, boolean runEventQueue) {
+	public static void keyCodeUp(Display display, int keyCode, boolean runEventQueue) {
 		keyCodeEvent(display, SWT.KeyUp, keyCode, runEventQueue);
 	}
 
 	private static Event sfKeyCodeEvent= new Event();
-	private static void keyCodeEvent(Display display, int type, int keyCode, boolean runEventQueue) {
+	public static void keyCodeEvent(Display display, int type, int keyCode, boolean runEventQueue) {
 		sfKeyCodeEvent.type= type;
 		sfKeyCodeEvent.keyCode= keyCode;
 		
@@ -80,16 +80,16 @@ public class SWTEventHelper {
 			keyCharUp(display, keyChars[i], runEventQueue);
 	}
 
-	private static void keyCharDown(Display display, char keyChar, boolean runEventQueue) {
+	public static void keyCharDown(Display display, char keyChar, boolean runEventQueue) {
 		keyCharEvent(display, SWT.KeyDown, keyChar, runEventQueue);
 	}
 
-	private static void keyCharUp(Display display, char keyChar, boolean runEventQueue) {
+	public static void keyCharUp(Display display, char keyChar, boolean runEventQueue) {
 		keyCharEvent(display, SWT.KeyUp, keyChar, runEventQueue);
 	}
 
 	private static Event sfKeyCharEvent= new Event();
-	private static void keyCharEvent(Display display, int type, char keyChar, boolean runEventQueue) {
+	public static void keyCharEvent(Display display, int type, char keyChar, boolean runEventQueue) {
 		sfKeyCharEvent.type= type;
 		sfKeyCharEvent.character= keyChar;
 		
@@ -118,7 +118,7 @@ public class SWTEventHelper {
 	}
 
 	private static Event sfMouseButtonEvent= new Event();
-	private static void mouseButtonEvent(Display display, int type, int button, boolean runEventQueue) {
+	public static void mouseButtonEvent(Display display, int type, int button, boolean runEventQueue) {
 		sfMouseButtonEvent.type= type;
 		sfMouseButtonEvent.button= button;
 		
