@@ -23,8 +23,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.FontMetrics;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -38,6 +36,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.Assert;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -46,6 +45,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Configures Java Editor hover preferences.
@@ -76,6 +76,7 @@ class JavaEditorHoverConfigurationBlock {
 	private Button fEnableField;
 	private List fHoverList;
 	private Text fDescription;
+	private Button fShowHoverAffordanceCheckbox;
 	
 	private JavaEditorPreferencePage fMainPreferencePage;
 
@@ -92,6 +93,8 @@ class JavaEditorHoverConfigurationBlock {
 	 * Creates page for hover preferences.
 	 */
 	public Control createControl(Composite parent) {
+
+		PixelConverter pixelConverter= new PixelConverter(parent);
 
 		Composite hoverComposite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout();
@@ -111,7 +114,8 @@ class JavaEditorHoverConfigurationBlock {
 		// Hover list
 		fHoverList= new List(hoverComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
 		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gd.heightHint= convertHeightInCharsToPixels(parent, 10);
+		int listHeight= 10 * fHoverList.getItemHeight();
+		gd.heightHint= listHeight;
 		fHoverList.setLayoutData(gd);
 		fHoverList.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -129,7 +133,7 @@ class JavaEditorHoverConfigurationBlock {
 		layout.numColumns= 2;
 		stylesComposite.setLayout(layout);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.heightHint= convertHeightInCharsToPixels(parent, 10) + (2 * fHoverList.getBorderWidth());
+		gd.heightHint= listHeight + (2 * fHoverList.getBorderWidth());
 		stylesComposite.setLayoutData(gd);
 
 		// Enabled checkbox		
@@ -214,6 +218,20 @@ class JavaEditorHoverConfigurationBlock {
 		gd.horizontalSpan= 2;
 		fDescription.setLayoutData(gd);
 
+		// Vertical filler
+		Label filler= new Label(hoverComposite, SWT.LEFT);
+		gd= new GridData(GridData.BEGINNING | GridData.VERTICAL_ALIGN_FILL);
+		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 3;
+		filler.setLayoutData(gd);
+
+		// Affordance checkbox
+		fShowHoverAffordanceCheckbox= new Button(hoverComposite, SWT.CHECK);
+		fShowHoverAffordanceCheckbox.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.showAffordance")); //$NON-NLS-1$
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= 0;
+		gd.horizontalSpan= 2;
+		fShowHoverAffordanceCheckbox.setLayoutData(gd);
+
 		initialize();
 
 		Dialog.applyDialogFont(hoverComposite);
@@ -243,6 +261,7 @@ class JavaEditorHoverConfigurationBlock {
 				}
 			}
 		});
+		fShowHoverAffordanceCheckbox.setSelection(fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE));
 	}
 
 	void performOk() {
@@ -266,6 +285,9 @@ class JavaEditorHoverConfigurationBlock {
 		}
 		fStore.setValue(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, buf.toString());
 		fStore.setValue(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS, maskBuf.toString());
+		
+		fStore.setValue(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE, fShowHoverAffordanceCheckbox.getSelection());
+		
 		JavaPlugin.getDefault().resetJavaEditorTextHoverDescriptors();
 	}
 
@@ -275,6 +297,9 @@ class JavaEditorHoverConfigurationBlock {
 	}
 
 	private void restoreFromPreferences() {
+
+		fShowHoverAffordanceCheckbox.setSelection(fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE));
+
 		String compiledTextHoverModifiers= fStore.getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS);
 		
 		StringTokenizer tokenizer= new StringTokenizer(compiledTextHoverModifiers, JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
@@ -347,16 +372,6 @@ class JavaEditorHoverConfigurationBlock {
 		if (description == null)
 			description= ""; //$NON-NLS-1$
 		fDescription.setText(description);
-	}
-
-	private int convertHeightInCharsToPixels(Control control, int chars) {
-		GC gc = new GC(control);
-		gc.setFont(control.getFont());
-		FontMetrics fontMetrics = gc.getFontMetrics();
-		gc.dispose();
-		if (fontMetrics == null)
-			return 0;
-		return Dialog.convertHeightInCharsToPixels(fontMetrics, chars);
 	}
 
 	IStatus getStatus() {

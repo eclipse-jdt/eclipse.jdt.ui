@@ -466,6 +466,14 @@ public class PreferenceConstants {
 	public static final String JAVADOC_COMMAND= "command"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that defines whether hint to make hover sticky should be shown.
+	 *
+	 * @see JavaUI
+	 * @since 3.0
+	 */
+	public static String EDITOR_SHOW_TEXT_HOVER_AFFORDANCE= "PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that defines the key for the hover modifiers.
 	 *
 	 * @see JavaUI
@@ -1998,6 +2006,7 @@ public class PreferenceConstants {
 		String ctrl= Action.findModifierString(SWT.CTRL);
 		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + ctrl); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + SWT.CTRL); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE, true);
 		
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS, true);
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, ctrl);

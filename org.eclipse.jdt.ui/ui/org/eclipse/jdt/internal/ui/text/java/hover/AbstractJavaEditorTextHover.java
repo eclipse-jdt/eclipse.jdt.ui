@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -126,7 +127,10 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	public IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), JavaHoverMessages.getString("JavaTextHover.makeStickyHint")); //$NON-NLS-1$
+				String affordanceString= null;
+				if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
+					affordanceString= JavaHoverMessages.getString("JavaTextHover.makeStickyHint"); //$NON-NLS-1$
+				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), affordanceString);
 			}
 		};
 	}
