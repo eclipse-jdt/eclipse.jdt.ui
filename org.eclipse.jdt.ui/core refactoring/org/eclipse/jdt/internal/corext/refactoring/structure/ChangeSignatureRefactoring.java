@@ -615,7 +615,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
-			if (problem.getID() == IProblem.RedefinedLocal)
+			if (problem.isError())
 				result.addEntry(createErrorEntry(problem, newCuSource));
 		}
 		return result;
