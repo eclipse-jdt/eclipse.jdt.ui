@@ -1924,8 +1924,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        process();\n");
-		buf.append("        super.hashCode();\n");
+		buf.append("        res= (super.hashCode() == 1);\n");
 		buf.append("    }\n");
 		buf.append("    public boolean process() {\n");
 		buf.append("        return true;\n");
@@ -2063,7 +2062,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    private void foo() {\n");
 		buf.append("        {\n");
-		buf.append("            toString();\n");
+		buf.append("            str= toString();\n");
 		buf.append("            str= new String[] { toString(), toString() };\n");
 		buf.append("        }\n");
 		buf.append("    }\n");

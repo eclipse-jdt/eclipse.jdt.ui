@@ -107,6 +107,11 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		return rewrite;
 	}
 	
+	/**
+	 * Remove the field or variable declaration including the initializer.
+	 * 
+	 */
+	
 	private void removeVariableReferences(ASTRewrite rewrite, SimpleName reference) {
 		int nameParentType= reference.getParent().getNodeType();
 		if (nameParentType == ASTNode.ASSIGNMENT) {
@@ -114,7 +119,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			Expression rightHand= assignment.getRightHandSide();
 			
 			ASTNode parent= assignment.getParent();
-			if (parent instanceof ExpressionStatement) {
+			if (parent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
 				removeVariableWithInitializer(rewrite, rightHand, parent);
 			}	else {
 				rewrite.markAsReplaced(assignment, rewrite.createCopy(rightHand));
@@ -125,23 +130,15 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) reference.getParent();
 			ASTNode varDecl= frag.getParent();
 			List fragments;
-			Expression initializer;
 			if (varDecl instanceof VariableDeclarationExpression) {
 				fragments= ((VariableDeclarationExpression) varDecl).fragments();
-				initializer= null; // can't preserve the initializer: remove it
 			} else if (varDecl instanceof FieldDeclaration) {
 				fragments= ((FieldDeclaration) varDecl).fragments();
-				initializer= null; // can't preserve the initializer: remove it
 			} else {	
 				fragments= ((VariableDeclarationStatement) varDecl).fragments();
-				initializer= frag.getInitializer();
 			}
 			if (fragments.size() == 1) {
-				if (initializer == null) {
-					rewrite.markAsRemoved(varDecl);
-				} else {
-					removeVariableWithInitializer(rewrite, initializer, varDecl);
-				}
+				rewrite.markAsRemoved(varDecl);
 			} else {
 				rewrite.markAsRemoved(frag); // don't try to preserve
 			}
@@ -153,12 +150,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		initializerNode.accept(new SideEffectFinder(sideEffectNodes));
 		int nSideEffects= sideEffectNodes.size();
 		if (nSideEffects == 0) {
-			// remove the whole expression statement
 			rewrite.markAsRemoved(statementNode); 
-		} else if (nSideEffects == 1) {
-			Expression node= (Expression) sideEffectNodes.get(0);
-			AST ast= statementNode.getAST();
-			rewrite.markAsReplaced(statementNode, ast.newExpressionStatement((Expression) rewrite.createCopy(node)));
 		} else {
 			// do nothing yet
 		}
