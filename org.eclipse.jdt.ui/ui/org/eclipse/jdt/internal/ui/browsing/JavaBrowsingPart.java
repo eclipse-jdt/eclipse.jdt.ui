@@ -251,7 +251,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		setInitialSelection();
 		
 		// Listen to workbench window changes
-		getViewSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
+		getViewSite().getWorkbenchWindow().getSelectionService().addSelectionListener(this);
 		getViewSite().getPage().addPartListener(fPartListener);
 		
 		fillActionBars();
