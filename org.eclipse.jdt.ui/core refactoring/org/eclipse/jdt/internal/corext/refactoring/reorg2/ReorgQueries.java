@@ -12,34 +12,46 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg2;
 
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.wizard.Wizard;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
 class ReorgQueries implements IReorgQueries{
 	
-	private final Shell fShell;
+	private final Wizard fWizard;
 	
-	ReorgQueries(Shell parent){
-		Assert.isNotNull(parent);
-		fShell= parent;
+	ReorgQueries(Wizard wizard){
+		Assert.isNotNull(wizard);
+		fWizard= wizard;
+	}
+	
+	private Shell getShell() {
+		return fWizard.getContainer().getShell();
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries#createYesYesToAllNoNoToAllQuery(java.lang.String)
 	 */
 	public IConfirmQuery createYesYesToAllNoNoToAllQuery(String dialogTitle, int queryID) {
-		return new YesYesToAllNoNoToAllQuery(fShell, dialogTitle);
+		return new YesYesToAllNoNoToAllQuery(getShell(), dialogTitle);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries#createYesNoQuery(java.lang.String)
 	 */
 	public IConfirmQuery createYesNoQuery(String dialogTitle, int queryID) {
-		return new YesNoQuery(fShell, dialogTitle);
+		return new YesNoQuery(getShell(), dialogTitle);
 	}
 
 	private static class YesYesToAllNoNoToAllQuery implements IConfirmQuery{
@@ -68,24 +80,19 @@ class ReorgQueries implements IReorgQueries{
 			return getResult(result);
 		}
 
-		private boolean getResult(int[] result) throws OperationCanceledException {
-			switch(result[0]){
-				case IDialogConstants.YES_TO_ALL_ID: 
-					fYesToAll= true;
-					return true;
-				case IDialogConstants.YES_ID:
-					return true;
-				case IDialogConstants.CANCEL_ID:
-					throw new OperationCanceledException();
-				case IDialogConstants.NO_ID:
-					return false;
-				case IDialogConstants.NO_TO_ALL_ID:
-					fNoToAll= true;
-					return false;
-				default:
-					Assert.isTrue(false);
-					return false;
-			}
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery#confirm(java.lang.String, java.lang.Object[])
+		 */
+		public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
+			if (fYesToAll) 
+				return true;
+
+			if (fNoToAll) 
+				return false;
+
+			final int[] result= new int[1];
+			fShell.getDisplay().syncExec(createQueryRunnable(question, elements, result));
+			return getResult(result);
 		}
 
 		private Runnable createQueryRunnable(final String question, final int[] result) {
@@ -116,6 +123,44 @@ class ReorgQueries implements IReorgQueries{
 				}
 			};
 		}
+		
+		private Runnable createQueryRunnable(final String question, final Object[] elements, final int[] result) {
+			return new Runnable() {
+				public void run() {
+					ListDialog dialog= new YesNoListDialog(fShell, true);
+					dialog.setAddCancelButton(false);
+					dialog.setBlockOnOpen(true);
+					dialog.setContentProvider(new ArrayContentProvider());
+					dialog.setLabelProvider(new JavaElementLabelProvider());
+					dialog.setTitle(fDialogTitle);
+					dialog.setMessage(question);
+					dialog.setInput(elements);
+
+					dialog.open();
+					result[0]= dialog.getReturnCode();
+				}
+			};
+		}
+
+		private boolean getResult(int[] result) throws OperationCanceledException {
+			switch(result[0]){
+				case IDialogConstants.YES_TO_ALL_ID: 
+					fYesToAll= true;
+					return true;
+				case IDialogConstants.YES_ID:
+					return true;
+				case IDialogConstants.CANCEL_ID:
+					throw new OperationCanceledException();
+				case IDialogConstants.NO_ID:
+					return false;
+				case IDialogConstants.NO_TO_ALL_ID:
+					fNoToAll= true;
+					return false;
+				default:
+					Assert.isTrue(false);
+					return false;
+			}
+		}
 	}
 	
 	private static class YesNoQuery implements IConfirmQuery{
@@ -127,7 +172,7 @@ class ReorgQueries implements IReorgQueries{
 			fShell= parent;
 			fDialogTitle= dialogTitle;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery#confirm(java.lang.String)
 		 */
@@ -137,7 +182,16 @@ class ReorgQueries implements IReorgQueries{
 			return getResult(result);
 		}
 
-		private Runnable createQueryRunnable(final String question, final int[] result) {
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries.IConfirmQuery#confirm(java.lang.String, java.lang.Object[])
+		 */
+		public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
+			final int[] result= new int[1];
+			fShell.getDisplay().syncExec(createQueryRunnable(question, elements, result));
+			return getResult(result);
+		}
+
+		private Runnable createQueryRunnable(final String question, final int[] result){
 			return new Runnable() {
 				public void run() {
 					int resultId[]= {
@@ -162,6 +216,24 @@ class ReorgQueries implements IReorgQueries{
 			};
 		}
 		
+		private Runnable createQueryRunnable(final String question, final Object[] elements, final int[] result) {
+			return new Runnable() {
+				public void run() {
+					ListDialog dialog= new YesNoListDialog(fShell, false);
+					dialog.setAddCancelButton(false);
+					dialog.setBlockOnOpen(true);
+					dialog.setContentProvider(new ArrayContentProvider());
+					dialog.setLabelProvider(new JavaElementLabelProvider());
+					dialog.setTitle(fDialogTitle);
+					dialog.setMessage(question);
+					dialog.setInput(elements);
+
+					dialog.open();
+					result[0]= dialog.getReturnCode();
+				}
+			};
+		}
+		
 		private boolean getResult(int[] result) throws OperationCanceledException {
 			switch(result[0]){
 				case IDialogConstants.YES_ID:
@@ -174,6 +246,29 @@ class ReorgQueries implements IReorgQueries{
 					Assert.isTrue(false);
 					return false;
 			}
+		}
+	}
+	private static final class YesNoListDialog extends ListDialog {
+		private final boolean fYesToAllNoToAll;
+		private YesNoListDialog(Shell parent, boolean includeYesToAllNoToAll) {
+			super(parent, SWT.TITLE | SWT.BORDER | SWT.RESIZE | SWT.APPLICATION_MODAL);
+			fYesToAllNoToAll= includeYesToAllNoToAll;
+		}
+
+		protected void buttonPressed(int buttonId) {
+			super.buttonPressed(buttonId);
+			setReturnCode(buttonId);
+			close();
+		}
+
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, IDialogConstants.YES_ID, IDialogConstants.YES_LABEL, true);
+			if (fYesToAllNoToAll)
+				createButton(parent, IDialogConstants.YES_TO_ALL_ID, IDialogConstants.YES_TO_ALL_LABEL, false);
+			createButton(parent, IDialogConstants.NO_ID, IDialogConstants.NO_LABEL, false);
+			if (fYesToAllNoToAll)
+				createButton(parent, IDialogConstants.NO_TO_ALL_ID, IDialogConstants.NO_TO_ALL_LABEL, false);
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		}
 	}
 }
