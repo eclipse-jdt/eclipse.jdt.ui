@@ -224,7 +224,7 @@ public class QuickFixTest extends TestCase {
 		IProblem[] problems= astRoot.getProblems();
 		if (problems.length != nProblems) {
 			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
-			buf.append(nProblems).append(", expected: ").append(nProblems).append('\n');
+			buf.append(problems.length).append(", expected: ").append(nProblems).append('\n');
 			for (int i= 0; i < problems.length; i++) {
 				buf.append(problems[i].getMessage()).append('\n');
 			}

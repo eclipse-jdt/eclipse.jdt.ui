@@ -45,17 +45,31 @@ public class ASTResolving {
 			return assignment.getLeftHandSide().resolveTypeBinding();
 		case ASTNode.INFIX_EXPRESSION:
 			InfixExpression infix= (InfixExpression) parent;
-			if (node.equals(infix.getLeftOperand())) {
-				// xx == expression
-				return infix.getRightOperand().resolveTypeBinding();
-			}
-			// expression == xx
 			InfixExpression.Operator op= infix.getOperator();
-			if (op == InfixExpression.Operator.LEFT_SHIFT || op == InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED		
-					|| op == InfixExpression.Operator.RIGHT_SHIFT_SIGNED) {
+			if (op == InfixExpression.Operator.CONDITIONAL_AND || op == InfixExpression.Operator.CONDITIONAL_OR) {
+				// boolean operation
+				return infix.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
+			} else if (op == InfixExpression.Operator.LEFT_SHIFT || op == InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED || op == InfixExpression.Operator.RIGHT_SHIFT_SIGNED) {
+				// assymetric operation
 				return infix.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
-			return infix.getLeftOperand().resolveTypeBinding();
+			if (node.equals(infix.getLeftOperand())) {
+				//	xx op expression
+				ITypeBinding rigthHandBinding= infix.getRightOperand().resolveTypeBinding();
+				if (rigthHandBinding != null) {
+					return rigthHandBinding;
+				}
+			} else {
+				// expression op xx
+				ITypeBinding leftHandBinding= infix.getLeftOperand().resolveTypeBinding();
+				if (leftHandBinding != null) {
+					return leftHandBinding;
+				}
+			}
+			if (op != InfixExpression.Operator.EQUALS && op != InfixExpression.Operator.NOT_EQUALS) {
+				return infix.getAST().resolveWellKnownType("int"); //$NON-NLS-1$ 
+			}
+			break;
 		case ASTNode.INSTANCEOF_EXPRESSION:
 			InstanceofExpression instanceofExpression= (InstanceofExpression) parent;
 			return instanceofExpression.getRightOperand().resolveBinding();
@@ -170,6 +184,8 @@ public class ASTResolving {
 				return getPossibleReferenceBinding(parent);
 			}
 			break;
+		default:
+			// do nothing
 		}
 			
 		return null;

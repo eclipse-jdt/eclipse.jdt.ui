@@ -125,14 +125,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
-	private static final boolean bug_37381= true;
-	
-	public void testMethodInForInit() throws Exception {
-		if (bug_37381) {
-			return; 
-		}
 		
+	public void testMethodInForInit() throws Exception {		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -165,7 +159,73 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-	}	
+	}
+	
+	public void testMethodInInfixExpression1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private boolean foo() {\n");
+		buf.append("        return f(1) || f(2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private boolean foo() {\n");
+		buf.append("        return f(1) || f(2);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private boolean f(int i) {\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testMethodInInfixExpression2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private boolean foo() {\n");
+		buf.append("        return f(1) == f(2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private boolean foo() {\n");
+		buf.append("        return f(1) == f(2);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private Object f(int i) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}		
 
 	public void testMethodSpacing0EmptyLines() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
