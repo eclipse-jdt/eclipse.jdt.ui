@@ -204,12 +204,29 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	public static void initDefaults(IPreferenceStore store) {
 		
-		Color color;
-		Display display= Display.getDefault();
+		/* 
+		 * Ensure that the display is accessed only in the UI thread.
+		 * Ensure that there are no side effects of switching the thread.
+		 */
+		final RGB[] rgbs= new RGB[3];
+		final Display display= Display.getDefault();
+		display.syncExec(new Runnable() {
+			public void run() {
+				Color c= display.getSystemColor(SWT.COLOR_GRAY);
+				rgbs[0]= c.getRGB();
+				c= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
+				rgbs[1]= c.getRGB();
+				c= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+				rgbs[2]= c.getRGB();
+			}
+		});
 		
+		
+		/* 
+		 * Go on in whatever thread this is. 
+		 */
 		store.setDefault(CompilationUnitEditor.MATCHING_BRACKETS, true);
-		color= display.getSystemColor(SWT.COLOR_GRAY);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.MATCHING_BRACKETS_COLOR,  color.getRGB());
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.MATCHING_BRACKETS_COLOR,  rgbs[0]);
 		
 		store.setDefault(CompilationUnitEditor.CURRENT_LINE, true);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.CURRENT_LINE_COLOR, new RGB(225, 235, 224));
@@ -229,12 +246,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
 		
-		color= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
-		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, color.getRGB());
+		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, rgbs[1]);
 		store.setDefault(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT, true);
 		
-		color= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, color.getRGB());		
+		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, rgbs[2]);		
 		store.setDefault(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT, true);
 		
 		store.setDefault(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 4);
@@ -282,7 +297,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(ContentAssistPreference.CASE_SENSITIVITY, false);
 		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
 		store.setDefault(ContentAssistPreference.ADD_IMPORT, true);				
-
 	}
 
 	/*
