@@ -78,11 +78,11 @@ with a public 0-argument constructor.
 &lt;p&gt;
 &lt;pre&gt;
  &lt;extension point=&quot;org.eclipse.jdt.ui.quickAssistProcessors&quot;&gt;
-  &lt;quickAssistProcessors
+  &lt;quickAssistProcessor
    id=&quot;AdvancedQuickAssistProcessor&quot;
    name=&quot;Advanced Quick Assist Processor&quot;
    class=&quot;com.example.AdvancedQuickAssistProcessor&quot;&gt;
-  &lt;/quickAssistProcessors&gt;
+  &lt;/quickAssistProcessor&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;
 &lt;/p&gt;
