@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,6 +48,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -58,10 +61,12 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootMan
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 public class JdtMoveAction extends ReorgDestinationAction {
 
 	public static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
+	private static final String DEFAULT_PACKAGE_WARNING= "DefaultPackageWarningDialog"; //$NON-NLS-1$
 	
 	private boolean fShowPreview= false;
 
@@ -172,11 +177,61 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	 * @see ReorgDestinationAction#doReorg(ReorgRefactoring) 
 	 */
 	void reorg(ReorgRefactoring refactoring) throws JavaModelException{
+		//moving to/from default package does not update anything - show info about it and provide 'cancel'
+		if (! showWarningAboutDefaultPackages(refactoring))
+			return;
+		
 		if (fShowPreview){		
 			openWizard(getShell(), refactoring);
 			return;
 		} else
 			super.reorg(refactoring);
+	}
+
+	/*
+	 * returns true if it's ok to continue reorging
+	 * false otherwise
+	 */
+	private boolean showWarningAboutDefaultPackages(ReorgRefactoring refactoring) {
+		try {
+			IPackageFragment destination= ReorgRefactoring.getDestinationAsPackageFragment(refactoring.getDestination());
+			if (! JavaElementUtil.isDefaultPackage(destination)){
+				List elementsToMove= getNotExcluded(refactoring.getElementsToReorg(), refactoring.getExcludedElements());
+				if (! containsAnyCusFromDefaultPackage(elementsToMove))
+					return true;
+			}
+			int result= OptionalMessageDialog.open(
+						DEFAULT_PACKAGE_WARNING, 
+						getShell(), 
+						ReorgMessages.getString("JdtMoveAction.move"), //$NON-NLS-1$
+						null, 
+						ReorgMessages.getString("JdtMoveAction.default_package_warning"), //$NON-NLS-1$
+						MessageDialog.INFORMATION, 
+						new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 
+						0);
+			return result != MessageDialog.CANCEL;
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, ReorgMessages.getString("JdtMoveAction.move"), ReorgMessages.getString("JdtMoveAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			return false;
+		}
+	}
+
+	private static boolean containsAnyCusFromDefaultPackage(List list) {
+		for (Iterator iter= list.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof ICompilationUnit){
+				if (JavaElementUtil.isDefaultPackage(((ICompilationUnit)element).getParent()))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	private static List getNotExcluded(Collection elements, Collection excluded) {
+		List result= new ArrayList(elements.size());
+		result.addAll(elements);
+		result.removeAll(excluded);
+		return result;
 	}
 
 	public static void openWizard(Shell parent, ReorgRefactoring refactoring) {
