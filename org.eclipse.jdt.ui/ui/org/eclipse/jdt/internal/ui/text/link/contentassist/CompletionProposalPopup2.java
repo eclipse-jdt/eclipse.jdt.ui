@@ -51,6 +51,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+
 
 
 /**
@@ -352,6 +354,16 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 				p.apply(document);
 			}
 			
+			// adjust replacement length - this is a HACK
+			if (p instanceof JavaCompletionProposal) {
+				int replacementLength= ((JavaCompletionProposal)p).getReplacementString().length();
+				for (int i= 0; i < fComputedProposals.length; i++) {
+					if (fComputedProposals[i] instanceof JavaCompletionProposal) {
+						((JavaCompletionProposal)fComputedProposals[i]).setReplacementLength(replacementLength);
+					}
+				}
+			}
+	
 			Point selection= p.getSelection(document);
 			if (selection != null) {
 				fViewer.setSelectedRange(selection.x, selection.y);
@@ -713,7 +725,7 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 		ICompletionProposal oldProposal= getSelectedProposal();
 		if (oldProposal instanceof ICompletionProposalExtension2)
 			((ICompletionProposalExtension2) oldProposal).unselected(fViewer);
-
+		
 		ICompletionProposal proposal= fFilteredProposals[index];
 		if (proposal instanceof ICompletionProposalExtension2)
 			((ICompletionProposalExtension2) proposal).selected(fViewer, smartToggle);
