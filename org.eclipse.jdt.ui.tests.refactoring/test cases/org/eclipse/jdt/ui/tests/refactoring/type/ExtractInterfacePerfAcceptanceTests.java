@@ -65,7 +65,7 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 			}
 		}
 		ExtractInterfaceProcessor processor= fRefactoring.getExtractInterfaceProcessor();
-		processor.setInterfaceName("IControl");
+		processor.setTypeName("IControl");
 		processor.setExtractedMembers((IMember[])extractedMembers.toArray(new IMember[extractedMembers.size()]));
 		processor.setReplace(true);
 	}

@@ -306,8 +306,8 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		 */
 		protected RefactoringStatus validateTextField(String text) {
 			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
-			processor.setInterfaceName(text);
-			return processor.checkInterfaceName(text);
+			processor.setTypeName(text);
+			return processor.checkTypeName(text);
 		}
 
 		private ExtractInterfaceRefactoring getExtractInterfaceRefactoring() {
@@ -344,7 +344,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 
 		private void initializeRefactoring() throws JavaModelException {
 			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
-			processor.setInterfaceName(getText());
+			processor.setTypeName(getText());
 			processor.setReplace(fReplaceAllCheckbox.getSelection());
 			processor.setExtractedMembers(getCheckedMembers());
 			processor.setAbstract(fDeclareAbstractCheckbox.getSelection());

@@ -98,8 +98,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 				
 		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
 		ExtractInterfaceProcessor processor= ref.getExtractInterfaceProcessor();
-		processor.setInterfaceName(newInterfaceName);
-		assertEquals("interface name should be accepted", RefactoringStatus.OK, processor.checkInterfaceName(newInterfaceName).getSeverity());
+		processor.setTypeName(newInterfaceName);
+		assertEquals("interface name should be accepted", RefactoringStatus.OK, processor.checkTypeName(newInterfaceName).getSeverity());
 		
 		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
 		for (int i= 0; i < cuNames.length; i++) {
@@ -128,8 +128,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 				
 		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 		ExtractInterfaceProcessor processor= ref.getExtractInterfaceProcessor();
-		processor.setInterfaceName(newInterfaceName);
-		assertEquals("interface name should be accepted", RefactoringStatus.OK, processor.checkInterfaceName(newInterfaceName).getSeverity());
+		processor.setTypeName(newInterfaceName);
+		assertEquals("interface name should be accepted", RefactoringStatus.OK, processor.checkTypeName(newInterfaceName).getSeverity());
 		
 		if (extractAll)
 			processor.setExtractedMembers(processor.getExtractableMembers());
@@ -149,7 +149,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
 		ExtractInterfaceProcessor processor= ref.getExtractInterfaceProcessor();
-		processor.setInterfaceName(newInterfaceName);
+		processor.setTypeName(newInterfaceName);
 		if (extractAll)
 			processor.setExtractedMembers(processor.getExtractableMembers());
 		assertTrue("was not supposed to pass", performRefactoring(ref) != null);	
