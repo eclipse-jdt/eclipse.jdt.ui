@@ -660,7 +660,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
 			if (! roots[i].isArchive()) {
-				if (roots[i].getUnderlyingResource() instanceof IProject)
+				if (isProjectPackageFragmentRoot(roots[i])) 
 					return roots[i];	
 				return null;
 			}
@@ -678,7 +678,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 	}
 	
 	private static final boolean isProjectPackageFragmentRoot(IPackageFragmentRoot root) throws JavaModelException {
-		return root.getUnderlyingResource() instanceof IProject;
+		return root.getResource() instanceof IProject;
 	}
 	
 	private static final boolean isPackageFragmentRoot(IJavaProject p) throws JavaModelException {

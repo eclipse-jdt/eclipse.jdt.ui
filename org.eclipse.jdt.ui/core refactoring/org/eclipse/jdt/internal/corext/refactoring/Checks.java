@@ -509,7 +509,7 @@ public class Checks {
 	}
 	
 	public static boolean isClasspathDelete(IPackageFragmentRoot pkgRoot) throws JavaModelException {
-		IResource res= pkgRoot.getUnderlyingResource();
+		IResource res= pkgRoot.getResource();
 		if (res == null)
 			return true;
 		IProject definingProject= res.getProject();

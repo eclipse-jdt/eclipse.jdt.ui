@@ -550,14 +550,10 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	
 	void updateRefactoring() {
 		storeDialogSettings();
-		try {
-			getNLSRefactoring().setPropertyFilePath(fPkgFragment.getUnderlyingResource().getFullPath().append(fPropertyFile.getText()));
-			getNLSRefactoring().setCodePattern(fCodePattern.getText());
-			getNLSRefactoring().setAddedImportDeclaration(fNewImport.getText());
-			getNLSRefactoring().setCreateAccessorClass(fCreateAccessorClass.isSelected());
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages.getString("wizardPage2.exception_change")); //$NON-NLS-2$ //$NON-NLS-1$
-		}
+		getNLSRefactoring().setPropertyFilePath(fPkgFragment.getPath().append(fPropertyFile.getText()));
+		getNLSRefactoring().setCodePattern(fCodePattern.getText());
+		getNLSRefactoring().setAddedImportDeclaration(fNewImport.getText());
+		getNLSRefactoring().setCreateAccessorClass(fCreateAccessorClass.isSelected());
 	}
 }
 

@@ -155,7 +155,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 	}
 
 	IChange createChange(IProgressMonitor pm, IPackageFragmentRoot root) throws JavaModelException{
-		IResource res= root.getUnderlyingResource();
+		IResource res= root.getResource();
 		IProject project= getDestinationForSourceFolders(getDestination());
 		IJavaProject javaProject= JavaCore.create(project);
 		CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("CopyRefactoring.copy_source_folder"), 2); //$NON-NLS-1$
@@ -179,8 +179,8 @@ public class CopyRefactoring extends ReorgRefactoring {
 				nameQuery= 	fCopyQueries.createNewPackageNameQuery(pack);
 			return new CopyPackageChange(pack, root, nameQuery);
 		} else {
-			if (root.getUnderlyingResource() instanceof IContainer){
-				IContainer dest= (IContainer)root.getUnderlyingResource();
+			if (root.getResource() instanceof IContainer){
+				IContainer dest= (IContainer)root.getResource();
 				IResource res= pack.getCorrespondingResource();
 				INewNameQuery nameQuery= fCopyQueries.createNewResourceNameQuery(res);
 				return new CopyResourceChange(res, dest, nameQuery);

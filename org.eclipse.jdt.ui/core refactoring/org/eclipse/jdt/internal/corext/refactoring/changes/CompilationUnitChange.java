@@ -35,7 +35,7 @@ public class CompilationUnitChange extends TextFileChange {
 	private static IFile getFile(ICompilationUnit cunit) throws CoreException {
 		if (cunit.isWorkingCopy())
 			cunit= (ICompilationUnit) cunit.getOriginalElement();
-		return (IFile)cunit.getCorrespondingResource();
+		return (IFile) cunit.getCorrespondingResource();
 	}
 	
 	/* non java-doc

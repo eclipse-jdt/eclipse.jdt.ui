@@ -94,7 +94,7 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 		if (! fSourceFolder.isConsistent())	
 			return RefactoringStatus.createFatalErrorStatus("");	 //$NON-NLS-1$
 		
-		if (fSourceFolder.getUnderlyingResource() instanceof IProject)
+		if (fSourceFolder.getResource() instanceof IProject)
 			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 
 		return new RefactoringStatus();

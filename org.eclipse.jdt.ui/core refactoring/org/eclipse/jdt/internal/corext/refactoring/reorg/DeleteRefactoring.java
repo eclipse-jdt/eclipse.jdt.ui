@@ -186,12 +186,7 @@ public class DeleteRefactoring extends Refactoring {
 	private static IPath getPath(Object o) throws JavaModelException {
 		if (o instanceof IJavaElement) {
 			IJavaElement je= (IJavaElement)o;
-			IResource res= je.getUnderlyingResource();
-			if (res != null)
-				return res.getFullPath();	
-			res= je.getCorrespondingResource();
-			if (res != null)
-				return res.getFullPath();	
+			return je.getPath();
 		}	
 
 		if (o instanceof IResource)

@@ -431,7 +431,7 @@ public class ImportsStructure implements IImportsStructure {
 		if (cu.isWorkingCopy()) {
 			cu= (ICompilationUnit) cu.getOriginalElement();
 		}		
-		IFile file= (IFile) cu.getUnderlyingResource();
+		IFile file= (IFile) cu.getResource();
 		return TextBuffer.acquire(file);
 	}
 	

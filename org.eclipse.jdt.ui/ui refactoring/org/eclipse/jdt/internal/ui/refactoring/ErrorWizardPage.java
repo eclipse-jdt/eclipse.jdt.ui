@@ -220,7 +220,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 					if (cunit.isWorkingCopy()) {
 						document= new Document(cunit.getSource());
 					} else {
-						IEditorInput editorInput= new FileEditorInput((IFile)cunit.getUnderlyingResource());
+						IEditorInput editorInput= new FileEditorInput((IFile)cunit.getResource());
 						document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);
 					}
 				}

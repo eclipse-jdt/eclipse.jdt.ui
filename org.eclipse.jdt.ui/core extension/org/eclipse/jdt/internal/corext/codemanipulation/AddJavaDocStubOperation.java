@@ -133,7 +133,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 				cu= (ICompilationUnit) cu.getOriginalElement();
 			}
 						
-			IFile file= (IFile) cu.getUnderlyingResource();
+			IFile file= (IFile) cu.getResource();
 			buffer= TextBuffer.acquire(file);				
 			
 			sortEntries(); // sort botton to top, so changing the document does not invalidate positions

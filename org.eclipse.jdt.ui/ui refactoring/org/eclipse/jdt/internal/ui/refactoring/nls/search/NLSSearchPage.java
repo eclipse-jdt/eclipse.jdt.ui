@@ -571,16 +571,8 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		if (searchFor == TYPE && pattern != null) {
 			String propertyFilePathStr= ""; //$NON-NLS-1$
 			// make suggestion for properties file
-			IResource resource;
-			try {
-				resource= element.getUnderlyingResource();
-			} catch (JavaModelException ex) {
-				resource= null;
-			}
-			if (resource != null) {
-				IPath path= resource.getFullPath().removeFileExtension().addFileExtension("properties"); //$NON-NLS-1$
-				propertyFilePathStr= path.toString();
-			}
+			IPath path= element.getPath().removeFileExtension().addFileExtension("properties"); //$NON-NLS-1$
+			propertyFilePathStr= path.toString();
 			return new SearchPatternData(pattern, element, propertyFilePathStr); //$NON-NLS-1$
 		}
 

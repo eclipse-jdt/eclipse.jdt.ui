@@ -404,7 +404,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 	 * @see ReorgRefactoring#createChange(IPackageFragmentRoot)
 	 */
 	IChange createChange(IProgressMonitor pm, IPackageFragmentRoot root) throws JavaModelException{
-		IResource res= root.getUnderlyingResource();
+		IResource res= root.getResource();
 		IProject project= getDestinationForSourceFolders(getDestination());
 		IJavaProject javaProject= JavaCore.create(project);
 		CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.move_source_folder"), 2); //$NON-NLS-1$

@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class ResourceUtil {
 	
@@ -42,14 +43,9 @@ public class ResourceUtil {
 	 * Finds an <code>IResource</code> for a given <code>ICompilationUnit</code>.
 	 * If the parameter is a working copy then the <code>IResource</code> for
 	 * the original element is returned.
-	 * @see ICompilationUnit#isWorkingCopy
-	 * @see ICompilationUnit#getUnderlyingResource
 	 */
 	public static IResource getResource(ICompilationUnit cu) throws JavaModelException{
-		if (cu.isWorkingCopy()) 
-			return cu.getOriginalElement().getUnderlyingResource();
-		else 
-			return cu.getUnderlyingResource();
+		return JavaModelUtil.toOriginal(cu).getResource();
 	}
 
 
