@@ -390,20 +390,20 @@ public class TextBuffer {
 	}
 
 	/**
-	 * Releases the given text buffer and saves it according to the value of
-	 * <code>force</code>.
+	 * Commits the changes made to the given text buffer to the underlying
+	 * storage system.
 	 * 
-	 * @param buffer the text buffer to be released
-	 * @param force if <code>true</code> the text buffer is saved in any case.
-	 * 	if <code>false</code> the text buffer is <b>ONLY</b> saved if the client 
+	 * @param buffer the text buffer containing the changes to be committed.
+	 * @param force if <code>true</code> the text buffer is committed in any case.
+	 * 	If <code>false</code> the text buffer is <b>ONLY</b> committed if the client 
 	 * 	is the last one that holds a reference to the text buffer. Clients of this
-	 * 	method must make sure that they don't call this method from within a <code>
+	 * 	method must make sure that they don't call this method from within an <code>
 	 *  IWorkspaceRunnable</code>.
-	 * @param pm the progress monitor used to report progress if saving is
+	 * @param pm the progress monitor used to report progress if committing is
 	 * 	necessary
 	 */
-	public static void saveAndRelease(TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
-		fgFactory.saveAndRelease(buffer, force, pm);
+	public static void commitChanges(TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
+		fgFactory.commitChanges(buffer, force, pm);
 	}
 	
 	/**

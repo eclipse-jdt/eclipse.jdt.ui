@@ -99,7 +99,7 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 		}
 	}
 	
-	public void saveAndRelease(TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
+	public void commitChanges(TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
 		final Value value= (Value)fBufferValueMap.get(buffer);
 		if (value == null)
 			return;
@@ -118,7 +118,6 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 				fDocumentProvider.changed(value.input);
 			}
 		}
-		release(buffer);			
 	}
 	
 	public TextBuffer create(IFile file) throws CoreException {
