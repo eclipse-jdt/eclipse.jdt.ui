@@ -79,15 +79,15 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	protected String fWorkspace;
 
 	private final String DOCUMENT_DIRECTORY= "doc";
-	private final String STANDARD_FLAG= " -d ";
-	private final String DOCLET_FLAG= " -doclet ";
-	private final String DOCLETPATH_FLAG= " -docletpath ";
-	private final String SOURCE_FLAG= " -sourcepath ";
-	private final String CLASSPATH_FLAG= " -classpath ";
-	private final String PRIVATE= " -private";
-	private final String PROTECTED= " -protected";
-	private final String PACKAGE= " -package";
-	private final String PUBLIC= " -public";
+	private final String STANDARD_FLAG= "-d";
+	private final String DOCLET_FLAG= "-doclet";
+	private final String DOCLETPATH_FLAG= "-docletpath";
+	private final String SOURCE_FLAG= "-sourcepath";
+	private final String CLASSPATH_FLAG= "-classpath";
+	private final String PRIVATE= "-private";
+	private final String PROTECTED= "-protected";
+	private final String PACKAGE= "-package";
+	private final String PUBLIC= "-public";
 	private final String SETTINGS_VISIBILITY= "VISIBILITY";
 	private final String SETTINGS_DESTINATION= "DESTINATION";
 	private final String SETTINGS_CUSTOM= "CUSTOM";
@@ -391,25 +391,24 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	public void collectArguments(ArrayList cFlags) {
 
 		if (fStandardButton.getSelection()) {
-			StringBuffer dest= new StringBuffer(STANDARD_FLAG);
-			dest.append('"');
-			dest.append(fDestinationText.getText());
-			dest.append('"');
-			cFlags.add(dest.toString());
+			cFlags.add(STANDARD_FLAG);
+			cFlags.add(fDestinationText.getText());
 
 		} else if (fCustomButton.getSelection()) {
-			cFlags.add(DOCLET_FLAG + fDocletTypeText.getText());
+			cFlags.add(DOCLET_FLAG);
+			cFlags.add(fDocletTypeText.getText());
 
 			String docletPath= fDocletText.getText();
 			if (docletPath.length() > 0) {
-				cFlags.add(DOCLETPATH_FLAG + docletPath);
+				cFlags.add(DOCLETPATH_FLAG);
+				cFlags.add(docletPath);
 			}
 		}
 
 		IJavaProject jproject= getCurrentProject();
 
-		cFlags.add(getSourcePath(jproject));
-		cFlags.add(getClassPath(jproject));
+		getSourcePath(jproject, cFlags);
+		getClassPath(jproject, cFlags);
 		cFlags.add(getVisibilityFlag());
 	}
 
@@ -428,8 +427,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	//to be changed
-	private String getSourcePath(IJavaProject project) {
-		StringBuffer buf= new StringBuffer(SOURCE_FLAG);
+	private void getSourcePath(IJavaProject project, ArrayList flags) {
+		flags.add(SOURCE_FLAG);
+		StringBuffer buf= new StringBuffer();
 		try {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 			int nAdded= 0;
@@ -447,11 +447,12 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			JavaPlugin.log(e);
 		}
 		//System.out.println("source path " + buf.toString());
-		return buf.toString();
+		flags.add(buf.toString());
 	}
 
-	private String getClassPath(IJavaProject javaProject) {
-		StringBuffer buf= new StringBuffer(CLASSPATH_FLAG);
+	private void getClassPath(IJavaProject javaProject, ArrayList flags) {
+		flags.add(CLASSPATH_FLAG);
+		StringBuffer buf= new StringBuffer();
 
 		try {
 			String outputLocation= javaProject.getCorrespondingResource().getLocation().append(javaProject.getOutputLocation()).toOSString();
@@ -472,11 +473,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			JavaPlugin.log(e);
 		} 
 		//System.out.println("class path " + buf.toString());
-		return buf.toString();
+		flags.add(buf.toString());
 	}
 
 	public String getFileListArgument() {
-		return " @\"" + createDocletFile() + '"';
+		return "@"+ createDocletFile();
 	}
 
 	//Returns the path were the doclet file will be created

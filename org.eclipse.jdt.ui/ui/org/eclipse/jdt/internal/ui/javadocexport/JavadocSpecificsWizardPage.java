@@ -30,6 +30,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.launching.ExecutionArguments;
 
 /**
  * @version 	1.0
@@ -58,16 +59,16 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	private Composite fUpperComposite;
 	private Composite fLowerComposite;
 
-	private final String NOTREE= " -notree";
-	private final String NOINDEX= " -noindex";
-	private final String NONAVBAR= " -nonavbar";
-	private final String NODEPRECATED= " -nodeprecated";
-	private final String NODEPRECATEDLIST= " -nodeprecatedlist";
-	private final String VERSION= " -version";
-	private final String AUTHOR= " -author";
-	private final String SPLITINDEX= " -splitindex";
-	private final String STYLESHEET= " -stylesheetfile ";
-	private final String OVERVIEW= " -overview ";
+	private final String NOTREE= "-notree";
+	private final String NOINDEX= "-noindex";
+	private final String NONAVBAR= "-nonavbar";
+	private final String NODEPRECATED= "-nodeprecated";
+	private final String NODEPRECATEDLIST= "-nodeprecatedlist";
+	private final String VERSION= "-version";
+	private final String AUTHOR= "-author";
+	private final String SPLITINDEX= "-splitindex";
+	private final String STYLESHEET= "-stylesheetfile";
+	private final String OVERVIEW= "-overview";
 
 	private StatusInfo fStyleSheetStatus;
 	private StatusInfo fOverviewStatus;
@@ -278,21 +279,22 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 					cFlags.add(button.getFlag());
 			}
 		}
-		if (fStyleSheetButton.getSelection() && fStyleSheetButton.getEnabled())
-			cFlags.add(STYLESHEET + addQuotes(fStyleSheetText.getText()));
-
-		if (!(fExtraOptionsText.getText().length() == 0)) {
-			cFlags.add(" " + fExtraOptionsText.getText());
+		if (fStyleSheetButton.getSelection() && fStyleSheetButton.getEnabled()) {
+			cFlags.add(STYLESHEET); 
+			cFlags.add(fStyleSheetText.getText());
 		}
-		if (fOverViewButton.getSelection())
-			cFlags.add(OVERVIEW + addQuotes(fOverViewText.getText()));
-	}
-
-	private String addQuotes(String str) {
-		StringBuffer buf= new StringBuffer("\"");
-		buf.append(str);
-		buf.append("\"");
-		return buf.toString();
+		String userArgs= fExtraOptionsText.getText();
+		if (userArgs.length() > 0) {
+			ExecutionArguments args= new ExecutionArguments("", userArgs);
+			String[] argsArray= args.getProgramArgumentsArray();
+			for (int i = 0; i < argsArray.length; i++) {
+				cFlags.add(argsArray[i]);
+			}
+		}
+		if (fOverViewButton.getSelection()) {
+			cFlags.add(OVERVIEW); 
+			cFlags.add(fOverViewText.getText());
+		}
 	}
 
 	public void finish() {

@@ -60,25 +60,24 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 		String jdocCommand= JavadocPreferencePage.getJavaDocCommand();
 
-		StringBuffer commandLine= new StringBuffer(jdocCommand);
+		cFlags.add(jdocCommand);
 		fJTWPage.collectArguments(cFlags);
 		fJSWPage.collectArguments(cFlags);
-		Object[] flags= cFlags.toArray();
-		for (int i= 0; i < flags.length; i++) {
-			commandLine.append((String) flags[i]);
-		}
-		commandLine.append(fJTWPage.getFileListArgument());
-
-		//for testing
-		//System.out.println(commandLine);
+		cFlags.add(fJTWPage.getFileListArgument());
+		
 		
 		IPath dest= fJTWPage.getDestination();
 		if (dest != null) {
 			dest.toFile().mkdirs();
 		}
 		
-
-		if (!executeJavadocGeneration(commandLine.toString()))
+		String[] args= (String[]) cFlags.toArray(new String[cFlags.size()]);
+		
+//		for (int i = 0; i < args.length; i++) {
+//			System.out.println(args[i]);
+//		}
+		
+		if (!executeJavadocGeneration(args))
 			return false;
 			
 		fJTWPage.preserveDialogSettings();
@@ -87,13 +86,13 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		return true;
 	}
 
-	private boolean executeJavadocGeneration(String command) {
+	private boolean executeJavadocGeneration(String[] args) {
 		Process process= null;
 		try {
-			process= Runtime.getRuntime().exec(command);
+			process= Runtime.getRuntime().exec(args);
 			if (process != null) {
 				IProcess iprocess= DebugPlugin.newProcess(process, "Javadoc Generation");
-				iprocess.setAttribute(JavaRuntime.ATTR_CMDLINE, command);
+				iprocess.setAttribute(JavaRuntime.ATTR_CMDLINE, "Javadoc Generation");
 
 				IProcess[] iProcesses= new IProcess[] { iprocess };
 
