@@ -151,7 +151,7 @@ public class ExtensionManager {
 			for (Iterator iter= fParticipants.iterator(); iter.hasNext();) {
 				ParticipantDescriptor descriptor= (ParticipantDescriptor)iter.next();
 				if (descriptor.matches(processor, element)) {
-					IRefactoringParticipant participant= (IRefactoringParticipant)shared.get(descriptor);
+					IRefactoringParticipant participant= shared.get(descriptor);
 					if (participant != null) {
 						((ISharableParticipant)participant).addElement(element);
 					} else {
