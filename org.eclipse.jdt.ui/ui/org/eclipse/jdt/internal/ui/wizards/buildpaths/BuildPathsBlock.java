@@ -37,6 +37,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -52,10 +53,10 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
@@ -96,6 +97,9 @@ public class BuildPathsBlock {
 		/**
 		 * Do the callback. Returns <code>true</code> if .class files should be removed from the
 		 * old output location.
+		 * @param oldOutputLocation The old output location
+		 * @return Returns true if .class files should be removed.
+		 * @throws InterruptedException
 		 */
 		boolean doQuery(IPath oldOutputLocation) throws InterruptedException;
 		
@@ -199,7 +203,7 @@ public class BuildPathsBlock {
 		item.setControl(fSourceContainerPage.getControl(folder));
 		
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();	
-		Image projectImage= workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_PROJECT);
+		Image projectImage= workbench.getSharedImages().getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
 		
 		fProjectsPage= new ProjectsWorkbookPage(fClassPathList);		
 		item= new TabItem(folder, SWT.NONE);
@@ -267,7 +271,7 @@ public class BuildPathsBlock {
 	/**
 	 * Initializes the classpath for the given project. Multiple calls to init are allowed,
 	 * but all existing settings will be cleared and replace by the given or default paths.
-	 * @param project The java project to configure. Does not have to exist.
+	 * @param jproject The java project to configure. Does not have to exist.
 	 * @param outputLocation The output location to be set in the page. If <code>null</code>
 	 * is passed, jdt default settings are used, or - if the project is an existing Java project- the
 	 * output location of the existing project 
@@ -335,7 +339,7 @@ public class BuildPathsBlock {
 	// -------- public api --------
 	
 	/**
-	 * Returns the Java project. Can return <code>null<code> if the page has not
+	 * @return Returns the Java project. Can return <code>null<code> if the page has not
 	 * been initialized.
 	 */
 	public IJavaProject getJavaProject() {
@@ -343,14 +347,14 @@ public class BuildPathsBlock {
 	}
 	
 	/**
-	 * Returns the current output location. Note that the path returned must not be valid.
+	 *  @return Returns the current output location. Note that the path returned must not be valid.
 	 */	
 	public IPath getOutputLocation() {
 		return new Path(fBuildPathDialogField.getText()).makeAbsolute();
 	}
 	
 	/**
-	 * Returns the current class path (raw). Note that the entries returned must not be valid.
+	 *  @return Returns the current class path (raw). Note that the entries returned must not be valid.
 	 */	
 	public IClasspathEntry[] getRawClassPath() {
 		List elements=  fClassPathList.getElements();
@@ -586,28 +590,20 @@ public class BuildPathsBlock {
 		monitor.beginTask("", 10); //$NON-NLS-1$
 
 		try {
-			Shell shell= null;
-			if (fSWTWidget != null && !fSWTWidget.getShell().isDisposed()) {
-				shell= fSWTWidget.getShell();
-			}
-			
-			internalConfigureJavaProject(fClassPathList.getElements(), getOutputLocation(), shell, monitor);
+			internalConfigureJavaProject(fClassPathList.getElements(), getOutputLocation(), monitor);
 		} finally {
 			monitor.done();
 		}
 	}
 	
-	/**
+	/*
 	 * Creates the Java project and sets the configured build path and output location.
 	 * If the project already exists only build paths are updated.
 	 */
-	private void internalConfigureJavaProject(List classPathEntries, IPath outputLocation, Shell shell, IProgressMonitor monitor) throws CoreException, InterruptedException {
+	private void internalConfigureJavaProject(List classPathEntries, IPath outputLocation, IProgressMonitor monitor) throws CoreException, InterruptedException {
 		// 10 monitor steps to go
 		
-		IRemoveOldBinariesQuery reorgQuery= null;
-		if (shell != null) {
-			reorgQuery= getRemoveOldBinariesQuery(shell);
-		}
+		IRemoveOldBinariesQuery reorgQuery= getRemoveOldBinariesQuery(null);
 
 		// remove old .class files
 		if (reorgQuery != null) {
@@ -711,11 +707,12 @@ public class BuildPathsBlock {
 		return new IRemoveOldBinariesQuery() {
 			public boolean doQuery(final IPath oldOutputLocation) throws InterruptedException {
 				final int[] res= new int[] { 1 };
-				shell.getDisplay().syncExec(new Runnable() {
+				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
+						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
 						String title= NewWizardMessages.getString("BuildPathsBlock.RemoveBinariesDialog.title"); //$NON-NLS-1$
 						String message= NewWizardMessages.getFormattedString("BuildPathsBlock.RemoveBinariesDialog.description", oldOutputLocation.toString()); //$NON-NLS-1$
-						MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+						MessageDialog dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
 						res[0]= dialog.open();
 					}
 				});

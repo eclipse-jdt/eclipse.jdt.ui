@@ -88,7 +88,7 @@ public class BuildPathDialog extends StatusDialog {
 		};
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
 		try {
-			new ProgressMonitorDialog(shell).run(false, true, op);
+			new ProgressMonitorDialog(shell).run(true, true, op);
 		} catch (InvocationTargetException e) {
 			String title= PreferencesMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
 			String message= PreferencesMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$

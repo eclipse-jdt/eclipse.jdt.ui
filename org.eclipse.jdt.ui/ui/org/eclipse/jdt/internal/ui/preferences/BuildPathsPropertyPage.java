@@ -94,7 +94,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	}
 	
 	
-	/**
+	/*
 	 * Content for valid projects.
 	 */
 	private Control createWithJava(Composite parent, IProject project) {
@@ -103,7 +103,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		return fBuildPathsBlock.createControl(parent);
 	}
 
-	/**
+	/*
 	 * Content for non-Java projects.
 	 */	
 	private Control createWithoutJava(Composite parent) {
@@ -115,7 +115,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		return label;
 	}
 
-	/**
+	/*
 	 * Content for closed projects.
 	 */		
 	private Control createForClosedProject(Composite parent) {
@@ -166,7 +166,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			};
 			IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
 			try {
-				new ProgressMonitorDialog(shell).run(false, true, op);
+				new ProgressMonitorDialog(shell).run(true, true, op);
 			} catch (InvocationTargetException e) {
 				String title= PreferencesMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
 				String message= PreferencesMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$
@@ -180,7 +180,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		return true;
 	}
 	
-	/**
+	/* (non-Javadoc)
 	 * @see IStatusChangeListener#statusChanged
 	 */
 	public void statusChanged(IStatus status) {
