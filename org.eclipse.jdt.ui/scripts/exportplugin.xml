@@ -26,6 +26,9 @@
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
 		</copy>
+		<copy todir="${dest}/templates">
+			<fileset dir="templates" />
+		</copy>
 		<zip zipfile="${dest}/jdtsrc.zip">
 		    <fileset dir="core refactoring" />
 		    <fileset dir="ui refactoring" />
