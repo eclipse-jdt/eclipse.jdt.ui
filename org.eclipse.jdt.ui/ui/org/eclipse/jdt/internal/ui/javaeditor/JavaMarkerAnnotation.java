@@ -9,12 +9,11 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import org.eclipse.search.ui.SearchUI;
-
-import org.eclipse.debug.core.IDebugConstants;
 
 import org.eclipse.jdt.internal.debug.ui.JDIModelPresentation;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -44,7 +43,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation {
 		try {
 			String type= getMarker().getType();
 			
-			if (MarkerUtilities.isMarkerType(getMarker(), IDebugConstants.BREAKPOINT_MARKER)) {
+			if (MarkerUtilities.isMarkerType(getMarker(), IBreakpoint.BREAKPOINT_MARKER)) {
 				if (fPresentation == null) 
 					fPresentation= new JDIModelPresentation();
 				setLayer(2);

@@ -8,7 +8,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.IDebugConstants;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -37,7 +36,7 @@ public class AddBreakpointAction extends AddMarkerAction {
 	private JavaEditor fJavaEditor;
 
 	public AddBreakpointAction(JavaEditor editor) {
-		super(JavaEditorMessages.getResourceBundle(), "AddBreakpoint.", editor, IDebugConstants.BREAKPOINT_MARKER, false); //$NON-NLS-1$
+		super(JavaEditorMessages.getResourceBundle(), "AddBreakpoint.", editor, IBreakpoint.BREAKPOINT_MARKER, false); //$NON-NLS-1$
 		fJavaEditor= editor;
 	}
 	

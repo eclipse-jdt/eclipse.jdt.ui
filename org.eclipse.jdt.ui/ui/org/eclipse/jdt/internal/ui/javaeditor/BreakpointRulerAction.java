@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IBreakpointManager;
-import org.eclipse.debug.core.IDebugConstants;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -47,7 +46,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 		
 	
 	public BreakpointRulerAction(IVerticalRuler ruler, ITextEditor editor) {
-		super(JavaEditorMessages.getResourceBundle(), "ManageBreakpoints.", ruler, editor, IDebugConstants.BREAKPOINT_MARKER, false); //$NON-NLS-1$
+		super(JavaEditorMessages.getResourceBundle(), "ManageBreakpoints.", ruler, editor, IBreakpoint.BREAKPOINT_MARKER, false); //$NON-NLS-1$
 	}
 	
 	
@@ -74,11 +73,11 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 				
 				IMarker[] markers= null;
 				if (resource instanceof IFile)
-					markers= resource.findMarkers(IDebugConstants.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
+					markers= resource.findMarkers(IBreakpoint.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
 				else {
 					IWorkspaceRoot root= JavaPlugin.getWorkspace().getRoot();
 					//fix for: 1GEUMGZ
-					markers= root.findMarkers(IDebugConstants.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
+					markers= root.findMarkers(IBreakpoint.BREAKPOINT_MARKER, true, IResource.DEPTH_INFINITE);
 				}
 				
 				if (markers != null) {
