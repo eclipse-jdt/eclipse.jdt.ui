@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterActionGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
@@ -60,7 +61,7 @@ public class MembersView extends JavaBrowsingPart {
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer viewer= new ProblemTreeViewer(parent, SWT.MULTI);
-		fMemberFilterActionGroup= new MemberFilterActionGroup(viewer, "BrowersMemberView");
+		fMemberFilterActionGroup= new MemberFilterActionGroup(viewer, JavaPlugin.ID_PACKAGES_VIEW);
 		return viewer;
 	}
 
@@ -159,7 +160,7 @@ public class MembersView extends JavaBrowsingPart {
 	 * @return	the closest Java element used as input for this part
 	 */
 	protected IJavaElement findInputForJavaElement(IJavaElement je) {
-		if (je == null)
+		if (je == null || !je.exists())
 			return null;
 			
 		switch (je.getElementType()) {
