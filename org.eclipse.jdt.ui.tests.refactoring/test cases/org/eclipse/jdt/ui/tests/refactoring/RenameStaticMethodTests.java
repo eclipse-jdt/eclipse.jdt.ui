@@ -179,8 +179,8 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	}
 	
 	public void test10() throws Exception{
-		printTestDisabledMessage("bug 40628");
-		if (true)	return;
+//		printTestDisabledMessage("bug 40628");
+//		if (true)	return;
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
