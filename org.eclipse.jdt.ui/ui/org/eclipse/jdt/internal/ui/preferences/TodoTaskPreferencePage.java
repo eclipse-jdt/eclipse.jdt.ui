@@ -93,7 +93,7 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 	 */
 	protected void performDefaults() {
 		super.performDefaults();
-		if (fConfigurationBlock != null && useProjectSettings()) {
+		if (fConfigurationBlock != null) {
 			fConfigurationBlock.performDefaults();
 		}
 	}
