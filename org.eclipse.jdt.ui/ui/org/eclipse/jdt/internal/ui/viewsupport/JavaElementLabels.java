@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -590,6 +591,7 @@ public class JavaElementLabels {
 	 * Appends the label for a package fragment root to a StringBuffer. Considers the ROOT_* flags.
 	 */	
 	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+		boolean varNamePrepended= false;
 		if (root.isArchive() && getFlag(flags, ROOT_VARIABLE)) {
 			try {
 				IClasspathEntry rawEntry= root.getRawClasspathEntry();
@@ -597,6 +599,7 @@ public class JavaElementLabels {
 					if (rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 						buf.append(rawEntry.getPath().makeRelative());
 						buf.append(CONCAT_STRING);
+						varNamePrepended= true;
 					}
 				}
 			} catch (JavaModelException e) {
@@ -604,9 +607,17 @@ public class JavaElementLabels {
 			}
 		}
 		if (root.isExternal()) {
-			// external jars have path == name
-			// no qualification for external roots
-			buf.append(root.getPath().toOSString());
+			IPath path= root.getPath();
+			int segements= path.segmentCount();
+			if (segements > 0 && !varNamePrepended) {
+				buf.append(path.segment(segements - 1));
+				if (segements > 1 || path.getDevice() != null) {
+					buf.append(CONCAT_STRING);
+					buf.append(path.removeLastSegments(1).toOSString());
+				}
+			} else {
+				buf.append(path.toOSString());
+			}
 		} else {
 			if (getFlag(flags, ROOT_QUALIFIED)) {
 				buf.append(root.getPath().makeRelative().toString());
