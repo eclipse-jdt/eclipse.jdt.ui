@@ -353,7 +353,6 @@ public class ASTRewriteClear extends ASTVisitor {
 		if (fRewrite.isInserted(node)) {
 			Assert.isTrue(false, "Inserted node not removed " + node + ", parent: " + node.getParent());
 		}
-		fRewrite.clearMark(node);
 	}
 
 }

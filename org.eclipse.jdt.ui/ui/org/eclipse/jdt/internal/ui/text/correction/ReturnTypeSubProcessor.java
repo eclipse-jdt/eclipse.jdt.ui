@@ -1,6 +1,5 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -19,7 +18,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
@@ -30,13 +28,13 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
   */
 public class ReturnTypeSubProcessor {
 	
-	public static void addMethodWithConstrNameProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void addMethodWithConstrNameProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 	
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-		if (selectedNode instanceof SimpleName && selectedNode.getParent() instanceof MethodDeclaration) {
-			MethodDeclaration declaration= (MethodDeclaration) selectedNode.getParent();
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= context.getCoveringNode();
+		if (selectedNode instanceof MethodDeclaration) {
+			MethodDeclaration declaration= (MethodDeclaration) selectedNode;
 			
 			ASTRewrite rewrite= new ASTRewrite(astRoot);
 			rewrite.markAsRemoved(declaration.getReturnType());
@@ -44,23 +42,24 @@ public class ReturnTypeSubProcessor {
 			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.constrnamemethod.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+			proposal.ensureNoModifications();
 			proposals.add(proposal);
 		}
 	
 	}
 	
-	public static void addVoidMethodReturnsProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void addVoidMethodReturnsProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= context.getCoveringNode();
 		if (selectedNode == null) {
 			return;
 		}
 			
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-		if (decl instanceof MethodDeclaration && selectedNode.getParent().getNodeType() == ASTNode.RETURN_STATEMENT) {
-			ReturnStatement returnStatement= (ReturnStatement) selectedNode.getParent();
+		if (decl instanceof MethodDeclaration && selectedNode.getNodeType() == ASTNode.RETURN_STATEMENT) {
+			ReturnStatement returnStatement= (ReturnStatement) selectedNode;
 			Expression expr= returnStatement.getExpression();
 			if (expr != null) {
 				ITypeBinding binding= ASTResolving.normalizeTypeBinding(expr.resolveTypeBinding());
@@ -88,7 +87,7 @@ public class ReturnTypeSubProcessor {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
 				proposal.addImport(binding);
-				proposal.calculateEditsAndClearRewrites();
+				proposal.ensureNoModifications();
 				proposals.add(proposal);
 			}
 			ASTRewrite rewrite= new ASTRewrite(astRoot);
@@ -97,7 +96,7 @@ public class ReturnTypeSubProcessor {
 			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.removereturn.description"); //$NON-NLS-1$	
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
-			proposal.calculateEditsAndClearRewrites();
+			proposal.ensureNoModifications();
 			proposals.add(proposal);			
 		}
 	}
@@ -127,11 +126,11 @@ public class ReturnTypeSubProcessor {
 		}
 	}
 	
-	public static void addMissingReturnTypeProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void addMissingReturnTypeProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= context.getCoveringNode();
 		if (selectedNode == null) {
 			return;
 		}
@@ -171,7 +170,7 @@ public class ReturnTypeSubProcessor {
 			modifiedNode.setExtraDimensions(methodDeclaration.getExtraDimensions()); // no changes
 			modifiedNode.setConstructor(false);
 			rewrite.markAsModified(methodDeclaration, modifiedNode);
-			
+			proposal.ensureNoModifications();
 			proposals.add(proposal);
 			
 			// change to constructor
@@ -187,14 +186,13 @@ public class ReturnTypeSubProcessor {
 
 	/**
 	 * Method addMissingReturnStatementProposals.
-	 * @param problemPos
+	 * @param context
 	 * @param proposals
 	 */
-	public static void addMissingReturnStatementProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void addMissingReturnStatementProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		ASTNode selectedNode= context.getCoveringNode();
 		if (selectedNode == null) {
 			return;
 		}
@@ -208,14 +206,15 @@ public class ReturnTypeSubProcessor {
 					ASTRewrite rewrite= new ASTRewrite(methodDecl);
 					
 					Expression expression= ASTResolving.getInitExpression(methodDecl.getReturnType());
-					returnStatement.setExpression(expression);
 					if (expression != null) {
+						returnStatement.setExpression(expression);
 						rewrite.markAsInserted(expression);
 					}
 					
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					String label= CorrectionMessages.getString("ReturnTypeSubProcessor.changereturnstatement.description");					
 					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
+					proposal.ensureNoModifications();
 					proposals.add(proposal);
 				}
  			} else {
@@ -235,6 +234,7 @@ public class ReturnTypeSubProcessor {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				String label= CorrectionMessages.getString("ReturnTypeSubProcessor.addreturnstatement.description");
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
+				proposal.ensureNoModifications();
 				proposals.add(proposal);
 			} 
 		}

@@ -11,7 +11,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -44,17 +43,17 @@ import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
   */
 public class LocalCorrectionsSubProcessor {
 
-	public static void addCastProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		String[] args= problemPos.getArguments();
+	public static void addCastProposals(ICorrectionContext context, List proposals) throws CoreException {
+		String[] args= context.getProblemArguments();
 		if (args.length != 2) {
 			return;
 		}
 			
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+		ICompilationUnit cu= context.getCompilationUnit();
 		String castType= args[1];
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= context.getCoveredNode();
 		if (!(selectedNode instanceof Expression)) {
 			return;
 		}
@@ -86,6 +85,7 @@ public class LocalCorrectionsSubProcessor {
 		castExpression.setType(typeCopy);
 		
 		rewrite.markAsReplaced(nodeToCast, castExpression);
+		proposal.ensureNoModifications();
 		
 		proposals.add(proposal);
 		
@@ -117,11 +117,11 @@ public class LocalCorrectionsSubProcessor {
 			
 	}
 	
-	public static void addUncaughtExceptionProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void addUncaughtExceptionProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= context.getCoveredNode();
 		if (selectedNode == null) {
 			return;
 		}
@@ -144,7 +144,7 @@ public class LocalCorrectionsSubProcessor {
 		if (decl == null) {
 			return;
 		}
-		ITypeBinding[] uncaughtExceptions= ExceptionAnalyzer.perform(decl, Selection.createFromStartLength(problemPos.getOffset(), problemPos.getLength()));
+		ITypeBinding[] uncaughtExceptions= ExceptionAnalyzer.perform(decl, Selection.createFromStartLength(context.getOffset(), context.getLength()));
 		
 		TryStatement surroundingTry= (TryStatement) ASTNodes.getParent(selectedNode, ASTNode.TRY_STATEMENT);
 		if (surroundingTry != null) {
@@ -166,7 +166,7 @@ public class LocalCorrectionsSubProcessor {
 				rewrite.markAsInserted(newClause);
 				catchClauses.add(newClause);
 			}
-			proposal.calculateEditsAndClearRewrites();
+			proposal.ensureNoModifications();
 			proposals.add(proposal);				
 		}
 		
@@ -185,38 +185,45 @@ public class LocalCorrectionsSubProcessor {
 				rewrite.markAsInserted(name);
 				exceptions.add(name);
 			}
-			//proposal.calculateEditsAndClearRewrites();
+			proposal.ensureNoModifications();
 			proposals.add(proposal);
 		}
 	}
 	
-	/**
-	 * Method addUnreachableCatchProposals.
-	 * @param problemPos
-	 * @param proposals
-	 */
-	public static void addUnreachableCatchProposals(ProblemPosition problemPos, ArrayList proposals) {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void addUnreachableCatchProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findCoveringNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		ASTNode selectedNode= context.getCoveringNode();
 		if (selectedNode == null) {
 			return;
 		}
 		
 		if (selectedNode.getNodeType() == ASTNode.BLOCK && selectedNode.getParent().getNodeType() == ASTNode.CATCH_CLAUSE ) {
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
-			rewrite.markAsRemoved(selectedNode.getParent());
+			CatchClause clause= (CatchClause) selectedNode.getParent();
+			TryStatement tryStatement= (TryStatement) clause.getParent();
+			ASTRewrite rewrite= new ASTRewrite(tryStatement.getParent());
 			
+			if (tryStatement.catchClauses().size() > 1 || tryStatement.getFinally() != null) {
+				rewrite.markAsRemoved(clause);
+			} else {
+				List statements= tryStatement.getBody().statements();
+				if (statements.size() > 0) {
+					ASTNode placeholder= rewrite.createCopy((ASTNode) statements.get(0), (ASTNode) statements.get(statements.size() - 1));
+					rewrite.markAsReplaced(tryStatement, placeholder);
+				} else {
+					rewrite.markAsRemoved(tryStatement);
+				}
+			}
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removecatchclause.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
+			proposal.ensureNoModifications();
 			proposals.add(proposal);
 		}
 	}	
 	
-	public static void addNLSProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		final ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void addNLSProposals(ICorrectionContext context, List proposals) throws CoreException {
+		final ICompilationUnit cu= context.getCompilationUnit();
 		String name= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.description"); //$NON-NLS-1$
 		
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 0) {
@@ -242,14 +249,14 @@ public class LocalCorrectionsSubProcessor {
      * </pre>
      * This correction changes <code>f</code> above to <code>File</code>.
      * 
-	 * @param problemPos
+	 * @param context
 	 * @param proposals
 	 */
-	public static void addInstanceAccessToStaticProposals(ProblemPosition problemPos, List proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void addInstanceAccessToStaticProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= context.getCoveredNode();
 		if (selectedNode == null) {
 			return;
 		}
@@ -275,16 +282,16 @@ public class LocalCorrectionsSubProcessor {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
 				proposal.addImport(typeBinding);
+				proposal.ensureNoModifications();
 
 				proposals.add(proposal);
 			}
 		}
 	}
 
-	public static void addUnimplementedMethodsProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findCoveringNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+	public static void addUnimplementedMethodsProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+		ASTNode selectedNode= context.getCoveringNode();
 		if (selectedNode == null) {
 			return;
 		}

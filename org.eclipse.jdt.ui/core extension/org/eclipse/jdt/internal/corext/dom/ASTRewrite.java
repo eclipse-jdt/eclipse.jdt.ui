@@ -68,7 +68,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
  *   rewrite.rewriteNode(textBuffer, resultingEdits, null);
  *   </code>
  */
-public class ASTRewrite {
+public final class ASTRewrite {
 	
 	/** Constant used to create place holder nodes */
 	public static final int UNKNOWN= -1;
@@ -80,16 +80,19 @@ public class ASTRewrite {
 	public static final int TYPE= 6;
 	public static final int JAVADOC= 7;
 	
-	private static final String CHANGEKEY= "ASTChangeData";
-	private static final String COPYSOURCEKEY= "ASTCopySource";
-	
 	private ASTNode fRootNode;
 	
+	private HashMap fChangedProperties;
+	private HashMap fCopiedProperties;
+	private boolean fHasInserts;
 	
 	/**
 	 * Creates the <code>ASTRewrite</code> object.	 * @param node A node which is parent to all modified or changed nodes.	 */
 	public ASTRewrite(ASTNode node) {
 		fRootNode= node;
+		fChangedProperties= new HashMap();
+		fCopiedProperties= new HashMap();
+		fHasInserts= false;
 	}
 	
 	public ASTNode getRootNode() {
@@ -118,7 +121,12 @@ public class ASTRewrite {
 	/**
 	 * Removes all modifications applied to the given AST.	 */
 	public void removeModifications() {
-		fRootNode.accept(new ASTRewriteClear(this));
+		if (fHasInserts) {
+			fRootNode.accept(new ASTRewriteClear(this));
+			fHasInserts= false;
+		}
+		fChangedProperties.clear();
+		fCopiedProperties.clear();
 	}
 	
 	/**
@@ -131,7 +139,8 @@ public class ASTRewrite {
 		Assert.isTrue(node.getStartPosition() == -1, "Tries to insert an existing node");
 		ASTInsert insert= new ASTInsert();
 		insert.description= description;
-		node.setProperty(CHANGEKEY, insert);		
+		setChangeProperty(node, insert);
+		fHasInserts= true;
 	}
 
 	/**
@@ -140,6 +149,10 @@ public class ASTRewrite {
 	 */
 	public final void markAsInserted(ASTNode node) {
 		markAsInserted(node, null);
+	}
+	
+	public boolean hasInserts() {
+		return fHasInserts;
 	}
 
 	/**
@@ -150,7 +163,7 @@ public class ASTRewrite {
 	public final void markAsRemoved(ASTNode node, String description) {
 		ASTRemove remove= new ASTRemove();
 		remove.description= description;
-		node.setProperty(CHANGEKEY, remove);	
+		setChangeProperty(node, remove);
 	}
 
 	/**
@@ -175,7 +188,7 @@ public class ASTRewrite {
 		ASTReplace replace= new ASTReplace();
 		replace.replacingNode= replacingNode;
 		replace.description= description;
-		node.setProperty(CHANGEKEY, replace);
+		setChangeProperty(node, replace);
 	}
 
 
@@ -201,8 +214,8 @@ public class ASTRewrite {
 		Assert.isTrue(node.getClass().equals(modifiedNode.getClass()), "Tries to modify with a node of different type");
 		ASTModify modify= new ASTModify();
 		modify.modifiedNode= modifiedNode;
-		modify.description= description;		
-		node.setProperty(CHANGEKEY, modify);
+		modify.description= description;
+		setChangeProperty(node, modify);
 	}
 
 	/**
@@ -221,9 +234,9 @@ public class ASTRewrite {
 	 */
 	public final ASTNode createCopy(ASTNode node) {
 		Assert.isTrue(node.getStartPosition() != -1, "Tries to copy a non-existing node");
-		Assert.isTrue(node.getProperty(COPYSOURCEKEY) == null, "Node used as more than one copy source");
+		Assert.isTrue(getCopySourceEdit(node) == null, "Node used as more than one copy source");
 		Object copySource= ASTRewriteAnalyzer.createSourceCopy(node.getStartPosition(), node.getLength());
-		node.setProperty(COPYSOURCEKEY, copySource);
+		setCopySourceEdit(node, copySource);
 		
 		int placeHolderType= getPlaceholderType(node);
 		if (placeHolderType == UNKNOWN) {
@@ -239,16 +252,16 @@ public class ASTRewrite {
 	public final ASTNode createCopy(ASTNode startNode, ASTNode endNode) {
 		Assert.isTrue(startNode.getStartPosition() != -1, "Tries to copy a non-existing node");
 		Assert.isTrue(endNode.getStartPosition() != -1, "Tries to copy a non-existing node");
-		Assert.isTrue(startNode.getProperty(COPYSOURCEKEY) == null, "Start node used as more than one copy source ");
-		Assert.isTrue(endNode.getProperty(COPYSOURCEKEY) == null, "End node used as more than one copy source ");
+		Assert.isTrue(getCopySourceEdit(startNode) == null, "Start node used as more than one copy source ");
+		Assert.isTrue(getCopySourceEdit(endNode) == null, "End node used as more than one copy source ");
 		Assert.isTrue(startNode.getParent() == endNode.getParent(), "Nodes must have same parent");
 		int start= startNode.getStartPosition();
 		int end= endNode.getStartPosition() + endNode.getLength();
 		Assert.isTrue(start < end, "Start node must have smaller offset than end node");
 
 		Object copySource= ASTRewriteAnalyzer.createSourceCopy(start, end - start);
-		startNode.setProperty(COPYSOURCEKEY, copySource);
-		endNode.setProperty(COPYSOURCEKEY, copySource);
+		setCopySourceEdit(startNode, copySource);
+		setCopySourceEdit(endNode, copySource);
 		int placeHolderType= getPlaceholderType(startNode);
 		if (placeHolderType == UNKNOWN) {
 			Assert.isTrue(false, "Can not create copy for elements of type " + startNode.getClass().getName());
@@ -294,23 +307,23 @@ public class ASTRewrite {
 	}
 			
 	public final boolean isInserted(ASTNode node) {
-		return node.getProperty(CHANGEKEY) instanceof ASTInsert;
+		return getChangeProperty(node) instanceof ASTInsert;
 	}
 	
 	public final boolean isReplaced(ASTNode node) {
-		return node.getProperty(CHANGEKEY) instanceof ASTReplace;
+		return getChangeProperty(node) instanceof ASTReplace;
 	}
 	
 	public final boolean isRemoved(ASTNode node) {
-		return node.getProperty(CHANGEKEY) instanceof ASTRemove;
+		return getChangeProperty(node) instanceof ASTRemove;
 	}	
 	
 	public final boolean isModified(ASTNode node) {
-		return node.getProperty(CHANGEKEY) instanceof ASTModify;
+		return getChangeProperty(node) instanceof ASTModify;
 	}
 	
 	public final String getDescription(ASTNode node) {
-		Object info= node.getProperty(CHANGEKEY);
+		Object info= getChangeProperty(node);
 		if (info instanceof ASTChange) {
 			return ((ASTChange) info).description;
 		}
@@ -318,7 +331,7 @@ public class ASTRewrite {
 	}
 	
 	public final ASTNode getModifiedNode(ASTNode node) {
-		Object info= node.getProperty(CHANGEKEY);
+		Object info= getChangeProperty(node);
 		if (info instanceof ASTModify) {
 			return ((ASTModify) info).modifiedNode;
 		}
@@ -326,7 +339,7 @@ public class ASTRewrite {
 	}
 
 	public final ASTNode getReplacingNode(ASTNode node) {
-		Object info= node.getProperty(CHANGEKEY);
+		Object info= getChangeProperty(node);
 		if (info instanceof ASTReplace) {
 			return ((ASTReplace) info).replacingNode;
 		}
@@ -334,14 +347,28 @@ public class ASTRewrite {
 	}
 	
 	public void clearMark(ASTNode node) {
-		node.setProperty(COPYSOURCEKEY, null);
-		node.setProperty(CHANGEKEY, null);
+		setCopySourceEdit(node, null);
+		setChangeProperty(node, null);
+	}
+
+	private static final String CHANGEKEY= "ASTChangeData";
+	private static final String COPYSOURCEKEY= "ASTCopySource";
+	
+	private final void setChangeProperty(ASTNode node, ASTChange change) {
+		fChangedProperties.put(node, change);
 	}
 	
+	private final Object getChangeProperty(ASTNode node) {
+		return fChangedProperties.get(node);
+	}
+	
+	private final void setCopySourceEdit(ASTNode node, Object copySource) {
+		fCopiedProperties.put(node, copySource);
+	}
 	
 	/* package */ final Object getCopySourceEdit(ASTNode node) {
-		return node.getProperty(COPYSOURCEKEY);
-	}
+		return fCopiedProperties.get(node);
+	}	
 
 	private static class ASTChange {
 		String description;

@@ -11,7 +11,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -26,7 +25,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -36,12 +34,12 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class UnresolvedElementsSubProcessor {
 	
-	public static void getVariableProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+	public static void getVariableProposals(ICorrectionContext context, List proposals) throws CoreException {
 		
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+		ICompilationUnit cu= context.getCompilationUnit();
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= context.getCoveredNode();
 		if (selectedNode == null) {
 			return;
 		}
@@ -106,7 +104,7 @@ public class UnresolvedElementsSubProcessor {
 			SimilarElement curr= elements[i];
 			if ((curr.getKind() & SimilarElementsRequestor.VARIABLES) != 0 && !curr.getName().equals(assignedName)) {
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
-				proposals.add(new ReplaceCorrectionProposal(label, problemPos.getCompilationUnit(), node.getStartPosition(), node.getLength(), curr.getName(), 3));
+				proposals.add(new ReplaceCorrectionProposal(label, cu, node.getStartPosition(), node.getLength(), curr.getName(), 3));
 			}
 		}
 		// add type proposals
@@ -123,7 +121,7 @@ public class UnresolvedElementsSubProcessor {
 		SimpleName simpleName= node.isSimpleName() ? (SimpleName) node : ((QualifiedName) node).getName();
 
 		// new variables
-		ICompilationUnit targetCU= getCompilationUnit(binding, cu, astRoot);
+		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
 		ITypeBinding senderBinding= binding != null ? binding : ASTResolving.getBindingOfParentType(node);
 		String label;
 		Image image;
@@ -153,11 +151,10 @@ public class UnresolvedElementsSubProcessor {
 		
 	}
 	
-	public static void getTypeProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void getTypeProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		ASTNode selectedNode= context.getCoveringNode();
 		if (selectedNode == null) {
 			return;
 		}
@@ -218,7 +215,7 @@ public class UnresolvedElementsSubProcessor {
 		addNewTypeProposals(cu, node, kind, 0, proposals);
 	}
 
-	private static void addSimilarTypeProposals(SimilarElement[] elements, ICompilationUnit cu, Name node, int relevance, ArrayList proposals) throws JavaModelException {
+	private static void addSimilarTypeProposals(SimilarElement[] elements, ICompilationUnit cu, Name node, int relevance, List proposals) throws JavaModelException {
 		// try to resolve type in context -> highest severity
 		String resolvedTypeName= null;
 		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node);
@@ -264,7 +261,7 @@ public class UnresolvedElementsSubProcessor {
 		return proposal;
 	}
 
-	private static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, ArrayList proposals) throws JavaModelException {
+	private static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, List proposals) throws JavaModelException {
 		Name node= refNode;
 		do {
 			String typeName= ASTResolving.getSimpleName(node);
@@ -315,12 +312,12 @@ public class UnresolvedElementsSubProcessor {
 		} while (node != null);
 	}
 	
-	public static void getMethodProposals(ProblemPosition problemPos, boolean needsNewName, ArrayList proposals) throws CoreException {
+	public static void getMethodProposals(ICorrectionContext context, boolean needsNewName, List proposals) throws CoreException {
 
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+		ICompilationUnit cu= context.getCompilationUnit();
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findCoveringNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= context.getCoveringNode();
 		
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
@@ -357,7 +354,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 			
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
-			proposals.add(new ReplaceCorrectionProposal(label, problemPos, curr, 2));
+			proposals.add(new ReplaceCorrectionProposal(label, context.getCompilationUnit(), context.getOffset(), context.getLength(), curr, 2));
 		}
 		
 		// new method
@@ -371,7 +368,7 @@ public class UnresolvedElementsSubProcessor {
 			}				
 		}
 		if (binding != null && binding.isFromSource()) {
-			ICompilationUnit targetCU= getCompilationUnit(binding, cu, astRoot);
+			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
 			if (targetCU != null) {			
 				String label;
 				Image image;
@@ -388,11 +385,11 @@ public class UnresolvedElementsSubProcessor {
 	}
 	
 
-	public static void getConstructorProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void getConstructorProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findCoveringNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= context.getCoveringNode();
 		if (selectedNode == null) {
 			return;
 		}
@@ -423,7 +420,7 @@ public class UnresolvedElementsSubProcessor {
 			}			
 		}
 		if (targetBinding != null && targetBinding.isFromSource()) {
-			ICompilationUnit targetCU= getCompilationUnit(targetBinding, cu, astRoot);
+			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetBinding);
 			if (targetCU != null) {
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", targetBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
@@ -432,15 +429,4 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	private static ICompilationUnit getCompilationUnit(ITypeBinding binding, ICompilationUnit cu, CompilationUnit astRoot) throws JavaModelException {
-		if (binding != null && astRoot.findDeclaringNode(binding) == null) {
-			ICompilationUnit targetCU= Binding2JavaModel.findCompilationUnit(binding, cu.getJavaProject());
-			if (targetCU != null) {
-				return JavaModelUtil.toWorkingCopy(targetCU);
-			}
-			return null;
-		}
-		return cu;
-	}
-
 }

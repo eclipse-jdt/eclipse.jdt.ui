@@ -28,12 +28,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 
-	private ProblemPosition fProblemPosition;
+	private ICorrectionContext fCorrectionContext;
 
-	public CorrectPackageDeclarationProposal(ProblemPosition problemPos, int relevance) {
-		super(CorrectionMessages.getString("CorrectPackageDeclarationProposal.name"), problemPos.getCompilationUnit(), relevance, //$NON-NLS-1$
+	public CorrectPackageDeclarationProposal(ICorrectionContext correctionContext, int relevance) {
+		super(CorrectionMessages.getString("CorrectPackageDeclarationProposal.name"), correctionContext.getCompilationUnit(), relevance, //$NON-NLS-1$
 			JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL)); 
-		fProblemPosition= problemPos;
+		fCorrectionContext= correctionContext;
 	}
 
 	/* (non-Javadoc)
@@ -59,8 +59,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 			return change;
 		}
 		
-		ProblemPosition pos= fProblemPosition;
-		root.add(SimpleTextEdit.createReplace(pos.getOffset(), pos.getLength(), parentPack.getElementName()));
+		root.add(SimpleTextEdit.createReplace(fCorrectionContext.getOffset(), fCorrectionContext.getLength(), parentPack.getElementName()));
 		return change;
 	}
 	
@@ -68,7 +67,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		ICompilationUnit cu= fProblemPosition.getCompilationUnit();
+		ICompilationUnit cu= fCorrectionContext.getCompilationUnit();
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
 		try {
 			IPackageDeclaration[] decls= cu.getPackageDeclarations();		

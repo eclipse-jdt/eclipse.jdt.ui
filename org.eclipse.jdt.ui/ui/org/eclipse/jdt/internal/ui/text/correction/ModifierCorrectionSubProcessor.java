@@ -1,6 +1,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -13,18 +13,16 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
   */
 public class ModifierCorrectionSubProcessor {
 
-	public static void addNonAccessibleMemberProposal(ProblemPosition problemPos, ArrayList proposals, boolean visibilityChange) throws JavaModelException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void addNonAccessibleMemberProposal(ICorrectionContext context, List proposals, boolean visibilityChange) throws JavaModelException {
+		ICompilationUnit cu= context.getCompilationUnit();
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		ASTNode selectedNode= context.getCoveringNode();
 		if (selectedNode == null) {
 			return;
 		}
@@ -84,9 +82,11 @@ public class ModifierCorrectionSubProcessor {
 				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertostatic.description", name);
 				includedModifiers= Modifier.STATIC;
 			}
-			ICompilationUnit targetCU= Binding2JavaModel.findCompilationUnit(typeBinding, cu.getJavaProject());
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, 0, image));
+			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding);
+			if (targetCU != null) {
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, 0, image));
+			}
 		}
 	}
 		
@@ -119,12 +119,12 @@ public class ModifierCorrectionSubProcessor {
 		return Modifier.PUBLIC;
 	}
 
-	public static void addAbstractMethodProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
+	public static void addAbstractMethodProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= context.getASTRoot();
 
-		ASTNode selectedNode= ASTResolving.findCoveringNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		ASTNode selectedNode= context.getCoveringNode();
 		if (selectedNode == null) {
 			return;
 		}
@@ -144,7 +144,7 @@ public class ModifierCorrectionSubProcessor {
 		IBuffer buffer= cu.getBuffer();
 		boolean hasNoBody= buffer.getLength() > endPos && buffer.getChar(endPos) == ';';
 		
-		if (problemPos.getId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstract) {
+		if (context.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstract) {
 			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
 			
 			AST ast= astRoot.getAST();
@@ -169,19 +169,18 @@ public class ModifierCorrectionSubProcessor {
 			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removeabstract.description");
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
-			proposal.calculateEditsAndClearRewrites();
+			proposal.ensureNoModifications();
 			proposals.add(proposal);
 		}
 				
-		if (problemPos.getId() == IProblem.AbstractMethodInAbstractClass && (parentType instanceof TypeDeclaration)) {
+		if (context.getProblemId() == IProblem.AbstractMethodInAbstractClass && (parentType instanceof TypeDeclaration)) {
 			ASTRewriteCorrectionProposal proposal= getMakeTypeStaticProposal(cu, (TypeDeclaration) parentType);
-			proposal.calculateEditsAndClearRewrites();
 			proposals.add(proposal);
 		}		
 		
 	}
 	
-	public static ASTRewriteCorrectionProposal getMakeTypeStaticProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration) {
+	public static ASTRewriteCorrectionProposal getMakeTypeStaticProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration) throws CoreException {
 		ASTRewrite rewrite= new ASTRewrite(typeDeclaration.getParent());
 		
 		AST ast= typeDeclaration.getAST();
@@ -192,7 +191,9 @@ public class ModifierCorrectionSubProcessor {
 
 		String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.addabstract.description", typeDeclaration.getName().getIdentifier());
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		return new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
+		proposal.ensureNoModifications();
+		return proposal;
 	}
 	
 

@@ -25,73 +25,10 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
-import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class ASTResolving {
-	
-	private static class SelectionFinder extends GenericVisitor {
-		
-		private int fStart;
-		private int fEnd;
-		
-		private ASTNode fCoveringNode;
-		private ASTNode fCoveredNode;
-		
-		public SelectionFinder(int offset, int length) {
-			fStart= offset;
-			fEnd= offset + length;
-		}
-
-		protected boolean visitNode(ASTNode node) {
-			int nodeStart= node.getStartPosition();
-			int nodeEnd= nodeStart + node.getLength();
-			if (nodeStart <= fStart && fEnd <= nodeEnd) {
-				fCoveringNode= node;
-			} else {
-				return false;
-			}
-			if (fStart <= nodeStart && nodeEnd <= fEnd) {
-				fCoveredNode= node;
-				return false;
-			}
-			return true;
-		}
-
-		/**
-		 * Returns the coveredNode.
-		 * @return ASTNode
-		 */
-		public ASTNode getCoveredNode() {
-			return fCoveredNode;
-		}
-
-		/**
-		 * Returns the coveringNode.
-		 * @return ASTNode
-		 */
-		public ASTNode getCoveringNode() {
-			return fCoveringNode;
-		}
-
-	}
-	
-
-	public static ASTNode findCoveringNode(CompilationUnit cuNode, int offset, int length) {
-		SelectionFinder selectionFinder= new SelectionFinder(offset, length);
-		cuNode.accept(selectionFinder);
-		return selectionFinder.getCoveringNode();
-	}
-
-	public static ASTNode findSelectedNode(CompilationUnit cuNode, int offset, int length) {
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(offset, length), true);
-		cuNode.accept(analyzer);
-		if (analyzer.hasSelectedNodes()) {
-			return analyzer.getFirstSelectedNode();
-		}
-		return analyzer.getLastCoveringNode();
-	}
 	
 	public static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
 		if (binding != null && !binding.isNullType() && !"void".equals(binding.getName())) {
@@ -540,6 +477,17 @@ public class ASTResolving {
 		} else {
 			return ((SimpleName) name).getIdentifier();
 		}
+	}
+	
+	public static ICompilationUnit findCompilationUnitForBinding(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding) throws JavaModelException {
+		if (binding != null && astRoot.findDeclaringNode(binding) == null) {
+			ICompilationUnit targetCU= Binding2JavaModel.findCompilationUnit(binding, cu.getJavaProject());
+			if (targetCU != null) {
+				return JavaModelUtil.toWorkingCopy(targetCU);
+			}
+			return null;
+		}
+		return cu;
 	}	
 	
 	

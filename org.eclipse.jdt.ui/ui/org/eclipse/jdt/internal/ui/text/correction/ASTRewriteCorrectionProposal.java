@@ -76,8 +76,10 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		return fRewrite;
 	}
 	
-	public void calculateEditsAndClearRewrites() throws CoreException {
-		getChange();
+	public void ensureNoModifications() throws CoreException {
+		if (fRewrite != null && fRewrite.hasInserts()) {
+			getChange(); // force the rewriting
+		}
 	}
 
 

@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
+import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 
 /**
   */
@@ -33,12 +34,12 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	public static class CorrectionMarkerResolution implements IMarkerResolution {
 	
 		private IEditorInput fEditorInput;
-		private ChangeCorrectionProposal fProposal;
+		private IJavaCompletionProposal fProposal;
 	
 		/**
 		 * Constructor for CorrectionMarkerResolution.
 		 */
-		public CorrectionMarkerResolution(IEditorInput editorInput, ChangeCorrectionProposal proposal) {
+		public CorrectionMarkerResolution(IEditorInput editorInput, IJavaCompletionProposal proposal) {
 			fEditorInput= editorInput;
 			fProposal= proposal;
 		}
@@ -84,14 +85,14 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			if (cu != null && JavaModelUtil.isEditable(cu)) {
 				IEditorInput input= EditorUtility.getEditorInput(cu);
 				if (input != null) { // only works with element open in editor
-					ProblemPosition pos= findProblemPosition(input, marker);
-					if (pos != null) {
+					CorrectionContext context= findCorrectionContext(input, marker);
+					if (context != null) {
 						ArrayList proposals= new ArrayList();
-						JavaCorrectionProcessor.collectCorrections(pos, proposals);
+						JavaCorrectionProcessor.collectCorrections(context, proposals);
 						int nProposals= proposals.size();
 						IMarkerResolution[] resolutions= new IMarkerResolution[nProposals];
 						for (int i= 0; i < nProposals; i++) {
-							resolutions[i]= new CorrectionMarkerResolution(input, (ChangeCorrectionProposal) proposals.get(i));
+							resolutions[i]= new CorrectionMarkerResolution(input, (IJavaCompletionProposal) proposals.get(i));
 						}
 						return resolutions;
 					}
@@ -111,7 +112,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		return null;
 	}
 	
-	private ProblemPosition findProblemPosition(IEditorInput input, IMarker marker) throws JavaModelException {
+	private CorrectionContext findCorrectionContext(IEditorInput input, IMarker marker) throws JavaModelException {
 		IAnnotationModel model= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(input);
 		if (model != null) {
 			Iterator iter= model.getAnnotationIterator();
@@ -124,7 +125,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 						Position pos= model.getPosition(annot);
 						if (pos != null) {
 							ICompilationUnit cu= getCompilationUnit(marker);
-							return new ProblemPosition(pos, annot, EditorUtility.getWorkingCopy(cu));
+							return new CorrectionContext(JavaModelUtil.toWorkingCopy(cu), pos.getOffset(), pos.getLength(), annot.getId(), annot.getArguments());
 						}
 					}
 				}

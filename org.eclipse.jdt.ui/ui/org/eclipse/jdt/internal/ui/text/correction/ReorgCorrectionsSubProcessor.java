@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -35,10 +35,10 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ReorgCorrectionsSubProcessor {
 	
-	public static void getWrongTypeNameProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		String[] args= problemPos.getArguments();
+	public static void getWrongTypeNameProposals(ICorrectionContext context, List proposals) throws CoreException {
+		String[] args= context.getProblemArguments();
 		if (args.length == 2) {
-			ICompilationUnit cu= problemPos.getCompilationUnit();
+			ICompilationUnit cu= context.getCompilationUnit();
 			
 			// rename type
 			proposals.add(new CorrectMainTypeNameProposal(cu, args[1], 1));
@@ -55,13 +55,13 @@ public class ReorgCorrectionsSubProcessor {
 		}
 	}
 	
-	public static void getWrongPackageDeclNameProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		String[] args= problemPos.getArguments();
+	public static void getWrongPackageDeclNameProposals(ICorrectionContext context, List proposals) throws CoreException {
+		String[] args= context.getProblemArguments();
 		if (args.length == 1) {
-			ICompilationUnit cu= problemPos.getCompilationUnit();
+			ICompilationUnit cu= context.getCompilationUnit();
 			
 			// correct pack decl
-			proposals.add(new CorrectPackageDeclarationProposal(problemPos, 1));
+			proposals.add(new CorrectPackageDeclarationProposal(context, 1));
 
 			// move to pack
 			IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
@@ -87,9 +87,9 @@ public class ReorgCorrectionsSubProcessor {
 		}
 	}
 	
-	public static void removeImportStatementProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
-		IJavaElement elem= cu.getElementAt(problemPos.getOffset());
+	public static void removeImportStatementProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+		IJavaElement elem= cu.getElementAt(context.getOffset());
 		if (elem instanceof IImportDeclaration) {
 			String label= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.unusedimport.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);

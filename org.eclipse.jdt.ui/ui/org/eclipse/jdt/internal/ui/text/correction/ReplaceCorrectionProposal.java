@@ -24,10 +24,6 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	private String fReplacementString;
 	private int fOffset;
 	private int fLength;
-
-	public ReplaceCorrectionProposal(String label, ProblemPosition problemPos, String replacementString, int relevance) {
-		this(label, problemPos.getCompilationUnit(), problemPos.getOffset(), problemPos.getLength(), replacementString, relevance);
-	}
 	
 	public ReplaceCorrectionProposal(String label, ICompilationUnit cu, int offset, int length, String replacementString, int relevance) {
 		super(label, cu, relevance);

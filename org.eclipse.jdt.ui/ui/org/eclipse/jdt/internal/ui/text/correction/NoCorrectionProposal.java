@@ -18,12 +18,12 @@ import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 
 public class NoCorrectionProposal extends ChangeCorrectionProposal {
 
-	private ProblemPosition fProblemPosition;
+	private CorrectionContext fCorrectionContext;
 	private String fMessage;
 
-	public NoCorrectionProposal(ProblemPosition problemPosition, String message) {
+	public NoCorrectionProposal(CorrectionContext correctionContext, String message) {
 		super(CorrectionMessages.getString("NoCorrectionProposal.description"), new NullChange(), 0, null); //$NON-NLS-1$
-		fProblemPosition= problemPosition;
+		fCorrectionContext= correctionContext;
 		fMessage= message;
 	}
 
@@ -31,7 +31,7 @@ public class NoCorrectionProposal extends ChangeCorrectionProposal {
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		if (fProblemPosition != null) {
+		if (fCorrectionContext != null) {
 			return showDebugInfo();
 		}
 		return null;
@@ -40,12 +40,12 @@ public class NoCorrectionProposal extends ChangeCorrectionProposal {
 	private String showDebugInfo() {	
 		StringBuffer buf= new StringBuffer();
 		buf.append("<p><b>"); //$NON-NLS-1$
-		buf.append(getErrorCode(fProblemPosition.getId()));
+		buf.append(getErrorCode(fCorrectionContext.getProblemId()));
 		buf.append("</b></p>"); //$NON-NLS-1$
 		buf.append("<p>"); //$NON-NLS-1$
 		buf.append(fMessage);
 		buf.append("</p>"); //$NON-NLS-1$
-		String[] arg= fProblemPosition.getArguments();
+		String[] arg= fCorrectionContext.getProblemArguments();
 		if (arg != null) {
 			for (int i= 0; i < arg.length; i++) {
 				buf.append("<p>"); //$NON-NLS-1$

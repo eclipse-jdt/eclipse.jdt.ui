@@ -36,7 +36,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -48,79 +47,45 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
-	public static boolean hasCorrections(int problemId) {
-		switch (problemId) {
-			case IProblem.UnterminatedString:
-			case IProblem.UnusedImport:
-			case IProblem.DuplicateImport:
-			case IProblem.CannotImportPackage:
-			case IProblem.ConflictingImport:			
-			case IProblem.UndefinedMethod:
-			case IProblem.UndefinedConstructor:
-			case IProblem.ParameterMismatch:
-			case IProblem.MethodButWithConstructorName:
-			case IProblem.UndefinedField:
-			case IProblem.UndefinedName:
-			case IProblem.PublicClassMustMatchFileName:
-			case IProblem.PackageIsNotExpectedPackage:
-			case IProblem.UndefinedType:
-			case IProblem.FieldTypeNotFound:
-			case IProblem.ArgumentTypeNotFound:
-			case IProblem.ReturnTypeNotFound:
-			case IProblem.SuperclassNotFound:
-			case IProblem.ExceptionTypeNotFound:
-			case IProblem.InterfaceNotFound: 
-			case IProblem.TypeMismatch:
-			case IProblem.UnhandledException:
-			case IProblem.UnreachableCatch:
-			case IProblem.VoidMethodReturnsValue:
-			case IProblem.ShouldReturnValue:
-			case IProblem.MissingReturnType:
-			case IProblem.NonExternalizedStringLiteral:
-			case IProblem.NonStaticAccessToStaticField:
-			case IProblem.NonStaticAccessToStaticMethod:
-			case IProblem.StaticMethodRequested:
-			case IProblem.NonStaticFieldFromStaticInvocation:
-			case IProblem.InstanceMethodDuringConstructorInvocation:
-			case IProblem.InstanceFieldDuringConstructorInvocation:			
-			case IProblem.NotVisibleMethod:
-			case IProblem.NotVisibleConstructor:
-			case IProblem.NotVisibleType:
-			case IProblem.SuperclassNotVisible:
-			case IProblem.InterfaceNotVisible:
-			case IProblem.FieldTypeNotVisible:
-			case IProblem.ArgumentTypeNotVisible:
-			case IProblem.ReturnTypeNotVisible:
-			case IProblem.ExceptionTypeNotVisible:
-			case IProblem.NotVisibleField:
-			case IProblem.ImportNotVisible:
-			case IProblem.BodyForAbstractMethod:
-			case IProblem.AbstractMethodInAbstractClass:
-			case IProblem.AbstractMethodMustBeImplemented:	
-				return true;
-			default:
-				return false;
-		}
-	}
-	
+
 	private static class CorrectionsComparator implements Comparator {
 		
 		private static Collator fgCollator= Collator.getInstance();
 		
 		public int compare(Object o1, Object o2) {
-			IJavaCompletionProposal e1= (IJavaCompletionProposal) o1;
-			IJavaCompletionProposal e2= (IJavaCompletionProposal) o2;
-			int del= e2.getRelevance() - e1.getRelevance();
-			if (del != 0) {
-				return del;
-			}
-			return fgCollator.compare(e1.getDisplayString(), e2.getDisplayString());
+			if ((o1 instanceof IJavaCompletionProposal) && (o2 instanceof IJavaCompletionProposal)) {
+				IJavaCompletionProposal e1= (IJavaCompletionProposal) o1;
+				IJavaCompletionProposal e2= (IJavaCompletionProposal) o2;				
+				int del= e2.getRelevance() - e1.getRelevance();
+				if (del != 0) {
+					return del;
+				}
+				return fgCollator.compare(e1.getDisplayString(), e1.getDisplayString());
+
+			}				
+			return fgCollator.compare(((ICompletionProposal) o1).getDisplayString(), ((ICompletionProposal) o1).getDisplayString());
 		}
 	}
-
-
+	
+	private static ICorrectionProcessor[] fCodeManipulationProcessors= null;
+	
+	public static ICorrectionProcessor[] getCodeManipulationProcessors() {
+		if (fCodeManipulationProcessors == null) {
+			fCodeManipulationProcessors= new ICorrectionProcessor[] {
+				new QuickFixProcessor(),
+				new QuickAssistProcessor()
+			};
+		}
+		return fCodeManipulationProcessors;
+	}
+	
+	public static boolean hasCorrections(int problemId) {
+		return QuickFixProcessor.hasCorrections(problemId);
+	}	
+	
 	private IEditorPart fEditor;
 
+	
 	/**
 	 * Constructor for JavaCorrectionProcessor.
 	 */
@@ -138,13 +103,14 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
 		ArrayList proposals= new ArrayList();
 		if (model != null) {
-			processProblemAnnotations(cu, model, documentOffset, proposals);
+			int length= viewer != null ? viewer.getSelectedRange().y : 0;
+			processProblemAnnotations(cu, model, documentOffset, length, proposals);
 		}
 		
 		if (proposals.isEmpty()) {
 			proposals.add(new NoCorrectionProposal(null, null));
 		}
-		IJavaCompletionProposal[] res= (IJavaCompletionProposal[]) proposals.toArray(new IJavaCompletionProposal[proposals.size()]);
+		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 		Arrays.sort(res, new CorrectionsComparator());
 		return res;
 	}
@@ -154,23 +120,24 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	}
 	
 
-	private void processProblemAnnotations(ICompilationUnit cu, IAnnotationModel model, int documentOffset, ArrayList proposals) {
+	private void processProblemAnnotations(ICompilationUnit cu, IAnnotationModel model, int offset, int length, ArrayList proposals) {
+		CorrectionContext context= new CorrectionContext(cu);
+		
+		boolean noProbemFound= true;
 		HashSet idsProcessed= new HashSet();
 		Iterator iter= new ProblemAnnotationIterator(model, true);
 		while (iter.hasNext()) {
 			IProblemAnnotation annot= (IProblemAnnotation) iter.next();
 			Position pos= model.getPosition((Annotation) annot);
-			if (isAtPosition(documentOffset, pos)) {
+			if (isAtPosition(offset, pos)) {
 				if (annot.isProblem()) {
-					Integer probId= new Integer(annot.getId());
-					if (!idsProcessed.contains(probId)) {
-						ProblemPosition pp = new ProblemPosition(pos, annot, cu);
-						idsProcessed.add(probId);
-						collectCorrections(pp, proposals);
+					if (idsProcessed.add(new Integer(annot.getId()))) { // collect only once per problem id
+						context.initialize(pos.getOffset(), pos.getLength(), annot.getId(), annot.getArguments());
+						collectCorrections(context, proposals);
 						if (proposals.isEmpty()) {
 							//proposals.add(new NoCorrectionProposal(pp, annot.getMessage()));
 						}
-					}
+					}					
 				} else {
 					if (annot instanceof MarkerAnnotation) {
 						IMarker marker= ((MarkerAnnotation) annot).getMarker();
@@ -180,114 +147,26 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 						}
 					}
 				}
+				noProbemFound= false;
+			}
+		}
+		if (noProbemFound) {
+			context.initialize(offset, length, 0, null);
+			collectCorrections(context, proposals);
+		}
+	}
+	
+	public static void collectCorrections(CorrectionContext context, ArrayList proposals) {
+		ICorrectionProcessor[] processors= getCodeManipulationProcessors();
+		for (int i= 0; i < processors.length; i++) {
+			try {
+				processors[i].process(context, proposals);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
 			}
 		}
 	}
 	
-	public static void collectCorrections(ProblemPosition problemPos, ArrayList proposals) {
-		try {
-			int id= problemPos.getId();
-			switch (id) {
-				case IProblem.UnterminatedString:
-					String quoteLabel= CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"); //$NON-NLS-1$
-					int pos= InsertCorrectionProposal.moveBack(problemPos.getOffset() + problemPos.getLength(), problemPos.getOffset(), "\n\r", problemPos.getCompilationUnit()); //$NON-NLS-1$
-					proposals.add(new InsertCorrectionProposal(quoteLabel, problemPos.getCompilationUnit(), pos, "\"", 0)); //$NON-NLS-1$ 
-					break;
-				case IProblem.UnusedImport:
-				case IProblem.DuplicateImport:
-				case IProblem.CannotImportPackage:
-				case IProblem.ConflictingImport:
-					ReorgCorrectionsSubProcessor.removeImportStatementProposals(problemPos, proposals);
-					break;
-				case IProblem.UndefinedMethod:
-					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, false, proposals);
-					break;
-				case IProblem.UndefinedConstructor:
-					UnresolvedElementsSubProcessor.getConstructorProposals(problemPos, proposals);
-					break;					
-				case IProblem.ParameterMismatch:
-					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, true, proposals);
-					break;
-				case IProblem.MethodButWithConstructorName:	
-					ReturnTypeSubProcessor.addMethodWithConstrNameProposals(problemPos, proposals);
-					break;
-				case IProblem.UndefinedField:
-				case IProblem.UndefinedName:
-					UnresolvedElementsSubProcessor.getVariableProposals(problemPos, proposals);
-					break;					
-				case IProblem.PublicClassMustMatchFileName:
-					ReorgCorrectionsSubProcessor.getWrongTypeNameProposals(problemPos, proposals);
-					break;
-				case IProblem.PackageIsNotExpectedPackage:
-					ReorgCorrectionsSubProcessor.getWrongPackageDeclNameProposals(problemPos, proposals);
-					break;
-				case IProblem.UndefinedType:
-				case IProblem.FieldTypeNotFound:
-				case IProblem.ArgumentTypeNotFound:
-				case IProblem.ReturnTypeNotFound:
-				case IProblem.SuperclassNotFound:
-				case IProblem.ExceptionTypeNotFound:
-				case IProblem.InterfaceNotFound: 
-					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, proposals);
-					break;	
-				case IProblem.TypeMismatch:
-					LocalCorrectionsSubProcessor.addCastProposals(problemPos, proposals);
-					break;
-				case IProblem.UnhandledException:
-					LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(problemPos, proposals);
-					break;
-				case IProblem.UnreachableCatch:
-					LocalCorrectionsSubProcessor.addUnreachableCatchProposals(problemPos, proposals);
-					break;
-				case IProblem.VoidMethodReturnsValue:
-					ReturnTypeSubProcessor.addVoidMethodReturnsProposals(problemPos, proposals);
-					break;
-				case IProblem.MissingReturnType:
-					ReturnTypeSubProcessor.addMissingReturnTypeProposals(problemPos, proposals);
-					break;
-				case IProblem.ShouldReturnValue:
-					ReturnTypeSubProcessor.addMissingReturnStatementProposals(problemPos, proposals);
-					break;
-				case IProblem.NonExternalizedStringLiteral:
-					LocalCorrectionsSubProcessor.addNLSProposals(problemPos, proposals);
-					break;
-				case IProblem.NonStaticAccessToStaticField:
-				case IProblem.NonStaticAccessToStaticMethod:
-					LocalCorrectionsSubProcessor.addInstanceAccessToStaticProposals(problemPos, proposals);
-					break;
-				case IProblem.StaticMethodRequested:
-				case IProblem.NonStaticFieldFromStaticInvocation:
-				case IProblem.InstanceMethodDuringConstructorInvocation:
-				case IProblem.InstanceFieldDuringConstructorInvocation:
-					ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(problemPos, proposals, false); 
-					break;				
-				case IProblem.NotVisibleMethod:
-				case IProblem.NotVisibleConstructor:
-				case IProblem.NotVisibleType:
-				case IProblem.SuperclassNotVisible:
-				case IProblem.InterfaceNotVisible:
-				case IProblem.FieldTypeNotVisible:
-				case IProblem.ArgumentTypeNotVisible:
-				case IProblem.ReturnTypeNotVisible:
-				case IProblem.ExceptionTypeNotVisible:
-				case IProblem.NotVisibleField:
-				case IProblem.ImportNotVisible:
-					ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(problemPos, proposals, true); 
-					break;
-				case IProblem.BodyForAbstractMethod:
-				case IProblem.AbstractMethodInAbstractClass:
-					ModifierCorrectionSubProcessor.addAbstractMethodProposals(problemPos, proposals); 
-					break;
-				case IProblem.AbstractMethodMustBeImplemented:
-					LocalCorrectionsSubProcessor.addUnimplementedMethodsProposals(problemPos, proposals);
-					break;					
-				default:
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		}
-	}
-
 	/*
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
 	 */
