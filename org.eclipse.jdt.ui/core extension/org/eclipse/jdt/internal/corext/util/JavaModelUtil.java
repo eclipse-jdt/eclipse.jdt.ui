@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -524,13 +525,8 @@ public class JavaModelUtil {
 		return false;
 	}
 	
-	/**
-	 * Tests if a method is a main method. Does not resolve the parameter types.
-	 * Method must exist.
-	 * @deprecated Use IMethod.isMainMethod
-	 */
-	public static boolean isMainMethod(IMethod method) throws JavaModelException {
-		return method.isMainMethod();
+	public static boolean isBoolean(IField field) throws JavaModelException{
+		return field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
 	}
 	
 	/**
