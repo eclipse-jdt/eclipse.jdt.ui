@@ -166,7 +166,7 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 				try {
 					ITypeHierarchy hierarchy= type.newSupertypeHierarchy(pm);
 					while (supertype != null) {
-						if ("java.lang.Exception".equals(supertype.getFullyQualifiedName())) {
+						if ("java.lang.Throwable".equals(supertype.getFullyQualifiedName())) {
 							result[0]= CHECKED_EXCEPTION;
 							return;
 						}
