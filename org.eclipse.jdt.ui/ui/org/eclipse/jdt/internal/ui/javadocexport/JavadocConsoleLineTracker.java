@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.javadocexport;
 
 import org.eclipse.debug.ui.console.IConsole;
-import org.eclipse.debug.ui.console.IConsoleHyperlink;
 import org.eclipse.debug.ui.console.IConsoleLineTracker;
 
 import org.eclipse.core.resources.IFile;
@@ -25,6 +24,7 @@ import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.JavaModelException;
@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 	
-	private static class JavadocConsoleHyperLink implements IConsoleHyperlink {
+	private static class JavadocConsoleHyperLink implements IHyperlink {
 		
 		private IPath fExternalPath;
 		private int fLineNumber;
