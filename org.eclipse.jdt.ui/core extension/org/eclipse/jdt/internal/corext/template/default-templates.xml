@@ -142,8 +142,10 @@ return ${name};
   <template context="java" description="file comment used by the class and interface wizards" enabled="true" name="filecomment">/**
  * Created on ${date}
  *
- * To change this generated comment edit the template variable "filecomment":
+ * To change this generated comment edit the template variable &quot;filecomment&quot;:
  * Window&gt;Preferences&gt;Java&gt;Templates.
+ * To enable and disable the creation of file comments go to
+ * Window&gt;Preferences&gt;Java&gt;Code Generation.
  */</template>
 
 <template name="typecomment" description="type comment used by the class and interface wizards" context="java" enabled="true">/**
@@ -151,6 +153,8 @@ return ${name};
  *
  * To change this generated comment edit the template variable &quot;typecomment&quot;:
  * Window&gt;Preferences&gt;Java&gt;Templates.
+ * To enable and disable the creation of type comments go to
+ * Window&gt;Preferences&gt;Java&gt;Code Generation.
  */</template> 
 
   <template description="print to standard out" name="stdout" context="java"
