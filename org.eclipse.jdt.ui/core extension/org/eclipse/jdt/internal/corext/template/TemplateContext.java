@@ -70,6 +70,8 @@ public abstract class TemplateContext {
 
 	/**
 	 * Evaluates the template and returns a template buffer.
+	 * @param template the template to evaluate
+	 * @return returns the buffer with the evaluated template or <code>null</code> if the buffer could not be created
 	 */
 	public abstract TemplateBuffer evaluate(Template template) throws CoreException;
 	
