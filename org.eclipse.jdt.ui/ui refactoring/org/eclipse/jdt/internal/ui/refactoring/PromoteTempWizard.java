@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -31,6 +32,8 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.FieldNameProcessor;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -47,6 +50,10 @@ public class PromoteTempWizard extends RefactoringWizard {
 	 */ 
 	protected void addUserInputPages(){
 		addPage(new PromoteTempInputPage());
+	}
+	
+	private PromoteTempToFieldRefactoring getPromoteTempToFieldRefactoring() {
+		return (PromoteTempToFieldRefactoring) getRefactoring();
 	}
 	
 	private static class PromoteTempInputPage extends UserInputWizardPage {
@@ -104,6 +111,8 @@ public class PromoteTempWizard extends RefactoringWizard {
 					PromoteTempInputPage.this.updateStatus();
 				}
 			});
+			IContentAssistProcessor processor= new FieldNameProcessor(getPromoteTempRefactoring());
+			ControlContentAssistHelper.createTextContentAssistant(fNameField, processor);
 		}
 
 		private void updateStatus() {

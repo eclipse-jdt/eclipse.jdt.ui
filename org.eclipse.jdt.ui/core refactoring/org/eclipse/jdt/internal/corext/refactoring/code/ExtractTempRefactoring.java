@@ -30,7 +30,6 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -74,6 +73,7 @@ import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
@@ -159,53 +159,77 @@ public class ExtractTempRefactoring extends Refactoring {
 		fReplaceAllOccurrences= replaceAllOccurrences;
 	}
 
-	public String guessTempName() throws JavaModelException{
-		IExpressionFragment selected= getSelectedExpression();
-		ASTNode associatedNode= selected.getAssociatedNode();
-		if (associatedNode instanceof MethodInvocation){
-			String candidate= guessTempNameFromMethodInvocation((MethodInvocation)associatedNode);
-			if (candidate != null)
-				return candidate;
-		}
-		if (associatedNode instanceof Expression) {
-			String candidate= guessTempNameFromExpression((Expression)associatedNode);
-			if (candidate != null)
-				return candidate;			
-		}
-		return fTempName;
+	public String guessTempName() {
+		String[] proposals= guessTempNames();
+		if (proposals.length == 0)
+			return fTempName;
+		else
+			return proposals[0];
 	}
 	
-	private static String guessTempNameFromMethodInvocation(MethodInvocation selectedMethodInvocation) {
+	/**
+	 * @return proposed variable names (may be empty, but not null).
+	 * The first proposal should be used as "best guess" (if it exists).
+	 */
+	public String[] guessTempNames() {
+		List proposals= new ArrayList();
+		try {
+			IExpressionFragment selected;
+				selected= getSelectedExpression();
+			ASTNode associatedNode= selected.getAssociatedNode();
+			if (associatedNode instanceof MethodInvocation){
+				proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) associatedNode));
+			}
+			if (associatedNode instanceof Expression) {
+				proposals.addAll(guessTempNamesFromExpression((Expression) associatedNode));
+			}
+		} catch (JavaModelException e) {
+			// too bad ... no proposals this time
+		}
+		return (String[]) proposals.toArray(new String[proposals.size()]);
+	}
+	
+	private List/*<String>*/ guessTempNamesFromMethodInvocation(MethodInvocation selectedMethodInvocation) {
+		String methodName= selectedMethodInvocation.getName().getIdentifier();
 		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-			String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], selectedMethodInvocation.getName().getIdentifier());
-			if (proposal != null)
-				return proposal;
+			String prefix= KNOWN_METHOD_NAME_PREFIXES[i];
+			if (! methodName.startsWith(prefix))
+				continue; //not this prefix
+			if (methodName.length() == prefix.length())
+				return Collections.EMPTY_LIST; // prefix alone -> don't take method name
+			char firstAfterPrefix= methodName.charAt(prefix.length());
+			if (! Character.isUpperCase(firstAfterPrefix))
+				continue; //not uppercase after prefix
+			//found matching prefix
+			String proposal= Character.toLowerCase(firstAfterPrefix) + methodName.substring(prefix.length() + 1);
+			methodName= proposal;
+			break;
 		}
-		return null;
+		String[] proposals= StubUtility.getLocalNameSuggestions(fCu.getJavaProject(), methodName, 0, new String[0]);
+		sortByLength(proposals);
+		return Arrays.asList(proposals);
 	}
 	
-	private String guessTempNameFromExpression(Expression selectedExpression) throws JavaModelException {
+	private void sortByLength(String[] proposals) {
+		Arrays.sort(proposals, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((String) o2).length() - ((String) o1).length();
+			}
+		});
+	}
+
+	private List/*<String>*/ guessTempNamesFromExpression(Expression selectedExpression) throws JavaModelException {
 		ITypeBinding expressionBinding= selectedExpression.resolveTypeBinding();
-			
-		String packageName= getPackageName(expressionBinding);
 		String typeName= getQualifiedName(expressionBinding);
 		if (typeName.length() == 0)
 			typeName= expressionBinding.getName();
 		if (typeName.length() == 0)			
-			return fTempName;
-		String[] candidates= NamingConventions.suggestLocalVariableNames(fCu.getJavaProject(), packageName, typeName, expressionBinding.getDimensions(), getExcludedVariableNames());
-		if (candidates.length > 0)
-			return candidates[0];
-		return null;
+			return Collections.EMPTY_LIST;
+		String[] proposals= StubUtility.getLocalNameSuggestions(fCu.getJavaProject(), typeName, expressionBinding.getDimensions(), getExcludedVariableNames());
+		sortByLength(proposals);
+		return Arrays.asList(proposals);
 	}
 	
-	private static String getPackageName(ITypeBinding typeBinding) {
-		if (typeBinding.getPackage() != null)
-			return typeBinding.getPackage().getName();
-		else
-			return ""; //$NON-NLS-1$
-	}
-
 	private String[] getExcludedVariableNames() throws JavaModelException {
 		IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES);
 		String[] names= new String[bindings.length];
@@ -224,17 +248,6 @@ public class ExtractTempRefactoring extends Refactoring {
 			return typeBinding.getElementType().getQualifiedName();
 	}
 
-	private static String tryTempNamePrefix(String prefix, String methodName){
-		if (! methodName.startsWith(prefix))
-			return null;
-		if (methodName.length() <= prefix.length())
-			return null;
-		char firstAfterPrefix= methodName.charAt(prefix.length());
-		if (! Character.isUpperCase(firstAfterPrefix))
-			return null;
-		return Character.toLowerCase(firstAfterPrefix) + methodName.substring(prefix.length() + 1);
-	}
-	
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 6); //$NON-NLS-1$

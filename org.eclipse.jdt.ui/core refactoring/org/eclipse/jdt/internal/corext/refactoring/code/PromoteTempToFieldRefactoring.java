@@ -284,15 +284,26 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		fFieldName= getInitialFieldName();
     }
     
-	private String getInitialFieldName() {
+	public String[] guessFieldNames() {
 		String tempName= fTempDeclarationNode.getName().getIdentifier();
 		String rawTempName= NamingConventions.removePrefixAndSuffixForLocalVariableName(fCu.getJavaProject(), tempName);
 		String[] excludedNames= getNamesOfFieldsInDeclaringType();
 		int dim= getTempTypeArrayDimensions();
-		String[] suggestedNames= NamingConventions.suggestFieldNames(fCu.getJavaProject(), fCu.getParent().getElementName(), rawTempName, dim, getModifiers(), excludedNames);
-		if (suggestedNames.length > 0)
-			return suggestedNames[0];
-		return tempName;
+		String[] suggestedNames= StubUtility.getFieldNameSuggestions(fCu.getJavaProject(), rawTempName, dim, getModifiers(), excludedNames);
+		return suggestedNames;
+	}
+
+    private String getInitialFieldName() {
+    	String[] suggestedNames= guessFieldNames();
+		if (suggestedNames.length > 0) {
+			String longest= suggestedNames[0];
+			for (int i= 1; i < suggestedNames.length; i++)
+				if (suggestedNames[i].length() > longest.length())
+					longest= suggestedNames[i];
+			return longest;
+		} else {
+			return fTempDeclarationNode.getName().getIdentifier();
+		}
 	}
 	
 	private String[] getNamesOfFieldsInDeclaringType() {

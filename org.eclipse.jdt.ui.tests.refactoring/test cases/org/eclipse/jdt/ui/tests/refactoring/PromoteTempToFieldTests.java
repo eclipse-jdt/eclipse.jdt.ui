@@ -543,4 +543,13 @@ public class PromoteTempToFieldTests extends RefactoringTest{
         boolean declareStatic= true;
 		passHelper(4, 17, 4, 18, "fgX", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
+	
+	public void test22() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=54444
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);						  	
+		ISourceRange selection= TextRangeUtil.getSelection(cu, 4, 34, 4, 37);
+        PromoteTempToFieldRefactoring ref= PromoteTempToFieldRefactoring.create(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
+		ref.checkInitialConditions(new NullProgressMonitor());
+        assertEquals("sortByDefiningTypeAction", ref.getFieldName());
+	}
+
 }

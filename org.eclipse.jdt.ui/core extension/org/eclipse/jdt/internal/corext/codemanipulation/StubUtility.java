@@ -1073,18 +1073,35 @@ public class StubUtility {
 	}
 	
 	/*
-	 * Workaraound for bug 38111
+	 * Workarounds for bug 38111
 	 */
 	public static String[] getArgumentNameSuggestions(IJavaProject project, String baseName, String[] excluded) {
-		String name= Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
+		String name= workaround38111(baseName);
 		return NamingConventions.suggestArgumentNames(project, "", name, 0, excluded); //$NON-NLS-1$
 	}
 	
 	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int modifiers, String[] excluded) {
-		String name= Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
-		return NamingConventions.suggestFieldNames(project, "", name, 0, modifiers, excluded); //$NON-NLS-1$
-	}	
+		return getFieldNameSuggestions(project, baseName, 0, modifiers, excluded);	}	
 	 
+	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int dimensions, int modifiers, String[] excluded) {
+		String name= workaround38111(baseName);
+		return NamingConventions.suggestFieldNames(project, "", name, dimensions, modifiers, excluded); //$NON-NLS-1$
+	}
+
+	public static String[] getLocalNameSuggestions(IJavaProject project, String baseName, int dimensions, String[] excluded) {
+		String name= workaround38111(baseName);
+		return NamingConventions.suggestLocalVariableNames(project, "", name, dimensions, excluded); //$NON-NLS-1$
+	}
+	
+	private static String workaround38111(String baseName) {
+		if (BASE_TYPES.contains(baseName))
+			return baseName;
+		return Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
+	}
+	
+	private static final List BASE_TYPES= Arrays.asList(
+			new String[] {"boolean", "byte", "char", "double", "float", "int", "long", "short"});  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+
 	public static String suggestArgumentName(IJavaProject project, String baseName, String[] excluded) {
 		String[] argnames= getArgumentNameSuggestions(project, baseName, excluded);
 		String longest= null;

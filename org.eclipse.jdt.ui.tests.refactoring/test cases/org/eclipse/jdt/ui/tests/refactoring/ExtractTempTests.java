@@ -236,7 +236,7 @@ public class ExtractTempTests extends RefactoringTest {
 	}	
 	
 	public void test19() throws Exception{
-		helper1(5, 20, 5, 23, true, false, "temp", "j");
+		helper1(5, 20, 5, 23, true, false, "temp", "f");
 	}	
 
 //cannot do it - see testFail16
@@ -308,7 +308,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test34() throws Exception{
 //		printTestDisabledMessage("another regression test for bug#11449");
-		helper1(4, 19, 4, 46, true, false, "temp", "list");
+		helper1(4, 19, 4, 46, true, false, "temp", "arrayList");
 	}
 
 	public void test35() throws Exception{
@@ -318,7 +318,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test36() throws Exception{
 //		printTestDisabledMessage("another regression test for bug#12205");
-		helper1(11, 15, 11, 25, true, false, "temp", "js");
+		helper1(11, 15, 11, 25, true, false, "temp", "foo");
 	}
 
 	public void test37() throws Exception{
@@ -343,7 +343,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test41() throws Exception{
 //		printTestDisabledMessage("test for bug 21815");
-		helper1(4, 9, 4, 36, true, false, "temp", "i");
+		helper1(4, 9, 4, 36, true, false, "temp", "length");
 	}
 
 	public void test42() throws Exception{
@@ -363,16 +363,16 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test45() throws Exception{
 		//21939
-		helper1(4, 16, 4, 19, true, false, "temp", "i");
+		helper1(4, 16, 4, 19, true, false, "temp", "f");
 	}
 
 	public void test46() throws Exception{
 //		printTestDisabledMessage("test for bug 21815");
-		helper1(4, 9, 4, 12, true, false, "temp", "i");
+		helper1(4, 9, 4, 12, true, false, "temp", "f");
 	}
 
 	public void test47() throws Exception{
-		helper1(5, 9, 5, 12, true, false, "temp", "i");
+		helper1(5, 9, 5, 12, true, false, "temp", "r");
 	}
 
 	public void test48() throws Exception{
@@ -423,7 +423,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test58() throws Exception{
 //		printTestDisabledMessage("test for bug 30304");
-		helper1(7, 14, 7, 30, true, false, "temp", "b");
+		helper1(7, 14, 7, 30, true, false, "temp", "equals");
 	}	
 
 	public void test59() throws Exception{
@@ -517,7 +517,7 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test77() throws Exception {
 //		printTestDisabledMessage("test for bug 40353: extracting fragment which matches for_initializer");
-		helper1(10, 13, 10, 17, true, false, "temp", "i");
+		helper1(10, 13, 10, 17, true, false, "temp", "f");
 	}
 
 	public void test78() throws Exception {

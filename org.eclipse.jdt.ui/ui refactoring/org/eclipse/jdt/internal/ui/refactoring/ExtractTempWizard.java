@@ -23,12 +23,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.TempNameProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
@@ -46,11 +49,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		try {
-			addPage(new ExtractTempInputPage(getExtractTempRefactoring().guessTempName()));
-		} catch (JavaModelException e) {
-			addPage(new ExtractTempInputPage("")); //$NON-NLS-1$
-		}
+		addPage(new ExtractTempInputPage(getExtractTempRefactoring().guessTempNames()));
 	}
 	
 	private ExtractTempRefactoring getExtractTempRefactoring(){
@@ -61,11 +60,14 @@ public class ExtractTempWizard extends RefactoringWizard {
 	
 		private Label fLabel;
 		private final boolean fInitialValid;
-		private static final String DESCRIPTION = RefactoringMessages.getString("ExtractTempInputPage.enter_name");//$NON-NLS-1$
+		private static final String DESCRIPTION = RefactoringMessages.getString("ExtractTempInputPage.enter_name"); //$NON-NLS-1$
+		private String[] fTempNameProposals;//$NON-NLS-1$
 		
-		public ExtractTempInputPage(String initialValue) {
-			super(DESCRIPTION, true, initialValue);
-			fInitialValid= ! ("".equals(initialValue)); //$NON-NLS-1$
+		public ExtractTempInputPage(String[] tempNameProposals) {
+			super(DESCRIPTION, true, tempNameProposals.length == 0 ? "" : tempNameProposals[0]); //$NON-NLS-1$
+			Assert.isNotNull(tempNameProposals);
+			fTempNameProposals= tempNameProposals; //$NON-NLS-1$
+			fInitialValid= tempNameProposals.length > 0; //$NON-NLS-1$
 		}
 	
 		public void createControl(Composite parent) {
@@ -83,6 +85,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 			Text text= createTextInputField(result);
 			text.selectAll();
 			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			ControlContentAssistHelper.createTextContentAssistant(text, new TempNameProcessor(fTempNameProposals));
 					
 			layouter.perform(label, text, 1);
 			
