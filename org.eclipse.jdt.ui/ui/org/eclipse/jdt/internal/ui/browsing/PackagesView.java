@@ -199,7 +199,7 @@ public class PackagesView extends JavaBrowsingPart{
 		return fWrappedViewer;
 	}
 
-	private boolean isInListState() {
+	protected boolean isInListState() {
 		return fCurrViewState== LIST_VIEW_STATE;
 	}
 	
