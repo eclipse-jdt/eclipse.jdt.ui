@@ -217,8 +217,13 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 
 		if (dialog.open() == ElementTreeSelectionDialog.OK) {
-			IPath path= ((IResource)dialog.getFirstResult()).getFullPath();
-			return path.removeFirstSegments(fCurrSourceFolder.getFullPath().segmentCount()).makeRelative().addTrailingSeparator();
+			IResource res= (IResource) dialog.getFirstResult();
+			IPath path= res.getFullPath().removeFirstSegments(fCurrSourceFolder.getFullPath().segmentCount()).makeRelative();
+			if (curr instanceof IContainer) {
+				return path.addTrailingSeparator();
+			} else {
+				return path;
+			}			
 		}
 		return null;
 	}

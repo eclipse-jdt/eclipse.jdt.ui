@@ -7,7 +7,12 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -18,9 +23,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -28,6 +41,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -54,9 +69,12 @@ public class ExclusionPatternDialog extends StatusDialog {
 	private CPListElement fCurrElement;
 	private IProject fCurrProject;
 	
+	private IContainer fCurrSourceFolder;
+	
 	private static final int IDX_ADD= 0;
-	private static final int IDX_EDIT= 1;
-	private static final int IDX_REMOVE= 3;
+	private static final int IDX_ADD_MULTIPLE= 1;
+	private static final int IDX_EDIT= 2;
+	private static final int IDX_REMOVE= 4;
 	
 		
 	public ExclusionPatternDialog(Shell parent, CPListElement entryToEdit) {
@@ -68,6 +86,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 		
 		String[] buttonLabels= new String[] {
 			/* IDX_ADD */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.add"), //$NON-NLS-1$
+			/* IDX_ADD_MULTIPLE */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.add.multiple"), //$NON-NLS-1$
 			/* IDX_EDIT */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.edit"), //$NON-NLS-1$
 			null,
 			/* IDX_REMOVE */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.remove") //$NON-NLS-1$
@@ -82,6 +101,11 @@ public class ExclusionPatternDialog extends StatusDialog {
 		fExclusionPatternList.enableButton(IDX_EDIT, false);
 	
 		fCurrProject= entryToEdit.getJavaProject().getProject();
+		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
+		IResource res= root.findMember(entryToEdit.getPath());
+		if (res instanceof IContainer) {
+			fCurrSourceFolder= (IContainer) res;
+		}				
 		
 		IPath[] pattern= (IPath[]) entryToEdit.getAttribute(CPListElement.EXCLUSION);
 		
@@ -91,6 +115,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 		}
 		fExclusionPatternList.setElements(elements);
 		fExclusionPatternList.selectFirstElement();
+		fExclusionPatternList.enableButton(IDX_ADD_MULTIPLE, fCurrSourceFolder != null);
 	}
 	
 	
@@ -115,6 +140,8 @@ public class ExclusionPatternDialog extends StatusDialog {
 			addEntry();
 		} else if (index == IDX_EDIT) {
 			editEntry();
+		} else if (index == IDX_ADD_MULTIPLE) {
+			addMultipleEntries();
 		}
 	}
 	
@@ -209,5 +236,42 @@ public class ExclusionPatternDialog extends StatusDialog {
 		super.configureShell(newShell);
 		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.EXCLUSION_PATTERN_DIALOG);
 	}
+	
+	private void addMultipleEntries() {
+		Class[] acceptedClasses= new Class[] { IFolder.class, IFile.class };
+		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses);
+
+		ILabelProvider lp= new WorkbenchLabelProvider();
+		ITreeContentProvider cp= new WorkbenchContentProvider();
+		
+		IResource initialElement= null;	
+
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
+		dialog.setTitle(NewWizardMessages.getString("ExclusionPatternDialog.ChooseExclusionPattern.title")); //$NON-NLS-1$
+		dialog.setValidator(validator);
+		dialog.setMessage(NewWizardMessages.getString("ExclusionPatternDialog.ChooseExclusionPattern.description")); //$NON-NLS-1$
+		dialog.addFilter(filter);
+		dialog.setInput(fCurrSourceFolder);
+		dialog.setInitialSelection(initialElement);
+		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+
+		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+			Object[] objects= dialog.getResult();
+			int existingSegments= fCurrSourceFolder.getFullPath().segmentCount();
+			
+			for (int i= 0; i < objects.length; i++) {
+				IResource curr= (IResource) objects[i];
+				IPath path= curr.getFullPath().removeFirstSegments(existingSegments).makeRelative();
+				String res;
+				if (curr instanceof IContainer) {
+					res= path.addTrailingSeparator().toString();
+				} else {
+					res= path.toString();
+				}
+				fExclusionPatternList.addElement(res);
+			}
+		}
+	}	
 	
 }
