@@ -5,7 +5,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
  * All Rights Reserved.
  */
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,18 +24,38 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.UnresolvableTypeInfo;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
@@ -355,7 +375,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 								
 				ArrayList typeRefsFound= fTypeRefsFound; // reuse
 				String typeName= ref.getIdentifier();
-				findTypeRefs(typeName, typeRefsFound, fNamesFound);				
+				findTypeRefs(typeName, typeRefsFound);				
 				int nFound= typeRefsFound.size();
 				if (nFound == 0) {
 					// nothing found
@@ -400,49 +420,18 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			return null;
 		}
 		
-		private void processEntry(TypeInfo curr, ArrayList typeRefsFound, ArrayList namesFound) {
-			if (curr.isEnclosed(fSearchScope)) {
-				String fullyQualifiedName= curr.getFullyQualifiedName();
-				if (!namesFound.contains(fullyQualifiedName)) {
-					try {
-						IType type= curr.resolveType(fSearchScope);
-						if (type != null && JavaModelUtil.isVisible(type, fCurrPackage)) {
-							typeRefsFound.add(curr);
-						}
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
-					}
-					namesFound.add(fullyQualifiedName);
-				}
-			}
-		}
-
-		private void findTypeRefs(String simpleTypeName, ArrayList typeRefsFound, ArrayList namesFound) throws JavaModelException {
+		private void findTypeRefs(String simpleTypeName, Collection typeRefsFound) throws JavaModelException {
 			if (fIgnoreLowerCaseNames && simpleTypeName.length() > 0 && Strings.isLowerCase(simpleTypeName.charAt(0))) {
 				return;
 			}
-			TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
-			TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, true, null); //$NON-NLS-1$
-			int index= Arrays.binarySearch(allTypes, key, AllTypesCache.getTypeNameComperator());
-			if (index >= 0 && index < allTypes.length) {
-				for (int i= index - 1; i>= 0; i--) {
-					TypeInfo curr= allTypes[i];
-					if (simpleTypeName.equals(curr.getTypeName())) {
-						processEntry(curr, typeRefsFound, namesFound);
-					} else {
-						break;
-					}
+			TypeInfo[] infos= AllTypesCache.findTypeRefs(simpleTypeName, fSearchScope);
+			for (int i= 0; i < infos.length; i++) {
+				TypeInfo curr= infos[i];
+				IType type= curr.resolveType(fSearchScope);
+				if (type != null && JavaModelUtil.isVisible(type, fCurrPackage)) {
+					typeRefsFound.add(curr);
 				}
-	
-				for (int i= index; i < allTypes.length; i++) {
-					TypeInfo curr= allTypes[i];
-					if (simpleTypeName.equals(curr.getTypeName())) {
-						processEntry(curr,  typeRefsFound, namesFound);
-					} else {
-						break;
-					}
-				}
-			}			
+			}
 		}
 	}	
 
