@@ -12,10 +12,9 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class MoveInnerToToplnputPage extends TextInputWizardPage{
 

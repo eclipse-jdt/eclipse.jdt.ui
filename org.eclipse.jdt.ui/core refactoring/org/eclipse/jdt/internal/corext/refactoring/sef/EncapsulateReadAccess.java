@@ -6,9 +6,9 @@ package org.eclipse.jdt.internal.corext.refactoring.sef;
 
 import org.eclipse.jdt.core.dom.SimpleName;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 final class EncapsulateReadAccess extends SimpleTextEdit {

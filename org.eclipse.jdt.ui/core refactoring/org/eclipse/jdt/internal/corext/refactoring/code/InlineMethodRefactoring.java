@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
