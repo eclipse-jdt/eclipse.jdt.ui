@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 public class NLSHolder {
 
 	private static final char SUBSTITUTE_CHAR= '_';	
-	private static final char[] UNWANTED_CHARS= new char[]{' ', ':', '"', '\\', '\'', '?'};
-	public static final String[] UNWANTED_STRINGS= {" ", ":", "\"", "\\", "'", "?"}; //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+	private static final char[] UNWANTED_CHARS= new char[]{' ', ':', '"', '\\', '\'', '?', '='};
+	public static final String[] UNWANTED_STRINGS= {" ", ":", "\"", "\\", "'", "?", "="}; //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 
 	private NLSSubstitution[] fSubstitutions;
 	private NLSLine[] fLines;
