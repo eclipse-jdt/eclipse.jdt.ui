@@ -296,12 +296,14 @@ public class ImportsStructure implements IImportsStructure {
 	public String addImport(String typeContainerName, String typeName) {
 		String fullTypeName= JavaModelUtil.concatenateName(typeContainerName, typeName);
 		
-		String existing= findImport(typeName);
-		if (existing != null) {
-			if (fullTypeName.equals(existing)) {
-				return typeName;
-			} else {
-				return fullTypeName;
+		if (!"*".equals(typeName)) {
+			String existing= findImport(typeName);
+			if (existing != null) {
+				if (fullTypeName.equals(existing)) {
+					return typeName;
+				} else {
+					return fullTypeName;
+				}
 			}
 		}
 		
