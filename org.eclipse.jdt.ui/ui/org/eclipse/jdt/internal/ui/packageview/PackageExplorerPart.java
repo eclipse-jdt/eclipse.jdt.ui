@@ -83,6 +83,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.search.ui.IWorkingSet;
+import org.eclipse.search.ui.SearchUI;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -145,6 +146,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
 	static final String TAG_SHOWLIBRARIES = "showLibraries"; //$NON-NLS-1$
 	static final String TAG_SHOWBINARIES = "showBinaries"; //$NON-NLS-1$
+	static final String TAG_WORKINGSET = "workingset"; //$NON-NLS-1$
 
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
@@ -353,7 +355,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		IMenuManager menu = actionBars.getMenuManager();
 		menu.add(fFilterAction);
 		menu.add(fShowLibrariesAction);  
-		menu.add(fShowBinariesAction);
+		//menu.add(fShowBinariesAction);
 		menu.add(fFilterWorkingSetAction); 
 		menu.add(fRemoveWorkingSetAction); 
 	}
@@ -423,7 +425,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	public void setWorkingSet(IWorkingSet ws) {
 		fWorkingSetFilter.setWorkingSet(ws);
 		firePropertyChange(IWorkbenchPart.PROP_TITLE);
-	}
+		fFilterWorkingSetAction.setChecked(ws != null);
+		fRemoveWorkingSetAction.setEnabled(ws != null);
+	} 
 	
 	/**
 	 * Returns the shell to use for opening dialogs.
@@ -784,6 +788,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		saveScrollState(memento, fViewer.getTree());
 		savePatternFilterState(memento);
 		saveFilterState(memento);
+		saveWorkingSetState(memento);
 	}
 
 	protected void saveFilterState(IMemento memento) {
@@ -847,6 +852,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				if (o instanceof IJavaElement)
 					elementMem.putString(TAG_PATH, ((IJavaElement) expandedElements[i]).getHandleIdentifier());
 			}
+		}
+	}
+
+	protected void saveWorkingSetState(IMemento memento) {
+		IWorkingSet ws= getWorkingSetFilter().getWorkingSet();
+		if (ws != null) {
+			memento.putString(TAG_WORKINGSET, ws.getName());
 		}
 	}
 
@@ -1097,6 +1109,15 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			getBinaryFilter().setShowBinaries(showbin.equals("true")); //$NON-NLS-1$
 		else 
 			initBinaryFilterFromPreferences();		
+			
+		//restore working set
+		String workingSetName= fMemento.getString(TAG_WORKINGSET);
+		if (workingSetName != null) {
+			IWorkingSet ws= SearchUI.findWorkingSet(workingSetName);
+			if (ws != null) {
+				getWorkingSetFilter().setWorkingSet(ws);
+			}
+		}
 	}
 	
 	void initFilterFromPreferences() {

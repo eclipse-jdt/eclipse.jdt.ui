@@ -8,8 +8,7 @@ class RemoveWorkingSetFilterAction extends SelectionProviderAction {
 	private Shell fShell;
 	public RemoveWorkingSetFilterAction(Shell shell, PackageExplorerPart packagesView, String label) {
 		super(packagesView.getViewer(), label);
-		fPackagesView= packagesView;		fShell= shell;
-		setEnabled(true);
+		fPackagesView= packagesView;		fShell= shell;		setEnabled(fPackagesView.getWorkingSetFilter().getWorkingSet() != null);		
 	}
 	
 	/*

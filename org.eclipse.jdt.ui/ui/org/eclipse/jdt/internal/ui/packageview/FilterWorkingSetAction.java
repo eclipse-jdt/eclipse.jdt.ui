@@ -13,15 +13,14 @@ class FilterWorkingSetAction extends SelectionProviderAction {
 	 */
 	public FilterWorkingSetAction(Shell shell, PackageExplorerPart packagesView, String label) {
 		super(packagesView.getViewer(), label);
-		fPackagesView= packagesView;		fShell= shell;
+		fPackagesView= packagesView;		fShell= shell;		setChecked(fPackagesView.getWorkingSetFilter().getWorkingSet() != null);		
 		setEnabled(true);
 	}
 	
 	/*
 	 * Implementation of method defined on <code>IAction</code>.
 	 */
-	public void run() {		SelectionDialog dialog= SearchUI.createWorkingSetDialog(fShell);		if (dialog.open() == dialog.OK) {			IWorkingSet ws= (IWorkingSet)dialog.getResult()[0]; 			fPackagesView.setWorkingSet(ws);		} 		fPackagesView.getViewer().getControl().setRedraw(false);
-		fPackagesView.getViewer().refresh();
-		fPackagesView.getViewer().getControl().setRedraw(true);
-	}
+	public void run() {		SelectionDialog dialog= SearchUI.createWorkingSetDialog(fShell);		if (dialog.open() == dialog.OK) {			IWorkingSet ws= (IWorkingSet)dialog.getResult()[0]; 			fPackagesView.setWorkingSet(ws);			fPackagesView.getViewer().getControl().setRedraw(false);
+			fPackagesView.getViewer().refresh();
+			fPackagesView.getViewer().getControl().setRedraw(true);		}	}
 }
