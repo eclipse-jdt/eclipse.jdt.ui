@@ -89,7 +89,8 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		if (fView != null) {
 			fView.searchStarted(
 				JavaSearchPage.EXTENSION_POINT_ID,
-				fOperation.getDescription(),
+				fOperation.getSingularLabel(),
+				fOperation.getPluralLabelPattern(),
 				fOperation.getImageDescriptor(),
 				fContextMenu,
 				JavaSearchResultLabelProvider.INSTANCE,

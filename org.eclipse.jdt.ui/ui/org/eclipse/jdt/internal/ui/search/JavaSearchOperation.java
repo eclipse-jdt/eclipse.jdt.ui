@@ -78,7 +78,40 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 			engine.search(fWorkspace, fStringPattern, fSearchFor, fLimitTo, fScope, fCollector);
 	}
 
-	String getDescription() {
+	String getSingularLabel() {
+		String desc= null;
+		if (fElementPattern != null) {
+			if (fLimitTo == IJavaSearchConstants.REFERENCES
+			&& fElementPattern.getElementType() == IJavaElement.METHOD)
+				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)fElementPattern);
+			else
+				desc= fElementPattern.getElementName();
+			if ("".equals(desc) && fElementPattern.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
+				desc= SearchMessages.getString("JavaSearchOperation.default_package"); //$NON-NLS-1$
+		}
+		else
+			desc= fStringPattern;
+
+		String[] args= new String[] {desc, fScopeDescription}; //$NON-NLS-1$
+		switch (fLimitTo) {
+			case IJavaSearchConstants.IMPLEMENTORS:
+				return SearchMessages.getFormattedString("JavaSearchOperation.singularImplementorsPostfix", args); //$NON-NLS-1$
+			case IJavaSearchConstants.DECLARATIONS:
+				return SearchMessages.getFormattedString("JavaSearchOperation.singularDeclarationsPostfix", args); //$NON-NLS-1$
+			case IJavaSearchConstants.REFERENCES:
+				return SearchMessages.getFormattedString("JavaSearchOperation.singularReferencesPostfix", args); //$NON-NLS-1$
+			case IJavaSearchConstants.ALL_OCCURRENCES:
+				return SearchMessages.getFormattedString("JavaSearchOperation.singularOccurrencesPostfix", args); //$NON-NLS-1$
+			case IJavaSearchConstants.READ_REFERENCES:
+				return SearchMessages.getFormattedString("JavaSearchOperation.singularReadReferencesPostfix", args); //$NON-NLS-1$
+			case IJavaSearchConstants.WRITE_REFERENCES:
+				return SearchMessages.getFormattedString("JavaSearchOperation.singularWriteReferencesPostfix", args); //$NON-NLS-1$
+			default:
+				return SearchMessages.getFormattedString("JavaSearchOperation.singularOccurrencesPostfix", args); //$NON-NLS-1$;
+		}
+	}
+
+	String getPluralLabelPattern() {
 		String desc= null;
 		if (fElementPattern != null) {
 			if (fLimitTo == IJavaSearchConstants.REFERENCES
@@ -95,19 +128,19 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 		String[] args= new String[] {desc, "{0}", fScopeDescription}; //$NON-NLS-1$
 		switch (fLimitTo) {
 			case IJavaSearchConstants.IMPLEMENTORS:
-				return SearchMessages.getFormattedString("JavaSearchOperation.implementorsPostfix", args); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.pluralImplementorsPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.DECLARATIONS:
-				return SearchMessages.getFormattedString("JavaSearchOperation.declarationsPostfix", args); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.pluralDeclarationsPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.REFERENCES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.referencesPostfix", args); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.pluralReferencesPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.ALL_OCCURRENCES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.occurrencesPostfix", args); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.pluralOccurrencesPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.READ_REFERENCES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.readReferencesPostfix", args); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.pluralReadReferencesPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.WRITE_REFERENCES:
-				return SearchMessages.getFormattedString("JavaSearchOperation.writeReferencesPostfix", args); //$NON-NLS-1$
+				return SearchMessages.getFormattedString("JavaSearchOperation.pluralWriteReferencesPostfix", args); //$NON-NLS-1$
 			default:
-				return SearchMessages.getFormattedString("JavaSearchOperation.occurrencesPostfix", args); //$NON-NLS-1$;
+				return SearchMessages.getFormattedString("JavaSearchOperation.pluralOccurrencesPostfix", args); //$NON-NLS-1$;
 		}
 	}
 	
