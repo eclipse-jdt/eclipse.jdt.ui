@@ -131,14 +131,9 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 
 		if (kind == IJavaElementDelta.REMOVED) {
 			Object input= fViewer.getInput();
-			if (input != null) {
-				if (fInputIsProject && input.equals(element.getJavaProject())) {
+			if (input != null && input.equals(element)) {
 					postRemove(input);
 					return;
-				} else if (!fInputIsProject && input.equals(element)) {
-					postRemove(input);
-					return;
-				}
 			}
 		}
 
