@@ -915,7 +915,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				if (markers != null && markers.length > 0) {
 					AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;						
 					for (int i= 0; i < markers.length; i++)
-						model.updateMarker(markers[i], document, null);
+						model.updateMarker(document, markers[i], null);
 				}
 			}
 		}
