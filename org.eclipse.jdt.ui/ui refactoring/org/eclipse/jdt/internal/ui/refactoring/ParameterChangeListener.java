@@ -16,7 +16,7 @@ public interface ParameterChangeListener {
 
 	/**
 	 * Gets fired when the given parameter has changed	 * @param parameter the paramter that has changed.	 */
-	public void paramterChanged(ParameterInfo parameter);
+	public void parameterChanged(ParameterInfo parameter);
 
 	/**
 	 * Gets fired if the paramters got reordered.	 */
