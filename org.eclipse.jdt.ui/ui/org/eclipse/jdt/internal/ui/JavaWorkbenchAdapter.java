@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
@@ -36,9 +37,10 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 	}
 
 	public Object[] getChildren(Object element) {
-		if (element instanceof IParent) {
+		IJavaElement je= getJavaElement(element);
+		if (je instanceof IParent) {
 			try {
-				return ((IParent)element).getChildren();
+				return ((IParent)je).getChildren();
 			} catch(JavaModelException e) {
 				JavaPlugin.log(e); 
 			}
@@ -47,18 +49,29 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 	}
 
 	public ImageDescriptor getImageDescriptor(Object element) {
-		return fImageProvider.getJavaImageDescriptor(
-			(IJavaElement)element, 
-			JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS);
+		IJavaElement je= getJavaElement(element);
+		if (je != null)
+			return fImageProvider.getJavaImageDescriptor(je, JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS);
+		
+		return null;
+		
 	}
 
 	public String getLabel(Object element) {
-		return JavaElementLabels.getTextLabel(element, JavaElementLabels.M_PARAMETER_TYPES);
+		return JavaElementLabels.getTextLabel(getJavaElement(element), JavaElementLabels.M_PARAMETER_TYPES);
 	}
 
 	public Object getParent(Object element) {
+		IJavaElement je= getJavaElement(element);
+		return je != null ? je.getParent() :  null;
+	}
+	
+	private IJavaElement getJavaElement(Object element) {
 		if (element instanceof IJavaElement)
-			return ((IJavaElement)element).getParent();
+			return (IJavaElement)element;
+		if (element instanceof IClassFileEditorInput)
+			return ((IClassFileEditorInput)element).getClassFile().getPrimaryElement();
+
 		return null;
 	}
 }

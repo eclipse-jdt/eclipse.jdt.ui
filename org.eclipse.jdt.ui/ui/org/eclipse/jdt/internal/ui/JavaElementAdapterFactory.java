@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
@@ -68,7 +70,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	
 	public Object getAdapter(Object element, Class key) {
 		updateLazyLoadedAdapters();
-		IJavaElement java= (IJavaElement) element;
+		IJavaElement java= getJavaElement(element);
 		
 		if (IPropertySource.class.equals(key)) {
 			return getProperties(java);
@@ -128,8 +130,21 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
      * @see org.eclipse.ui.IContributorResourceAdapter#getAdaptedResource(org.eclipse.core.runtime.IAdaptable)
      */
     public IResource getAdaptedResource(IAdaptable adaptable) {
-        return getResource((IJavaElement)adaptable);
+    	IJavaElement je= getJavaElement(adaptable);
+    	if (je != null)
+    		return getResource((IJavaElement)adaptable);
+
+    	return null;
     }
+    
+	private IJavaElement getJavaElement(Object element) {
+		if (element instanceof IJavaElement)
+			return (IJavaElement)element;
+		if (element instanceof IClassFileEditorInput)
+			return ((IClassFileEditorInput)element).getClassFile().getPrimaryElement();
+
+		return null;
+	}
 	
 	private IResource getProject(IJavaElement element) {
 		return element.getJavaProject().getProject();
