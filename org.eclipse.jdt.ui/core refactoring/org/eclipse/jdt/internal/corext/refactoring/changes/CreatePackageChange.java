@@ -22,7 +22,6 @@ public class CreatePackageChange extends Change {
 	public CreatePackageChange(IPackageFragment pack) {
 		fPackageFragment= pack;
 	}
-	
 
 	/*
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
