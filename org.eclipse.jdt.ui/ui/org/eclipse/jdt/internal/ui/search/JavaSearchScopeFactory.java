@@ -37,6 +37,7 @@ import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -101,16 +102,61 @@ public class JavaSearchScopeFactory {
 	}
 	
 	public IJavaSearchScope createJavaProjectSearchScope(ISelection selection) {
-		Set javaElements= getJavaElements(selection);
-		Set javaProjects= new HashSet(javaElements.size());
-		Iterator elements= javaElements.iterator();
-		while (elements.hasNext()) {
-			IJavaProject jp= ((IJavaElement)elements.next()).getJavaProject();
-			if (jp != null)
-				javaProjects.add(jp);	
-		}
+		Set javaProjects= getJavaProjects(selection);
 		return createJavaSearchScope(javaProjects);
 	}
+	
+	private Set getJavaProjects(ISelection selection) {
+		Set javaProjects;
+		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
+			Iterator iter= ((IStructuredSelection) selection).iterator();
+			javaProjects= new HashSet(((IStructuredSelection) selection).size());
+			while (iter.hasNext()) {
+				Object selectedElement= iter.next();
+
+				// Unpack search result view entry
+				if (selectedElement instanceof ISearchResultViewEntry)
+					selectedElement= ((ISearchResultViewEntry) selectedElement).getGroupByKey();
+
+				if (selectedElement instanceof LogicalPackage)
+					// must check this first, since it's adaptable, but doesn't adapt to anything useful
+					javaProjects.add(((LogicalPackage) selectedElement).getJavaProject());
+				else if (selectedElement instanceof IAdaptable) {
+					IJavaProject javaProject= getJavaProject((IAdaptable) selectedElement);
+					if (javaProject != null)
+						javaProjects.add(javaProject);
+				}
+			}
+		} else {
+			javaProjects= EMPTY_SET;
+		}
+		return javaProjects;
+	}
+
+	private IJavaProject getJavaProject(IAdaptable selectedElement) {
+		IJavaProject javaProject= (IJavaProject) selectedElement.getAdapter(IJavaProject.class);
+		if (javaProject != null)
+			return javaProject;
+		IJavaElement javaElement= (IJavaElement) selectedElement.getAdapter(IJavaElement.class);
+		if (javaElement != null) {
+			javaProject= javaElement.getJavaProject();
+			if (javaProject != null)
+				return javaProject;
+		}
+		IResource resource= (IResource) selectedElement.getAdapter(IResource.class);
+		if (resource != null) {
+			IProject project= resource.getProject();
+			try {
+				if (project != null && project.isAccessible() && project.hasNature(JavaCore.NATURE_ID)) {
+					return JavaCore.create(project);
+				}
+			} catch (CoreException e) {
+				// Since the java project is accessible, this should not happen, anyway, don't search this project
+			}
+		}
+		return null;
+	}
+
 	
 	public IProject[] getJavaProjects(IJavaSearchScope scope) {
 		IPath[] paths= scope.enclosingProjectsAndJars();
