@@ -288,7 +288,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	public JavaTextTools getJavaTextTools() {
 		if (fJavaTextTools == null)
-			fJavaTextTools= new JavaTextTools();
+			fJavaTextTools= new JavaTextTools(getPreferenceStore());
 		return fJavaTextTools;
 	}
 	

@@ -19,6 +19,9 @@ package org.eclipse.jdt.ui.text;
  */
 public interface IJavaColorConstants {
 	
+	/** The prefix all color constants start with */
+	String PREFIX= "java_"; //$NON-NLS-1$
+	
 	/** The color key for multi-line comments in Java code. */
 	String JAVA_MULTI_LINE_COMMENT= "java_multi_line_comment"; //$NON-NLS-1$
 	/** The color key for single-line comments in Java code. */
@@ -33,11 +36,11 @@ public interface IJavaColorConstants {
 	String JAVA_DEFAULT= "java_default"; //$NON-NLS-1$
 	
 	/** The color key for JavaDoc keywords (<code>@foo</code>) in JavaDoc comments. */
-	String JAVADOC_KEYWORD= "javadoc_keyword"; //$NON-NLS-1$
+	String JAVADOC_KEYWORD= "java_doc_keyword"; //$NON-NLS-1$
 	/** The color key for HTML tags (<code>&lt;foo&gt;</code>) in JavaDoc comments. */
-	String JAVADOC_TAG= "javadoc_tag"; //$NON-NLS-1$
+	String JAVADOC_TAG= "java_doc_tag"; //$NON-NLS-1$
 	/** The color key for JavaDoc links (<code>{foo}</code>) in JavaDoc comments. */
-	String JAVADOC_LINK= "javadoc_link"; //$NON-NLS-1$
+	String JAVADOC_LINK= "java_doc_link"; //$NON-NLS-1$
 	/** The color key for everthing in JavaDoc comments for which no other color is specified. */
-	String JAVADOC_DEFAULT= "javadoc_default"; //$NON-NLS-1$
+	String JAVADOC_DEFAULT= "java_doc_default"; //$NON-NLS-1$
 }

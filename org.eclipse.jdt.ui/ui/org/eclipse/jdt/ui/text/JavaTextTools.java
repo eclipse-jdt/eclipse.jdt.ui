@@ -5,9 +5,12 @@ package org.eclipse.jdt.ui.text;
  * All Rights Reserved.
  */
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.rules.RuleBasedPartitioner;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
@@ -26,21 +29,36 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
  */
 public class JavaTextTools {
 	
+	private class PreferenceListener implements IPropertyChangeListener {
+		public void propertyChange(PropertyChangeEvent event) {
+			if (affectsBehavior(event))
+				adaptToPreferenceChange(event);
+		}
+	};
+		
 	/** The color manager */
-	private IColorManager fColorManager;
+	private JavaColorManager fColorManager;
 	/** The Java source code scanner */
 	private JavaCodeScanner fCodeScanner;
 	/** The JavaDoc scanner */
 	private JavaDocScanner fJavaDocScanner;
 	/** The Java partitions scanner */
-	private JavaPartitionScanner fPartitionScanner;
+	private JavaPartitionScanner fPartitionScanner;	
 	
+	/** The preference store */
+	private IPreferenceStore fPreferenceStore;
+	/** The preference change listener */
+	private PreferenceListener fPreferenceListener= new PreferenceListener();
+
 	
 	/**
 	 * Creates a new Java text tools collection.
 	 */
-	public JavaTextTools() {
-		fColorManager= new JavaColorManager();
+	public JavaTextTools(IPreferenceStore store) {
+		fPreferenceStore= store;
+		fPreferenceStore.addPropertyChangeListener(fPreferenceListener);
+		
+		fColorManager= new JavaColorManager(store);
 		fCodeScanner= new JavaCodeScanner(fColorManager);
 		fJavaDocScanner= new JavaDocScanner(fColorManager);
 		fPartitionScanner= new JavaPartitionScanner();
@@ -55,8 +73,16 @@ public class JavaTextTools {
 		fJavaDocScanner= null;
 		fPartitionScanner= null;
 		
-		fColorManager.dispose();
-		fColorManager= null;
+		if (fColorManager != null) {
+			fColorManager.dispose();
+			fColorManager= null;
+		}
+		
+		if (fPreferenceStore != null) {
+			fPreferenceStore.removePropertyChangeListener(fPreferenceListener);
+			fPreferenceStore= null;
+			fPreferenceListener= null;
+		}
 	}
 	
 	/**
@@ -128,5 +154,28 @@ public class JavaTextTools {
 	 */
 	public String[] getPartitionManagingPositionCategories() {
 		return new String[] { RuleBasedPartitioner.CONTENT_TYPES_CATEGORY };
+	}
+	
+	/**
+	 * Determines whether the preference change encoded by the given event
+	 * changes the behavior of one its contained components.
+	 * 
+	 * @param event the event to be investigated
+	 * @return <code>true</code> if event causes a behavioral change
+	 */
+	public boolean affectsBehavior(PropertyChangeEvent event) {
+		return fColorManager.affectsBehavior(event);
+	}
+	
+	/**
+	 * Adapts the behavior of the contained components to the change
+	 * encoded in the given event.
+	 * 
+	 * @param event the event to whch to adapt
+	 */
+	protected void adaptToPreferenceChange(PropertyChangeEvent event) {
+		fColorManager.adaptToPreferenceChange(event);
+		fCodeScanner.colorManagerChanged();
+		fJavaDocScanner.colorManagerChanged();
 	}
 }

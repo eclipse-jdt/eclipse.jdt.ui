@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 import java.util.Iterator;
-import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -15,6 +14,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -84,6 +84,14 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
 	
+	/**
+	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
+	 */
+	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		return textTools.affectsBehavior(event);
+	}
+		
 	/**
 	 * Sets the outliner's context menu ID.
 	 */

@@ -23,6 +23,7 @@ import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.rules.RuleBasedDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -109,24 +110,17 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		IColorManager manager= getColorManager();
 		PresentationReconciler reconciler= new PresentationReconciler();
 
-		RuleBasedDamagerRepairer dr= new RuleBasedDamagerRepairer(
-			getCodeScanner(),
-			new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_DEFAULT))
-		);
+		RuleBasedDamagerRepairer dr= new RuleBasedDamagerRepairer(getCodeScanner());
 		reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
 		reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
-		dr= new RuleBasedDamagerRepairer(
-			getJavaDocScanner(),
-			new TextAttribute(manager.getColor(IJavaColorConstants.JAVADOC_DEFAULT))
-		);
+		dr= new RuleBasedDamagerRepairer(getJavaDocScanner());
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_DOC);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_DOC);
 
-		dr= new RuleBasedDamagerRepairer(
-			null,
-			new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT))
-		);		
+		RuleBasedScanner scanner= new RuleBasedScanner();
+		scanner.setDefaultReturnToken(new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT))));
+		dr= new RuleBasedDamagerRepairer(scanner);		
 		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_MULTILINE_COMMENT);
 		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_MULTILINE_COMMENT);
 

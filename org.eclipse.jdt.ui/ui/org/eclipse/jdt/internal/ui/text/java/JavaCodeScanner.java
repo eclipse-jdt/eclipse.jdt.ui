@@ -54,49 +54,69 @@ public class JavaCodeScanner extends RuleBasedScanner {
 	private static String[] fgConstants= { "false", "null", "true" }; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 
 	
-	private TextAttribute fComment;
-	private TextAttribute fKeyword;
-	private TextAttribute fType;
-	private TextAttribute fString;
-	private IColorManager fColorManager;
+	private Token fKeyword;
+	private Token fType;
+	private Token fString;
+	private Token fComment;
 	
+	private IColorManager fColorManager;
+		
 	/**
 	 * Creates a Java code scanner
 	 */
 	public JavaCodeScanner(IColorManager manager) {
-	
-		IToken keyword= new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_KEYWORD)));
-		IToken type= new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_TYPE)));
-		IToken string= new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_STRING)));
-		IToken comment= new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT)));
-		IToken other= new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_DEFAULT)));
+		super();
 		
-				
+		setDefaultReturnToken(new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_DEFAULT))));
+		
+		fColorManager= manager;
+		
+		fKeyword= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_KEYWORD)));
+		fType= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_TYPE)));
+		fString= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_STRING)));
+		fComment= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT)));
+		
+		initializeRules();
+		
+	}
+	
+	private void initializeRules() {
 		List rules= new ArrayList();
-				
+		
 		// Add rule for single line comments.
-		rules.add(new EndOfLineRule("//", comment)); //$NON-NLS-1$
+		rules.add(new EndOfLineRule("//", fComment)); //$NON-NLS-1$
 		
 		// Add rule for strings and character constants.
-		rules.add(new SingleLineRule("\"", "\"", string, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
-		rules.add(new SingleLineRule("'", "'", string, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
+		rules.add(new SingleLineRule("\"", "\"", fString, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
+		rules.add(new SingleLineRule("'", "'", fString, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
 				
 		// Add generic whitespace rule.
 		rules.add(new WhitespaceRule(new JavaWhitespaceDetector()));
 		
 		// Add word rule for keywords, types, and constants.
-		WordRule wordRule= new WordRule(new JavaWordDetector(), other);
+		WordRule wordRule= new WordRule(new JavaWordDetector(), getDefaultReturnToken());
 		for (int i=0; i<fgKeywords.length; i++)
-			wordRule.addWord(fgKeywords[i], keyword);
+			wordRule.addWord(fgKeywords[i], fKeyword);
 		for (int i=0; i<fgTypes.length; i++)
-			wordRule.addWord(fgTypes[i], type);
+			wordRule.addWord(fgTypes[i], fType);
 		for (int i=0; i<fgConstants.length; i++)
-			wordRule.addWord(fgConstants[i], type);
+			wordRule.addWord(fgConstants[i], fType);
 		rules.add(wordRule);
-		
 		
 		IRule[] result= new IRule[rules.size()];
 		rules.toArray(result);
 		setRules(result);
+	}
+	
+	public void colorManagerChanged() {
+		
+		IToken token= getDefaultReturnToken();
+		if (token instanceof Token) 
+			((Token) token).setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_DEFAULT)));
+		
+		fKeyword.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_KEYWORD)));
+		fType.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_TYPE)));
+		fString.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_STRING)));
+		fComment.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT)));
 	}
 }

@@ -13,6 +13,12 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.StringConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
@@ -24,39 +30,46 @@ public class JavaColorManager implements IColorManager {
 	protected Map fKeyTable= new HashMap(10);
 	protected Map fDisplayTable= new HashMap(2);
 	
+	protected String[] fPredefinedColors= {
+		IJavaColorConstants.JAVA_MULTI_LINE_COMMENT,
+		IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT,
+		IJavaColorConstants.JAVA_KEYWORD,
+		IJavaColorConstants.JAVA_TYPE,
+		IJavaColorConstants.JAVA_STRING,
+		IJavaColorConstants.JAVA_DEFAULT,
+		IJavaColorConstants.JAVADOC_KEYWORD,
+		IJavaColorConstants.JAVADOC_TAG,
+		IJavaColorConstants.JAVADOC_LINK,
+		IJavaColorConstants.JAVADOC_DEFAULT
+	};	
 	
-	public JavaColorManager() {
-		initializeColorMapping();
+	
+	public JavaColorManager(IPreferenceStore store) {
+		for (int i= 0; i < fPredefinedColors.length; i++) {
+			String key= fPredefinedColors[i];
+			fKeyTable.put(key, PreferenceConverter.getColor(store, key));
+		}
 	}
 	
-	protected void initializeColorMapping() {
-		
-//		put(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, new RGB(42, 127, 170));
-//		put(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT, new RGB(42, 127, 170));
-		put(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, new RGB(63, 127, 95));
-		put(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT, new RGB(63, 127, 95));
-		
-		put(IJavaColorConstants.JAVA_KEYWORD, new RGB(127, 0, 85));
-		put(IJavaColorConstants.JAVA_TYPE, new RGB(127, 0, 85));
-		put(IJavaColorConstants.JAVA_STRING, new RGB(42, 0, 255));
-		put(IJavaColorConstants.JAVA_DEFAULT, new RGB(0, 0, 0));
-		
-//		put(IJavaColorConstants.JAVADOC_KEYWORD, new RGB(127, 159, 95));
-//		put(IJavaColorConstants.JAVADOC_TAG, new RGB(127, 159, 95));
-//		put(IJavaColorConstants.JAVADOC_LINK, new RGB(159, 191, 95));
-//		put(IJavaColorConstants.JAVADOC_DEFAULT, new RGB(63, 127, 95));
-		
-		put(IJavaColorConstants.JAVADOC_KEYWORD, new RGB(127, 159, 191));
-		put(IJavaColorConstants.JAVADOC_TAG, new RGB(127, 127, 159));
-		put(IJavaColorConstants.JAVADOC_LINK, new RGB(63, 63, 191));
-		put(IJavaColorConstants.JAVADOC_DEFAULT, new RGB(63, 95, 191));
+	public boolean affectsBehavior(PropertyChangeEvent event) {
+		String property= event.getProperty();
+		return property.startsWith(IJavaColorConstants.PREFIX);
 	}
 	
-	public void put(String key, RGB rgb) {
-		fKeyTable.put(key, rgb);
+	public void adaptToPreferenceChange(PropertyChangeEvent event) {
+		RGB rgb= null;
+		
+		Object value= event.getNewValue();
+		if (value instanceof RGB)
+			rgb= (RGB) value;
+		else if (value instanceof String)
+			rgb= StringConverter.asRGB((String) value);
+			
+		if (rgb != null)
+			fKeyTable.put(event.getProperty(), rgb);
 	}
 	
-	private void dispose(Display display) {
+	private void dispose(Display display) {		
 		Map colorTable= (Map) fDisplayTable.get(display);
 		if (colorTable != null) {
 			Iterator e= colorTable.values().iterator();
@@ -98,7 +111,10 @@ public class JavaColorManager implements IColorManager {
 	 * @see IColorManager#dispose
 	 */
 	public void dispose() {
-		// unfortunately the display's are already gone at this point
+		/* 
+		 * unfortunately the displays are already gone at this point
+		 * see getColor's dispose runnable for disposing colors
+		 */
 	}
 	
 	/**

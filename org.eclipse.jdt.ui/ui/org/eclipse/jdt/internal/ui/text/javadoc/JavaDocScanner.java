@@ -100,29 +100,44 @@ public class JavaDocScanner extends BufferedRuleBasedScanner {
 	private static String[] fgKeywords= {"@author", "@deprecated", "@exception", "@param", "@return", "@see", "@serial", "@serialData", "@serialField", "@since", "@throws", "@version"}; //$NON-NLS-12$ //$NON-NLS-11$ //$NON-NLS-10$ //$NON-NLS-7$ //$NON-NLS-9$ //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 	
 	
+	private Token fKeyword;
+	private Token fTag;
+	private Token fLink;
+	
+	private IColorManager fColorManager;
+	
+	
 	public JavaDocScanner(IColorManager manager) {
 		super();
 		
-		IToken keyword= new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVADOC_KEYWORD)));
-		IToken tag= new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVADOC_TAG)));
-		IToken link= new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVADOC_LINK)));
+		setDefaultReturnToken(new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVADOC_DEFAULT))));
 		
+		fColorManager= manager;
+		
+		fKeyword= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_KEYWORD)));
+		fTag= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_TAG)));
+		fLink= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_LINK)));
+		
+		initializeRules();
+	}
+	
+	private void initializeRules() {
 		
 		List list= new ArrayList();
 		
 		// Add rule for tags.
-		list.add(new TagRule(tag));
+		list.add(new TagRule(fTag));
 		
 		// Add rule for links.
-		list.add(new SingleLineRule("{", "}", link)); //$NON-NLS-2$ //$NON-NLS-1$
+		list.add(new SingleLineRule("{", "}", fLink)); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		// Add generic whitespace rule.
 		list.add(new WhitespaceRule(new JavaWhitespaceDetector()));
 		
 		// Add word rule for keywords.
-		WordRule wordRule= new WordRule(new JavaDocWordDetector());
+		WordRule wordRule= new WordRule(new JavaDocWordDetector(), getDefaultReturnToken());
 		for (int i= 0; i < fgKeywords.length; i++)
-			wordRule.addWord(fgKeywords[i], keyword);
+			wordRule.addWord(fgKeywords[i], fKeyword);
 		list.add(wordRule);
 		
 		IRule[] result= new IRule[list.size()];
@@ -132,6 +147,17 @@ public class JavaDocScanner extends BufferedRuleBasedScanner {
 	
 	public IDocument getDocument() {
 		return fDocument;
+	}
+	
+	public void colorManagerChanged() {
+		
+		IToken token= getDefaultReturnToken();
+		if (token instanceof Token) 
+			((Token) token).setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_DEFAULT)));
+			
+		fKeyword.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_KEYWORD)));
+		fTag.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_TAG)));
+		fLink.setData(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_LINK)));
 	}
 }
 
