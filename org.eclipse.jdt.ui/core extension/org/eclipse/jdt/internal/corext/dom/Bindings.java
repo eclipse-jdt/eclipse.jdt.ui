@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class Bindings {
 	
+	public static final String ARRAY_LENGTH_FIELD_BINDING_STRING= "(array type):length";//$NON-NLS-1$
 	private Bindings() {
 		// No instance
 	}
@@ -91,6 +92,10 @@ public class Bindings {
 	private static String asString(IVariableBinding variableBinding) {
 		if (! variableBinding.isField())
 			return variableBinding.toString();
+		if (variableBinding.getDeclaringClass() == null) {
+			Assert.isTrue(variableBinding.getName().equals("length"));//$NON-NLS-1$
+			return ARRAY_LENGTH_FIELD_BINDING_STRING;
+		}
 		StringBuffer result= new StringBuffer();
 		result.append(variableBinding.getDeclaringClass().getName());
 		result.append(':');
