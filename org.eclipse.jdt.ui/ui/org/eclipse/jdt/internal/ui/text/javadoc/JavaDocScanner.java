@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.Preferences;
@@ -30,8 +31,10 @@ import org.eclipse.jface.text.rules.WordRule;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule;
 import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
 
 /**
  * A rule based JavaDoc scanner.
@@ -39,27 +42,6 @@ import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 public final class JavaDocScanner extends JavaCommentScanner {
 		
 		
-	/**
-	 * A key word detector.
-	 */
-	static class JavaDocKeywordDetector implements IWordDetector {
-
-		/**
-		 * @see IWordDetector#isWordStart(char)
-		 */
-		public boolean isWordStart(char c) {
-			return (c == '@');
-		}
-
-		/**
-		 * @see IWordDetector#isWordPart(char)
-		 */
-		public boolean isWordPart(char c) {
-			return Character.isLetter(c);
-		}
-	}
-	
-	
 	/**
 	 * Detector for HTML comment delimiters.
 	 */
@@ -170,7 +152,7 @@ public final class JavaDocScanner extends JavaCommentScanner {
 	 */
 	protected List createRules() {
 		
-		List list= super.createRules();
+		List list= new ArrayList();
 		
 		// Add rule for tags.
 		Token token= getToken(IJavaColorConstants.JAVADOC_TAG);
@@ -193,14 +175,22 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		list.add(new WhitespaceRule(new JavaWhitespaceDetector()));
 		
 		
-		// Add word rule for keywords.
-		token= getToken(IJavaColorConstants.JAVADOC_DEFAULT);
-		wordRule= new WordRule(new JavaDocKeywordDetector(), token);
+		list.addAll(super.createRules());
+		return list;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.JavaCommentScanner#createMatchers()
+	 */
+	protected List createMatchers() {
+		List list= super.createMatchers();
 		
-		token= getToken(IJavaColorConstants.JAVADOC_KEYWORD);
+		// Add word rule for keywords.
+		WordMatcher matcher= new CombinedWordRule.WordMatcher();
+		IToken token= getToken(IJavaColorConstants.JAVADOC_KEYWORD);
 		for (int i= 0; i < fgKeywords.length; i++)
-			wordRule.addWord(fgKeywords[i], token);
-		list.add(wordRule);
+			matcher.addWord(fgKeywords[i], token);
+		list.add(matcher);
 		
 		return list;
 	}

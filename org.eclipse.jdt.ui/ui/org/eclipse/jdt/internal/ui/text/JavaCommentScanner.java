@@ -26,7 +26,6 @@ import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
-import org.eclipse.jface.text.rules.WordRule;
 import org.eclipse.jface.text.rules.Token;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -34,13 +33,14 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
 
 /**
  * AbstractJavaCommentScanner.java
  */
 public class JavaCommentScanner extends AbstractJavaScanner{
 
-	private static class TaskTagDetector implements IWordDetector {
+	private static class AtJavaIdentifierDetector implements IWordDetector {
 
 		public boolean isWordStart(char c) {
 			return c == '@' || Character.isJavaIdentifierStart(c);
@@ -51,58 +51,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		}
 	}
 
-	/**
-	 * Character scanner returning uppercased characters of the wrapped scanner.
-	 * 
-	 * @since 3.0
-	 */
-	private class UppercaseScanner implements ICharacterScanner {
-		
-		/**
-		 * The wrapped scanner.
-		 */
-		private ICharacterScanner fScanner;
-		
-		/**
-		 * Set the scanner
-		 * 
-		 * @param scanner the scanner
-		 */
-		public void setScanner(ICharacterScanner scanner) {
-			fScanner= scanner;
-		}
-		
-		/*
-		 * @see org.eclipse.jface.text.rules.ICharacterScanner#getLegalLineDelimiters()
-		 */
-		public char[][] getLegalLineDelimiters() {
-			return fScanner.getLegalLineDelimiters();
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.rules.ICharacterScanner#getColumn()
-		 */
-		public int getColumn() {
-			return fScanner.getColumn();
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.rules.ICharacterScanner#read()
-		 */
-		public int read() {
-			int ch= fScanner.read();
-			return ch != EOF ? Character.toUpperCase((char) ch) : EOF;
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.rules.ICharacterScanner#unread()
-		 */
-		public void unread() {
-			fScanner.unread();
-		}
-	}
-	
-	private class TaskTagRule extends WordRule {
+	private class TaskTagMatcher extends CombinedWordRule.WordMatcher {
 
 		private IToken fToken;
 		/**
@@ -111,28 +60,26 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		 */
 		private Map fUppercaseWords= new HashMap();
 		/**
-		 * Original words
-		 * @since 3.0
-		 */
-		private Map fOriginalWords= fWords;
-		/**
-		 * Uppercase scanner
-		 * @since 3.0
-		 */
-		private UppercaseScanner fUppercaseScanner= new UppercaseScanner();
-		/**
 		 * <code>true</code> if task tag detection is case-sensitive.
 		 * @since 3.0
 		 */
 		private boolean fCaseSensitive= true;
+		/**
+		 * Buffer for uppercase word
+		 * @since 3.0
+		 */
+		private CombinedWordRule.CharacterBuffer fBuffer= new CombinedWordRule.CharacterBuffer(16);
 		
-		public TaskTagRule(IToken token, IToken defaultToken) {
-			super(new TaskTagDetector(), defaultToken);
+		public TaskTagMatcher(IToken token) {
 			fToken= token;
 		}
 	
-		public void clearTaskTags() {
-			fOriginalWords.clear();
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#clearWords()
+		 * @since 3.0
+		 */
+		public void clearWords() {
+			super.clearWords();
 			fUppercaseWords.clear();
 		}
 	
@@ -156,30 +103,33 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		}
 		
 		/*
-		 * @see org.eclipse.jface.text.rules.WordRule#addWord(java.lang.String, org.eclipse.jface.text.rules.IToken)
+		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#addWord(java.lang.String, org.eclipse.jface.text.rules.IToken)
 		 * @since 3.0
 		 */
 		public void addWord(String word, IToken token) {
 			Assert.isNotNull(word);
 			Assert.isNotNull(token);		
 		
-			fOriginalWords.put(word, token);
-			fUppercaseWords.put(word.toUpperCase(), token);
+			super.addWord(word, token);
+			fUppercaseWords.put(new CombinedWordRule.CharacterBuffer(word.toUpperCase()), token);
 		}
 		
 		/*
-		 * @see IRule#evaluate(ICharacterScanner)
+		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#evaluate(org.eclipse.jface.text.rules.ICharacterScanner, org.eclipse.jdt.internal.ui.text.CombinedWordRule.CharacterBuffer)
 		 * @since 3.0
 		 */
-		public IToken evaluate(final ICharacterScanner scanner) {
-			if (fCaseSensitive) {
-				fWords= fOriginalWords;
-				return super.evaluate(scanner);
-			}
+		public IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word) {
+			if (fCaseSensitive)
+				return super.evaluate(scanner, word);
 			
-			fWords= fUppercaseWords;
-			fUppercaseScanner.setScanner(scanner);
-			return super.evaluate(fUppercaseScanner);
+			fBuffer.clear();
+			for (int i= 0, n= word.length(); i < n; i++)
+				fBuffer.append(Character.toUpperCase(word.charAt(i)));
+			
+			IToken token= (IToken) fUppercaseWords.get(fBuffer);
+			if (token != null)
+				return token;
+			return Token.UNDEFINED;
 		}
 		
 		/**
@@ -216,7 +166,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	 */
 	private static final String ENABLED= JavaCore.ENABLED;
 
-	private TaskTagRule fTaskTagRule;
+	private TaskTagMatcher fTaskTagMatcher;
 	private Preferences fCorePreferenceStore;
 	private String fDefaultTokenProperty;
 	private String[] fTokenProperties;
@@ -267,6 +217,28 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	 */
 	protected List createRules() {
 		List list= new ArrayList();
+		Token defaultToken= getToken(fDefaultTokenProperty);
+		
+		List matchers= createMatchers();
+		if (matchers.size() > 0) {
+			CombinedWordRule combinedWordRule= new CombinedWordRule(new AtJavaIdentifierDetector(), defaultToken);
+			for (int i= 0, n= matchers.size(); i < n; i++)
+				combinedWordRule.addWordMatcher((WordMatcher) matchers.get(i));
+			list.add(combinedWordRule);
+		}
+		
+		setDefaultReturnToken(defaultToken);
+
+		return list;
+	}
+	
+	/**
+	 * Creates a list of word matchers.
+	 * 
+	 * @return the list of word matchers
+	 */
+	protected List createMatchers() {
+		List list= new ArrayList();
 		
 		// Add rule for Task Tags.
 		boolean isCaseSensitive= true;
@@ -279,14 +251,12 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 			isCaseSensitive= ENABLED.equals(fCorePreferenceStore.getString(COMPILER_TASK_CASE_SENSITIVE));
 		}
 		if (tasks != null) {
-			fTaskTagRule= new TaskTagRule(getToken(TASK_TAG), Token.UNDEFINED);
-			fTaskTagRule.addTaskTags(tasks);
-			fTaskTagRule.setCaseSensitive(isCaseSensitive);
-			list.add(fTaskTagRule);
+			fTaskTagMatcher= new TaskTagMatcher(getToken(TASK_TAG));
+			fTaskTagMatcher.addTaskTags(tasks);
+			fTaskTagMatcher.setCaseSensitive(isCaseSensitive);
+			list.add(fTaskTagMatcher);
 		}
-
-		setDefaultReturnToken(getToken(fDefaultTokenProperty));
-
+		
 		return list;
 	}
 
@@ -301,16 +271,16 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#adaptToPreferenceChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
 	public void adaptToPreferenceChange(PropertyChangeEvent event) {
-		if (fTaskTagRule != null && event.getProperty().equals(COMPILER_TASK_TAGS)) {
+		if (fTaskTagMatcher != null && event.getProperty().equals(COMPILER_TASK_TAGS)) {
 			Object value= event.getNewValue();
 			if (value instanceof String) {
-				fTaskTagRule.clearTaskTags();
-				fTaskTagRule.addTaskTags((String) value);
+				fTaskTagMatcher.clearWords();
+				fTaskTagMatcher.addTaskTags((String) value);
 			}
-		} else if (fTaskTagRule != null && event.getProperty().equals(COMPILER_TASK_CASE_SENSITIVE)) {
+		} else if (fTaskTagMatcher != null && event.getProperty().equals(COMPILER_TASK_CASE_SENSITIVE)) {
 			Object value= event.getNewValue();
 			if (value instanceof String)
-				fTaskTagRule.setCaseSensitive(ENABLED.equals(value));
+				fTaskTagMatcher.setCaseSensitive(ENABLED.equals(value));
 		} else if (super.affectsBehavior(event))
 			super.adaptToPreferenceChange(event);
 	}
