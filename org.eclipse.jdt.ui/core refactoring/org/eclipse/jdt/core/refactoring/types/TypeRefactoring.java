@@ -42,14 +42,6 @@ abstract class TypeRefactoring extends Refactoring{
 	public final IType getType(){
 		return fType;
 	}
-		
-	protected static IPath getNewFilePath(IType type, String newName) throws JavaModelException{
-		  return RenameResourceChange.renamedResourcePath(getResource(type).getFullPath(), newName);
-	}
-	
-	protected static boolean resourceExists(IPath resourcePath){
-		return ResourcesPlugin.getWorkspace().getRoot().findMember(resourcePath) != null;
-	}
 	
 	protected static boolean typeNameExistsInPackage(IPackageFragment pack, String name) throws JavaModelException{
 		Assert.isTrue(pack.exists(), "package must exist");
