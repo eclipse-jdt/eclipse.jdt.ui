@@ -1,9 +1,8 @@
-package org.eclipse.jdt.internal.ui;/*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
-
+package org.eclipse.jdt.internal.ui;
 
 import java.io.File;import org.eclipse.jdt.internal.ui.preferences.JDKZipFieldEditor;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jface.preference.IPreferenceStore;
 
