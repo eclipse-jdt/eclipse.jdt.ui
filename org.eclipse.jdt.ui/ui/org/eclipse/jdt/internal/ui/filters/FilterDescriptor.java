@@ -120,7 +120,13 @@ public class FilterDescriptor implements Comparable {
 			handleError(ex.getStatus());
 		} catch (ClassCastException ex) {
 			handleError(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
-			return null;
+
+
+		// Workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=37215
+		} catch (NoClassDefFoundError ex) {
+			handleError(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, ex.getLocalizedMessage(), ex));
+
+
 		}
 		return result;
 	}
