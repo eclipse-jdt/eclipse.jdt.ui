@@ -621,11 +621,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		List arguments= invocation.arguments();
 		for (int i= 0; i < fParameterInfos.size(); i++) {
 			ParameterInfo parameter= ((ParameterInfo)fParameterInfos.get(i));
-			if (duplicate == null) {
-				arguments.add(ASTNodeFactory.newName(fAST, parameter.getOldName()));
-			} else {
-				arguments.add(ASTNodeFactory.newName(fAST, duplicate.getMappedName(parameter.getOldBinding()).getIdentifier()));
-			}
+			arguments.add(ASTNodeFactory.newName(fAST, getMappedName(duplicate, parameter)));
 		}		
 		
 		ASTNode call;		
@@ -634,11 +630,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 			case ExtractMethodAnalyzer.ACCESS_TO_LOCAL:
 				IVariableBinding binding= fAnalyzer.getReturnLocal();
 				if (binding != null) {
-					VariableDeclarationStatement decl= createDeclaration(binding, invocation);
+					VariableDeclarationStatement decl= createDeclaration(getMappedBinding(duplicate, binding), invocation);
 					call= decl;
 				} else {
 					Assignment assignment= fAST.newAssignment();
-					assignment.setLeftHandSide(ASTNodeFactory.newName(fAST, fAnalyzer.getReturnValue().getName()));
+					assignment.setLeftHandSide(ASTNodeFactory.newName(fAST, 
+							getMappedBinding(duplicate, fAnalyzer.getReturnValue()).getName()));
 					assignment.setRightHandSide(invocation);
 					call= assignment;
 				}
@@ -664,6 +661,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 			result.add(fAST.newReturnStatement());
 		}
 		return (ASTNode[])result.toArray(new ASTNode[result.size()]);		
+	}
+	
+	private IVariableBinding getMappedBinding(SnippetFinder.Match duplicate, IVariableBinding org) {
+		if (duplicate == null)
+			return org;
+		return duplicate.getMappedBinding(org);
+	}
+	
+	private String getMappedName(SnippetFinder.Match duplicate, ParameterInfo paramter) {
+		if (duplicate == null)
+			return paramter.getOldName();
+		return duplicate.getMappedName(paramter.getOldBinding()).getIdentifier();
 	}
 	
 	private void replaceDuplicates(CompilationUnitChange result) {
@@ -821,13 +830,5 @@ public class ExtractMethodRefactoring extends Refactoring {
 		result.setModifiers(ASTNodes.getModifiers(original));
 		result.setType(ASTNodeFactory.newType(fAST, original));
 		return result;
-	}
-	
-	/**
-	 * TODO Auto-generated Javadoc stub
-	 * @param i
-	 */
-	public void foo(int i) {
-		
-	}
+	}	
 }

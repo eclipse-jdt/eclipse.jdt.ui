@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -51,9 +52,20 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		public SimpleName getMappedName(IVariableBinding org) {
 			return (SimpleName)fLocalMappings.get(org);
 		}
+		public IVariableBinding getMappedBinding(IVariableBinding org) {
+			SimpleName name= (SimpleName) fLocalMappings.get(org);
+			return ASTNodes.getVariableBinding(name);
+		}
 		public boolean isEmpty() {
 			return fNodes.isEmpty();
 		}
+		/**
+		 * Tests if the whole duplicate is the full body of a method. If so
+		 * don't replace it since we would replace a method body with a new
+		 * method body which doesn't make to much sense.
+		 * 
+		 * @return whether the duplicte is the whole method body
+		 */
 		public boolean isMethodBody() {
 			ASTNode first= (ASTNode)fNodes.get(0);
 			if (first.getParent() == null)
@@ -79,9 +91,6 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 			if (candidate.isDeclaration() != snippet.isDeclaration())
 				return false;
 			
-			if (isLeftHandSideOfAssignment(candidate))
-				return false;
-					
 			IBinding cb= candidate.resolveBinding();
 			IBinding sb= snippet.resolveBinding();
 			if (cb == null || sb == null)
@@ -102,13 +111,6 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 			}
 			return Bindings.equals(cb, sb);	
 		}
-
-		private boolean isLeftHandSideOfAssignment(SimpleName candidate) {
-			// doesn't match if the candidate is the left hand side of a assignement. 
-			// Otherwise y= i; i= z; results in y= e(); e()= z;
-			ASTNode cParent= candidate.getParent();
-			return cParent != null && cParent.getNodeType() == ASTNode.ASSIGNMENT && ((Assignment)cParent).getLeftHandSide() == candidate;
-		}
 	}
 
 	private List fResult= new ArrayList(2);
@@ -127,7 +129,22 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 	public static Match[] perform(TypeDeclaration start, ASTNode[] snippet) {
 		SnippetFinder finder= new SnippetFinder(snippet);
 		start.accept(finder);
+		for (Iterator iter = finder.fResult.iterator(); iter.hasNext();) {
+			Match match = (Match)iter.next();
+			ASTNode[] nodes= match.getNodes();
+			// doesn't match if the candidate is the left hand side of an 
+			// assignment and the snippet consists of a single node.
+			// Otherwise y= i; i= z; results in y= e(); e()= z;
+			if (nodes.length == 1 && isLeftHandSideOfAssignment(nodes[0])) {
+				iter.remove();
+			}
+		}
 		return (Match[])finder.fResult.toArray(new Match[finder.fResult.size()]);
+	}
+	
+	private static boolean isLeftHandSideOfAssignment(ASTNode node) {
+		ASTNode parent= node.getParent();
+		return parent != null && parent.getNodeType() == ASTNode.ASSIGNMENT && ((Assignment)parent).getLeftHandSide() == node;
 	}
 	
 	public boolean visit(TypeDeclaration node) {

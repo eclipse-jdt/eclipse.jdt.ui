@@ -525,6 +525,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 						status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_type_reference")); //$NON-NLS-1$
 						break superCall;
 					}
+					if (name.resolveBinding() instanceof IMethodBinding) {
+						status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_method_name_reference")); //$NON-NLS-1$
+					}
 					if (name.isSimpleName() && ((SimpleName)name).isDeclaration()) {
 						status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_name_in_declaration")); //$NON-NLS-1$
 						break superCall;

@@ -612,6 +612,12 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
+	//---- single names
+	
+	public void test194() throws Exception {
+		invalidSelectionTest();
+	}
+	
 	//====================================================================================
 	// Testing valid selections
 	//=====================================================================================
@@ -1563,6 +1569,30 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test956() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test957() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test958() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test959() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test960() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test961() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test962() throws Exception {
 		duplicatesTest();
 	}
 	
