@@ -159,6 +159,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 				|| looksLike(doc, pos, "else") //$NON-NLS-1$
 				|| looksLike(doc, pos, "synchronized") //$NON-NLS-1$
 				|| looksLike(doc, pos, "static") //$NON-NLS-1$
+				|| looksLike(doc, pos, "finally") //$NON-NLS-1$
 				|| looksLike(doc, pos, "do")) //$NON-NLS-1$
 					return new String(new char[] { ' ', character });
 			}
@@ -217,10 +218,13 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 		} else if (character == SEMICHAR) {
 
-			int nextPartitionPos= nextPartitionOrLineEnd(document, line, offset, partitioning);
-			insertPos= offset;
-			if (!isForStatement(text, offset)) {
+			if (isForStatement(text, offset)) {
+				insertPos= offset;
+			} else {
+				int nextPartitionPos= nextPartitionOrLineEnd(document, line, offset, partitioning);
 				insertPos= startOfWhitespaceBeforeOffset(text, nextPartitionPos);
+				if (insertPos > 0 && text.charAt(insertPos - 1) == character)
+					insertPos= offset;
 			}
 			
 		} else {
@@ -278,7 +282,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Computes an insert position for an opening brace if <code>offset</code> maps to a position in
 	 * <code>document</code> involving a keyword taking a block after it. These are: <code>try</code>, 
-	 * <code>do</code>, <code>synchronized</code>, <code>static</code>, or <code>else</code>.
+	 * <code>do</code>, <code>synchronized</code>, <code>static</code>, <code>finally</code>, or <code>else</code>.
 	 * 
 	 * @param document the document being modified
 	 * @param line the current line under investigation
@@ -297,6 +301,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 				|| looksLike(doc, p, "do")  //$NON-NLS-1$
 				|| looksLike(doc, p, "synchronized")  //$NON-NLS-1$
 				|| looksLike(doc, p, "static")  //$NON-NLS-1$
+				|| looksLike(doc, p, "finally")  //$NON-NLS-1$
 				|| looksLike(doc, p, "else"))  //$NON-NLS-1$
 			return p + 1 - line.getOffset();
 
@@ -405,7 +410,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Finds the highest position in <code>document</code> such that the position is &lt;= <code>position</code>
-	 * and &gt; <code>bound</code> and <code>Character.isWhitespace(document.getChar(pos))</code> evaluates to <code>true</code>
+	 * and &gt; <code>bound</code> and <code>Character.isWhitespace(document.getChar(pos))</code> evaluates to <code>false</code>
 	 * and the position is in the default partition.   
 	 * 
 	 * @param document the document being modified
@@ -432,7 +437,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Finds the smallest position in <code>document</code> such that the position is &gt;= <code>position</code>
-	 * and &lt; <code>bound</code> and <code>Character.isWhitespace(document.getChar(pos))</code> evaluates to <code>true</code>
+	 * and &lt; <code>bound</code> and <code>Character.isWhitespace(document.getChar(pos))</code> evaluates to <code>false</code>
 	 * and the position is in the default partition.   
 	 * 
 	 * @param document the document being modified
@@ -823,7 +828,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	}
 
 	/**
-	 * Returns a position int the first java partition after the last non-empty and non-comment partition.
+	 * Returns a position in the first java partition after the last non-empty and non-comment partition.
 	 * There is no non-whitespace from the returned position to the end of the partition it is contained in.
 	 * 
 	 * @param document the document being modified

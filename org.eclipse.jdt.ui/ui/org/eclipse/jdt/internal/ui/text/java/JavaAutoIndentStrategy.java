@@ -327,6 +327,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 						buf.append(d.get(start, length));
 						buf.append('}');
 					}
+				} else if (isBracelessBlockStart(d, c.offset, start)) {
+					buf.append(createIndent(1, useSpaces()));
 				}
 			}
 			c.text= buf.toString();
@@ -334,6 +336,85 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
+	}
+
+	/**
+	 * Checks if the line seems to be an open condition not followed by a block (i.e. an if, while, 
+	 * or for statement with just one following statement, see example below). 
+	 * 
+	 * <pre>
+	 * if (condition)
+	 *     doStuff();
+	 * </pre>
+	 * 
+	 * <p>Algorithm: if the last non-WS, non-Comment code on the line is an if (condition), while (condition),
+	 * for( expression), do, else, and there is no statement after that </p> 
+	 * 
+	 * @param document the document worked on
+	 * @param position the insert position of the new character
+	 * @param bound the lowest position to consider
+	 * @return <code>true</code> if the code is a conditional statement or loop without a block, <code>false</code> otherwise
+	 */
+	private boolean isBracelessBlockStart(IDocument document, int position, int bound) {
+		position= firstNonWhitespaceBackward(document, position, fPartitioning, bound);
+		if (position < 1)
+			return false;
+
+		// new line after do, else without brace
+		if (looksLike(document, position, "do") //$NON-NLS-1$
+				|| looksLike(document, position, "else")) //$NON-NLS-1$
+			return true;
+			
+		try {
+			// new line after if,while,for + expression
+			if (")".equals(document.get(position, 1))) { //$NON-NLS-1$
+				position= findOpeningParenMatch(document, position, fPartitioning);
+				if (position > 0) {
+					position= firstNonWhitespaceBackward(document, position - 1, fPartitioning, -1);
+					if (position != -1) {
+						if (looksLike(document, position, "if") //$NON-NLS-1$
+								|| looksLike(document, position, "for") //$NON-NLS-1$
+								|| looksLike(document, position, "while")) //$NON-NLS-1$
+							return true;
+					}
+				}
+			}
+		} catch (BadLocationException e) {
+			// ignore and return false
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Checks whether code>document</code> contains the <code>String</code> <code>like</code> such 
+	 * that its last character is at <code>position</code>. If <code>like</code> starts with a
+	 * identifier part (as determined by {@link Character.isJavaIdentifier(char)}), it is also made
+	 * sure that <code>like</code> is preceded by some non-identifier character or stands at the
+	 * document start.
+	 * 
+	 * @param document the document being modified
+	 * @param position the first character position in <code>document</code> to be considered
+	 * @param like the <code>String</code> to look for.
+	 * @return <code>true</code> if  <code>document</code> contains <code>like</code> such that it ends at <code>position</code>, <code>false</code> otherwise
+	 */
+	private static boolean looksLike(IDocument document, int position, String like) {
+		int length= like.length();
+		if (position < length - 1)
+			return false;
+
+		try {
+			if (!like.equals(document.get(position - length + 1, length)))
+				return false;
+
+			if (position >= length && Character.isJavaIdentifierPart(like.charAt(0)) && Character.isJavaIdentifierPart(document.getChar(position - length)))
+				return false;
+
+		} catch (BadLocationException e) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -407,7 +488,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	/**
 	 * Finds the highest position in <code>document</code> such that the position is &lt;= <code>position</code>
-	 * and &gt; <code>bound</code> and <code>Character.isWhitespace(document.getChar(pos))</code> evaluates to <code>true</code>
+	 * and &gt; <code>bound</code> and <code>Character.isWhitespace(document.getChar(pos))</code> evaluates to <code>false</code>
 	 * and the position is in the default partition.   
 	 * 
 	 * @param document the document being modified
