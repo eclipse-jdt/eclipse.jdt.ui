@@ -14,11 +14,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.search.ui.text.Match;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -45,17 +47,10 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.search.ui.text.Match;
-import org.eclipse.ui.texteditor.MarkerUtilities;
 
 public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
 
@@ -130,58 +125,6 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			fResult.add(fSelectedName);
 		}
 		return fResult;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.search.IPositionFinder#createMarkers(org.eclipse.core.resources.IResource, org.eclipse.jface.text.IDocument)
-	 */
-	public IMarker[] createMarkers(IResource file, IDocument document) throws CoreException {
-		List result= new ArrayList();
-		for (Iterator iter = fResult.iterator(); iter.hasNext();) {
-			ASTNode node = (ASTNode) iter.next();
-			result.add(createMarker(file, document, node));
-		}
-		return (IMarker[]) result.toArray(new IMarker[result.size()]);
-	}
- 	
-	private IMarker createMarker(IResource file, IDocument document, ASTNode node) throws CoreException {
-		Map attributes= new HashMap(10);
-		IMarker marker= file.createMarker(NewSearchUI.SEARCH_MARKER);
-	
-		int startPosition= node.getStartPosition();
-		MarkerUtilities.setCharStart(attributes, startPosition);
-		MarkerUtilities.setCharEnd(attributes, startPosition + node.getLength());
-		
-		if (node == fSelectedName) {
-			attributes.put(IS_EXCEPTION, Boolean.TRUE);
-		}
-		
-		try {
-			int line= document.getLineOfOffset(startPosition);
-			MarkerUtilities.setLineNumber(attributes, line);
-			IRegion region= document.getLineInformation(line);
-			String lineContents= document.get(region.getOffset(), region.getLength());
-			MarkerUtilities.setMessage(attributes, lineContents.trim());
-			throw new BadLocationException();
-		} catch (BadLocationException e) {
-		}
-		marker.setAttributes(attributes);
-		return marker;
-	}
-	
-	public void searchStarted(ISearchResultView view, String inputName) {
-		String elementName= ASTNodes.asString(fSelectedName);
-		view.searchStarted(
-			null,
-			getSingularLabel(elementName, inputName),
-			getPluralLabelPattern(elementName, inputName),
-			JavaPluginImages.DESC_OBJS_SEARCH_REF,
-			"org.eclipse.jdt.ui.JavaFileSearch", //$NON-NLS-1$
-			new ExceptionOccurrencesLabelProvider(),
-			new GotoMarkerAction(), 
-			new SearchGroupByKeyComputer(),
-			null
-		);
 	}
 	
 	public Match[] getOccurrenceMatches(IJavaElement element, IDocument document) {

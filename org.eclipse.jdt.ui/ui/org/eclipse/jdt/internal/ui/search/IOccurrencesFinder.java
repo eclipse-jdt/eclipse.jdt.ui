@@ -11,34 +11,19 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.List;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.search.ui.IGroupByKeyComputer;
-import org.eclipse.search.ui.ISearchResultView;
+
 import org.eclipse.search.ui.text.Match;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
 public interface IOccurrencesFinder {
-	
-	/** @deprecated not used for new search */
-	public static class SearchGroupByKeyComputer implements IGroupByKeyComputer {
-		public Object computeGroupByKey(IMarker marker) {
-			return marker; 
-		}
-	}
 	
 	public String initialize(CompilationUnit root, int offset, int length);
 	
 	public List perform();
-	
-	/** @deprecated not used for new search */
-	public IMarker[] createMarkers(IResource file, IDocument document) throws CoreException;
-	
-	/** @deprecated not used for new search */
-	public void searchStarted(ISearchResultView view, String inputName);
 	
 	public String getJobLabel();
 
@@ -47,5 +32,4 @@ public interface IOccurrencesFinder {
 	public String getSingularLabel(String documentName);
 	
 	public Match[] getOccurrenceMatches(IJavaElement element, IDocument document);
-	
 }

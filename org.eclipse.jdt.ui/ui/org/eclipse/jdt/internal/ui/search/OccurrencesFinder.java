@@ -14,13 +14,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.search.ui.text.Match;
+
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -31,24 +32,20 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.search.ui.text.Match;
-import org.eclipse.ui.texteditor.MarkerUtilities;
 
 public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
 	
@@ -87,42 +84,6 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		return fUsages;
 	}
 	
-	public IMarker[] createMarkers(IResource file, IDocument document) throws CoreException {
-		List result= new ArrayList();
-		boolean isVariable= fTarget instanceof IVariableBinding;
-		for (Iterator each= fUsages.iterator(); each.hasNext();) {
-			ASTNode node= (ASTNode) each.next();
-			result.add(createMarker(file, document, node, fWriteUsages.contains(node), isVariable));
-		}
-		return (IMarker[]) result.toArray(new IMarker[result.size()]);
-	}
-	
-	private static IMarker createMarker(IResource file, IDocument document, ASTNode node, boolean writeAccess, boolean isVariable) throws CoreException {
-		Map attributes= new HashMap(10);
-		IMarker marker= file.createMarker(NewSearchUI.SEARCH_MARKER);
-
-		int startPosition= node.getStartPosition();
-		MarkerUtilities.setCharStart(attributes, startPosition);
-		MarkerUtilities.setCharEnd(attributes, startPosition + node.getLength());
-		
-		if(writeAccess)
-			attributes.put(IS_WRITEACCESS, new Boolean(true));
-
-		if(isVariable)
-			attributes.put(IS_VARIABLE, new Boolean(true));
-			
-		try {
-			int line= document.getLineOfOffset(startPosition);
-			MarkerUtilities.setLineNumber(attributes, line);
-			IRegion region= document.getLineInformation(line);
-			String lineContents= document.get(region.getOffset(), region.getLength());
-			MarkerUtilities.setMessage(attributes, lineContents.trim());
-		} catch (BadLocationException e) {
-		}
-		marker.setAttributes(attributes);
-		return marker;
-	}
-	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getOccurrenceMatches(org.eclipse.jdt.core.IJavaElement, org.eclipse.jface.text.IDocument)
 	 */
@@ -156,21 +117,6 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 			}
 		}
 		return (Match[]) matches.toArray(new Match[matches.size()]);
-	}
-	
-	public void searchStarted(ISearchResultView view, String inputName) {
-		String elementName= ASTNodes.asString(fSelectedNode);
-		view.searchStarted(
-			null,
-			getSingularLabel(elementName, inputName),
-			getPluralLabelPattern(elementName, inputName),
-			JavaPluginImages.DESC_OBJS_SEARCH_REF,
-			"org.eclipse.jdt.ui.JavaFileSearch", //$NON-NLS-1$
-			new OccurrencesInFileLabelProvider(),
-			new GotoMarkerAction(), 
-			new SearchGroupByKeyComputer(),
-			null
-		);
 	}
 	
 	/*
