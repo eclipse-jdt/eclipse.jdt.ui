@@ -42,7 +42,6 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 	private ASTNode fNode; // MethodInvocation, ConstructorInvocation, SuperConstructorInvocation, ClassInstanceCreation, SuperMethodInvocation
 	private List fArguments;
 	private ITypeBinding fSenderBinding;
-	private boolean fIsInDifferentCU;
 		
 	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode,  List arguments, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
@@ -57,11 +56,12 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
 		ASTNode newTypeDecl= null;
+		boolean isInDifferentCU;
 		if (typeDecl != null) {
-			fIsInDifferentCU= false;
+			isInDifferentCU= false;
 			newTypeDecl= typeDecl;
 		} else {
-			fIsInDifferentCU= true;
+			isInDifferentCU= true;
 			astRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
@@ -78,14 +78,14 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			
 			if (isConstructor()) {
 				members.add(findConstructorInsertIndex(members), newStub);
-			} else if (!fIsInDifferentCU) {
+			} else if (!isInDifferentCU) {
 				members.add(findMethodInsertIndex(members, fNode.getStartPosition()), newStub);
 			} else {
 				members.add(newStub);
 			}
 			rewrite.markAsInserted(newStub);
 
-			if (!fIsInDifferentCU) {
+			if (!isInDifferentCU) {
 				Name invocationName= getInvocationName();
 				if (invocationName != null) {
 					markAsLinked(rewrite, invocationName, true, KEY_NAME);

@@ -540,8 +540,11 @@ public class UnresolvedElementsSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
 		
-		ASTNode nameNode= problem.getCoveredNode(astRoot);
-		
+		ASTNode nameNode= problem.getCoveringNode(astRoot);
+		if (nameNode == null) {
+			return;
+		}
+	
 		// add arguments
 		{			
 			String[] arg= new String[] { getMethodSignature(methodBinding, false) };
@@ -558,37 +561,39 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		// remove parameters
-		if (declaringType.isFromSource()) {
-			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
-			if (targetCU != null) {
-				ChangeDescription[] changeDesc= new ChangeDescription[paramTypes.length];
-				ITypeBinding[] changedTypes= new ITypeBinding[diff];
-				for (int i= diff - 1; i >= 0; i--) {
-					int idx= indexSkipped[i];
-					changeDesc[idx]= new RemoveDescription();
-					changedTypes[i]= paramTypes[idx];
-				}
-				String[] arg= new String[] { getMethodSignature(methodBinding, !cu.equals(targetCU)), getTypeNames(changedTypes) };
-				String label;
-				if (methodBinding.isConstructor()) {
-					if (diff == 1) {
-						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparam.constr.description", arg); //$NON-NLS-1$
-					} else {
-						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparams.constr.description", arg); //$NON-NLS-1$
-					}
-				} else {
-					if (diff == 1) {
-						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparam.description", arg); //$NON-NLS-1$
-					} else {
-						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparams.description", arg); //$NON-NLS-1$
-					}					
-				}
-			
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
-				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 5, image);
-				proposals.add(proposal);
+		if (!declaringType.isFromSource()) {
+			return;
+		}
+		
+		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
+		if (targetCU != null) {
+			ChangeDescription[] changeDesc= new ChangeDescription[paramTypes.length];
+			ITypeBinding[] changedTypes= new ITypeBinding[diff];
+			for (int i= diff - 1; i >= 0; i--) {
+				int idx= indexSkipped[i];
+				changeDesc[idx]= new RemoveDescription();
+				changedTypes[i]= paramTypes[idx];
 			}
-		}		
+			String[] arg= new String[] { getMethodSignature(methodBinding, !cu.equals(targetCU)), getTypeNames(changedTypes) };
+			String label;
+			if (methodBinding.isConstructor()) {
+				if (diff == 1) {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparam.constr.description", arg); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparams.constr.description", arg); //$NON-NLS-1$
+				}
+			} else {
+				if (diff == 1) {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparam.description", arg); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparams.description", arg); //$NON-NLS-1$
+				}					
+			}
+		
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
+			ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 5, image);
+			proposals.add(proposal);
+		}
 	}
 	
 	private static String getTypeNames(ITypeBinding[] types) {
@@ -621,7 +626,10 @@ public class UnresolvedElementsSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
 		
-		ASTNode nameNode= problem.getCoveredNode(astRoot);
+		ASTNode nameNode= problem.getCoveringNode(astRoot);
+		if (nameNode == null) {
+			return;
+		}
 		
 		// remove arguments
 		{
@@ -645,43 +653,67 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		// add parameters
-		if (declaringType.isFromSource()) {
-			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
-			if (targetCU != null) {
-				ChangeDescription[] changeDesc= new ChangeDescription[argTypes.length];
-				ITypeBinding[] changeTypes= new ITypeBinding[diff];
-				for (int i= diff - 1; i >= 0; i--) {
-					int idx= indexSkipped[i];
-					Expression arg= (Expression) arguments.get(idx);
-					String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;
-					ITypeBinding newType= Bindings.normalizeTypeBinding(argTypes[idx]);
-					if (newType == null) {
-						newType= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-					}
-					changeDesc[idx]= new InsertDescription(newType, name);
-					changeTypes[i]= newType;
-				}
-				String[] arg= new String[] { getMethodSignature(methodBinding, !cu.equals(targetCU)), getTypeNames(changeTypes) };
-				String label;
-				if (methodBinding.isConstructor()) {
-					if (diff == 1) {
-						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparam.constr.description", arg); //$NON-NLS-1$
-					} else {
-						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparams.constr.description", arg); //$NON-NLS-1$
-					}						
-				} else {
-					if (diff == 1) {
-						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparam.description", arg); //$NON-NLS-1$
-					} else {
-						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparams.description", arg); //$NON-NLS-1$
-					}
-				}	
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 5, image);
-				proposals.add(proposal);
+		if (!declaringType.isFromSource()) {
+			return;
+		}
+		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
+		if (targetCU != null) {
+			boolean isDifferentCU= !cu.equals(targetCU);
+			
+			if (isDifferentCU && isImplicitConstructor(methodBinding, targetCU)) {
+				return;
 			}
-		}		
+			
+			ChangeDescription[] changeDesc= new ChangeDescription[argTypes.length];
+			ITypeBinding[] changeTypes= new ITypeBinding[diff];
+			for (int i= diff - 1; i >= 0; i--) {
+				int idx= indexSkipped[i];
+				Expression arg= (Expression) arguments.get(idx);
+				String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;
+				ITypeBinding newType= Bindings.normalizeTypeBinding(argTypes[idx]);
+				if (newType == null) {
+					newType= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				}
+				changeDesc[idx]= new InsertDescription(newType, name);
+				changeTypes[i]= newType;
+			}
+			String[] arg= new String[] { getMethodSignature(methodBinding, isDifferentCU), getTypeNames(changeTypes) };
+			String label;
+			if (methodBinding.isConstructor()) {
+				if (diff == 1) {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparam.constr.description", arg); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparams.constr.description", arg); //$NON-NLS-1$
+				}
+			} else {
+				if (diff == 1) {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparam.description", arg); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparams.description", arg); //$NON-NLS-1$
+				}
+			}	
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+			ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, nameNode, methodBinding, changeDesc, 5, image);
+			proposals.add(proposal);
+		}
 	}
+	
+	private static boolean isImplicitConstructor(IMethodBinding meth, ICompilationUnit targetCU) {
+		if (meth.isConstructor() && meth.getParameterTypes().length == 0) {
+			IMethodBinding[] bindings= meth.getDeclaringClass().getDeclaredMethods();
+			// implicit constructors must be the only constructor
+			for (int i= 0; i < bindings.length; i++) {
+				IMethodBinding curr= bindings[i];
+				if (curr.isConstructor() && curr != meth) {
+					return false;
+				}
+			}
+			CompilationUnit unit= AST.parsePartialCompilationUnit(targetCU, 0, true);
+			return unit.findDeclaringNode(meth.getKey()) == null;
+		}
+		return false;		
+	}
+	
 	
 	private static String getMethodSignature(IMethodBinding binding, boolean inOtherCU) {
 		StringBuffer buf= new StringBuffer();
@@ -733,7 +765,10 @@ public class UnresolvedElementsSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
 		
-		ASTNode nameNode= problem.getCoveredNode(astRoot);
+		ASTNode nameNode= problem.getCoveringNode(astRoot);
+		if (nameNode == null) {
+			return;
+		}
 		
 		if (nDiffs == 1) { // one argument missmatching: try to fix
 			int idx= indexOfDiff[0];
@@ -842,6 +877,7 @@ public class UnresolvedElementsSubProcessor {
 		
 		ITypeBinding targetBinding= null;
 		List arguments= null;
+		IMethodBinding recursiveConstructor= null;
 		
 		int type= selectedNode.getNodeType();
 		if (type == ASTNode.CLASS_INSTANCE_CREATION) {
@@ -863,6 +899,7 @@ public class UnresolvedElementsSubProcessor {
 			if (typeBinding != null && !typeBinding.isAnonymous()) {
 				targetBinding= typeBinding;
 				arguments= ((ConstructorInvocation) selectedNode).arguments();
+				recursiveConstructor= ASTResolving.findParentMethodDeclaration(selectedNode).resolveBinding();
 			}			
 		}
 		if (targetBinding == null) {
@@ -870,22 +907,10 @@ public class UnresolvedElementsSubProcessor {
 		}
 		IMethodBinding[] methods= targetBinding.getDeclaredMethods();
 		ArrayList similarElements= new ArrayList();
-		IMethodBinding defConstructor= null;
 		for (int i= 0; i < methods.length; i++) {
 			IMethodBinding curr= methods[i];
-			if (curr.isConstructor()) {
-				if (curr.getParameterTypes().length == 0) {
-					defConstructor= curr;
-				} else {
-					similarElements.add(curr);
-				}
-			}
-		}
-		if (defConstructor != null) {
-			// default constructor could be implicit (bug 36819). Only add when we're sure its not.
-			// Misses the case when in other type
-			if (!similarElements.isEmpty() || (astRoot.findDeclaringNode(defConstructor) != null)) {
-				similarElements.add(defConstructor);
+			if (curr.isConstructor() && recursiveConstructor != curr) {
+				similarElements.add(curr); // similar elements can contain a implicit default constructor
 			}
 		}
 		

@@ -232,8 +232,5 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				markAsLinked(rewrite, var.getName(), false, nameKey); //$NON-NLS-1$			
 			}
 		}
-		if (isInDifferentCU) {
-			markAsSelection(rewrite, fNameNode.getParent());
-		}
 	}
 }
