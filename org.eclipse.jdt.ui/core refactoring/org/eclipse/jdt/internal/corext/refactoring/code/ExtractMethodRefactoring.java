@@ -425,7 +425,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (extractsExpression) {
 			result.append(indent);
 			Expression expression= (Expression)fAnalyzer.getFirstSelectedNode();
-			// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10865
 			ITypeBinding binding= expression.resolveTypeBinding();
 			if (binding != null && (!binding.isPrimitive() || !"void".equals(binding.getName()))) //$NON-NLS-1$
 				result.append(RETURN_BLANK);

@@ -155,7 +155,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 		}
 			
 		if (returns > 1) {
-			result.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.ambiguous_return_value")); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.ambiguous_return_value"), JavaSourceContext.create(fCUnit, getSelection())); //$NON-NLS-1$
 			fReturnKind= MULTIPLE;
 			return result;
 		}
@@ -227,7 +227,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 		fInputFlowInfo= flowAnalyzer.perform(getSelectedNodes());
 		
 		if (fInputFlowInfo.branches()) {
-			status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.branch_mismatch")); //$NON-NLS-1$
+			status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.branch_mismatch"), JavaSourceContext.create(fCUnit, getSelection())); //$NON-NLS-1$
 			fReturnKind= ERROR;
 			return status;
 		}
@@ -240,7 +240,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 		}
 		
 		if (fReturnKind == UNDEFINED) {
-			status.addFatalError(RefactoringCoreMessages.getString("FlowAnalyzer.execution_flow")); //$NON-NLS-1$
+			status.addFatalError(RefactoringCoreMessages.getString("FlowAnalyzer.execution_flow"), JavaSourceContext.create(fCUnit, getSelection())); //$NON-NLS-1$
 			fReturnKind= ERROR;
 			return status;
 		}
@@ -300,7 +300,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 				break;
 			default:
 				fReturnValue= null;
-				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.assignments_to_local")); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.assignments_to_local"), JavaSourceContext.create(fCUnit, getSelection())); //$NON-NLS-1$
 				return;
 		}
 		List callerLocals= new ArrayList(5);

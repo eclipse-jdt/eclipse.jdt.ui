@@ -45,7 +45,7 @@ public class TypeReferenceFinder {
 		private static boolean areReportedForSameNode(ASTNode node, SearchResult searchResult){
 			if (node.getStartPosition() != searchResult.getStart())
 				return false;
-			if (ASTNodes.getEndPosition(node) < searchResult.getEnd())	
+			if (ASTNodes.getExclusiveEnd(node) < searchResult.getEnd())	
 				return false;
 		
 			return true;			

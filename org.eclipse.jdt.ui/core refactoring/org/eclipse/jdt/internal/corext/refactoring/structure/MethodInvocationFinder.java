@@ -55,7 +55,7 @@ class MethodInvocationFinder {
 		private static boolean areReportedForSameNode(MethodInvocation node, SearchResult searchResult){
 			if (node.getStartPosition() > searchResult.getStart())
 				return false;
-			if (ASTNodes.getEndPosition(node) < searchResult.getEnd())	
+			if (ASTNodes.getExclusiveEnd(node) < searchResult.getEnd())	
 				return false;
 			if (node.getName().getStartPosition() != searchResult.getStart())
 				return false;
@@ -77,7 +77,7 @@ class MethodInvocationFinder {
 				return true;
 			
 			int start= node.getStartPosition();
-			int end= ASTNodes.getEndPosition(node.getName());
+			int end= ASTNodes.getExclusiveEnd(node.getName());
 			int length= end - start;
 			fFoundRanges.add(new SourceRange(start, length));
 			return true;

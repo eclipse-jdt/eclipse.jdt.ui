@@ -245,9 +245,8 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		for (Iterator iter= statements.iterator(); iter.hasNext(); ) {
 			Statement statement= (Statement)iter.next();
 			if (statement instanceof SwitchCase) {
-				// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10881
 				SwitchCase switchCase= (SwitchCase)statement;
-				if (switchCase.getExpression() == null || (switchCase.getExpression() instanceof SimpleName && ((SimpleName)switchCase.getExpression()).getIdentifier().equals("MISSING"))) { //$NON-NLS-1$
+				if (switchCase.isDefault()) {
 					result.setHasDefaultCase();
 				}
 				if (info == null) {
@@ -530,8 +529,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	}
 	
 	public void endVisit(MethodInvocation node) {
-		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10244
-		endVisitMethodInvocation(node, node.getExpression(), node.arguments(), null);
+		endVisitMethodInvocation(node, node.getExpression(), node.arguments(), getMethodBinding(node.getName()));
 	}
 	
 	public void endVisit(NullLiteral node) {
@@ -626,8 +624,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	}
 	
 	public void endVisit(SuperConstructorInvocation node) {
-		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10244
-		endVisitMethodInvocation(node, node.getExpression(), node.arguments(), null);
+		endVisitMethodInvocation(node, node.getExpression(), node.arguments(), node.resolveConstructorBinding());
 	}
 	
 	public void endVisit(SuperFieldAccess node) {
@@ -637,8 +634,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	}
 	
 	public void endVisit(SuperMethodInvocation node) {
-		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10244
-		endVisitMethodInvocation(node, node.getQualifier(), node.arguments(), null);
+		endVisitMethodInvocation(node, node.getQualifier(), node.arguments(), getMethodBinding(node.getName()));
 	}
 	
 	public void endVisit(SwitchCase node) {
@@ -756,8 +752,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			info.mergeArgument(getFlowInfo(arg), fFlowContext);
 		}
 		info.mergeReceiver(getFlowInfo(receiver), fFlowContext);
-		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10244
-		// info.mergeExceptions(binding, fFlowContext);
+		info.mergeExceptions(binding, fFlowContext);
 	}
 	
 	private void endVisitPrePostfixExpression(Expression node, Expression operand) {
@@ -776,5 +771,14 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		} else {
 			setFlowInfo(node, info);
 		}
+	}
+	
+	private IMethodBinding getMethodBinding(Name name) {
+		if (name == null)
+			return null;
+		IBinding binding= name.resolveBinding();
+		if (binding instanceof IMethodBinding)
+			return (IMethodBinding)binding;
+		return null;
 	}		
 }

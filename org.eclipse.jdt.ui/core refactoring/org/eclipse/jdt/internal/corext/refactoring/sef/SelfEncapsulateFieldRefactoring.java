@@ -205,13 +205,11 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			fChangeManager.clear();
 			pm.beginTask(NO_NAME, 11);
 			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.checking_preconditions")); //$NON-NLS-1$
-			pm.subTask(NO_NAME);	// XXX: http://bugs.eclipse.org/bugs/show_bug.cgi?id=6794
 			result.merge(checkMethodNames());
 			pm.worked(1);
 			if (result.hasFatalError())
 				return result;
 			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.searching_for_cunits")); //$NON-NLS-1$
-			pm.subTask(NO_NAME); 	// XXX: http://bugs.eclipse.org/bugs/show_bug.cgi?id=6794
 			ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
 				new SubProgressMonitor(pm, 5), SearchEngine.createWorkspaceScope(),
 				SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
@@ -252,7 +250,6 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			CompositeChange result= new CompositeChange(getName());
 			pm.beginTask(NO_NAME, 10);
 			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.create_changes")); //$NON-NLS-1$
-			pm.subTask(NO_NAME); 	// XXX: http://bugs.eclipse.org/bugs/show_bug.cgi?id=6794
 			addChanges(result, new SubProgressMonitor(pm, 2));
 			TextChange[] changes= fChangeManager.getAllChanges();
 			SubProgressMonitor sub= new SubProgressMonitor(pm, 8);

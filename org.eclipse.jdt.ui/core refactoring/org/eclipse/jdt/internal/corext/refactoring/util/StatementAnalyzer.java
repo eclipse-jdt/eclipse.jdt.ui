@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CatchClause;
@@ -22,10 +23,13 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 
@@ -53,18 +57,25 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	
 	protected void checkSelectedNodes() {
 		ASTNode[] nodes= getSelectedNodes();
-		Selection selection= getSelection();
-		int pos= fBuffer.indexOfStatementCharacter(selection.getOffset());
+		int selectionOffset= getSelection().getOffset();
+		int pos= fBuffer.indexOfNextToken(selectionOffset, false);
 		ASTNode node= nodes[0];
 		if (node.getStartPosition() != pos) {
-			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.doesNotCover")); //$NON-NLS-1$
+			ISourceRange range= new SourceRange(selectionOffset, node.getStartPosition() - selectionOffset + 1);
+			invalidSelection(
+				RefactoringCoreMessages.getString("StatementAnalyzer.beginning_of_selection"),  //$NON-NLS-1$
+				JavaSourceContext.create(fCUnit, range));
 			return;
 		}	
 		
 		node= nodes[nodes.length - 1];
-		pos= fBuffer.indexOfStatementCharacter(node.getStartPosition() + node.getLength());
-		if (pos != -1 && pos <= selection.getInclusiveEnd())
-			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.end_of_selection")); //$NON-NLS-1$
+		pos= fBuffer.indexOfNextToken(node.getStartPosition() + node.getLength(), false);
+		if (pos != -1 && pos <= getSelection().getInclusiveEnd()) {
+			ISourceRange range= new SourceRange(ASTNodes.getExclusiveEnd(node), pos - ASTNodes.getExclusiveEnd(node));
+			invalidSelection(
+				RefactoringCoreMessages.getString("StatementAnalyzer.end_of_selection"), 	//$NON-NLS-1$
+				JavaSourceContext.create(fCUnit, range)); 
+		}
 	}
 	
 	protected RefactoringStatus getStatus() {

@@ -144,8 +144,12 @@ public class ASTNodes {
 		return node;
 	}
 	
-	public static int getEndPosition(ASTNode node){
+	public static int getExclusiveEnd(ASTNode node){
 		return node.getStartPosition() + node.getLength();
+	}
+	
+	public static int getInclusiveEnd(ASTNode node){
+		return node.getStartPosition() + node.getLength() - 1;
 	}
 	
 	public static Message[] getMessages(ASTNode node, int flags) {

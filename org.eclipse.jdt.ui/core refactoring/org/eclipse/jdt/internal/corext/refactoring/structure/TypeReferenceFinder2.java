@@ -42,7 +42,7 @@ public class TypeReferenceFinder2 {
 		private static boolean areReportedForSameNode(SimpleType node, SearchResult searchResult){
 			if (node.getStartPosition() != searchResult.getStart())
 				return false;
-			if (ASTNodes.getEndPosition(node) < searchResult.getEnd())	
+			if (ASTNodes.getExclusiveEnd(node) < searchResult.getEnd())	
 				return false;
 		
 			return true;			
@@ -51,7 +51,7 @@ public class TypeReferenceFinder2 {
 		private static boolean areReportedForSameNode(ArrayType node, SearchResult searchResult){
 			if (node.getStartPosition() != searchResult.getStart())
 				return false;
-			if (ASTNodes.getEndPosition(node) < searchResult.getEnd())	
+			if (ASTNodes.getExclusiveEnd(node) < searchResult.getEnd())	
 				return false;
 		
 			return true;			
@@ -86,7 +86,7 @@ public class TypeReferenceFinder2 {
 			if (! isReported(node))
 				return true;
 			
-			int end= ASTNodes.getEndPosition(node.getElementType());
+			int end= ASTNodes.getExclusiveEnd(node.getElementType());
 			int length= end - node.getStartPosition();
 			fFoundRanges.add(new SourceRange(node.getStartPosition(), length));
 			return false;
