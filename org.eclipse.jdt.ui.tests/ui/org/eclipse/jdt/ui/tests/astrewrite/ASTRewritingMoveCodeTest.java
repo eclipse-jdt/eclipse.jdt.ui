@@ -119,7 +119,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			TypeDeclaration innerType= (TypeDeclaration) members.get(0);
 			
 			rewrite.markAsRemoved(innerType);
-			ASTNode movedNode= rewrite.createCopyTarget(innerType);
+			ASTNode movedNode= rewrite.createCopy(innerType);
 			members.add(movedNode);
 			rewrite.markAsInserted(movedNode);
 			
@@ -146,8 +146,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				List statements= body.statements();
 				assertTrue("Has statements", statements.isEmpty());
 				
-				ASTNode insertNodeForMove= rewrite.createCopyTarget(toMove);
-				ASTNode insertNodeForCopy= rewrite.createCopyTarget(toCopy);
+				ASTNode insertNodeForMove= rewrite.createCopy(toMove);
+				ASTNode insertNodeForCopy= rewrite.createCopy(toCopy);
 				
 				statements.add(insertNodeForCopy);
 				statements.add(insertNodeForMove);
@@ -242,14 +242,14 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				
 				rewrite.markAsRemoved(outerType);
 				
-				ASTNode insertNodeForCopy= rewrite.createCopyTarget(outerType);
+				ASTNode insertNodeForCopy= rewrite.createCopy(outerType);
 				innerMembers.add(insertNodeForCopy);
 				rewrite.markAsInserted(insertNodeForCopy);
 				
 			}
 			{ // copy method of inner to main type
 				MethodDeclaration methodDecl= (MethodDeclaration) innerMembers.get(0);
-				ASTNode insertNodeForMove= rewrite.createCopyTarget(methodDecl);
+				ASTNode insertNodeForMove= rewrite.createCopy(methodDecl);
 				members.add(insertNodeForMove);
 				rewrite.markAsInserted(insertNodeForMove);
 			}
@@ -262,7 +262,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				WhileStatement whileStatement= ast.newWhileStatement();
 				whileStatement.setExpression(ast.newBooleanLiteral(true));
 				
-				Statement insertNodeForCopy= (Statement) rewrite.createCopyTarget(body);
+				Statement insertNodeForCopy= (Statement) rewrite.createCopy(body);
 				
 				whileStatement.setBody(insertNodeForCopy); // set existing body
 
@@ -357,8 +357,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			
 			IfStatement ifStatement= (IfStatement) statements.get(3);
 			
-			Statement insertNodeForCopy1= (Statement) rewrite.createCopyTarget((ASTNode) statements.get(1));
-			Statement insertNodeForCopy2= (Statement) rewrite.createCopyTarget((ASTNode) statements.get(2));
+			Statement insertNodeForCopy1= (Statement) rewrite.createCopy((ASTNode) statements.get(1));
+			Statement insertNodeForCopy2= (Statement) rewrite.createCopy((ASTNode) statements.get(2));
 			
 			Block whileBody= ast.newBlock();
 			
@@ -450,7 +450,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			List statements= body.statements();
 			assertTrue("Cannot find if statement", statements.size() == 1);
 			
-			ASTNode placeHolder= rewrite.createCopyTarget((ASTNode) statements.get(0));
+			ASTNode placeHolder= rewrite.createCopy((ASTNode) statements.get(0));
 			
 			
 			MethodDeclaration methodGoo= findMethodDeclaration(type, "goo");
@@ -513,7 +513,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			IfStatement ifStatement= (IfStatement) fooStatements.get(0);
 			rewrite.markAsRemoved(ifStatement);
 			
-			ASTNode placeHolder= rewrite.createCopyTarget(ifStatement);
+			ASTNode placeHolder= rewrite.createCopy(ifStatement);
 			
 			// add return statement to ifStatement block
 			ReturnStatement returnStatement= ast.newReturnStatement();
@@ -586,8 +586,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			ASTNode arg0= (ASTNode) arguments.get(0);
 			ASTNode arg1= (ASTNode) arguments.get(1);
 			
-			ASTNode placeHolder0= rewrite.createCopyTarget(arg0);
-			ASTNode placeHolder1= rewrite.createCopyTarget(arg1);
+			ASTNode placeHolder0= rewrite.createCopy(arg0);
+			ASTNode placeHolder1= rewrite.createCopy(arg1);
 			
 			rewrite.markAsReplaced(arg0, placeHolder1);
 			rewrite.markAsReplaced(arg1, placeHolder0);

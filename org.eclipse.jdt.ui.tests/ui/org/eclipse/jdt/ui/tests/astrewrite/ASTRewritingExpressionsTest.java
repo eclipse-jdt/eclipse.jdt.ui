@@ -96,7 +96,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			NumberLiteral name= ast.newNumberLiteral("1");
 			rewrite.markAsReplaced(left.getIndex(), name, "Replace left array index with 1");
 			
-			ASTNode placeHolder= rewrite.createCopyTarget(left.getIndex());
+			ASTNode placeHolder= rewrite.createCopy(left.getIndex());
 			rewrite.markAsReplaced(right.getIndex(), placeHolder, "Replace right array index with left array index");
 			
 			SimpleName newName= ast.newSimpleName("o");
@@ -444,7 +444,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			
 			Expression rightHand= assignment.getRightHandSide();
 			
-			Expression placeholder= (Expression) rewrite.createCopyTarget(rightHand);
+			Expression placeholder= (Expression) rewrite.createCopy(rightHand);
 			
 			CastExpression newCastExpression= ast.newCastExpression();
 			newCastExpression.setType(ast.newSimpleType(ast.newSimpleName("List")));
@@ -940,7 +940,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(2);
 			MethodInvocation invocation= (MethodInvocation) stmt.getExpression();
 			
-			ASTNode placeHolder= rewrite.createCopyTarget(invocation.getExpression());
+			ASTNode placeHolder= rewrite.createCopy(invocation.getExpression());
 			
 			rewrite.markAsRemoved(invocation.getExpression());
 			rewrite.markAsInserted(placeHolder);
@@ -1169,7 +1169,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			MethodInvocation expression= (MethodInvocation) invocation.getExpression();
 			rewrite.markAsRemoved(expression);
 			
-			ASTNode placeHolder= rewrite.createCopyTarget((ASTNode) expression.arguments().get(0));
+			ASTNode placeHolder= rewrite.createCopy((ASTNode) expression.arguments().get(0));
 			
 			ASTNode arg1= (ASTNode) invocation.arguments().get(0);
 			
@@ -1182,7 +1182,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			MethodInvocation arg1= (MethodInvocation) invocation.arguments().get(0);
 			rewrite.markAsRemoved(arg1);
 			
-			ASTNode placeHolder= rewrite.createCopyTarget((ASTNode) arg1.arguments().get(0));
+			ASTNode placeHolder= rewrite.createCopy((ASTNode) arg1.arguments().get(0));
 			
 			rewrite.markAsReplaced((ASTNode) invocation.getExpression(), placeHolder);
 		}
@@ -1306,7 +1306,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			Name qualifier= (Name) invocation.getQualifier();
 			rewrite.markAsRemoved(qualifier);
 			
-			Name placeHolder= (Name) rewrite.createCopyTarget(qualifier);
+			Name placeHolder= (Name) rewrite.createCopy(qualifier);
 			
 			FieldAccess newFieldAccess= ast.newFieldAccess();
 			newFieldAccess.setExpression(placeHolder);
@@ -1324,7 +1324,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			
 			MethodInvocation innerArg= (MethodInvocation) arg1.arguments().get(0);
 			
-			ASTNode placeHolder= rewrite.createCopyTarget((ASTNode) innerArg.getExpression());
+			ASTNode placeHolder= rewrite.createCopy((ASTNode) innerArg.getExpression());
 			
 			rewrite.markAsReplaced((ASTNode) invocation.getQualifier(), placeHolder);
 		}

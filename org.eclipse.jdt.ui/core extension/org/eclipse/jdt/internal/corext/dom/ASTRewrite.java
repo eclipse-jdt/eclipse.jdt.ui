@@ -194,7 +194,7 @@ public class ASTRewrite {
 	 * Creates a target node for a node to be moved or copied. A target node can be inserted or used
 	 * to replace at the target position. 
 	 */
-	public final ASTNode createCopyTarget(ASTNode node) {
+	public final ASTNode createCopy(ASTNode node) {
 		Assert.isTrue(node.getProperty(COPYSOURCEKEY) == null, "Node used as more than one copy source");
 		Object copySource= ASTRewriteAnalyzer.createSourceCopy(node);
 		node.setProperty(COPYSOURCEKEY, copySource);
@@ -202,10 +202,14 @@ public class ASTRewrite {
 	}
 	
 	/**
-	 * Creates a target node for a node to be moved or copied. A target node can be inserted or used
-	 * to replace at the target position. 
+	 * Creates a target node for a source string to be inserted without being formatted. A target node can
+	 * be inserted or used to replace at the target position.
+	 * @param code String that will be inserted. The string must have no extra indent.
+	 * @param similarNode A node that is similar to the code which is inserted. This node is only used to
+	 * find a similar placeholder (Expression, Statement, BodyDeclaration...). No operations are performed
+	 * on this node.
 	 */
-	public final ASTNode createCopyTarget(String code, ASTNode similarNode) {
+	public final ASTNode createPlaceholder(String code, ASTNode similarNode) {
 		return ASTWithExistingFlattener.getPlaceholder(fRootNode.getAST(), code, similarNode);
 	}	
 	public final boolean isInserted(ASTNode node) {

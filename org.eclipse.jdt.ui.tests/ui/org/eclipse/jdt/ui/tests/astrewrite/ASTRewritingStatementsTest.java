@@ -643,7 +643,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
 			
 			Assignment assignment= (Assignment) stmt.getExpression();
-			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment);
+			Expression placeholder= (Expression) rewrite.createCopy(assignment);
 									
 			Assignment newExpression= ast.newAssignment();
 			newExpression.setLeftHandSide(ast.newSimpleName("x"));
@@ -806,7 +806,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			VariableDeclarationExpression varDecl= ast.newVariableDeclarationExpression(varFragment);
 			varFragment.setName(ast.newSimpleName(leftHandSide.getIdentifier()));
 			
-			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
+			Expression placeholder= (Expression) rewrite.createCopy(assignment.getRightHandSide());
 			varFragment.setInitializer(placeholder);
 			varDecl.setType(ast.newPrimitiveType(PrimitiveType.INT));
 
@@ -1669,7 +1669,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		{ // replace while statement with comment, insert new statement
 			WhileStatement whileStatement= (WhileStatement) statements.get(0);
 			String comment= "//hello";
-			ASTNode placeHolder= rewrite.createCopyTarget(comment, whileStatement);
+			ASTNode placeHolder= rewrite.createPlaceholder(comment, whileStatement);
 			
 			rewrite.markAsReplaced(whileStatement, placeHolder);
 			
@@ -1678,7 +1678,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			buf1.append("    System.beep();\n");
 			buf1.append("}");
 			
-			ASTNode placeHolder2= rewrite.createCopyTarget(buf1.toString(), whileStatement);
+			ASTNode placeHolder2= rewrite.createPlaceholder(buf1.toString(), whileStatement);
 			rewrite.markAsInserted(placeHolder2);
 			
 			statements.add(placeHolder2);
