@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.wizards.NewGroup;
  
-public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements IProblemChangedListener {
+public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	
 	private OpenJavaElementAction fOpen;
 	private ShowInPackageViewAction fShowInPackageViewAction;

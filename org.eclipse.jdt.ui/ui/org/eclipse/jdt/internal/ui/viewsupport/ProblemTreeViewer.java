@@ -72,21 +72,23 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	}
 	
 	/*
-	 * @see StructuredViewer#associate(Object, Item)
+	 * @see StructuredViewer#mapElement(Object, Widget)
 	 */
-	protected void associate(Object element, Item item) {
-		if (item.getData() != element) {
-			fProblemItemMapper.addToMap(element, item);	
+	protected void mapElement(Object element, Widget item) {
+		super.mapElement(element, item);
+		if (item instanceof Item) {
+			fProblemItemMapper.addToMap(element, (Item) item);
 		}
-		super.associate(element, item);		
 	}
 
 	/*
-	 * @see StructuredViewer#disassociate(Item)
+	 * @see StructuredViewer#unmapElement(Object, Widget)
 	 */
-	protected void disassociate(Item item) {
-		fProblemItemMapper.removeFromMap(item.getData(), item);
-		super.disassociate(item);	
+	protected void unmapElement(Object element, Widget item) {
+		if (item instanceof Item) {
+			fProblemItemMapper.removeFromMap(element, (Item) item);
+		}		
+		super.unmapElement(element, item);
 	}
 
 }
