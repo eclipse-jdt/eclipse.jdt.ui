@@ -8,6 +8,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
@@ -38,6 +39,15 @@ public class MultiMoveTests extends RefactoringTest {
 	private ICompilationUnit createCu(IPackageFragment pack, String cuPath, String cuName) throws Exception{
 		return createCU(pack, cuName, getFileContents(getRefactoringPath() + cuPath));
 	}
+	
+	private static void delete(IPackageFragment pack) {
+		try {
+			pack.delete(true, null);
+		} catch(JavaModelException e) {
+			//ignore
+		}
+	}
+	
 	
 	//--------
 	public void test0() throws Exception{		
@@ -76,9 +86,10 @@ public class MultiMoveTests extends RefactoringTest {
 		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/C.java");
 		assertEquals("incorrect update of C", expectedSource ,p2C.getSource());
 		
-		packP1.delete(true, null);
-		packP2.delete(true, null);
+		delete(packP1);
+		delete(packP2);
 	}
+
 	
 	public void test1() throws Exception{		
 		final String p1Name= "p1";
@@ -119,9 +130,9 @@ public class MultiMoveTests extends RefactoringTest {
 		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/C.java");
 		assertEquals("incorrect update of C", expectedSource ,p2C.getSource());
 		
-		packP1.delete(true, null);
-		packP2.delete(true, null);
-		packP3.delete(true, null);
+		delete(packP1);
+		delete(packP2);
+		delete(packP3);
 	}
 	
 	public void test2() throws Exception{
@@ -159,8 +170,8 @@ public class MultiMoveTests extends RefactoringTest {
 		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/C.java");
 		assertEquals("incorrect update of C", expectedSource, p2C.getSource());
 		
-		packP1.delete(true, null);
-		packP2.delete(true, null);
+		delete(packP1);
+		delete(packP2);
 	}
 	
 }
