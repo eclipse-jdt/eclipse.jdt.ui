@@ -91,8 +91,9 @@ public class DeleteTest extends RefactoringTest{
 	private void checkDelete(IJavaElement[] elems, boolean deleteCu) throws JavaModelException, Exception {
 		ICompilationUnit newCuA= null;
 		try {
-			DeleteRefactoring2 refactoring= DeleteRefactoring2.create(new IResource[0], elems, createReorgQueries());
+			DeleteRefactoring2 refactoring= DeleteRefactoring2.create(new IResource[0], elems);
 			assertNotNull(refactoring);
+			refactoring.setQueries(createReorgQueries());
 			RefactoringStatus status= performRefactoring(refactoring);
 			assertEquals("precondition was supposed to pass", null, status);
 
@@ -316,23 +317,22 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	private IReorgQueries createReorgQueries() {
-		IReorgQueries queries= new IReorgQueries(){
-			public IConfirmQuery createYesNoQuery(String queryTitle, int queryID) {
-				return new IConfirmQuery(){
-					public boolean confirm(String question) throws OperationCanceledException {
-						return true;
-					}
-				};
+		final IConfirmQuery yesQuery= new IConfirmQuery(){
+			public boolean confirm(String question) throws OperationCanceledException {
+				return true;
 			}
-			public IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, int queryID) {
-				return new IConfirmQuery(){
-					public boolean confirm(String question) throws OperationCanceledException {
-						return true;
-					}
-				};
+			public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
+				return true;
 			}
 		};
-		return queries;
+		return new IReorgQueries(){
+			public IConfirmQuery createYesNoQuery(String queryTitle, int queryID) {
+				return yesQuery;
+			}
+			public IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, int queryID) {
+				return yesQuery;
+			}
+		};
 	}
 	
 	public void testDeleteWithinCu0() throws Exception{
@@ -541,7 +541,8 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements, createReorgQueries());
+		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
 		assertTrue("file not deleted", ! file.exists());
@@ -558,7 +559,8 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements, createReorgQueries());
+		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
 		assertTrue("folder not deleted", ! subFolder.exists());
@@ -578,7 +580,8 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements, createReorgQueries());
+		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
 		assertTrue("folder not deleted", ! subFolder.exists());
@@ -594,7 +597,8 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 		
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements, createReorgQueries());
+		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
 		assertTrue("package not deleted", ! newPackage.exists());
@@ -609,7 +613,8 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 		
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements, createReorgQueries());
+		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
 		assertTrue("cu not deleted", ! newCU.exists());
@@ -624,7 +629,8 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements, createReorgQueries());
+		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
 		assertTrue("not deleted", ! fredRoot.exists());
