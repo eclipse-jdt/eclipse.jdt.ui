@@ -147,7 +147,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 	IChange createChange(IPackageFragment pack) throws JavaModelException{
 		IPackageFragmentRoot root= getDestinationForPackages(getDestination());
 		String newName= createNewName(pack, root);
-		if (JavaConventions.validatePackageName(newName).isOK())
+		if (newName == null || JavaConventions.validatePackageName(newName).isOK())
 			return new CopyPackageChange(pack, root, newName);
 		else{
 			if (root.getUnderlyingResource() instanceof IContainer){
