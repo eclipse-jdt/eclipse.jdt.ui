@@ -61,8 +61,8 @@ class CPListLabelProvider extends LabelProvider {
 		fMissingFolderImage= reg.get(JavaPluginImages.IMG_OBJS_MISSING_PACKFRAG_ROOT);
 		fMissingProjectImage= workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_PROJECT_CLOSED);
 		
-		fContainerImage= reg.get(JavaPluginImages.IMG_OBJS_PACKAGE);
-		fMissingContainerImage= reg.get(JavaPluginImages.IMG_OBJS_PACKAGE);
+		fContainerImage= reg.get(JavaPluginImages.IMG_OBJS_LIBRARY);
+		fMissingContainerImage= reg.get(JavaPluginImages.IMG_OBJS_LIBRARY);
 	}
 	
 	public String getText(Object element) {

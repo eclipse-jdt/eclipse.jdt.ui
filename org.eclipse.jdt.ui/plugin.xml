@@ -59,14 +59,14 @@
 <!-- </extension>                                                                        -->
 <!--                                                                                     -->
 <!-- =================================================================================== -->
-<extension-point name="%classpathContainerPage" id="classpathContainerPage"/>
+<extension-point name="classpathContainerPageExtensionPoint" id="classpathContainerPage"/>
 
 <extension
       point="org.eclipse.jdt.ui.classpathContainerPage">
    <classpathContainerPage
          id= "*"
          class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerDefaultPage"
-         name="Unspecified Container">
+         name="%defaultClasspathContainerPage">
    </classpathContainerPage>
 </extension>
 
@@ -1591,5 +1591,12 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.toggle.text.hover" />
 	</acceleratorSet>
 </extension>
+
+<extension point="org.eclipse.ui.markerResolution"> 
+   <markerResolutionGenerator 
+      class="org.eclipse.jdt.internal.ui.text.correction.CorrectionMarkerResolutionGenerator" 
+      markerType="org.eclipse.jdt.core.problem"> 
+   </markerResolutionGenerator> 
+</extension> 
 
 </plugin>

@@ -18,6 +18,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 public class ClasspathContainerWizard extends Wizard {
 	
 	private IClasspathEntry fEntryToEdit;
+	private IClasspathEntry fNewEntry;
 	
 	private ClasspathContainerSelectionPage fSelectionWizardPage;
 	private IClasspathContainerPage fContainerPage;
@@ -28,13 +29,11 @@ public class ClasspathContainerWizard extends Wizard {
 	public ClasspathContainerWizard(IClasspathEntry entryToEdit) {
 		super();
 		fEntryToEdit= entryToEdit;
+		fNewEntry= null;
 	}
 	
 	public IClasspathEntry getNewEntry() {
-		if (fContainerPage != null) {
-			return fContainerPage.getSelection();
-		}
-		return null;
+		return fNewEntry;
 	}
 
 	/* (non-Javadoc)
@@ -42,7 +41,10 @@ public class ClasspathContainerWizard extends Wizard {
 	 */
 	public boolean performFinish() {
 		if (fContainerPage != null) {
-			return fContainerPage.finish();
+			if (fContainerPage.finish()) {
+				fNewEntry= fContainerPage.getSelection();
+				return true;
+			}
 		}
 		return false;
 	}
@@ -51,17 +53,28 @@ public class ClasspathContainerWizard extends Wizard {
 	 * @see IWizard#addPages()
 	 */
 	public void addPages() {
-		if (fEntryToEdit == null) {
-			ClasspathContainerDescriptor[] containers= ClasspathContainerDescriptor.getDescriptors();
-			fSelectionWizardPage= new ClasspathContainerSelectionPage(containers);
-			addPage(fSelectionWizardPage);
-			
-			// add as dummy, will not be shown
-			fContainerPage= new ClasspathContainerDefaultPage();
-			addPage(fContainerPage); 
-		} else {
+		ClasspathContainerDescriptor[] containers= ClasspathContainerDescriptor.getDescriptors();
+		
+		if (fEntryToEdit == null) { // new entry
+			if (containers.length != 1) {
+				fSelectionWizardPage= new ClasspathContainerSelectionPage(containers);
+				addPage(fSelectionWizardPage);
+				
+				// add as dummy, will not be shown
+				fContainerPage= new ClasspathContainerDefaultPage();
+				addPage(fContainerPage); 						
+			} else {
+				try {
+					fContainerPage= containers[0].createPage();
+					fContainerPage.setSelection(null);
+					addPage(fContainerPage);
+				} catch (CoreException e) {
+					handlePageCreationFailed(e);
+				}
+			}
+		} else { // edit entry
 			IClasspathContainerPage containerPage= null;
-			ClasspathContainerDescriptor desc= findDescriptorPage(fEntryToEdit);
+			ClasspathContainerDescriptor desc= findDescriptorPage(containers, fEntryToEdit);
 			if (desc != null) {
 				try {
 					containerPage= desc.createPage();
@@ -89,8 +102,7 @@ public class ClasspathContainerWizard extends Wizard {
 	}
 	
 	
-	private ClasspathContainerDescriptor findDescriptorPage(IClasspathEntry entry) {
-		ClasspathContainerDescriptor[] containers= ClasspathContainerDescriptor.getDescriptors();
+	private ClasspathContainerDescriptor findDescriptorPage(ClasspathContainerDescriptor[] containers, IClasspathEntry entry) {
 		for (int i = 0; i < containers.length; i++) {
 			if (containers[i].canEdit(fEntryToEdit)) {
 				return containers[i];
