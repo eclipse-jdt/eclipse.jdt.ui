@@ -38,10 +38,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 
 	public ExtractInterfaceInputPage() {
 		super(true);
-	}
-
-	public ExtractInterfaceInputPage(String initialValue) {
-		super(true, "");
+		setMessage("Select the name for the new interface and select the members that will be declared in the interface.");
 	}
 
 	public void createControl(Composite parent) {
@@ -61,9 +58,14 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 				
 		addReplaceAllCheckbox(result);
 
-		Label tableLabel= new Label(result, SWT.NONE);
-		tableLabel.setText("Members to declare in the interface:");
+		Label separator= new Label(result, SWT.NONE);
 		GridData gd= new GridData();
+		gd.horizontalSpan= 2;
+		separator.setLayoutData(gd);
+
+		Label tableLabel= new Label(result, SWT.NONE);
+		tableLabel.setText("&Members to declare in the interface:");
+		gd= new GridData();
 		gd.horizontalSpan= 2;
 		tableLabel.setLayoutData(gd);
 		
@@ -75,6 +77,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		composite.setLayout(layout);
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan= 2;
@@ -87,10 +90,15 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		try {
 			fTableViewer.setInput(getExtractInterfaceRefactoring().getExtractableMembers());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, "Extract Interface", "Internal Error"); //XXX
+			ExceptionHandler.handle(e, "Extract Interface", "Internal Error. See log for details");
 			fTableViewer.setInput(new IMember[0]);
 		}
 
+		createButtonComposite(composite);
+	}
+
+	private void createButtonComposite(Composite composite) {
+		GridData gd;
 		Composite buttonComposite= new Composite(composite, SWT.NONE);
 		GridLayout gl= new GridLayout();
 		gl.marginHeight= 0;
@@ -108,7 +116,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 				fTableViewer.setAllChecked(true);
 			}
 		});
-
+		
 		Button deSelectAll= new Button(buttonComposite, SWT.PUSH);
 		deSelectAll.setText("&Deselect All");
 		deSelectAll.setLayoutData(new GridData());
