@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -113,6 +114,10 @@ public class JdtFlags {
 		if (member.getElementType() != IJavaElement.METHOD && isInterfaceMember(member))
 			return true;
 		return Flags.isStatic(member.getFlags());
+	}
+
+	public static boolean isStatic(IMethodBinding methodBinding){
+		return Modifier.isStatic(methodBinding.getModifiers());
 	}
 
 	public static boolean isStrictfp(IMember member) throws JavaModelException{
