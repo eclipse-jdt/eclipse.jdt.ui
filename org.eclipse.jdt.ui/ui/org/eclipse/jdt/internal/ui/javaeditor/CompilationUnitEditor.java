@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.lang.reflect.InvocationTargetException;import java.util.Iterator;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.Dialog;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextOperationTarget;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.text.Position;import org.eclipse.jface.text.source.Annotation;import org.eclipse.jface.text.source.IAnnotationModel;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.IDocumentProvider;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.texteditor.MarkerAnnotation;import org.eclipse.ui.texteditor.MarkerUtilities;import org.eclipse.ui.texteditor.TextOperationAction;import org.eclipse.ui.views.tasklist.TaskList;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction;import org.eclipse.jdt.internal.ui.reorg.CUSavePolicy;
+import java.lang.reflect.InvocationTargetException;import java.util.Iterator;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.Dialog;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextOperationTarget;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.text.Position;import org.eclipse.jface.text.source.Annotation;import org.eclipse.jface.text.source.IAnnotationModel;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.IDocumentProvider;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.texteditor.MarkerAnnotation;import org.eclipse.ui.texteditor.MarkerUtilities;import org.eclipse.ui.texteditor.TextOperationAction;import org.eclipse.ui.views.tasklist.TaskList;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction;import org.eclipse.jdt.internal.ui.reorg.CUSavePolicy;
 
 
 /**
@@ -154,8 +154,12 @@ public class CompilationUnitEditor extends JavaEditor {
 			} else {
 				
 				Shell shell= getSite().getShell();
-				String title= getResourceString("Error.save.deleted.title");
-				String msg= getResourceString("Error.save.deleted.message");
+				/* 
+				 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
+				 * Missing resources.
+				 */
+				String title= getResourceString("Editor.Error.save.deleted.title");
+				String msg= getResourceString("Editor.Error.save.deleted.message");
 				MessageDialog.openError(shell, title, msg);
 			}
 			
@@ -291,8 +295,49 @@ public class CompilationUnitEditor extends JavaEditor {
 	}
 	
 	/*
+	 * 1GF7WG9: ITPJUI:ALL - EXCEPTION: "Save As..." always fails
+	 */
+	protected IPackageFragment getPackage(IWorkspaceRoot root, IPath path) {
+				
+		if (path.segmentCount() == 1) {
+			
+			IProject project= root.getProject(path.toString());
+			if (project != null) {
+				IJavaProject jProject= JavaCore.create(project);
+				if (jProject != null) {
+					try {
+						IJavaElement element= jProject.findElement(new Path(""));
+						if (element instanceof IPackageFragment) {
+							IPackageFragment fragment= (IPackageFragment) element;
+							IJavaElement parent= fragment.getParent();
+							if (parent instanceof IPackageFragmentRoot) {
+								IPackageFragmentRoot pRoot= (IPackageFragmentRoot) parent;
+								if ( !pRoot.isArchive() && !pRoot.isExternal() && path.equals(pRoot.getPath()))
+									return fragment;
+							}
+						}
+					} catch (JavaModelException x) {
+						// ignore
+					}
+				}
+			}
+			
+			return null;
+			
+		} else if (path.segmentCount() > 1) {
+		
+			IFolder folder= root.getFolder(path);
+			IJavaElement element= JavaCore.create(folder);
+			if (element instanceof IPackageFragment)
+				return (IPackageFragment) element;
+		}
+		
+		return null;
+	}
+	
+	/*
 	 * 1GEUSSR: ITPUI:ALL - User should never loose changes made in the editors.
-	 * Changed Behavior to make sure that if called inside a regular save (because
+	 * Changed behavior to make sure that if called inside a regular save (because
 	 * of deletion of input element) there is a way to report back to the caller.
 	 */	
 	protected void performSaveAs(IProgressMonitor progressMonitor) {
@@ -321,29 +366,44 @@ public class CompilationUnitEditor extends JavaEditor {
 				progressMonitor.setCanceled(true);			
 			return;
 		}
-			
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IFolder folder= workspace.getRoot().getFolder(folderPath);
-		final Object fragment= JavaCore.create(folder);
 		
-		IFile file= workspace.getRoot().getFile(filePath);
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		
+		/*
+		 * 1GF7WG9: ITPJUI:ALL - EXCEPTION: "Save As..." always fails
+		 */
+		final IPackageFragment fragment= getPackage(root, folderPath);
+		
+		IFile file= root.getFile(filePath);
 		final FileEditorInput newInput= new FileEditorInput(file);
 		
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(final IProgressMonitor monitor) throws CoreException {
-				if (fragment instanceof IPackageFragment) {
-					
-					IPackageFragment pkgf= (IPackageFragment) fragment;
-					
-					// copy to another package
-					IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-					ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
-					unit.copy(pkgf, null, fileName, false, monitor);
-					
-				} else {
-					// copy to another directory
-					getDocumentProvider().saveDocument(monitor, newInput, getDocumentProvider().getDocument(getEditorInput()), false);
+				
+				if (fragment != null) {
+					try {	
+						
+						// copy to another package
+						IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+						ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
+						
+						/* 
+						 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
+						 * Changed false to true.
+						 */
+						unit.copy(fragment, null, fileName, true, monitor);
+						return;
+						
+					} catch (JavaModelException x) {
+					}
 				}
+				
+				// copy to another directory
+				/* 
+				 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
+				 * Changed false to true.
+				 */
+				getDocumentProvider().saveDocument(monitor, newInput, getDocumentProvider().getDocument(getEditorInput()), true);
 			}
 		};
 		
@@ -360,8 +420,12 @@ public class CompilationUnitEditor extends JavaEditor {
 		} catch (InterruptedException x) {
 		} catch (InvocationTargetException x) {
 			
-			String title= getResourceString("Error.save.title");
-			String msg= getResourceString("Error.save.message");
+			/* 
+			 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
+			 * Missing resources.
+			 */			
+			String title= getResourceString("Editor.Error.save.title");
+			String msg= getResourceString("Editor.Error.save.message");
 			
 			Throwable t= x.getTargetException();
 			if (t instanceof CoreException) {

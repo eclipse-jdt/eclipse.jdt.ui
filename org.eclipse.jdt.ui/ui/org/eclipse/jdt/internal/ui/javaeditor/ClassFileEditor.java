@@ -46,16 +46,25 @@ public class ClassFileEditor extends JavaEditor {
 		
 		setAction(ITextEditorActionConstants.SAVE, null);
 		setAction(ITextEditorActionConstants.REVERT_TO_SAVED, null);
-				
+		
 		setAction("AddBreakpoint", new AddBreakpointAction(getResourceBundle(), "Editor.AddBreakpoint.", this));
 		setAction("ManageBreakpoints", new BreakpointRulerAction(getResourceBundle(), "Editor.ManageBreakpoints.", getVerticalRuler(), this));
 		
-		// replace default action with class file specific ones
-		setAction(ITextEditorActionConstants.BOOKMARK, new AddClassFileMarkerAction(getResourceBundle(), "Editor.AddBookmark.", this, IMarker.BOOKMARK, true));
-		setAction(ITextEditorActionConstants.ADD_TASK, new AddClassFileMarkerAction(getResourceBundle(), "Editor.AddTask.", this, IMarker.TASK, false));
-		setAction(ITextEditorActionConstants.RULER_MANAGE_BOOKMARKS, new ClassFileMarkerRulerAction(getResourceBundle(), "Editor.ManageBookmarks.", getVerticalRuler(), this, IMarker.BOOKMARK, true));
-		setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, new ClassFileMarkerRulerAction(getResourceBundle(), "Editor.ManageTasks.", getVerticalRuler(), this, IMarker.TASK, true));
-
+		/*
+		 * 1GF82PL: ITPJUI:ALL - Need to be able to add bookmark to classfile
+		 *
+		 *  // replace default action with class file specific ones
+		 *	
+		 *	setAction(ITextEditorActionConstants.BOOKMARK, new AddClassFileMarkerAction(getResourceBundle(), "Editor.AddBookmark.", this, IMarker.BOOKMARK, true));
+		 *	setAction(ITextEditorActionConstants.ADD_TASK, new AddClassFileMarkerAction(getResourceBundle(), "Editor.AddTask.", this, IMarker.TASK, false));
+		 *	setAction(ITextEditorActionConstants.RULER_MANAGE_BOOKMARKS, new ClassFileMarkerRulerAction(getResourceBundle(), "Editor.ManageBookmarks.", getVerticalRuler(), this, IMarker.BOOKMARK, true));
+		 *	setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, new ClassFileMarkerRulerAction(getResourceBundle(), "Editor.ManageTasks.", getVerticalRuler(), this, IMarker.TASK, true));
+		 */
+		setAction(ITextEditorActionConstants.BOOKMARK, null);
+		setAction(ITextEditorActionConstants.ADD_TASK, null);
+		setAction(ITextEditorActionConstants.RULER_MANAGE_BOOKMARKS, null);
+		setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, null);
+		
 		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		
 	}
 	
