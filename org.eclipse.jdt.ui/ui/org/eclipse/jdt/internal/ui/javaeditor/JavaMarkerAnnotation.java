@@ -50,10 +50,6 @@ public class JavaMarkerAnnotation extends MarkerAnnotation {
 				setLayer(2);
 				setImage(fPresentation.getImage(getMarker()));
 				return;						
-			} else if (MarkerUtilities.isMarkerType(getMarker(), SearchUI.SEARCH_MARKER)) {
-				setLayer(2);
-				setImage(SearchUI.getSearchMarkerImage());
-				return;
 			}
 			
 		} catch (CoreException e) {
