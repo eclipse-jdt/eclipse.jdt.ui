@@ -53,6 +53,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getUnWrapProposals(context, coveringNode, null)
 				|| getAssignParamToFieldProposals(context, coveringNode, null)
 				|| getJoinVariableProposals(context, coveringNode, null)
+				|| getAddFinallyProposals(context, coveringNode, null)
+				|| getAddElseProposals(context, coveringNode, null)
 				|| getSplitVariableProposals(context, coveringNode, null);
 		}
 		return false;
@@ -76,6 +78,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getUnWrapProposals(context, coveringNode, resultingCollections);
 				getSplitVariableProposals(context, coveringNode, resultingCollections);
 				getJoinVariableProposals(context, coveringNode, resultingCollections);
+				getAddFinallyProposals(context, coveringNode, resultingCollections);
+				getAddElseProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -294,7 +298,64 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;				
 	}
 	
+	private boolean getAddFinallyProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+		TryStatement tryStatement= ASTResolving.findParentTryStatement(node);
+		if (tryStatement == null || tryStatement.getFinally() != null) {
+			return false;	
+		}
+		Statement statement= ASTResolving.findParentStatement(node);
+		if (tryStatement != statement) {
+			return false; // an node inside a catch or finally block		
+		}
+		
+		if (resultingCollections == null) {
+			return true;
+		}
+		
+		ASTRewrite rewrite= new ASTRewrite(tryStatement);
+		AST ast= tryStatement.getAST();
+		Block finallyBody= ast.newBlock();
+		tryStatement.setFinally(finallyBody);
+
+		rewrite.markAsInserted(finallyBody);
+				
+		String label= CorrectionMessages.getString("QuickAssistProcessor.addfinallyblock.description"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		proposal.ensureNoModifications();
+		resultingCollections.add(proposal);
+		return true;
+	}
 	
+	private boolean getAddElseProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+		Statement statement= ASTResolving.findParentStatement(node);
+		if (!(statement instanceof IfStatement)) {
+			return false;
+		}
+		IfStatement ifStatement= (IfStatement) statement;
+		if (ifStatement.getElseStatement() != null) {
+			return false;
+		}
+		
+		if (resultingCollections == null) {
+			return true;
+		}
+		
+		ASTRewrite rewrite= new ASTRewrite(statement);
+		AST ast= statement.getAST();
+		Block body= ast.newBlock();
+		ifStatement.setElseStatement(body);
+
+		rewrite.markAsInserted(body);
+				
+		String label= CorrectionMessages.getString("QuickAssistProcessor.addelseblock.description"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		proposal.ensureNoModifications();
+		resultingCollections.add(proposal);
+		return true;
+	}	
+
 	private boolean getCatchClauseToThrowsProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(node, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
