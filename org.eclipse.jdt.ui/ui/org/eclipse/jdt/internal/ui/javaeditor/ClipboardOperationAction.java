@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.ByteArrayTransfer;
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.RTFTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
@@ -295,9 +296,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		if (clipboardData != null) {
 			Clipboard clipboard= new Clipboard(getDisplay());
 			Object textData= clipboard.getContents(TextTransfer.getInstance());
+			Object rtfData= clipboard.getContents(RTFTransfer.getInstance());
+			// see bug 61876, I currently make assumptions about what the styled text widget sets
 			
-			Transfer[] dataTypes= new Transfer[] { TextTransfer.getInstance(),  fgTransferInstance};
-			Object[] data= new Object[] { textData,  clipboardData};
+			Transfer[] dataTypes= new Transfer[] { TextTransfer.getInstance(), RTFTransfer.getInstance(), fgTransferInstance};
+			Object[] data= new Object[] { textData, rtfData, clipboardData};
 			clipboard.setContents(data, dataTypes);
 		}
 	}
