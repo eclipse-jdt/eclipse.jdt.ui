@@ -118,7 +118,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	
 	private boolean getAssignParamToFieldProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		ASTNode parent= node.getParent();
-		if (node.getNodeType() != ASTNode.SIMPLE_NAME || !(parent instanceof SingleVariableDeclaration) || !(parent.getParent() instanceof MethodDeclaration)) {
+		if (!(parent instanceof SingleVariableDeclaration) || !(parent.getParent() instanceof MethodDeclaration)) {
 			return false;
 		}
 		SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) parent;

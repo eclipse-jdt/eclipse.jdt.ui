@@ -33,9 +33,10 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssignToVariableAssistProposal;
-import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
 
 public class AssistQuickFixTest extends QuickFixTest {
 	
@@ -54,7 +55,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -75,11 +76,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
 		
-//		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
-	
-//		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
-//		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
-		
+		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
+		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
+		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");		
 		
 		fJProject1= ProjectTestSetup.getProject();
 
@@ -368,7 +369,252 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			}
 		}
+	}
+
+	public void testAssignToLocal5() throws Exception {
+		// test prefixes and this qualification on static method
+		
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, true);
+		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
+		corePrefs.setValue(JavaCore.CODEASSIST_LOCAL_PREFIXES, "_");
+			
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private int fCount;\n");
+		buf.append("\n");
+		buf.append("    public static void foo() {\n");
+		buf.append("        System.getSecurityManager();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("System");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
+
+		boolean doField= true, doLocal= true;
+		for (int i= 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (!(curr instanceof AssignToVariableAssistProposal)) {
+				continue;
+			}			
+			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
+			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
+				assertTrue("same proposal kind", doField);
+				doField= false;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("\n");
+				buf.append("    private int fCount;\n");
+				buf.append("    private static SecurityManager fgManager;\n");
+				buf.append("\n");				
+				buf.append("    public static void foo() {\n");
+				buf.append("        E.fgManager = System.getSecurityManager();\n");
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+				
+			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
+				assertTrue("same proposal kind", doLocal);
+				doLocal= false;
+				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+				buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class E {\n");
+				buf.append("\n");
+				buf.append("    private int fCount;\n");
+				buf.append("\n");
+				buf.append("    public static void foo() {\n");
+				buf.append("        SecurityManager _manager = System.getSecurityManager();\n");
+				buf.append("    }\n");
+				buf.append("}\n");
+				assertEqualString(preview, buf.toString());
+
+			}
+		}
+	}
+
+
+	
+	public void testAssignParamToField() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public  E(int count) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("count");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int count;\n");
+		buf.append("\n");
+		buf.append("    public  E(int count) {\n");
+		buf.append("        this.count = count;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}
+	
+	public void testAssignParamToField2() throws Exception {
+		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    public  E(int count, Vector vec[]) {\n");
+		buf.append("        super();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("vec");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    private Vector[] fVec;\n");
+		buf.append("\n");
+		buf.append("    public  E(int count, Vector vec[]) {\n");
+		buf.append("        super();\n");
+		buf.append("        fVec = vec;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}
+
+	public void testAssignParamToField3() throws Exception {
+		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
+
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, true);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int fgVec;\n");
+		buf.append("\n");
+		buf.append("    public static void foo(int count, Vector vec[]) {\n");
+		buf.append("        count++;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("vec[]");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int fgVec;\n");
+		buf.append("    private static Vector[] fgVec2;\n");
+		buf.append("\n");
+		buf.append("    public static void foo(int count, Vector vec[]) {\n");
+		buf.append("        E.fgVec2 = vec;\n");
+		buf.append("        count++;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}
+	
+	public void testAssignParamToField4() throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, true);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private long count;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int count) {\n");
+		buf.append("        count++;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("int count");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private long count;\n");
+		buf.append("    private int count2;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int count) {\n");
+		buf.append("        this.count2 = count;\n");
+		buf.append("        count++;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
 	}	
+	
 	
 	
 	public void testAssignToLocal2CursorAtEnd() throws Exception {
