@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -54,7 +55,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class PullUpRefactoring extends Refactoring {
 	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
@@ -81,7 +81,7 @@ public class PullUpRefactoring extends Refactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringMessages.getString("PullUpRefactoring.Pull_Up"); //$NON-NLS-1$
+		return RefactoringCoreMessages.getString("PullUpRefactoring.Pull_Up"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -237,7 +237,7 @@ public class PullUpRefactoring extends Refactoring {
 				return result;
 			
 			if (! haveCommonDeclaringType())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.same_declaring_type"));			 //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.same_declaring_type"));			 //$NON-NLS-1$
 
 			return new RefactoringStatus();
 	}
@@ -256,9 +256,9 @@ public class PullUpRefactoring extends Refactoring {
 				return result;			
 
 			if (getSuperType(new SubProgressMonitor(pm, 1)) == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.not_allowed")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.not_allowed")); //$NON-NLS-1$
 			if (getSuperType(new SubProgressMonitor(pm, 1)).isBinary())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.subtypes_of_binary_types")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.subtypes_of_binary_types")); //$NON-NLS-1$
 
 			fElementsToPullUp= getOriginals(fElementsToPullUp);
 			for (int i= 0; i < fElementsToPullUp.length; i++) {
@@ -335,21 +335,21 @@ public class PullUpRefactoring extends Refactoring {
 
 			if (member.getElementType() != IJavaElement.METHOD && 
 				member.getElementType() != IJavaElement.FIELD)
-					return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.only_fields_and_methods"));			 //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.only_fields_and_methods"));			 //$NON-NLS-1$
 			if (! member.exists())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.elements_do_not_exist"));			 //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.elements_do_not_exist"));			 //$NON-NLS-1$
 	
 			if (member.isBinary())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_binary_elements"));	 //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_binary_elements"));	 //$NON-NLS-1$
 
 			if (member.isReadOnly())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_read_only_elements"));					 //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_read_only_elements"));					 //$NON-NLS-1$
 
 			if (! member.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_unknown_structure"));					 //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_unknown_structure"));					 //$NON-NLS-1$
 
 			if (JdtFlags.isStatic(member)) //for now
-				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_static_elements")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_static_elements")); //$NON-NLS-1$
 			
 			if (member.getElementType() == IJavaElement.METHOD)
 				return checkMethod((IMethod)member);
@@ -359,13 +359,13 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private static RefactoringStatus checkMethod(IMethod method) throws JavaModelException {
 		if (method.isConstructor())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_constructors"));			 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_constructors"));			 //$NON-NLS-1$
 			
 		if (JdtFlags.isAbstract(method))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_abstract_methods")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_abstract_methods")); //$NON-NLS-1$
 			
  		if (JdtFlags.isNative(method)) //for now - move to input preconditions
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_native_methods"));				 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_native_methods"));				 //$NON-NLS-1$
 
 		return null;	
 	}
@@ -375,25 +375,25 @@ public class PullUpRefactoring extends Refactoring {
 		IType declaringType= getDeclaringType();
 				
 		if (declaringType.isInterface()) //for now
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_interface_members")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_interface_members")); //$NON-NLS-1$
 		
 		if (JavaModelUtil.getFullyQualifiedName(declaringType).equals("java.lang.Object")) //$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_java.lang.Object"));	 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_java.lang.Object"));	 //$NON-NLS-1$
 
 		if (declaringType.isBinary())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_binary_types"));	 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_binary_types"));	 //$NON-NLS-1$
 
 		if (declaringType.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_read_only_types"));	 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_read_only_types"));	 //$NON-NLS-1$
 	
 		if (getSuperType(new SubProgressMonitor(pm, 1)) == null)	
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.not_this_type"));	 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.not_this_type"));	 //$NON-NLS-1$
 			
 		if (getSuperType(new SubProgressMonitor(pm, 1)).isBinary())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_subclasses_of_binary_types"));	 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_subclasses_of_binary_types"));	 //$NON-NLS-1$
 
 		if (getSuperType(new SubProgressMonitor(pm, 1)).isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_subclasses_of_read_only_types"));	 //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_subclasses_of_read_only_types"));	 //$NON-NLS-1$
 		
 		return null;
 	}
@@ -413,7 +413,7 @@ public class PullUpRefactoring extends Refactoring {
 		for (int i= 0; i < fElementsToPullUp.length; i++) {
 			if (fElementsToPullUp[i].getElementType() == IJavaElement.FIELD && JdtFlags.isFinal(fElementsToPullUp[i])){
 				Context context= JavaSourceContext.create(fElementsToPullUp[i]);
-				result.addWarning(RefactoringMessages.getString("PullUpRefactoring.final_fields"), context); //$NON-NLS-1$
+				result.addWarning(RefactoringCoreMessages.getString("PullUpRefactoring.final_fields"), context); //$NON-NLS-1$
 			}
 			pm.worked(1);
 		}
@@ -423,7 +423,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkAccesses(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask(RefactoringMessages.getString("PullUpRefactoring.checking_referenced_elements"), 3); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.checking_referenced_elements"), 3); //$NON-NLS-1$
 		result.merge(checkAccessedTypes(new SubProgressMonitor(pm, 1)));
 		result.merge(checkAccessedFields(new SubProgressMonitor(pm, 1)));
 		result.merge(checkAccessedMethods(new SubProgressMonitor(pm, 1)));
@@ -643,7 +643,7 @@ public class PullUpRefactoring extends Refactoring {
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
 			fChangeManager= createChangeManager(pm);
-			return new CompositeChange(RefactoringMessages.getString("PullUpRefactoring.Pull_Up"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+			return new CompositeChange(RefactoringCoreMessages.getString("PullUpRefactoring.Pull_Up"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} catch(CoreException e){
 			throw new JavaModelException(e);
 		} finally{
@@ -743,7 +743,7 @@ public class PullUpRefactoring extends Refactoring {
 			importEdit.addImport(JavaModelUtil.getFullyQualifiedName(iType));
 		}
 		if (! importEdit.isEmpty())
-			manager.get(cu).addTextEdit(RefactoringMessages.getString("PullUpRefactoring.update_imports"), importEdit); //$NON-NLS-1$
+			manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("PullUpRefactoring.update_imports"), importEdit); //$NON-NLS-1$
 	}
 
 	private static int getTabWidth() {

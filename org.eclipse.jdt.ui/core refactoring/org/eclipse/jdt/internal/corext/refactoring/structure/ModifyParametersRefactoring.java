@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -33,7 +34,7 @@ public class ModifyParametersRefactoring extends Refactoring implements IMultiRe
 	}
 
 	public String getName() {
-		return "Modify Parameters";
+		return RefactoringCoreMessages.getString("ModifyParamatersRefactoring.modify_Parameters"); //$NON-NLS-1$
 	}
 	
 	public String[] getNewParameterOrder() {
@@ -87,7 +88,7 @@ public class ModifyParametersRefactoring extends Refactoring implements IMultiRe
 	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 2);
+			pm.beginTask("", 2); //$NON-NLS-1$
 			RefactoringStatus result= fRenameParameters.checkActivation(new SubProgressMonitor(pm, 1));
 			if (! result.isOK())
 				return result;
@@ -100,9 +101,9 @@ public class ModifyParametersRefactoring extends Refactoring implements IMultiRe
 
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("'Checking preconditions", 2);
+			pm.beginTask(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.checking_preconditions"), 2); //$NON-NLS-1$
 			if (fRenameParameters.isInputSameAsInitial() && fReorderParameters.isInputSameAsInitial())
-				return RefactoringStatus.createFatalErrorStatus("No parameters were renamed or reordered.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.no_changes")); //$NON-NLS-1$
 			
 			RefactoringStatus result;
 			if (! fRenameParameters.isInputSameAsInitial()){
@@ -161,10 +162,10 @@ public class ModifyParametersRefactoring extends Refactoring implements IMultiRe
 		int[] permutation= fReorderParameters.getParamaterPermutation();
 		for (int i= 0; i < parameterTypes.length; i++) {
 			if (i != 0)
-				buff.append(", "); 
+				buff.append(", ");  //$NON-NLS-1$
 			int newI= permutation[i];
 			buff.append(Signature.toString(parameterTypes[newI]));
-			buff.append(" ");
+			buff.append(" "); //$NON-NLS-1$
 			buff.append(parameterNames[newI]);
 		}
 		return buff.toString();
@@ -189,8 +190,8 @@ public class ModifyParametersRefactoring extends Refactoring implements IMultiRe
 	//--  changes ----
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("Preparing preview", 2);
-			return new CompositeChange("Restructure parameters", fChangeManager.getAllChanges());
+			pm.beginTask(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.preparing_preview"), 2); //$NON-NLS-1$
+			return new CompositeChange(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.restructure_parameters"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
 		}	

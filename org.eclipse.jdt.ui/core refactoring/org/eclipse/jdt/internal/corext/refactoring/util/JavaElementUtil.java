@@ -31,14 +31,14 @@ public class JavaElementUtil {
 	}
 	
 	public static String createFieldSignature(IField field){
-		return JavaModelUtil.getFullyQualifiedName(field.getDeclaringType()) + "." + field.getElementName();
+		return JavaModelUtil.getFullyQualifiedName(field.getDeclaringType()) + "." + field.getElementName(); //$NON-NLS-1$
 	}
 	
 	public static String createInitializerSignature(IInitializer initializer){
 		String label= "initializer in " + JavaModelUtil.getFullyQualifiedName(initializer.getDeclaringType());
 		try {
 			if (JdtFlags.isStatic(initializer))
-				return "static " + label;
+				return "static " + label; //$NON-NLS-1$
 			else 
 				return label;
 		} catch(JavaModelException e) {
