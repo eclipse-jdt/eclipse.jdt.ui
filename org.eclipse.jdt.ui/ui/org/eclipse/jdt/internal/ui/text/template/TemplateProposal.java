@@ -113,7 +113,7 @@ public class TemplateProposal implements ICompletionProposal {
 			}
 		}
 
-		if (TemplatePreferencePage.useCodeFormatter()) {
+		if (TemplatePreferencePage.useCodeFormatter() && fTemplate.getContext().equals("java")) { //$NON-NLS-1$
 			CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
 			formatter.setPositionsToMap(new int[] {fSelectionStart, fSelectionEnd});
 			formatter.setInitialIndentationLevel(indentationLevel);
@@ -205,30 +205,30 @@ public class TemplateProposal implements ICompletionProposal {
 
 	private static String textToHTML(String string) {
 		StringBuffer buffer= new StringBuffer(string.length());
-		buffer.append("<pre>"); // $NON-NLS-1$ //$NON-NLS-1$
+		buffer.append("<pre>"); //$NON-NLS-1$
 	
 		for (int i= 0; i != string.length(); i++) {
 			char ch= string.charAt(i);
 			
 			switch (ch) {
 				case '&':
-					buffer.append("&amp;"); // $NON-NLS-1$ //$NON-NLS-1$
+					buffer.append("&amp;"); //$NON-NLS-1$
 					break;
 					
 				case '<':
-					buffer.append("&lt;"); // $NON-NLS-1$ //$NON-NLS-1$
+					buffer.append("&lt;"); //$NON-NLS-1$
 					break;
 
 				case '>':
-					buffer.append("&gt;"); // $NON-NLS-1$ //$NON-NLS-1$
+					buffer.append("&gt;"); //$NON-NLS-1$
 					break;
 
 				case '\t':
-					buffer.append("    "); // $NON-NLS-1$ //$NON-NLS-1$
+					buffer.append("    "); //$NON-NLS-1$
 					break;
 
 				case '\n':
-					buffer.append("<br>"); // $NON-NLS-1$ //$NON-NLS-1$
+					buffer.append("<br>"); //$NON-NLS-1$
 					break;
 
 				default:
@@ -237,7 +237,7 @@ public class TemplateProposal implements ICompletionProposal {
 			}
 		}
 
-		buffer.append("</pre>"); // $NON-NLS-1$	 //$NON-NLS-1$
+		buffer.append("</pre>"); //$NON-NLS-1$
 		return buffer.toString();
 	}
 

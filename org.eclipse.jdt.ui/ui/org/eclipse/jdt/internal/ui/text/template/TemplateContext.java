@@ -35,19 +35,19 @@ import org.eclipse.jface.text.ITextViewer;
 
 public class TemplateContext implements VariableEvaluator {
 
-	private static final String FILE= "file"; // $NON-NLS-1$ //$NON-NLS-1$
-	private static final String LINE= "line"; // $NON-NLS-1$ //$NON-NLS-1$
-	private static final String DATE= "date"; // $NON-NLS-1$ //$NON-NLS-1$
+	private static final String FILE= "file"; //$NON-NLS-1$
+	private static final String LINE= "line"; //$NON-NLS-1$
+	private static final String DATE= "date"; //$NON-NLS-1$
 
-	private static final String INDEX= "index"; // $NON-NLS-1$ //$NON-NLS-1$
-	private static final String ARRAY= "array"; // $NON-NLS-1$ //$NON-NLS-1$
-	private static final String ITERATOR= "iterator"; // $NON-NLS-1$ //$NON-NLS-1$
-	private static final String COLLECTION= "collection"; // $NON-NLS-1$ //$NON-NLS-1$
-	private static final String VECTOR= "vector"; // $NON-NLS-1$ //$NON-NLS-1$
-	private static final String ENUMERATION= "enumeration"; // $NON-NLS-1$ //$NON-NLS-1$
-	private static final String TYPE= "type"; // $NON-NLS-1$ //$NON-NLS-1$
-	private static final String ELEMENT_TYPE= "element_type"; // $NON-NLS-1$ //$NON-NLS-1$
-	private static final String ELEMENT= "element"; // $NON-NLS-1$ //$NON-NLS-1$
+	private static final String INDEX= "index"; //$NON-NLS-1$
+	private static final String ARRAY= "array"; //$NON-NLS-1$
+	private static final String ITERATOR= "iterator"; //$NON-NLS-1$
+	private static final String COLLECTION= "collection"; //$NON-NLS-1$
+	private static final String VECTOR= "vector"; //$NON-NLS-1$
+	private static final String ENUMERATION= "enumeration"; //$NON-NLS-1$
+	private static final String TYPE= "type"; //$NON-NLS-1$
+	private static final String ELEMENT_TYPE= "element_type"; //$NON-NLS-1$
+	private static final String ELEMENT= "element"; //$NON-NLS-1$
 
 	private ICompilationUnit fUnit;
 	private IDocument fDocument;
