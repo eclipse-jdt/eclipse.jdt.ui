@@ -415,9 +415,8 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private class OutlineSorter extends ViewerSorter {
 
 		private static final int OTHER= 1;
-		private static final int CLASS= 2;
-		private static final int INTERFACE= 3;
-		private static final int ANONYM= 4;
+		private static final int TYPE= 2;
+		private static final int ANONYM= 3;
 
 		private JavaElementSorter fJavaElementSorter= new JavaElementSorter();
 		
@@ -495,14 +494,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 				if (type.getElementName().length() == 0) {
 					return ANONYM;
 				}
-				ITypeHierarchy hierarchy= getSuperTypeHierarchy(type);
-				if (hierarchy != null) {
-					if (Flags.isInterface(hierarchy.getCachedFlags((IType) element))) {
-						return INTERFACE;
-					} else {
-						return CLASS;
-					}
-				}
+				return TYPE;
 			}
 			return OTHER;
 		}
