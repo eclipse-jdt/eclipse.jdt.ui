@@ -35,10 +35,13 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
@@ -171,6 +174,15 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				containerName= ASTNodes.asString(qualifier);
 				name= JavaModelUtil.concatenateName(containerName, simpleName);
 				qualifierStart= qualifier.getStartPosition();
+			} else if (nameNode.getLocationInParent() == MethodInvocation.NAME_PROPERTY) {
+				ASTNode qualifier= ((MethodInvocation) nameNode.getParent()).getExpression();
+				if (qualifier instanceof Name) {
+					containerName= ASTNodes.asString(qualifier);
+					name= JavaModelUtil.concatenateName(containerName, simpleName);
+					qualifierStart= qualifier.getStartPosition();
+				} else {
+					return null;
+				}
 			} else {
 				containerName= ""; //$NON-NLS-1$
 				name= simpleName;
@@ -178,21 +190,39 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			}
 			
 			IBinding binding= nameNode.resolveBinding();
-			if (binding instanceof ITypeBinding) {
-				ITypeBinding typeBinding= (ITypeBinding) binding;
-				String qualifiedBindingName= typeBinding.getQualifiedName();
-				if (containerName.length() > 0 && !qualifiedBindingName.equals(name)) {
+			if (binding != null) {
+				if (binding instanceof ITypeBinding) {
+					ITypeBinding typeBinding= (ITypeBinding) binding;
+					String qualifiedBindingName= typeBinding.getQualifiedName();
+					if (containerName.length() > 0 && !qualifiedBindingName.equals(name)) {
+						return null;
+					}
+					
+					String res= importRewrite.addImport(typeBinding);
+					if (containerName.length() > 0 && !res.equals(simpleName)) {
+						// adding import failed
+						return null;
+					}
+					return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+				} else if (binding instanceof IVariableBinding || binding instanceof IMethodBinding) {
+					boolean isField= binding instanceof IVariableBinding;
+					ITypeBinding declaringClass= isField ? ((IVariableBinding) binding).getDeclaringClass() : ((IMethodBinding) binding).getDeclaringClass();
+					if (Modifier.isStatic(binding.getModifiers())) {
+						if (containerName.length() > 0) { 
+							if (containerName.equals(declaringClass.getName()) || containerName.equals(declaringClass.getQualifiedName()) ) {
+								String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
+								if (!res.equals(simpleName)) {
+									// adding import failed
+									return null;
+								}
+								return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+							}
+						}
+					}
+					return null; // no static imports for packages
+				} else {
 					return null;
 				}
-				
-				String res= importRewrite.addImport(typeBinding);
-				if (containerName.length() > 0 && !res.equals(simpleName)) {
-					// adding import failed
-					return null;
-				}
-				return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
-			} else if (binding != null) {
-				return null; // no static imports
 			}
 			
 		} else {
@@ -206,7 +236,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			
 			simpleNameStart= getSimpleNameStart(fDocument, qualifierStart, containerName);
 			
-			String existingImport= importRewrite.findImport(null, simpleName, false);
+			String existingImport= importRewrite.findImport(simpleName);
 			if (existingImport != null) {
 				if (containerName.length() == 0) {
 					return null;

@@ -34,7 +34,7 @@ public interface IImportsStructure {
 	 * @return Retuns the simple type name that can be used in the code or the
 	 * fully qualified type name if an import conflict prevented the import.
 	 */		
-	String addImport(String qualifiedTypeName, boolean isStatic);
+	String addStaticImport(String qualifiedTypeName, String selector, boolean isField);
 	
 	
 }

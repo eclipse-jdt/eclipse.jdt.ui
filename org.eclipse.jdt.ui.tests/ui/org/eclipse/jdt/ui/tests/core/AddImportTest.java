@@ -308,9 +308,9 @@ public class AddImportTest extends CoreTests {
 		String[] order= new String[] { "java" };
 
 		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
-		imports.addImport("java.lang.Math.min", true);
-		imports.addImport("java.lang.Math", false);
-		imports.addImport("java.lang.Math.max", true);
+		imports.addStaticImport("java.lang.Math", "min", true);
+		imports.addImport("java.lang.Math");
+		imports.addStaticImport("java.lang.Math", "max", true);
 
 		imports.create(true, null);
 
@@ -342,9 +342,9 @@ public class AddImportTest extends CoreTests {
 		String[] order= new String[] { "java" };
 
 		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
-		imports.addImport("xx.MyConstants.SIZE", true);
-		imports.addImport("xy.MyConstants.*", true);
-		imports.addImport("xy.MyConstants", false);
+		imports.addStaticImport("xx.MyConstants", "SIZE", true);
+		imports.addStaticImport("xy.MyConstants", "*", true);
+		imports.addImport("xy.MyConstants");
 		
 		imports.create(true, null);
 
@@ -483,6 +483,44 @@ public class AddImportTest extends CoreTests {
 		}
 	}	
 
+	public void testAddImportActionStatic1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    String str= java.io.File.separator;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		IPath path= cu.getPath();
+		
+		FileBuffers.getTextFileBufferManager().connect(path, null);
+		try {
+			IDocument doc= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path).getDocument();
+			int selOffset= buf.indexOf("separator");
+		
+			AddImportsOperation op= new AddImportsOperation(cu, doc, selOffset, 0, null);
+			op.run(null);
+
+			buf= new StringBuffer();
+			buf.append("package pack1;\n");
+			buf.append("\n");
+			buf.append("import static java.io.File.separator;\n");
+			buf.append("import java.lang.System;\n");
+			buf.append("\n");		
+			buf.append("public class C {\n");
+			buf.append("    String str= separator;\n");
+			buf.append("}\n");
+			assertEqualString(doc.get(), buf.toString());
+
+		} finally {
+			FileBuffers.getTextFileBufferManager().disconnect(path, null);
+		}
+	}	
 
 }

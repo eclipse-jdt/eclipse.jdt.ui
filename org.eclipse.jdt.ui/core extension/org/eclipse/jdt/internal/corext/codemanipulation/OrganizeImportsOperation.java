@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -165,7 +166,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 							typeBinding= typeBinding.getElementType();
 						}
 						if (needsImport(typeBinding, ref)) {
-							fImpStructure.addImport(typeBinding, false);
+							fImpStructure.addImport(typeBinding);
 							fImportsAdded.add(typeName);
 						}
 					}	
@@ -183,7 +184,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					return null;
 				} else if (nFound == 1) {
 					TypeInfo typeRef= (TypeInfo) typeRefsFound.get(0);
-					fImpStructure.addImport(typeRef.getFullyQualifiedName(), false);
+					fImpStructure.addImport(typeRef.getFullyQualifiedName());
 					return null;
 				} else {
 					String containerToImport= null;
@@ -196,7 +197,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						String containerName= typeRef.getTypeContainerName();
 						if (fOldSingleImports.contains(fullName)) {
 							// was single-imported
-							fImpStructure.addImport(fullName, false);
+							fImpStructure.addImport(fullName);
 							return null;
 						} else if (fOldDemandImports.contains(containerName)) {
 							if (containerToImport == null) {
@@ -208,7 +209,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					}
 					
 					if (containerToImport != null && !ambiguousImports) {
-						fImpStructure.addImport(JavaModelUtil.concatenateName(containerToImport, typeName), false);
+						fImpStructure.addImport(JavaModelUtil.concatenateName(containerToImport, typeName));
 					} else {
 						// return the open choices
 						return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[nFound]);
@@ -357,7 +358,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			Name name= (Name) staticReferences.get(i);
 			IBinding binding= name.resolveBinding();
 			if (binding != null) { // paranoidal check
-				importsStructure.addImport(Bindings.getImportName(binding), true);
+				if (binding instanceof IVariableBinding) {
+					ITypeBinding declaringType= ((IVariableBinding) binding).getDeclaringClass();
+					importsStructure.addStaticImport(declaringType.getQualifiedName(), binding.getName(), true);
+					
+				} else if (binding instanceof IMethodBinding) {
+					ITypeBinding declaringType= ((IMethodBinding) binding).getDeclaringClass();
+					importsStructure.addStaticImport(declaringType.getQualifiedName(), binding.getName(), false);
+				}
 			}
 		}
 	}

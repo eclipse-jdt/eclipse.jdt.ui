@@ -49,6 +49,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -439,7 +440,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			Name curr= (Name) staticImportsRefs.get(i);
 			IBinding binding= curr.resolveBinding();
 			if (binding != null) {
-				staticsToImport.add(Bindings.getImportName(binding));
+				StringBuffer buf= new StringBuffer(Bindings.getImportName(binding));
+				if (binding.getKind() == IBinding.METHOD) {
+					buf.append("()"); //$NON-NLS-1$
+				}
+				staticsToImport.add(buf.toString());
 			}
 		}
 		
@@ -488,11 +493,17 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		importsStructure.setFindAmbiguousImports(false);
 		String[] imports= data.getTypeImports();
 		for (int i= 0; i < imports.length; i++) {
-			importsStructure.addImport(imports[i], false);
+			importsStructure.addImport(imports[i]);
 		}
 		String[] staticImports= data.getStaticImports();
 		for (int i= 0; i < staticImports.length; i++) {
-			importsStructure.addImport(staticImports[i], true);
+			String name= Signature.getSimpleName(staticImports[i]);
+			boolean isField= !name.endsWith("()"); //$NON-NLS-1$
+			if (!isField) {
+				name= name.substring(0, name.length() - 2);
+			}
+			String qualifier= Signature.getQualifier(staticImports[i]);
+			importsStructure.addStaticImport(qualifier, name, isField);
 		}
 		
 		importsStructure.create(false, null);

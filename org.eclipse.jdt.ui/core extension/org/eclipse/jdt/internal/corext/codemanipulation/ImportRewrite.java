@@ -94,19 +94,20 @@ public final class ImportRewrite {
 	 * The type name can contain dimensions.
 	 */
 	public String addImport(String qualifiedTypeName) {
-		return fImportsStructure.addImport(qualifiedTypeName, false);
+		return fImportsStructure.addImport(qualifiedTypeName);
 	}
 	
 	/**
 	 * Adds a new static import declaration that is sorted in the structure using
 	 * a best match algorithm. 
-	 * @param qualifiedTypeName The fully qualified import name of the static member
+	 * @param qualifiedName The name of the static member type
+	 * 	@param selector The name of the static member
 	 * @return Returns the simple type name that can be used in the code or the
 	 * fully qualified type name if an import conflict prevented the import.
 	 * The type name can contain dimensions.
 	 */
-	public String addStaticImport(String qualifiedTypeName) {
-		return fImportsStructure.addImport(qualifiedTypeName, true);
+	public String addStaticImport(String qualifiedName, String selector, boolean isField) {
+		return fImportsStructure.addStaticImport(qualifiedName, selector, isField);
 	}
 	
 	/**
@@ -119,7 +120,7 @@ public final class ImportRewrite {
 	 * fully qualified type name if an import conflict prevented the import.
 	 */
 	public String addImport(ITypeBinding binding) {
-		return fImportsStructure.addImport(binding, false);
+		return fImportsStructure.addImport(binding);
 	}
 	
 	
@@ -134,17 +135,16 @@ public final class ImportRewrite {
 	 * fully qualified type name if an import conflict prevented the import.
 	 */
 	public Type addImport(ITypeBinding binding, AST ast) {
-		return fImportsStructure.addImport(binding, ast, false);
+		return fImportsStructure.addImport(binding, ast);
 	}
 	
 	/**
 	 * Looks if there already is single import for the given name.
-	 * @param containerName The container name or <code>null</code>
 	 * @param simpleName The simple name to find
 	 * @return Returns the qualified import name or <code>null</code>.
 	 */	
-	public String findImport(String containerName, String simpleName, boolean isStatic) {
-		return fImportsStructure.findImport(containerName, simpleName, isStatic);
+	public String findImport(String simpleName) {
+		return fImportsStructure.findImport(simpleName);
 	}
 	
 

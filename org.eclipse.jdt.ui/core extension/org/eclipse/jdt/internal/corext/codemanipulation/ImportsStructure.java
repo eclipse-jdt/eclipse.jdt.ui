@@ -428,7 +428,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 * @return Returns the a new AST node that is either simple if the import was successful or 
 	 * fully qualified type name if the import could not be added due to a conflict. 
 	 */
-	public Type addImport(ITypeBinding binding, AST ast, boolean isStaticImport) {
+	public Type addImport(ITypeBinding binding, AST ast) {
 		if (binding.isPrimitive()) {
 			return ast.newPrimitiveType(PrimitiveType.toCode(binding.getName()));
 		}
@@ -446,34 +446,34 @@ public final class ImportsStructure implements IImportsStructure {
 			WildcardType wcType= ast.newWildcardType();
 			ITypeBinding bound= normalizedBinding.getBound();
 			if (bound != null) {
-				Type boundType= addImport(bound, ast, isStaticImport);
+				Type boundType= addImport(bound, ast);
 				wcType.setBound(boundType, normalizedBinding.isUpperbound());
 			}
 			return wcType;
 		}
 		
 		if (normalizedBinding.isArray()) {
-			Type elementType= addImport(normalizedBinding.getElementType(), ast, isStaticImport);
+			Type elementType= addImport(normalizedBinding.getElementType(), ast);
 			return ast.newArrayType(elementType, normalizedBinding.getDimensions());
 		}
 		
 		if (normalizedBinding.isParameterizedType()) {
 			ITypeBinding erasure= normalizedBinding.getErasure();
 			
-			Type erasureType= addImport(erasure, ast, isStaticImport);
+			Type erasureType= addImport(erasure, ast);
 			ParameterizedType paramType= ast.newParameterizedType(erasureType);
 			List arguments= paramType.typeArguments();
 			
 			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
 			for (int i= 0; i < typeArguments.length; i++) {
-				arguments.add(addImport(typeArguments[i], ast, isStaticImport));
+				arguments.add(addImport(typeArguments[i], ast));
 			}
 			return paramType;
 		}
 		
 		String qualifiedName= normalizedBinding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
-			String res= internalAddImport(qualifiedName, isStaticImport);
+			String res= internalAddImport(qualifiedName);
 			return ast.newSimpleType(ast.newSimpleName(res));
 		}
 		return ast.newSimpleType(ast.newSimpleName(normalizedBinding.getName()));
@@ -489,7 +489,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 * was added, fully qualified type name if the import could not be added due
 	 * to a conflict. 
 	 */
-	public String addImport(ITypeBinding binding, boolean isStaticImport) {
+	public String addImport(ITypeBinding binding) {
 		
 		if (binding.isPrimitive() || binding.isTypeVariable()) {
 			return binding.getName();
@@ -508,13 +508,13 @@ public final class ImportsStructure implements IImportsStructure {
 				} else {
 					res.append(" super "); //$NON-NLS-1$
 				}
-				res.append(addImport(bound, isStaticImport));
+				res.append(addImport(bound));
 			}
 			return res.toString();
 		}
 		
 		if (normalizedBinding.isArray()) {
-			StringBuffer res= new StringBuffer(addImport(normalizedBinding.getElementType(), isStaticImport));
+			StringBuffer res= new StringBuffer(addImport(normalizedBinding.getElementType()));
 			for (int i= normalizedBinding.getDimensions(); i > 0; i--) {
 				res.append("[]"); //$NON-NLS-1$
 			}
@@ -523,21 +523,21 @@ public final class ImportsStructure implements IImportsStructure {
 		
 		if (normalizedBinding.isParameterizedType()) {
 			ITypeBinding erasure= normalizedBinding.getErasure();
-			StringBuffer res= new StringBuffer(addImport(erasure, isStaticImport));
+			StringBuffer res= new StringBuffer(addImport(erasure));
 			res.append('<');
 			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
 			for (int i= 0; i < typeArguments.length; i++) {
 				if (i > 0) {
 					res.append(','); //$NON-NLS-1$
 				}
-				res.append(addImport(typeArguments[i], isStaticImport));
+				res.append(addImport(typeArguments[i]));
 			}
 			return res.toString();
 		}
 		
 		String qualifiedName= normalizedBinding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
-			return internalAddImport(qualifiedName, isStaticImport);
+			return internalAddImport(qualifiedName);
 		}
 		return normalizedBinding.getName();
 	}
@@ -546,37 +546,57 @@ public final class ImportsStructure implements IImportsStructure {
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
-	 * @param qualifiedName The fully qualified name of the type to import
-	 * @return Returns either the simple type name if the import was succesful or else the qualified type name
-	 */
-	public String addImport(String qualifiedName) {
-		return addImport(qualifiedName, false);
-	}
-	
-	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 * @return Returns either the simple type name if the import was succesful or else the qualified type name
 	 */
-	public String addImport(String qualifiedTypeName, boolean isStaticImport) {
+	public String addImport(String qualifiedTypeName) {
 		int bracketOffset= qualifiedTypeName.indexOf('[');
 		if (bracketOffset != -1) {
-			return internalAddImport(qualifiedTypeName.substring(0, bracketOffset), isStaticImport) + qualifiedTypeName.substring(bracketOffset);
+			return internalAddImport(qualifiedTypeName.substring(0, bracketOffset)) + qualifiedTypeName.substring(bracketOffset);
 		}
-		return internalAddImport(qualifiedTypeName, isStaticImport);
+		return internalAddImport(qualifiedTypeName);
 	}
+	
+	/**
+	 * Adds a new static import declaration that is sorted in the structure using
+	 * a best match algorithm. If an import already exists, the import is
+	 * not added.
+	 * @param declaringTypeName The qualified name of the static's member declaring type
+	 * @return Returns either the simple type name if the import was succesful or else the qualified type name
+	 */
+	public String addStaticImport(String declaringTypeName, String simpleName, boolean isField) {
+		String containerName= Signature.getQualifier(declaringTypeName);
+		String typeName= Signature.getSimpleName(declaringTypeName);
+		String fullName= declaringTypeName + '.' + simpleName;
 		
-	private String internalAddImport(String fullTypeName, boolean isStaticImport) {
-		int idx= fullTypeName.lastIndexOf('.');
-		if (isStaticImport) {
-			if (idx == -1) {
-				return fullTypeName;
-			}
-			idx= fullTypeName.lastIndexOf('.', idx - 1); // to second last dot
+		if (containerName.length() == 0) {
+			return declaringTypeName + '.' + simpleName;
 		}
+		if (!"*".equals(simpleName)) { //$NON-NLS-1$
+			if (isField) {
+				String existing= findStaticImport(null, null, simpleName);
+				if (existing != null) {
+					if (existing.equals(fullName)) {
+						return simpleName;
+					} else {
+						return fullName;
+					}
+				}
+			} else {
+				String existing= findStaticImport(containerName, typeName, simpleName);
+				if (existing != null) {
+					return simpleName;
+				}
+			}
+		}
+		ImportDeclEntry decl= new ImportDeclEntry(fullName, null, true);
 		
+		sortIn(containerName, decl);
+		return simpleName;
+	}
+	
+	private String internalAddImport(String fullTypeName) {
+		int idx= fullTypeName.lastIndexOf('.');	
 		String typeContainerName, typeName;
 		if (idx != -1) {
 			typeContainerName= fullTypeName.substring(0, idx);
@@ -593,32 +613,30 @@ public final class ImportsStructure implements IImportsStructure {
 		if (!"*".equals(typeName)) { //$NON-NLS-1$
 			String topLevelTypeName= Signature.getQualifier(fCompilationUnit.getElementName());
 			
-			if (!isStaticImport) {
-				if (typeName.equals(topLevelTypeName)) {
-					if (!typeContainerName.equals(fCompilationUnit.getParent().getElementName())) {
-						return fullTypeName;
-					} else {
-						return typeName;
-					}
+			if (typeName.equals(topLevelTypeName)) {
+				if (!typeContainerName.equals(fCompilationUnit.getParent().getElementName())) {
+					return fullTypeName;
+				} else {
+					return typeName;
 				}
-				String existing= findImport(null, typeName, isStaticImport);
-				if (existing != null) {
-					if (fullTypeName.equals(existing)) {
-						return typeName;
-					} else {
-						return fullTypeName;
-					}
-				}
-			} else {
-				String existing= findImport(typeContainerName, typeName, isStaticImport);
+			}
+			String existing= findImport(typeName);
+			if (existing != null) {
 				if (fullTypeName.equals(existing)) {
 					return typeName;
+				} else {
+					return fullTypeName;
 				}
 			}
 		}
 		
-		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, null, isStaticImport);
+		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, null, false);
 			
+		sortIn(typeContainerName, decl);
+		return typeName;
+	}
+	
+	private void sortIn(String typeContainerName, ImportDeclEntry decl) {
 		PackageEntry bestMatch= findBestMatch(typeContainerName);
 		if (bestMatch == null) {
 			PackageEntry packEntry= new PackageEntry(typeContainerName, null);
@@ -646,11 +664,9 @@ public final class ImportsStructure implements IImportsStructure {
 				}
 			}
 		}
-	
 		fHasChanges= true;
-		return typeName;
 	}
-	
+
 	/**
 	 * Removes an import from the structure.
 	 * @param qualifiedTypeName The qualified type name to remove from the imports
@@ -696,16 +712,27 @@ public final class ImportsStructure implements IImportsStructure {
 
 	/**
 	 * Looks if there already is single import for the given type name.
-	 * @param containerName The container name or <code>null</code>
 	 * @param simpleName The simple name to find
 	 * @return Returns the qualified import name or <code>null</code>.
 	 */	
-	public String findImport(String containerName, String simpleName, boolean isStatic) {
+	public String findImport(String simpleName) {		
 		int nPackages= fPackageEntries.size();
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
-			if (containerName == null || entry.getName().equals(containerName)) {
-				ImportDeclEntry found= entry.find(simpleName, isStatic);
+			ImportDeclEntry found= entry.find(simpleName);
+			if (found != null) {
+				return found.getElementName();
+			}
+		}
+		return null;		
+	}
+		
+	public String findStaticImport(String typeContainerName, String typeSimpleName, String simpleName) {		
+		int nPackages= fPackageEntries.size();
+		for (int i= 0; i < nPackages; i++) {
+			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
+			if (typeContainerName == null || entry.getName().equals(typeContainerName)) {
+				ImportDeclEntry found= entry.findStatic(typeSimpleName, simpleName);
 				if (found != null) {
 					return found.getElementName();
 				}
@@ -862,7 +889,7 @@ public final class ImportsStructure implements IImportsStructure {
 				lastPackage= pack;
 				
 				boolean doStarImport= pack.hasStarImport(fImportOnDemandThreshold, onDemandConflicts, false);
-				if (doStarImport && (pack.find("*", false) == null)) { //$NON-NLS-1$
+				if (doStarImport && (pack.find("*") == null)) { //$NON-NLS-1$
 					String starImportString= pack.getName() + ".*"; //$NON-NLS-1$
 					appendImportToBuffer(buf, starImportString, false, lineDelim);
 					nCreated++;
@@ -1163,11 +1190,11 @@ public final class ImportsStructure implements IImportsStructure {
 			fImportEntries.add(imp);
 		}
 		
-		public ImportDeclEntry find(String simpleName, boolean isStatic) {
+		public ImportDeclEntry find(String simpleName) {
 			int nInports= fImportEntries.size();
 			for (int i= 0; i < nInports; i++) {
 				ImportDeclEntry curr= getImportAt(i);
-				if (!curr.isComment() && curr.isStatic() == isStatic) {
+				if (!curr.isComment() && !curr.isStatic()) {
 					String name= curr.getElementName();
 					if (name.endsWith(simpleName)) {
 						int dotPos= name.length() - simpleName.length() - 1;
@@ -1178,7 +1205,29 @@ public final class ImportsStructure implements IImportsStructure {
 				}
 			}
 			return null;
-		}		
+		}
+		
+		public ImportDeclEntry findStatic(String typeSimpleName, String simpleName) {
+			int nInports= fImportEntries.size();
+			for (int i= 0; i < nInports; i++) {
+				ImportDeclEntry curr= getImportAt(i);
+				if (!curr.isComment() && curr.isStatic()) {
+					String name= curr.getElementName();
+					int idx= name.lastIndexOf('.');
+					if (idx > 0 && simpleName.equals(name.substring(idx + 1))) { // not -1 and not 0
+						if (typeSimpleName != null) {
+							int prexIdx= name.lastIndexOf('.', idx - 1);
+							if (prexIdx != -1 && typeSimpleName.equals(name.substring(prexIdx + 1, idx))) { 
+								return curr;
+							}
+						} else {
+							return curr;
+						}
+					}
+				}
+			}
+			return null;
+		}	
 		
 		public boolean remove(String fullName, boolean isStaticImport) {
 			int nInports= fImportEntries.size();
