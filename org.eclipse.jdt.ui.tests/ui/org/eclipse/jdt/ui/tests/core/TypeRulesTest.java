@@ -15,9 +15,6 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -35,10 +32,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 public class TypeRulesTest extends CoreTests {
 	
 	private static final Class THIS= TypeRulesTest.class;
+	private static final boolean BUG_82504_core_parser_CCE= true;
 	
 	private IJavaProject fJProject1;
 
@@ -47,7 +47,11 @@ public class TypeRulesTest extends CoreTests {
 	public TypeRulesTest(String name) {
 		super(name);
 	}
-
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
+	
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
@@ -67,6 +71,7 @@ public class TypeRulesTest extends CoreTests {
 		options.put(JavaCore.COMPILER_PB_NO_EFFECT_ASSIGNMENT, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.IGNORE);
 		JavaCore.setOptions(options);
 		
 		fJProject1= ProjectTestSetup.getProject();
@@ -87,7 +92,7 @@ public class TypeRulesTest extends CoreTests {
 		buf.append("import java.util.Collection;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("import java.net.Socket;\n");
-		buf.append("public class E {\n");
+		buf.append("public class E<T, U extends Number> {\n");
 		buf.append("    boolean bool= false;\n");
 		buf.append("    char c= 0;\n");
 		buf.append("    byte b= 0;\n");
@@ -96,6 +101,16 @@ public class TypeRulesTest extends CoreTests {
 		buf.append("    long l= 0;\n");
 		buf.append("    float f= 0;\n");
 		buf.append("    double d= 0;\n");
+		
+		buf.append("    Boolean bool_class= null;\n");
+		buf.append("    Character c_class= null;\n");
+		buf.append("    Byte b_class= null;\n");
+		buf.append("    Short s_class= null;\n");
+		buf.append("    Integer i_class= null;\n");
+		buf.append("    Long l_class= null;\n");
+		buf.append("    Float f_class= null;\n");
+		buf.append("    Double d_class= null;\n");
+		
 		buf.append("    Object object= null;\n");
 		buf.append("    Vector vector= null;\n");
 		buf.append("    Socket socket= null;\n");
@@ -112,6 +127,29 @@ public class TypeRulesTest extends CoreTests {
 		buf.append("    Collection[][] collection_arrarr= null;\n");
 		buf.append("    Vector[][] vector_arrarr= null;\n");
 		buf.append("    Socket[][] socket_arrarr= null;\n");
+		
+		buf.append("    Collection<String> collection_string= null;\n");
+		buf.append("    Collection<Object> collection_object= null;\n");
+		buf.append("    Collection<Number> collection_number= null;\n");
+		buf.append("    Collection<Integer> collection_integer= null;\n");
+		buf.append("    Collection<? extends Number> collection_upper_number= null;\n");
+		buf.append("    Collection<? super Number> collection_lower_number= null;\n");
+		buf.append("    Vector<Object> vector_object= null;\n");
+		buf.append("    Vector<Number> vector_number= null;\n");
+		buf.append("    Vector<Integer> vector_integer= null;\n");
+		buf.append("    Vector<? extends Number> vector_upper_number= null;\n");
+		buf.append("    Vector<? super Number> vector_lower_number= null;\n");
+		buf.append("    Vector<? extends Exception> vector_upper_exception= null;\n");
+		buf.append("    Vector<? super Exception> vector_lower_exception= null;\n");
+		
+		buf.append("    T t= null;\n");
+		buf.append("    U u= null;\n");
+		buf.append("    Vector<T> vector_t= null;\n");
+		buf.append("    Vector<U> vector_u= null;\n");
+		buf.append("    Vector<? extends T> vector_upper_t= null;\n");
+		buf.append("    Vector<? extends U> vector_upper_u= null;\n");
+		buf.append("    Vector<? super T> vector_lower_t= null;\n");
+		buf.append("    Vector<? super U> vector_lower_u= null;\n");
 		buf.append("}\n");
 		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
@@ -133,12 +171,8 @@ public class TypeRulesTest extends CoreTests {
 		return targets;
 	}
 	
-	public static final boolean BUG_80455= true;
-	
-	public void testCanAssign() throws Exception {
-		if (BUG_80455)
-			return;
-		
+	//TODO: only tests behavior for ITypeBindings from the same AST. See bug 80715.
+	public void testIsAssignmentCompatible() throws Exception {
 		VariableDeclarationFragment[] targets= createVariables();
 		
 		StringBuffer errors= new StringBuffer();
@@ -150,7 +184,7 @@ public class TypeRulesTest extends CoreTests {
 				
 				StringBuffer buf= new StringBuffer();
 				buf.append("package test1;\n");
-				buf.append("public class F extends E {\n");
+				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
 				buf.append("    void foo() {\n");
 				buf.append("        ").append(line).append(";\n");
 				buf.append("    }\n");
@@ -164,21 +198,78 @@ public class TypeRulesTest extends CoreTests {
 				
 				CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
-
+				
 				ITypeBinding b1= f1.resolveBinding().getType();
 				assertNotNull(b1);
 				ITypeBinding b2= f2.resolveBinding().getType();
 				assertNotNull(b2);
-				boolean res2= TypeRules.canAssign(b1, b2);
+				boolean res2= b1.isAssignmentCompatible(b2);
 				if (res2 != (problems.length == 0)) {
 					errors.append(line).append('\n');
-				}	
+				}
 			}
 		}
 		assertTrue(errors.toString(), errors.length() == 0);
 	}
 	
-	public void testCanCast() throws Exception {
+	public void testCanAssign() throws Exception {
+		VariableDeclarationFragment[] targets= createVariables();
+		
+		StringBuffer errors= new StringBuffer();
+		for (int k= 0; k < targets.length; k++) {
+			for (int n= 0; n < targets.length; n++) {
+				VariableDeclarationFragment f1= targets[k];
+				VariableDeclarationFragment f2= targets[n];
+				String line= f2.getName().getIdentifier() + "= " + f1.getName().getIdentifier();
+				
+				StringBuffer buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
+				buf.append("    void foo() {\n");
+				buf.append("        ").append(line).append(";\n");
+				buf.append("    }\n");
+				buf.append("}\n");
+				char[] content= buf.toString().toCharArray();
+				
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setSource(content);
+				parser.setProject(fJProject1);
+				parser.setUnitName("F.java");
+				
+				CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
+				IProblem[] problems= astRoot.getProblems();
+				
+				ITypeBinding b1= f1.resolveBinding().getType();
+				assertNotNull(b1);
+				ITypeBinding b2= f2.resolveBinding().getType();
+				assertNotNull(b2);
+				
+				//old implementation does not support generics:
+				if (b1.isParameterizedType() || b1.isWildcardType() || b1.isTypeVariable())
+					continue;
+				if (b2.isParameterizedType() || b2.isWildcardType() || b2.isTypeVariable())
+					continue;
+				if (b1.isRawType() != b2.isRawType())
+					continue;
+				//old implementation does not support autoboxing:
+				if (b1.isPrimitive() != b2.isPrimitive())
+					continue;
+				
+				boolean res2= TypeRules.canAssign(b1, b2);
+				if (res2 != (problems.length == 0)) {
+					errors.append(line).append('\n');
+				}
+			}
+		}
+		assertTrue(errors.toString(), errors.length() == 0);
+	}
+		
+	public void testIsCastCompatible() throws Exception {
+		if (BUG_82504_core_parser_CCE) {
+			System.out.println("TypeRulesTest.testCanCast() disabled (BUG_82504_core_parser_CCE)");
+			return;
+		}
+		StringBuffer errors= new StringBuffer();
 		VariableDeclarationFragment[] targets= createVariables();
 		for (int k= 0; k < targets.length; k++) {
 			for (int n= 0; n < targets.length; n++) {
@@ -190,7 +281,7 @@ public class TypeRulesTest extends CoreTests {
 				
 				StringBuffer buf= new StringBuffer();
 				buf.append("package test1;\n");
-				buf.append("public class F extends E {\n");
+				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
 				buf.append("    void foo() {\n");
 				buf.append("        ").append(line).append(";\n");
 				buf.append("    }\n");
@@ -203,20 +294,92 @@ public class TypeRulesTest extends CoreTests {
 				parser.setProject(fJProject1);
 				parser.setUnitName("F.java");
 				
-				CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
+				CompilationUnit astRoot= null;
+try {
+				astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
 
 				ITypeBinding b1= f1.resolveBinding().getType();
 				assertNotNull(b1);
 				ITypeBinding b2= f2.resolveBinding().getType();
 				assertNotNull(b2);
-				boolean res= TypeRules.canCast(b2, b1);
+				boolean res= b2.isCastCompatible(b1);
 				if (res != (problems.length == 0)) {
-					res= TypeRules.canCast(b2, b1);
-					assertTrue(line, false);
+					errors.append(line).append('\n');
 				}
+} catch (ClassCastException e) {
+	//TODO jdt.core bug 82504: [5.0] ClassCastException when parsing a CastExpression from type Object[] to a type variable
+	errors.append(line).append('\n');
+	errors.append(e).append('\n');
+	e.printStackTrace();
+}
+				
 			}	
 		}
+		assertTrue(errors.toString(), errors.length() == 0);
+	}
+	
+	public void testCanCast() throws Exception {
+		StringBuffer errors= new StringBuffer();
+		VariableDeclarationFragment[] targets= createVariables();
+		for (int k= 0; k < targets.length; k++) {
+			for (int n= 0; n < targets.length; n++) {
+				VariableDeclarationFragment f1= targets[k];
+				VariableDeclarationFragment f2= targets[n];
+				
+				String castType= f2.resolveBinding().getType().getQualifiedName();
+				String line= castType + " x= (" + castType + ") " + f1.getName().getIdentifier();
+				
+				StringBuffer buf= new StringBuffer();
+				buf.append("package test1;\n");
+				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
+				buf.append("    void foo() {\n");
+				buf.append("        ").append(line).append(";\n");
+				buf.append("    }\n");
+				buf.append("}\n");
+				char[] content= buf.toString().toCharArray();
+				
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setSource(content);
+				parser.setResolveBindings(true);
+				parser.setProject(fJProject1);
+				parser.setUnitName("F.java");
+				
+				ITypeBinding b1= f1.resolveBinding().getType();
+				assertNotNull(b1);
+				ITypeBinding b2= f2.resolveBinding().getType();
+				assertNotNull(b2);
+				
+				//old implementation does not support generics:
+				if (b1.isParameterizedType() || b1.isWildcardType() || b1.isTypeVariable())
+					continue;
+				if (b2.isParameterizedType() || b2.isWildcardType() || b2.isTypeVariable())
+					continue;
+				if (b1.isRawType() != b2.isRawType())
+					continue;
+				//old implementation does not support autoboxing:
+				if (b1.isPrimitive() != b2.isPrimitive())
+					continue;
+
+				CompilationUnit astRoot= null;
+try {
+				astRoot= (CompilationUnit) parser.createAST(null);
+				IProblem[] problems= astRoot.getProblems();
+
+				boolean res= TypeRules.canCast(b2, b1);
+				if (res != (problems.length == 0)) {
+					errors.append(line).append('\n');
+				}
+} catch (ClassCastException e) {
+	//TODO jdt.core bug 82504: [5.0] ClassCastException when parsing a CastExpression from type Object[] to a type variable
+	errors.append(line).append('\n');
+	errors.append(e).append('\n');
+	e.printStackTrace();
+}
+				
+			}	
+		}
+		assertTrue(errors.toString(), errors.length() == 0);
 	}
 		
 	

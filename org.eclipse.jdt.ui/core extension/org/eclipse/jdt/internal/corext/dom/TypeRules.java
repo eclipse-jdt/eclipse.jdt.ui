@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
@@ -193,8 +194,21 @@ public class TypeRules {
 			if (castType.isArray()) {
 				return isArrayCompatible(bindingToCast);
 			}
-			
-			if (castType.isInterface() || bindingToCast.isInterface() || isJavaLangObject(castType)) {
+			if (castType.isInterface()) {
+				if ((bindingToCast.getModifiers() & Modifier.FINAL) != 0) {
+					return Bindings.isSuperType(castType, bindingToCast);
+				} else {
+					return true;
+				}
+			}
+			if (bindingToCast.isInterface()) {
+				if ((castType.getModifiers() & Modifier.FINAL) != 0) {
+					return Bindings.isSuperType(bindingToCast, castType);
+				} else {
+					return true;
+				}
+			}
+			if (isJavaLangObject(castType)) {
 				return true;
 			}
 			
