@@ -41,7 +41,7 @@ import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
-import org.eclipse.jface.text.templates.TemplatePosition;
+import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
@@ -144,10 +144,10 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 
 			// translate positions
 			LinkedEnvironment env= new LinkedEnvironment();
-			TemplatePosition[] variables= templateBuffer.getVariables();
+			TemplateVariable[] variables= templateBuffer.getVariables();
 			boolean hasPositions= false;
 			for (int i= 0; i != variables.length; i++) {
-				TemplatePosition variable= variables[i];
+				TemplateVariable variable= variables[i];
 
 				if (variable.isResolved())
 					continue;
@@ -191,10 +191,10 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	
 	private int getCaretOffset(TemplateBuffer buffer) {
 	
-	    TemplatePosition[] variables= buffer.getVariables();
+	    TemplateVariable[] variables= buffer.getVariables();
 		for (int i= 0; i != variables.length; i++) {
-			TemplatePosition variable= variables[i];
-			if (variable.getName().equals(GlobalVariables.Cursor.NAME))
+			TemplateVariable variable= variables[i];
+			if (variable.getType().equals(GlobalVariables.Cursor.NAME))
 				return variable.getOffsets()[0];
 		}
 

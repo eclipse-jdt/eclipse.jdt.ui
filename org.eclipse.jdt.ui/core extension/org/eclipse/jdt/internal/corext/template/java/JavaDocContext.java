@@ -165,7 +165,7 @@ public class JavaDocContext extends CompilationUnitContext {
 		if (buffer == null)
 			return null;
 
-		getContextType().edit(buffer, this);
+		getContextType().resolve(buffer, this);
 			
 		return buffer;
 	}

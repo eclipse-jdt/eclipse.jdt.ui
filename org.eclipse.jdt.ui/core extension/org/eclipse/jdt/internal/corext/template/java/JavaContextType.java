@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.*;
 import org.eclipse.jface.text.templates.TemplateContext;
-import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,57 +28,57 @@ public class JavaContextType extends CompilationUnitContextType {
 
 	public static final String NAME= "java"; //$NON-NLS-1$
 
-	protected static class Array extends TemplateVariable {
+	protected static class Array extends TemplateVariableResolver {
 		public Array() {
 			super("array", JavaTemplateMessages.getString("JavaContextType.variable.description.array")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	    public String resolve(TemplateContext context) {
+		protected String resolve(TemplateContext context) {
 	        return ((JavaContext) context).guessArray();
 	    }
 	}
 
-	protected static class ArrayType extends TemplateVariable {
+	protected static class ArrayType extends TemplateVariableResolver {
 	    public ArrayType() {
 	     	super("array_type", JavaTemplateMessages.getString("JavaContextType.variable.description.array.type")); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
-	    public String resolve(TemplateContext context) {
+	    protected String resolve(TemplateContext context) {
 	        return ((JavaContext) context).guessArrayType();
 	    }
 	}
 
-	protected static class ArrayElement extends TemplateVariable {
+	protected static class ArrayElement extends TemplateVariableResolver {
 	    public ArrayElement() {
 	     	super("array_element", JavaTemplateMessages.getString("JavaContextType.variable.description.array.element"));	//$NON-NLS-1$ //$NON-NLS-2$    
 	    }
-	    public String resolve(TemplateContext context) {
+	    protected String resolve(TemplateContext context) {
 	        return ((JavaContext) context).guessArrayElement();
 	    }	    
 	}
 
-	protected static class Index extends TemplateVariable {
+	protected static class Index extends TemplateVariableResolver {
 	    public Index() {
 	     	super("index", JavaTemplateMessages.getString("JavaContextType.variable.description.index")); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
-	    public String resolve(TemplateContext context) {
+	    protected String resolve(TemplateContext context) {
 	        return ((JavaContext) context).getIndex();
 	    }	    
 	}
 
-	protected static class Collection extends TemplateVariable {
+	protected static class Collection extends TemplateVariableResolver {
 	    public Collection() {
 		    super("collection", JavaTemplateMessages.getString("JavaContextType.variable.description.collection")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	    public String resolve(TemplateContext context) {
+	    protected String resolve(TemplateContext context) {
 	        return ((JavaContext) context).guessCollection();
 	    }
 	}
 
-	protected static class Iterator extends TemplateVariable {
+	protected static class Iterator extends TemplateVariableResolver {
 
 	    public Iterator() {
 		    super("iterator", JavaTemplateMessages.getString("JavaContextType.variable.description.iterator")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	    public String resolve(TemplateContext context) {
+	    protected String resolve(TemplateContext context) {
 	    	JavaContext javaContext= (JavaContext) context;
 
 			if (!context.isReadOnly())
@@ -88,12 +88,12 @@ public class JavaContextType extends CompilationUnitContextType {
 	    }	    
 	}
 	
-	protected static class Todo extends TemplateVariable {
+	protected static class Todo extends TemplateVariableResolver {
 
 		public Todo() {
 			super("todo", JavaTemplateMessages.getString("JavaContextType.variable.description.todo")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		public String resolve(TemplateContext context) {
+		protected String resolve(TemplateContext context) {
 			JavaContext javaContext= (JavaContext) context;
 			ICompilationUnit compilationUnit= javaContext.getCompilationUnit();
 			if (compilationUnit == null)
@@ -108,7 +108,7 @@ public class JavaContextType extends CompilationUnitContextType {
 		}
 	}	
 /*
-	protected static class Arguments extends SimpleTemplateVariable {
+	protected static class Arguments extends SimpleVariableResolver {
 	    public Arguments() {
 	     	super("arguments", TemplateMessages.getString("JavaContextType.variable.description.arguments"), "");   
 	    }
@@ -123,33 +123,33 @@ public class JavaContextType extends CompilationUnitContextType {
 		super(NAME);
 		
 		// global
-		addVariable(new GlobalVariables.Cursor());
-		addVariable(new GlobalVariables.WordSelection());
-		addVariable(new GlobalVariables.LineSelection());
-		addVariable(new GlobalVariables.Dollar());
-		addVariable(new GlobalVariables.Date());
-		addVariable(new GlobalVariables.Year());
-		addVariable(new GlobalVariables.Time());
-		addVariable(new GlobalVariables.User());
+		addResolver(new GlobalVariables.Cursor());
+		addResolver(new GlobalVariables.WordSelection());
+		addResolver(new GlobalVariables.LineSelection());
+		addResolver(new GlobalVariables.Dollar());
+		addResolver(new GlobalVariables.Date());
+		addResolver(new GlobalVariables.Year());
+		addResolver(new GlobalVariables.Time());
+		addResolver(new GlobalVariables.User());
 		
 		// compilation unit
-		addVariable(new File());
-		addVariable(new PrimaryTypeName());
-		addVariable(new ReturnType());
-		addVariable(new Method());
-		addVariable(new Type());
-		addVariable(new Package());
-		addVariable(new Project());
-		addVariable(new Arguments());
+		addResolver(new File());
+		addResolver(new PrimaryTypeName());
+		addResolver(new ReturnType());
+		addResolver(new Method());
+		addResolver(new Type());
+		addResolver(new Package());
+		addResolver(new Project());
+		addResolver(new Arguments());
 
 		// java
-		addVariable(new Array());
-		addVariable(new ArrayType());
-		addVariable(new ArrayElement());
-		addVariable(new Index());
-		addVariable(new Iterator());
-		addVariable(new Collection());
-		addVariable(new Todo());
+		addResolver(new Array());
+		addResolver(new ArrayType());
+		addResolver(new ArrayElement());
+		addResolver(new Index());
+		addResolver(new Iterator());
+		addResolver(new Collection());
+		addResolver(new Todo());
 	}
 	
 

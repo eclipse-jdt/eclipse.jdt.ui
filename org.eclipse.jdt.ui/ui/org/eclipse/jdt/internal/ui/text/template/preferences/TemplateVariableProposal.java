@@ -21,7 +21,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class TemplateVariableProposal implements ICompletionProposal {
 
-	private TemplateVariable fVariable;
+	private TemplateVariableResolver fVariable;
 	private int fOffset;
 	private int fLength;	
 	private ITextViewer fViewer;
@@ -46,7 +46,7 @@ public class TemplateVariableProposal implements ICompletionProposal {
 	 * @param length the length to replace
 	 * @param viewer the viewer
 	 */
-	public TemplateVariableProposal(TemplateVariable variable, int offset, int length, ITextViewer viewer) {
+	public TemplateVariableProposal(TemplateVariableResolver variable, int offset, int length, ITextViewer viewer) {
 		fVariable= variable;
 		fOffset= offset;
 		fLength= length;
@@ -59,7 +59,7 @@ public class TemplateVariableProposal implements ICompletionProposal {
 	public void apply(IDocument document) {
 
 		try {
-			String variable= fVariable.getName().equals("dollar") ? "$$" : "${" + fVariable.getName() + '}'; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String variable= fVariable.getType().equals("dollar") ? "$$" : "${" + fVariable.getType() + '}'; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			document.replace(fOffset, fLength, variable);
 			fSelection= new Point(fOffset + variable.length(), 0);
 
@@ -89,7 +89,7 @@ public class TemplateVariableProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return fVariable.getName() + " - " + fVariable.getDescription(); //$NON-NLS-1$
+		return fVariable.getType() + " - " + fVariable.getDescription(); //$NON-NLS-1$
 	}
 
 	/*

@@ -25,7 +25,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -62,10 +62,10 @@ public class TemplateEditorSourceViewerConfiguration extends JavaSourceViewerCon
 				int offset= subject.getOffset();
 				if (offset >= 2 && "${".equals(doc.get(offset-2, 2))) { //$NON-NLS-1$
 					String varName= doc.get(offset, subject.getLength());
-					Iterator iter= fProcessor.getContextType().variableIterator();
+					Iterator iter= fProcessor.getContextType().resolvers();
 					while (iter.hasNext()) {
-						TemplateVariable var= (TemplateVariable) iter.next();
-						if (varName.equals(var.getName())) {
+						TemplateVariableResolver var= (TemplateVariableResolver) iter.next();
+						if (varName.equals(var.getType())) {
 							return var.getDescription();
 						}
 					}

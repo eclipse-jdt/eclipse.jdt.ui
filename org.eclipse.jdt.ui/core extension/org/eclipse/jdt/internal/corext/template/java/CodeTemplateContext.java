@@ -21,15 +21,13 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateTranslator;
-import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-/**
- */
 public class CodeTemplateContext extends TemplateContext {
 	
 	private String fLineDelimiter;
@@ -50,11 +48,11 @@ public class CodeTemplateContext extends TemplateContext {
 	 */
 	public TemplateBuffer evaluate(Template template) throws BadLocationException {
 		// test that all variables are defined
-		Iterator iterator= getContextType().variableIterator();
+		Iterator iterator= getContextType().resolvers();
 		while (iterator.hasNext()) {
-			TemplateVariable var= (TemplateVariable) iterator.next();
-			if (var instanceof CodeTemplateContextType.CodeTemplateVariable) {
-				Assert.isNotNull(getVariable(var.getName()), "Variable " + var.getName() + "not defined"); //$NON-NLS-1$ //$NON-NLS-2$
+			TemplateVariableResolver var= (TemplateVariableResolver) iterator.next();
+			if (var instanceof CodeTemplateContextType.CodeTemplateVariableResolver) {
+				Assert.isNotNull(getVariable(var.getType()), "Variable " + var.getType() + "not defined"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 
@@ -67,7 +65,7 @@ public class CodeTemplateContext extends TemplateContext {
 		TemplateBuffer buffer= translator.translate(pattern);
 		if (buffer == null)
 			return null;
-		getContextType().edit(buffer, this);
+		getContextType().resolve(buffer, this);
 
 		return buffer;
 	}

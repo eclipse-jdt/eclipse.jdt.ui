@@ -24,7 +24,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
-import org.eclipse.jface.text.templates.TemplatePosition;
+import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -487,7 +487,7 @@ public class StubUtility {
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;
 		}
-		TemplatePosition position= findTagPosition(buffer); // look if Javadoc tags have to be added
+		TemplateVariable position= findTagVariable(buffer); // look if Javadoc tags have to be added
 		if (position == null) {
 			return str;
 		}
@@ -646,7 +646,7 @@ public class StubUtility {
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;
 		}
-		TemplatePosition position= findTagPosition(buffer);  // look if Javadoc tags have to be added
+		TemplateVariable position= findTagVariable(buffer);  // look if Javadoc tags have to be added
 		if (position == null) {
 			return str;
 		}
@@ -671,11 +671,11 @@ public class StubUtility {
 		return textBuffer.getContent();
 	}
 	
-	private static TemplatePosition findTagPosition(TemplateBuffer buffer) {
-		TemplatePosition[] positions= buffer.getVariables();
+	private static TemplateVariable findTagVariable(TemplateBuffer buffer) {
+		TemplateVariable[] positions= buffer.getVariables();
 		for (int i= 0; i < positions.length; i++) {
-			TemplatePosition curr= positions[i];
-			if (CodeTemplateContextType.TAGS.equals(curr.getName())) {
+			TemplateVariable curr= positions[i];
+			if (CodeTemplateContextType.TAGS.equals(curr.getType())) {
 				return curr;
 			}
 		}

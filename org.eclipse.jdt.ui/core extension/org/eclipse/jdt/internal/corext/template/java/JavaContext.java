@@ -29,7 +29,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
-import org.eclipse.jface.text.templates.ITemplateEditor;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateTranslator;
@@ -105,7 +104,7 @@ public class JavaContext extends CompilationUnitContext {
 		TemplateTranslator translator= new TemplateTranslator();
 		TemplateBuffer buffer= translator.translate(template);
 
-		getContextType().edit(buffer, this);
+		getContextType().resolve(buffer, this);
 			
 		String lineDelimiter= null;
 		try {
@@ -119,8 +118,8 @@ public class JavaContext extends CompilationUnitContext {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);			
 		
-		ITemplateEditor formatter= new JavaFormatter(lineDelimiter, getIndentation(), useCodeFormatter);
-		formatter.edit(buffer, this);
+		JavaFormatter formatter= new JavaFormatter(lineDelimiter, getIndentation(), useCodeFormatter);
+		formatter.format(buffer, this);
 
 		return buffer;
 	}

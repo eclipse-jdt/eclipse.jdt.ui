@@ -22,7 +22,7 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.text.templates.ContextType;
-import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 
 
@@ -81,10 +81,10 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 		int offset= start;
 		int length= end - start;
 
-		for (Iterator iterator= fContextType.variableIterator(); iterator.hasNext(); ) {
-			TemplateVariable variable= (TemplateVariable) iterator.next();
+		for (Iterator iterator= fContextType.resolvers(); iterator.hasNext(); ) {
+			TemplateVariableResolver variable= (TemplateVariableResolver) iterator.next();
 
-			if (prefix == null || variable.getName().startsWith(prefix))
+			if (prefix == null || variable.getType().startsWith(prefix))
 				proposals.add(new TemplateVariableProposal(variable, offset, length, viewer));
 		}
 

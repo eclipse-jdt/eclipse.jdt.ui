@@ -14,8 +14,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.TemplateContext;
-import org.eclipse.jface.text.templates.TemplatePosition;
 import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,11 +29,11 @@ import org.eclipse.jdt.core.Signature;
  */
 public abstract class CompilationUnitContextType extends ContextType {
 	
-	protected static class ReturnType extends TemplateVariable {
+	protected static class ReturnType extends TemplateVariableResolver {
 	 	public ReturnType() {
 	 	 	super("return_type", JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.return.type")); //$NON-NLS-1$ //$NON-NLS-2$
 	 	}
-	 	public String resolve(TemplateContext context) {
+	 	protected String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
 			if (element == null)
 				return null;
@@ -44,55 +44,43 @@ public abstract class CompilationUnitContextType extends ContextType {
 				return null;
 			}
 		}
-		public boolean isResolved(TemplateContext context) {
-			return resolve(context) != null;
-		}		
 	}
 
-	protected static class File extends TemplateVariable {
+	protected static class File extends TemplateVariableResolver {
 		public File() {
 			super("file", JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.file")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		public String resolve(TemplateContext context) {
+		protected String resolve(TemplateContext context) {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
 			
 			return (unit == null) ? null : unit.getElementName();
 		}
-		public boolean isResolved(TemplateContext context) {
-			return resolve(context) != null;
-		}		
 	}
 	
-	protected static class PrimaryTypeName extends TemplateVariable {
+	protected static class PrimaryTypeName extends TemplateVariableResolver {
 		public PrimaryTypeName() {
 			super("primary_type_name", JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.primary.type.name")); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}
-		public String resolve(TemplateContext context) {
+		protected String resolve(TemplateContext context) {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
 			if (unit == null) 
 				return null;
 			String elementName= unit.getElementName();
 			return elementName.substring(0, elementName.lastIndexOf('.'));
 		}
-		public boolean isResolved(TemplateContext context) {
-			return resolve(context) != null;
-		}
 	}
 
-	protected static class EnclosingJavaElement extends TemplateVariable {
+	protected static class EnclosingJavaElement extends TemplateVariableResolver {
 		protected final int fElementType;
 		
 		public EnclosingJavaElement(String name, String description, int elementType) {
 			super(name, description);
 			fElementType= elementType;
 		}
-		public String resolve(TemplateContext context) {
+		protected String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(fElementType);
 			return (element == null) ? null : element.getElementName();			
-		}
-		public boolean isResolved(TemplateContext context) {
-			return resolve(context) != null;
 		}
 	}
 	
@@ -126,7 +114,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 		}
 	}	
 /*
-	protected static class Project2 extends TemplateVariable {
+	protected static class Project2 extends TemplateVariableResolver {
 		public Project2() {
 			super("project", TemplateMessages.getString("JavaContextType.variable.description.project"));
 		}
@@ -136,11 +124,11 @@ public abstract class CompilationUnitContextType extends ContextType {
 		}
 	}	
 */
-	protected static class Arguments extends TemplateVariable {
+	protected static class Arguments extends TemplateVariableResolver {
 		public Arguments() {
 			super("enclosing_method_arguments", JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.enclosing.method.arguments")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		public String resolve(TemplateContext context) {
+		protected String resolve(TemplateContext context) {
 			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
 			if (element == null)
 				return null;
@@ -166,7 +154,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 	}
 
 /*	
-	protected static class Line extends TemplateVariable {
+	protected static class Line extends TemplateVariableResolver {
 		public Line() {
 			super("line", TemplateMessages.getString("CompilationUnitContextType.variable.description.line"));
 		}
@@ -187,13 +175,13 @@ public abstract class CompilationUnitContextType extends ContextType {
 
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validateVariables(org.eclipse.jdt.internal.corext.template.TemplatePosition[])
+	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validateVariables(org.eclipse.jdt.internal.corext.template.TemplateVariable[])
 	 */
-	protected String validateVariables(TemplatePosition[] variables) {
+	protected String validateVariables(TemplateVariable[] variables) {
 		// check for multiple cursor variables		
 		for (int i= 0; i < variables.length; i++) {
-			TemplatePosition position= variables[i];
-			if (position.getName().equals(GlobalVariables.Cursor.NAME)) {
+			TemplateVariable position= variables[i];
+			if (position.getType().equals(GlobalVariables.Cursor.NAME)) {
 				if (position.getOffsets().length > 1) {
 					return JavaTemplateMessages.getString("ContextType.error.multiple.cursor.variables"); //$NON-NLS-1$
 				}

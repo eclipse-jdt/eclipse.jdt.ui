@@ -29,10 +29,9 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.templates.GlobalVariables;
-import org.eclipse.jface.text.templates.ITemplateEditor;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
-import org.eclipse.jface.text.templates.TemplatePosition;
+import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
@@ -46,7 +45,7 @@ import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 /**
  * A template editor using the Java formatter to format a template buffer.
  */
-public class JavaFormatter implements ITemplateEditor {
+public class JavaFormatter {
 
 	private static final String MARKER= "/*${" + GlobalVariables.Cursor.NAME + "}*/"; //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -67,10 +66,13 @@ public class JavaFormatter implements ITemplateEditor {
 		fInitialIndentLevel= initialIndentLevel;
 	}
 
-	/*
-	 * @see ITemplateEditor#edit(TemplateBuffer, TemplateContext)
+	/**
+	 * Formats the template buffer.
+	 * @param buffer
+	 * @param context
+	 * @throws BadLocationException
 	 */
-	public void edit(TemplateBuffer buffer, TemplateContext context) throws BadLocationException {
+	public void format(TemplateBuffer buffer, TemplateContext context) throws BadLocationException {
 		try {
 			if (fUseCodeFormatter)
 				format(buffer, (JavaContext) context);
@@ -84,11 +86,11 @@ public class JavaFormatter implements ITemplateEditor {
 		}
 	}
 
-	private static int getCaretOffset(TemplatePosition[] variables) {
+	private static int getCaretOffset(TemplateVariable[] variables) {
 	    for (int i= 0; i != variables.length; i++) {
-	        TemplatePosition variable= variables[i];
+	        TemplateVariable variable= variables[i];
 	        
-	        if (variable.getName().equals(GlobalVariables.Cursor.NAME))
+	        if (variable.getType().equals(GlobalVariables.Cursor.NAME))
 	        	return variable.getOffsets()[0];
 	    }
 	    
@@ -122,7 +124,7 @@ public class JavaFormatter implements ITemplateEditor {
 		// handle a special case where cursor position is surrounded by whitespaces		
 
 		String string= templateBuffer.getString();
-		TemplatePosition[] variables= templateBuffer.getVariables();
+		TemplateVariable[] variables= templateBuffer.getVariables();
 
 		int caretOffset= getCaretOffset(variables);
 		if ((caretOffset > 0) && Character.isWhitespace(string.charAt(caretOffset - 1)) &&
@@ -165,7 +167,7 @@ public class JavaFormatter implements ITemplateEditor {
 			return; // don't format if the document has changed
 		}
 
-		TemplatePosition[] variables= templateBuffer.getVariables();
+		TemplateVariable[] variables= templateBuffer.getVariables();
 
 		int[] offsets= variablesToOffsets(variables, start);
 		
@@ -179,7 +181,7 @@ public class JavaFormatter implements ITemplateEditor {
 	private void indentate(TemplateBuffer templateBuffer) throws CoreException {
 
 		String string= templateBuffer.getString();
-		TemplatePosition[] variables= templateBuffer.getVariables();
+		TemplateVariable[] variables= templateBuffer.getVariables();
 
 		List positions= variablesToPositions(variables);
 		List edits= new ArrayList(5);
@@ -203,7 +205,7 @@ public class JavaFormatter implements ITemplateEditor {
 
 	private static void trimBegin(TemplateBuffer templateBuffer) throws CoreException {
 		String string= templateBuffer.getString();
-		TemplatePosition[] variables= templateBuffer.getVariables();
+		TemplateVariable[] variables= templateBuffer.getVariables();
 
 		List positions= variablesToPositions(variables);
 
@@ -237,7 +239,7 @@ public class JavaFormatter implements ITemplateEditor {
 		return textBuffer.getContent();
 	}
 		
-	private static int[] variablesToOffsets(TemplatePosition[] variables, int start) {
+	private static int[] variablesToOffsets(TemplateVariable[] variables, int start) {
 		Vector vector= new Vector();
 		for (int i= 0; i != variables.length; i++) {
 		    int[] offsets= variables[i].getOffsets();
@@ -254,7 +256,7 @@ public class JavaFormatter implements ITemplateEditor {
 		return offsets;	    
 	}
 	
-	private static void offsetsToVariables(int[] allOffsets, TemplatePosition[] variables, int start) {
+	private static void offsetsToVariables(int[] allOffsets, TemplateVariable[] variables, int start) {
 		int[] currentIndices= new int[variables.length];
 		for (int i= 0; i != currentIndices.length; i++)
 			currentIndices[i]= 0;
@@ -290,7 +292,7 @@ public class JavaFormatter implements ITemplateEditor {
 			variables[i].setOffsets(offsets[i]);	
 	}
 
-	private static List variablesToPositions(TemplatePosition[] variables) {
+	private static List variablesToPositions(TemplateVariable[] variables) {
    		List positions= new ArrayList(5);
 		for (int i= 0; i != variables.length; i++) {
 		    int[] offsets= variables[i].getOffsets();
@@ -300,11 +302,11 @@ public class JavaFormatter implements ITemplateEditor {
 		return positions;	    
 	}
 	
-	private static void positionsToVariables(List positions, TemplatePosition[] variables) {
+	private static void positionsToVariables(List positions, TemplateVariable[] variables) {
 		Iterator iterator= positions.iterator();
 		
 		for (int i= 0; i != variables.length; i++) {
-		    TemplatePosition variable= variables[i];
+		    TemplateVariable variable= variables[i];
 		    
 			int[] offsets= new int[variable.getOffsets().length];
 			for (int j= 0; j != offsets.length; j++)
