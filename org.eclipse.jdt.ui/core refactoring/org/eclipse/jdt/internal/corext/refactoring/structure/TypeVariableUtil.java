@@ -80,12 +80,12 @@ public final class TypeVariableUtil {
 		Assert.isNotNull(signature);
 		Assert.isNotNull(variables);
 
-		try {
-			final String[] arguments= Signature.getTypeArguments(signature);
+		final String[] arguments= Signature.getTypeArguments(signature);
+		if (arguments.length == 0) {
+			variables.add(Signature.toString(signature));
+		} else {
 			for (int index= 0; index < arguments.length; index++)
 				variables.add(Signature.toString(arguments[index]));
-		} catch (IllegalArgumentException exception) {
-			variables.add(Signature.toString(signature));
 		}
 	}
 
