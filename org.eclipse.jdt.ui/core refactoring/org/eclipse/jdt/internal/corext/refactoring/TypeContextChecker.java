@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -265,7 +266,19 @@ public class TypeContextChecker {
 			
 			if (Flags.isStatic(fMethod.getFlags()))
 				cuString.append("static "); //$NON-NLS-1$
-			//TODO: method type parameters
+
+			ITypeParameter[] methodTypeParameters= fMethod.getTypeParameters();
+			if (methodTypeParameters.length != 0) {
+				cuString.append('<');
+				for (int i= 0; i < methodTypeParameters.length; i++) {
+					ITypeParameter typeParameter= methodTypeParameters[i];
+					if (i > 0)
+						cuString.append(',');
+					cuString.append(typeParameter.getElementName());
+				}
+				cuString.append("> "); //$NON-NLS-1$
+			}
+			
 			cuString.append(types[parameterCount]).append(' ');
 			int offsetBeforeMethodName= cuString.length();
 			cuString.append(METHOD_NAME).append('('); //$NON-NLS-1$

@@ -20,6 +20,9 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -32,9 +35,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 /**
  * @see org.eclipse.jdt.core.Signature for encoding of signature strings.
  */
@@ -42,6 +42,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private static final Class clazz= ChangeSignatureTests.class;
 	private static final String REFACTORING_PATH= "ChangeSignature/";
 	
+	private static final boolean BUG_79976_CORE_GENERIC_RippleMethodFinder= true;
 	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
 	private static final boolean BUG_83319_CORE_REFS_IN_STATIC_IMPORT= true;
 	private static final boolean BUG_83393_CORE_VARARG_JAVADOC_REFERENCE= true;
@@ -626,6 +627,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] deletedIndices= {};
 		int newVisibility= Modifier.PUBLIC;
 		int expectedSeverity= RefactoringStatus.FATAL;
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
+	}
+
+	public void testFailGenerics01() throws Exception {
+		//type variable name may not be available in related methods
+		String[] signature= {"QE;"};
+		String[] newNames= {"e2"};
+		String[] newTypes= {"E"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+		
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.NONE;
+		int expectedSeverity= RefactoringStatus.ERROR;
 		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
 	}
 
@@ -1856,6 +1875,86 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PUBLIC;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testGenerics01() throws Exception {
+		if (BUG_79976_CORE_GENERIC_RippleMethodFinder) {
+			printTestDisabledMessage("BUG_79976_CORE_GENERIC_RippleMethodFinder");
+			return;
+		}
+		String[] signature= {"QInteger;", "QE;"};
+		String[] newNames= {};
+		String[] newTypes= {};
+		String[] newDefaultValues= {};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {};
+
+		String[] oldParamNames= {"i", "e"};
+		String[] newParamNames= {"integer", "e"};
+		String[] newParameterTypeNames= null;
+		int[] permutation= {1, 0};
+		int[] deletedIndices= { };
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testGenerics02() throws Exception {
+		if (BUG_79976_CORE_GENERIC_RippleMethodFinder) {
+			printTestDisabledMessage("BUG_79976_CORE_GENERIC_RippleMethodFinder");
+			return;
+		}
+		String[] signature= {"QT;", "QE;"};
+		String[] newNames= {"maps"};
+		String[] newTypes= {"java.util.List<HashMap>"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {2};
+
+		String[] oldParamNames= {"e", "t"};
+		String[] newParamNames= {"e", "t"};
+		String[] newParameterTypeNames= null;
+		int[] permutation= {1, 0, 2};
+		int[] deletedIndices= { };
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testGenerics03() throws Exception {
+		String[] signature= {"QT;", "QE;"};
+		String[] newNames= {"maps"};
+		String[] newTypes= {"java.util.List<HashMap>"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {2};
+
+		String[] oldParamNames= {"e", "t"};
+		String[] newParamNames= {"e", "t"};
+		String[] newParameterTypeNames= null;
+		int[] permutation= {1, 0, 2};
+		int[] deletedIndices= { };
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testGenerics04() throws Exception {
+		String[] signature= {"QList<QInteger;>;", "QA<QString;>;"};
+		String[] newNames= {"li"};
+		String[] newTypes= {"List<Integer>"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {2};
+
+		String[] oldParamNames= {"li", "as"};
+		String[] newParamNames= {"li", "as"};
+		String[] newParameterTypeNames= null;
+		int[] permutation= {1, 2, 0};
+		int[] deletedIndices= {0};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
 }

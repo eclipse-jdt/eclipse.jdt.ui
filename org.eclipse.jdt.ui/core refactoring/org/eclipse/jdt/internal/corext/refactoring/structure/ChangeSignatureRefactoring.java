@@ -468,6 +468,59 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 		return null;
 	}
+	
+	private RefactoringStatus checkTypeVariables() throws JavaModelException {
+		if (fRippleMethods.length == 1)
+			return null;
+		
+		RefactoringStatus result= new RefactoringStatus();
+		if (fReturnTypeInfo.isTypeNameChanged() && fReturnTypeInfo.getNewTypeBinding() != null) {
+			HashSet typeVariablesCollector= new HashSet();
+			collectTypeVariables(fReturnTypeInfo.getNewTypeBinding(), typeVariablesCollector);
+			if (typeVariablesCollector.size() != 0) {
+				ITypeBinding first= (ITypeBinding) typeVariablesCollector.iterator().next();
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.return_type_contains_type_variable", new String[] {fReturnTypeInfo.getNewTypeName(), first.getName()}); //$NON-NLS-1$
+				result.addError(msg);
+			}
+		}
+		
+		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			if (info.isTypeNameChanged() && info.getNewTypeBinding() != null) {
+				HashSet typeVariablesCollector= new HashSet();
+				collectTypeVariables(info.getNewTypeBinding(), typeVariablesCollector);
+				if (typeVariablesCollector.size() != 0) {
+					ITypeBinding first= (ITypeBinding) typeVariablesCollector.iterator().next();
+					String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_type_contains_type_variable", new String[] {info.getNewTypeName(), info.getNewName(), first.getName()}); //$NON-NLS-1$
+					result.addError(msg);
+				}
+			}
+		}
+		return result;
+	}
+	
+	private void collectTypeVariables(ITypeBinding typeBinding, Set typeVariablesCollector) {
+		if (typeBinding.isTypeVariable()) {
+			typeVariablesCollector.add(typeBinding);
+			ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
+			for (int i= 0; i < typeBounds.length; i++)
+				collectTypeVariables(typeBounds[i], typeVariablesCollector);
+			
+		} else if (typeBinding.isArray()) {
+			collectTypeVariables(typeBinding.getElementType(), typeVariablesCollector);
+			
+		} else if (typeBinding.isParameterizedType()) {
+			ITypeBinding[] typeArguments= typeBinding.getTypeArguments();
+			for (int i= 0; i < typeArguments.length; i++)
+				collectTypeVariables(typeArguments[i], typeVariablesCollector);
+		
+		} else if (typeBinding.isWildcardType()) {
+			ITypeBinding bound= typeBinding.getBound();
+			collectTypeVariables(bound, typeVariablesCollector);
+			
+		}
+	}
+	
 
 	private static boolean isValidTypeName(String string, boolean isVoidAllowed){
 		if ("".equals(string.trim())) //speed up for a common case //$NON-NLS-1$
@@ -644,6 +697,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			fOccurrences= findOccurrences(new SubProgressMonitor(pm, 1), result);
 			
 			result.merge(checkVisibilityChanges());
+			result.merge(checkTypeVariables());
 			
 			//TODO:
 			// We need a common way of dealing with possible compilation errors for all occurrences,
