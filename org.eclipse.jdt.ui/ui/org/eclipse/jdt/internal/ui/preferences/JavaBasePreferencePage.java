@@ -53,15 +53,15 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 		addField(boolEditor);
 		
 		boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ,
-			JavaPlugin.getResourceString(KEY_USE_SRCBIN_FOLDERS),
+			IPreferencesConstants.DOUBLE_CLICK_GOES_INTO,
+			JavaPlugin.getResourceString(KEY_DOUBLE_CLICK_GOES_INTO),
 			parent
 		);
 		addField(boolEditor);
 		
 		boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.DOUBLE_CLICK_GOES_INTO,
-			JavaPlugin.getResourceString(KEY_DOUBLE_CLICK_GOES_INTO),
+			IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ,
+			JavaPlugin.getResourceString(KEY_USE_SRCBIN_FOLDERS),
 			parent
 		);
 		addField(boolEditor);
