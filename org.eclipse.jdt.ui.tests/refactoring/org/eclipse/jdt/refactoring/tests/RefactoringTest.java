@@ -7,7 +7,7 @@ package org.eclipse.jdt.refactoring.tests;
 
 import java.io.BufferedReader;import java.io.IOException;import java.io.InputStream;import java.io.InputStreamReader;import java.net.URL;import junit.framework.TestCase;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.IRefactoring;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.core.JavaModelManager;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jdt.refactoring.tests.infra.TextBufferChangeCreator;import org.eclipse.jdt.testplugin.JavaTestProject;import org.eclipse.jdt.testplugin.JavaTestSetup;
 
-abstract class RefactoringTest extends TestCase {
+public abstract class RefactoringTest extends TestCase {
 
 	private IPackageFragmentRoot fRoot;
 	private IPackageFragment fPackageP;
@@ -15,7 +15,7 @@ abstract class RefactoringTest extends TestCase {
 	
 	public static boolean fgIsVerbose= false;
 
-	private static final String TEST_PATH_PREFIX= "Refactoring Tests Resources/";
+	public static final String TEST_PATH_PREFIX= "Refactoring Tests Resources/";
 
 	private static final String TEST_INPUT_INFIX= "/in/";
 	private static final String TEST_OUTPUT_INFIX= "/out/";

@@ -25,6 +25,7 @@ public class RenamePackageTests extends RefactoringTest {
 
 	public RenamePackageTests(String name) {
 		super(name);
+		//fgIsVerbose= true;
 	}
 
 	public static void main(String[] args) {
@@ -166,8 +167,17 @@ public class RenamePackageTests extends RefactoringTest {
 		helper1(new String[]{"p", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
+	//native method used p.A as a paramter
 	public void testFail9() throws Exception{
 		helper1(new String[]{"p", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+	}
+	
+	public void testFail10() throws Exception{
+		helper1(new String[]{"p.p1", "p"}, new String[][]{{"A"}, {"A"}}, "p");
+	}
+
+	public void testFail11() throws Exception{
+		helper1(new String[]{"p.p1", "p", "r.p1"}, new String[][]{{"A"}, {"A"}, {}}, "r.p1");
 	}
 	
 	//-------
@@ -181,5 +191,13 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	public void test2() throws Exception{
 		helper2(new String[]{"p", "fred"}, new String[][]{{"A"}, {"A"}}, "p1");
+	}
+	
+	public void test3() throws Exception{
+		helper2(new String[]{"fred", "p.r"}, new String[][]{{"A"}, {"B"}}, "p");
+	}
+	
+	public void test4() throws Exception{
+		helper2(new String[]{"p.p1", "p", "r.p1"}, new String[][]{{"A"}, {"A"}, {}}, "r");
 	}
 }
