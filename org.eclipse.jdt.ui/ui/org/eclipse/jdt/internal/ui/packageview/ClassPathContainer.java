@@ -12,15 +12,24 @@ package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.ui.model.IWorkbenchAdapter;
+
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * Representation of class path containers in Java UI.
@@ -73,13 +82,23 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	}
 
 	public ImageDescriptor getImageDescriptor(Object object) {
-		return JavaPluginImages.DESC_OBJS_LIBRARY;
+		ImageDescriptor desc= JavaPluginImages.DESC_OBJS_LIBRARY;
+		if (fContainer == null) {
+			desc = new JavaElementImageDescriptor(desc, JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
+		}
+		return desc;
 	}
 
 	public String getLabel(Object o) {
 		if (fContainer != null)
 			return fContainer.getDescription();
-		return PackagesMessages.getString("ClassPathContainer.error_label"); //$NON-NLS-1$
+		
+		IPath path= fClassPathEntry.getPath();
+		String containerId= path.segment(0);
+		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerId);
+		String description= initializer.getDescription(path, fProject);
+		
+		return PackagesMessages.getFormattedString("ClassPathContainer.unbound_label", description); //$NON-NLS-1$
 	}
 
 	public Object getParent(Object o) {
