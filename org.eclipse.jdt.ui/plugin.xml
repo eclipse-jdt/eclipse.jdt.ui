@@ -3,7 +3,7 @@
 <plugin
 	name="%pluginName"
 	id = "org.eclipse.jdt.ui"
-	version = "1.0"
+	version = "2.0.0.M5"
 	provider-name = "Object Technology International, Inc."
 	class="org.eclipse.jdt.internal.ui.JavaPlugin">
 
@@ -657,14 +657,14 @@ JavaStructureDiffViewerCreator
 </extension>
 
 <!-- =========================================================================== -->
-<!-- Javadoc Export                                                       -->
+<!-- Javadoc Export                                                              -->
 <!-- =========================================================================== -->
 
 <extension point="org.eclipse.ui.exportWizards">
 	<!-- Change to necessary NLS -->
 	<wizard
 	   id="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard"
-	   name="Javadoc" 
+	   name="%JavadocWizard.name"
 	   class="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard"
 	   icon="icons/full/ctool16/insp_sbook.gif">
 	   <description>Generate Javadoc</description>
@@ -674,7 +674,7 @@ JavaStructureDiffViewerCreator
 
 <extension
 	point="org.eclipse.ui.preferencePages">
-	<page name="Javadoc"
+	<page name="%JavaDoc.preferencePageName"
 		id="org.eclipse.jdt.ui.preferences.JavadocPreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
@@ -687,8 +687,8 @@ JavaStructureDiffViewerCreator
 		objectClass="org.eclipse.core.resources.IFile"
 		nameFilter="*.xml"> 
 		<action id="LaunchJavadocWizard"
-			label="Run Javadoc Wizard..."
-			tooltip="Run Javadoc Wizard"
+			label="%CreateJavadocAction.label"
+			tooltip="%CreateJavadocAction.tooltip"
 			enablesFor="1"
 			class="org.eclipse.jdt.internal.ui.javadocexport.CreateJavadocActionDelegate"/> 
 	</objectContribution> 
