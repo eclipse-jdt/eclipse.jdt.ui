@@ -27,12 +27,14 @@ import org.eclipse.search.ui.ISearchResultViewEntry;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 
 public class JavaSearchScopeFactory {
 
@@ -95,11 +97,13 @@ public class JavaSearchScopeFactory {
 				// Unpack search result view entry
 				if (selectedElement instanceof ISearchResultViewEntry)
 					selectedElement= ((ISearchResultViewEntry)selectedElement).getGroupByKey();
-				
+
 				if (selectedElement instanceof IJavaElement)
 					addJavaElements(javaElements, (IJavaElement)selectedElement);
 				else if (selectedElement instanceof IResource)
 					addJavaElements(javaElements, (IResource)selectedElement);
+				else if (selectedElement instanceof LogicalPackage)
+					addJavaElements(javaElements, (LogicalPackage)selectedElement);
 				else if (selectedElement instanceof IAdaptable) {
 					IResource resource= (IResource)((IAdaptable)selectedElement).getAdapter(IResource.class);
 					if (resource != null)
@@ -173,5 +177,11 @@ public class JavaSearchScopeFactory {
 			else
 				addJavaElements(javaElements, elements[i]);
 		}
+	}
+
+	public void addJavaElements(Set javaElements, LogicalPackage selectedElement) {
+		IPackageFragment[] packages= ((LogicalPackage)selectedElement).getFragments();
+		for (int i= 0; i < packages.length; i++)
+			addJavaElements(javaElements, packages[i]);
 	}
 }

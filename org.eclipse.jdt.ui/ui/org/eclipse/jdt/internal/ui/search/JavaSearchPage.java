@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
@@ -512,6 +513,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		} else if (o instanceof ISearchResultViewEntry) {
 			IJavaElement element= SearchUtil.getJavaElement(((ISearchResultViewEntry)o).getSelectedMarker());
 			return determineInitValuesFrom(element);
+		} else if (o instanceof LogicalPackage) {
+			LogicalPackage lp= (LogicalPackage)o;
+			return new SearchPatternData(PACKAGE, REFERENCES, fIsCaseSensitive, lp.getElementName(), null);
 		} else if (o instanceof IAdaptable) {
 			IJavaElement element= (IJavaElement)((IAdaptable)o).getAdapter(IJavaElement.class);
 			if (element != null) {

@@ -11,6 +11,7 @@ import org.eclipse.search.ui.ISearchPageScoreComputer;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -21,7 +22,7 @@ public class JavaSearchPageScoreComputer implements ISearchPageScoreComputer {
 			// Can't decide
 			return ISearchPageScoreComputer.UNKNOWN;
 		
-		if (element instanceof IJavaElement || element instanceof IClassFileEditorInput)
+		if (element instanceof IJavaElement || element instanceof IClassFileEditorInput || element instanceof LogicalPackage)
 			return 90;
 		
 		if (element instanceof IMarker) {

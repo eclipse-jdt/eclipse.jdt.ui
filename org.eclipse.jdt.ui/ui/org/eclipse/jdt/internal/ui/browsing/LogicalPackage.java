@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.browsing;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.PlatformObject;
+
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -22,7 +24,7 @@ import org.eclipse.jdt.core.IPackageFragment;
  * Contains a list of package fragments with the same name
  * but residing in different source folders of a unique Java project.
  */
-public class LogicalPackage {
+public class LogicalPackage extends PlatformObject {
 
 	private Set fPackages;
 	private String fName;

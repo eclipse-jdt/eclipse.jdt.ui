@@ -53,6 +53,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -114,11 +116,14 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private MarkerAdapterFactory fMarkerAdapterFactory;
 	private EditorInputAdapterFactory fEditorInputAdapterFactory;
 	private ResourceAdapterFactory fResourceAdapterFactory;
+	private LogicalPackageAdapterFactory fLogicalPackageAdapterFactory;
+	
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
 	private IPropertyChangeListener fFontPropertyChangeListener;
 	
 	private JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
 	
+
 	
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -393,12 +398,14 @@ public class JavaPlugin extends AbstractUIPlugin {
 		fMarkerAdapterFactory= new MarkerAdapterFactory();
 		fEditorInputAdapterFactory= new EditorInputAdapterFactory();
 		fResourceAdapterFactory= new ResourceAdapterFactory();
+		fLogicalPackageAdapterFactory= new LogicalPackageAdapterFactory();
 
 		IAdapterManager manager= Platform.getAdapterManager();		
 		manager.registerAdapters(fJavaElementAdapterFactory, IJavaElement.class);
 		manager.registerAdapters(fMarkerAdapterFactory, IMarker.class);
 		manager.registerAdapters(fEditorInputAdapterFactory, IEditorInput.class);
 		manager.registerAdapters(fResourceAdapterFactory, IResource.class);
+		manager.registerAdapters(fLogicalPackageAdapterFactory, LogicalPackage.class);
 }
 	private void unregisterAdapters() {
 		IAdapterManager manager= Platform.getAdapterManager();
@@ -406,5 +413,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		manager.unregisterAdapters(fMarkerAdapterFactory);
 		manager.unregisterAdapters(fEditorInputAdapterFactory);
 		manager.unregisterAdapters(fResourceAdapterFactory);
+		manager.unregisterAdapters(fLogicalPackageAdapterFactory);
 	}
 }
