@@ -34,15 +34,29 @@ import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
 import org.eclipse.ui.commands.IKeySequenceBinding;
 
-
+/**
+ * A quick menu actions provides support to assign short cuts
+ * to sub menus.
+ * 
+ * @since 3.0
+ */
 public abstract class QuickMenuAction extends Action { 
 
 	private static final int CHAR_INDENT= 3;
 	
+	/**
+	 * Creates a new quick menu action with the given command id.
+	 * 
+	 * @param commandId the command id of the short cut used to open
+	 *  the sub menu 
+	 */
 	public QuickMenuAction(String commandId) {
 		setActionDefinitionId(commandId);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void run() {
 		Display display= Display.getCurrent();
 		if (display == null)
@@ -51,7 +65,7 @@ public abstract class QuickMenuAction extends Action {
 		if (focus == null || focus.isDisposed())
 			return;
 		
-		Point location= getMenuLocation(focus);
+		Point location= computeMenuLocation(focus);
 		if (location == null)
 			return;
 		MenuManager menu= new MenuManager();
@@ -61,8 +75,19 @@ public abstract class QuickMenuAction extends Action {
 		widget.setVisible(true);
 	}
 	
+	/**
+	 * Hook to fill a menu manager with the items of the sub menu.
+	 * 
+	 * @param menu the sub menu to fill
+	 */
 	protected abstract void fillMenu(IMenuManager menu);
 	
+	/**
+	 * Returns the short cut assigned to the sub menu or <code>null</code> if
+	 * no short cut is assigned.
+	 * 
+	 * @return the short cut as a human readable string or <code>null</code>
+	 */
 	public String getShortCutString() {
 		final ICommandManager commandManager = PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
 		final ICommand command = commandManager.getCommand(getActionDefinitionId());
@@ -76,24 +101,40 @@ public abstract class QuickMenuAction extends Action {
 		return null; //$NON-NLS-1$
 	}
 	
-	private Point getMenuLocation(Control focus) {
+	private Point computeMenuLocation(Control focus) {
 		if (focus instanceof StyledText) {
-			return getMenuLocation((StyledText)focus);
+			return computeMenuLocation((StyledText)focus);
 		} else if (focus instanceof Tree) {
-			return getMenuLocation((Tree)focus);
+			return computeMenuLocation((Tree)focus);
 		} else if (focus instanceof Table) {
-			return getMenuLocation((Table)focus);
+			return computeMenuLocation((Table)focus);
 		}
 		return null;
 	}
 	
-	protected Point getMenuLocation(StyledText text) {
+	/**
+	 * Hook to compute the menu location if the focus widget is
+	 * a styled text widget.
+	 * 
+	 * @param text the styled text widget that has the focus
+	 * 
+	 * @return a display relative position of the menu to pop up
+	 */
+	protected Point computeMenuLocation(StyledText text) {
 		Point result= text.getLocationAtOffset(text.getCaretOffset());
 		result.y+= text.getLineHeight();
-		return result;
+		return text.toDisplay(result);
 	}
 	
-	protected Point getMenuLocation(Tree tree) {
+	/**
+	 * Hook to compute the menu location if the focus widget is
+	 * a tree widget.
+	 * 
+	 * @param tree the tree widget that has the focus
+	 * 
+	 * @return a display relative position of the menu to pop up
+	 */
+	protected Point computeMenuLocation(Tree tree) {
 		TreeItem[] items= tree.getSelection();
 		switch (items.length) {
 			case 0:
@@ -117,7 +158,15 @@ public abstract class QuickMenuAction extends Action {
 		}
 	}
 	
-	protected Point getMenuLocation(Table table) {
+	/**
+	 * Hook to compute the menu location if the focus widget is
+	 * a table widget.
+	 * 
+	 * @param table the table widget that has the focus
+	 * 
+	 * @return a widget relative position of the menu to pop up
+	 */
+	protected Point computeMenuLocation(Table table) {
 		TableItem[] items= table.getSelection();
 		switch (items.length) {
 			case 0: {

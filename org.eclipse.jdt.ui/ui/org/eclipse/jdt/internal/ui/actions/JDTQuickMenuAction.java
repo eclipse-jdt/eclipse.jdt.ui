@@ -36,7 +36,7 @@ public abstract class JDTQuickMenuAction extends QuickMenuAction {
 		fEditor= editor;
 	}
 
-	protected Point getMenuLocation(StyledText text) {
+	protected Point computeMenuLocation(StyledText text) {
 		if (fEditor == null || text != fEditor.getViewer().getTextWidget())
 			return null;
 		return fEditor.getViewer().getTextWidget().toDisplay(computeWordStart());
