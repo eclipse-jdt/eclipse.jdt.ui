@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import org.eclipse.jface.resource.JFaceResources;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -46,8 +48,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 
@@ -495,11 +495,29 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
 		data.widthHint= adjustWidth ? Math.min(size.x, 300) : width;
-		data.heightHint= Math.min(SWTUtil.getTableHeightHint(fProposalTable, fProposalTable.getItemCount() - 1), SWTUtil.getTableHeightHint(fProposalTable, 9));
+		data.heightHint= Math.min(getTableHeightHint(fProposalTable, fProposalTable.getItemCount() - 1), getTableHeightHint(fProposalTable, 9));
 		fProposalTable.setLayoutData(data);
 		
 		fProposalShell.layout(true);
 		fProposalShell.pack();
+	}
+
+	/**
+	 * Computes the table hight hint for <code>table</code>.
+	 * 
+	 * @param table the table to compute the height for
+	 * @param rows the number of rows to compute the height for
+	 * @return the height hint for <code>table</code>
+	 */
+	private int getTableHeightHint(Table table, int rows) {
+		if (table.getFont().equals(JFaceResources.getDefaultFont()))
+			table.setFont(JFaceResources.getDialogFont());
+		int result= table.getItemHeight() * rows;
+		if (table.getLinesVisible())
+			result+= table.getGridLineWidth() * (rows - 1);
+
+		// TODO adjustment might just work on windows
+		return result + 4;		
 	}
 
 	private boolean validateProposal(IDocument document, ICompletionProposal p, int offset, DocumentEvent event) {
