@@ -136,7 +136,7 @@ public class TemplateSet {
 					}
 					add(template);					
 				} else {
-					JavaPlugin.logErrorMessage("Template " + name + " not added: " + message);
+					JavaPlugin.logErrorMessage("Template " + name + " not added: " + message);  //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		} catch (ParserConfigurationException e) {
