@@ -18,7 +18,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IField;
@@ -28,9 +27,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -40,8 +39,8 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	private SelfEncapsulateFieldRefactoring fRefactoring;
 
 	public SelfEncapsulateFieldInputPage() {
-		super("InputPage", true);
-		setDescription("Create getting and setting methods for the field and use only those to access the field.");
+		super(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.inputPage"), true); //$NON-NLS-1$
+		setDescription(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.description")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 	}
 	
@@ -61,7 +60,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		layouter.setDefaultGridData(data, 1);
 		
 		Label label= new Label(result, SWT.LEFT);
-		label.setText("&Getter name:");
+		label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.getter_name")); //$NON-NLS-1$
 		Text text= new Text(result, SWT.BORDER);
 		text.setText(fRefactoring.getGetterName());
 		layouter.perform(label, text, 1);
@@ -75,7 +74,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		
 		if (needsModifiers()) {
 			label= new Label(result, SWT.LEFT);
-			label.setText("&Setter name:");
+			label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.setter_name")); //$NON-NLS-1$
 			text= new Text(result, SWT.BORDER);
 			text.setText(fRefactoring.getSetterName());
 			layouter.perform(label, text, 1);
@@ -90,7 +89,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		// createSeparator(result, layouter);
 		
 		label= new Label(result, SWT.LEFT);
-		label.setText("&Insert new methods after:");
+		label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.insert_after")); //$NON-NLS-1$
 		final Combo combo= new Combo(result, SWT.READ_ONLY);
 		fillWithPossibleInsertPositions(combo, fRefactoring.getField());
 		combo.addSelectionListener(new SelectionAdapter() {
@@ -101,7 +100,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		layouter.perform(label, combo, 1);
 		
 		final Button checkBox= new Button(result, SWT.CHECK);
-		checkBox.setText("&Encapsulate field accesses in declaring class");
+		checkBox.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.encapsulate_in_declaring_class")); //$NON-NLS-1$
 		checkBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setEncapsulateDeclaringClass(checkBox.getSelection());
@@ -125,7 +124,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	
 	private void fillWithPossibleInsertPositions(Combo combo, IField field) {
 		int select= 0;
-		combo.add("As first method");
+		combo.add(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.first_method")); //$NON-NLS-1$
 		try {
 			IMethod[] methods= field.getDeclaringType().getMethods();
 			for (int i= 0; i < methods.length; i++) {

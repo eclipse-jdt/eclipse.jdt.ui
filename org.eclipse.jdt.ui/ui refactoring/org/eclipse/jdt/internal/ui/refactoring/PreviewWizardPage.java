@@ -4,10 +4,11 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -18,10 +19,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -30,17 +29,15 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.compare.CompareUI;
-import org.eclipse.compare.CompareViewerPane;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.PageBook;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.compare.CompareUI;
+import org.eclipse.compare.CompareViewerPane;
+
 import org.eclipse.jdt.core.ISourceReference;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -49,13 +46,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Presents the changes made by the refactoring.
  * Consists of a tree of changes and a compare viewer that shows the differences. 
@@ -127,8 +121,8 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	}
 	
 	private class ShowDetailsAction extends Action {
-		private static final String SHOW_QUALIFIED_NAMES= RefactoringMessages.getString("PreviewWizardPage.show_Qualified_Names"); //$NON-NLS-1$
-		private static final String HIDE_QUALIFIED_NAMES= RefactoringMessages.getString("PreviewWizardPage.hide_Qualified_Names"); //$NON-NLS-1$
+		private final String SHOW_QUALIFIED_NAMES= RefactoringMessages.getString("PreviewWizardPage.show_Qualified_Names"); //$NON-NLS-1$
+		private final String HIDE_QUALIFIED_NAMES= RefactoringMessages.getString("PreviewWizardPage.hide_Qualified_Names"); //$NON-NLS-1$
 		public ShowDetailsAction() {
 			setImageDescriptor(JavaPluginImages.DESC_OBJS_PACKAGE);
 			setChecked(true);

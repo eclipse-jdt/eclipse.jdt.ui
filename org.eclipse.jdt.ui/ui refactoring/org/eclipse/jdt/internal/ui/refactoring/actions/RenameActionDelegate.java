@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.reorg.RenameAction;
 
 public class RenameActionDelegate extends RefactoringActionDelegate {

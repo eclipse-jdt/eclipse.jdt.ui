@@ -17,18 +17,19 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.ModifyParametersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.MoveMembersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.PullUpWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.ModifyParametersWizard;
 
 /**
  * Refactoring menu group

@@ -15,6 +15,7 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class RenameInputDialog extends InputDialog{
 		

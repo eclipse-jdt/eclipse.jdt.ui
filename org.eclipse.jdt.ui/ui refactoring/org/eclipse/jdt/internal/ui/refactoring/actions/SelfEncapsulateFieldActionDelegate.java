@@ -4,11 +4,10 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.jdt.internal.ui.reorg.RenameAction;
-import org.eclipse.jdt.internal.ui.actions.*;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class SelfEncapsulateFieldActionDelegate extends RefactoringActionDelegate {
 
