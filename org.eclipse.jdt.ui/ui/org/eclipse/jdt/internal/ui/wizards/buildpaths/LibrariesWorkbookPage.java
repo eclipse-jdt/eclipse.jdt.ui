@@ -503,7 +503,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private CPListElement[] openJarFileDialog(CPListElement existing) {
 		if (existing == null) {
-			IPath[] selected= BuildPathDialogAccess.chooseJAREntries(getShell(), fCurrJProject.getPath(), getUsedContainers(existing));
+			IPath[] selected= BuildPathDialogAccess.chooseJAREntries(getShell(), fCurrJProject.getPath(), getUsedJARFiles(existing));
 			if (selected != null) {
 				ArrayList res= new ArrayList();
 				
