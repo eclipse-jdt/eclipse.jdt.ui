@@ -77,6 +77,8 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 			RefactoringStatus result= new RefactoringStatus();
 
 			result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
+			if (result.hasFatalError())
+				return result;
 
 			pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 

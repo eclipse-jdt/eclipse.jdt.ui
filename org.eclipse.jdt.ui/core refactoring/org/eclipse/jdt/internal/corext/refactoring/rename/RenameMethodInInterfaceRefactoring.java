@@ -72,6 +72,8 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(super.checkInput(new SubProgressMonitor(pm, 6)));
+			if (result.hasFatalError())
+				return result;
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 			if (isSpecialCase())
 				result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.special_case")); //$NON-NLS-1$
