@@ -248,6 +248,19 @@ public class StubUtility {
 	 * Generates a '@see' tag to the defined method.
 	 */
 	public static void genJavaDocSeeTag(IType declaringType, String methodName, String[] paramTypes, boolean nonJavaDocComment, boolean isDeprecated, StringBuffer buf) throws JavaModelException {
+		String[] fullParamNames= new String[paramTypes.length];
+		for (int i= 0; i < paramTypes.length; i++) {
+			fullParamNames[i]= JavaModelUtil.getResolvedTypeName(paramTypes[i], declaringType);
+		}
+		String fullTypeName= JavaModelUtil.getFullyQualifiedName(declaringType);
+		
+		genJavaDocSeeTag(fullTypeName, methodName, fullParamNames, nonJavaDocComment, isDeprecated, buf);
+	}
+	
+	/**
+	 * Generates a '@see' tag to the defined method.
+	 */
+	public static void genJavaDocSeeTag(String fullyQualifiedTypeName, String methodName, String[] fullParamTypeNames, boolean nonJavaDocComment, boolean isDeprecated, StringBuffer buf) throws JavaModelException {
 		// create a @see link
 		buf.append("/*"); //$NON-NLS-1$
 		if (!nonJavaDocComment) {
@@ -256,15 +269,15 @@ public class StubUtility {
 			buf.append(" (non-Javadoc)"); //$NON-NLS-1$
 		}
 		buf.append("\n * @see "); //$NON-NLS-1$
-		buf.append(JavaModelUtil.getFullyQualifiedName(declaringType));
+		buf.append(fullyQualifiedTypeName);
 		buf.append('#'); 
 		buf.append(methodName);
 		buf.append('(');
-		for (int i= 0; i < paramTypes.length; i++) {
+		for (int i= 0; i < fullParamTypeNames.length; i++) {
 			if (i > 0) {
 				buf.append(", "); //$NON-NLS-1$
 			}
-			buf.append(JavaModelUtil.getResolvedTypeName(paramTypes[i], declaringType));
+			buf.append(fullParamTypeNames[i]);
 		}
 		buf.append(")\n"); //$NON-NLS-1$
 		if (isDeprecated) {
@@ -272,6 +285,8 @@ public class StubUtility {
 		}
 		buf.append(" */\n"); //$NON-NLS-1$
 	}	
+	
+	
 
 	/**
 	 * Finds a method in a list of methods.

@@ -51,6 +51,9 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 			case ASTRewrite.SINGLEVAR_DECLARATION:
 				placeHolder= ast.newSingleVariableDeclaration();
 				break;
+			case ASTRewrite.JAVADOC:
+				placeHolder= ast.newJavadoc();
+				break;				
 			default:
 				return null;
 		}

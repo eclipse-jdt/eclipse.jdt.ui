@@ -92,7 +92,10 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.ReturnTypeNotVisible:
 			case IProblem.ExceptionTypeNotVisible:
 			case IProblem.NotVisibleField:
-			case IProblem.ImportNotVisible:		
+			case IProblem.ImportNotVisible:
+			case IProblem.BodyForAbstractMethod:
+			case IProblem.AbstractMethodInAbstractClass:
+			case IProblem.AbstractMethodMustBeImplemented:	
 				return true;
 			default:
 				return false;
@@ -246,13 +249,13 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					break;
 				case IProblem.NonStaticAccessToStaticField:
 				case IProblem.NonStaticAccessToStaticMethod:
-					LocalCorrectionsSubProcessor.addAccessToStaticProposals(problemPos, proposals);
+					LocalCorrectionsSubProcessor.addInstanceAccessToStaticProposals(problemPos, proposals);
 					break;
 				case IProblem.StaticMethodRequested:
 				case IProblem.NonStaticFieldFromStaticInvocation:
 				case IProblem.InstanceMethodDuringConstructorInvocation:
 				case IProblem.InstanceFieldDuringConstructorInvocation:
-					LocalCorrectionsSubProcessor.addNonAccessibleMemberProposal(problemPos, proposals, false); 
+					ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(problemPos, proposals, false); 
 					break;				
 				case IProblem.NotVisibleMethod:
 				case IProblem.NotVisibleConstructor:
@@ -265,8 +268,15 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.ExceptionTypeNotVisible:
 				case IProblem.NotVisibleField:
 				case IProblem.ImportNotVisible:
-					LocalCorrectionsSubProcessor.addNonAccessibleMemberProposal(problemPos, proposals, true); 
+					ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(problemPos, proposals, true); 
 					break;
+				case IProblem.BodyForAbstractMethod:
+				case IProblem.AbstractMethodInAbstractClass:
+					ModifierCorrectionSubProcessor.addAbstractMethodProposals(problemPos, proposals); 
+					break;
+				case IProblem.AbstractMethodMustBeImplemented:
+					LocalCorrectionsSubProcessor.addUnimplementedMethodsProposals(problemPos, proposals);
+					break;					
 				default:
 			}
 		} catch (CoreException e) {

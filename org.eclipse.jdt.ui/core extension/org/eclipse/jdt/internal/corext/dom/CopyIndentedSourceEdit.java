@@ -44,6 +44,6 @@ public final class CopyIndentedSourceEdit extends CopySourceEdit {
 		if (destIndentLevel == fSourceIndentLevel) {
 			return str;
 		}
-		return Strings.changeIndent(str, fSourceIndentLevel, fTabWidth, fDestinationIndent);
+		return Strings.changeIndent(str, fSourceIndentLevel, fTabWidth, fDestinationIndent, buffer.getLineDelimiter());
 	}
 }

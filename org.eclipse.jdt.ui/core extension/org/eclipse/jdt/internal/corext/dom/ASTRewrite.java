@@ -16,6 +16,7 @@ import java.util.HashMap;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 
@@ -77,6 +78,7 @@ public class ASTRewrite {
 	public static final int STATEMENT= 4;
 	public static final int SINGLEVAR_DECLARATION= 5;
 	public static final int TYPE= 6;
+	public static final int JAVADOC= 7;
 	
 	private static final String CHANGEKEY= "ASTChangeData";
 	private static final String COPYSOURCEKEY= "ASTCopySource";
@@ -260,7 +262,7 @@ public class ASTRewrite {
 	 * @param code String that will be inserted. The string must have no extra indent.
 	 * @param nodeType the type of the place holder. Valid values are <code>BODY_DECLARATION</code>,
 	 * <code>BLOCK</code>, <code>STATEMENT</code>, <code>SINGLEVAR_DECLARATION</code>,
-	 * <code>TYPE</code> and <code>EXPRESSION</code>.
+	 * <code>TYPE</code>, <code>EXPRESSION</code> and <code>JAVADOC</code> .
 	 * @return the place holder node
 	 */
 	public final ASTNode createPlaceholder(String code, int nodeType) {
@@ -283,7 +285,9 @@ public class ASTRewrite {
 		} else if (existingNode instanceof BodyDeclaration) {
 			return BODY_DECLARATION;
 		} else if (existingNode instanceof SingleVariableDeclaration) {
-			return SINGLEVAR_DECLARATION;			
+			return SINGLEVAR_DECLARATION;
+		} else if (existingNode instanceof Javadoc) {
+			return JAVADOC;				
 		} else {
 			return UNKNOWN;
 		}

@@ -23,13 +23,29 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
@@ -191,7 +207,7 @@ public class LocalCorrectionsSubProcessor {
 	 * @param problemPos
 	 * @param proposals
 	 */
-	public static void addAccessToStaticProposals(ProblemPosition problemPos, List proposals) throws CoreException {
+	public static void addInstanceAccessToStaticProposals(ProblemPosition problemPos, List proposals) throws CoreException {
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
@@ -226,105 +242,26 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 	}
-	
-	public static void addNonAccessibleMemberProposal(ProblemPosition problemPos, ArrayList proposals, boolean visibilityChange) throws JavaModelException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
 
+	public static void addUnimplementedMethodsProposals(ProblemPosition problemPos, ArrayList proposals) {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		ASTNode selectedNode= ASTResolving.findCoveringNode(astRoot, problemPos.getOffset(), problemPos.getLength());
 		if (selectedNode == null) {
 			return;
 		}
-		
-		IBinding binding=null;
-		switch (selectedNode.getNodeType()) {
-			case ASTNode.SIMPLE_NAME:
-				binding= ((SimpleName) selectedNode).resolveBinding();
-				break;
-			case ASTNode.QUALIFIED_NAME:
-				binding= ((QualifiedName) selectedNode).resolveBinding();
-				break;
-			case ASTNode.SIMPLE_TYPE:
-				binding= ((SimpleType) selectedNode).resolveBinding();
-				break;
-			case ASTNode.METHOD_INVOCATION:
-				binding= ((MethodInvocation) selectedNode).getName().resolveBinding();
-				break;
-			case ASTNode.SUPER_METHOD_INVOCATION:
-				binding= ((SuperMethodInvocation) selectedNode).getName().resolveBinding();
-				break;								
-			case ASTNode.SUPER_FIELD_ACCESS:
-				binding= ((SuperFieldAccess) selectedNode).getName().resolveBinding();
-				break;				
-			case ASTNode.CLASS_INSTANCE_CREATION:
-				binding= ((ClassInstanceCreation) selectedNode).resolveConstructorBinding();
-				break;
-			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
-				binding= ((SuperConstructorInvocation) selectedNode).resolveConstructorBinding();
-				break;							
-			default:
-				return;
+		ASTNode typeNode= null;
+		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && selectedNode.getParent().getNodeType() == ASTNode.TYPE_DECLARATION) {
+			typeNode= selectedNode.getParent();
+		} else if (selectedNode.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+			ClassInstanceCreation creation= (ClassInstanceCreation) selectedNode;
+			typeNode= creation.getAnonymousClassDeclaration();				
 		}
-		ITypeBinding typeBinding= null;
-		String name;
-		if (binding instanceof IMethodBinding) {
-			typeBinding= ((IMethodBinding) binding).getDeclaringClass();
-			name= binding.getName() + "()";
-		} else if (binding instanceof IVariableBinding) {
-			typeBinding= ((IVariableBinding) binding).getDeclaringClass();
-			name= binding.getName();
-		} else if (binding instanceof ITypeBinding) {
-			typeBinding= (ITypeBinding) binding;
-			name= binding.getName();
-		} else {
-			return;
+		if (typeNode != null) {
+			UnimplementedMethodsCompletionProposal proposal= new UnimplementedMethodsCompletionProposal(cu, typeNode, 0);
+			proposals.add(proposal);
 		}
-		if (typeBinding.isFromSource()) {
-			int includedModifiers= 0;
-			int excludedModifiers= 0;
-			String label;
-			if (visibilityChange) {
-				excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
-				includedModifiers= getNeededVisibility(selectedNode, typeBinding);
-				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changevisibility.description", new String[] { name, getVisibilityString(includedModifiers) });
-			} else {				
-				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changemodifiertostatic.description", name);
-				includedModifiers= Modifier.STATIC;
-			}
-			ICompilationUnit targetCU= Binding2JavaModel.findCompilationUnit(typeBinding, cu.getJavaProject());
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, 0, image));
-		}
-	}
-		
-	private static String getVisibilityString(int code) {
-		if (Modifier.isPublic(code)) {
-			return "public";
-		}else if (Modifier.isProtected(code)) {
-			return "protected";
-		}
-		return "default";
-	}
-	
-	
-	private static int getNeededVisibility(ASTNode currNode, ITypeBinding targetType) {
-		ITypeBinding currNodeBinding= ASTResolving.getBindingOfParentType(currNode);
-		if (currNodeBinding == null) { // import
-			return Modifier.PUBLIC;
-		}
-		
-		ITypeBinding curr= currNodeBinding;
-		while (curr != null) {
-			if (curr.getKey().equals(targetType.getKey())) {
-				return Modifier.PROTECTED;
-			}
-			curr= curr.getSuperclass();
-		}
-		if (currNodeBinding.getPackage().getKey().equals(targetType.getPackage().getKey())) {
-			return 0;
-		}
-		return Modifier.PUBLIC;
-	}
 
+	}
 
 }

@@ -603,7 +603,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				int srcIndentLevel= getIndent(existingNode.getStartPosition());
 				doTextCopy(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
 			} else if (data instanceof String) {
-				String str= Strings.changeIndent((String) data, 0, tabWidth, destIndentString); 
+				String str= Strings.changeIndent((String) data, 0, tabWidth, destIndentString, fTextBuffer.getLineDelimiter()); 
 				doTextInsert(insertOffset, str, description);
 			}
 		

@@ -732,4 +732,5 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	}
 	*/
 	
+	
 }

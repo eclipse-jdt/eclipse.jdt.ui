@@ -162,7 +162,7 @@ public class Bindings {
 		return null;
 	}
 	
-	private static boolean isEqualMethod(IMethodBinding method, String methodName, ITypeBinding[] parameters) {
+	public static boolean isEqualMethod(IMethodBinding method, String methodName, ITypeBinding[] parameters) {
 		if (!method.getName().equals(methodName))
 			return false;
 			
