@@ -42,7 +42,6 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	private Button fUpdateTextualMatches;
 	private Button fUpdateQualifiedNames;
 	private QualifiedNameComponent fQualifiedNameComponent;
-	private static final String UPDATE_REFERENCES= "updateReferences"; //$NON-NLS-1$
 	private static final String UPDATE_TEXTUAL_MATCHES= "updateTextualMatches"; //$NON-NLS-1$
 	private static final String UPDATE_QUALIFIED_NAMES= "updateQualifiedNames"; //$NON-NLS-1$
 	
@@ -50,7 +49,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	 * Creates a new text input page.
 	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
 	 *  user input page. Otherwise <code>false</code>.
-	 * @param initialSetting the initialSetting.
+	 * @param initialValue the initial value
 	 */
 	public RenameInputWizardPage(String description, String contextHelpId, boolean isLastUserPage, String initialValue) {
 		super(description, isLastUserPage, initialValue);
@@ -104,7 +103,6 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	
 	public void dispose() {
 		if (saveSettings()) {
-			saveBooleanSetting(UPDATE_REFERENCES, fUpdateReferences);
 			saveBooleanSetting(UPDATE_TEXTUAL_MATCHES, fUpdateTextualMatches);
 			saveBooleanSetting(UPDATE_QUALIFIED_NAMES, fUpdateQualifiedNames);
 			if (fQualifiedNameComponent != null)
@@ -118,7 +116,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		if (ref == null || !ref.canEnableUpdateReferences())	
 			return;
 		String title= RefactoringMessages.getString("RenameInputWizardPage.update_references"); //$NON-NLS-1$
-		boolean defaultValue= getBooleanSetting(UPDATE_REFERENCES, ref.getUpdateReferences());
+		boolean defaultValue= true; //bug 77901
 		fUpdateReferences= createCheckbox(result, title, defaultValue, layouter);
 		ref.setUpdateReferences(fUpdateReferences.getSelection());
 		fUpdateReferences.addSelectionListener(new SelectionAdapter(){
