@@ -16,6 +16,6 @@ public interface ISelectionValidator {
  	 * @param selection The elements to validate
  	 * @return The resulting status
 	 */	
-	IStatus isValid(Object[] selection);
+	IStatus validate(Object[] selection);
 	
 }

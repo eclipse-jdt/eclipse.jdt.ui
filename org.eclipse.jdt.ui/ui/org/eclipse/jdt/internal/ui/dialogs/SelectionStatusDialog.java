@@ -32,9 +32,11 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	private IStatus fLastStatus;
 	private Image fImage;
 	private boolean fInitialSelectionSet;
-	private boolean fStatusLineAboveButtons= false;
-	
-	
+	private boolean fStatusLineAboveButtons= false;	
+
+	/**
+	 *
+	 */	
 	public SelectionStatusDialog(Shell parent) {
 		super(parent);
 		fInitialSelectionSet= false;
@@ -171,9 +173,8 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	 */
 	public void create() {
 		super.create();
-		if (fLastStatus != null) {
+		if (fLastStatus != null)
 			updateStatus(fLastStatus);
-		}
 	}
 
 	/* (non-Javadoc)

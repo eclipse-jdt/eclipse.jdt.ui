@@ -35,13 +35,9 @@ public class ProblemDialog extends ErrorDialog {
 	 *   as per <code>IStatus.matches</code>
 	 * @see org.eclipse.core.runtime.IStatus#matches
 	 */
-	protected ProblemDialog(
-			Shell parent,
-			String title,
-			String message,
-			Image image,
-			IStatus status,
-			int displayMask) {
+	protected ProblemDialog(Shell parent, String title,	String message,
+		Image image, IStatus status, int displayMask)
+	{
 		super(parent, title, message, status, displayMask);
 		fImage= image;
 	}
@@ -115,12 +111,9 @@ public class ProblemDialog extends ErrorDialog {
 	 *     decoration or the ESC key was used.
 	 * @see org.eclipse.core.runtime.IStatus#matches
 	 */
-	public static int open(
-			Shell parent,
-			String title,
-			String message,
-			IStatus status,
-			int displayMask) {
+	public static int open(Shell parent, String title, String message,
+		IStatus status,	int displayMask)
+	{
 		Image image;
 		if (status == null || status.matches(IStatus.ERROR))
 			image= JFaceResources.getImageRegistry().get(DLG_IMG_ERROR);
@@ -128,7 +121,9 @@ public class ProblemDialog extends ErrorDialog {
 			image= JFaceResources.getImageRegistry().get(DLG_IMG_WARNING);
 		else
 			image= JFaceResources.getImageRegistry().get(DLG_IMG_INFO);
+			
 		ErrorDialog dialog= new ProblemDialog(parent, title, message, image, status, displayMask);
 		return dialog.open();
 	}
+	
 }

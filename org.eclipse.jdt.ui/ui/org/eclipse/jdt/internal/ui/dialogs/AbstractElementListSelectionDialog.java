@@ -233,7 +233,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		int length= sel.size();
 		if (length > 0) {
 			if (fValidator != null) {
-				status= fValidator.isValid(sel.toArray());
+				status= fValidator.validate(sel.toArray());
 			} else {
 				status= new StatusInfo();
 			}

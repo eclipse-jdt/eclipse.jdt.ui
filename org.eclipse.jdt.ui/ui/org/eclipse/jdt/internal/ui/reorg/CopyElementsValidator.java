@@ -27,15 +27,15 @@ public class CopyElementsValidator implements ISelectionValidator {
 		fElementsToCopy= elements;
 	}
 	
-	public IStatus isValid(Object[] selected) {
-		if (validate(selected)) {
+	public IStatus validate(Object[] selected) {
+		if (isValid(selected)) {
 			return fOKStatus;
 		}
 		//XXX: Could give more detailed error message
 		return fErrorStatus;
 	}
 	
-	private boolean validate(Object[] selection) {
+	private boolean isValid(Object[] selection) {
 		if (selection.length != 1)
 			return false;
 		Object selected= selection[0];

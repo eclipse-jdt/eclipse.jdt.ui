@@ -26,23 +26,22 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		public Image getImage(Object element) {
 			return super.getImage(((IType)element).getPackageFragment());
 		}
+		
 		public String getText(Object element) {
 			return super.getText(((IType)element).getPackageFragment());
 		}
 	}
 	
 	public MainTypeSelectionDialog(Shell shell, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase) {
-		super(
-			shell,
-			"", //$NON-NLS-1$
-			null,
-			new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
-			new PackageRenderer(),
-			ignoreCase, true); 
+		super(shell, "", //$NON-NLS-1$
+			null, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
+			new PackageRenderer(), ignoreCase, true);
+
+		Assert.isNotNull(context);
+		Assert.isNotNull(scope);
+
 		fRunnableContext= context;
-		Assert.isNotNull(fRunnableContext);
 		fScope= scope;
-		Assert.isNotNull(fScope);
 		fStyle= style;
 	}
 	

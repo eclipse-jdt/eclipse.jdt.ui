@@ -11,8 +11,11 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 	private static final String SECTION_NAME= "OpenTypeSelectionDialog"; //$NON-NLS-1$
 	private static final String SHOW_IN_TYPE_HIERARCHY= "showInTypeHierarchy"; //$NON-NLS-1$
 
-	public OpenTypeSelectionDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString) {
+	public OpenTypeSelectionDialog(Shell parent, IRunnableContext context,
+		IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString)
+	{
 		super(parent, context, scope, style, ignoreCase, matchEmtpyString);
+
 		fShowInTypeHierarchy= getDialogSetting().getBoolean(SHOW_IN_TYPE_HIERARCHY);
 	}
 	
@@ -21,6 +24,7 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
+		
 		WorkbenchHelp.setHelp(newShell, new Object[] { IJavaHelpContextIds.OPEN_TYPE_DIALOG });
 	}	
 
@@ -31,10 +35,12 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 	private IDialogSettings getDialogSetting() {
 		IDialogSettings mainStore= JavaPlugin.getDefault().getDialogSettings(); 
 		IDialogSettings result= mainStore.getSection(SECTION_NAME);
+
 		if (result == null) {
 			result= mainStore.addNewSection(SECTION_NAME);
 			result.put(SHOW_IN_TYPE_HIERARCHY, true);
 		}
+
 		return result;
 	}
 	
@@ -53,10 +59,11 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 		return contents;
 	}
 
-
 	public boolean close() {
 		if (getReturnCode() != CANCEL)
 			getDialogSetting().put(SHOW_IN_TYPE_HIERARCHY, fShowInTypeHierarchy);
+
 		return super.close();
 	}
+	
 }

@@ -35,8 +35,8 @@ public class TypedElementSelectionValidator implements ISelectionValidator {
 	/**
 	 * @see ISelectionValidator#isValid
 	 */
-	public IStatus isValid(Object[] elements) {
-		if (validate(elements)) {
+	public IStatus validate(Object[] elements) {
+		if (isValid(elements)) {
 			return fgOKStatus;
 		}
 		return fgErrorStatus;
@@ -51,7 +51,7 @@ public class TypedElementSelectionValidator implements ISelectionValidator {
 		return false;
 	}
 	
-	private boolean validate(Object[] selection) {
+	private boolean isValid(Object[] selection) {
 		if (selection.length == 0) {
 			return false;
 		}

@@ -824,7 +824,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		dialog.addFilter(new LibraryFilter());
 		dialog.addFilter(new SealPackagesFilter(packages));
 		dialog.setValidator(new ISelectionValidator() {
-			public IStatus isValid(Object[] selection) {
+			public IStatus validate(Object[] selection) {
 				StatusInfo res= new StatusInfo();
 				for (int i= 0; i < selection.length; i++) {
 					if (!(selection[i] instanceof IPackageFragment)) {
@@ -860,7 +860,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		ILabelProvider labelProvider= new JavaElementLabelProvider(labelFlags);
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, contentProvider, false, true); 
 		dialog.setValidator(new ISelectionValidator() {
-			public IStatus isValid(Object[] selection) {
+			public IStatus validate(Object[] selection) {
 				StatusInfo res= new StatusInfo();
 				// only single selection
 				if (selection.length == 1 && (selection[0] instanceof IFile))

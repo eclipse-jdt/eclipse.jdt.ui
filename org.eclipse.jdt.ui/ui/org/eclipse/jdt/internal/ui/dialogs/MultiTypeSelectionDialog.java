@@ -33,12 +33,17 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 	private IJavaSearchScope fScope;
 	private int fStyle;
 	
-	public MultiTypeSelectionDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase) {
-		super(parent, new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_POSTFIX), ignoreCase, true); 
+	public MultiTypeSelectionDialog(Shell parent, IRunnableContext context,
+		IJavaSearchScope scope, int style, boolean ignoreCase)
+	{
+		super(parent, new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_POSTFIX),
+			ignoreCase, true); 
+
+		Assert.isNotNull(context);
+		Assert.isNotNull(scope);
+
 		fRunnableContext= context;
-		Assert.isNotNull(fRunnableContext);
 		fScope= scope;
-		Assert.isNotNull(fScope);
 		fStyle= style;
 	}
 
@@ -53,7 +58,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 			return CANCEL;
 		
 		setElements(typesFound);
-		setInitialSelection("A");				 //$NON-NLS-1$
+		setInitialSelection("A"); //$NON-NLS-1$
 		return super.open();
 	}
 	
@@ -67,6 +72,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 			setResult(null);
 			return;
 		}
+		
 		List result= new ArrayList(size);
 		if (result != null) {
 			for (int i= 0; i < size; i++) {

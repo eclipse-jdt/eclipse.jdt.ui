@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class TwoPaneElementSelector extends SelectionStatusDialog {
+	
 	// construction parameters
 	private ILabelProvider fElementRenderer;
 	private ILabelProvider fQualifierRenderer;
@@ -51,13 +52,18 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	
 	private final TwoArrayQuickSorter fSorter;
 	
-
+	/**
+	 *
+	 */
 	public TwoPaneElementSelector(Shell parent, String title, Image image, ILabelProvider elementRenderer, 
-			ILabelProvider qualifierRenderer, boolean ignoreCase, boolean matchEmtpyString) {
+			ILabelProvider qualifierRenderer, boolean ignoreCase, boolean matchEmtpyString)
+	{
 		super(parent);
+		
 		setTitle(title);
 		setImage(image);
 		setMessage(""); //$NON-NLS-1$
+		
 		fElementRenderer= elementRenderer;
 		fQualifierRenderer= qualifierRenderer;
 		fIgnoreCase= ignoreCase;
@@ -85,22 +91,13 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 				access$superOpen();
 			}
 		});
+		
 		return getReturnCode();
 	}
 		
 	private void access$superOpen() {
 		super.open();
 	}	
-	 
-	public int open(Object[] elements, String initialSelection) {
-		setInitialSelection(initialSelection);
-		setElements(elements);
-		return open();
-	}
-	
-	public int open(Object[] elements) {
-		return open(elements, null);
-	}
 
 	/**
 	 * @deprecated Use getPrimaryResult instead.
@@ -109,6 +106,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 		Object[] result= getResult();
 		if (result == null || result.length == 0)
 			return null;
+			
 		return result[0];
 	}
 
@@ -141,29 +139,35 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 			(new Label(parent, SWT.NONE)).setText(fUpperListLabel);
 			
 		Table list= new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		
 		list.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event evt) {
 				handleUpperSelectionChanged();
 			}
 		});
+		
 		list.addListener(SWT.MouseDoubleClick, new Listener() {
 			public void handleEvent(Event evt) {
 				handleUpperDoubleClick();
 			}
 		});
+		
 		list.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				fElementRenderer.dispose();
 			}
 		});
-		GridData spec= new GridData();
-		spec.widthHint= convertWidthInCharsToPixels(50);
-		spec.heightHint= convertHeightInCharsToPixels(15);
-		spec.grabExcessVerticalSpace= true;
-		spec.grabExcessHorizontalSpace= true;
-		spec.horizontalAlignment= spec.FILL;
-		spec.verticalAlignment= spec.FILL;
-		list.setLayoutData(spec);
+		
+		GridData data= new GridData();
+		data.widthHint= convertWidthInCharsToPixels(50);
+		data.heightHint= convertHeightInCharsToPixels(15);
+		data.grabExcessVerticalSpace= true;
+		data.grabExcessHorizontalSpace= true;
+		data.horizontalAlignment= GridData.FILL;
+		data.verticalAlignment= GridData.FILL;
+		
+		list.setLayoutData(data);
+		
 		return list;
 	}
 	
@@ -176,29 +180,34 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 			(new Label(parent, SWT.NONE)).setText(fLowerListLabel);
 
 		Table list= new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		
 		list.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event evt) {
 				handleLowerSelectionChanged();
 			}
 		});
+		
 		list.addListener(SWT.MouseDoubleClick, new Listener() {
 			public void handleEvent(Event evt) {
 				handleLowerDoubleClick();
 			}
 		});
+		
 		list.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				fQualifierRenderer.dispose();
 			}
 		});
-		GridData spec= new GridData();
-		spec.widthHint= convertWidthInCharsToPixels(50);
-		spec.heightHint= convertHeightInCharsToPixels(5);
-		spec.grabExcessVerticalSpace= true;
-		spec.grabExcessHorizontalSpace= true;
-		spec.horizontalAlignment= spec.FILL;
-		spec.verticalAlignment= spec.FILL;
-		list.setLayoutData(spec);
+		
+		GridData data= new GridData();
+		data.widthHint= convertWidthInCharsToPixels(50);
+		data.heightHint= convertHeightInCharsToPixels(5);
+		data.grabExcessVerticalSpace= true;
+		data.grabExcessHorizontalSpace= true;
+		data.horizontalAlignment= GridData.FILL;
+		data.verticalAlignment= GridData.FILL;
+		list.setLayoutData(data);
+		
 		return list;
 	}
 
@@ -208,18 +217,20 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	 */
 	private Text createText(Composite parent) {
 		Text text= new Text(parent, SWT.BORDER);
-		GridData spec= new GridData();
-		spec.grabExcessVerticalSpace= false;
-		spec.grabExcessHorizontalSpace= true;
-		spec.horizontalAlignment= spec.FILL;
-		spec.verticalAlignment= spec.BEGINNING;
-		text.setLayoutData(spec);
-		Listener l= new Listener() {
+
+		GridData data= new GridData();
+		data.grabExcessVerticalSpace= false;
+		data.grabExcessHorizontalSpace= true;
+		data.horizontalAlignment= GridData.FILL;
+		data.verticalAlignment= GridData.BEGINNING;
+		text.setLayoutData(data);
+		
+		Listener listener= new Listener() {
 			public void handleEvent(Event evt) {
 				rematch(fText.getText());
 			}
 		};
-		text.addListener(SWT.Modify, l);
+		text.addListener(SWT.Modify, listener);
 		        
 		return text;
 	}
@@ -270,26 +281,27 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	private void updateUpperListWidget(int[] indices, int size) {
 		fUpperList.setRedraw(false);
 		int itemCount= fUpperList.getItemCount();
-		if (size < itemCount) {
-			fUpperList.remove(0, itemCount-size-1);
-		}
-		Display d= fUpperList.getDisplay();
+		if (size < itemCount)
+			fUpperList.remove(0, itemCount - size - 1);
+
 		TableItem[] items= fUpperList.getItems();
 		for (int i= 0; i < size; i++) {
-			TableItem ti= null;
+			TableItem item= null;
 			if (i < itemCount) {
-				ti= items[i];
+				item= items[i];
 			} else {
-				ti= new TableItem(fUpperList, i);
+				item= new TableItem(fUpperList, i);
 			}
-			ti.setText(fRenderedStrings[indices[i]]);
+			item.setText(fRenderedStrings[indices[i]]);
 			// XXX: 1G65LDG: JFUIF:WIN2000 - ILabelProvider used outside a viewer
-			Image img= fElementRenderer.getImage(fElements[indices[i]]);
-			if (img != null)
-				ti.setImage(img);
+			Image image= fElementRenderer.getImage(fElements[indices[i]]);
+			if (image != null)
+				item.setImage(image);
 		}
+
 		if (fUpperList.getItemCount() > 0)
 			fUpperList.setSelection(0);
+
 		fUpperList.setRedraw(true);
 		handleUpperSelectionChanged();
 	}
@@ -342,15 +354,13 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	}
 	
 	private void handleUpperDoubleClick() {
-		if (getWidgetSelection() != null) {
+		if (getWidgetSelection() != null)
 			buttonPressed(getDefaultButtonID());
-		}
 	}
 	
 	private void handleLowerDoubleClick() {
-		if (getWidgetSelection() != null) {
+		if (getWidgetSelection() != null)
 			buttonPressed(getDefaultButtonID());
-		}
 	}	
 
 	private void handleLowerSelectionChanged() {
@@ -380,9 +390,9 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	
 	private void updateLowerListWidget(int from, int to) {
 		fLowerList.removeAll();
-		Display d= fLowerList.getDisplay();
-		fQualifierMap= new Integer[to-from];
-		String[] qualifiers= new String[to-from];
+		fQualifierMap= new Integer[to - from];
+		String[] qualifiers= new String[to - from];
+		
 		for (int i= from; i < to; i++) {
 			// XXX: 1G65LDG: JFUIF:WIN2000 - ILabelProvider used outside a viewer
 			qualifiers[i-from]= fQualifierRenderer.getText(fElements[i]);
@@ -390,18 +400,20 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 		}
 		fSorter.sort(qualifiers, fQualifierMap);
 		
-		for (int i= 0; i < to-from; i++) {
-			TableItem ti= new TableItem(fLowerList, i);
-			ti.setText(qualifiers[i]);
+		for (int i= 0; i < to - from; i++) {
+			TableItem item= new TableItem(fLowerList, i);
+			item.setText(qualifiers[i]);
+
 			// XXX: 1G65LDG: JFUIF:WIN2000 - ILabelProvider used outside a viewer
-			Image img= fQualifierRenderer.getImage(fElements[from+i]);
-			if (img != null)
-				ti.setImage(img);
+			Image image= fQualifierRenderer.getImage(fElements[from + i]);
+			if (image != null)
+				item.setImage(image);
 		}
 		
-		if (fLowerList.getItemCount() > 0) {
+		if (fLowerList.getItemCount() > 0)
 			fLowerList.setSelection(0);
-		}
+
 		updateOkState();
 	}
+	
 }

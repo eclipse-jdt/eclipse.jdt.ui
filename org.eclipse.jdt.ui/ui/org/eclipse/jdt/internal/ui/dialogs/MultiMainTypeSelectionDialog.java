@@ -12,11 +12,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
-
 
 /**
  * A dialog to select a type from a list of types. The dialog allows
@@ -28,20 +25,28 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 	private IJavaSearchScope fScope;
 	private int fStyle;
 		
-	public MultiMainTypeSelectionDialog(Shell shell, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase) {
-		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_CONTAINER | 
-				JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION |
-				JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION), 
-				ignoreCase, true); 
+	/**
+	 * 
+	 */
+	public MultiMainTypeSelectionDialog(Shell shell, IRunnableContext context,
+		IJavaSearchScope scope, int style, boolean ignoreCase)
+	{
+		super(shell, new JavaElementLabelProvider(
+			JavaElementLabelProvider.SHOW_CONTAINER | 
+			JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION |
+			JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION), 
+			ignoreCase, true);
+
+		Assert.isNotNull(context);
+		Assert.isNotNull(scope);
+
 		fRunnableContext= context;
-		Assert.isNotNull(fRunnableContext);
 		fScope= scope;
-		Assert.isNotNull(fScope);
 		fStyle= style;
 	}
 
-	/*
-	 * @private
+	/**
+	 *
 	 */
 	public int open() {
 		MainMethodSearchEngine engine= new MainMethodSearchEngine();
@@ -51,7 +56,7 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 			return CANCEL;
 		
 		setElements(typesFound);
-		setInitialSelection("A");				 //$NON-NLS-1$
+		setInitialSelection("A"); //$NON-NLS-1$
 		return super.open();
 	}
 	

@@ -192,7 +192,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	protected void updateOKStatus() {
 		if (!fIsEmpty) {
 			if (fValidator != null) {
-				fCurrStatus= fValidator.isValid(getResult());
+				fCurrStatus= fValidator.validate(getResult());
 				updateStatus(fCurrStatus);
 			} else {
 				fCurrStatus= new StatusInfo();

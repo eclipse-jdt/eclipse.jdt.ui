@@ -79,20 +79,13 @@ public class TypeCache{
 		}
 	
 		private static boolean shouldStopProcessing(IJavaElementDelta delta) {
-			int type= delta.getElement().getElementType();			//fix for: 1GEUFCP			if (type == IJavaElement.CLASS_FILE)				return true;
-			if (type == IJavaElement.FIELD)
-				return true;
-			if (type == IJavaElement.METHOD)
-				return true;
-			if (type == IJavaElement.INITIALIZER)
-				return true;
-			if (type == IJavaElement.PACKAGE_DECLARATION)
-				return true;
-			if (type == IJavaElement.IMPORT_CONTAINER)
-				return true;
-			if (type == IJavaElement.IMPORT_DECLARATION)
-				return true;
-			return false;
+			//fix for: 1GEUFCP			switch (delta.getElement().getElementType()) {					case IJavaElement.CLASS_FILE:				case IJavaElement.FIELD:
+				case IJavaElement.METHOD:
+				case IJavaElement.INITIALIZER:
+				case IJavaElement.PACKAGE_DECLARATION:
+				case IJavaElement.IMPORT_CONTAINER:
+				case IJavaElement.IMPORT_DECLARATION:					return true;					
+				default:					return false;			}
 		}
 	}
 }
