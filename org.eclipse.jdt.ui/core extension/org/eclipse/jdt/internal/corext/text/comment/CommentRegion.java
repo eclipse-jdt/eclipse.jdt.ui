@@ -518,22 +518,19 @@ public class CommentRegion extends Position implements IHtmlTagConstants, IBorde
 	 */
 	protected final String stringToIndent(final String reference, final boolean tabs) {
 
-		int space;
-		int pixels;
+		int spaceWidth;
+		int referenceWidth;
 
 		if (fTextMeasurement != null) {
-			pixels= stringToPixels(reference);
-			space= fTextMeasurement.computeWidth(" "); //$NON-NLS-1$
+			spaceWidth= fTextMeasurement.computeWidth(" "); //$NON-NLS-1$
+			referenceWidth= fTextMeasurement.computeWidth(expandTabs(reference));
 		} else {
-			space= 1;
-			pixels= reference.length();
-			int index= -1;
-			while ((index= reference.indexOf('\t', index+1)) >= 0)
-				pixels += fTabSize-1;
+			spaceWidth= 1;
+			referenceWidth= expandTabs(reference).length();
 		}
 
 		final StringBuffer buffer= new StringBuffer();
-		final int spaces= pixels / space;
+		final int spaces= referenceWidth / spaceWidth;
 
 		if (tabs) {
 
@@ -562,44 +559,33 @@ public class CommentRegion extends Position implements IHtmlTagConstants, IBorde
 	 * @return The length of the string in expanded characters
 	 */
 	protected final int stringToLength(final String reference) {
-
-		int tabs= 0;
-		int count= reference.length();
-
-		for (int index= 0; index < count; index++) {
-
-			if (reference.charAt(index) == '\t')
-				tabs++;
-		}
-		count += tabs * (fTabSize - 1);
-
-		return count;
+		return expandTabs(reference).length();
 	}
 
 	/**
-	 * Returns the width of the string in pixels.
+	 * Expands the given string's tabs according to the given tab size.
 	 * 
-	 * @param reference
-	 *                   The string to get the width for
-	 * @return The width of the string in pixels
+	 * @param string the string
+	 * @return the expanded string
+	 * @since 3.1
 	 */
-	private int stringToPixels(final String reference) {
-
-		final StringBuffer buffer= new StringBuffer();
-
-		char character= 0;
-		for (int index= 0; index < reference.length(); index++) {
-
-			character= reference.charAt(index);
-			if (character == '\t') {
-
-				for (int tab= 0; tab < fTabSize; tab++)
-					buffer.append(' ');
-
-			} else
-				buffer.append(character);
+	private String expandTabs(String string) {
+		StringBuffer expanded= new StringBuffer();
+		for (int i= 0, n= string.length(), chars= 0; i < n; i++) {
+			char ch= string.charAt(i);
+			if (ch == '\t') {
+				for (; chars < fTabSize; chars++)
+					expanded.append(' ');
+				chars= 0;
+			} else {
+				expanded.append(ch);
+				chars++;
+				if (chars >= fTabSize)
+					chars= 0;
+			}
+		
 		}
-		return fTextMeasurement.computeWidth(buffer.toString());
+		return expanded.toString();
 	}
 
 	/**

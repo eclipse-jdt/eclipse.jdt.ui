@@ -106,7 +106,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 					fReferenceIndentation= common;
 				else if (hasAttribute(COMMENT_PARAMETER)) {
 					if (parent.isIndentDescriptions())
-						fReferenceIndentation= common + "\t"; //$NON-NLS-1$
+						fReferenceIndentation= "\t" + common; //$NON-NLS-1$
 					else
 						fReferenceIndentation= common;
 				}
