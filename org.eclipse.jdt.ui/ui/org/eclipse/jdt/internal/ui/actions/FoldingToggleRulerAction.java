@@ -13,8 +13,8 @@ package org.eclipse.jdt.internal.ui.actions;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 
-import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.ui.IEditorPart;
@@ -23,11 +23,9 @@ import org.eclipse.ui.texteditor.AbstractRulerActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextOperationAction;
 
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
 
 /**
- * Groups the JDT folding actions.
+ * Groups the folding actions.
  *  
  * @since 3.0
  */
@@ -65,12 +63,9 @@ public class FoldingToggleRulerAction extends AbstractRulerActionDelegate {
 	}
 	
 	private void update() {
-		if (fTextEditor instanceof JavaEditor) {
-			ISourceViewer viewer= ((JavaEditor) fTextEditor).getViewer();
-			if (viewer instanceof ProjectionViewer) {
-				boolean enabled= ((ProjectionViewer) viewer).getProjectionAnnotationModel() != null;
-				fUIAction.setChecked(enabled);
-			}
+		if (fTextEditor != null) {
+			boolean enabled= fTextEditor.getAdapter(ProjectionAnnotationModel.class) != null;
+			fUIAction.setChecked(enabled);
 		}
 	}
 }
