@@ -192,11 +192,11 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		gd= new GridData(GridData.FILL_BOTH);
 		inner.setLayoutData(gd);
 		
-		Composite entryComposite= createEntryPtCombo(composite);
-		entryComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		Composite entryComposite= createEntryPtCombo(composite); 
+		entryComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		Composite commentComposite= createCommentSelection(composite);
-		commentComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));		
+		commentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));		
 
 		gd= new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(gd);
@@ -240,7 +240,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		selectionComposite.setLayout(layout);
-		selectionComposite.setFont(composite.getFont());	
 					
 		addOrderEntryChoices(selectionComposite);	
 										
@@ -251,14 +250,13 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		Label enterLabel= new Label(buttonComposite, SWT.NONE);
 		enterLabel.setText(ActionMessages.getString("SourceActionDialog.enterAt_label")); //$NON-NLS-1$
 			
-		GridData gd= new GridData(GridData.FILL_BOTH);
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		enterLabel.setLayoutData(gd);
 
 		final Combo enterCombo= new Combo(buttonComposite, SWT.READ_ONLY);
 		fillWithPossibleInsertPositions(enterCombo);
 			
 		gd= new GridData(GridData.FILL_BOTH);
-		gd.grabExcessHorizontalSpace= true;
 		enterCombo.setLayoutData(gd);
 		enterCombo.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {

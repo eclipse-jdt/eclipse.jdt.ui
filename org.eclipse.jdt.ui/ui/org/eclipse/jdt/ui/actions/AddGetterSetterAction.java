@@ -966,8 +966,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		
 		protected Composite createEntryPtCombo(Composite composite) {
 			Composite entryComposite= super.createEntryPtCombo(composite);			
-			entryComposite= addSortOrder(entryComposite);
-			entryComposite= addVisibilityAndModifiersChoices(entryComposite);
+			addSortOrder(entryComposite);
+			addVisibilityAndModifiersChoices(entryComposite);
 			
 			return entryComposite;						
 		}
@@ -986,7 +986,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			int sort= fContentProvider.getSortOrder() ? 1 : 0;
 			combo.setText(combo.getItem(sort));
 			gd= new GridData(GridData.FILL_BOTH);
-			gd.grabExcessHorizontalSpace= true;
 			combo.setLayoutData(gd);
 			combo.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
@@ -1025,8 +1024,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			int initialVisibility= fContentProvider.getVisibilityModifier();
 			int[] availableVisibilities= new int[]{Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.NONE};
 			
-			Composite visibilityComposite= createVisibilityControlAndModifiers(buttonComposite, visibilityChangeListener, availableVisibilities, initialVisibility);							
-			
+			Composite visibilityComposite= createVisibilityControlAndModifiers(buttonComposite, visibilityChangeListener, availableVisibilities, initialVisibility);
 			return visibilityComposite;				
 		}
 		
@@ -1045,7 +1043,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		
 			Group group= new Group(parent, SWT.NONE);
 			group.setText(RefactoringMessages.getString("VisibilityControlUtil.Access_modifier")); //$NON-NLS-1$
-			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+			GridData gd= new GridData(GridData.FILL_BOTH);
 			group.setLayoutData(gd);
 			GridLayout layout= new GridLayout();
 			layout.makeColumnsEqualWidth= true;
@@ -1067,6 +1065,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			for (int i= 0; i < labels.length; i++) {
 				Button radio= new Button(group, SWT.RADIO);
 				Integer visibilityCode= data[i];
+				radio.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 				radio.setText(labels[i]);
 				radio.setData(visibilityCode);
 				radio.setSelection(visibilityCode.equals(initialVisibility));
@@ -1077,7 +1076,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					}
 				});
 			}
-			group.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 			return group;
 		}		
 		
