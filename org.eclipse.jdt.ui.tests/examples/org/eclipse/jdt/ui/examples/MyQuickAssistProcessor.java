@@ -105,7 +105,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		
 		OldASTRewrite rewrite= new OldASTRewrite(inv.getParent());
-		rewrite.replace(inv, rewrite.createPlaceholder(str, ASTNode.METHOD_INVOCATION), null);
+		rewrite.replace(inv, rewrite.createStringPlaceholder(str, ASTNode.METHOD_INVOCATION), null);
 		
 		String label= "Use AST Constants";
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
