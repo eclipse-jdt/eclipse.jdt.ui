@@ -4,9 +4,10 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -17,15 +18,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.jdt.internal.core.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
-import org.eclipse.jdt.internal.ui.util.TypeInfo;
 
 /**
  * A composite widget which holds a list of elements for user selection.
@@ -73,6 +73,7 @@ public class FilteredList extends Composite {
 	
 	private Object[] fElements= new Object[0];
 	private Label[] fLabels;
+	private Vector fImages= new Vector();
 
 	private int[] fFoldedIndices;
 	private int fFoldedCount;
@@ -101,7 +102,7 @@ public class FilteredList extends Composite {
 		}
 	}
 
-	private static class LabelComparator implements Comparator {
+	private class LabelComparator implements Comparator {
 		private boolean fIgnoreCase;
 	
 		LabelComparator(boolean ignoreCase) {
@@ -125,8 +126,9 @@ public class FilteredList extends Composite {
 			} else if (rightLabel.image == null) {
 				return +1;				
 			} else {
-				// XXX works only for max. two image types
-				return leftLabel.image.equals(rightLabel.image) ? 0 : 1;
+				return
+					fImages.indexOf(leftLabel.image) -
+					fImages.indexOf(rightLabel.image);
 			}
 		}
 		
@@ -182,10 +184,16 @@ public class FilteredList extends Composite {
 
 		// fill labels			
 		fLabels= new Label[length];
-		for (int i= 0; i != length; i++)
-			fLabels[i]= new Label(
-				fRenderer.getText(fElements[i]),
-				fRenderer.getImage(fElements[i]));
+		Set imageSet= new HashSet();
+		for (int i= 0; i != length; i++) {
+			String text= fRenderer.getText(fElements[i]);
+			Image image= fRenderer.getImage(fElements[i]);
+			
+			fLabels[i]= new Label(text, image);				
+			imageSet.add(image);
+		}
+		fImages.clear();
+		fImages.addAll(imageSet);
 
 		fSorter.sort(fLabels, fElements);
 
