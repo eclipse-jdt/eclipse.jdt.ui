@@ -21,13 +21,15 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.ui.text.java.*;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -50,6 +52,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getAssignToVariableProposals(context, coveringNode, null)
 				|| getUnWrapProposals(context, coveringNode, null)
 				|| getAssignParamToFieldProposals(context, coveringNode, null)
+				|| getJoinVariableProposals(context, coveringNode, null)
 				|| getSplitVariableProposals(context, coveringNode, null);
 		}
 		return false;
@@ -72,10 +75,90 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
 				getSplitVariableProposals(context, coveringNode, resultingCollections);
+				getJoinVariableProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
+	}
+	
+	
+	private boolean getJoinVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+		ASTNode parent= node.getParent();
+		if (!(parent instanceof VariableDeclarationFragment)) {
+			return false;
+		}
+		VariableDeclarationFragment fragment= (VariableDeclarationFragment) parent;
+		
+		IVariableBinding binding= fragment.resolveBinding();
+		if (fragment.getInitializer() != null || binding == null || binding.isField()) {
+			return false;
+		}
+		
+		if (!(fragment.getParent() instanceof VariableDeclarationStatement)) {
+			return false;
+		}
+		VariableDeclarationStatement statement= (VariableDeclarationStatement) fragment.getParent();
+		
+		SimpleName[] names= LinkedNodeFinder.perform(statement.getParent(), binding);
+		if (names.length <= 1 && names[0] != fragment.getName()) {
+			return false;
+		}
+		
+		SimpleName firstAccess= names[1];
+		if (!(firstAccess.getParent() instanceof Assignment)) { 
+			return false;
+		}
+		Assignment assignment= (Assignment) firstAccess.getParent();
+		if (assignment.getLeftHandSide() != firstAccess) {
+			return false;
+		}
+		
+		ASTNode assignParent= assignment.getParent();
+		if (!(assignParent instanceof ExpressionStatement || assignParent instanceof ForStatement && ((ForStatement) assignParent).initializers().contains(assignment))) {
+			return false;
+		}
+				
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		ASTRewrite rewrite= new ASTRewrite(statement.getParent());
+		AST ast= statement.getAST();
+		
+		String label= CorrectionMessages.getString("QuickAssistProcessor.joindeclaration.description"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+
+		Expression placeholder= (Expression) rewrite.createMove(assignment.getRightHandSide());
+		
+		VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
+		newFrag.setName(ast.newSimpleName(fragment.getName().getIdentifier()));
+		newFrag.setExtraDimensions(fragment.getExtraDimensions());
+		newFrag.setInitializer(placeholder);
+		
+		Type newType= (Type) ASTNode.copySubtree(ast, statement.getType());
+		
+		if (assignParent instanceof ExpressionStatement) {
+			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
+			newVarDec.setType(newType);
+			newVarDec.setModifiers(statement.getModifiers());
+			rewrite.markAsReplaced(assignParent, newVarDec);
+		} else {
+			VariableDeclarationExpression newVarDec= ast.newVariableDeclarationExpression(newFrag);
+			newVarDec.setType(newType);
+			newVarDec.setModifiers(statement.getModifiers());
+			rewrite.markAsReplaced(assignment, newVarDec);
+		}
+		
+		rewrite.markAsRemoved(statement);
+		
+		proposal.markAsSelection(rewrite, newFrag.getName());
+		
+		proposal.ensureNoModifications();
+		resultingCollections.add(proposal);
+		return true;
+		
 	}
 	
 	private boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
@@ -85,12 +168,19 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		VariableDeclarationFragment fragment= (VariableDeclarationFragment) parent;
 		
-		IVariableBinding binding= fragment.resolveBinding();
-		if (fragment.getInitializer() == null || binding == null) {
+		if (fragment.getInitializer() == null) {
 			return false;
 		}
 
-		Statement statement= ASTResolving.findParentStatement(fragment);
+		Statement statement;
+		ASTNode fragParent= fragment.getParent();
+		if (fragParent instanceof VariableDeclarationStatement) {
+			statement= (VariableDeclarationStatement) fragParent;
+		} else if (fragParent instanceof VariableDeclarationExpression) {
+			statement= (Statement) fragParent.getParent();
+		} else {
+			return false;
+		}
 		// statement is ForStatement or VariableDeclarationStatement
 		
 		List list= ASTNodes.getContainingList(statement);
@@ -124,11 +214,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			rewrite.markAsReplaced(fragment.getParent(), assignment);
 			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
 			newFrag.setName(ast.newSimpleName(fragment.getName().getIdentifier()));
-			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
+			newFrag.setExtraDimensions(fragment.getExtraDimensions());
 			
-			ITypeBinding typeBinding= fragment.resolveBinding().getType();
-			String typeName= proposal.addImport(typeBinding);
-			newVarDec.setType(ASTNodeFactory.newType(ast, typeName));
+			VariableDeclarationExpression oldVarDecl= (VariableDeclarationExpression) fragParent;
+			
+			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
+			newVarDec.setType((Type) ASTNode.copySubtree(ast, oldVarDecl.getType()));
+			newVarDec.setModifiers(oldVarDecl.getModifiers());
 			newStatement= newVarDec;
 		}
 

@@ -1169,7 +1169,115 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());	
+	}
+	
+	public void testSplitDeclaration3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        final int i[] = null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "i[]";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        final int i[];\n");
+		buf.append("        i = null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
 	}	
+	
+	public void testJoinDeclaration1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int var[];\n");
+		buf.append("        var = null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "var";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int var[] = null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+
+
+		assertEqualString(preview, buf.toString());	
+	}
+	
+	public void testJoinDeclaration2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int var;\n");
+		buf.append("        for (var = 0; var < 9; var++) {\n");
+		buf.append("       }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "var";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int var = 0; var < 9; var++) {\n");
+		buf.append("       }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}	
+	
 	
 	
 }
