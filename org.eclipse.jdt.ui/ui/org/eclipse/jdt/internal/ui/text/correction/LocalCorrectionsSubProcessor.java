@@ -19,6 +19,8 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.ui.ISharedImages;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
@@ -549,8 +551,12 @@ public class LocalCorrectionsSubProcessor {
 		BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(selectedNode);
 		if (declaration != null) {
 			
+			String label;
 			ASTNode nodeToRemove= declaration;
 			if (declaration.getNodeType() == ASTNode.FIELD_DECLARATION) {
+				label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedfield.description"); //$NON-NLS-1$
+
+				
 				List fragments= ((FieldDeclaration) declaration).fragments();
 				if (fragments.size() > 1) {
 					for (int i= 0; i < fragments.size(); i++) {
@@ -561,13 +567,22 @@ public class LocalCorrectionsSubProcessor {
 						}
 					}
 				}
+			} else if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+				if (((MethodDeclaration) declaration).isConstructor()) {
+					label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedconstructor.description"); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedmethod.description"); //$NON-NLS-1$
+				}
+			} else if (declaration.getNodeType() == ASTNode.TYPE_DECLARATION) {
+				label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedtype.description"); //$NON-NLS-1$
+			} else {
+				return;
 			}
 			
 			ASTRewrite rewrite= new ASTRewrite(nodeToRemove.getParent());		
 			rewrite.markAsRemoved(nodeToRemove);
-			
-			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedmember.description"); //$NON-NLS-1$
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+
+			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
 			proposal.ensureNoModifications();
 			proposals.add(proposal);			
