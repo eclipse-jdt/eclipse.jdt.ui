@@ -119,7 +119,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PROBLEM_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PROBLEM_INDICATION),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.COMPILE_TIME_PROBLEM_INDICATION),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.OVERVIEW_RULER),
 		
@@ -219,7 +218,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE, new RGB(185, 176 , 180));
 		
 		store.setDefault(CompilationUnitEditor.PROBLEM_INDICATION, true);
-		store.setDefault(CompilationUnitEditor.COMPILE_TIME_PROBLEM_INDICATION, false);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
 		
 		store.setDefault(CompilationUnitEditor.OVERVIEW_RULER, false);
@@ -556,7 +554,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Control fPrintMarginColor;
 	private Control fPrintMarginColumn;
 	private Button fProblemIndicationButton;
-	private Button fCompileTimeProblemIndicationButton;
 	private Control fProblemIndicationColor;
 	private Control fFindScopeColor;
 	
@@ -611,16 +608,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= "Highlight &problems";
 		fProblemIndicationButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
-
-		label= "Include c&ompile time problems";
-		fCompileTimeProblemIndicationButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.COMPILE_TIME_PROBLEM_INDICATION, 20);
 		
 		label= "Prob&lem highlight color:";
 		fProblemIndicationColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, 0);
 
 		fProblemIndicationButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				setEnabled(fCompileTimeProblemIndicationButton, fProblemIndicationButton.getSelection());
 				setEnabled(fProblemIndicationColor, fProblemIndicationButton.getSelection());
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -948,16 +941,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		}
 		return buffer.toString();
 	}
-
-	public static boolean showProblems() {
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		return prefs.getBoolean(CompilationUnitEditor.PROBLEM_INDICATION);
-	}
-		
-	public static boolean showCompileTimeProblems() {
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		return prefs.getBoolean(CompilationUnitEditor.COMPILE_TIME_PROBLEM_INDICATION);
-	}	
 }
 
 

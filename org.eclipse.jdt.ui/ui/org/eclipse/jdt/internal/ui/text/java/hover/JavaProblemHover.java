@@ -7,24 +7,28 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.ProblemPosition;
+import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 
 
 public class JavaProblemHover implements IJavaEditorTextHover {
 	
-	private ProblemPosition fProblemPosition;
 	private CompilationUnitEditor fCompilationUnitEditor;
 	
 	/**
@@ -48,17 +52,19 @@ public class JavaProblemHover implements IJavaEditorTextHover {
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+		
 		if (fCompilationUnitEditor == null)
 			return null;
 			
-		List problemPositions= fCompilationUnitEditor.getProblemPositions();
-		if (problemPositions == null)
-			return null;
-			
-		for (Iterator e = problemPositions.iterator(); e.hasNext();) {
-			ProblemPosition pp = (ProblemPosition) e.next();
-			if (pp.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
-				String msg= pp.getProblem().getMessage();
+		IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+		IAnnotationModel model= provider.getAnnotationModel(fCompilationUnitEditor.getEditorInput());
+		
+		Iterator e= new ProblemAnnotationIterator(model);
+		while (e.hasNext()) {
+			Annotation a= (Annotation) e.next();
+			Position p= model.getPosition(a);
+			if (p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
+				String msg= ((IProblemAnnotation) a).getMessage();
 				if (msg != null && msg.trim().length() > 0)
 					return formatMessage(msg);
 			}

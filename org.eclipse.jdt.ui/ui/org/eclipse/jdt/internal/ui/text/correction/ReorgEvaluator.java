@@ -18,14 +18,13 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.ProblemPosition;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+
 
 public class ReorgEvaluator {
 	
 	public static void getWrongTypeNameProposals(ICompilationUnit cu, ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		IProblem problem= problemPos.getProblem();
-		String[] args= problem.getArguments();
+		String[] args= problemPos.getArguments();
 		if (args.length == 2) {
 			// rename type
 			Path path= new Path(args[0]);
@@ -46,8 +45,7 @@ public class ReorgEvaluator {
 	}
 	
 	public static void getWrongPackageDeclNameProposals(ICompilationUnit cu, ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		IProblem problem= problemPos.getProblem();
-		String[] args= problem.getArguments();
+		String[] args= problemPos.getArguments();
 		if (args.length == 1) {
 			// correct pack decl
 			proposals.add(new CorrectPackageDeclarationProposal(cu, problemPos));

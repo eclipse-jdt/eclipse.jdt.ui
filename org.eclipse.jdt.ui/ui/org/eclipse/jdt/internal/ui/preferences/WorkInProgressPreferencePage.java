@@ -29,7 +29,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 
 
 	public static final String PREF_SYNC_OUTLINE_ON_CURSOR_MOVE= "JavaEditor.SyncOutlineOnCursorMove";
-
+	public static final String PREF_SHOW_TEMP_PROBLEMS= "JavaEditor.ShowTemporaryProblem";
 
 	public WorkInProgressPreferencePage() {
 		super(GRID);
@@ -41,6 +41,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, false);
 		store.setDefault(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
+		store.setDefault(PREF_SHOW_TEMP_PROBLEMS, false);
 	}
 	
 	/*
@@ -68,18 +69,28 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 			parent
         );
 		addField(boolEditor);
-	}
 		
-	
-	
-	static public boolean synchronizeOutlineOnCursorMove() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE);
+		boolEditor= new BooleanFieldEditor(
+			PREF_SHOW_TEMP_PROBLEMS,
+			"Show &temporary problems in vertical ruler", //$NON-NLS-1$
+			parent
+        );
+		addField(boolEditor);
 	}
 	
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
+	}
+	
+	
+	static public boolean synchronizeOutlineOnCursorMove() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE);
+	}
+	
+	static public boolean showTempProblems() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SHOW_TEMP_PROBLEMS);
 	}
 }
 

@@ -8,18 +8,13 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.util.Iterator;
-import java.util.List;
-
-import javax.swing.text.StyleContext;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
@@ -38,15 +33,17 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextEvent;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelListener;
 
-import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.java.ReconcilingProblemRequestor;
+
 
 
 /**
@@ -57,7 +54,8 @@ public class OverviewRuler {
 	/**
 	 * Internal listener class.
 	 */
-	class InternalListener implements ITextListener {
+	class InternalListener implements ITextListener, IAnnotationModelListener {
+		
 		/*
 		 * @see ITextListener#textChanged
 		 */
@@ -66,6 +64,13 @@ public class OverviewRuler {
 				// handle only changes of visible document
 				redraw();
 			}
+		}
+		
+		/*
+		 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
+		 */
+		public void modelChanged(IAnnotationModel model) {
+			update();
 		}
 	}
 	
@@ -76,19 +81,19 @@ public class OverviewRuler {
 		
 		private Iterator fIterator;
 		private int fType;
-		private ProblemPosition fNext;
+		private Annotation fNext;
 		
 		public FilterIterator(int type) {
 			fType= type;
-			fIterator= fProblemPositions.iterator();
+			fIterator= fModel.getAnnotationIterator();
 			skip();
 		}
 		
 		private void skip() {
 			while (fIterator.hasNext()) {
-				fNext= (ProblemPosition) fIterator.next();
-				IProblem p= fNext.getProblem();
-				if (fType == getType(p))
+				fNext= (Annotation) fIterator.next();
+				int type= getType(fNext);
+				if ((fType == ALL && type != UNKNOWN) || fType == type)
 					return;
 			}
 			fNext= null;
@@ -123,9 +128,11 @@ public class OverviewRuler {
 	
 	
 	/** Problem types */
+	private static final int ALL= -1;
 	private static final int COMPILE_WARNING= 0;
 	private static final int COMPILE_ERROR= 1;
 	private static final int TEMPORARY= 2;
+	private static final int UNKNOWN= 4;
 	
 	/** Color table */
 	private static final RGB[][] COLORS= new RGB[][] {
@@ -145,7 +152,7 @@ public class OverviewRuler {
 
 	
 	/** The model of the overview ruler */
-	private List fProblemPositions;
+	private IAnnotationModel fModel;
 	/** The view to which this ruler is connected */
 	private ITextViewer fTextViewer;
 	/** The ruler's canvas */
@@ -156,6 +163,7 @@ public class OverviewRuler {
 	private InternalListener fInternalListener= new InternalListener();
 	/** The width of this vertical ruler */
 	private int fWidth;
+	
 	
 	/**
 	 * Constructs a vertical ruler with the given width.
@@ -174,16 +182,34 @@ public class OverviewRuler {
 		return fWidth;
 	}
 	
-	private int getType(IProblem p) {
-		if (p instanceof ReconcilingProblemRequestor.IMarkerProblem)
-			return p.isError() ? COMPILE_ERROR : COMPILE_WARNING;
-		return TEMPORARY;
+	private int getType(Annotation annotation) {
+		if (annotation instanceof IProblemAnnotation) {
+			IProblemAnnotation pa= (IProblemAnnotation) annotation;
+			if (pa.isTemporaryProblem())
+				return TEMPORARY;
+			if (pa.isError())
+				return COMPILE_ERROR;
+			if (pa.isWarning())
+				return COMPILE_WARNING;
+		}
+		
+		return UNKNOWN;
 	}
 	
-	public void setProblemPositions(List problemPositions) {
-		fProblemPositions= problemPositions;
-		update();
-	}
+	public void setModel(IAnnotationModel model) {
+		if (model != fModel) {
+			
+			if (fModel != null)
+				fModel.removeAnnotationModelListener(fInternalListener);
+			
+			fModel= model;
+			
+			if (fModel != null)
+				fModel.addAnnotationModelListener(fInternalListener);
+			
+			update();
+		}
+	}	
 	
 	public Control createControl(Composite parent, ITextViewer textViewer) {
 		
@@ -226,13 +252,14 @@ public class OverviewRuler {
 			fTextViewer.removeTextListener(fInternalListener);
 			fTextViewer= null;
 		}
-				
+
+		if (fModel != null)
+			fModel.removeAnnotationModelListener(fInternalListener);
+
 		if (fBuffer != null) {
 			fBuffer.dispose();
 			fBuffer= null;
 		}
-		
-		fProblemPositions= null;
 	}
 
 	/**
@@ -274,7 +301,7 @@ public class OverviewRuler {
 	
 	private void doPaint(GC gc) {
 		
-		if (fTextViewer == null || fProblemPositions == null)
+		if (fTextViewer == null)
 			return;
 			
 		Rectangle r= new Rectangle(0, 0, 0, 0);
@@ -300,7 +327,8 @@ public class OverviewRuler {
 			
 			for (int i= 0; e.hasNext(); i++) {
 				
-				ProblemPosition p= (ProblemPosition) e.next();
+				Annotation a= (Annotation) e.next();
+				Position p= fModel.getPosition(a);
 				
 				if (!p.overlapsWith(visible.getOffset(), visible.getLength()))
 					continue;
@@ -398,9 +426,10 @@ public class OverviewRuler {
 		return lines;
 	}
 	
-	private ProblemPosition getProblemAt(int[] lineNumbers) {
+	private Position getProblemPositionAt(int[] lineNumbers) {
 		
-		ProblemPosition found= null;
+		Position found= null;
+		
 		try {
 			IDocument d= fTextViewer.getDocument();
 			IRegion line= d.getLineInformation(lineNumbers[0]);
@@ -409,16 +438,16 @@ public class OverviewRuler {
 			line= d.getLineInformation(lineNumbers[lineNumbers.length - 1]);
 			int end= line.getOffset() + line.getLength();
 			
-			if (fProblemPositions != null) {
-				Iterator e= fProblemPositions.iterator();
-				while (e.hasNext()) {
-					ProblemPosition p= (ProblemPosition) e.next();
-					if (start <= p.getOffset() && p.getOffset() < end) {
-						if (found == null || p.getOffset() < found.getOffset())
-							found= p;
-					}
+			Iterator e= new FilterIterator(ALL);
+			while (e.hasNext()) {
+				Annotation a= (Annotation) e.next();
+				Position p= fModel.getPosition(a);
+				if (start <= p.getOffset() && p.getOffset() < end) {
+					if (found == null || p.getOffset() < found.getOffset())
+						found= p;
 				}
 			}
+			
 		} catch (BadLocationException x) {
 		}
 		
@@ -428,7 +457,7 @@ public class OverviewRuler {
 	private void handleMouseDown(MouseEvent event) {
 		if (fTextViewer != null) {
 			int[] lines= toLineNumbers(event.y);
-			ProblemPosition p= getProblemAt(lines);
+			Position p= getProblemPositionAt(lines);
 			if (p != null) {
 				fTextViewer.revealRange(p.getOffset(), p.getLength());
 				fTextViewer.setSelectedRange(p.getOffset(), p.getLength());

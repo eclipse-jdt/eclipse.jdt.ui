@@ -7,10 +7,17 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Canvas;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -20,13 +27,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.text.DefaultLineTracker;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
@@ -40,12 +50,15 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 
 
 
@@ -78,9 +91,85 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		};
 		
 		/**
+		 * Annotation representating an <code>IProblem</code>.
+		 */
+		static protected class ProblemAnnotation extends Annotation implements IProblemAnnotation {
+			
+			private IProblem fProblem;
+			private Image fImage;
+			private static Image fgImage;
+			
+			public ProblemAnnotation(IProblem problem) {
+				fProblem= problem;
+				setLayer(1);
+				
+				if (fgImage == null)
+					fgImage= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_INFO_TSK);
+				
+				if (WorkInProgressPreferencePage.showTempProblems())
+					fImage= fgImage;
+			}
+			
+			/*
+			 * @see Annotation#paint
+			 */
+			public void paint(GC gc, Canvas canvas, Rectangle r) {
+				if (fImage != null)
+					drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.TOP);
+			}				
+
+			/*
+			 * @see IProblemAnnotation#getMessage()
+			 */
+			public String getMessage() {
+				return fProblem.getMessage();
+			}
+
+			/*
+			 * @see IProblemAnnotation#isTemporaryProblem()
+			 */
+			public boolean isTemporaryProblem() {
+				return true;
+			}
+
+			/*
+			 * @see IProblemAnnotation#isWarning()
+			 */
+			public boolean isWarning() {
+				return fProblem.isWarning();
+			}
+
+			/*
+			 * @see IProblemAnnotation#isError()
+			 */
+			public boolean isError() {
+				return fProblem.isError();
+			}
+			
+			/*
+			 * @see IProblemAnnotation#getArguments()
+			 */
+			public String[] getArguments() {
+				return fProblem.getArguments();
+			}
+
+			/*
+			 * @see IProblemAnnotation#getId()
+			 */
+			public int getId() {
+				return fProblem.getID();
+			}
+
+		};
+		
+		/**
 		 * Annotation model dealing with java marker annotations.
 		 */
-		protected class CompilationUnitMarkerAnnotationModel extends ResourceMarkerAnnotationModel {
+		protected class CompilationUnitMarkerAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestorExtension {
+			
+			private List fCollectedProblems= new ArrayList();
+			private List fGeneratedAnnotations= new ArrayList();
+			
 			
 			public CompilationUnitMarkerAnnotationModel(IResource resource) {
 				super(resource);
@@ -88,6 +177,40 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			
 			protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
 				return new JavaMarkerAnnotation(marker);
+			}
+			
+			protected Position createPositionFromProblem(IProblem problem) {
+				return new Position(problem.getSourceStart(), problem.getSourceEnd() + 1 - problem.getSourceStart());
+			}
+			
+			/*
+			 * @see IProblemRequestorExtension#beginReporting()
+			 */
+			public void beginReporting() {
+				removeAnnotations(fGeneratedAnnotations, false, true);
+				fGeneratedAnnotations.clear();
+			}
+			
+			/*
+			 * @see IProblemRequestor#acceptProblem(IProblem)
+			 */
+			public void acceptProblem(IProblem problem) {
+				fCollectedProblems.add(problem);
+			}
+
+			/*
+			 * @see IProblemRequestorExtension#endReporting()
+			 */
+			public void endReporting() {
+				Iterator e= fCollectedProblems.iterator();
+				while (e.hasNext()) {
+					IProblem problem= (IProblem) e.next();
+					ProblemAnnotation annotation= new ProblemAnnotation(problem);
+					fGeneratedAnnotations.add(annotation);
+					addAnnotation(annotation, createPositionFromProblem(problem), false);
+				}
+				fCollectedProblems.clear();
+				fireModelChanged();
 			}
 		};
 		
@@ -237,8 +360,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
 			
 			try {					
+				
+				CompilationUnitMarkerAnnotationModel model= (CompilationUnitMarkerAnnotationModel) info.fModel;
 				// update structure, assumes lock on info.fCopy
-				info.fCopy.reconcile();
+				if (!info.fCopy.isConsistent()) {
+					model.beginReporting();
+					info.fCopy.reconcile(model);
+					model.endReporting();
+				}
 				
 				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
 				IResource resource= original.getUnderlyingResource();
@@ -257,7 +386,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					fIsAboutToSave= false;
 				}
 				
-				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
 				model.updateMarkers(info.fDocument);
 				
 				if (resource != null)

@@ -15,8 +15,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.ui.javaeditor.ProblemPosition;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
 
 public class UnknownTypeEvaluator {
 
@@ -100,8 +100,7 @@ public class UnknownTypeEvaluator {
 	
 	
 	public static void getTypeProposals(ICompilationUnit cu, ProblemPosition problemPos, int kind, ArrayList proposals) throws CoreException {
-		IProblem problem= problemPos.getProblem();
-		String[] args= problem.getArguments();
+		String[] args= problemPos.getArguments();
 		if (args.length < 1) {
 			return;
 		}

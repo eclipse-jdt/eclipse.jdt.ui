@@ -11,7 +11,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.ProblemPosition;
+
 
 public class NoCorrectionProposal implements ICompletionProposal {
 
@@ -33,15 +33,14 @@ public class NoCorrectionProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		IProblem prob= fProblemPosition.getProblem();
 		StringBuffer buf= new StringBuffer();
 		buf.append("<p><b>");
-		buf.append(getErrorCode(prob.getID()));
+		buf.append(getErrorCode(fProblemPosition.getId()));
 		buf.append("</b></p>");
 		buf.append("<p>");
-		buf.append(prob.getMessage());
+		buf.append(fProblemPosition.getMessage());
 		buf.append("</p>");
-		String[] arg= prob.getArguments();
+		String[] arg= fProblemPosition.getArguments();
 		if (arg != null) {
 			for (int i= 0; i < arg.length; i++) {
 				buf.append("<p>");

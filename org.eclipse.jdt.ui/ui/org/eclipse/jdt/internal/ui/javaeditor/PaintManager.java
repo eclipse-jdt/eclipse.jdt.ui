@@ -109,6 +109,7 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 			if (fPainters.size() == 1)
 				install();
 			painter.setPositionManager(fManager);
+			painter.paint(IPainter.INTERNAL);
 		}
 	}
 	
@@ -244,8 +245,10 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 	 * @see ITextInputListener#inputDocumentChanged(IDocument, IDocument)
 	 */
 	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
-		if (newInput != null)
+		if (newInput != null) {
 			fManager.install(newInput);
+			paint(IPainter.TEXT_CHANGE);
+		}
 	}
 }
 

@@ -80,7 +80,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -99,15 +98,14 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.SurroundWithTryCatchActio
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
-import org.eclipse.jdt.internal.ui.text.java.IProblemAcceptor;
+import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
-import org.eclipse.jdt.internal.ui.text.java.ReconcilingProblemRequestor;
 
 
 /**
  * Java specific text editor.
  */
-public class CompilationUnitEditor extends JavaEditor implements IReconcilingParticipant, IProblemAcceptor {
+public class CompilationUnitEditor extends JavaEditor implements IReconcilingParticipant {
 	
 	
 	interface ITextConverter {
@@ -313,6 +311,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		public boolean isOverviewRulerVisible() {
 			return fIsOverviewRulerVisible;
 		}
+		
+		/*
+		 * @see ISourceViewer#setDocument(IDocument, IAnnotationModel, int, int)
+		 */
+		public void setDocument(IDocument document, IAnnotationModel annotationModel, int visibleRegionOffset, int visibleRegionLength) {
+			super.setDocument(document, annotationModel, visibleRegionOffset, visibleRegionLength);
+			fOverviewRuler.setModel(annotationModel);
+		}
 	};
 	
 	static class TabConverter implements ITextConverter {
@@ -370,8 +376,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String SPACES_FOR_TABS= "spacesForTabs";
 	/** Preference key for problem indication */
 	public final static String PROBLEM_INDICATION= "problemIndication";
-	/** Preference key for compile time problem indication */
-	public final static String COMPILE_TIME_PROBLEM_INDICATION= "compileTimeProblemIndication";
 	/** Preference key for problem highlight color */
 	public final static String PROBLEM_INDICATION_COLOR= "problemIndicationColor";
 	/** Preference key for shwoing the overview ruler */
@@ -416,8 +420,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
-	
-	/**
+	/*
 	 * @see AbstractTextEditor#createActions()
 	 */
 	protected void createActions() {
@@ -451,7 +454,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fSelectionHistory.setHistoryAction(historyAction);		
 	}
 	
-	/**
+	/*
 	 * @see JavaEditor#getElementAt(int)
 	 */
 	protected IJavaElement getElementAt(int offset) {
@@ -463,10 +466,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				try {
 					
 					if (!unit.isConsistent()) {
-						ReconcilingProblemRequestor rpr= new ReconcilingProblemRequestor(this); 
-						rpr.init();
-						unit.reconcile(rpr);
-						setProblems(rpr.getProblems());
+						IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
+						if (model instanceof IProblemRequestorExtension) {
+							IProblemRequestorExtension requestor= (IProblemRequestorExtension) model;
+							requestor.beginReporting();
+							unit.reconcile(requestor);
+							requestor.endReporting();
+						}
 					}
 					
 					return unit.getElementAt(offset);
@@ -479,7 +485,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return null;
 	}
 	
-	/**
+	/*
 	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
 	 */
 	protected IJavaElement getCorrespondingElement(IJavaElement element) {
@@ -491,7 +497,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return null;
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
@@ -515,7 +521,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#rulerContextMenuAboutToShow(IMenuManager)
 	 */
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
@@ -523,7 +529,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		addAction(menu, "ManageBreakpoints"); //$NON-NLS-1$
 	}
 	
-	/**
+	/*
 	 * @see JavaEditor#createOutlinePage()
 	 */
 	protected JavaOutlinePage createOutlinePage() {
@@ -538,7 +544,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		return page;
 	}
-	/**
+	
+	/*
 	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
 	 */
 	protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input) {
@@ -548,7 +555,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#performSaveOperation(WorkspaceModifyOperation, IProgressMonitor)
 	 */
 	protected void performSaveOperation(WorkspaceModifyOperation operation, IProgressMonitor progressMonitor) {
@@ -568,7 +575,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#doSave(IProgressMonitor)
 	 */
 	public void doSave(IProgressMonitor progressMonitor) {
@@ -649,6 +656,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			
 		}
 	}
+	
 	/**
 	 * Sets the given message as error message to this editor's status line.
 	 * @param msg message to be set
@@ -719,7 +727,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return nextError;
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#isSaveAsAllowed() 
 	 */
 	public boolean isSaveAsAllowed() {
@@ -903,7 +911,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
@@ -982,7 +990,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	private void startProblemIndication() {
 		if (fProblemPainter == null) {
-			fProblemPainter= new ProblemPainter(getSourceViewer());
+			fProblemPainter= new ProblemPainter(this, getSourceViewer());
 			fProblemPainter.setHighlightColor(getColor(PROBLEM_INDICATION_COLOR));
 			fPaintManager.addPainter(fProblemPainter);
 		}
@@ -1049,7 +1057,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return textTools.getColorManager().getColor(rgb);
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#dispose()
 	 */
 	public void dispose() {
@@ -1072,7 +1080,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		super.dispose();
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#createPartControl(Composite)
 	 */
 	public void createPartControl(Composite parent) {			
@@ -1092,7 +1100,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			startShowingOverviewRuler();
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
@@ -1200,7 +1208,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			super.handlePreferenceStoreChanged(event);
 		}
 	}
-	/**
+	
+	/*
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
@@ -1213,44 +1222,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return affects ? affects : super.affectsTextPresentation(event);
 	}
 	
-	/**
+	/*
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 		return new AdaptedSourceViewer(parent, ruler, styles);
 	}
-	
-	/**
-	 * Returns the list of problem positions.
-	 */
-	public List getProblemPositions() {
-		if (fProblemPainter != null)
-			return fProblemPainter.getProblemPositions();
-		return null;
-	}	
-	
-	/*
-	 * @see IProblemAcceptor#setProblems(IProblem[])
-	 */
-	public void setProblems(final IProblem[] problems) {
 		
-		if (fProblemPainter == null)
-			return;
-		
-		Shell shell= getSite().getShell();
-		if (shell != null && !shell.isDisposed()) {
-			shell.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					if (fProblemPainter != null)
-						fProblemPainter.updateProblems(problems);
-					AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-					if (asv != null)
-						asv.getOverviewRuler().setProblemPositions(getProblemPositions());
-				}
-			});
-		}
-	}
-	
 	/*
 	 * @see IReconcilingParticipant#reconciled()
 	 */

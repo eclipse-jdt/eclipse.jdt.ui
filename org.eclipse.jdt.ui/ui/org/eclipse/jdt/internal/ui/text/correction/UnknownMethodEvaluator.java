@@ -14,7 +14,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.ProblemPosition;
+
+
 
 public class UnknownMethodEvaluator {
 		
@@ -46,8 +47,7 @@ public class UnknownMethodEvaluator {
 	
 	
 	public static void getProposals(ICompilationUnit cu, ProblemPosition problemPos, ArrayList proposals) throws CoreException {
-		IProblem problem= problemPos.getProblem();
-		String[] args= problem.getArguments();
+		String[] args= problemPos.getArguments();
 		if (args.length < 3) {
 			return;
 		}

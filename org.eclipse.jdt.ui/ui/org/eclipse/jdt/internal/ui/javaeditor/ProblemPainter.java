@@ -15,100 +15,126 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditor;
+
 import org.eclipse.jdt.core.compiler.IProblem;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
  * Highlights the temporary problems.
  */
-public class ProblemPainter implements IPainter, PaintListener {
-	
+public class ProblemPainter implements IPainter, PaintListener, IAnnotationModelListener {
 	
 	private boolean fIsActive= false;
-	private StyledText fTextWidget;
-	private ISourceViewer fSourceViewer;
+	private boolean fIsPainting= false;
+	
 	private Color fColor;
-	private IPositionManager fPositionManager;
+	private ITextEditor fTextEditor;
+	private ISourceViewer fSourceViewer;
+	private StyledText fTextWidget;
+	private IAnnotationModel fModel;
+	private List fProblemPositions= new ArrayList();
 	
-	private List fProblemPositions= new ArrayList(5);
-		
 	
-	public ProblemPainter(ISourceViewer sourceViewer) {
-		fTextWidget= sourceViewer.getTextWidget();
+	
+	public ProblemPainter(ITextEditor textEditor, ISourceViewer sourceViewer) {
+		fTextEditor= textEditor;
 		fSourceViewer= sourceViewer;
+		fTextWidget= sourceViewer.getTextWidget();
 	}
 	
-	public List getProblemPositions() {
-		return fProblemPositions;
+	private boolean hasProblems() {
+		return !fProblemPositions.isEmpty();
+	}	
+	
+	private void enablePainting() {
+		if (!fIsPainting && hasProblems()) {
+			fIsPainting= true;
+			fTextWidget.addPaintListener(this);
+			handleDrawRequest(null);
+		}
+	}
+	
+	private void disablePainting(boolean redraw) {
+		if (fIsPainting) {
+			fIsPainting= false;
+			fTextWidget.removePaintListener(this);
+			if (redraw && hasProblems())
+				handleDrawRequest(null);
+		}
+	}
+	
+	private void setModel(IAnnotationModel model) {
+		
+		if (fModel != model) {
+			if (fModel != null)
+				fModel.removeAnnotationModelListener(this);
+			if (model != null)
+				model.addAnnotationModelListener(this);
+			fModel= model;
+		}
+		
+		fProblemPositions.clear();
+		if (fModel != null) {
+			Iterator e= new ProblemAnnotationIterator(fModel);
+			while (e.hasNext()) {
+				Annotation a= (Annotation) e.next();
+				Position p= fModel.getPosition(a);
+				fProblemPositions.add(p);
+			}
+		}
+	}
+
+	/*
+	 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
+	 */
+	public void modelChanged(final IAnnotationModel model) {
+		if (fTextWidget != null && !fTextWidget.isDisposed()) {
+			Display d= fTextWidget.getDisplay();
+			if (d != null) {
+				d.asyncExec(new Runnable() {
+					public void run() {
+						disablePainting(true);
+						setModel(model);
+						enablePainting();					
+					}
+				});
+			}	
+		}
 	}
 	
 	public void setHighlightColor(Color color) {
 		fColor= color;
 	}
 	
+	/*
+	 * @see IPainter#dispose()
+	 */
 	public void dispose() {
 		fColor= null;
 		fTextWidget= null;
-	}
-	
-	private void setProblems(IProblem[] problems) {
-		int length= problems.length;
-		for (int i= 0; i < length; i++) {
-			ProblemPosition p= new ProblemPosition(problems[i]);
-			fProblemPositions.add(p);
-			if (fPositionManager != null)
-				fPositionManager.addManagedPosition(p);
-		}
-	}
-	
-	public void updateProblems(IProblem[] problems) {
-		deactivate(true);
-		if (problems != null)
-			setProblems(problems);
-		paint(INTERNAL);
-	}
-	
-	private void removePositions() {
-		if (fPositionManager != null) {
-			for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {
-				ProblemPosition p = (ProblemPosition) e.next();
-				fPositionManager.removeManagedPosition(p);
-			}
-		}
-	}
-	
-	private void removeProblems() {
-		removePositions();
-		fProblemPositions.clear();
-	}
-	
-	private boolean hasProblems() {
-		return !fProblemPositions.isEmpty();
-	}
-	
-	public void deactivate(boolean redraw) {
-		if (fIsActive) {
-			fIsActive= false;
-			fTextWidget.removePaintListener(this);
-			if (hasProblems()) {
-				if (redraw)
-					handleDrawRequest(null);
-				removeProblems();
-			}
-		}
+		fModel= null;
+		fProblemPositions= null;
 	}
 	
 	/*
 	 * @see PaintListener#paintControl(PaintEvent)
 	 */
 	public void paintControl(PaintEvent event) {
-		if (fTextWidget != null && hasProblems())
+		if (fTextWidget != null)
 			handleDrawRequest(event.gc);
 	}
 	
@@ -119,7 +145,7 @@ public class ProblemPainter implements IPainter, PaintListener {
 		int length= region.getLength();
 		
 		for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {
-			ProblemPosition p = (ProblemPosition) e.next();
+			Position p = (Position) e.next();
 			if (p.overlapsWith(offset, length)) {
 				int p1= Math.max(offset, p.getOffset());
 				int p2= Math.min(offset + length, p.getOffset() + p.getLength());
@@ -179,25 +205,25 @@ public class ProblemPainter implements IPainter, PaintListener {
 	}
 	
 	/*
+	 * @see IPainter#deactivate(boolean)
+	 */
+	public void deactivate(boolean redraw) {
+		if (fIsActive) {
+			fIsActive= false;
+			disablePainting(redraw);
+			setModel(null);
+		}
+	}
+	
+	/*
 	 * @see IPainter#paint(int)
 	 */
 	public void paint(int reason) {
-		if (INTERNAL == reason)
-			doPaint();
-	}
-	
-	private void doPaint() {
-		if (fIsActive) {
-			
-			if (hasProblems())
-				handleDrawRequest(null);
-			else
-				deactivate(false);
-				
-		} else if (hasProblems()) {
+		if (!fIsActive) {
 			fIsActive= true;
-			fTextWidget.addPaintListener(this);
-			handleDrawRequest(null);
+			IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+			setModel(provider.getAnnotationModel(fTextEditor.getEditorInput()));
+			enablePainting();
 		}
 	}
 
@@ -205,8 +231,5 @@ public class ProblemPainter implements IPainter, PaintListener {
 	 * @see IPainter#setPositionManager(IPositionManager)
 	 */
 	public void setPositionManager(IPositionManager manager) {
-		if (manager != fPositionManager && fPositionManager != null)
-			removePositions();
-		fPositionManager= manager;
 	}
 }

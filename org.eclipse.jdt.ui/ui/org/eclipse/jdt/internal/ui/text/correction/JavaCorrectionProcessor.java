@@ -7,10 +7,15 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+
+import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -19,7 +24,9 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.ProblemPosition;
+import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
+
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
@@ -36,18 +43,20 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
-		List problemPositions= fCompilationUnitEditor.getProblemPositions();
-		if (problemPositions == null)
-			return null;
 		
-
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit cu= manager.getWorkingCopy(fCompilationUnitEditor.getEditorInput());
+		
+		IDocumentProvider dp= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+		IAnnotationModel m= dp.getAnnotationModel(fCompilationUnitEditor.getEditorInput());
 
 		ArrayList proposals= new ArrayList();
 			
-		for (Iterator e = problemPositions.iterator(); e.hasNext();) {
-			ProblemPosition pp = (ProblemPosition) e.next();
+		for (Iterator e = new ProblemAnnotationIterator(m); e.hasNext();) {
+			IProblemAnnotation a= (IProblemAnnotation) e.next();
+			Position p= m.getPosition((Annotation) a);
+			
+			ProblemPosition pp = new ProblemPosition(p, a);
 			if (pp.overlapsWith(documentOffset, 1)) {
 				collectCorrections(cu, pp, proposals);
 			}
@@ -60,7 +69,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	
 	private void collectCorrections(ICompilationUnit cu, ProblemPosition problemPos, ArrayList proposals) {
 		try {
-			int id= problemPos.getProblem().getID();
+			int id= problemPos.getId();
 			switch (id) {
 				case IProblem.UnterminatedString:
 					proposals.add(new InsertCharacterCorrectionProposal(cu, problemPos, "Insert missing quote", "\"", false));

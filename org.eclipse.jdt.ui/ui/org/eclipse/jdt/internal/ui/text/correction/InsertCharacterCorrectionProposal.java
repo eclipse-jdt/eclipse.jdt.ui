@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.ui.javaeditor.ProblemPosition;
+
 
 public class InsertCharacterCorrectionProposal extends CUCorrectionProposal {
 	
