@@ -134,14 +134,15 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 			
 		String start= null;
 		if (IJavaPartitions.JAVA_DOC.equals(fPartition)) {
-			start= "/**\n"; //$NON-NLS-1$
+			start= "/**" + doc.getLegalLineDelimiters()[0]; //$NON-NLS-1$
 		} else if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(fPartition)) {
-			start= "/* \n"; //$NON-NLS-1$
+			start= "/*" + doc.getLegalLineDelimiters()[0]; //$NON-NLS-1$
 		}
 		if (start != null) {
 			try {
 				doc.replace(0, 0, start);
-				getViewer().setDocument(doc, 4, doc.getLength() - 4);
+				int startLen= start.length();
+				getViewer().setDocument(doc, startLen, doc.getLength() - startLen);
 			} catch (BadLocationException e) {
 			}
 		}
