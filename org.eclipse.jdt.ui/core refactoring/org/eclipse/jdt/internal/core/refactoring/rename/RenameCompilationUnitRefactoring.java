@@ -17,10 +17,11 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 
-public class RenameCompilationUnitRefactoring extends Refactoring implements IRenameRefactoring{
+public class RenameCompilationUnitRefactoring extends Refactoring implements ITextUpdatingRefactoring{
 
 	private String fNewName;
 	private RenameTypeRefactoring fRenameTypeRefactoring;
@@ -65,6 +66,13 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		if (fWillRenameType)
 			fRenameTypeRefactoring.setNewName(removeFileNameExtension(newName));
 	}
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#getNewName()
+	*/
+	public String getNewName(){
+		return fNewName;
+	}
 
 	/* non java-doc
 	 * @see IRenameRefactoring#checkNewName()
@@ -92,6 +100,66 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.name",  //$NON-NLS-1$
 															new String[]{fCu.getElementName(), fNewName});
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#canEnableTextUpdating()
+	 */
+	public boolean canEnableTextUpdating() {
+		if (fRenameTypeRefactoring == null)
+			return false;
+		return fRenameTypeRefactoring.canEnableUpdateReferences();
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#getUpdateJavaDoc()
+	 */
+	public boolean getUpdateJavaDoc() {
+		if (fRenameTypeRefactoring == null)
+			return false;
+		return fRenameTypeRefactoring.getUpdateJavaDoc();
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#getUpdateComments()
+	 */
+	public boolean getUpdateComments() {
+		if (fRenameTypeRefactoring == null)
+			return false;
+		return fRenameTypeRefactoring.getUpdateComments();
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#getUpdateStrings()
+	 */
+	public boolean getUpdateStrings() {
+		if (fRenameTypeRefactoring == null)
+			return false;
+		return fRenameTypeRefactoring.getUpdateStrings();
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#setUpdateJavaDoc(boolean)
+	 */
+	public void setUpdateJavaDoc(boolean update) {
+		if (fRenameTypeRefactoring != null)
+			fRenameTypeRefactoring.setUpdateJavaDoc(update);
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#setUpdateComments(boolean)
+	 */
+	public void setUpdateComments(boolean update) {
+		if (fRenameTypeRefactoring != null)
+			fRenameTypeRefactoring.setUpdateComments(update);
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#setUpdateStrings(boolean)
+	 */
+	public void setUpdateStrings(boolean update) {
+		if (fRenameTypeRefactoring != null)
+			fRenameTypeRefactoring.setUpdateStrings(update);
 	}
 
 	/* non java-doc

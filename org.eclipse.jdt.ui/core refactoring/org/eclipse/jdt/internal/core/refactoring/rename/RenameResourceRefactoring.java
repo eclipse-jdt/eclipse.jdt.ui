@@ -45,6 +45,13 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 		Assert.isNotNull(newName);
 		fNewName= newName;
 	}
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#getNewName()
+	*/
+	public String getNewName(){
+		return fNewName;
+	}
 
 	/* non java-doc
 	 * @see IRenameRefactoring#getCurrentName()

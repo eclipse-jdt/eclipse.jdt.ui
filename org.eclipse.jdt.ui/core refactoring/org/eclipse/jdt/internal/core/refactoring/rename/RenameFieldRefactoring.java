@@ -3,11 +3,9 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.rename;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -19,7 +17,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
@@ -31,14 +28,14 @@ import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
 import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 import org.eclipse.jdt.internal.core.refactoring.util.TextBufferChangeManager;
 
-public class RenameFieldRefactoring extends Refactoring implements IRenameRefactoring{
+public class RenameFieldRefactoring extends Refactoring implements ITextUpdatingRefactoring{
 	
 	private String fNewName;
 	private IField fField;
@@ -46,13 +43,69 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	private SearchResultGroup[] fOccurrences;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private boolean fUpdateReferences;
-
+	
+	private boolean fUpdateJavaDoc;
+	private boolean fUpdateComments;
+	private boolean fUpdateStrings;
+	
 	public RenameFieldRefactoring(ITextBufferChangeCreator changeCreator, IField field){
 		Assert.isNotNull(changeCreator);
 		Assert.isTrue(field.exists());
 		fTextBufferChangeCreator= changeCreator;
 		fField= field;
 		fUpdateReferences= true;
+		fUpdateJavaDoc= false;
+		fUpdateComments= false;
+		fUpdateStrings= false;
+	}
+	
+	/*
+	 * @see ITextUpdatingRefactoring#canEnableTextUpdating()
+	 */
+	public boolean canEnableTextUpdating() {
+		return true;
+	}
+	
+	/*
+	 * @see ITextUpdatingRefactoring#getUpdateJavaDoc()
+	 */
+	public boolean getUpdateJavaDoc() {
+		return fUpdateJavaDoc;
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#getUpdateComments()
+	 */
+	public boolean getUpdateComments() {
+		return fUpdateComments;
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#getUpdateStrings()
+	 */
+	public boolean getUpdateStrings() {
+		return fUpdateStrings;
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#setUpdateJavaDoc(boolean)
+	 */
+	public void setUpdateJavaDoc(boolean update) {
+		fUpdateJavaDoc= update;
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#setUpdateComments(boolean)
+	 */
+	public void setUpdateComments(boolean update) {
+		fUpdateComments= update;
+	}
+
+	/*
+	 * @see ITextUpdatingRefactoring#setUpdateStrings(boolean)
+	 */
+	public void setUpdateStrings(boolean update) {
+		fUpdateStrings= update;
 	}
 	
 	/* non java-doc
@@ -278,8 +331,12 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		}
 	}
 	
+	private void addTextMatches(TextBufferChangeManager manager, IProgressMonitor pm) throws JavaModelException{
+		TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
+	}	
+	
 	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
-		pm.beginTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.creating_change"), 4);//$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.creating_change"), 5);//$NON-NLS-1$
 		TextBufferChangeManager manager= new TextBufferChangeManager(fTextBufferChangeCreator);
 
 		addDeclarationUpdate(manager);
@@ -287,6 +344,9 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		
 		if (fUpdateReferences)
 			addReferenceUpdates(manager, new SubProgressMonitor(pm, 3));
+		
+		pm.subTask("searching for text matches...");
+		addTextMatches(manager, new SubProgressMonitor(pm, 1));
 		
 		//putting it together
 		IChange[] changes= manager.getAllChanges();

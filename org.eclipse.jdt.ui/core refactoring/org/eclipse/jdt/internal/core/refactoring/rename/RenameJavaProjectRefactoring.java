@@ -35,6 +35,13 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 		Assert.isNotNull(newName);
 		fNewName= newName;
 	}
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#getNewName()
+	*/
+	public String getNewName(){
+		return fNewName;
+	}
 
 	/* non java-doc
 	 * @see IRenameRefactoring#getCurrentName()

@@ -45,6 +45,13 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 	}
 	
 	/* non java-doc
+	 * @see IRenameRefactoring#getNewName()
+	*/
+	public String getNewName(){
+		return fNewName;
+	}
+	
+	/* non java-doc
 	 * @see IRenameRefactoring#getCurrentName()
 	 */
 	public String getCurrentName() {
