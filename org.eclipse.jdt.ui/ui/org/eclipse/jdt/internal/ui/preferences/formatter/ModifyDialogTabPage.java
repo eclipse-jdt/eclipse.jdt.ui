@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public abstract class ModifyDialogTabPage {
 	
-	private static final int RIGHT_SIDE_WIDTH_HINT_CHARS= 55;
+	private static final int RIGHT_SIDE_WIDTH_HINT_CHARS= 65;
 	private static final int LEFT_SIDE_WIDTH_HINT_CHARS= 65;
 
 	
@@ -277,8 +277,10 @@ public abstract class ModifyDialogTabPage {
 		        fSelected= fOldSelected;
 		    else
 		        fSelected= Integer.parseInt(input);
-		    saveSelected();
-		    fNumberText.setText(Integer.toString(fSelected));
+		    if (fSelected != fOldSelected) {
+		    	saveSelected();
+		    	fNumberText.setText(Integer.toString(fSelected));
+		    }
 		}
 		
 		

@@ -392,7 +392,7 @@ public class CodingStyleConfigurationBlock {
 	/**
 	 * Create the contents
 	 */
-	public Control createContents(Composite parent) {
+	public Composite createContents(Composite parent) {
 
 		final int numColumns = 5;
 		

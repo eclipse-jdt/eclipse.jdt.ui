@@ -142,7 +142,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 				index= -1;
 			}
 			if (index < 0 || index > fCategoriesList.size() - 1) {
-				index= 0;
+				index= 1; // In order to select a category with preview initially
 			}
 			final Category category= (Category)fCategoriesList.get(index);
 			fCategoriesViewer.setSelection(new StructuredSelection(new Category[] {category}));

@@ -136,7 +136,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 				index= -1;
 			}
 			if (index < 0 || index > fCategoriesList.size() - 1) {
-				index= 0;
+				index= 1; // in order to select a category with preview initially
 			}
 			final Category category= (Category)fCategoriesList.get(index);
 			fCategoriesViewer.setSelection(new StructuredSelection(new Category[] {category}));
@@ -233,17 +233,9 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		"boolean d = !Other.isValid();" + //$NON-NLS-1$
 		"}}" //$NON-NLS-1$
 	);
-		
+
 	
-	private final static Category fMemberFunctionCategory= new Category(
-		FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.title"), //$NON-NLS-1$
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_METHOD_DECLARATION_OPEN_PAREN, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.before_opening_paren")), //$NON-NLS-1$
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_FIRST_ARGUMENT, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.after_opening_paren")), //$NON-NLS-1$
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.before_closing_paren")), //$NON-NLS-1$
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.between_empty_paren")), //$NON-NLS-1$
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_METHOD_OPEN_BRACE, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.before_opening_brace")) //$NON-NLS-1$
-		},
+	private final static String fMemberFunctionPreview= 		
 		"class Example {" + //$NON-NLS-1$
 		"int fField;" + //$NON-NLS-1$
 		"Example(int a, int b) throws E1, E2 {" + //$NON-NLS-1$
@@ -254,7 +246,19 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		"}" + //$NON-NLS-1$
 		"int foo() throws E1, E2 {" + //$NON-NLS-1$
 		"return 0;" + //$NON-NLS-1$
-		"}}" //$NON-NLS-1$
+		"}}"; //$NON-NLS-1$
+ 
+	
+	private final static Category fMemberFunctionCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.title"), //$NON-NLS-1$
+		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_METHOD_DECLARATION_OPEN_PAREN, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.before_opening_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_FIRST_ARGUMENT, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.after_opening_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.before_closing_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.between_empty_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_METHOD_OPEN_BRACE, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.before_opening_brace")) //$NON-NLS-1$
+		},
+		fMemberFunctionPreview
 	);
 	
 	private final static Category fMethodCategory= new Category(
@@ -265,7 +269,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_THROWS, FormatterMessages.getString("WhiteSpaceTabPage.methods.before_comma_in_throws")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_THROWS, FormatterMessages.getString("WhiteSpaceTabPage.methods.after_comma_in_throws")) //$NON-NLS-1$
 		},
-		fMemberFunctionCategory.previewText
+		fMemberFunctionPreview
 	);
 	
 	private final static Category fConstructorCategory= new Category(
@@ -276,7 +280,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS, FormatterMessages.getString("WhiteSpaceTabPage.constructors.before_comma_in_throws")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_THROWS, FormatterMessages.getString("WhiteSpaceTabPage.constructors.after_comma_in_throws")) //$NON-NLS-1$
 		},
-		fMemberFunctionCategory.previewText
+		fMemberFunctionPreview
 	);
 
 	private final static Category fFieldCategory= new Category(
