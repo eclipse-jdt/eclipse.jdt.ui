@@ -327,15 +327,6 @@ public abstract class TypePage extends ContainerPage {
 			fTypeNameDialogField.setFocus();
 		}
 	}
-	
-	private boolean setFocus(StringDialogField field) {
-		if (field.isCreated() && field.getText().length() == 0) {
-			field.setFocus();
-			return true;
-		}
-		return false;
-	}
-
 				
 	// -------- TypeFieldsAdapter --------
 
