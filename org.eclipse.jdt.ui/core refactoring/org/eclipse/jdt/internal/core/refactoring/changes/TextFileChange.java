@@ -32,14 +32,19 @@ public class TextFileChange extends TextChange  {
 			return fFile;
 		}
 		protected TextBuffer acquireTextBuffer() throws CoreException {
-			fAcquiredTextBuffer= TextBuffer.acquire(fFile);
-			fAcquireCounter++;
-			return fAcquiredTextBuffer;
+			TextBuffer result= TextBuffer.acquire(fFile);
+			if (fAcquiredTextBuffer == null || result == fAcquiredTextBuffer) {
+				fAcquiredTextBuffer= result;
+				fAcquireCounter++;
+			}
+			return result;
 		}
 		protected void releaseTextBuffer(TextBuffer textBuffer) {
 			TextBuffer.release(textBuffer);
-			if (--fAcquireCounter == 0)
-				fAcquiredTextBuffer= null;
+			if (textBuffer == fAcquiredTextBuffer) {
+				if (--fAcquireCounter == 0)
+					fAcquiredTextBuffer= null;
+			}
 		}
 		protected TextBuffer createTextBuffer() throws CoreException {
 			return TextBuffer.create(fFile);
@@ -61,13 +66,16 @@ public class TextFileChange extends TextChange  {
 			}
 		}
 		public void performed() {
-			try {
-				TextBuffer.changed(fAcquiredTextBuffer);
-			} catch (CoreException e) {
-				Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	
-			} finally {
-				if (fAcquiredTextBuffer != null)
+			// During acquiring of text buffer an exception has occured. In this case
+			// the pointer is <code>null</code>
+			if (fAcquiredTextBuffer != null) {
+				try {
+					TextBuffer.changed(fAcquiredTextBuffer);
+				} catch (CoreException e) {
+					Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	
+				} finally {
 					releaseTextBuffer(fAcquiredTextBuffer);
+				}
 			}
 			super.performed();
 		}		
@@ -93,9 +101,12 @@ public class TextFileChange extends TextChange  {
 	 * Method declared in TextChange
 	 */
 	protected TextBuffer acquireTextBuffer() throws CoreException {
-		fAcquiredTextBuffer= TextBuffer.acquire(fFile);
-		fAcquireCounter++;
-		return fAcquiredTextBuffer;
+		TextBuffer result= TextBuffer.acquire(fFile);
+		if (fAcquiredTextBuffer == null || result == fAcquiredTextBuffer) {
+			fAcquiredTextBuffer= result;
+			fAcquireCounter++;
+		}
+		return result;
 	}
 	
 	/* non java-doc
@@ -103,8 +114,10 @@ public class TextFileChange extends TextChange  {
 	 */
 	protected void releaseTextBuffer(TextBuffer textBuffer) {
 		TextBuffer.release(textBuffer);
-		if (--fAcquireCounter == 0)
-			fAcquiredTextBuffer= null;
+		if (textBuffer == fAcquiredTextBuffer) {
+			if (--fAcquireCounter == 0)
+				fAcquiredTextBuffer= null;
+		}
 	}
 
 	/* non java-doc
@@ -149,13 +162,16 @@ public class TextFileChange extends TextChange  {
 	 * Method declared in TextChange
 	 */
 	public void performed() {
-		try {
-			TextBuffer.changed(fAcquiredTextBuffer);
-		} catch (CoreException e) {
-			Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	
-		} finally {
-			if (fAcquiredTextBuffer != null)
+		// During acquiring of text buffer an exception has occured. In this case
+		// the pointer is <code>null</code>
+		if (fAcquiredTextBuffer != null) {
+			try {
+				TextBuffer.changed(fAcquiredTextBuffer);
+			} catch (CoreException e) {
+				Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	
+			} finally {
 				releaseTextBuffer(fAcquiredTextBuffer);
+			}
 		}
 		super.performed();
 	}		
