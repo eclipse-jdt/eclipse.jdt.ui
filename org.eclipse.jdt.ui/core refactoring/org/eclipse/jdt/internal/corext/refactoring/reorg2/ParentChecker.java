@@ -135,7 +135,7 @@ class ParentChecker {
 		removeFromSetToDelete((IResource[]) subResources.toArray(new IResource[subResources.size()]));
 	}
 
-	private static boolean isChildOf(IResource subResource, IJavaElement superElement) {
+	public static boolean isChildOf(IResource subResource, IJavaElement superElement) {
 		IResource parent= subResource.getParent();
 		while(parent != null){
 			IJavaElement el= JavaCore.create(parent);
@@ -146,7 +146,7 @@ class ParentChecker {
 		return false;
 	}
 
-	private static boolean isChildOf(IJavaElement subElement, IJavaElement superElement) {
+	public static boolean isChildOf(IJavaElement subElement, IJavaElement superElement) {
 		if (subElement.equals(superElement))
 			return false;
 		IJavaElement parent= subElement.getParent();
@@ -158,7 +158,7 @@ class ParentChecker {
 		return false;
 	}
 
-	private static boolean isChildOf(IResource subResource, IResource superResource) {
+	public static boolean isChildOf(IResource subResource, IResource superResource) {
 		return ! subResource.equals(superResource) && superResource.getFullPath().isPrefixOf(subResource.getFullPath());
 	}
 
