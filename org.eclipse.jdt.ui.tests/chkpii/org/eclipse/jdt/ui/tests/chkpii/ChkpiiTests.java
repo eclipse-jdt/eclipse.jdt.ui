@@ -200,7 +200,7 @@ public class ChkpiiTests extends TestCase {
 	 * @return String
 	 */
 	private String getExec() {
-		return new File("chkpii.exe").getPath(); //$NON-NLS-1$
+		return new File("chkpw5051.exe").getPath(); //$NON-NLS-1$
 	}
 	
 	/**
