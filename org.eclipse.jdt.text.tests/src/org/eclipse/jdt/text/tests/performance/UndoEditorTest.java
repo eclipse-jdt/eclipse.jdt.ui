@@ -21,7 +21,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-public class UndoEditorTest extends TestCase {
+public abstract class UndoEditorTest extends TestCase {
 
 	private PerformanceMeter fPerformanceMeter;
 

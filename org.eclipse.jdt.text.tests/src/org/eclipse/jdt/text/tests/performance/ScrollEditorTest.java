@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.ui.PartInitException;
 
-public class ScrollEditorTest extends TestCase {
+public abstract class ScrollEditorTest extends TestCase {
 
 	private static final int[] CTRL_HOME= new int[] { SWT.CTRL, SWT.HOME };
 	
