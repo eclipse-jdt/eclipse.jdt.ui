@@ -10,3 +10,8 @@ org.eclipse.jdt.ui/debug/allTypesCache=false
 # trace generation of type constraints and create toString info for debugging
 org.eclipse.jdt.ui/debug/TypeConstraints=false
 
+# verify jdt.core API for IBinding#isEqualTo(..)
+org.eclipse.jdt.ui/debug/checkCoreBindingIsEqualTo=false
+
+# verify jdt.core API for IBinding#getJavaElement()
+org.eclipse.jdt.ui/debug/checkCoreBindingGetJavaElement=false

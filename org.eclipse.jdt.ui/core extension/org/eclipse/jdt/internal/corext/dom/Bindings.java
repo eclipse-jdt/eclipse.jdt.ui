@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -33,6 +34,8 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -41,6 +44,17 @@ public class Bindings {
 	public static final String ARRAY_LENGTH_FIELD_BINDING_STRING= "(array type):length";//$NON-NLS-1$
 	private Bindings() {
 		// No instance
+	}
+	
+	private static final boolean CHECK_CORE_BINDING_IS_EQUAL_TO;
+	static {
+		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingIsEqualTo"); //$NON-NLS-1$
+		CHECK_CORE_BINDING_IS_EQUAL_TO= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
+	}
+	private static final boolean CHECK_CORE_BINDING_GET_JAVA_ELEMENT;
+	static {
+		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingGetJavaElement"); //$NON-NLS-1$
+		CHECK_CORE_BINDING_GET_JAVA_ELEMENT= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -52,6 +66,24 @@ public class Bindings {
 	 * @return boolean
 	 */
 	public static boolean equals(IBinding b1, IBinding b2) {
+		boolean originalEquals= originalEquals(b1, b2);
+		if (CHECK_CORE_BINDING_IS_EQUAL_TO) {
+			boolean equalTo= !originalEquals;
+			try {
+				equalTo= b1.isEqualTo(b2);
+			} catch (RuntimeException e) {
+				//avoid endless dialog loop in OccurrencesFinder
+			}
+			if (equalTo != originalEquals) {
+				String message= "Unexpected difference between Bindings.equals(..) and IBinding#isEqualTo(..)"; //$NON-NLS-1$
+				String detail= "\nb1 == " + b1.getKey() + ", b2 == " + (b2 == null ? "null binding" : b2.getKey()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				JavaPlugin.logRepeatedMessage(message, detail);
+			}
+		}
+		return originalEquals;
+	}
+	
+	private static boolean originalEquals(IBinding b1, IBinding b2) {
 		Assert.isNotNull(b1);
 		if (b1 == b2)
 			return true;
@@ -688,6 +720,28 @@ public class Bindings {
 	 * @throws JavaModelException if an errors occurs in the Java model
 	 */
 	public static ICompilationUnit findCompilationUnit(ITypeBinding typeBinding, IJavaProject project) throws JavaModelException {
+		ICompilationUnit originalFindCompilationUnit= originalFindCompilationUnit(typeBinding, project);
+		if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
+			IType type= (IType) typeBinding.getJavaElement();
+			if (type == null) {
+				if (originalFindCompilationUnit != null) {
+					JavaPlugin.logRepeatedMessage("ITypeBinding#getJavaElement() is not supposed to be null", //$NON-NLS-1$
+							"typeBinding == " + typeBinding.getKey() + ", project == " + project.getElementName());  //$NON-NLS-1$//$NON-NLS-2$
+				}
+			} else {
+				ICompilationUnit cu= type.getCompilationUnit();
+				if (cu != null && ! cu.equals(originalFindCompilationUnit)
+						|| cu == null && originalFindCompilationUnit != null) {
+					JavaPlugin.logRepeatedMessage("ITypeBinding#getJavaElement() is not correct element", //$NON-NLS-1$
+							"typeBinding == " + typeBinding.getKey() + ", project == " + project.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
+							+ ", cu == " + cu + ", originalFindCompilationUnit == " + originalFindCompilationUnit);  //$NON-NLS-1$//$NON-NLS-2$
+				}
+			}
+		}
+		return originalFindCompilationUnit;
+	}
+
+	private static ICompilationUnit originalFindCompilationUnit(ITypeBinding typeBinding, IJavaProject project) throws JavaModelException {
 		if (!typeBinding.isFromSource()) {
 			return null;
 		}
@@ -716,14 +770,28 @@ public class Bindings {
 	 */
 	public static IField findField(IVariableBinding field, IJavaProject in) throws JavaModelException {
 		Assert.isTrue(field.isField());
+		IField originalFindField= originalFindField(field, in);
+		if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
+			IField iField= (IField) field.getJavaElement();
+			if (iField != null && ! iField.equals(originalFindField)
+					|| iField == null && originalFindField != null) {
+				JavaPlugin.logRepeatedMessage("IVariableBinding#getJavaElement() is not correct element", //$NON-NLS-1$
+						"field == " + field.getKey() + ", project == " + in.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
+						+ ", iField == " + iField + ", originalFindField == " + originalFindField);  //$NON-NLS-1$//$NON-NLS-2$
+			}
+		}
+		return originalFindField;
+	}
+
+	private static IField originalFindField(IVariableBinding field, IJavaProject in) throws JavaModelException {
 		ITypeBinding declaringClassBinding = field.getDeclaringClass();
 		if (declaringClassBinding == null)
 			return null;
 		IType declaringClass = findType(declaringClassBinding, in);
 		if (declaringClass == null)
 			return null;
-	    IField foundField= declaringClass.getField(field.getName());
-	    if (! foundField.exists())
+		IField foundField= declaringClass.getField(field.getName());
+		if (! foundField.exists())
 	    	return null;
 		return foundField;
 	}
@@ -738,6 +806,20 @@ public class Bindings {
 	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IType findType(ITypeBinding type, IJavaProject scope) throws JavaModelException {
+		IType originalFindType= originalFindType(type, scope);
+		if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
+			IType iType= (IType) type.getJavaElement();
+			if (iType != null && ! iType.equals(originalFindType)
+					|| iType == null && originalFindType != null) {
+				JavaPlugin.logRepeatedMessage("ITypeBinding#getJavaElement() is not correct element", //$NON-NLS-1$
+						"type == " + type.getKey() + ", project == " + scope.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
+						+ ", iType == " + iType + ", originalFindType == " + originalFindType);  //$NON-NLS-1$//$NON-NLS-2$
+			}
+		}
+		return originalFindType;
+	}
+
+	private static IType originalFindType(ITypeBinding type, IJavaProject scope) throws JavaModelException {
 		if (type.isPrimitive() || type.isAnonymous() || type.isNullType())
 			return null;
 		if (type.isArray())
@@ -774,10 +856,24 @@ public class Bindings {
 	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IMethod findMethod(IMethodBinding method, IJavaProject scope) throws JavaModelException {
+		IMethod originalFindMethod= originalFindMethod(method, scope);
+		if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
+			IMethod iMethod= (IMethod) method.getJavaElement();
+			if (iMethod != null && ! iMethod.equals(originalFindMethod)
+					|| iMethod == null && originalFindMethod != null) {
+				JavaPlugin.logRepeatedMessage("ITypeBinding#getJavaElement() is not correct element", //$NON-NLS-1$
+						"method == " + method.getKey() + ", project == " + scope.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
+						+ ", iMethod == " + iMethod + ", originalFindMethod == " + originalFindMethod);  //$NON-NLS-1$//$NON-NLS-2$
+			}
+		}
+		return originalFindMethod;	
+	}
+
+	private static IMethod originalFindMethod(IMethodBinding method, IJavaProject scope) throws JavaModelException {
 		IType type= findType(method.getDeclaringClass(), scope);
 		if (type == null)
 			return null;
-		return findMethod(method, type);	
+		return findMethod(method, type);
 	}
 	
 	/**

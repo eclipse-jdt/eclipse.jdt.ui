@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -308,6 +309,22 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	public static void log(Throwable e) {
 		log(new Status(IStatus.ERROR, getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.getString("JavaPlugin.internal_error"), e)); //$NON-NLS-1$
+	}
+	
+	private static LinkedHashMap fgRepeatedMessages= new LinkedHashMap(20, .75f, true) {
+		private static final long serialVersionUID= 1L;
+		protected boolean removeEldestEntry(java.util.Map.Entry eldest) {
+			return true;
+		}
+	};
+	
+	public static void logRepeatedMessage(String message, String detail) {
+		if (fgRepeatedMessages.containsKey(message)) {
+			long last= ((Long) fgRepeatedMessages.get(message)).longValue();
+			long now= System.currentTimeMillis();
+			if (now - last < 2000)
+				log(new Exception(message + detail).fillInStackTrace());
+		}
 	}
 	
 	public static boolean isDebug() {
