@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
@@ -120,8 +121,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			
 			run(shell, type, editor);
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
-			ErrorDialog.openError(shell, getDialogTitle(), null, e.getStatus()); 
+			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
 		}			
 	}
 
@@ -154,7 +154,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			ErrorDialog.openError(getShell(), getDialogTitle(), null, e.getStatus()); 			
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 		}
 	}
 
@@ -174,8 +174,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 				EditorUtility.revealInEditor(editor, res[0]);
 			}
 		} catch (InvocationTargetException e) {
-			JavaPlugin.log(e);
-			MessageDialog.openError(shell, getDialogTitle(), e.getTargetException().getMessage()); 
+			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
 		}

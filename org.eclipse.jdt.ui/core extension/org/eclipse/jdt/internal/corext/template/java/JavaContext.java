@@ -4,8 +4,11 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -29,6 +32,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -162,15 +166,22 @@ public class JavaContext extends CompilationUnitContext {
 			return collector;
 		
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			openErrorDialog(null, e);
+			handleException(null, e);
 			return null;
 		}
 	}	
 	
 	
-	private static void openErrorDialog(Shell shell, Exception e) {
-		MessageDialog.openError(shell, JavaTemplateMessages.getString("JavaContext.error.title"), e.getMessage()); //$NON-NLS-1$
+	private static void handleException(Shell shell, Exception e) {
+		String title= JavaTemplateMessages.getString("JavaContext.error.title"); //$NON-NLS-1$
+		if (e instanceof CoreException)
+			ExceptionHandler.handle((CoreException)e, shell, title, null);
+		else if (e instanceof InvocationTargetException)
+			ExceptionHandler.handle((InvocationTargetException)e, shell, title, null);
+		else {
+			JavaPlugin.log(e);
+			MessageDialog.openError(shell, title, e.getMessage());
+		}
 	}	
 
 	private CompilationUnitCompletion getCompletion() {

@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * A template proposal.
@@ -107,8 +108,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 			openErrorDialog(e);		    	    
 
 	    } catch (CoreException e) {
-	       	JavaPlugin.log(e);	
-			openErrorDialog(e);		    
+			handleException(e);
 	    }	    
 	}
 	
@@ -142,9 +142,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 			return textToHTML(fTemplateBuffer.getString());
 
 	    } catch (CoreException e) {
-	       	JavaPlugin.log(e);	
-			openErrorDialog(e);		    
-
+			handleException(e);		    
 			return null;
 	    }
 	}
@@ -213,9 +211,9 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
 	}
 
-	private void openErrorDialog(CoreException e) {
+	private void handleException(CoreException e) {
 		Shell shell= fViewer.getTextWidget().getShell();
-		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
+		ExceptionHandler.handle(e, shell, TemplateMessages.getString("TemplateEvaluator.error.title"), null); //$NON-NLS-1$
 	}
 
 	/*

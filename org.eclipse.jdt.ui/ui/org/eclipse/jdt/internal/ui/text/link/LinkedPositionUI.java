@@ -4,6 +4,10 @@
  */
 package org.eclipse.jdt.internal.ui.text.link;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -40,6 +44,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * A user interface for <code>LinkedPositionManager</code>, using <code>ITextViewer</code>.
@@ -180,7 +186,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			if (fFinalCaretOffset != -1)
 				document.addPosition(CARET_POSITION, new Position(fFinalCaretOffset));
 		} catch (BadLocationException e) {
-			openErrorDialog(fViewer.getTextWidget().getShell(), e);
+			handleException(fViewer.getTextWidget().getShell(), e);
 
 		} catch (BadPositionCategoryException e) {
 			JavaPlugin.log(e);
@@ -484,8 +490,16 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		updateCaret();
 	}
 
-	private static void openErrorDialog(Shell shell, Exception e) {
-		MessageDialog.openError(shell, LinkedPositionMessages.getString("LinkedPositionUI.error.title"), e.getMessage()); //$NON-NLS-1$
+	private static void handleException(Shell shell, Exception e) {
+		String title= LinkedPositionMessages.getString("LinkedPositionUI.error.title"); //$NON-NLS-1$
+		if (e instanceof CoreException)
+			ExceptionHandler.handle((CoreException)e, shell, title, null);
+		else if (e instanceof InvocationTargetException)
+			ExceptionHandler.handle((InvocationTargetException)e, shell, title, null);
+		else {
+			MessageDialog.openError(shell, title, e.getMessage());
+			JavaPlugin.log(e);
+		}
 	}
 
 	/*

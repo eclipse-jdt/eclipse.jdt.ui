@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
 public class AddImportOnSelectionAction extends Action implements IUpdate {
@@ -131,15 +132,13 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					try {
 						dialog.run(false, true, new WorkbenchRunnableAdapter(op));
 					} catch (InvocationTargetException e) {
-						JavaPlugin.log(e);
-						MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
+						ExceptionHandler.handle(e, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null); //$NON-NLS-1$
 					} catch (InterruptedException e) {
 						// Do nothing. Operation has been canceled.
 					}
 					return;
 				} catch (CoreException e) {
-					JavaPlugin.log(e);
-					ErrorDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null, e.getStatus()); //$NON-NLS-1$
+					ExceptionHandler.handle(e, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null); //$NON-NLS-1$
 				} catch (BadLocationException e) {
 					JavaPlugin.log(e);
 					MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getMessage()); //$NON-NLS-1$

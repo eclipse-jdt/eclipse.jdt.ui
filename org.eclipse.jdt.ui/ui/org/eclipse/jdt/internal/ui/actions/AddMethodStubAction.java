@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 
@@ -112,11 +113,9 @@ public class AddMethodStubAction extends Action {
 				EditorUtility.revealInEditor(editor, res[0]);
 			}
 		} catch (InvocationTargetException e) {
-			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
-			JavaPlugin.log(e.getTargetException());
+			ExceptionHandler.handle(e, shell, JavaUIMessages.getString("AddMethodStubAction.error.title"), null); //$NON-NLS-1$
 		} catch (CoreException e) {
-			ErrorDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.error.title"), null, e.getStatus()); //$NON-NLS-1$
-			JavaPlugin.log(e.getStatus());
+			ExceptionHandler.handle(e, shell, JavaUIMessages.getString("AddMethodStubAction.error.title"), null); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
 		}

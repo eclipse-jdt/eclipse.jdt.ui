@@ -23,6 +23,8 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 /**
  * This action delegate opens the JAR Package Wizard and initializes
  * it with the selected JAR package description.
@@ -42,16 +44,18 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 			jarPackage= readJarPackage(getDescriptionFile(getSelection()));			
 		} catch (IOException ex) {
 			errorDetail= ex.getLocalizedMessage();
+			MessageDialog.openError(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.title"), JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.message") + errorDetail); //$NON-NLS-2$ //$NON-NLS-1$
+			return;
 		} catch (CoreException ex) {
 			errorDetail= ex.getLocalizedMessage();
+			ExceptionHandler.handle(ex, parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.title"), JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.message") + errorDetail); //$NON-NLS-2$ //$NON-NLS-1$
+			return;
 		} catch (SAXException ex) {
 			errorDetail= JarPackagerMessages.getString("OpenJarPackageWizardDelegate.badXmlFormat") + ex.getLocalizedMessage(); //$NON-NLS-1$
-		}
-		// Handle exceptions
-		if (jarPackage == null) {
 			MessageDialog.openError(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.title"), JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.message") + errorDetail); //$NON-NLS-2$ //$NON-NLS-1$
 			return;
 		}
+
 		if (fReader != null && !fReader.getStatus().isOK())
 			ProblemDialog.open(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.jarDescriptionReaderWarnings.title"), null, fReader.getStatus()); //$NON-NLS-1$
 		JarPackageWizard wizard= new JarPackageWizard();
