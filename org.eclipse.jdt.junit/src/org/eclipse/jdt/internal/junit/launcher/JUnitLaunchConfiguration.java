@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
 
+import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 
@@ -18,6 +19,7 @@ import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 
@@ -34,7 +36,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 	 * In addition it adds the port for the RemoteTestRunner as an argument
 	 */
 	protected VMRunnerConfiguration createVMRunner(ILaunchConfiguration configuration, IType[] testTypes, int port, String runMode) throws CoreException {
-		String[] classPath= createClassPath(testTypes[0]);	
+		String[] classPath= createClassPath(configuration, testTypes[0]);	
 		VMRunnerConfiguration vmConfig= new VMRunnerConfiguration("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", classPath); //$NON-NLS-1$
 	
 		Vector argv= new Vector(10);
@@ -55,15 +57,21 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 		return vmConfig;
 	}
 	
-	private String[] createClassPath(IType type) throws CoreException {
+	private String[] createClassPath(ILaunchConfiguration configuration, IType type) throws CoreException {
 		URL url= JUnitPlugin.getDefault().getDescriptor().getInstallURL();
-		String[] cp= JavaRuntime.computeDefaultRuntimeClassPath(type.getJavaProject());
-		String[] classPath= new String[cp.length + 2];
-		System.arraycopy(cp, 0, classPath, 2, cp.length);
+		String[] cp= getClasspath(configuration);
+		boolean inDevelopmentMode= BootLoader.inDevelopmentMode();
+
+		String[] classPath= new String[cp.length + 1];
+		System.arraycopy(cp, 0, classPath, 1, cp.length);
 		try {
-			// assumption is that the output folder is called bin!
-			classPath[0]= Platform.asLocalURL(new URL(url, "bin")).getFile(); //$NON-NLS-1$
-			classPath[1]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
+			if (inDevelopmentMode) {
+				// assumption is that the output folder is called bin!
+				classPath[0]= Platform.asLocalURL(new URL(url, "bin")).getFile(); //$NON-NLS-1$
+			}
+			else {
+				classPath[0]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
+			}
 		} catch (MalformedURLException e) {
 			JUnitPlugin.log(e); // TO DO abort run and inform user
 		} catch (IOException e) {
