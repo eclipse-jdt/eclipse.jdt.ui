@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.refactoring;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMappingContext;
+
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
@@ -220,10 +226,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li><code>IPackageFragmentRoot</code>: participants registered for copying 
 	 *       <code>IPackageFragmentRoot</code> and <code>ResourceMapping</code>.</li>
 	 *   <li><code>IPackageFragment</code>: participants registered for copying 
-	 *       <code>IPackageFragment</code> and <code>ResourceMapping</code>. Use the
-	 *       method {@link org.eclipse.core.resources.mapping.ResourceTraversal#accept(org.eclipse.core.resources.IResourceVisitor)} 
-	 *       to enumerate the resources which form the package; <code>null</code> should be
-	 *       use as the <code>ResourceMappingContext</code>.</li>
+	 *       <code>IPackageFragment</code> and <code>ResourceMapping</code>.</li>
 	 *   <li><code>ICompilationUnit</code>: participants registered for copying 
 	 *       <code>ICompilationUnit</code> and <code>ResourceMapping</code>.</li>
 	 *   <li><code>IType</code>: like ICompilationUnit if the primary top level type is copied.
@@ -232,6 +235,9 @@ public interface IRefactoringProcessorIds {
 	 *   <li><code>IFolder</code>: participants registered for copying folders.</li>
 	 *   <li><code>IFile</code>: participants registered for copying files.</li>
 	 * </ul>
+	 * Use the method {@link ResourceMapping#accept(ResourceMappingContext context, IResourceVisitor visitor, IProgressMonitor monitor)} 
+	 * to enumerate the resources which form the Java element. <code>ResourceMappingContext.LOCAL_CONTEXT</code> 
+	 * should be use as the <code>ResourceMappingContext</code> passed to the accept methdod.
 	 * <p>
 	 * NOTE: the support for resource mappings is still experimental and will 
 	 * likely change before the final API freeze.

@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.mapping.RemoteResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.resources.mapping.ResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceTraversal;
@@ -146,22 +147,18 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 	}
 	
-	private static final class TeamPackageFragmentResourceMapping extends JavaElementResourceMapping {
+	private static final class LocalPackageFragementTraversal extends ResourceTraversal {
 		private final IPackageFragment fPack;
-		private TeamPackageFragmentResourceMapping(IPackageFragment pack) {
-			Assert.isNotNull(pack);
+		public LocalPackageFragementTraversal(IPackageFragment pack) throws CoreException {
+			super(new IResource[] {pack.getCorrespondingResource()}, IResource.DEPTH_ONE, 0);
 			fPack= pack;
 		}
-		public Object getModelObject() {
-			return fPack;
-		}
-		public IProject[] getProjects() {
-			return new IProject[] { fPack.getJavaProject().getProject() };
-		}
-		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
-			return new ResourceTraversal[] {
-				new ResourceTraversal(new IResource[] {fPack.getCorrespondingResource()}, IResource.DEPTH_ONE, 0)
-			};
+		public void accept(IResourceVisitor visitor) throws CoreException {
+			IFile[] files= getPackageContent(fPack);
+			visitor.visit(fPack.getCorrespondingResource());
+			for (int i= 0; i < files.length; i++) {
+				visitor.visit(files[i]);
+			}
 		}
 	}
 	
@@ -178,44 +175,51 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			return new IProject[] { fPack.getJavaProject().getProject() };
 		}
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
-			return new ResourceTraversal[] {
-				new ResourceTraversal(new IResource[] {fPack.getCorrespondingResource()}, IResource.DEPTH_ONE, 0)
-			};
+			if (context instanceof RemoteResourceMappingContext) {
+				return new ResourceTraversal[] {
+					new ResourceTraversal(new IResource[] {fPack.getCorrespondingResource()}, IResource.DEPTH_ONE, 0)
+				};
+			} else {
+				return new ResourceTraversal[] { new LocalPackageFragementTraversal(fPack) };
+			}
 		}
 		public void accept(ResourceMappingContext context, IResourceVisitor visitor, IProgressMonitor monitor) throws CoreException {
-			if (context != null) {
+			if (context instanceof RemoteResourceMappingContext) {
 				super.accept(context, visitor, monitor);
-			}
-			// If we don't have a context then we assume that we have a precise iteration.
-			IFile[] files= getPackageContent();
-			if (monitor == null)
-				monitor= new NullProgressMonitor();
-			monitor.beginTask("", files.length + 1); //$NON-NLS-1$
-			visitor.visit(fPack.getCorrespondingResource());
-			monitor.worked(1);
-			for (int i= 0; i < files.length; i++) {
-				visitor.visit(files[i]);
+			} else {
+				// We assume a local context.
+				IFile[] files= getPackageContent(fPack);
+				if (monitor == null)
+					monitor= new NullProgressMonitor();
+				monitor.beginTask("", files.length + 1); //$NON-NLS-1$
+				visitor.visit(fPack.getCorrespondingResource());
 				monitor.worked(1);
-			}
-		}
-		/* package */ IFile[] getPackageContent() throws CoreException {
-			List result= new ArrayList();
-			IContainer container= (IContainer)fPack.getCorrespondingResource();
-			if (container != null) {
-				IResource[] members= container.members();
-				for (int m= 0; m < members.length; m++) {
-					IResource member= members[m];
-					if (member instanceof IFile) {
-						IFile file= (IFile)member;
-						if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
-							continue;
-						result.add(member);
-					}
+				for (int i= 0; i < files.length; i++) {
+					visitor.visit(files[i]);
+					monitor.worked(1);
 				}
 			}
-			return (IFile[])result.toArray(new IFile[result.size()]);
 		}
 	}
+	
+	private static IFile[] getPackageContent(IPackageFragment pack) throws CoreException {
+		List result= new ArrayList();
+		IContainer container= (IContainer)pack.getCorrespondingResource();
+		if (container != null) {
+			IResource[] members= container.members();
+			for (int m= 0; m < members.length; m++) {
+				IResource member= members[m];
+				if (member instanceof IFile) {
+					IFile file= (IFile)member;
+					if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
+						continue;
+					result.add(member);
+				}
+			}
+		}
+		return (IFile[])result.toArray(new IFile[result.size()]);
+	}
+	
 	
 	private static final class CompilationUnitResourceMapping extends JavaElementResourceMapping {
 		private final ICompilationUnit fUnit;
