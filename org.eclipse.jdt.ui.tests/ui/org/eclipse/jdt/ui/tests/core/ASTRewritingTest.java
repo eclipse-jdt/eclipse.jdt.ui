@@ -24,9 +24,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
-import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteInfo;
-import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingTest extends TestCase {
 	
@@ -78,10 +78,10 @@ public class ASTRewritingTest extends TestCase {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class D {\n");
-		buf.append("    public Object foo() {\n");
+		buf.append("    public Object goo() {\n");
 		buf.append("        return new Integer(3);\n");
 		buf.append("    }\n");
-		buf.append("    public void voo() {\n");
+		buf.append("    public void hoo() {\n");
 		buf.append("        return;\n");
 		buf.append("    }\n");		
 		buf.append("}\n");	
@@ -93,12 +93,7 @@ public class ASTRewritingTest extends TestCase {
 		JavaProjectHelper.delete(fJProject1);
 	}
 	
-	private void assertEqualString(String str1, String str2) {
-		//int len1= str1.length();
-		//int len2= str2.length();
-		
-		//assertTrue("Text has different length: Is " + len1 + ", should be " + len2, len1 == len2);
-		
+	private void assertEqualString(String str1, String str2) {	
 		int len1= Math.min(str1.length(), str2.length());
 		
 		int diffPos= -1;
@@ -127,7 +122,7 @@ public class ASTRewritingTest extends TestCase {
 	
 	
 	public void testAdd() throws Exception {
-		{
+		{	/* foo(): append a return statement */
 			ICompilationUnit cu= fCU_C;
 			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 			
@@ -139,7 +134,7 @@ public class ASTRewritingTest extends TestCase {
 			ReturnStatement returnStatement= block.getAST().newReturnStatement();
 			returnStatement.setExpression(ASTResolving.getNullExpression(methodDecl.getReturnType()));
 			statements.add(returnStatement);
-			ASTRewriteInfo.markAsInserted(returnStatement);
+			ASTRewriteAnalyzer.markAsInserted(returnStatement);
 			
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 			proposal.getCompilationUnitChange().setSave(true);
@@ -159,11 +154,11 @@ public class ASTRewritingTest extends TestCase {
 			
 			assertEqualString(cu.getSource(), buf.toString());
 		}
-		{	
+		{	/* hoo(): return; -> return false;  */
 			ICompilationUnit cu= fCU_D;
 			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		
-			MethodDeclaration methodDecl= findMethodDeclaration(cu, astRoot, "voo");
+			MethodDeclaration methodDecl= findMethodDeclaration(cu, astRoot, "hoo");
 			Block block= methodDecl.getBody();
 			assertTrue("No block" , block != null);
 			
@@ -175,7 +170,7 @@ public class ASTRewritingTest extends TestCase {
 			Expression expr= block.getAST().newBooleanLiteral(false);
 			
 			returnStatement.setExpression(expr);
-			ASTRewriteInfo.markAsInserted(expr);
+			ASTRewriteAnalyzer.markAsInserted(expr);
 			
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 			proposal.getCompilationUnitChange().setSave(true);
@@ -185,10 +180,10 @@ public class ASTRewritingTest extends TestCase {
 			StringBuffer buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class D {\n");
-			buf.append("    public Object foo() {\n");
+			buf.append("    public Object goo() {\n");
 			buf.append("        return new Integer(3);\n");
 			buf.append("    }\n");
-			buf.append("    public void voo() {\n");
+			buf.append("    public void hoo() {\n");
 			buf.append("        return false;\n");
 			buf.append("    }\n");		
 			buf.append("}\n");	
@@ -199,7 +194,7 @@ public class ASTRewritingTest extends TestCase {
 	}
 	
 	public void testRemove() throws Exception {
-		{
+		{	/* foo():  remove if... */
 			ICompilationUnit cu= fCU_C;
 			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 			
@@ -210,7 +205,7 @@ public class ASTRewritingTest extends TestCase {
 			List statements= block.statements();
 			assertTrue("No statements in block", !statements.isEmpty());
 			
-			ASTRewriteInfo.markAsRemoved((ASTNode) statements.get(0));
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) statements.get(0), null);
 					
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 			proposal.getCompilationUnitChange().setSave(true);
@@ -226,11 +221,11 @@ public class ASTRewritingTest extends TestCase {
 				
 			assertEqualString(cu.getSource(), buf.toString());
 		}
-		{	
+		{	/* goo(): remove new Integer(3) */
 			ICompilationUnit cu= fCU_D;
 			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		
-			MethodDeclaration methodDecl= findMethodDeclaration(cu, astRoot, "foo");
+			MethodDeclaration methodDecl= findMethodDeclaration(cu, astRoot, "goo");
 			Block block= methodDecl.getBody();
 			assertTrue("No block" , block != null);
 			
@@ -240,7 +235,7 @@ public class ASTRewritingTest extends TestCase {
 			
 			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
 			Expression expr= returnStatement.getExpression();
-			ASTRewriteInfo.markAsRemoved(expr);
+			ASTRewriteAnalyzer.markAsReplaced(expr, null);
 			
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 			proposal.getCompilationUnitChange().setSave(true);
@@ -250,10 +245,10 @@ public class ASTRewritingTest extends TestCase {
 			StringBuffer buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class D {\n");
-			buf.append("    public Object foo() {\n");
+			buf.append("    public Object goo() {\n");
 			buf.append("        return;\n");
 			buf.append("    }\n");
-			buf.append("    public void voo() {\n");
+			buf.append("    public void hoo() {\n");
 			buf.append("        return;\n");
 			buf.append("    }\n");		
 			buf.append("}\n");	
@@ -262,64 +257,72 @@ public class ASTRewritingTest extends TestCase {
 		}
 	}
 	
-	public void testModify() throws Exception {
-		ICompilationUnit cu= fCU_D;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-	
-		{
+	public void testReplace() throws Exception {
+		{	/* foo(): if.. -> return; */
+			ICompilationUnit cu= fCU_C;
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+			
 			MethodDeclaration methodDecl= findMethodDeclaration(cu, astRoot, "foo");
 			Block block= methodDecl.getBody();
-			assertTrue("No block in foo" , block != null);
+			assertTrue("No block" , block != null);	
 			
 			List statements= block.statements();
-			assertTrue("No statements in block foo", !statements.isEmpty());
-			assertTrue("No ReturnStatement in foo", statements.get(0) instanceof ReturnStatement);
+			assertTrue("No statements in block", !statements.isEmpty());
 			
-			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
-			Expression expr= returnStatement.getExpression();
-	
-			ReturnStatement modifiedStatement= block.getAST().newReturnStatement();
-			modifiedStatement.setExpression(ASTResolving.getNullExpression(methodDecl.getReturnType()));			
+			ReturnStatement returnStatement= block.getAST().newReturnStatement();
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) statements.get(0), returnStatement);
+					
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+			proposal.getCompilationUnitChange().setSave(true);
 			
-			ASTRewriteInfo.markAsModified(returnStatement, modifiedStatement);
-		}
-		{
+			proposal.apply(null);
+			
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class C {\n");
+			buf.append("    public Object foo() {\n");
+			buf.append("        return;\n");			
+			buf.append("    }\n");
+			buf.append("}\n");
+				
+			assertEqualString(cu.getSource(), buf.toString());
+		}		
+		{	/* goo(): new Integer(3) -> 'null' */
+			ICompilationUnit cu= fCU_D;
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		
-			MethodDeclaration methodDecl= findMethodDeclaration(cu, astRoot, "voo");
+			MethodDeclaration methodDecl= findMethodDeclaration(cu, astRoot, "goo");
 			Block block= methodDecl.getBody();
-			assertTrue("No block in voo" , block != null);
+			assertTrue("No block" , block != null);
 			
 			List statements= block.statements();
-			assertTrue("No statements in block voo", !statements.isEmpty());
-			assertTrue("No ReturnStatement in voo", statements.get(0) instanceof ReturnStatement);
+			assertTrue("No statements in block", !statements.isEmpty());
+			assertTrue("No ReturnStatement", statements.get(0) instanceof ReturnStatement);
 			
 			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
 			Expression expr= returnStatement.getExpression();
+			Expression modified= ASTResolving.getNullExpression(methodDecl.getReturnType());
 	
-			ReturnStatement modifiedStatement= block.getAST().newReturnStatement();
-			modifiedStatement.setExpression(block.getAST().newBooleanLiteral(false));			
+			ASTRewriteAnalyzer.markAsReplaced(expr, modified);
 			
-			ASTRewriteInfo.markAsModified(returnStatement, modifiedStatement);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+			proposal.getCompilationUnitChange().setSave(true);
+			
+			proposal.apply(null);
+			
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class D {\n");
+			buf.append("    public Object goo() {\n");
+			buf.append("        return null;\n");
+			buf.append("    }\n");
+			buf.append("    public void hoo() {\n");
+			buf.append("        return;\n");
+			buf.append("    }\n");		
+			buf.append("}\n");	
+			
+			assertEqualString(cu.getSource(), buf.toString());
 		}
-		
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
-		
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class D {\n");
-		buf.append("    public Object foo() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    public void voo() {\n");
-		buf.append("        return false;\n");
-		buf.append("    }\n");		
-		buf.append("}\n");	
-		
-		assertEqualString(cu.getSource(), buf.toString());				
-		
 	}	
 	
 }

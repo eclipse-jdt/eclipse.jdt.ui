@@ -35,7 +35,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	private static final String KEY= "ASTChangeData";
 	
 	private static final int INSERT= 1;
-	private static final int REMOVE= 2;
+	private static final int REPLACE= 2;
 	private static final int MODIFY= 3;
 
 
@@ -43,52 +43,46 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		node.setProperty(KEY, new ASTRewriteInfo(INSERT, null));
 	}
 	
-	public static void markAsRemoved(ASTNode node) {
-		node.setProperty(KEY, new ASTRewriteInfo(REMOVE, null));
+	public static void markAsReplaced(ASTNode node, ASTNode modifiedNode) {
+		node.setProperty(KEY, new ASTRewriteInfo(REPLACE, modifiedNode));
 	}
 	
 	public static void markAsModified(ASTNode node, ASTNode modifiedNode) {
 		node.setProperty(KEY, new ASTRewriteInfo(MODIFY, modifiedNode));
 	}
 	
-	public static ASTRewriteInfo getChangeData(ASTNode node) {
-		return (ASTRewriteInfo) node.getProperty(KEY);
+	public static boolean isInserted(ASTNode node) {
+		ASTRewriteInfo info= (ASTRewriteInfo) node.getProperty(KEY);
+		return info != null && info.operation == INSERT;
 	}
 	
-	public static class ASTRewriteInfo {
-		
+	public static boolean isReplaced(ASTNode node) {
+		ASTRewriteInfo info= (ASTRewriteInfo) node.getProperty(KEY);
+		return info != null && info.operation == REPLACE;
+	}
 	
-		private int fOperation;
-		private ASTNode fModifiedNode;
-		
-		public ASTRewriteInfo(int op, ASTNode modifiedNode) {
-			fOperation= op;
-			fModifiedNode= modifiedNode;
-		}
-		
-		public boolean isInsert() {
-			return fOperation == INSERT;
-		}
-			
-		public boolean isRemove() {
-			return fOperation == REMOVE;
-		}	
-		
-		public boolean isModifiy() {
-			return fOperation == MODIFY;
-		}
-		
-		/**
-		 * Returns the modified node.
-		 * @return ASTNode
-		 */
-		public ASTNode getModifiedNode() {
-			return fModifiedNode;
-		}
-	
+	public static boolean isModified(ASTNode node) {
+		ASTRewriteInfo info= (ASTRewriteInfo) node.getProperty(KEY);
+		return info != null && info.operation == MODIFY;
 	}	
 	
-
+	public static ASTNode getChangedNode(ASTNode node) {
+		ASTRewriteInfo info= (ASTRewriteInfo) node.getProperty(KEY);
+		return info != null ? info.modifiedNode : null;
+	}
+	
+		
+	private static class ASTRewriteInfo {
+	
+		private int operation;
+		private ASTNode modifiedNode;
+		
+		public ASTRewriteInfo(int op, ASTNode modifiedNode) {
+			this.operation= op;
+			this.modifiedNode= modifiedNode;
+		}
+			
+	}	
 
 	private CompilationUnitChange fChange;
 	private TextBuffer fTextBuffer;
@@ -105,27 +99,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ReturnStatement)
 	 */
 	public boolean visit(ReturnStatement node) {
-		ASTRewriteInfo changeData= getChangeData(node);
-		if (changeData != null && changeData.isModifiy()) {
-			ReturnStatement modified= (ReturnStatement) changeData.getModifiedNode();
-			if (modified.getExpression() != node.getExpression()) {
-				if (node.getExpression() != null) {
-					modifyExpression(node.getExpression(), modified.getExpression());
-				} else {
-					insertExpression(modified.getExpression(), node.getStartPosition(), ITerminalSymbols.TokenNamereturn);
-				}
-					
-			}
-		}
 		Expression expression= node.getExpression();
 		if (expression != null) {
-			changeData= getChangeData(expression);
-			if (changeData != null && !changeData.isModifiy()) {
-				if (changeData.isRemove()) {
-					modifyExpression(expression, null);
-				} else {
-					insertExpression(expression, node.getStartPosition(), ITerminalSymbols.TokenNamereturn);
-				}
+			if (isReplaced(expression)) {
+				replaceExpression(expression, (Expression) getChangedNode(expression));
+			} else if (isInserted(expression)) {
+				insertExpression(expression, node.getStartPosition(), ITerminalSymbols.TokenNamereturn);
+			} else {
+				expression.accept(this);
 			}
 		}
 		return false;
@@ -140,7 +121,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			int pos= scanner.getCurrentTokenEndPosition() + 1;
 			
 			String str= " " + generateSource(inserted, 0);
-			fChange.addTextEdit("Insert Expression", SimpleTextEdit.createInsert(pos, str));
+			fChange.addTextEdit("Add Expression", SimpleTextEdit.createInsert(pos, str));
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		} catch (InvalidInputException e) {
@@ -149,7 +130,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	
-	private void modifyExpression(Expression old, Expression modified) {
+	private void replaceExpression(Expression old, Expression modified) {
 		if (modified == null) {
 			int startPos= old.getStartPosition();
 			int endPos= startPos + old.getLength();
@@ -160,7 +141,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			fChange.addTextEdit("Remove Expression", SimpleTextEdit.createReplace(startPos, endPos - startPos, ""));
 		} else {
 			String str= generateSource(modified, 0);
-			fChange.addTextEdit("Modify Expression", SimpleTextEdit.createReplace(old.getStartPosition(), old.getLength(), str));
+			fChange.addTextEdit("Replace Expression", SimpleTextEdit.createReplace(old.getStartPosition(), old.getLength(), str));
 		}
 	}
 	
@@ -175,46 +156,48 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		Statement last= null;
 		for (int i= 0; i < list.size(); i++) {
 			Statement elem= (Statement) list.get(i);
-			ASTRewriteInfo changeData= getChangeData(elem);
-			if (changeData != null && !changeData.isModifiy()) {
-				if (changeData.isRemove()) {
-					removeStatement(elem);
-				} else {
-					insertStatement(block, elem, last);
-					last= elem;
-				}
+			if (isReplaced(elem)) {
+				replaceStatement(elem, (Statement) getChangedNode(elem));
+			} else if (isInserted(elem)) {
+				insertStatement(block, elem, last);
 			} else {
 				elem.accept(this);
-				last= elem;
 			}
-			
+			last= elem;
 		}		
 		return false;
 	}
 	
-	private void removeStatement(Statement elem) {
-		int start= elem.getStartPosition();
-		int end= start + elem.getLength();
-		
-		TextRegion endRegion= fTextBuffer.getLineInformationOfOffset(end);
-		int lineEnd= endRegion.getOffset() + endRegion.getLength();
-		// move end to include all spaces and tabs
-		while (end < lineEnd && Character.isWhitespace(fTextBuffer.getChar(end))) {
-			end++;
-		}
-		if (lineEnd == end) { // if there is no comment / other statement remove the line (indent + new line)
-			int startLine= fTextBuffer.getLineOfOffset(start);
-			if (startLine > 0) {
-				TextRegion prevRegion= fTextBuffer.getLineInformation(startLine - 1);
-				int cutPos= prevRegion.getOffset() + prevRegion.getLength();
-				String str= fTextBuffer.getContent(cutPos, start - cutPos);
-				if (Strings.containsOnlyWhitespaces(str)) {
-					start= cutPos;
+	private void replaceStatement(Statement elem, Statement changed) {
+		if (changed == null) {
+			int start= elem.getStartPosition();
+			int end= start + elem.getLength();
+			
+			TextRegion endRegion= fTextBuffer.getLineInformationOfOffset(end);
+			int lineEnd= endRegion.getOffset() + endRegion.getLength();
+			// move end to include all spaces and tabs
+			while (end < lineEnd && Character.isWhitespace(fTextBuffer.getChar(end))) {
+				end++;
+			}
+			if (lineEnd == end) { // if there is no comment / other statement remove the line (indent + new line)
+				int startLine= fTextBuffer.getLineOfOffset(start);
+				if (startLine > 0) {
+					TextRegion prevRegion= fTextBuffer.getLineInformation(startLine - 1);
+					int cutPos= prevRegion.getOffset() + prevRegion.getLength();
+					String str= fTextBuffer.getContent(cutPos, start - cutPos);
+					if (Strings.containsOnlyWhitespaces(str)) {
+						start= cutPos;
+					}
 				}
 			}
+			
+			fChange.addTextEdit("Remove Statement", SimpleTextEdit.createReplace(start, end - start, ""));
+		} else {
+			int startLine= fTextBuffer.getLineOfOffset(elem.getStartPosition());
+			int indent= fTextBuffer.getLineIndent(startLine, CodeFormatterUtil.getTabWidth());
+			String str= Strings.trimLeadingTabsAndSpaces(generateSource(changed, indent));
+			fChange.addTextEdit("Replace Statement", SimpleTextEdit.createReplace(elem.getStartPosition(), elem.getLength(), str));
 		}
-		
-		fChange.addTextEdit("Remove Statement", SimpleTextEdit.createReplace(start, end - start, ""));
 	}
 
 	private void insertStatement(Block block, Statement elem, Statement sibiling) {
