@@ -54,16 +54,18 @@ public class ParameterGuesser {
 		public final int variableType;
 		public final int positionScore;
 		public boolean alreadyMatched;
+		public char[] triggerChars;
 		
 		/**
 		 * Creates a variable.
 		 */
-		public Variable(String typePackage, String typeName, String name, int variableType, int positionScore) {
+		public Variable(String typePackage, String typeName, String name, int variableType, int positionScore, char[] triggers) {
 			this.typePackage= typePackage;
 			this.typeName= typeName;
 			this.name= name;
 			this.variableType= variableType;
 			this.positionScore= positionScore;
+			triggerChars= triggers;
 		}
 
 		/*
@@ -125,10 +127,10 @@ public class ParameterGuesser {
 				thisPkg= new String();
 				thisType= fEnclosingTypeName;
 			}
-			addVariable(Variable.FIELD, thisPkg.toCharArray(), thisType.toCharArray(), "this".toCharArray()); //$NON-NLS-1$
-			addVariable(Variable.FIELD, "java.lang".toCharArray(), "Object".toCharArray(), "null".toCharArray()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "true".toCharArray());  //$NON-NLS-1$//$NON-NLS-2$
-			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "false".toCharArray());  //$NON-NLS-1$//$NON-NLS-2$
+			addVariable(Variable.FIELD, thisPkg.toCharArray(), thisType.toCharArray(), "this".toCharArray(), new char[] {'.'}); //$NON-NLS-1$
+			addVariable(Variable.FIELD, "java.lang".toCharArray(), "Object".toCharArray(), "null".toCharArray(), new char[0]); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "true".toCharArray(), new char[0]);  //$NON-NLS-1$//$NON-NLS-2$
+			addVariable(Variable.LOCAL, new char[0], "boolean".toCharArray(), "false".toCharArray(), new char[0]);  //$NON-NLS-1$//$NON-NLS-2$
 			
 			return fVariables;
 		}
@@ -160,8 +162,8 @@ public class ParameterGuesser {
 			return !declaringTypeName.equals(fEnclosingTypeName);
 		}
 
-		private void addVariable(int varType, char[] typePackageName, char[] typeName, char[] name) {
-			fVariables.add(new Variable(new String(typePackageName), new String(typeName), new String(name), varType, fVariables.size()));
+		private void addVariable(int varType, char[] typePackageName, char[] typeName, char[] name, char[] triggers) {
+			fVariables.add(new Variable(new String(typePackageName), new String(typeName), new String(name), varType, fVariables.size(), triggers));
 		}
 
 		/*
@@ -171,19 +173,32 @@ public class ParameterGuesser {
 			char[] typePackageName, char[] typeName, char[] completionName, int modifiers, int completionStart,
 			int completionEnd, int relevance)
 		{
+			char[] triggers= isPrimitive(typeName) ? new char[0] : new char[] {'.'};
 			if (!isInherited(new String(declaringTypeName)))
-				addVariable(Variable.FIELD, typePackageName, typeName, name);
+				addVariable(Variable.FIELD, typePackageName, typeName, name, triggers);
 			else
-				addVariable(Variable.INHERITED_FIELD, typePackageName, typeName, name);
+				addVariable(Variable.INHERITED_FIELD, typePackageName, typeName, name, triggers);
 		}
 	
+		/**
+		 * Returns <code>true</code> if <code>typeName</code> is the name of a primitive type.
+		 * 
+		 * @param typeName the type to check
+		 * @return <code>true</code> if <code>typeName</code> is the name of a primitive type
+		 */
+		private boolean isPrimitive(char[] typeName) {
+			String s= new String(typeName);
+			return "boolean".equals(s) || "byte".equals(s) || "short".equals(s) || "int".equals(s) || "long".equals(s) || "float".equals(s) || "double".equals(s) || "char".equals(s); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+		}
+
 		/*
 		 * @see ICompletionRequestor#acceptLocalVariable(char[], char[], char[], int, int, int, int)
 		 */
 		public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers,
 			int completionStart, int completionEnd, int relevance)
 		{
-			addVariable(Variable.LOCAL, typePackageName, typeName, name);
+			char[] triggers= isPrimitive(typeName) ? new char[0] : new char[] {'.'};
+			addVariable(Variable.LOCAL, typePackageName, typeName, name, triggers);
 		}
 		
 		/*
@@ -192,7 +207,8 @@ public class ParameterGuesser {
 		public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 			// TODO: for now: only add zero-arg methods.
 			if (parameterNames.length == 0) {
-				addVariable(isInherited(new String(declaringTypeName)) ? Variable.INHERITED_METHOD : Variable.METHOD, returnTypePackageName, returnTypeName, completionName);
+				char[] triggers= isPrimitive(returnTypeName) ? new char[0] : new char[] {'.'};
+				addVariable(isInherited(new String(declaringTypeName)) ? Variable.INHERITED_METHOD : Variable.METHOD, returnTypePackageName, returnTypeName, completionName, triggers);
 			}
 		}
 	}
@@ -302,7 +318,12 @@ public class ParameterGuesser {
 		for (Iterator it= typeMatches.iterator(); it.hasNext();) {
 			Variable v= (Variable)it.next();
 			if (i == 0) v.alreadyMatched= true;
-			ret[i++]= new JavaCompletionProposal(v.name, offset, paramName.length(), null, null, ret.length - i);
+			JavaCompletionProposal proposal= new JavaCompletionProposal(v.name, offset, paramName.length(), null, null, ret.length - i);
+			char[] triggers= new char[v.triggerChars.length + 1];
+			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
+			triggers[triggers.length - 1]= ';';
+			proposal.setTriggerCharacters(triggers);
+			ret[i++]= proposal;
 		}
 		return ret;
 	}

@@ -51,6 +51,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	private final ITextViewer fViewer;
 	private IRegion fSelectedRegion; // initialized by apply()
 	private ICompletionProposal[][] fChoices; // initialized by guessParameters()
+	private static final String TYPE= "ParamterGuessingProposal_"; //$NON-NLS-1$
 		
 	/**
 	 * Creates a template proposal with a template and its context.
@@ -140,10 +141,11 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				LinkedPositionManager manager= new LinkedPositionManager(document);
 				for (int i= 0; i != parameterCount; i++) {
 					int positionOffset= baseOffset + positionOffsets[i];
+					String type= TYPE + i;
 					if (fChoices[i].length == 0) {
-						manager.addPosition(positionOffset, positionLengths[i]);
+						manager.addPosition(positionOffset, positionLengths[i], type);
 					} else {
-						manager.addPosition(positionOffset, positionLengths[i], fChoices[i]);
+						manager.addPosition(positionOffset, positionLengths[i], type, fChoices[i]);
 					}
 				}
 				
@@ -226,7 +228,9 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			if (i != 0)
 				buffer.append(", "); //$NON-NLS-1$
 			offsets[i]= buffer.length();
-			buffer.append(fParameterNames[i]);
+			ICompletionProposal[] proposals= fChoices[i];
+			String display= proposals.length > 0 ? proposals[0].getDisplayString() : new String(fParameterNames[i]);
+			buffer.append(display);
 			lengths[i]= buffer.length() - offsets[i];			
 		}
 
