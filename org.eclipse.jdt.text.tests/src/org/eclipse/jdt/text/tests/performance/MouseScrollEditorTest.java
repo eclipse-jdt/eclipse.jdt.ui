@@ -93,6 +93,8 @@ public abstract class MouseScrollEditorTest extends TestCase {
 	
 	private Poster fPoster;
 
+	private Error fBackgroundError;
+
 	private Runnable fThreadRunnable= new Runnable() {
 		private volatile int fTopPixel;
 		private int fOldTopPixel;
@@ -114,11 +116,11 @@ public abstract class MouseScrollEditorTest extends TestCase {
 				while (fTopPixel < fMaxTopPixel) {
 					fPoster.driveFromBackground();
 					fOldTopPixel= fTopPixel;
-					if (!fCondition.busyWaitFor(1000)) {
-						System.out.println("Timeout in " + MouseScrollEditorTest.this.getClass().getName() + "#" + getName() + "()");
-						break;
-					}
+					assertTrue(fCondition.busyWaitFor(1000));
 				}
+			} catch (Error e) {
+				fBackgroundError= e;
+				throw e;
 			} finally {
 				SWTEventHelper.mouseUpEvent(fDisplay, 1, false);
 				fDone= true;
@@ -156,6 +158,8 @@ public abstract class MouseScrollEditorTest extends TestCase {
 				while (!fDone)
 					if (!fDisplay.readAndDispatch())
 						fDisplay.sleep();
+				if (fBackgroundError != null)
+					throw fBackgroundError;
 				fPerformanceMeter.stop();
 				assertEquals(fMaxTopPixel, fText.getTopPixel());
 				EditorTestHelper.calmDown(100, 1000, 100);
