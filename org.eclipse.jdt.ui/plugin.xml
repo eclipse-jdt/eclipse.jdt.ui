@@ -128,11 +128,13 @@
   	   id="org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"
        objectClass="org.eclipse.core.resources.IProject"
        class="org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage">
+       <filter name="nature" value="org.eclipse.jdt.core.javanature"/>
    	</page>
    	<page name="Java Build Path"
   	   id="org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"
        objectClass="org.eclipse.jdt.core.IJavaProject"
        class="org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage">
+       <filter name="nature" value="org.eclipse.jdt.core.javanature"/>
    	</page>
    	<page name="Java Source Attachment"
 		id="org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1" 
@@ -451,6 +453,7 @@
 		name="Java Runtime"
 		objectClass="org.eclipse.core.resources.IProject"
 		class="org.eclipse.jdt.internal.ui.launcher.VMPropertyPage">
+		<filter name="nature" value="org.eclipse.jdt.core.javanature"/>
     </page>
 </extension>
 
@@ -486,6 +489,7 @@
 		name="Debugger Source Lookup"
 		objectClass="org.eclipse.core.resources.IProject"
 		class="org.eclipse.jdt.internal.ui.launcher.SourceLookupPropertyPage"> 
+		<filter name="nature" value="org.eclipse.jdt.core.javanature"/>
     </page>
 	<page
 		id="org.eclipse.jdt.ui.launching.SourceLookupPage" 

@@ -45,7 +45,6 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		
 		public String getText(Object element) {
 			String packName= ((TypeRef) element).getPackageName();
-			
 			if (packName.length() == 0) {
 				return JavaPlugin.getResourceString("DefaultPackage.label");
 			} else {
