@@ -292,8 +292,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		for (int i= 0; i < varsBefore.length; i++) {
 			names[i]= varsBefore[i].getName();
 		}
-		for (int i= varsBefore.length; i < names.length; i++) {
-			names[i]= varsAfter[i].getName();
+		for (int i= 0; i < varsAfter.length; i++) {
+			names[i + varsBefore.length]= varsAfter[i].getName();
 		}
 		return names;
 	}
