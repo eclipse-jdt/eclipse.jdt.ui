@@ -22,7 +22,6 @@ import org.eclipse.core.expressions.ExpressionTagNames;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class ContributedProcessorDescriptor {
@@ -59,7 +58,9 @@ public class ContributedProcessorDescriptor {
 			
 			ExpressionConverter parser= ExpressionConverter.getDefault();
 			Expression expression= parser.perform(children[0]);
-			fLastResult= !(expression.evaluate(new EvaluationContext(null, cunit, cunit)) != EvaluationResult.TRUE);
+			EvaluationContext evalContext= new EvaluationContext(null, cunit);
+			evalContext.addVariable("selection", cunit); //$NON-NLS-1$
+			fLastResult= !(expression.evaluate(evalContext) != EvaluationResult.TRUE);
 			fLastCUnit= cunit;
 			return fLastResult;
 
