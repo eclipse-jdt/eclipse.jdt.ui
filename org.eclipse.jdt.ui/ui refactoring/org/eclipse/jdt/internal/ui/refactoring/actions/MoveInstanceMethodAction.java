@@ -81,7 +81,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
        //do nothing
     }
 
-	private boolean canEnable(IStructuredSelection selection) throws JavaModelException{
+	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
 		if (selection.isEmpty() || selection.size() != 1) 
 			return false;
 		
@@ -89,7 +89,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 		return (first instanceof IMethod) && shouldAcceptElement((IMethod)first);
 	}
 
-	private boolean shouldAcceptElement(IMethod method) throws JavaModelException {
+	private static boolean shouldAcceptElement(IMethod method) throws JavaModelException {
 		return (! method.isBinary() && ! JdtFlags.isStatic(method));
 	}
 	
@@ -144,7 +144,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 		return SelectionConverter.getInputAsCompilationUnit(fEditor);
 	}
 	
-	private RefactoringWizard createWizard(MoveInstanceMethodRefactoring refactoring) {
+	private static RefactoringWizard createWizard(MoveInstanceMethodRefactoring refactoring) {
 		return new MoveInstanceMethodWizard(refactoring);
 	}
 }

@@ -86,7 +86,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 		return SelectionConverter.getInputAsCompilationUnit(fEditor);
 	}
 	
-	private RefactoringWizard createWizard(InlineMethodRefactoring refactoring) {
+	private static RefactoringWizard createWizard(InlineMethodRefactoring refactoring) {
 		return new InlineMethodWizard(refactoring);
 	}
 
@@ -139,7 +139,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 		}
 	}
 
-	private boolean canEnable(IStructuredSelection selection) throws JavaModelException{
+	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
 		if (selection.isEmpty() || selection.size() != 1)
 			return false;
 
@@ -147,7 +147,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 		return (first instanceof IMethod) && shouldAcceptElement((IMethod)first);
 	}
 
-	private boolean shouldAcceptElement(IMethod method) throws JavaModelException {
+	private static boolean shouldAcceptElement(IMethod method) throws JavaModelException {
 		return ! method.isBinary();
 	}
 }

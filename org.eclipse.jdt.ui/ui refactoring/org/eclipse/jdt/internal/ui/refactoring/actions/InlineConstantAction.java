@@ -23,19 +23,19 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.InlineConstantWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
  * Inlines a constant.
@@ -73,7 +73,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		try {
 			setEnabled(canEnable(selection));
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			setEnabled(false);//no ui
 		}
 	}
 
@@ -84,7 +84,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
        //do nothing
     }
 
-	private boolean canEnable(IStructuredSelection selection) throws JavaModelException{
+	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
 		if (selection.isEmpty() || selection.size() != 1) 
 			return false;
 		
@@ -92,7 +92,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		return (first instanceof IField) && shouldAcceptElement((IField)first);
 	}
 
-	private boolean shouldAcceptElement(IField field) throws JavaModelException {
+	private static boolean shouldAcceptElement(IField field) throws JavaModelException {
 		return (! field.isBinary() && JdtFlags.isStatic(field) && JdtFlags.isFinal(field));
 	}
 	
@@ -146,7 +146,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		return SelectionConverter.getInputAsCompilationUnit(fEditor);
 	}
 	
-	private RefactoringWizard createWizard(InlineConstantRefactoring refactoring) {
+	private static RefactoringWizard createWizard(InlineConstantRefactoring refactoring) {
 		return new InlineConstantWizard(refactoring);
 	}
 }
