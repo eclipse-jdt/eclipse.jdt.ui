@@ -17,6 +17,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 public class PromoteTempToFieldTests extends RefactoringTest{
 	
@@ -103,7 +104,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		assertEquals("incorrect changes", getFileContents(getTestFileName(true, false)), newcu.getSource());
+		//assertEquals("incorrect changes", getFileContents(getTestFileName(true, false)), newcu.getSource());
+		AbstractCUTestCase.compareSource(newcu.getSource(), getFileContents(getTestFileName(true, false)));
 	}
 
 	private void failHelper(int startLine, int startColumn, int endLine, int endColumn, 
@@ -253,4 +255,135 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 		enablementHelper1(5, 13, 5, 14, expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 	
+	///---- test failing preconditions --------------
+	
+	public void testFail0() throws Exception{
+		failHelper(3, 16, 3, 17, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, JdtFlags.VISIBILITY_CODE_PRIVATE, RefactoringStatus.FATAL);
+	}
+
+	public void testFail1() throws Exception{
+		failHelper(5, 28, 5, 29, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, JdtFlags.VISIBILITY_CODE_PRIVATE, RefactoringStatus.FATAL);
+	}
+
+	public void testFail2() throws Exception{
+		failHelper(5, 15, 5, 16, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, JdtFlags.VISIBILITY_CODE_PRIVATE, RefactoringStatus.FATAL);
+	}
+
+	public void testFail3() throws Exception{
+		failHelper(5, 16, 5, 17, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, JdtFlags.VISIBILITY_CODE_PRIVATE, RefactoringStatus.FATAL);
+	}
+
+	public void testFail4() throws Exception{
+		failHelper(7, 13, 7, 14, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, JdtFlags.VISIBILITY_CODE_PRIVATE, RefactoringStatus.FATAL);
+	}
+
+	public void testFail5() throws Exception{
+		failHelper(6, 13, 6, 14, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, JdtFlags.VISIBILITY_CODE_PRIVATE, RefactoringStatus.FATAL);
+	}
+	
+	///----------- tests of transformation ------------
+
+	public void test0() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+
+	public void test1() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+
+	public void test2() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(7, 13, 7, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test3() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(9, 13, 9, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test4() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test5() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(6, 21, 6, 22, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test6() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(6, 21, 6, 22, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test7() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(4, 13, 4, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test8() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(4, 13, 4, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test9() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(5, 13, 5, 14, "field", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test10() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
+        boolean declareFinal= true;
+        boolean declareStatic= false;
+		passHelper(7, 13, 7, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test11() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PUBLIC;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(7, 13, 7, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test12() throws Exception{
+        int accessModifier= JdtFlags.VISIBILITY_CODE_PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+        boolean declareFinal= false;
+        boolean declareStatic= true;
+		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
 }
