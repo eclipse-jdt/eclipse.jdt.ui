@@ -55,7 +55,6 @@ public class ImportsStructure implements IImportsStructure {
 	
 	private int fImportOnDemandThreshold;
 	
-	private boolean fRestoreExistingImports;
 	private boolean fFilterImplicitImports;
 	private boolean fFindAmbiguousImports;
 	
@@ -81,13 +80,12 @@ public class ImportsStructure implements IImportsStructure {
 		IImportContainer container= cu.getImportContainer();
 		
 		fImportOnDemandThreshold= importThreshold;
-		fRestoreExistingImports= restoreExistingImports && container.exists();
 		fFilterImplicitImports= true;
 		fFindAmbiguousImports= !restoreExistingImports;
 		
 		fPackageEntries= new ArrayList(20);
 		
-		if (fRestoreExistingImports) {
+		if (restoreExistingImports && container.exists()) {
 			TextBuffer buffer= null;
 			try {
 				buffer= aquireTextBuffer();
