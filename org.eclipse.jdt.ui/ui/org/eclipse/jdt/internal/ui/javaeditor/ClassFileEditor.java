@@ -5,29 +5,21 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
- 
 import org.eclipse.core.resources.IFile;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.IMenuManager;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 
 /**
  * Java specific text editor.
@@ -46,7 +38,7 @@ public class ClassFileEditor extends JavaEditor {
 	}
 	
 	/**
-	 * @see AbstractTextEditor#createActions
+	 * @see AbstractTextEditor#createActions()
 	 */
 	protected void createActions() {
 		super.createActions();
@@ -54,7 +46,6 @@ public class ClassFileEditor extends JavaEditor {
 		setAction(ITextEditorActionConstants.SAVE, null);
 		setAction(ITextEditorActionConstants.REVERT_TO_SAVED, null);
 		
-		setAction("AddBreakpoint", new AddBreakpointAction(this)); //$NON-NLS-1$
 		setAction("ManageBreakpoints", new BreakpointRulerAction(getVerticalRuler(), this)); //$NON-NLS-1$
 		
 		/*
@@ -75,8 +66,8 @@ public class ClassFileEditor extends JavaEditor {
 		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		 //$NON-NLS-1$
 	}
 	
-	/*
-	 * @see JavaEditor#getElementAt
+	/**
+	 * @see JavaEditor#getElementAt(int)
 	 */
 	protected IJavaElement getElementAt(int offset) {
 		if (getEditorInput() instanceof IClassFileEditorInput) {
@@ -89,7 +80,7 @@ public class ClassFileEditor extends JavaEditor {
 		return null;
 	}
 	
-	/*
+	/**
 	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
 	 */
 	protected IJavaElement getCorrespondingElement(IJavaElement element) {
@@ -127,7 +118,7 @@ public class ClassFileEditor extends JavaEditor {
 	}
 		
 	/**
-	 * @see AbstractTextEditor#editorContextMenuAboutToShow
+	 * @see AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		
@@ -148,7 +139,7 @@ public class ClassFileEditor extends JavaEditor {
 	}
 	
 	/**
-	 * @see AbstractTextEditor#rulerContextMenuAboutToShow
+	 * @see AbstractTextEditor#rulerContextMenuAboutToShow(IMenuManager)
 	 */
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
@@ -189,7 +180,7 @@ public class ClassFileEditor extends JavaEditor {
 		return false;
 	}
 	
-	/*
+	/**
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {

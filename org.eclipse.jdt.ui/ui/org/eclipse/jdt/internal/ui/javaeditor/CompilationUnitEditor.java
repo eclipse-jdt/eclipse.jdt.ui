@@ -9,24 +9,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
@@ -37,7 +19,25 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
+import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
+import org.eclipse.jdt.internal.ui.dialogs.AbstractElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor.BracketHighlighter.BracketPositionManager;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor.BracketHighlighter.HighlightBrackets;
+import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -57,7 +57,6 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextEvent;
-import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.Annotation;
@@ -70,40 +69,33 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.TextOperationAction;
-import org.eclipse.ui.views.tasklist.TaskList;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
-import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
-import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.ui.views.tasklist.TaskList;
 
 /**
  * Java specific text editor.
@@ -355,14 +347,14 @@ public class CompilationUnitEditor extends JavaEditor {
 			}
 		}
 		
-		/*
+		/**
 		 * @see KeyListener#keyPressed(KeyEvent)
 		 */
 		public void keyPressed(KeyEvent e) {
 			fTextChanged= false;
 		}
 
-		/*
+		/**
 		 * @see KeyListener#keyReleased(KeyEvent)
 		 */
 		public void keyReleased(KeyEvent e) {
@@ -370,33 +362,33 @@ public class CompilationUnitEditor extends JavaEditor {
 				fHighlightBrackets.run();
 		}
 
-		/*
+		/**
 		 * @see MouseListener#mouseDoubleClick(MouseEvent)
 		 */
 		public void mouseDoubleClick(MouseEvent e) {
 		}
 		
-		/*
+		/**
 		 * @see MouseListener#mouseDown(MouseEvent)
 		 */
 		public void mouseDown(MouseEvent e) {
 		}
 		
-		/*
+		/**
 		 * @see MouseListener#mouseUp(MouseEvent)
 		 */
 		public void mouseUp(MouseEvent e) {
 			fHighlightBrackets.run();
 		}
 		
-		/*
+		/**
 		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
 		 */
 		public void selectionChanged(SelectionChangedEvent event) {
 			fHighlightBrackets.run();
 		}
 		
-		/*
+		/**
 		 * @see ITextListener#textChanged(TextEvent)
 		 */
 		public void textChanged(TextEvent event) {
@@ -412,7 +404,7 @@ public class CompilationUnitEditor extends JavaEditor {
 			}
 		}
 		
-		/*
+		/**
 		 * @see ITextInputListener#inputDocumentAboutToBeChanged(IDocument, IDocument)
 		 */
 		public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
@@ -422,7 +414,7 @@ public class CompilationUnitEditor extends JavaEditor {
 			}
 		}
 		
-		/*
+		/**
 		 * @see ITextInputListener#inputDocumentChanged(IDocument, IDocument)
 		 */
 		public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
@@ -474,8 +466,8 @@ public class CompilationUnitEditor extends JavaEditor {
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
-	/*
-	 * @see AbstractTextEditor#createActions
+	/**
+	 * @see AbstractTextEditor#createActions()
 	 */
 	protected void createActions() {
 		
@@ -489,14 +481,13 @@ public class CompilationUnitEditor extends JavaEditor {
 		setAction("Uncomment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("Format", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT)); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		setAction("AddBreakpoint", new AddBreakpointAction(this)); //$NON-NLS-1$
 		setAction("ManageBreakpoints", new BreakpointRulerAction(getVerticalRuler(), this)); //$NON-NLS-1$
 		
 		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		 //$NON-NLS-1$
 	}
 	
-	/*
-	 * @see JavaEditor#getElementAt
+	/**
+	 * @see JavaEditor#getElementAt(int)
 	 */
 	protected IJavaElement getElementAt(int offset) {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
@@ -515,7 +506,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		return null;
 	}
 	
-	/*
+	/**
 	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
 	 */
 	protected IJavaElement getCorrespondingElement(IJavaElement element) {
@@ -527,8 +518,8 @@ public class CompilationUnitEditor extends JavaEditor {
 		return null;
 	}
 	
-	/*
-	 * @see AbstractEditor#editorContextMenuAboutToChange
+	/**
+	 * @see AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
@@ -536,22 +527,21 @@ public class CompilationUnitEditor extends JavaEditor {
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "ContentAssistProposal"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "AddImportOnSelection"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "OrganizeImports"); //$NON-NLS-1$
-		addAction(menu, ITextEditorActionConstants.GROUP_ADD, "AddBreakpoint"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Comment"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Uncomment"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
 	}
 	
-	/*
-	 * @see AbstractTextEditor#rulerContextMenuAboutToShow
+	/**
+	 * @see AbstractTextEditor#rulerContextMenuAboutToShow(IMenuManager)
 	 */
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
 		addAction(menu, "ManageBreakpoints"); //$NON-NLS-1$
 	}
 	
-	/*
-	 * @see JavaEditor#createOutlinePage
+	/**
+	 * @see JavaEditor#createOutlinePage()
 	 */
 	protected JavaOutlinePage createOutlinePage() {
 		JavaOutlinePage page= super.createOutlinePage();
@@ -566,7 +556,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		return page;
 	}
 
-	/*
+	/**
 	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
 	 */
 	protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input) {
@@ -576,7 +566,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 	}
 	
-	/*
+	/**
 	 * @see AbstractTextEditor#performSaveOperation(WorkspaceModifyOperation, IProgressMonitor)
 	 */
 	protected void performSaveOperation(WorkspaceModifyOperation operation, IProgressMonitor progressMonitor) {
@@ -596,7 +586,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 	}
 	
-	/*
+	/**
 	 * @see AbstractTextEditor#doSave(IProgressMonitor)
 	 */
 	public void doSave(IProgressMonitor progressMonitor) {
@@ -732,7 +722,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		return nextError;
 	}
 	
-	/*
+	/**
 	 * @see AbstractTextEditor#isSaveAsAllowed() 
 	 */
 	public boolean isSaveAsAllowed() {
@@ -895,7 +885,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 	}
 	
-	/*
+	/**
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
@@ -930,7 +920,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		return textTools.getColorManager().getColor(rgb);
 	}
 	
-	/*
+	/**
 	 * @see AbstractTextEditor#dispose()
 	 */
 	public void dispose() {
@@ -944,7 +934,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		super.dispose();
 	}
 	
-	/*
+	/**
 	 * @see AbstractTextEditor#createPartControl(Composite)
 	 */
 	public void createPartControl(Composite parent) {
@@ -953,7 +943,7 @@ public class CompilationUnitEditor extends JavaEditor {
 			startBracketHighlighting();
 	}
 	
-	/*
+	/**
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
@@ -989,7 +979,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 	}
 
-	/*
+	/**
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
@@ -998,7 +988,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		return affects ? affects : super.affectsTextPresentation(event);
 	}
 	
-	/*
+	/**
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
