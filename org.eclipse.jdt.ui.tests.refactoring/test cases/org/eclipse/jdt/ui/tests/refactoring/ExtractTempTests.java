@@ -273,8 +273,8 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 
 	public void test37() throws Exception{
-		printTestDisabledMessage("another regression test for bug#15196");
-//		helper1(8, 20, 8, 25, true, false, "temp");
+//		printTestDisabledMessage("another regression test for bug#15196");
+		helper1(8, 20, 8, 25, true, false, "temp");
 	}
 	
 	
