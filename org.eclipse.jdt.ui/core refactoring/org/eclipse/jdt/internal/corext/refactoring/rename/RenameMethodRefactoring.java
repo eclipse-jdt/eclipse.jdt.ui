@@ -391,9 +391,8 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			IJavaElement element= JavaCore.create(fOccurrences[i].getResource());
 			if (!(element instanceof ICompilationUnit))
 				continue;
-			String name= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_references");
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
-			TextChange change= new CompilationUnitChange(name, cu);
+			TextChange change= new CompilationUnitChange(cu.getElementName(), cu);
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_reference");
@@ -405,9 +404,8 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 	
 	private void addDeclarationUpdate(CompositeChange builder) throws CoreException{
-		String name= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_references");
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit());
-		TextChange change= new CompilationUnitChange(name, cu);
+		TextChange change= new CompilationUnitChange(cu.getElementName(), cu);
 		addDeclarationUpdate(change);
 		builder.add(change);
 	}

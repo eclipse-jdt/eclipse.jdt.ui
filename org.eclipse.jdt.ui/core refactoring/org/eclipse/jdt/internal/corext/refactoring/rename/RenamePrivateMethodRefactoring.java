@@ -84,9 +84,8 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	 * overriding RenameMethodrefactoring@addOccurrences
 	 */
 	void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
-		String name= RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.rename_method");
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getMethod().getCompilationUnit());
-		TextChange change= new CompilationUnitChange(name, cu);
+		TextChange change= new CompilationUnitChange(cu.getElementName(), cu);
 		
 		if (getUpdateReferences())
 			addReferenceUpdates(change);
