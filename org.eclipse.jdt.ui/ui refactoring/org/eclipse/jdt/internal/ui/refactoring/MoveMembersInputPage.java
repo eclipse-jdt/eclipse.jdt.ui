@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class MoveMembersInputPage extends UserInputWizardPage {
 
@@ -41,8 +42,14 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 	public MoveMembersInputPage() {
 		super(PAGE_NAME, true);
 	}
-
-	public void createControl(Composite parent) {
+	
+	public void setVisible(boolean visible){
+		if (visible)
+			setDescription(getMoveRefactoring().getMovedMembers().length + " member(s) from \'" + getMoveRefactoring().getDeclaringType().getFullyQualifiedName() + "\'.");
+		super.setVisible(visible);	
+	}
+	
+	public void createControl(Composite parent) {		
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout gl= new GridLayout();
 		gl.numColumns= 3;
@@ -50,7 +57,7 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		composite.setLayout(gl);
 		
 		Label label= new Label(composite, SWT.NONE);
-		label.setText("Select a type:");
+		label.setText("&Select destination type:");
 		label.setLayoutData(new GridData());
 		
 		fTextField= new Text(composite, SWT.SINGLE | SWT.BORDER);
@@ -59,6 +66,7 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		Button button= new Button(composite, SWT.PUSH);
 		button.setText("&Browse...");
 		button.setLayoutData(new GridData());
+		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				openTypeSelectionDialog();
@@ -129,6 +137,8 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		dialog.setMessage("&Choose a type (? = any character, * = any string):");
 		dialog.setUpperListLabel("&Matching types:");
 		dialog.setLowerListLabel("&Qualifier:");
+		dialog.setMatchEmptyString(false);
+		dialog.setFilter(fTextField.getText());
 		if (dialog.open() == Dialog.CANCEL)
 			return;
 		IType firstResult= (IType)dialog.getFirstResult();
