@@ -92,43 +92,55 @@ public class JavaElementSorter extends ViewerSorter {
 				IJavaElement je= (IJavaElement) element;
 
 				switch (je.getElementType()) {
-					case IJavaElement.METHOD: {
+					case IJavaElement.METHOD:
+						{
 							IMethod method= (IMethod) je;
 							if (method.isConstructor()) {
-								return MEMBERSOFFSET + MembersOrderPreferencePage.getConstructorOffset();
+								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.CONSTRUCTORS_INDEX);
 							}
 							int flags= method.getFlags();
-							return MEMBERSOFFSET + MembersOrderPreferencePage.getMethodOffset(Flags.isStatic(flags));
+							if (Flags.isStatic(flags))
+								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.STATIC_METHODS_INDEX);
+							else
+								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.METHOD_INDEX);
 						}
-					case IJavaElement.FIELD: {
+					case IJavaElement.FIELD :
+						{
 							int flags= ((IField) je).getFlags();
-							return MEMBERSOFFSET + MembersOrderPreferencePage.getFieldOffset(Flags.isStatic(flags));
+							if (Flags.isStatic(flags))
+								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.STATIC_FIELDS_INDEX);
+							else
+								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.FIELDS_INDEX);
 						}
-					case IJavaElement.INITIALIZER: {
+					case IJavaElement.INITIALIZER :
+						{
 							int flags= ((IInitializer) je).getFlags();
-							return MEMBERSOFFSET + MembersOrderPreferencePage.getInitOffset(Flags.isStatic(flags));
+							if (Flags.isStatic(flags))
+								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.STATIC_INIT_INDEX);
+							else
+								return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.INIT_INDEX);
 						}
 					case IJavaElement.TYPE :
-						return MEMBERSOFFSET + MembersOrderPreferencePage.getTypeOffset();
-					case IJavaElement.PACKAGE_DECLARATION:
+						return MEMBERSOFFSET + MembersOrderPreferencePage.getOffset(MembersOrderPreferencePage.TYPE_INDEX);
+					case IJavaElement.PACKAGE_DECLARATION :
 						return PACKAGE_DECL;
-					case IJavaElement.IMPORT_CONTAINER:
+					case IJavaElement.IMPORT_CONTAINER :
 						return IMPORT_CONTAINER;
-					case IJavaElement.IMPORT_DECLARATION:
+					case IJavaElement.IMPORT_DECLARATION :
 						return IMPORT_DECLARATION;
-					case IJavaElement.PACKAGE_FRAGMENT:
+					case IJavaElement.PACKAGE_FRAGMENT :
 						IPackageFragment pack= (IPackageFragment) je;
 						if (pack.getParent().getResource() instanceof IProject) {
 							return PACKAGEFRAGMENTROOTS;
 						}
 						return PACKAGEFRAGMENT;
-					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
 						return PACKAGEFRAGMENTROOTS;
-					case IJavaElement.JAVA_PROJECT:
+					case IJavaElement.JAVA_PROJECT :
 						return JAVAPROJECTS;
-					case IJavaElement.CLASS_FILE:
+					case IJavaElement.CLASS_FILE :
 						return CLASSFILES;
-					case IJavaElement.COMPILATION_UNIT:
+					case IJavaElement.COMPILATION_UNIT :
 						return COMPILATIONUNITS;
 				}
 
