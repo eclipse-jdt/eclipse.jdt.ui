@@ -23,11 +23,11 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -488,16 +488,7 @@ public class StubUtility {
 				while (i > 0 && "\n\r".indexOf(buf.getChar(i - 1)) == -1) { //$NON-NLS-1$
 					i--;
 				}
-				int tabWidth= 4;
-				String tabWidthString= (String) JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE);
-				if (tabWidthString != null) {
-					try {
-						tabWidth= Integer.parseInt(tabWidthString);
-					} catch (NumberFormatException e) {
-					}
-				}
-				
-				return Strings.computeIndent(buf.getText(i, offset - i), tabWidth);
+				return Strings.computeIndent(buf.getText(i, offset - i), CodeFormatterUtil.getTabWidth());
 			}
 		}
 		return 0;
