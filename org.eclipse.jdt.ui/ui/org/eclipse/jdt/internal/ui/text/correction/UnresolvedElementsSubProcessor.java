@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -93,12 +94,25 @@ public class UnresolvedElementsSubProcessor {
 		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, problemPos.getOffset(), typeName, kind);
 		for (int i= 0; i < elements.length; i++) {
 			String curr= elements[i].getName();
+			String simpleName= Signature.getSimpleName(curr);
+			
+			String replaceName= simpleName;
 			
 			ImportEdit importEdit= new ImportEdit(cu, settings);
+						
+			IImportDeclaration existingImport= JavaModelUtil.findImport(cu, simpleName);
+			if (existingImport != null) {
+				if (!existingImport.getElementName().equals(curr)) {
+					// import for otehr type already exists -> use qualified
+					replaceName= curr;
+				}
+			} else {
+				importEdit.addImport(curr);
+			}
+						
 			importEdit.addImport(curr);
-			
-			String simpleName= Signature.getSimpleName(curr);
-			boolean importOnly= simpleName.equals(typeName);
+						
+			boolean importOnly= replaceName.equals(typeName);
 			
 			CUCorrectionProposal proposal= new CUCorrectionProposal("", cu, 0); //$NON-NLS-1$
 			proposals.add(proposal);
@@ -109,8 +123,8 @@ public class UnresolvedElementsSubProcessor {
 				change.addTextEdit("import", importEdit); //$NON-NLS-1$
 			}
 			if (!importOnly) {
-				change.addTextEdit("change", SimpleTextEdit.createReplace(problemPos.getOffset(), typeName.length(), simpleName)); //$NON-NLS-1$
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", simpleName)); //$NON-NLS-1$
+				change.addTextEdit("change", SimpleTextEdit.createReplace(problemPos.getOffset(), typeName.length(), replaceName)); //$NON-NLS-1$
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", replaceName)); //$NON-NLS-1$
 				proposal.setRelevance(3);
 			} else {
 				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", curr)); //$NON-NLS-1$

@@ -106,8 +106,12 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					String simpleName= Signature.getSimpleName(name);
 					String containerName= Signature.getQualifier(name);
 					
-					if (hasImport(cu, simpleName)) {
-						getShell().getDisplay().beep();
+					
+					IImportDeclaration existingImport= JavaModelUtil.findImport(cu, simpleName);
+					if (existingImport != null) {
+						if (!existingImport.getElementName().equals(name)) {
+							getShell().getDisplay().beep();
+						}
 						return;
 					}			
 					
@@ -153,20 +157,6 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			}
 		}		
 	}
-	
-	private boolean hasImport(ICompilationUnit cu, String simpleName) throws JavaModelException {
-		IImportDeclaration[] existing= cu.getImports();
-		for (int i= 0; i < existing.length; i++) {
-			String curr= existing[i].getElementName();
-			if (curr.endsWith(simpleName)) {
-				int dotPos= curr.length() - simpleName.length() - 1;
-				return (dotPos == -1) || (simpleName.charAt(dotPos) == '.');
-			}
-		}	
-		return false;
-	}
-	
-	
 	
 	private int getNameStart(IDocument doc, int pos) throws BadLocationException {
 		while (pos > 0) {

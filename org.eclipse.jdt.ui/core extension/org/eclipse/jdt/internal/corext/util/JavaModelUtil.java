@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -462,6 +463,22 @@ public class JavaModelUtil {
 		}
 		return (cu.exists() && !cu.getCorrespondingResource().isReadOnly());
 	}
+	
+	public static IImportDeclaration findImport(ICompilationUnit cu, String simpleName) throws JavaModelException {
+		IImportDeclaration[] existing= cu.getImports();
+		for (int i= 0; i < existing.length; i++) {
+			String curr= existing[i].getElementName();
+			if (curr.endsWith(simpleName)) {
+				int dotPos= curr.length() - simpleName.length() - 1;
+				if ((dotPos == -1) || (dotPos > 0 && curr.charAt(dotPos) == '.')) {
+					return existing[i];
+				}
+			}
+		}	
+		return null;
+	}	
+		
+	
 	
 	
 
