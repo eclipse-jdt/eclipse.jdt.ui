@@ -139,6 +139,17 @@ public class UnresolvedElementsSubProcessor {
 				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 			}
 			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, 2, image));
+			if (binding == null && senderBinding.isAnonymous()) {
+				ASTNode anonymDecl= astRoot.findDeclaringNode(senderBinding);
+				if (anonymDecl != null) {
+					senderBinding= ASTResolving.getBindingOfParentType(anonymDecl.getParent());
+					if (!senderBinding.isAnonymous()) {
+						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { simpleName.getIdentifier(), senderBinding.getName() } ); //$NON-NLS-1$
+						image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
+						proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, 2, image));
+					}
+				}
+			}
 		}
 		if (binding == null) {
 			BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
@@ -386,6 +397,19 @@ public class UnresolvedElementsSubProcessor {
 					image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 				}
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, binding, 1, image));
+				
+				if (binding.isAnonymous() && cu.equals(targetCU)) {
+					ASTNode anonymDecl= astRoot.findDeclaringNode(binding);
+					if (anonymDecl != null) {
+						binding= ASTResolving.getBindingOfParentType(anonymDecl.getParent());
+						if (!binding.isAnonymous()) {
+							String[] args= new String[] { methodName, binding.getName() };
+							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", args); //$NON-NLS-1$
+							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
+							proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, binding, 1, image));
+						}
+					}
+				}
 			}
 		}
 	}

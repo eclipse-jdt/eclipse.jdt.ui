@@ -208,11 +208,15 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 			return 0;
 		}
 		int modifiers= 0;
-		if (newTypeDecl.equals(ASTResolving.findParentType(fOriginalNode))) {
+		
+		ASTNode node= ASTResolving.findParentType(fOriginalNode);
+		if (newTypeDecl.equals(node)) {
 			modifiers |= Modifier.PRIVATE;
 			if (ASTResolving.isInStaticContext(fOriginalNode)) {
 				modifiers |= Modifier.STATIC;
 			}
+		} else if (node instanceof AnonymousClassDeclaration) {
+			modifiers |= Modifier.PROTECTED;
 		} else {
 			modifiers |= Modifier.PUBLIC;
 			ASTNode parent= fOriginalNode.getParent();	

@@ -220,9 +220,11 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			} else if (ASTResolving.isInStaticContext(fNode)) {
 				modifiers |= Modifier.STATIC;
 			}
-
-			if (targetTypeDecl.equals(ASTResolving.findParentType(fNode))) {
+			ASTNode node= ASTResolving.findParentType(fNode);
+			if (targetTypeDecl.equals(node)) {
 				modifiers |= Modifier.PRIVATE;
+			} else if (node instanceof AnonymousClassDeclaration) {
+				modifiers |= Modifier.PROTECTED;
 			} else {
 				modifiers |= Modifier.PUBLIC;
 			}
