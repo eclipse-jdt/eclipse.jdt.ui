@@ -27,9 +27,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class RefactoringWizardDialog extends WizardDialog {
 
-	private static final String DIALOG_SETTINGS= "RefactoringWizard";
-	private static final String WIDTH= "width";
-	private static final String HEIGHT= "height";
+	private static final String DIALOG_SETTINGS= "RefactoringWizard"; //$NON-NLS-1$
+	private static final String WIDTH= "width"; //$NON-NLS-1$
+	private static final String HEIGHT= "height"; //$NON-NLS-1$
 
 	private IDialogSettings fSettings;
 	

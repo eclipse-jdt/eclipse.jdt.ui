@@ -89,6 +89,8 @@ public class GenerateActionGroup extends ActionGroup {
 		fOverrideMethods= new OverrideMethodsAction(editor);
 		fOverrideMethods.editorStateChanged();
 		
+		fAddGetterSetter= new AddGetterSetterAction(editor);
+		
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(editor);
 		fAddUnimplementedConstructors.editorStateChanged();
 		
@@ -198,7 +200,7 @@ public class GenerateActionGroup extends ActionGroup {
 		IMenuManager target= menu;
 		IMenuManager generateMenu= null;
 		if (fEditorIsOwner) {
-			generateMenu= new MenuManager(ActionMessages.getString("SourceMenu.label"));
+			generateMenu= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
 			generateMenu.add(new GroupMarker(fGroupName));
 			target= generateMenu;
 		}

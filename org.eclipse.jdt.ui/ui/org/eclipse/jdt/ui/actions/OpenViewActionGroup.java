@@ -90,6 +90,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		fOpenSuperImplementation= new OpenSuperImplementationAction(part);
 		fOpenExternalJavadoc= new OpenExternalJavadocAction(part);
 		fOpenTypeHierarchy= new OpenTypeHierarchyAction(part);
+		fOpenSuperImplementation= new OpenSuperImplementationAction(part);
 		initialize(part.getEditorSite());
 	}
 

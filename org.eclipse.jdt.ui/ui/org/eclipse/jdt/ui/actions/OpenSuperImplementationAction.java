@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -23,6 +24,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -54,23 +56,6 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
 
-	/* (non-Javadoc)
-	 * Class implements IObjectActionDelegate
-	 */
-	public static class ObjectDelegate implements IObjectActionDelegate {
-		private OpenSuperImplementationAction fAction;
-		public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-			fAction= new OpenSuperImplementationAction(targetPart.getSite());
-		}
-		public void run(IAction action) {
-			fAction.run();
-		}
-		public void selectionChanged(IAction action, ISelection selection) {
-			if (fAction == null)
-				action.setEnabled(false);
-		}
-	}
-	
 	/**
 	 * Creates a new <code>OpenSuperImplementationAction</code>.
 	 * 
@@ -98,7 +83,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null && getMethod(selection) != null);
+		setEnabled(fEditor != null);
 	}
 
 	/* (non-Javadoc)
@@ -112,7 +97,21 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) {
-		run(getMethod(selection));
+		IJavaElement element= elementAtOffset();
+		IMethod method= null;
+		if (element == null || !(element instanceof IMethod)) {
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("OpenSuperImplementationAction.not_applicable")); //$NON-NLS-1$
+			return;
+		} else {
+			method= checkMethod(element);
+		}
+		
+		if (method == null) {
+			MessageDialog.openInformation(getShell(), getDialogTitle(), 
+				ActionMessages.getFormattedString("OpenSuperImplementationAction.no_super_implementation", element.getElementName())); //$NON-NLS-1$
+			return;
+		}
+		run(method);
 	}
 	
 	/* (non-Javadoc)
@@ -189,7 +188,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		return null;
 	}
 	
-	private Object elementAtOffset() {
+	private IJavaElement elementAtOffset() {
 		try {
 			return SelectionConverter.getElementAtOffset(fEditor);
 		} catch(JavaModelException e) {

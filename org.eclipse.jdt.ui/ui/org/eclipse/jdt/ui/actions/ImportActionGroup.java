@@ -37,7 +37,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
  */
 public class ImportActionGroup extends ActionGroup {
 
-	private static final String GROUP_IMPORT= "group.import";
+	private static final String GROUP_IMPORT= "group.import"; //$NON-NLS-1$
 
 	private ImportResourcesAction fImportAction;
 	private ExportResourcesAction fExportAction;

@@ -154,7 +154,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
+		setEnabled(fEditor != null);
 	}
 
 	/* (non-Javadoc)
@@ -166,7 +166,15 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			if (elements.length == 0 || elements.length > 1 || !(elements[0] instanceof IField)) {
 				MessageDialog.openInformation(getShell(), getDialogTitle(), 
 					ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
+				return;
 			}
+			IField field= (IField)elements[0];
+			if (!JavaModelUtil.isEditable(field.getCompilationUnit())) {
+				MessageDialog.openInformation(getShell(), getDialogTitle(), 
+					ActionMessages.getFormattedString("AddGetterSetterAction.read_only", field.getElementName())); //$NON-NLS-1$
+				return;
+			}
+			run (new IField[] {field}, fEditor);
 		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
 			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
