@@ -43,14 +43,12 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	 * @see IStructuredContentProvider#getElements(Object)
 	 */
 	public Object[] getElements(Object inputElement) {
-
 		if (inputElement instanceof IWorkspaceRoot) {
 			ArrayList list= new ArrayList();
-			IProject[] projects= ((IWorkspaceRoot) inputElement).getProjects();
-			for (int i= 0; i < projects.length; i++) {
-
-				try {
-					IJavaProject javaProject= JavaCore.create((IProject) projects[i]);
+			try {
+				IJavaProject[] jprojects= JavaCore.create((IWorkspaceRoot) inputElement).getJavaProjects();
+				for (int i= 0; i < jprojects.length; i++) {
+					IJavaProject javaProject= jprojects[i];
 					IPackageFragment[] els= javaProject.getPackageFragments();
 					for (int j= 0; j < els.length; j++) {
 						IPackageFragment iPackageFragment= (IPackageFragment) els[j];
@@ -59,15 +57,12 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 							break;
 						}
 					}
-
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
 				}
-
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
 			}
 			return list.toArray();
 		}
-
 		return new Object[0];
 	}
 
