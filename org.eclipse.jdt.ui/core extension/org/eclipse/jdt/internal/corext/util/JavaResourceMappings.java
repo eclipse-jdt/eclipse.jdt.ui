@@ -47,7 +47,7 @@ public class JavaResourceMappings {
 		}
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
-				new ResourceTraversal(new IResource[] {fProject.getProject()}, IResource.DEPTH_INFINITE)
+				new ResourceTraversal(new IResource[] {fProject.getProject()}, IResource.DEPTH_INFINITE, 0)
 			};
 		}
 	}
@@ -67,7 +67,7 @@ public class JavaResourceMappings {
 		}
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
-				new ResourceTraversal(new IResource[] {fResource}, IResource.DEPTH_INFINITE)
+				new ResourceTraversal(new IResource[] {fResource}, IResource.DEPTH_INFINITE, 0)
 			};
 		}
 	}
@@ -89,7 +89,7 @@ public class JavaResourceMappings {
 			IFile[] files= getPackageContent();
 			List result= new ArrayList();
 			for (int i= 0; i < files.length; i++) {
-				result.add(new ResourceTraversal(new IResource[] {files[i]}, IResource.DEPTH_ONE));
+				result.add(new ResourceTraversal(new IResource[] {files[i]}, IResource.DEPTH_ONE, 0));
 			}
 			return (ResourceTraversal[])result.toArray(new ResourceTraversal[result.size()]);
 		}
@@ -126,7 +126,7 @@ public class JavaResourceMappings {
 		}
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
-				new ResourceTraversal(new IResource[] {fResource}, IResource.DEPTH_INFINITE)
+				new ResourceTraversal(new IResource[] {fResource}, IResource.DEPTH_INFINITE, 0)
 			};
 		}
 	}
