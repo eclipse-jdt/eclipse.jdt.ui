@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.Iterator;
 
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 
@@ -117,11 +118,34 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 			return super.showPossibleCompletions();
 		
 		int initalOffset= fViewer.getSelectedRange().x;
-		int invocationOffset= computeOffsetWithCorrection(initalOffset);
+		int invocationOffset;
+		int invocationLength;
+		
+		if (areMultipleLinesSelected()) {
+			try {
+				IDocument document= fViewer.getDocument();
+				IRegion start= document.getLineInformationOfOffset(initalOffset);
+				invocationOffset= start.getOffset();
+				int line= document.getLineOfOffset(initalOffset);
+				if (line + 1 < document.getNumberOfLines()) {
+					IRegion end= document.getLineInformation(line + 1);
+					invocationLength= end.getOffset() - invocationOffset + end.getLength();
+				} else {
+					invocationLength= start.getLength();
+				}
+			} catch (BadLocationException ex) {
+				invocationOffset= initalOffset;
+				invocationLength= 0;
+			}
+		} else {
+			invocationOffset= computeOffsetWithCorrection(initalOffset);
+			invocationLength= 0;
+		}
+			
 		if (invocationOffset != -1) {
 			storePosition();
-			fViewer.setSelectedRange(invocationOffset, 0);
-			fViewer.revealRange(invocationOffset, 0);
+			fViewer.setSelectedRange(invocationOffset, invocationLength);
+			fViewer.revealRange(invocationOffset, invocationLength);
 		} else {
 			fPosition= null;
 		}
@@ -162,10 +186,11 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	/**
 	 * @return the best matching offset with corrections or -1 if nothing is found
 	 */
-	private int computeOffsetWithCorrection(int startOffset, int endOffset, int offset) {
+	private int computeOffsetWithCorrection(int startOffset, int endOffset, int initialOffset) {
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 
 		int invocationOffset= -1;
+		int offsetOfFirstProblem= Integer.MAX_VALUE;
 
 		Iterator iter= new JavaAnnotationIterator(model, true);
 		while (iter.hasNext()) {
@@ -173,11 +198,17 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 			Position pos= model.getPosition((Annotation)annot);
 			if (isIncluded(pos, startOffset, endOffset)) {
 				if (JavaCorrectionProcessor.hasCorrections(annot)) {
-					invocationOffset= computeBestOffset(invocationOffset, pos, offset);
+					offsetOfFirstProblem= Math.min(offsetOfFirstProblem, pos.getOffset());
+					invocationOffset= computeBestOffset(invocationOffset, pos, initialOffset);
+					if (initialOffset == invocationOffset)
+						return initialOffset;
 				}
 			}
 		}
-		return invocationOffset;
+		if (initialOffset < offsetOfFirstProblem && offsetOfFirstProblem != Integer.MAX_VALUE)
+			return offsetOfFirstProblem;
+		else
+			return invocationOffset;
 	}
 
 	private boolean isIncluded(Position pos, int lineStart, int lineEnd) {
@@ -205,7 +236,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 			return newOffset;
 
 		if (newOffset <= initalOffset && invocationOffset < initalOffset)
-			return Math.max(invocationOffset, newOffset);;
+			return Math.max(invocationOffset, newOffset);
 
 		if (invocationOffset <= initalOffset)
 			return invocationOffset;
@@ -219,6 +250,32 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	protected void possibleCompletionsClosed() {
 		super.possibleCompletionsClosed();
 		restorePosition();
+	}
+
+	/**
+	 * Returns <code>true</code> if one line is completely selected or if multiple lines are selected.
+	 * Being completely selected means that all characters except the new line characters are 
+	 * selected.
+	 * 
+	 * @return <code>true</code> if one or multiple lines are selected
+	 * @since 2.1
+	 */
+	private boolean areMultipleLinesSelected() {
+		Point s= fViewer.getSelectedRange();
+		if (s.y == 0)
+			return false;
+			
+		try {
+			
+			IDocument document= fViewer.getDocument();
+			int startLine= document.getLineOfOffset(s.x);
+			int endLine= document.getLineOfOffset(s.x + s.y);
+			IRegion line= document.getLineInformation(startLine);
+			return startLine != endLine || (s.x == line.getOffset() && s.y == line.getLength());
+		
+		} catch (BadLocationException x) {
+			return false;
+		}
 	}
 
 	private void storePosition() {

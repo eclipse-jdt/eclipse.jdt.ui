@@ -21,6 +21,11 @@ import java.util.Iterator;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -113,13 +118,14 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	}	
 	
 	private IEditorPart fEditor;
+	private QuickTemplateProcessor fQuickTemplateProcessor;
 
-	
 	/**
 	 * Constructor for JavaCorrectionProcessor.
 	 */
 	public JavaCorrectionProcessor(IEditorPart editor) {
 		fEditor= editor;
+		fQuickTemplateProcessor= new QuickTemplateProcessor(editor);
 	}
 
 	/*
@@ -127,6 +133,14 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		
+		if (areMultipleLinesSelected(viewer)){
+			ICompletionProposal[] templateProposals= fQuickTemplateProcessor.computeCompletionProposals(viewer, documentOffset);
+			if (templateProposals != null && templateProposals.length > 0)
+				return templateProposals;
+			else
+				return new ICompletionProposal[]{new NoCorrectionProposal(null, null)};
+		}
+
 		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 
@@ -197,6 +211,32 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
+		}
+	}
+	
+	/**
+	 * Returns <code>true</code> if one line is completely selected or if multiple lines are selected.
+	 * Being completely selected means that all characters except the new line characters are 
+	 * selected.
+	 * 
+	 * @return <code>true</code> if one or multiple lines are selected
+	 * @since 2.1
+	 */
+	private boolean areMultipleLinesSelected(ITextViewer viewer) {
+		Point s= viewer.getSelectedRange();
+		if (s.y == 0)
+			return false;
+			
+		try {
+			
+			IDocument document= viewer.getDocument();
+			int startLine= document.getLineOfOffset(s.x);
+			int endLine= document.getLineOfOffset(s.x + s.y);
+			IRegion line= document.getLineInformation(startLine);
+			return startLine != endLine || (s.x == line.getOffset() && s.y == line.getLength());
+		
+		} catch (BadLocationException x) {
+			return false;
 		}
 	}
 	
