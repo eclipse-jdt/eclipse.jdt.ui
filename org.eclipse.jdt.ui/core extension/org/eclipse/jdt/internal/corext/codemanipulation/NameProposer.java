@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 /**
@@ -55,13 +56,11 @@ public class NameProposer {
 	}
 		
 	public String proposeGetterName(IField field) throws JavaModelException {
-		boolean isBoolean=	field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
-		return proposeGetterName(field.getElementName(), isBoolean);
+		return proposeGetterName(field.getElementName(), JavaModelUtil.isBoolean(field));
 	}	
 	
 	public String proposeSetterName(IField field) throws JavaModelException {
-		boolean isBoolean=	field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
-		return proposeSetterName(field.getElementName(), isBoolean);
+		return proposeSetterName(field.getElementName(), JavaModelUtil.isBoolean(field));
 	}
 	
 	/**
