@@ -43,7 +43,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		
 		IPlaceholderFolderLayout outputfolder= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
 		outputfolder.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
-		outputfolder.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
+		outputfolder.addPlaceholder(SearchUI.SEARCH_VIEW_ID);
 		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		outputfolder.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
@@ -57,7 +57,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
 		layout.addShowViewShortcut(JavaUI.ID_TYPE_HIERARCHY);
 
-		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
+		layout.addShowViewShortcut(SearchUI.SEARCH_VIEW_ID);
 		
 		// views - debugging
 		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);

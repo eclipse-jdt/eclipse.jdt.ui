@@ -42,7 +42,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		outputfolder.addView(IPageLayout.ID_PROBLEM_VIEW);
 		outputfolder.addView(JavaUI.ID_JAVADOC_VIEW);
 		outputfolder.addView(JavaUI.ID_SOURCE_VIEW);
-		outputfolder.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
+		outputfolder.addPlaceholder(SearchUI.SEARCH_VIEW_ID);
 		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		
@@ -60,7 +60,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(JavaUI.ID_JAVADOC_VIEW);
 
 		// views - search
-		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
+		layout.addShowViewShortcut(SearchUI.SEARCH_VIEW_ID);
 		
 		// views - debugging
 		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);

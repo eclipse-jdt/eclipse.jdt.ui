@@ -64,7 +64,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(JavaUI.ID_JAVADOC_VIEW);
 
 		// views - search		
-		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
+		layout.addShowViewShortcut(SearchUI.SEARCH_VIEW_ID);
 		
 		// views - debugging
 		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
@@ -106,7 +106,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
-		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
+		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_VIEW_ID);
 		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
@@ -139,7 +139,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
-		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
+		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_VIEW_ID);
 		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
