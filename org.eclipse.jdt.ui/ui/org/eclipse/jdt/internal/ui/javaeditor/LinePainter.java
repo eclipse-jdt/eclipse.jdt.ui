@@ -46,13 +46,16 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 	public void lineGetBackground(LineBackgroundEvent event) {
 		/* Don't use cached line information because of patched redrawing events. */
 		
-		int caret= fTextWidget.getCaretOffset();
-		int length= event.lineText.length();
-		
-		if (event.lineOffset <= caret && caret <= event.lineOffset + length && fIsActive)
-			event.lineBackground= fHighlightColor;
-		else
-			event.lineBackground= fTextWidget.getBackground();
+		if (fTextWidget != null) {
+			
+			int caret= fTextWidget.getCaretOffset();
+			int length= event.lineText.length();
+			
+			if (event.lineOffset <= caret && caret <= event.lineOffset + length && fIsActive)
+				event.lineBackground= fHighlightColor;
+			else
+				event.lineBackground= fTextWidget.getBackground();
+		}
 	}
 	
 	private void updateHighlightLine() {
@@ -61,14 +64,10 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 		
 		fLine[0]= content.getOffsetAtLine(fLineNumber);
 			
-		if (false) {
-			fLine[1]= content.getLine(fLineNumber).length();
-		} else {
-			try {
-				fLine[1]= content.getOffsetAtLine(fLineNumber + 1) - fLine[0];
-			} catch (IllegalArgumentException x) {
-				fLine[1]= -1;
-			}
+		try {
+			fLine[1]= content.getOffsetAtLine(fLineNumber + 1) - fLine[0];
+		} catch (IllegalArgumentException x) {
+			fLine[1]= -1;
 		}
 	}
 	
@@ -99,6 +98,7 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 	 * @see IPainter#dispose()
 	 */
 	public void dispose() {
+		fTextWidget= null;
 	}
 	
 	/*

@@ -111,6 +111,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.CURRENT_LINE_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CURRENT_LINE),
 		
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PRINT_MARGIN_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, CompilationUnitEditor.PRINT_MARGIN_COLUMN),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PRINT_MARGIN),
+		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.AUTOACTIVATION),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, ContentAssistPreference.AUTOACTIVATION_DELAY),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.AUTOINSERT),
@@ -197,6 +201,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		store.setDefault(CompilationUnitEditor.CURRENT_LINE, true);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.CURRENT_LINE_COLOR, new RGB(225, 235, 224));
+		
+		store.setDefault(CompilationUnitEditor.PRINT_MARGIN, true);
+		store.setDefault(CompilationUnitEditor.PRINT_MARGIN_COLUMN, 80);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.PRINT_MARGIN_COLOR, new RGB(255, 0 , 128));
 		
 		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
 		
@@ -521,16 +529,27 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Control fBracketHighlightColor;
 	private Button fLineHighlightButton;
 	private Control fLineHighlightColor;
+	private Button fPrintMarginButton;
+	private Control fPrintMarginColor;
+	private Control fPrintMarginColumn;
 	
 	private Control createBehaviorPage(Composite parent) {
 
 		Composite behaviorComposite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		behaviorComposite.setLayout(layout);
-				
-		String label= "Highlight &matching brackets";
-		fBracketHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
 		
+		
+		String label= "Text font:";
+		addTextFontEditor(behaviorComposite, label, AbstractTextEditor.PREFERENCE_FONT);
+		
+		label= "Displayed &tab width:";
+		addTextField(behaviorComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 2, 0);
+		
+		
+		label= "Highlight &matching brackets";
+		fBracketHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
+
 		label= "Matching &brackets highlight color:";
 		fBracketHighlightColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS_COLOR, 0);
 
@@ -541,6 +560,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+		
 		
 		label= "Highlight &current line";
 		fLineHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.CURRENT_LINE, 0);
@@ -554,14 +574,28 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
-		});		
+		});
 		
-		label= "Text font:";
-		addTextFontEditor(behaviorComposite, label, AbstractTextEditor.PREFERENCE_FONT);
 		
-		label= "Displayed &tab width:";
-		addTextField(behaviorComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 2, 0);
+		label= "Show print &margin";
+		fPrintMarginButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
+		
+		label= "Print m&argin color:";
+		fPrintMarginColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLOR, 0);
 
+		label= "Print margin col&umn:";
+		fPrintMarginColumn= addTextField(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLUMN, 4, 0);
+		
+		fPrintMarginButton.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean enabled= fPrintMarginButton.getSelection();
+				setEnabled(fPrintMarginColor, enabled);
+				setEnabled(fPrintMarginColumn, enabled);
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		
 		return behaviorComposite;
 	}
 	
@@ -687,10 +721,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			String key= (String) fTextFields.get(t);
 			t.setText(fOverlayStore.getString(key));
 		}
-
+		
 		RGB rgb= PreferenceConverter.getColor(fOverlayStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
 		fBackgroundColorEditor.setColorValue(rgb);		
-
+		
 		boolean default_= fOverlayStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT);
 		fBackgroundDefaultRadioButton.setSelection(default_);
 		fBackgroundCustomRadioButton.setSelection(!default_);
@@ -794,23 +828,35 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return checkBox;
 	}
 	
-	private void addTextField(Composite parent, String label, String key, int textLimit, int indentation) {
-		Label labelControl= new Label(parent, SWT.NONE);
-		labelControl.setText(label);
+	private Control addTextField(Composite parent, String label, String key, int textLimit, int indentation) {
+		
+		Composite composite= new Composite(parent, SWT.NONE);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		composite.setLayoutData(gd);
+		
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		composite.setLayout(layout);
+
+		Label labelControl= new Label(composite, SWT.NONE);
+		labelControl.setText(label);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalIndent= indentation;
 		labelControl.setLayoutData(gd);
 		
-		Text textControl= new Text(parent, SWT.BORDER | SWT.SINGLE);		
+		Text textControl= new Text(composite, SWT.BORDER | SWT.SINGLE);		
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(textLimit + 1);
 		gd.horizontalAlignment= GridData.END;
 		textControl.setLayoutData(gd);
-		
 		textControl.setTextLimit(textLimit);
 		textControl.addModifyListener(fTextFieldListener);
-		
 		fTextFields.put(textControl, key);
+		
+		return composite;
 	}
 	
 	private void addTextFontEditor(Composite parent, String label, String key) {

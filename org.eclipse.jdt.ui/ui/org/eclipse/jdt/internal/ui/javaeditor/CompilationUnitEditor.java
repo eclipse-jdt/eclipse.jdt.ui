@@ -154,6 +154,12 @@ public class CompilationUnitEditor extends JavaEditor {
 	public final static String CURRENT_LINE= "currentLine";
 	/** Preference key for highlight color of current line */
 	public final static String CURRENT_LINE_COLOR= "currentLineColor";
+	/** Preference key for showing print marging ruler */
+	public final static String PRINT_MARGIN= "printMargin";
+	/** Preference key for print margin ruler color */
+	public final static String PRINT_MARGIN_COLOR= "printMarginColor";
+	/** Preference key for print margin ruler column */
+	public final static String PRINT_MARGIN_COLUMN= "printMarginColumn";
 	
 	
 	
@@ -169,6 +175,8 @@ public class CompilationUnitEditor extends JavaEditor {
 	private BracketPainter fBracketPainter;
 	/** The editor's line painter */
 	private LinePainter fLinePainter;
+	/** The editor's print margin ruler painter */
+	private PrintMarginPainter fPrintMarginPainter;
 	
 	
 	/**
@@ -709,6 +717,29 @@ public class CompilationUnitEditor extends JavaEditor {
 		return store.getBoolean(CURRENT_LINE);
 	}
 	
+	private void startShowingPrintMargin() {
+		if (fPrintMarginPainter == null) {
+			fPrintMarginPainter= new PrintMarginPainter(getSourceViewer());
+			fPrintMarginPainter.setMarginRulerColor(getColor(PRINT_MARGIN_COLOR));
+			fPrintMarginPainter.setMarginRulerColumn(getPreferenceStore().getInt(PRINT_MARGIN_COLUMN));
+			fPaintManager.addPainter(fPrintMarginPainter);
+		}
+	}
+	
+	private void stopShowingPrintMargin() {
+		if (fPrintMarginPainter != null) {
+			fPaintManager.removePainter(fPrintMarginPainter);
+			fPrintMarginPainter.deactivate(true);
+			fPrintMarginPainter.dispose();
+			fPrintMarginPainter= null;
+		}
+	}
+	
+	private boolean isShowingPrintMarginEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(PRINT_MARGIN);
+	}
+	
 	private Color getColor(String key) {
 		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
 		return getColor(rgb);
@@ -749,6 +780,8 @@ public class CompilationUnitEditor extends JavaEditor {
 			startBracketHighlighting();
 		if (isLineHighlightingEnabled())
 			startLineHighlighting();
+		if (isShowingPrintMarginEnabled())
+			startShowingPrintMargin();
 	}
 	
 	/**
@@ -796,6 +829,26 @@ public class CompilationUnitEditor extends JavaEditor {
 				if (CURRENT_LINE_COLOR.equals(p)) {
 					if (fLinePainter != null)
 						fLinePainter.setHighlightColor(getColor(CURRENT_LINE_COLOR));
+					return;
+				}
+				
+				if (PRINT_MARGIN.equals(p)) {
+					if (isShowingPrintMarginEnabled())
+						startShowingPrintMargin();
+					else
+						stopShowingPrintMargin();
+					return;
+				}
+				
+				if (PRINT_MARGIN_COLOR.equals(p)) {
+					if (fPrintMarginPainter != null)
+						fPrintMarginPainter.setMarginRulerColor(getColor(PRINT_MARGIN_COLOR));
+					return;
+				}
+				
+				if (PRINT_MARGIN_COLUMN.equals(p)) {
+					if (fPrintMarginPainter != null)
+						fPrintMarginPainter.setMarginRulerColumn(getPreferenceStore().getInt(PRINT_MARGIN_COLUMN));
 					return;
 				}
 				
