@@ -46,12 +46,12 @@ public class OpenTextEditorTest extends OpenEditorTest {
 		protected void setUp() throws Exception {
 			ResourceTestHelper.replicate("/" + PerformanceTestSetup.PROJECT + ORIG_FILE, PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS, ResourceTestHelper.SKIP_IF_EXISTS);
 			ResourceTestHelper.copy(ORIG_LARGE_FILE, LARGE_FILE, ResourceTestHelper.SKIP_IF_EXISTS);
-			EditorTestHelper.showPerspective(EditorTestHelper.RESOURCE_PERSPECTIVE);
+			EditorTestHelper.showPerspective(EditorTestHelper.RESOURCE_PERSPECTIVE_ID);
 		}
 		
 		protected void tearDown() throws Exception {
 			if (fTearDown) {
-				EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE);
+				EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE_ID);
 				ResourceTestHelper.delete(PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS);
 				ResourceTestHelper.delete(LARGE_FILE);
 			}

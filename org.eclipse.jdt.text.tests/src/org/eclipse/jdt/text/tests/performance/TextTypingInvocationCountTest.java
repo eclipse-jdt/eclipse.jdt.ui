@@ -37,7 +37,7 @@ public class TextTypingInvocationCountTest extends TypingInvocationCountTest {
 		}
 
 		protected String getPerspectiveId() {
-			return EditorTestHelper.RESOURCE_PERSPECTIVE;
+			return EditorTestHelper.RESOURCE_PERSPECTIVE_ID;
 		}
 	}
 

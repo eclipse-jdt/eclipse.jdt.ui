@@ -66,7 +66,7 @@ public class PerformanceTestSetup extends TestSetup {
 			activePage.hideView(viewReference);
 		
 		if (fSetPerspective)
-			EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE);
+			EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE_ID);
 		
 		if (!ResourceTestHelper.projectExists(PROJECT)) {
 			boolean wasAutobuilding= ResourceTestHelper.disableAutoBuilding();

@@ -37,7 +37,7 @@ public class JavaTypingInvocationCountTest extends TypingInvocationCountTest {
 		}
 
 		protected String getPerspectiveId() {
-			return EditorTestHelper.JAVA_PERSPECTIVE;
+			return EditorTestHelper.JAVA_PERSPECTIVE_ID;
 		}
 	}
 

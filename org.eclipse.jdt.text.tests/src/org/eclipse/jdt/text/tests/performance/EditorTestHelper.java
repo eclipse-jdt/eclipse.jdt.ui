@@ -91,9 +91,13 @@ public class EditorTestHelper {
 
 	public static final String COMPILATION_UNIT_EDITOR_ID= "org.eclipse.jdt.ui.CompilationUnitEditor";
 	
-	public static final String RESOURCE_PERSPECTIVE= "org.eclipse.ui.resourcePerspective";
+	public static final String RESOURCE_PERSPECTIVE_ID= "org.eclipse.ui.resourcePerspective";
 
-	public static final String JAVA_PERSPECTIVE= "org.eclipse.jdt.ui.JavaPerspective";
+	public static final String JAVA_PERSPECTIVE_ID= "org.eclipse.jdt.ui.JavaPerspective";
+
+	public static final String OUTLINE_VIEW_ID= "org.eclipse.ui.views.ContentOutline";
+
+	public static final String PACKAGE_EXPLORER_VIEW_ID= "org.eclipse.jdt.ui.PackageExplorer";
 	
 	public static IEditorPart openInEditor(IFile file, boolean runEventLoop) throws PartInitException {
 		IEditorPart part= IDE.openEditor(getActivePage(), file);

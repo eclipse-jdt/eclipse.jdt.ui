@@ -66,8 +66,6 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 
 	private static final String SHORT_NAME_WARM_RUN_FIRST= "Open Java editor (reopen first)";
 	
-	private static final String OUTLINE_VIEW= "org.eclipse.ui.views.ContentOutline";
-
 	private static final int WARM_UP_RUNS= 10;
 	
 	private static final int MEASURED_RUNS= 5;
@@ -155,7 +153,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	}
 	
 	protected void measureOpenInEditor(String file, boolean enableFolding, boolean showOutline, PerformanceMeter performanceMeter) throws PartInitException {
-		boolean shown= EditorTestHelper.isViewShown(OUTLINE_VIEW);
+		boolean shown= EditorTestHelper.isViewShown(EditorTestHelper.OUTLINE_VIEW_ID);
 		try {
 			EditorTestHelper.enableFolding(enableFolding);
 			showOutline(showOutline);
@@ -167,6 +165,6 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	}
 
 	private boolean showOutline(boolean show) throws PartInitException {
-		return EditorTestHelper.showView(OUTLINE_VIEW, show);
+		return EditorTestHelper.showView(EditorTestHelper.OUTLINE_VIEW_ID, show);
 	}
 }

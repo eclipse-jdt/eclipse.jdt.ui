@@ -31,8 +31,6 @@ public class OpenQuickOutlineTest extends OpenQuickControlTest {
 	
 	private static final String SHORT_NAME_COLD= "Open Quick Outline (first time)";
 	
-	private static final String OUTLINE_VIEW= "org.eclipse.ui.views.ContentOutline";
-
 	private boolean fWasOutlineViewShown;
 	
 	public static Test suite() {
@@ -41,13 +39,13 @@ public class OpenQuickOutlineTest extends OpenQuickControlTest {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		fWasOutlineViewShown= EditorTestHelper.hideView(OUTLINE_VIEW);
+		fWasOutlineViewShown= EditorTestHelper.hideView(EditorTestHelper.OUTLINE_VIEW_ID);
 	}
 	
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (fWasOutlineViewShown)
-			EditorTestHelper.showView(OUTLINE_VIEW);
+			EditorTestHelper.showView(EditorTestHelper.OUTLINE_VIEW_ID);
 	}
 
 	protected IAction setUpMeasurement(AbstractTextEditor editor) throws Exception {

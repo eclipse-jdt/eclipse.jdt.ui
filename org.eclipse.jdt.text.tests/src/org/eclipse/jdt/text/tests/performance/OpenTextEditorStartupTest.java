@@ -43,7 +43,7 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 		protected void setUp() throws Exception {
 			if (fSetUp) {
 				ResourceTestHelper.copy(ORIG_FILE, FILE);
-				EditorTestHelper.showPerspective(EditorTestHelper.RESOURCE_PERSPECTIVE);
+				EditorTestHelper.showPerspective(EditorTestHelper.RESOURCE_PERSPECTIVE_ID);
 				EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 			}
 		}
@@ -51,7 +51,7 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 		protected void tearDown() throws Exception {
 			if (fTearDown) {
 				EditorTestHelper.closeAllEditors();
-				EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE);
+				EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE_ID);
 				ResourceTestHelper.delete(FILE);
 			}
 		}
