@@ -681,7 +681,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, adapter.getLabel(o), null);
 			}
 		}
-		return null;
+		return res;
 	}
 
 	private SearchPatternData determineInitValuesFrom(IJavaElement element) {
