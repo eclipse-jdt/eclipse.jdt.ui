@@ -100,9 +100,6 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
-		// XXX: workaround for: working set wizards override page title (bug 14492)
-		setTitle(PAGE_TITLE);
-
 		initializeDialogUnits(parent);
 		
 		Composite composite= new Composite(parent, SWT.NONE);
