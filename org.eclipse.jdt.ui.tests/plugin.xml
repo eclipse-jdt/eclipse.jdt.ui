@@ -26,7 +26,8 @@
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.core.runtime.compatibility"/>
       <import plugin="org.eclipse.search"/>
-	  <import plugin="org.eclipse.ltk.core.refactoring"/>      
+	  <import plugin="org.eclipse.ltk.core.refactoring"/>
+      <import plugin="org.eclipse.perfmsr.core"/>      
    </requires>
 
 
