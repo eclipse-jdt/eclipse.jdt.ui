@@ -361,11 +361,12 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				Assert.isTrue(superType.equals(fType));
 				
 				String match= findMatchingTypeArgument(fVariable.signature, index, fUnit.findPrimaryType());
+				String bound= SignatureUtil.getUpperBound(match);
 				
 				// use the match whether it is a concrete type or not - if not,
 				// the generic type will at least be in visible in our context
 				// and can be referenced
-				addBound(match);
+				addBound(bound);
 				return;
 			}
 			
@@ -430,9 +431,8 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				// raw binding - bound to Object
 				return OBJECT_SIGNATURE;
 			} else {
-				if (SignatureUtil.isUpperBound(typeArguments[index]))
-					return OBJECT_SIGNATURE;
-				return SignatureUtil.qualifySignature(typeArguments[index], context);
+				String bound= SignatureUtil.getUpperBound(typeArguments[index]);
+				return SignatureUtil.qualifySignature(bound, context);
 			}
 		}
 
@@ -505,7 +505,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 *        collected bounds
 		 */
 		private void addBound(String boundSignature) {
-			if (SignatureUtil.isWildcard(boundSignature) || SignatureUtil.isJavaLangObject(boundSignature) || SignatureUtil.isUpperBound(boundSignature))
+			if (SignatureUtil.isJavaLangObject(boundSignature))
 				return;
 			
 			boolean found= false;
@@ -526,7 +526,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 
 		/**
 		 * Returns <code>true</code> if <code>subTypeSignature</code>
-		 * describes a type which is a true subtype of the type described by
+		 * describes a type which is a true sub type of the type described by
 		 * <code>superTypeSignature</code>.
 		 * 
 		 * @param subTypeSignature the potential subtype's signature
@@ -611,18 +611,6 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		}
 		
 		/**
-		 * Returns <code>true</code> if <code>signature</code> is a wildcard
-		 * signature.
-		 * 
-		 * @param signature the signature
-		 * @return <code>true</code> if <code>signature</code> is a wildcard
-		 *         signature, <code>false</code> otherwise
-		 */
-		public static boolean isWildcard(String signature) {
-			return "*".equals(signature); //$NON-NLS-1$
-		}
-
-		/**
 		 * Returns <code>true</code> if <code>signature</code> is the
 		 * signature of the <code>java.lang.Object</code> type.
 		 * 
@@ -636,15 +624,25 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		}
 		
 		/**
-		 * Returns <code>true</code> if <code>signature</code> is an upper
-		 * bound (<code>(? super T)</code>) signature.
+		 * Returns the signature of <code>java.lang.Object</code> if
+		 * <code>signature</code> is a lower bound (<code>(? super T)</code>)
+		 * or the signature of an upper bound (<code>(? extends T)</code>)
+		 * or concrete type.
 		 * 
 		 * @param signature the signature
-		 * @return <code>true</code> if <code>signature</code> is an upper
-		 *         bound signature, <code>false</code> otherwise
+		 * @return the upper bound signature of <code>signature</code>
 		 */
-		public static boolean isUpperBound(String signature) {
-			return signature.startsWith("-"); //$NON-NLS-1$
+		public static String getUpperBound(String signature) {
+			if (signature.equals("*")) //$NON-NLS-1$
+				return OBJECT_SIGNATURE;
+			
+			if (signature.startsWith("-")) //$NON-NLS-1$
+				return OBJECT_SIGNATURE;
+			
+			if (signature.startsWith("+")) //$NON-NLS-1$
+				return signature.substring(1);
+			
+			return signature;
 		}
 
 		/**

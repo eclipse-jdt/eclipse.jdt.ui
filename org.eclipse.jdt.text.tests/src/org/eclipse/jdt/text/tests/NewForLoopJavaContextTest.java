@@ -98,9 +98,11 @@ public class NewForLoopJavaContextTest extends TestCase {
 		IPackageFragmentRoot fragmentRoot= JavaProjectHelper.addSourceContainer(fProject, SRC);
 		IPackageFragment fragment= fragmentRoot.createPackageFragment("test", true, new NullProgressMonitor());
 		fCU= fragment.createCompilationUnit(CU_NAME, "", true, new NullProgressMonitor());
+		fCU.becomeWorkingCopy(null, null);
 	}
 
 	protected void tearDown() throws Exception {
+		fCU.discardWorkingCopy();
 		EditorTestHelper.closeAllEditors();
 		JavaProjectHelper.delete(fProject);
 	}
@@ -115,7 +117,6 @@ public class NewForLoopJavaContextTest extends TestCase {
 	}
 	
 	private String evaluateTemplateInMethod(String signature) throws BadLocationException, TemplateException, CoreException {
-		fCU.becomeWorkingCopy(null, null);
 		fCU.getBuffer().setContents(CU_PREFIX + signature + CU_POSTFIX);
 		int offset= CU_PREFIX.length() + signature.length() + 3;
 		fCU.reconcile(ICompilationUnit.NO_AST, false, null, null);
@@ -207,6 +208,14 @@ public class NewForLoopJavaContextTest extends TestCase {
 		String template= evaluateTemplateInMethod("void method(List<String> list)");
 		assertEquals(
 				"	for (String string : list) {\n" + 
+				"		\n" + 
+				"	}", template);
+	}
+
+	public void testUpperboundList() throws Exception {
+		String template= evaluateTemplateInMethod("void method(List<? extends Number> list)");
+		assertEquals(
+				"	for (Number number : list) {\n" + 
 				"		\n" + 
 				"	}", template);
 	}
