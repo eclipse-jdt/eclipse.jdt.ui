@@ -24,8 +24,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
@@ -73,7 +75,11 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 				
 			if (selected instanceof IMember && ((IMember)selected).isBinary())
 				return false;
-				
+
+			ISourceReference workingCopyEl= getWorkingCopyElement((ISourceReference)selected);
+			if (workingCopyEl == null || ! ((IJavaElement)workingCopyEl).exists())
+				return false;
+			
 			return canPaste((ISourceReference)selected, getClipboardContents());
 		} catch (JavaModelException e){
 			JavaPlugin.log(e);
@@ -133,17 +139,27 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 	}
 	
 	static void perform(ISourceReference selected) throws CoreException{
-		if (canPasteIn(selected, getClipboardContents())){
-			if (selected instanceof ICompilationUnit) //special case
-				pasteInCompilationUnit((ICompilationUnit)selected);
+		ISourceReference selectedWorkingCopyElement= getWorkingCopyElement(selected);
+		if (selectedWorkingCopyElement == null || ! ((IJavaElement)selectedWorkingCopyElement).exists())
+			return;
+		
+		if (canPasteIn(selectedWorkingCopyElement, getClipboardContents())){
+			if (selectedWorkingCopyElement instanceof ICompilationUnit) //special case
+				pasteInCompilationUnit((ICompilationUnit)selectedWorkingCopyElement);
 			else
-				paste(MemberEdit.ADD_AT_BEGINNING, selected);	
-		}	else if (canPasteAfter(selected, getClipboardContents()))
-			paste(MemberEdit.INSERT_AFTER, selected);
+				paste(MemberEdit.ADD_AT_BEGINNING, selectedWorkingCopyElement);	
+		}	else if (canPasteAfter(selectedWorkingCopyElement, getClipboardContents()))
+			paste(MemberEdit.INSERT_AFTER, selectedWorkingCopyElement);
 		else	
 			Assert.isTrue(false);//should be checked already (on activation)	
 	}
-	
+
+	private static ISourceReference getWorkingCopyElement(ISourceReference selected) throws JavaModelException {
+		ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(selected);
+		ICompilationUnit workingCopy= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+		return (ISourceReference)JavaModelUtil.findInCompilationUnit(workingCopy, (IJavaElement)selected);
+	}
+		
 	private static void paste(int style, ISourceReference selected) throws CoreException{
 		TextBuffer tb= TextBuffer.acquire(SourceReferenceUtil.getFile(selected));
 		TextBufferEditor tbe= new TextBufferEditor(tb);
