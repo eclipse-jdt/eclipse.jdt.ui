@@ -22,7 +22,9 @@ import java.util.jar.Manifest;
 import java.util.zip.CRC32;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -30,6 +32,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
@@ -84,6 +88,7 @@ public class JarWriter {
 		if (fJarOutputStream != null)
 			try {
 				fJarOutputStream.close();
+				registerInWorkspaceIfNeeded();
 			} catch (IOException ex) {
 				throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
 			}
@@ -215,5 +220,28 @@ public class JarWriter {
 				return directory.mkdirs();
 		}
 		return true;
+	}
+
+	private void registerInWorkspaceIfNeeded() {
+		IPath jarPath= fJarPackage.getJarLocation();
+		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		for (int i= 0; i < projects.length; i++) {
+			IProject project= projects[i];
+			IPath projectLocation= project.getLocation();
+			boolean isInWorkspace= projectLocation != null && projectLocation.isPrefixOf(jarPath);
+			if (isInWorkspace)
+				try {
+					jarPath= jarPath.removeFirstSegments(projectLocation.segmentCount());
+					jarPath= jarPath.removeLastSegments(1);
+					IResource containingFolder= project.findMember(jarPath);
+					if (containingFolder != null && containingFolder.isAccessible())
+						containingFolder.refreshLocal(IResource.DEPTH_ONE, null);
+				} catch (CoreException ex) {
+					// don't refresh the folder but log the problem
+					JavaPlugin.log(ex);
+				} finally {
+					return;
+				}
+		}
 	}
 }
