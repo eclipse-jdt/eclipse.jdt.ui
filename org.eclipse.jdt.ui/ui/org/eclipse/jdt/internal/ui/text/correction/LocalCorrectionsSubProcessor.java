@@ -6,7 +6,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -90,11 +89,14 @@ public class LocalCorrectionsSubProcessor {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) selectedNode.getParent();
 			VariableDeclarationStatement statement= (VariableDeclarationStatement) fragment.getParent();
 			if (statement.fragments().size() == 1) {
+				String castType= args[0];
+				String simpleCastType= Signature.getSimpleName(castType);
+				
 				Type type= statement.getType();
-				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", simpleCastDestType); //$NON-NLS-1$
-				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, type.getStartPosition(), type.getLength(), simpleCastDestType, 1);
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", simpleCastType); //$NON-NLS-1$
+				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, type.getStartPosition(), type.getLength(), simpleCastType, 1);
 				edit= new ImportEdit(cu, settings);
-				edit.addImport(castDestType);
+				edit.addImport(castType);
 				varProposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
 				
 				proposals.add(varProposal);
