@@ -15,10 +15,10 @@ import org.eclipse.jdt.ui.tests.core.TextBufferTest;
 import org.eclipse.jdt.ui.tests.core.TypeHierarchyTest;
 import org.eclipse.jdt.ui.tests.core.TypeInfoTest;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
+import org.eclipse.jdt.ui.tests.core.HierarchicalASTVisitorTest;
 import org.eclipse.jdt.ui.tests.text.HTML2TextReaderTester;
 import org.eclipse.jdt.ui.tests.text.JavaDoc2HTMLTextReaderTester;
-import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
-
+import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
 
 /**
  * Test all areas of the UI.
@@ -52,6 +52,7 @@ public class AutomatedSuite extends TestSuite {
 		// disabled addTest(AllTypesCacheTest.suite());
 		addTest(NewJavaProjectWizardTest.suite());
 		
+		addTest(HierarchicalASTVisitorTest.suite());
 	}
 	
 }
