@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Common Public License v1.0 which accompanies
+ * this distribution, and is available at http://www.eclipse.org/legal/cpl-v10.
+ * html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 
@@ -13,11 +19,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -43,9 +50,11 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -53,18 +62,20 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 
-public class RenamePackageRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
+public class RenamePackageRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring, IQualifiedNameUpdatingRefactoring {
 	
 	private IPackageFragment fPackage;
 	private String fNewName;
 	private SearchResultGroup[] fOccurrences;
 	private TextChangeManager fChangeManager;
-	private boolean fUpdateReferences;
+	private QualifiedNameFinder fQualifiedNameFinder;
 	
+	private boolean fUpdateReferences;
 	private boolean fUpdateJavaDoc;
 	private boolean fUpdateComments;
 	private boolean fUpdateStrings;
-	
+	private boolean fUpdateQualifiedNames;
+	private String fFilePatterns;
 	
 	public RenamePackageRefactoring(IPackageFragment pack){
 		Assert.isNotNull(pack);
@@ -185,6 +196,42 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return fUpdateReferences;
 	}
 	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public boolean canEnableQualifiedNameUpdating() {
+		return !fPackage.isDefaultPackage();
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public boolean getUpdateQualifiedNames() {
+		return fUpdateQualifiedNames;
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public void setUpdateQualifiedNames(boolean update) {
+		fUpdateQualifiedNames= true;
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public String getFilePatterns() {
+		return fFilePatterns;
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public void setFilePatterns(String patterns) {
+		Assert.isNotNull(patterns);
+		fFilePatterns= patterns;
+	}
+	
 	//--- preconditions
 	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
@@ -211,7 +258,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		try{
-			pm.beginTask("", 14); //$NON-NLS-1$
+			pm.beginTask("", 15); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkNewName(fNewName));
@@ -246,6 +293,12 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 				return result;
 			
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
+			
+			if (fUpdateQualifiedNames)			
+				computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
+			else
+				pm.worked(1);
+				
 			result.merge(validateModifiesFiles());
 			return result;
 		} catch (CoreException e){	
@@ -399,6 +452,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		List combined= new ArrayList();
 		combined.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 		combined.addAll(Arrays.asList(getAllCusInPackageAsFiles()));
+		combined.addAll(Arrays.asList(fQualifiedNameFinder.getAllFiles()));
 		return (IFile[]) combined.toArray(new IFile[combined.size()]);
 	}
 	
@@ -416,6 +470,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			if (fUpdateReferences)
 				builder.addAll(fChangeManager.getAllChanges());
 				
+			builder.addAll(fQualifiedNameFinder.getAllChanges());
 			builder.add(new RenamePackageChange(fPackage, fNewName));
 			pm.worked(1);
 			return builder;
@@ -474,4 +529,9 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			pm.worked(1);
 		}	
 	}
+	
+	private void computeQualifiedNameMatches(IProgressMonitor pm) {
+		fQualifiedNameFinder= new QualifiedNameFinder(fFilePatterns, fPackage.getElementName(), fNewName);
+		fQualifiedNameFinder.process(pm);
+	}	
 }

@@ -1,8 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
-
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Common Public License v1.0 which accompanies
+ * this distribution, and is available at http://www.eclipse.org/legal/cpl-v10.
+ * html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
@@ -17,14 +22,17 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
+
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 public abstract class RenameInputWizardPage extends TextInputWizardPage{
 
 	private String fHelpContextID;
+	private QualifiedNameComponent fQualifiedNameComponent;
 	
 	/**
 	 * Creates a new text input page.
@@ -69,8 +77,15 @@ public abstract class RenameInputWizardPage extends TextInputWizardPage{
 		
 		addOptionalUpdateReferencesCheckbox(composite, layouter);
 		addOptionalUpdateCommentsAndStringCheckboxes(composite, layouter);
+		addOptionalUpdateQualifiedNameComponent(composite, layouter, layout.marginWidth);
 		
 		WorkbenchHelp.setHelp(getControl(), fHelpContextID);
+	}
+	
+	public void dispose() {
+		if (fQualifiedNameComponent != null)
+			fQualifiedNameComponent.savePatterns(getRefactoringSettings(), getContainer());
+		super.dispose();
 	}
 	
 	private void addOptionalUpdateCommentsAndStringCheckboxes(Composite result, RowLayouter layouter) {
@@ -138,6 +153,33 @@ public abstract class RenameInputWizardPage extends TextInputWizardPage{
 		});		
 	}
 		
+	private void addOptionalUpdateQualifiedNameComponent(Composite parent, RowLayouter layouter, int marginWidth) {
+		if (!(getRefactoring() instanceof IQualifiedNameUpdatingRefactoring))
+			return;
+		final IQualifiedNameUpdatingRefactoring ref= (IQualifiedNameUpdatingRefactoring)getRefactoring();
+		if (!ref.canEnableQualifiedNameUpdating())
+			return;
+		Button checkbox= new Button(parent, SWT.CHECK);
+		int indent= marginWidth + checkbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		checkbox.setText(RefactoringMessages.getString("RenameInputWizardPage.update_qualified_names")); //$NON-NLS-1$
+		layouter.perform(checkbox);
+		
+		fQualifiedNameComponent= new QualifiedNameComponent(parent, SWT.NONE, ref, getRefactoringSettings());
+		layouter.perform(fQualifiedNameComponent);
+		GridData gd= (GridData)fQualifiedNameComponent.getLayoutData();
+		gd.horizontalAlignment= GridData.FILL;
+		gd.horizontalIndent= indent;
+		fQualifiedNameComponent.setEnabled(false);
+
+		checkbox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean enabled= ((Button)e.widget).getSelection();
+				fQualifiedNameComponent.setEnabled(enabled);
+				ref.setUpdateQualifiedNames(enabled);
+			}
+		});
+	}
+	
 	protected String getLabelText(){
 		return RefactoringMessages.getString("RenameInputWizardPage.enter_name"); //$NON-NLS-1$
 	}

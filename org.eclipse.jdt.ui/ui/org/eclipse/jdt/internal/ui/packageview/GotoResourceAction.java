@@ -87,7 +87,7 @@ public class GotoResourceAction extends Action {
 		for (int i= 0; i < roots.length; i++) {
 			IPackageFragmentRoot root= roots[i];
 			if (isVisible(parent, root, filters) && !root.isArchive() && !root.isExternal()) {
-				if ("".equals(root.getElementName()))
+				if ("".equals(root.getElementName())) //$NON-NLS-1$
 					handleResources= false;
 				collect(result, root, filters);
 			}

@@ -101,7 +101,7 @@ public abstract class TextChange extends AbstractTextChange {
 			fEdit= new AutoOrganizingTextEdit();
 			fAutoMode= true;
 		} else {
-			Assert.isTrue(fAutoMode, "Can only add edits when in auot organizing mode"); //$NON-NLS-1$
+			Assert.isTrue(fAutoMode, "Can only add edits when in auto organizing mode"); //$NON-NLS-1$
 		}
 		for (int i= 0; i < edits.length; i++) {
 			fEdit.add(edits[i]);

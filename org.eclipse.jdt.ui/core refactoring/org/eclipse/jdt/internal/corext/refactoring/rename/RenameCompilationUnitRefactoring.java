@@ -21,12 +21,13 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 
 
-public class RenameCompilationUnitRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
+public class RenameCompilationUnitRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring, IQualifiedNameUpdatingRefactoring {
 
 	private static final String JAVA_CU_SUFFIX= ".java"; //$NON-NLS-1$
 	
@@ -197,6 +198,53 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		return fRenameTypeRefactoring.getUpdateReferences();		
 	}
 
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public boolean canEnableQualifiedNameUpdating() {
+		if (fRenameTypeRefactoring == null)
+			return false;
+		return fRenameTypeRefactoring.canEnableQualifiedNameUpdating();
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public boolean getUpdateQualifiedNames() {
+		if (fRenameTypeRefactoring == null)
+			return false;
+			
+		return fRenameTypeRefactoring.getUpdateQualifiedNames();
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public void setUpdateQualifiedNames(boolean update) {
+		if (fRenameTypeRefactoring == null)
+			return;
+			
+		fRenameTypeRefactoring.setUpdateQualifiedNames(update);
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public String getFilePatterns() {
+		if (fRenameTypeRefactoring == null)
+			return null;
+		return fRenameTypeRefactoring.getFilePatterns();
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public void setFilePatterns(String patterns) {
+		if (fRenameTypeRefactoring == null)
+			return;
+		fRenameTypeRefactoring.setFilePatterns(patterns);
+	}
+	
 	//--- preconditions
 	
 	/* non java-doc

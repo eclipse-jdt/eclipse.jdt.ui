@@ -148,6 +148,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 		super(shell);
 		Assert.isNotNull(wizard);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
+		wizard.setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		fWizard= wizard; 
 		fWizard.setContainer(this);
 		fWizard.addPages();
@@ -355,6 +356,11 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	
 	//---- Dialog -----------------------------------------------------------
 	
+	public boolean close() {
+		fWizard.dispose();
+		return super.close();
+	}
+
 	protected void cancelPressed() {
 		if (fActiveRunningOperations == 0)	{
 			if (fWizard.performCancel())	

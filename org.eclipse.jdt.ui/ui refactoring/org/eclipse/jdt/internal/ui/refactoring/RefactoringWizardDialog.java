@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 
@@ -40,10 +39,11 @@ public class RefactoringWizardDialog extends WizardDialog {
 	/**
 	 * Creates a new refactoring wizard dialag with the given wizard.
 	 */
-	public RefactoringWizardDialog(Shell parent, IWizard wizard) {
+	public RefactoringWizardDialog(Shell parent, RefactoringWizard wizard) {
 		super(parent, wizard);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+		wizard.setDialogSettings(settings);
 		fSettings= settings.getSection(DIALOG_SETTINGS);
 		if (fSettings == null) {
 			fSettings= new DialogSettings(DIALOG_SETTINGS);
