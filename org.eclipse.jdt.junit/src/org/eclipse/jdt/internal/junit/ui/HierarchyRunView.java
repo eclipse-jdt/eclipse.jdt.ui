@@ -19,6 +19,10 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Vector;
 
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -425,15 +429,38 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			String testLabel= testInfo.getTestName();
 			if (isSuiteSelected()) {	
 				manager.add(new OpenTestAction(fTestRunnerPart, testLabel));
+				manager.add(new Separator());
+				if (testClassExists(getClassName()) && !fTestRunnerPart.lastLaunchIsKeptAlive()) {
+					manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), null, ILaunchManager.RUN_MODE));
+					manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), null, ILaunchManager.DEBUG_MODE));
+				}
 			} else {
 				manager.add(new OpenTestAction(fTestRunnerPart, getClassName(), getTestMethod()));
-				manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), getTestMethod()));
+				manager.add(new Separator());
+				if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
+					manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), getTestMethod(), ILaunchManager.RUN_MODE));
+					
+				} else {
+					manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), getTestMethod(), ILaunchManager.RUN_MODE));
+					manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), getTestMethod(), ILaunchManager.DEBUG_MODE));
+				} 
 			}
 			manager.add(new Separator());
 			manager.add(new ExpandAllAction());
 		}
 	}	
 	
+	private boolean testClassExists(String className) {
+		IJavaProject project= fTestRunnerPart.getLaunchedProject();
+		try {
+			IType type= project.findType(className);
+			return type != null;
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return false;
+	}
+
 	public void newTreeEntry(String treeEntry) {
 		// format: testId","testName","isSuite","testcount
 		int index0= treeEntry.indexOf(',');
