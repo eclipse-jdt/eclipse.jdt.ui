@@ -16,11 +16,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock;
 import org.eclipse.ui.texteditor.spelling.IPreferenceStatusMonitor;
+import org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
@@ -58,15 +56,11 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 
 	private SpellingConfigurationBlock fBlock= new SpellingConfigurationBlock(new NullStatusChangeListener(), null);
 	
-	private Control fControl;
-
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public Control createControl(Composite parent) {
-		fControl= fBlock.createContents(parent);
-		WorkbenchHelp.setHelp(fControl, IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
-		return fControl;
+		return fBlock.createContents(parent);
 	}
 
 	/*

@@ -39,8 +39,11 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
@@ -366,6 +369,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 		fAllControls= (Control[]) allControls.toArray(new Control[allControls.size()]);
 		
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
 		return composite;
 	}
 
