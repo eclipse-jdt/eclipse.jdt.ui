@@ -327,6 +327,7 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 						addReplace(document, command, replaceOffset, replaceLength, innerSpace + "}" + outerSpace); //$NON-NLS-1$
 						
 					} else {
+						//TODO Usage of code formatter constant: Should use probing to allow pluggable formatters 
 						if (followingControl && JavaCore.DO_NOT_INSERT.equals(JavaCore.getOption(JavaCore.FORMATTER_NEWLINE_CONTROL))) {
 							addReplace(document, command, nextStatement.getOffset(), 0, "}" + outerSpace); //$NON-NLS-1$
 
