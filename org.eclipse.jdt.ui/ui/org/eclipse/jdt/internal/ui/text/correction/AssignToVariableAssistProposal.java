@@ -61,12 +61,12 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 	}
 	
-	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, int relevance) {
+	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, ITypeBinding typeBinding, int relevance) {
 		super(null, cu, null, relevance, null);
 	
 		fVariableKind= FIELD;
 		fNodeToAssign= parameter;
-		fTypeBinding= parameter.resolveBinding().getType();
+		fTypeBinding= typeBinding;
 		setDisplayName(CorrectionMessages.getString("AssignToVariableAssistProposal.assignparamtofield.description")); //$NON-NLS-1$
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 	}	

@@ -287,9 +287,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (binding == null || methodDecl.getBody() == null) {
 			return false;
 		}
+		ITypeBinding typeBinding= binding.getType();
+		if (typeBinding == null) {
+			return false;
+		}
 		
 		if (resultingCollections != null) {
-			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, 1);
+			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, typeBinding, 1);
 			resultingCollections.add(fieldProposal);
 		}
 		return true;				
