@@ -57,7 +57,7 @@ import org.eclipse.jface.text.Region;
  * 
  * <p>
  * This class isn't intended to be subclassed outside of the edit framework. Clients 
- * are only allowed to subclass <code>SimpleTextEdit</code> and <code>MultiTextEdit</code>.
+ * are only allowed to subclass <code>MultiTextEdit</code>.
  * 
  * @see TextBufferEditor
  */
@@ -119,21 +119,6 @@ public abstract class TextEdit {
 	 */
 	public final IRegion getRegion() {
 		return new Region(fOffset, fLength);
-	}
-	
-	/**
-	 * Sets the edits region to the given value. Changing an edit's
-	 * region is only support as long as the edit doesn't have any
-	 * children and as long as it isn't added to a parent edit. Trying
-	 * to change the edit's region in these situations result in an
-	 * assertion failure. 
-	 * 
-	 * @param region the new region this edit is manipulating
-	 */
-	public final void setRegion(IRegion region) {
-		Assert.isTrue(fParent == null && fChildren == null);
-		fOffset= region.getOffset();
-		fLength= region.getLength();
 	}
 	
 	/**
@@ -235,6 +220,8 @@ public abstract class TextEdit {
 	 *  edit can't be added to this edit. This is the case if the child 
 	 *  overlaps with one of its siblings or if the child edit's region
 	 *  isn't fully covered by this edit.
+	 * 
+	 * TODO check if addChild is better name
 	 */
 	public final void add(TextEdit child) throws MalformedTreeException {
 		internalAdd(child);
@@ -248,6 +235,8 @@ public abstract class TextEdit {
 	 *  the given edits can't be added to this edit.
 	 * 
 	 * @see #add(TextEdit)
+	 * 
+	 * TODO check if addChildren is better name
 	 */
 	public final void addAll(TextEdit[] edits) throws MalformedTreeException {
 		for (int i= 0; i < edits.length; i++) {
@@ -323,6 +312,7 @@ public abstract class TextEdit {
 	 * Returns an iterator over the children.
 	 * 
 	 * @return an iterator over the children
+	 * TODO rename to getChildrenIterator
 	 */
 	public final Iterator iterator() {
 		if (fChildren == null)
@@ -339,6 +329,8 @@ public abstract class TextEdit {
 	 * @param edits an array of edits
 	 * @return the text range spawned by the given array of edits or
 	 *  <code>null</code> if all edits are marked as deleted
+	 * 
+	 * TODO rename to getCoverage
 	 */
 	public static IRegion getTextRange(TextEdit[] edits) {
 		Assert.isTrue(edits != null && edits.length > 0);
@@ -468,6 +460,27 @@ public abstract class TextEdit {
 	//---- Execution -------------------------------------------------------
 	
 	/**
+	 * Returns whether the edit tree can be applied to the
+	 * given document or not.
+	 * 
+	 * @return <code>true</code> if the edit tree can be
+	 *  applied to the given document. Otherwise <code>false
+	 *  </code> is returned.
+	 * 
+	 * TODO rename to canBeApplied 
+	 */
+	public boolean canApply(IDocument document) {
+		try {
+			TextEditProcessor processor= new TextEditProcessor(document);
+			processor.add(this);
+			return processor.canPerformEdits();
+		} finally {
+			// unconnect from text edit processor
+			fParent= null;
+		}
+	}
+	 
+	/**
 	 * Applies the edit tree rooted by this edit to the given document.
 	 * 
 	 * @param document the document to be manipulated
@@ -484,10 +497,16 @@ public abstract class TextEdit {
 	 * @see #checkIntegrity()
 	 * @see #perform(IDocument)
 	 */
-	public final void apply(IDocument document) throws MalformedTreeException, PerformEditException {
-		EditProcessor processor= new EditProcessor(document);
-		processor.add(this);
-		processor.performEdits();
+	public final UndoMemento apply(IDocument document) throws MalformedTreeException, BadLocationException {
+		try {
+			TextEditProcessor processor= new TextEditProcessor(document);
+			processor.add(this);
+			processor.checkIntegrity();
+			return processor.performEdits();
+		} finally {
+			// unconnect from text edit processor
+			fParent= null;
+		}
 	}
 	
 	/**
@@ -516,28 +535,10 @@ public abstract class TextEdit {
 	 * 
 	 * @see #apply(IDocument)
 	 */
-	/* package */ abstract void perform(IDocument document) throws PerformEditException;
+	/* package */ abstract void perform(IDocument document) throws BadLocationException;
 	
 	
 	//---- Helpers -------------------------------------------------------------------------------------------
-	
-	protected void performReplace(IDocument document, String text) throws PerformEditException {
-		try {
-			document.replace(fOffset, fLength, text);
-		} catch (BadLocationException e) {
-			throw new PerformEditException(this, e.getMessage(), e);
-		}
-	}
-	
-	/* package */ void performReplace(IDocument document, IRegion range, String text) throws PerformEditException {
-		try {
-			document.replace(range.getOffset(), range.getLength(), text);
-		} catch (BadLocationException e) {
-			throw new PerformEditException(this, e.getMessage(), e);
-		}
-	}
-	
-	//---- Setter and Getters -------------------------------------------------------------------------------
 	
 	/* package */ void aboutToBeAdded(TextEdit parent) {
 	}	
@@ -571,16 +572,16 @@ public abstract class TextEdit {
 		if (child.isDeleted())
 			throw new MalformedTreeException(this, child, "Can't add deleted edit");
 		if (!covers(child))
-			throw new MalformedTreeException(this, child, EditMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
+			throw new MalformedTreeException(this, child, TextEditMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
 		if (fChildren == null) {
 			fChildren= new ArrayList(2);
 		}
-		int index= getInsertionIndex(child);
+		int index= computeInsertionIndex(child);
 		fChildren.add(index, child);
 		child.setParent(this);
 	}
 	
-	private int getInsertionIndex(TextEdit edit) {
+	private int computeInsertionIndex(TextEdit edit) {
 		int size= fChildren.size();
 		if (size == 0)
 			return 0;
@@ -595,7 +596,7 @@ public abstract class TextEdit {
 				continue;
 			if (end < childOffset)
 				return i;
-			throw new MalformedTreeException(this, edit, EditMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
+			throw new MalformedTreeException(this, edit, TextEditMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
 		}
 		return size;
 	}

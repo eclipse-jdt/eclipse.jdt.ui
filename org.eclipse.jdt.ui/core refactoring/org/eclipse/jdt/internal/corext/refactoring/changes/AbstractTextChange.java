@@ -201,7 +201,6 @@ public abstract class AbstractTextChange extends Change {
 			handleException(context, e);
 		} finally {
 			if (editor != null) {
-				editor.clear();
 				releaseTextBuffer(editor.getTextBuffer());
 			}
 		}

@@ -1747,15 +1747,13 @@ class InstanceMethodMover {
 		}
 		
 		public String getContent() {
-			IRegion range= fMarker.getRegion();
-			return fBuffer.getContent(range.getOffset(), range.getLength());	
+			return fBuffer.getContent(fMarker.getOffset(), fMarker.getLength());	
 		}
 		
 		public String getUnindentedContentIgnoreFirstLine() {
-			IRegion range= fMarker.getRegion();
 			return Strings.changeIndent(
-				fBuffer.getContent(range.getOffset(), range.getLength()),
-				fBuffer.getLineIndent(fBuffer.getLineOfOffset(range.getOffset()), CodeFormatterUtil.getTabWidth()),
+				fBuffer.getContent(fMarker.getOffset(), fMarker.getLength()),
+				fBuffer.getLineIndent(fBuffer.getLineOfOffset(fMarker.getOffset()), CodeFormatterUtil.getTabWidth()),
 				CodeFormatterUtil.getTabWidth(),
 				"", //$NON-NLS-1$
 				fBuffer.getLineDelimiter()

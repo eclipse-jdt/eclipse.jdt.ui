@@ -10,10 +10,16 @@
  *******************************************************************************/
 package org.eclipse.text.edits;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+
 /**
  * Text edit to delete a range in a document.
+ * 
+ * @since 3.0
  */
-public final class DeleteEdit extends SimpleTextEdit {
+public final class DeleteEdit extends TextEdit {
 	
 	/**
 	 * Constructs a new delete edit.
@@ -25,23 +31,32 @@ public final class DeleteEdit extends SimpleTextEdit {
 		super(offset, length);
 	}
 	
-	/**
+	/*
 	 * Copy constructor
-	 * 
-	 * @param other the edit to copy from
 	 */
 	private DeleteEdit(DeleteEdit other) {
 		super(other);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.text.edits.SimpleTextEdit#getText()
-	 */
-	public String getText() {
-		return ""; //$NON-NLS-1$
-	}
-	
+	/* non Java-doc
+	 * @see TextEdit#doCopy
+	 */	
 	protected TextEdit doCopy() {
 		return new DeleteEdit(this);
-	}	
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#perform
+	 */	
+	/* package */ void perform(IDocument document) throws BadLocationException {
+		document.replace(getOffset(), getLength(), ""); //$NON-NLS-1$
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#update
+	 */	
+	/* package */ void update(DocumentEvent event, TreeIterationInfo info) {
+		markChildrenAsDeleted();
+		super.update(event, info);
+	}		
 }

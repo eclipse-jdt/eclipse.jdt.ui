@@ -10,20 +10,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
+import org.eclipse.text.edits.TextEditProcessor;
+import org.eclipse.text.edits.UndoMemento;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.text.edits.EditProcessor;
-import org.eclipse.text.edits.PerformEditException;
-import org.eclipse.text.edits.UndoMemento;
+import org.eclipse.jface.text.BadLocationException;
+
+import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class TextBufferEditor extends EditProcessor {
+public class TextBufferEditor extends TextEditProcessor {
 
 	private TextBuffer fBuffer;
+	private UndoMemento fUndoMemento;
 		
 	/**
 	 * Creates a new <code>TextBufferEditor</code> for the given 
@@ -46,6 +50,28 @@ public class TextBufferEditor extends EditProcessor {
 	}
 	
 	/**
+	 * Adds an undo memento to this edit processor. Adding an undo memento
+	 * transfers ownership of the memento to the processor. So after a memento 
+	 * has been added the creator of that memento <b>must</b> not continue
+	 * modifying it.
+	 * 
+	 * @param undo the undo memento to add
+	 * @exception EditException if the undo memento can not be added
+	 * 	to this processor
+	 */
+	public void add(UndoMemento undo) {
+		Assert.isTrue(!getRoot().hasChildren());
+		fUndoMemento= undo;
+	}
+	
+	public boolean canPerformEdits() {
+		if (fUndoMemento != null)
+			return fUndoMemento.canApply(getDocument());
+		else 
+			return super.canPerformEdits();
+	}
+	
+	/**
 	 * Executes the text edits added to this text buffer editor and clears all added
 	 * text edits.
 	 * 
@@ -56,8 +82,12 @@ public class TextBufferEditor extends EditProcessor {
 	 */
 	public UndoMemento performEdits(IProgressMonitor pm) throws CoreException {
 		try {
-			return super.performEdits();
-		} catch (PerformEditException e) {
+			if (fUndoMemento != null) {
+				return fUndoMemento.apply(getDocument());
+			} else {
+				return super.performEdits();
+			}
+		} catch (BadLocationException e) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
 				IStatus.ERROR, e.getMessage(), e));
 		}

@@ -18,6 +18,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.UndoMemento;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -40,11 +45,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.RangeMarker;
-import org.eclipse.text.edits.Regions;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.UndoMemento;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -227,11 +227,17 @@ public class SourceProvider {
 		for (int i= 0; i < markers.length; i++) {
 			markers[i]= new RangeMarker((IRegion)ranges.get(i));
 		}
-		int split= size <= 1 ? Integer.MAX_VALUE : Regions.getExclusiveEnd((IRegion)ranges.get(0));
+		int split;
+		if (size <= 1) {
+			split= Integer.MAX_VALUE;
+		} else {
+			IRegion region= (IRegion)ranges.get(0);
+			split= region.getOffset() + region.getLength();
+		}
 		TextEdit[] edits= dummy.removeAll();
 		for (int i= 0; i < edits.length; i++) {
 			TextEdit edit= edits[i];
-			int pos= edit.getRegion().getOffset() >= split ? 1 : 0;
+			int pos= edit.getOffset() >= split ? 1 : 0;
 			markers[pos].add(edit);
 		}
 		MultiTextEdit root= new MultiTextEdit();
@@ -392,8 +398,8 @@ public class SourceProvider {
 	private String[] getBlocks(RangeMarker[] markers) {
 		String[] result= new String[markers.length];
 		for (int i= 0; i < markers.length; i++) {
-			IRegion range= markers[i].getRegion();
-			String content= fBuffer.getContent(range.getOffset(), range.getLength());
+			RangeMarker marker= markers[i];
+			String content= fBuffer.getContent(marker.getOffset(), marker.getLength());
 			String lines[]= Strings.convertIntoLines(content);
 			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
 			result[i]= Strings.concatenate(lines, fBuffer.getLineDelimiter());

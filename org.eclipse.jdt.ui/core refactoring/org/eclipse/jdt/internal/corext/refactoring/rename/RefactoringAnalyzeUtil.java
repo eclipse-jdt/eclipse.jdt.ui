@@ -80,7 +80,7 @@ public class RefactoringAnalyzeUtil {
 	public static TextEdit getFirstEdit(TextEdit[] edits){
 		Arrays.sort(edits, new Comparator(){
 			public int compare(Object o1, Object o2){
-				return ((TextEdit)o1).getRegion().getOffset() - ((TextEdit)o2).getRegion().getOffset();
+				return ((TextEdit)o1).getOffset() - ((TextEdit)o2).getOffset();
 			}
 		});
 		return edits[0];

@@ -13,18 +13,18 @@ package org.eclipse.text.edits;
 import java.util.Iterator;
 
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 /**
- * An <code>EditProcessor</code> manages a set of <code>Edit</code>s and applies
- * them as a whole to a <code>IDocument</code>. Clients should use the method <code>
- * canPerformEdits</code> to validate if all added edits follow can be executed.
+ * A <code>TextEditProcessor</code> manages a set of <code>Edit</code>s and applies
+ * them as a whole to an <code>IDocument</code>. Clients should use the method <code>
+ * canPerformEdits</code> to validate if all added edits can be executed.
  */
-public class EditProcessor {
+public class TextEditProcessor {
 	
 	private IDocument fDocument;
 	private MultiTextEdit fRoot;
-	private UndoMemento fUndoMemento;
 	
 	/**
 	 * Constructs a new edit processor for the given
@@ -32,9 +32,10 @@ public class EditProcessor {
 	 * 
 	 * @param document the document to manipulate
 	 */
-	public EditProcessor(IDocument document) {
+	public TextEditProcessor(IDocument document) {
 		Assert.isNotNull(document);
 		fDocument= document;
+		fRoot= new MultiTextEdit(0, fDocument.getLength()); 
 	}
 	
 	/**
@@ -44,6 +45,15 @@ public class EditProcessor {
 	 */
 	public IDocument getDocument() {
 		return fDocument;
+	}
+	
+	/**
+	 * Returns the edit processor's root edit.
+	 * 
+	 * @return the processor's root edit
+	 */
+	public TextEdit getRoot() {
+		return fRoot;
 	}
 	
 	/**
@@ -57,29 +67,10 @@ public class EditProcessor {
 	 * 	to this edit processor.
 	 */
 	public void add(TextEdit edit) throws MalformedTreeException {
-		Assert.isTrue(fUndoMemento == null);
-		executeConnect(edit, fDocument);
-		if (fRoot == null) {
-			fRoot= new MultiTextEdit(0, fDocument.getLength());
-		}
+		checkIntegrity(edit, fDocument);
 		fRoot.add(edit);
 	}
 		
-	/**
-	 * Adds an undo memento to this edit processor. Adding an undo memento
-	 * transfers ownership of the memento to the processor. So after a memento 
-	 * has been added the creator of that memento <b>must</b> not continue
-	 * modifying it.
-	 * 
-	 * @param undo the undo memento to add
-	 * @exception EditException if the undo memento can not be added
-	 * 	to this processor
-	 */
-	public void add(UndoMemento undo) throws MalformedTreeException {
-		Assert.isTrue(fRoot == null);
-		fUndoMemento= undo;
-	}
-	
 	/**
 	 * Checks if the processor can execute all its edits.
 	 * 
@@ -89,20 +80,7 @@ public class EditProcessor {
 	 * likely end in a <code>BadLocationException</code>.
 	 */
 	public boolean canPerformEdits() {
-		if (fRoot != null && !checkBufferLength(fRoot, fDocument.getLength())) {
-			return false;
-		} else if (fUndoMemento != null) {
-			return fUndoMemento.canPerform(fDocument.getLength());
-		} 
-		return true;
-	}
-	
-	/**
-	 * Clears the text buffer editor.
-	 */
-	public void clear() {
-		fRoot= null;
-		fUndoMemento= null;
+		return checkBufferLength(fRoot, fDocument.getLength()) == null;
 	}
 	
 	/**
@@ -114,46 +92,45 @@ public class EditProcessor {
 	 * @return an object representing the undo of the executed <code>TextEdit</code>s
 	 * @exception CoreException if the edits cannot be executed
 	 */
-	public UndoMemento performEdits() throws PerformEditException {
-		try {
-			if (fRoot != null) {
-				return executeDo();
-			} else if (fUndoMemento != null) {
-				return executeUndo();
-			} else {
-				return new UndoMemento();
-			}
-		} finally {
-			clear();
+	public UndoMemento performEdits() throws BadLocationException {
+		return execute();
+	}
+	
+	
+	protected boolean considerEdit(TextEdit edit) {
+		return true;
+	}
+		
+	/* proctected */ void checkIntegrity() throws MalformedTreeException {
+		TextEdit failure= checkBufferLength(fRoot, fDocument.getLength());
+		if (failure != null) {
+			throw new MalformedTreeException(failure.getParent(), failure, "End position lies outside of document range");
 		}
 	}
 	
 	//---- Helper methods ------------------------------------------------------------------------
 		
-	private static boolean checkBufferLength(TextEdit root, int bufferLength) {
+	private static TextEdit checkBufferLength(TextEdit root, int bufferLength) {
 		if (root.getExclusiveEnd() > bufferLength)
-			return false;
+			return root;
 		for (Iterator iter= root.iterator(); iter.hasNext();) {
 			TextEdit edit= (TextEdit)iter.next();
-			if (!checkBufferLength(edit, bufferLength))
-				return false;
+			TextEdit failure= null;
+			if ((failure= checkBufferLength(edit, bufferLength)) != null)
+				return failure;
 		}
-		return true;
+		return null;
 	}
 	
-	private static void executeConnect(TextEdit root, IDocument document) {
-		int oldOffset= root.getOffset();
-		int oldLength= root.getLength();
+	private static void checkIntegrity(TextEdit root, IDocument document) {
 		root.checkIntegrity();
-		if (oldOffset != root.getOffset() || oldLength != root.getLength())
-			throw new MalformedTreeException(root.getParent(), root, "Text edit changed during connect method");
 		for (Iterator iter= root.iterator(); iter.hasNext();) {
 			TextEdit edit= (TextEdit)iter.next();
-			executeConnect(edit, document);
+			checkIntegrity(edit, document);
 		}
 	}
 	
-	private UndoMemento executeDo() throws PerformEditException {
+	private UndoMemento execute() throws BadLocationException {
 		Updater.DoUpdater updater= null;
 		try {
 			updater= Updater.createDoUpdater();
@@ -168,7 +145,7 @@ public class EditProcessor {
 		}
 	}
 	
-	private void execute(TextEdit edit, Updater.DoUpdater updater) throws PerformEditException {
+	private void execute(TextEdit edit, Updater.DoUpdater updater) throws BadLocationException {
 		if (edit.hasChildren()) {
 			TextEdit[] children= edit.getChildren();
 			updater.push(children);
@@ -181,23 +158,6 @@ public class EditProcessor {
 		if (considerEdit(edit)) {
 			updater.setActiveEdit(edit);
 			edit.perform(fDocument);
-		}
-	}
-	
-	protected boolean considerEdit(TextEdit edit) {
-		return true;
-	}
-	
-	private UndoMemento executeUndo() throws PerformEditException {
-		Updater updater= null;
-		try {
-			updater= Updater.createUndoUpdater();
-			fDocument.addDocumentListener(updater);
-			fUndoMemento.execute(fDocument);
-			return updater.undo;
-		} finally {
-			if (updater != null)
-				fDocument.removeDocumentListener(updater);
 		}
 	}
 }

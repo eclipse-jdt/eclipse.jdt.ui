@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.eclipse.text.edits;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+
 /**
  * Text edit to replace a range in a document with a different
  * string
  */
-public final class ReplaceEdit extends SimpleTextEdit {
+public final class ReplaceEdit extends TextEdit {
 	
 	private String fText;
 	
@@ -40,8 +44,11 @@ public final class ReplaceEdit extends SimpleTextEdit {
 		fText= other.fText;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit#getText()
+	/**
+	 * Returns the new text replacing the text denoted
+	 * by the edit.
+	 * 
+	 * @return the edit's text.
 	 */
 	public String getText() {
 		return fText;
@@ -51,6 +58,15 @@ public final class ReplaceEdit extends SimpleTextEdit {
 		return new ReplaceEdit(this);
 	}
 	
+	/* package */ void perform(IDocument document) throws BadLocationException {
+		document.replace(getOffset(), getLength(), fText);
+	}
+	
+	/* package */ void update(DocumentEvent event, TreeIterationInfo info) {
+		markChildrenAsDeleted();
+		super.update(event, info);
+	}
+			
 	/* non Java-doc
 	 * @see java.lang.Object#toString()
 	 */

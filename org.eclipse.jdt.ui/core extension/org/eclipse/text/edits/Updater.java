@@ -62,19 +62,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 			Assert.isTrue(false, "Can't happen"); //$NON-NLS-1$
 		}
 
-		String newText= event.getText();
-		int newLength= newText.length();
-
-		if (currentLength > 0 && newLength == 0) {
-			// Delete edit
-			undo.add(new InsertEdit(offset, currentText));
-		} else if (currentLength == 0 && newLength > 0) {
-			// insert edit
-			undo.add(new DeleteEdit(offset, newLength));
-		} else {
-			// replace edit
-			undo.add(new ReplaceEdit(offset, newLength, currentText));
-		}
+		undo.add(new ReplaceEdit(offset, event.getText().length(), currentText));
 	}
 	
 	public void documentChanged(DocumentEvent event) {

@@ -18,7 +18,7 @@ import java.util.List;
  * move a text region inside a document to another location.
  * <p>
  * This class isn't intended to be subclassed outside of the edit framework. Clients 
- * are only allowed to subclass <code>SimpleTextEdit</code> and <code>MultiTextEdit</code>.
+ * are only allowed to subclass <code>MultiTextEdit</code>.
  */
 public abstract class AbstractTransferEdit extends TextEdit {
 
@@ -31,7 +31,7 @@ public abstract class AbstractTransferEdit extends TextEdit {
 		super(offset, length);
 	}
 	
-	/**
+	/*
 	 * Copy constructor
 	 */
 	/* package */ AbstractTransferEdit(AbstractTransferEdit other) {

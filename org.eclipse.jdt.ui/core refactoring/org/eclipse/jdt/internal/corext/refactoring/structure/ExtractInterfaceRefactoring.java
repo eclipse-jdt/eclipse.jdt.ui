@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.Regions;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
@@ -322,7 +321,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				ISourceRange sourceRange= cuRange.getSourceRange();
 				IRegion oldRange= getOldRange(edits, new Region(sourceRange.getOffset(), sourceRange.getLength()), change);
 				String typeName= fInputType.getElementName();
-				int offset= Regions.getExclusiveEnd(oldRange) - typeName.length();
+				int offset= oldRange.getOffset() + oldRange.getLength() - typeName.length();
 				TextEdit edit= new ReplaceEdit(offset, typeName.length(), fNewInterfaceName);
 				ExtractInterfaceUtil.getTextChange(manager, cu).addTextEdit(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update"), edit); //$NON-NLS-1$
 			}

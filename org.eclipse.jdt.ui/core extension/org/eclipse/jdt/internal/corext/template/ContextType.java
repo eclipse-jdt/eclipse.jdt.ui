@@ -175,7 +175,7 @@ public abstract class ContextType implements ITemplateEditor {
 		    
 			int[] offsets= new int[variable.getOffsets().length];
 			for (int j= 0; j != offsets.length; j++)
-				offsets[j]= ((TextEdit) iterator.next()).getRegion().getOffset();
+				offsets[j]= ((TextEdit) iterator.next()).getOffset();
 			
 		 	variable.setOffsets(offsets);   
 		}

@@ -14,13 +14,13 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class EditMessages {
+/* package */ class TextEditMessages {
 
 	private static final String BUNDLE_NAME= "org.eclipse.text.edits.Messages"; //$NON-NLS-1$
 
 	private static final ResourceBundle RESOURCE_BUNDLE= ResourceBundle.getBundle(BUNDLE_NAME);
 
-	private EditMessages() {
+	private TextEditMessages() {
 	}
 
 	public static String getString(String key) {

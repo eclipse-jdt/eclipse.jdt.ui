@@ -16,15 +16,16 @@ import java.util.List;
 
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.ISourceModifier;
-import org.eclipse.text.edits.Regions;
+import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.SimpleTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -57,31 +58,29 @@ public abstract class SourceModifier implements ISourceModifier {
 		
 		/* package */ void insertEdits(TextEdit root, List edits) {
 			while(edits.size() > 0) {
-				SimpleTextEdit edit= (SimpleTextEdit)edits.remove(0);
+				TextEdit edit= (TextEdit)edits.remove(0);
 				insert(root, edit, edits);
 			}
 		}
-		private static void insert(TextEdit parent, SimpleTextEdit edit, List edits) {
+		private static void insert(TextEdit parent, TextEdit edit, List edits) {
 			if (!parent.hasChildren()) {
 				parent.add(edit);
 				return;
 			}
-			IRegion editRange= edit.getRegion();
 			TextEdit[] children= parent.getChildren();
 			// First dive down to find the right parent.
 			for (int i= 0; i < children.length; i++) {
 				TextEdit child= children[i];
-				IRegion childRange= child.getRegion();
-				if (Regions.covers(childRange, editRange)) {
+				if (child.covers(edit)) {
 					insert(child, edit, edits);
 					return;
-				} else if (Regions.covers(editRange, childRange)) {
+				} else if (edit.covers(child)) {
 					parent.remove(i);
 					edit.add(child);
 				} else {
-					IRegion intersect= Regions.intersect(editRange, childRange);
+					IRegion intersect= intersect(edit, child);
 					if (intersect != null) {
-						SimpleTextEdit[] splits= splitEdit(edit, editRange, intersect);
+						TextEdit[] splits= splitEdit(edit, intersect);
 						insert(child, splits[0], edits);
 						edits.add(splits[1]);
 					}
@@ -90,33 +89,62 @@ public abstract class SourceModifier implements ISourceModifier {
 			parent.add(edit);
 		}
 		
-		private static SimpleTextEdit[] splitEdit(SimpleTextEdit edit, IRegion editRange, IRegion intersect) {
-			if (editRange.getOffset() != intersect.getOffset()) {
-				return splitIntersectRight(edit, editRange, intersect);
+		public static IRegion intersect(TextEdit op1, TextEdit op2) {
+			int offset1= op1.getOffset();
+			int length1= op1.getLength();
+			int end1= offset1 + length1 - 1;
+			int offset2= op2.getOffset();
+			if (end1 < offset2)
+				return null;
+			int length2= op2.getLength();
+			int end2= offset2 + length2 - 1;
+			if (end2 < offset1)
+				return null;
+			if (offset1 < offset2) {
+				int end= Math.max(end1, end2);
+				return new Region(offset2, end - offset2 + 1);
 			} else {
-				return splitIntersectLeft(edit, editRange, intersect);
+				int end= Math.max(end1, end2);
+				return new Region(offset1, end - offset1 + 1); 
 			}
 		}
 		
-		private static SimpleTextEdit[] splitIntersectRight(SimpleTextEdit edit, IRegion editRange, IRegion intersect) {
-			SimpleTextEdit[] result= new SimpleTextEdit[2];
+		private static TextEdit[] splitEdit(TextEdit edit, IRegion intersect) {
+			if (edit.getOffset() != intersect.getOffset()) {
+				return splitIntersectRight(edit, intersect);
+			} else {
+				return splitIntersectLeft(edit, intersect);
+			}
+		}
+		
+		private static TextEdit[] splitIntersectRight(TextEdit edit, IRegion intersect) {
+			TextEdit[] result= new TextEdit[2];
 			result[0]= new DeleteEdit(
 				intersect.getOffset(), intersect.getLength());
 			result[1]= new ReplaceEdit(
-				editRange.getOffset(), intersect.getOffset() - editRange.getOffset(), edit.getText());
+				edit.getOffset(), intersect.getOffset() - edit.getOffset(), getText(edit));
 			return result;
 		}
 		
-		private static SimpleTextEdit[] splitIntersectLeft(SimpleTextEdit edit, IRegion editRange, IRegion intersect) {
-			SimpleTextEdit[] result= new SimpleTextEdit[2];
-			result[0]= new ReplaceEdit(intersect.getOffset(), intersect.getLength(), edit.getText());
+		private static TextEdit[] splitIntersectLeft(TextEdit edit, IRegion intersect) {
+			TextEdit[] result= new TextEdit[2];
+			result[0]= new ReplaceEdit(intersect.getOffset(), intersect.getLength(), getText(edit));
 			result[1]= new DeleteEdit(
 				intersect.getOffset() + intersect.getLength(),
-				editRange.getLength() - intersect.getLength());
+				edit.getLength() - intersect.getLength());
 			return result;
 		}
-
-
+		
+		private static String getText(TextEdit edit) {
+			if (edit instanceof ReplaceEdit)
+				return ((ReplaceEdit)edit).getText();
+			if (edit instanceof DeleteEdit)
+				return ""; //$NON-NLS-1$
+			if (edit instanceof InsertEdit)
+				return ((InsertEdit)edit).getText();
+			Assert.isTrue(false, "Cannot happen"); //$NON-NLS-1$
+			return ""; //$NON-NLS-1$
+		}
 	}
 	
 	public SourceModifier(int sourceIndentLevel, String destinationIndent, int tabWidth) {

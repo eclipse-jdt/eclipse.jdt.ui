@@ -22,6 +22,23 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
+/**
+ * A move source edit denotes the source of a move operation. Move
+ * source edits are only valid inside an edit tree if they have a
+ * corresponding traget edit. Furthermore the corresponding target 
+ * edit can't be a direct or indirect child of the source edit. 
+ * Violating one of two requirements will result in a <code>
+ * MalformedTreeException</code> when executing the edit tree.
+ * <p>
+ * A move source edit can manange an optional source modifier. A
+ * source modifier gets access to the text before it is actually 
+ * inserted at the target position.
+ * 
+ * @see org.eclipse.text.edits.MoveTargetEdit
+ * @see org.eclipse.text.edits.CopySourceEdit
+ *  
+ * @since 3.0 
+ */
 public final class MoveSourceEdit extends AbstractTransferEdit {
 
 	/* package */ int fCounter;
@@ -32,96 +49,82 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	private int fContentOffset;
 	private List fContentChildren;
 	
+	/**
+	 * Constructs a new move source edit.
+	 * 
+	 * @param offset the edit's offset
+	 * @param length the edit's length
+	 */
 	public MoveSourceEdit(int offset, int length) {
 		super(offset, length);
 	}
 
+	/**
+	 * Constructs a new copy source edit.
+	 * 
+	 * @param offset the edit's offset
+	 * @param length the edit's length
+	 * @param target the edit's target
+	 */
 	public MoveSourceEdit(int offset, int length, MoveTargetEdit target) {
 		this(offset, length);
 		setTargetEdit(target);
 	}
 
-	/**
+	/*
 	 * Copy constructor
 	 */
-	protected MoveSourceEdit(MoveSourceEdit other) {
+	private MoveSourceEdit(MoveSourceEdit other) {
 		super(other);
 		if (other.fModifier != null)
 			fModifier= other.fModifier.copy();
 	}
-
+	
+	/**
+	 * Returns the associated traget edit or <code>null</code>
+	 * if no target edit is associated yet.
+	 * 
+	 * @return the target edit or <code>null</code>
+	 */
+	public MoveTargetEdit getTargetEdit() {
+		return fTarget;
+	}
+	
 	/**
 	 * Sets the target edit.
 	 * 
-	 * @param edit the target edit. The target edit must
-	 *  not be <code>null</code>
-	 */	
+	 * @param edit the new target edit.
+	 * 
+	 * @exception MalformedTreeException is thrown if the target edit
+	 *  is a direct or indirect child of the source edit
+	 */
 	public void setTargetEdit(MoveTargetEdit edit) {
 		fTarget= edit;
 		fTarget.setSourceEdit(this);
 	}
 	
-	public MoveTargetEdit getTargetEdit() {
-		return fTarget;
-	}
-	
-	public void setSourceModifier(ISourceModifier modifier) {
-		fModifier= modifier;
-	}
-	
+	/**
+	 * Returns the current source modifier or <code>null</code>
+	 * if no source modifier is set.
+	 * 
+	 * @return the source modifier
+	 */
 	public ISourceModifier getSourceModifier() {
 		return fModifier;
 	}
 	
-	protected void checkIntegrity() throws MalformedTreeException {
-		if (fTarget == null)
-			throw new MalformedTreeException(getParent(), this, EditMessages.getString("MoveSourceEdit.no_target")); //$NON-NLS-1$
-		if (fTarget.getSourceEdit() != this)
-			throw new MalformedTreeException(getParent(), this, EditMessages.getString("MoveSourceEdit.different_source"));  //$NON-NLS-1$
+	/**
+	 * Sets the optional source modifier.
+	 * 
+	 * @param modifier the source modifier or <code>null</code>
+	 *  if no source modification is need. 
+	 */
+	public void setSourceModifier(ISourceModifier modifier) {
+		fModifier= modifier;
 	}
 	
 	/* non Java-doc
-	 * @see TextEdit#perform
-	 */	
-	/* package */ void perform(IDocument document) throws PerformEditException {
-		fCounter++;
-		switch(fCounter) {
-			// Position of move source > position of move target.
-			// Hence MoveTarget does the actual move. Move Source
-			// only deletes the content.
-			case 1:
-				fContent= getContent(document);
-				fContentOffset= getOffset();
-				fContentChildren= internalGetChildren();
-				fMode= DELETE;
-				performReplace(document, ""); //$NON-NLS-1$
-				// do this after executing the replace to be able to
-				// compute the number of children.
-				internalSetChildren(null);
-				break;
-				
-			// Position of move source < position of move target.
-			// Hence move source handles the delete and the 
-			// insert at the target position.	
-			case 2:
-				fContent= getContent(document);
-				fMode= DELETE;
-				performReplace(document, ""); //$NON-NLS-1$
-				if (!fTarget.isDeleted()) {
-					// Insert target
-					IRegion targetRange= fTarget.getRegion();
-					fMode= INSERT;
-					performReplace(document, targetRange, fContent);
-				}
-				clearContent();
-				break;
-			default:
-				Assert.isTrue(false, "Should never happen"); //$NON-NLS-1$
-		}
-	}
-
-	/* non Java-doc
-	 * @see TextEdit#copy
+	 * @see TextEdit#doCopy
 	 */	
 	protected TextEdit doCopy() {
 		return new MoveSourceEdit(this);
@@ -136,6 +139,56 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		}
 	}
 	
+	/* non Java-doc
+	 * @see TextEdit#checkIntegrity
+	 */	
+	protected void checkIntegrity() throws MalformedTreeException {
+		if (fTarget == null)
+			throw new MalformedTreeException(getParent(), this, TextEditMessages.getString("MoveSourceEdit.no_target")); //$NON-NLS-1$
+		if (fTarget.getSourceEdit() != this)
+			throw new MalformedTreeException(getParent(), this, TextEditMessages.getString("MoveSourceEdit.different_source"));  //$NON-NLS-1$
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#perform
+	 */	
+	/* package */ void perform(IDocument document) throws BadLocationException {
+		fCounter++;
+		switch(fCounter) {
+			// Position of move source > position of move target.
+			// Hence MoveTarget does the actual move. Move Source
+			// only deletes the content.
+			case 1:
+				fContent= getContent(document);
+				fContentOffset= getOffset();
+				fContentChildren= internalGetChildren();
+				fMode= DELETE;
+				document.replace(getOffset(), getLength(), ""); //$NON-NLS-1$
+				// do this after executing the replace to be able to
+				// compute the number of children.
+				internalSetChildren(null);
+				break;
+				
+			// Position of move source < position of move target.
+			// Hence move source handles the delete and the 
+			// insert at the target position.	
+			case 2:
+				fContent= getContent(document);
+				fMode= DELETE;
+				document.replace(getOffset(), getLength(), ""); //$NON-NLS-1$
+				if (!fTarget.isDeleted()) {
+					// Insert target
+					IRegion targetRange= fTarget.getRegion();
+					fMode= INSERT;
+					document.replace(targetRange.getOffset(), targetRange.getLength(), fContent);
+				}
+				clearContent();
+				break;
+			default:
+				Assert.isTrue(false, "Should never happen"); //$NON-NLS-1$
+		}
+	}
+
 	/* package */ String getContent() {
 		return fContent;
 	}
@@ -169,65 +222,24 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		} else {
 			Assert.isTrue(false);
 		}
-	}
-	
-//	protected void updateTextRange(int delta, List executedEdits) {
-//		if (fMode == DELETE) {
-//			adjustLength(delta);
-//			updateParents(delta);
-//			if (fCounter == 1) {
-//				predecessorExecuted(executedEdits, getNumberOfChildren(), delta);
-//			} else {
-//				// only update the edits which are executed between the move source
-//				// and the move target. For all other edits nothing will change.
-//				// The children of the move source will be updte when moving them 
-//				// under the target edit
-//				for (int i= executedEdits.size() - 1 - getNumberOfChildren(); i >= 0; i--) {
-//					TextEdit edit= (TextEdit)executedEdits.get(i);
-//					edit.predecessorExecuted(delta);
-//					if (edit == fTarget)
-//						break;
-//				}
-//			}
-//		} else if (fMode == INSERT) {
-//			fTarget.adjustLength(delta);
-//			fTarget.updateParents(delta);
-//			
-//			fTarget.markChildrenAsDeleted();
-//			
-//			List children= internalGetChildren();
-//			internalSetChildren(null);
-//			int moveDelta= fTarget.getTextRange().getOffset() - getTextRange().getOffset();
-//			move(children, moveDelta);
-//			fTarget.internalSetChildren(children);
-//		} else {
-//			Assert.isTrue(false);
-//		}
-//	}
+	}	
 	
 	//---- content management ------------------------------------------
 	
-	private String getContent(IDocument document) throws PerformEditException {
-		try {
-			IRegion range= getRegion();
-			String result= document.get(range.getOffset(), range.getLength());
-			if (fModifier != null) {
-				IDocument newDocument= new Document(result);
-				Map editMap= new HashMap();
-				TextEdit newEdit= createEdit(editMap);
-				fModifier.addEdits(result, newEdit);
-				EditProcessor processor= new EditProcessor(newDocument);
-				processor.add(newEdit);
-				processor.performEdits();
-				restorePositions(editMap, range.getOffset());
-				result= newDocument.get();
-			}
-			return result;
-		} catch (MalformedTreeException e) {
-			throw new PerformEditException(this, e.getMessage(), e);
-		} catch (BadLocationException e) {
-			throw new PerformEditException(this, e.getMessage(), e);
+	private String getContent(IDocument document) throws BadLocationException {
+		String result= document.get(getOffset(), getLength());
+		if (fModifier != null) {
+			IDocument newDocument= new Document(result);
+			Map editMap= new HashMap();
+			TextEdit newEdit= createEdit(editMap);
+			fModifier.addEdits(result, newEdit);
+			TextEditProcessor processor= new TextEditProcessor(newDocument);
+			processor.add(newEdit);
+			processor.performEdits();
+			restorePositions(editMap, getOffset());
+			result= newDocument.get();
 		}
+		return result;
 	}
 	
 	private TextEdit createEdit(Map editMap) {

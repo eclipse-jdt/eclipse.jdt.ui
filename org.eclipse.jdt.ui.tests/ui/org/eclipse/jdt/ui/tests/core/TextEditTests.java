@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.ui.tests.core;
 
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ import junit.framework.TestSuite;
 import org.eclipse.text.edits.CopySourceEdit;
 import org.eclipse.text.edits.CopyTargetEdit;
 import org.eclipse.text.edits.DeleteEdit;
-import org.eclipse.text.edits.EditProcessor;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MoveSourceEdit;
@@ -30,26 +28,21 @@ import org.eclipse.text.edits.MoveTargetEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.RangeMarker;
 import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.SimpleTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditCopier;
 import org.eclipse.text.edits.UndoMemento;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+public class TextEditTests extends TestCase {
 
-public class TextBufferTest extends TestCase {
-
-	private static final Class THIS= TextBufferTest.class;
+	private static final Class THIS= TextEditTests.class;
 	
 	private IDocument fDocument;
-	private EditProcessor fProcessor;
+	private MultiTextEdit fRoot;
 	
-	public TextBufferTest(String name) {
+	public TextEditTests(String name) {
 		super(name);
 	}
 
@@ -72,19 +65,20 @@ public class TextBufferTest extends TestCase {
 	
 	protected void setUp() throws Exception {
 		fDocument= new Document("0123456789");
-		fProcessor= new EditProcessor(fDocument);
+		fRoot= new MultiTextEdit(0, fDocument.getLength());
 	}
 	
 	protected void tearDown() throws Exception {
-		fProcessor= null;
+		fRoot= null;
+		fRoot= null;
 	}
 	
 	public void testOverlap1() throws Exception {
 		// [ [ ] ]
-		fProcessor.add(new ReplaceEdit(0, 2, "01"));
+		fRoot.add(new ReplaceEdit(0, 2, "01"));
 		boolean exception= false;
 		try {
-			fProcessor.add(new ReplaceEdit(1, 2, "12"));
+			fRoot.add(new ReplaceEdit(1, 2, "12"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -93,10 +87,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap2() throws Exception {
 		// [[ ] ]
-		fProcessor.add(new ReplaceEdit(0, 2, "01"));
+		fRoot.add(new ReplaceEdit(0, 2, "01"));
 		boolean exception= false;
 		try {
-			fProcessor.add(new ReplaceEdit(0, 1, "0"));
+			fRoot.add(new ReplaceEdit(0, 1, "0"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -105,10 +99,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap3() throws Exception {
 		// [ [ ]]
-		fProcessor.add(new ReplaceEdit(0, 2, "01"));
+		fRoot.add(new ReplaceEdit(0, 2, "01"));
 		boolean exception= false;
 		try {
-			fProcessor.add(new ReplaceEdit(1, 1, "1"));
+			fRoot.add(new ReplaceEdit(1, 1, "1"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -117,10 +111,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap4() throws Exception {
 		// [ [ ] ]
-		fProcessor.add(new ReplaceEdit(0, 3, "012"));
+		fRoot.add(new ReplaceEdit(0, 3, "012"));
 		boolean exception= false;
 		try {
-			fProcessor.add(new ReplaceEdit(1, 1, "1"));
+			fRoot.add(new ReplaceEdit(1, 1, "1"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -129,10 +123,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap5() throws Exception {
 		// [ []  ]
-		fProcessor.add(new ReplaceEdit(0, 3, "012"));
+		fRoot.add(new ReplaceEdit(0, 3, "012"));
 		boolean exception= false;
 		try {
-			fProcessor.add(new InsertEdit(1, "xx"));
+			fRoot.add(new InsertEdit(1, "xx"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -141,10 +135,10 @@ public class TextBufferTest extends TestCase {
 	
 	public void testOverlap6() throws Exception {
 		// [  [] ]
-		fProcessor.add(new ReplaceEdit(0, 3, "012"));
+		fRoot.add(new ReplaceEdit(0, 3, "012"));
 		boolean exception= false;
 		try {
-			fProcessor.add(new InsertEdit(2, "xx"));
+			fRoot.add(new InsertEdit(2, "xx"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -154,10 +148,10 @@ public class TextBufferTest extends TestCase {
 	public void testOverlap7() throws Exception {
 		MoveSourceEdit source= new MoveSourceEdit(2, 5);
 		MoveTargetEdit target= new MoveTargetEdit(3, source);
-		fProcessor.add(source);
+		fRoot.add(source);
 		boolean exception= false;
 		try {
-			fProcessor.add(target);
+			fRoot.add(target);
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -167,10 +161,10 @@ public class TextBufferTest extends TestCase {
 	public void testOverlap8() throws Exception {
 		MoveSourceEdit source= new MoveSourceEdit(2, 5);
 		MoveTargetEdit target= new MoveTargetEdit(6, source);
-		fProcessor.add(source);
+		fRoot.add(source);
 		boolean exception= false;
 		try {
-			fProcessor.add(target);
+			fRoot.add(target);
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -182,12 +176,12 @@ public class TextBufferTest extends TestCase {
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
 		MoveSourceEdit s2= new MoveSourceEdit(2, 3);
 		MoveTargetEdit t2= new MoveTargetEdit(8, s2);
-		fProcessor.add(s1);
-		fProcessor.add(t1);
+		fRoot.add(s1);
+		fRoot.add(t1);
 		boolean exception= false;
 		try {
-			fProcessor.add(s2);
-			fProcessor.add(t2);
+			fRoot.add(s2);
+			fRoot.add(t2);
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -198,7 +192,8 @@ public class TextBufferTest extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(3, 1);
 		boolean exception= false;
 		try {
-			fProcessor.add(s1);
+			fRoot.add(s1);
+			fRoot.apply(fDocument);
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -207,8 +202,8 @@ public class TextBufferTest extends TestCase {
 	
 	public void testCopy1() throws Exception {
 		MultiTextEdit root= new MultiTextEdit();
-		SimpleTextEdit e1= new InsertEdit(2, "yy");
-		SimpleTextEdit e2= new ReplaceEdit(2, 3, "3456");
+		TextEdit e1= new InsertEdit(2, "yy");
+		TextEdit e2= new ReplaceEdit(2, 3, "3456");
 		root.add(e1);
 		root.add(e2);
 		List org= flatten(root);
@@ -274,134 +269,134 @@ public class TextBufferTest extends TestCase {
 		
 	public void testInsert1() throws Exception {
 		// [][  ]
-		SimpleTextEdit e1= new InsertEdit(2, "yy");
-		SimpleTextEdit e2= new ReplaceEdit(2, 3, "3456");
-		fProcessor.add(e1);
-		fProcessor.add(e2);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getRegion(), 2, 2);
-		assertEquals(e2.getRegion(), 4, 4);
+		TextEdit e1= new InsertEdit(2, "yy");
+		TextEdit e2= new ReplaceEdit(2, 3, "3456");
+		fRoot.add(e1);
+		fRoot.add(e2);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(e1, 2, 2);
+		assertEquals(e2, 4, 4);
 		assertEquals("Buffer content", "01yy345656789", fDocument.get());
 		doUndoRedo(undo, "01yy345656789");
 	}
 	
 	public void testInsert2() throws Exception {
 		// [][]
-		SimpleTextEdit e1= new InsertEdit(2, "yy");
-		SimpleTextEdit e2= new InsertEdit(2, "xx");
-		fProcessor.add(e1);
-		fProcessor.add(e2);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getRegion(), 2, 2);
-		assertEquals(e2.getRegion(), 4, 2);
+		TextEdit e1= new InsertEdit(2, "yy");
+		TextEdit e2= new InsertEdit(2, "xx");
+		fRoot.add(e1);
+		fRoot.add(e2);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(e1, 2, 2);
+		assertEquals(e2, 4, 2);
 		assertEquals("Buffer content", "01yyxx23456789", fDocument.get());
 		doUndoRedo(undo, "01yyxx23456789");
 	}
 	
 	public void testInsert3() throws Exception {
 		// [  ][][  ]
-		SimpleTextEdit e1= new ReplaceEdit(0, 2, "011");
-		SimpleTextEdit e2= new InsertEdit(2, "xx");
-		SimpleTextEdit e3= new ReplaceEdit(2, 2, "2");
-		fProcessor.add(e1);
-		fProcessor.add(e2);
-		fProcessor.add(e3);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getRegion(), 0, 3);
-		assertEquals(e2.getRegion(), 3, 2);
-		assertEquals(e3.getRegion(), 5, 1);
+		TextEdit e1= new ReplaceEdit(0, 2, "011");
+		TextEdit e2= new InsertEdit(2, "xx");
+		TextEdit e3= new ReplaceEdit(2, 2, "2");
+		fRoot.add(e1);
+		fRoot.add(e2);
+		fRoot.add(e3);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(e1, 0, 3);
+		assertEquals(e2, 3, 2);
+		assertEquals(e3, 5, 1);
 		assertEquals("Buffer content", "011xx2456789", fDocument.get());
 		doUndoRedo(undo, "011xx2456789");
 	}
 	
 	public void testInsert4() throws Exception {
-		SimpleTextEdit e1= new InsertEdit(0, "xx");
-		fProcessor.add(e1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		TextEdit e1= new InsertEdit(0, "xx");
+		fRoot.add(e1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer length", 12, fDocument.getLength());
-		assertEquals(e1.getRegion(), 0, 2);
+		assertEquals(e1, 0, 2);
 		assertEquals("Buffer content", "xx0123456789", fDocument.get());
 		doUndoRedo(undo, "xx0123456789");
 	}
 	
 	public void testInsert5() throws Exception {
-		SimpleTextEdit e1= new InsertEdit(10, "xx");
-		fProcessor.add(e1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		TextEdit e1= new InsertEdit(10, "xx");
+		fRoot.add(e1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer length", 12, fDocument.getLength());
-		assertEquals(e1.getRegion(), 10, 2);
+		assertEquals(e1, 10, 2);
 		assertEquals("Buffer content", "0123456789xx", fDocument.get());
 		doUndoRedo(undo, "0123456789xx");
 	}
 	
 	public void testInsertReplace1() throws Exception {
-		SimpleTextEdit e1= new ReplaceEdit(2, 1, "y");
-		SimpleTextEdit e2= new InsertEdit(2, "xx");
-		fProcessor.add(e1);
-		fProcessor.add(e2);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getRegion(), 4, 1);
-		assertEquals(e2.getRegion(), 2, 2);
+		TextEdit e1= new ReplaceEdit(2, 1, "y");
+		TextEdit e2= new InsertEdit(2, "xx");
+		fRoot.add(e1);
+		fRoot.add(e2);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(e1, 4, 1);
+		assertEquals(e2, 2, 2);
 		assertEquals("Buffer content", "01xxy3456789", fDocument.get());
 		doUndoRedo(undo, "01xxy3456789");
 	}
 	
 	public void testDelete1() throws Exception {
-		SimpleTextEdit e1= new DeleteEdit(3, 1);
-		fProcessor.add(e1);
-		assertTrue("Can perform edits", fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getRegion(), 3, 0);
+		TextEdit e1= new DeleteEdit(3, 1);
+		fRoot.add(e1);
+		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(e1, 3, 0);
 		assertEquals("Buffer content", "012456789", fDocument.get());
 		doUndoRedo(undo, "012456789");
 	}
 	
 	public void testDelete2() throws Exception {
-		SimpleTextEdit e1= new DeleteEdit(4, 1);
-		SimpleTextEdit e2= new DeleteEdit(3, 1);
-		SimpleTextEdit e3= new DeleteEdit(5, 1);
-		fProcessor.add(e1);
-		fProcessor.add(e2);
-		fProcessor.add(e3);
-		assertTrue("Can perform edits", fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getRegion(), 3, 0);
-		assertEquals(e2.getRegion(), 3, 0);
-		assertEquals(e3.getRegion(), 3, 0);
+		TextEdit e1= new DeleteEdit(4, 1);
+		TextEdit e2= new DeleteEdit(3, 1);
+		TextEdit e3= new DeleteEdit(5, 1);
+		fRoot.add(e1);
+		fRoot.add(e2);
+		fRoot.add(e3);
+		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(e1, 3, 0);
+		assertEquals(e2, 3, 0);
+		assertEquals(e3, 3, 0);
 		assertEquals("Buffer content", "0126789", fDocument.get());
 		doUndoRedo(undo, "0126789");
 	}
 	
 	public void testDelete3() throws Exception {
-		SimpleTextEdit e1= new InsertEdit(3, "x");
-		SimpleTextEdit e2= new DeleteEdit(3, 1);
-		fProcessor.add(e1);
-		fProcessor.add(e2);
-		assertTrue("Can perform edits", fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(e1.getRegion(), 3, 1);
-		assertEquals(e2.getRegion(), 4, 0);
+		TextEdit e1= new InsertEdit(3, "x");
+		TextEdit e2= new DeleteEdit(3, 1);
+		fRoot.add(e1);
+		fRoot.add(e2);
+		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(e1, 3, 1);
+		assertEquals(e2, 4, 0);
 		assertEquals("Buffer content", "012x456789", fDocument.get());
 		doUndoRedo(undo, "012x456789");
 	}
 	
 	public void testDeleteWithChildren() throws Exception {
-		SimpleTextEdit e1= new DeleteEdit(2, 6);
+		TextEdit e1= new DeleteEdit(2, 6);
 		MultiTextEdit e2= new MultiTextEdit(3, 3);
 		e1.add(e2);
-		SimpleTextEdit e3= new ReplaceEdit(3, 1, "xx");
-		SimpleTextEdit e4= new ReplaceEdit(5, 1, "yy");
+		TextEdit e3= new ReplaceEdit(3, 1, "xx");
+		TextEdit e4= new ReplaceEdit(5, 1, "yy");
 		e2.add(e3);
 		e2.add(e4);
-		fProcessor.add(e1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		fRoot.add(e1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0189", fDocument.get());
 		assertTrue(e2.isDeleted());
 		assertTrue(e3.isDeleted());
@@ -412,58 +407,58 @@ public class TextBufferTest extends TestCase {
 	public void testMove1() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(5, s1);
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		fRoot.add(s1);
+		fRoot.add(t1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0142356789", fDocument.get());
-		assertEquals(s1.getRegion(), 2, 0);
-		assertEquals(t1.getRegion(), 3, 2);
+		assertEquals(s1, 2, 0);
+		assertEquals(t1, 3, 2);
 		doUndoRedo(undo, "0142356789");
 	}
 	
 	public void testMove2() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(5, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		fRoot.add(s1);
+		fRoot.add(t1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0156234789", fDocument.get());
-		assertEquals(s1.getRegion(), 7, 0);
-		assertEquals(t1.getRegion(), 2, 2);
+		assertEquals(s1, 7, 0);
+		assertEquals(t1, 2, 2);
 		doUndoRedo(undo, "0156234789");
 	}
 
 	public void testMove3() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
-		SimpleTextEdit e2= new ReplaceEdit(4, 1, "x");
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		fProcessor.add(e2);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		TextEdit e2= new ReplaceEdit(4, 1, "x");
+		fRoot.add(s1);
+		fRoot.add(t1);
+		fRoot.add(e2);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "01x5623789", fDocument.get());
-		assertEquals(s1.getRegion(), 2, 0);
-		assertEquals(t1.getRegion(), 5, 2);
-		assertEquals(e2.getRegion(), 2, 1);
+		assertEquals(s1, 2, 0);
+		assertEquals(t1, 5, 2);
+		assertEquals(e2, 2, 1);
 		doUndoRedo(undo, "01x5623789");
 	}
 	
 	public void testMove4() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(7, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
-		SimpleTextEdit e2= new ReplaceEdit(5, 1, "x");
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		fProcessor.add(e2);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		TextEdit e2= new ReplaceEdit(5, 1, "x");
+		fRoot.add(s1);
+		fRoot.add(t1);
+		fRoot.add(e2);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0178234x69", fDocument.get());
-		assertEquals(s1.getRegion(), 9, 0);
-		assertEquals(t1.getRegion(), 2, 2);
-		assertEquals(e2.getRegion(), 7, 1);
+		assertEquals(s1, 9, 0);
+		assertEquals(t1, 2, 2);
+		assertEquals(e2, 7, 1);
 		doUndoRedo(undo, "0178234x69");
 	}
 	
@@ -471,15 +466,15 @@ public class TextBufferTest extends TestCase {
 		// Move onto itself
 		MoveSourceEdit s1= new MoveSourceEdit(2, 1);
 		MoveTargetEdit t1= new MoveTargetEdit(3, s1);
-		SimpleTextEdit e2= new ReplaceEdit(2, 1, "x");
+		TextEdit e2= new ReplaceEdit(2, 1, "x");
 		s1.add(e2);
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getRegion(), 2, 0);
-		assertEquals(t1.getRegion(), 2, 1);
-		assertEquals(e2.getRegion(), 2, 1);
+		fRoot.add(s1);
+		fRoot.add(t1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(s1, 2, 0);
+		assertEquals(t1, 2, 1);
+		assertEquals(e2, 2, 1);
 		assertEquals("Buffer content", "01x3456789", fDocument.get());
 		doUndoRedo(undo, "01x3456789");
 	}
@@ -488,15 +483,15 @@ public class TextBufferTest extends TestCase {
 		// Move onto itself
 		MoveSourceEdit s1= new MoveSourceEdit(2, 1);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
-		SimpleTextEdit e2= new ReplaceEdit(2, 1, "x");
+		TextEdit e2= new ReplaceEdit(2, 1, "x");
 		s1.add(e2);
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getRegion(), 3, 0);
-		assertEquals(t1.getRegion(), 2, 1);
-		assertEquals(e2.getRegion(), 2, 1);
+		fRoot.add(s1);
+		fRoot.add(t1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(s1, 3, 0);
+		assertEquals(t1, 2, 1);
+		assertEquals(e2, 2, 1);
 		assertEquals("Buffer content", "01x3456789", fDocument.get());
 		doUndoRedo(undo,"01x3456789");
 	}
@@ -504,32 +499,32 @@ public class TextBufferTest extends TestCase {
 	public void testMove7() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 3);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
-		SimpleTextEdit e2= new ReplaceEdit(3, 1, "x");
+		TextEdit e2= new ReplaceEdit(3, 1, "x");
 		s1.add(e2);
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		fRoot.add(s1);
+		fRoot.add(t1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "01562x4789", fDocument.get());
-		assertEquals(s1.getRegion(), 2, 0);
-		assertEquals(t1.getRegion(), 4, 3);
-		assertEquals(e2.getRegion(), 5, 1);
+		assertEquals(s1, 2, 0);
+		assertEquals(t1, 4, 3);
+		assertEquals(e2, 5, 1);
 		doUndoRedo(undo, "01562x4789");
 	}
 	
 	public void testMove8() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(5, 3);
 		MoveTargetEdit t1= new MoveTargetEdit(1, s1);
-		SimpleTextEdit e2= new ReplaceEdit(6, 1, "x");
+		TextEdit e2= new ReplaceEdit(6, 1, "x");
 		s1.add(e2);
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		fRoot.add(s1);
+		fRoot.add(t1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "05x7123489", fDocument.get());
-		assertEquals(s1.getRegion(), 8, 0);
-		assertEquals(t1.getRegion(), 1, 3);
-		assertEquals(e2.getRegion(), 2, 1);
+		assertEquals(s1, 8, 0);
+		assertEquals(t1, 1, 3);
+		assertEquals(e2, 2, 1);
 		doUndoRedo(undo, "05x7123489");
 	}
 		
@@ -542,15 +537,15 @@ public class TextBufferTest extends TestCase {
 		s1.add(s2);
 		s1.add(t2);
 		
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		assertTrue("Can perform edits", fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getRegion(), 1, 0);
-		assertEquals(t1.getRegion(), 2, 3);
+		fRoot.add(s1);
+		fRoot.add(t1);
+		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(s1, 1, 0);
+		assertEquals(t1, 2, 3);
 		
-		assertEquals(s2.getRegion(), 2, 0);
-		assertEquals(t2.getRegion(), 3, 1);
+		assertEquals(s2, 2, 0);
+		assertEquals(t2, 3, 1);
 		assertEquals("Buffer content", "0421356789", fDocument.get());
 		doUndoRedo(undo, "0421356789");
 	}
@@ -561,17 +556,17 @@ public class TextBufferTest extends TestCase {
 		MoveSourceEdit s2= new MoveSourceEdit(5, 2);
 		MoveTargetEdit t2= new MoveTargetEdit(1, s2);
 		
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		fProcessor.add(s2);
-		fProcessor.add(t2);
+		fRoot.add(s1);
+		fRoot.add(t1);
+		fRoot.add(s2);
+		fRoot.add(t2);
 		
-		assertTrue("Can perform edits", fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getRegion(), 4, 0);
-		assertEquals(t1.getRegion(), 6, 2);		
-		assertEquals(s2.getRegion(), 5, 0);
-		assertEquals(t2.getRegion(), 1, 2);
+		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(s1, 4, 0);
+		assertEquals(t1, 6, 2);		
+		assertEquals(s2, 5, 0);
+		assertEquals(t2, 1, 2);
 		assertEquals("Buffer content", "0561472389", fDocument.get());
 		doUndoRedo(undo, "0561472389");		
 	}
@@ -583,31 +578,31 @@ public class TextBufferTest extends TestCase {
 		RangeMarker marker= new RangeMarker(2, 2);
 		s1.add(marker);		
 		
-		fProcessor.add(s1);
-		fProcessor.add(t1);
+		fRoot.add(s1);
+		fRoot.add(t1);
 		
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0142356789", fDocument.get());
-		assertEquals(s1.getRegion(), 2, 0);
-		assertEquals(t1.getRegion(), 3, 2);
-		assertEquals(marker.getRegion(), 3, 2);
+		assertEquals(s1, 2, 0);
+		assertEquals(t1, 3, 2);
+		assertEquals(marker, 3, 2);
 		doUndoRedo(undo, "0142356789");
 	}
 	
 	public void testMoveWithTargetDelete() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 3);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
-		SimpleTextEdit e2= new DeleteEdit(6, 2);
+		TextEdit e2= new DeleteEdit(6, 2);
 		e2.add(t1);
-		fProcessor.add(s1);
-		fProcessor.add(e2);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		fRoot.add(s1);
+		fRoot.add(e2);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "01589", fDocument.get());
-		assertEquals(s1.getRegion(), 2, 0);
+		assertEquals(s1, 2, 0);
 		assertTrue(t1.isDeleted());
-		assertEquals(e2.getRegion(), 3, 0);
+		assertEquals(e2, 3, 0);
 		doUndoRedo(undo, "01589");
 	}
 	
@@ -615,72 +610,72 @@ public class TextBufferTest extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(5, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
 		
-		SimpleTextEdit d1= new DeleteEdit(5, 2);
+		TextEdit d1= new DeleteEdit(5, 2);
 		d1.add(s1);
 		
 		RangeMarker marker= new RangeMarker(5, 2);
 		s1.add(marker);		
 		
-		fProcessor.add(d1);
-		fProcessor.add(t1);
+		fRoot.add(d1);
+		fRoot.add(t1);
 		
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0156234789", fDocument.get());
-		assertEquals(t1.getRegion(), 2, 2);
-		assertEquals(marker.getRegion(), 2, 2);
+		assertEquals(t1, 2, 2);
+		assertEquals(marker, 2, 2);
 		assertTrue(s1.isDeleted());
-		assertEquals(d1.getRegion(), 7, 0);
+		assertEquals(d1, 7, 0);
 		doUndoRedo(undo, "0156234789");
 	}		
 	
 	public void testMoveDown() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
-		SimpleTextEdit i1= new InsertEdit(5, "x");
+		TextEdit i1= new InsertEdit(5, "x");
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
-		SimpleTextEdit d1= new DeleteEdit(9, 1);
+		TextEdit d1= new DeleteEdit(9, 1);
 	
 		RangeMarker m1= new RangeMarker(2, 2);
 		s1.add(m1);
 		
-		fProcessor.add(s1);
-		fProcessor.add(i1);
-		fProcessor.add(t1);
-		fProcessor.add(d1);
+		fRoot.add(s1);
+		fRoot.add(i1);
+		fRoot.add(t1);
+		fRoot.add(d1);
 		
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "014x562378", fDocument.get());
-		assertEquals(s1.getRegion(), 2, 0);
-		assertEquals(i1.getRegion(), 3, 1);
-		assertEquals(t1.getRegion(), 6, 2);
-		assertEquals(m1.getRegion(), 6, 2);
-		assertEquals(d1.getRegion(), 10, 0);
+		assertEquals(s1, 2, 0);
+		assertEquals(i1, 3, 1);
+		assertEquals(t1, 6, 2);
+		assertEquals(m1, 6, 2);
+		assertEquals(d1, 10, 0);
 		doUndoRedo(undo, "014x562378");
 	}		
 		
 	public void testMoveUp() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(7, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
-		SimpleTextEdit i1= new InsertEdit(5, "x");
-		SimpleTextEdit d1= new DeleteEdit(9, 1);
+		TextEdit i1= new InsertEdit(5, "x");
+		TextEdit d1= new DeleteEdit(9, 1);
 	
 		RangeMarker m1= new RangeMarker(7, 2);
 		s1.add(m1);
 		
-		fProcessor.add(s1);
-		fProcessor.add(i1);
-		fProcessor.add(t1);
-		fProcessor.add(d1);
+		fRoot.add(s1);
+		fRoot.add(i1);
+		fRoot.add(t1);
+		fRoot.add(d1);
 		
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0178234x56", fDocument.get());
-		assertEquals(s1.getRegion(), 10, 0);
-		assertEquals(i1.getRegion(), 7, 1);
-		assertEquals(t1.getRegion(), 2, 2);
-		assertEquals(m1.getRegion(), 2, 2);
-		assertEquals(d1.getRegion(), 10, 0);
+		assertEquals(s1, 10, 0);
+		assertEquals(i1, 7, 1);
+		assertEquals(t1, 2, 2);
+		assertEquals(m1, 2, 2);
+		assertEquals(d1, 10, 0);
 		doUndoRedo(undo, "0178234x56");
 	}		
 		
@@ -688,54 +683,54 @@ public class TextBufferTest extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
 	
-		SimpleTextEdit d1= new DeleteEdit(2, 2);
+		TextEdit d1= new DeleteEdit(2, 2);
 		d1.add(s1);
 		
 		RangeMarker m1= new RangeMarker(2, 2);
 		s1.add(m1);
 		
-		fProcessor.add(t1);
-		fProcessor.add(d1);
+		fRoot.add(t1);
+		fRoot.add(d1);
 		
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0145623789", fDocument.get());
-		assertEquals(d1.getRegion(), 2, 0);
+		assertEquals(d1, 2, 0);
 		assertTrue(s1.isDeleted());
-		assertEquals(t1.getRegion(), 5, 2);
-		assertEquals(m1.getRegion(), 5, 2);
+		assertEquals(t1, 5, 2);
+		assertEquals(m1, 5, 2);
 		doUndoRedo(undo, "0145623789");
 	}		
 	
 	public void testMoveUpWithInnerMark() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(7, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
-		SimpleTextEdit m= new ReplaceEdit(4, 1, "yy");
-		fProcessor.add(t1);
-		fProcessor.add(m);
-		fProcessor.add(s1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		TextEdit m= new ReplaceEdit(4, 1, "yy");
+		fRoot.add(t1);
+		fRoot.add(m);
+		fRoot.add(s1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "017823yy569", fDocument.get());
-		assertEquals(s1.getRegion(), 10, 0);
-		assertEquals(t1.getRegion(), 2, 2);
-		assertEquals(m.getRegion(), 6, 2);
+		assertEquals(s1, 10, 0);
+		assertEquals(t1, 2, 2);
+		assertEquals(m, 6, 2);
 		doUndoRedo(undo, "017823yy569");
 	}	
 	
 	public void testMoveDownWithInnerMark() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
-		SimpleTextEdit m= new ReplaceEdit(4, 1, "yy");
-		fProcessor.add(t1);
-		fProcessor.add(m);
-		fProcessor.add(s1);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		TextEdit m= new ReplaceEdit(4, 1, "yy");
+		fRoot.add(t1);
+		fRoot.add(m);
+		fRoot.add(s1);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "01yy5623789", fDocument.get());
-		assertEquals(s1.getRegion(), 2, 0);
-		assertEquals(t1.getRegion(), 6, 2);
-		assertEquals(m.getRegion(), 2, 2);
+		assertEquals(s1, 2, 0);
+		assertEquals(t1, 6, 2);
+		assertEquals(m, 2, 2);
 		doUndoRedo(undo, "01yy5623789");
 	}	
 	
@@ -745,13 +740,13 @@ public class TextBufferTest extends TestCase {
 		MoveTargetEdit t1= new MoveTargetEdit(3, s1);
 		m.add(s1);
 		m.add(t1);
-		fProcessor.add(m);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		fRoot.add(m);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0124536789", fDocument.get());
-		assertEquals(m.getRegion(), 2, 6);
-		assertEquals(t1.getRegion(), 3, 2);
-		assertEquals(s1.getRegion(), 6, 0);		
+		assertEquals(m, 2, 6);
+		assertEquals(t1, 3, 2);
+		assertEquals(s1, 6, 0);		
 		doUndoRedo(undo, "0124536789");		
 	}
 	
@@ -761,13 +756,13 @@ public class TextBufferTest extends TestCase {
 		MoveTargetEdit t1= new MoveTargetEdit(5, s1);
 		m.add(s1);
 		m.add(t1);
-		fProcessor.add(m);
-		assertTrue(fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
+		fRoot.add(m);
+		assertTrue(fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0142356789", fDocument.get());
-		assertEquals(m.getRegion(), 2, 6);
-		assertEquals(t1.getRegion(), 3, 2);
-		assertEquals(s1.getRegion(), 2, 0);		
+		assertEquals(m, 2, 6);
+		assertEquals(t1, 3, 2);
+		assertEquals(s1, 2, 0);		
 		doUndoRedo(undo, "0142356789");		
 	}
 	
@@ -775,12 +770,12 @@ public class TextBufferTest extends TestCase {
 		CopySourceEdit s1= new CopySourceEdit(2, 3);
 		CopyTargetEdit t1= new CopyTargetEdit(8, s1);
 		
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		assertTrue("Can perform edits", fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getRegion(), 2, 3);
-		assertEquals(t1.getRegion(), 8, 3);
+		fRoot.add(s1);
+		fRoot.add(t1);
+		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(s1, 2, 3);
+		assertEquals(t1, 8, 3);
 		String result= "0123456723489";
 		assertEquals("Buffer content", result, fDocument.get());
 		doUndoRedo(undo, result);		
@@ -790,12 +785,12 @@ public class TextBufferTest extends TestCase {
 		CopySourceEdit s1= new CopySourceEdit(7, 2);
 		CopyTargetEdit t1= new CopyTargetEdit(3, s1);
 		
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		assertTrue("Can perform edits", fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getRegion(), 9, 2);
-		assertEquals(t1.getRegion(), 3, 2);
+		fRoot.add(s1);
+		fRoot.add(t1);
+		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(s1, 9, 2);
+		assertEquals(t1, 3, 2);
 		String result= "012783456789";
 		assertEquals("Buffer content", result, fDocument.get());
 		doUndoRedo(undo, result);		
@@ -808,33 +803,32 @@ public class TextBufferTest extends TestCase {
 		CopyTargetEdit t2= new CopyTargetEdit(2, s2);
 		s1.add(s2);
 		
-		fProcessor.add(s1);
-		fProcessor.add(t1);
-		fProcessor.add(t2);
-		assertTrue("Can perform edits", fProcessor.canPerformEdits());
-		UndoMemento undo= fProcessor.performEdits();
-		assertEquals(s1.getRegion(), 7, 2);
-		assertEquals(t1.getRegion(), 10, 2);
-		assertEquals(s2.getRegion(), 7, 2);
-		assertEquals(t2.getRegion(), 2, 2);
+		fRoot.add(s1);
+		fRoot.add(t1);
+		fRoot.add(t2);
+		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		UndoMemento undo= fRoot.apply(fDocument);
+		assertEquals(s1, 7, 2);
+		assertEquals(t1, 10, 2);
+		assertEquals(s2, 7, 2);
+		assertEquals(t2, 2, 2);
 		String result= "01562345675689";
 		assertEquals("Buffer content", result, fDocument.get());
 		doUndoRedo(undo, result);		
 	}
 	
 	public void testSwap1() throws Exception {
-		TextBuffer buffer= TextBuffer.create("foo(1, 2), 3");
-		TextBufferEditor editor= new TextBufferEditor(buffer);		
+		IDocument document= new Document("foo(1, 2), 3");
 		
 		MultiTextEdit root= new MultiTextEdit();
 		{
 			CopySourceEdit innerRoot= new CopySourceEdit(0, 9);
 			
-			SimpleTextEdit e1= new ReplaceEdit(0, 9, "");
+			TextEdit e1= new ReplaceEdit(0, 9, "");
 			e1.add(innerRoot);
 			CopyTargetEdit t1= new CopyTargetEdit(11, innerRoot);
 			
-			SimpleTextEdit e2= new ReplaceEdit(11, 1, "");
+			TextEdit e2= new ReplaceEdit(11, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(11, 1);
 			e2.add(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(0, s2);
@@ -843,60 +837,54 @@ public class TextBufferTest extends TestCase {
 			root.add(t2);
 			root.add(e2);				
 			root.add(t1);
-
-			editor.add(root);
 		}
 		
-		assertTrue("Can perform edits", editor.canPerformEdits());
-		editor.performEdits();
+		assertTrue("Can perform edits", root.canApply(document));
+		root.apply(document);
 
 		String result= "3, foo(1, 2)";
-		assertEquals("Buffer content", result, buffer.getContent());
+		assertEquals("Buffer content", result, document.get());
 	}
 	
 	public void testSwap2() throws Exception {
-		TextBuffer buffer= TextBuffer.create("foo(1, 2), 3");
-		TextBufferEditor editor= new TextBufferEditor(buffer);		
+		IDocument document= new Document("foo(1, 2), 3");
 		
-		MultiTextEdit innerRoot= new MultiTextEdit();
+		MultiTextEdit root= new MultiTextEdit();
 		{
-			SimpleTextEdit e1= new ReplaceEdit(4, 1, "");
+			TextEdit e1= new ReplaceEdit(4, 1, "");
 			CopySourceEdit s1= new CopySourceEdit(4, 1);
 			e1.add(s1);
 			CopyTargetEdit t1= new CopyTargetEdit(7, s1);
 			
-			SimpleTextEdit e2= new ReplaceEdit(7, 1, "");
+			TextEdit e2= new ReplaceEdit(7, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(7, 1);
 			e2.add(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(4, s2);
 			
-			innerRoot.add(e1);
-			innerRoot.add(t2);
-			innerRoot.add(e2);				
-			innerRoot.add(t1);
+			root.add(e1);
+			root.add(t2);
+			root.add(e2);				
+			root.add(t1);
 		}
 		
-		editor.add(innerRoot);
-		
-		assertTrue("Can perform edits", editor.canPerformEdits());
-		editor.performEdits();
+		assertTrue("Can perform edits", root.canApply(document));
+		root.apply(document);
 
 		String result= "foo(2, 1), 3";
-		assertEquals("Buffer content", result, buffer.getContent());
+		assertEquals("Buffer content", result, document.get());
 	}	
 	
 	public void testSwap2InSwap1() throws Exception {
-		TextBuffer buffer= TextBuffer.create("foo(1, 2), 3");
-		TextBufferEditor editor= new TextBufferEditor(buffer);		
+		IDocument document= new Document("foo(1, 2), 3");
 		
 		CopySourceEdit innerRoot= new CopySourceEdit(0, 9);
 		{
-			SimpleTextEdit e1= new ReplaceEdit(4, 1, "");
+			TextEdit e1= new ReplaceEdit(4, 1, "");
 			CopySourceEdit s1= new CopySourceEdit(4, 1);
 			e1.add(s1);
 			CopyTargetEdit t1= new CopyTargetEdit(7, s1);
 			
-			SimpleTextEdit e2= new ReplaceEdit(7, 1, "");
+			TextEdit e2= new ReplaceEdit(7, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(7, 1);
 			e2.add(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(4, s2);
@@ -908,11 +896,11 @@ public class TextBufferTest extends TestCase {
 		}
 		MultiTextEdit root= new MultiTextEdit();
 		{
-			SimpleTextEdit e1= new ReplaceEdit(0, 9, "");
+			TextEdit e1= new ReplaceEdit(0, 9, "");
 			e1.add(innerRoot);
 			CopyTargetEdit t1= new CopyTargetEdit(11, innerRoot);
 			
-			SimpleTextEdit e2= new ReplaceEdit(11, 1, "");
+			TextEdit e2= new ReplaceEdit(11, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(11, 1);
 			e2.add(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(0, s2);
@@ -921,32 +909,27 @@ public class TextBufferTest extends TestCase {
 			root.add(t2);
 			root.add(e2);				
 			root.add(t1);
-			
-			editor.add(root);
 		}
 
-		assertTrue("Can perform edits", editor.canPerformEdits());
-		editor.performEdits();
+		assertTrue("Can perform edits", root.canApply(document));
+		root.apply(document);
 
 		String result= "3, foo(2, 1)";
-		assertEquals("Buffer content", result, buffer.getContent());
+		assertEquals("Buffer content", result, document.get());
 	}	
 	
 	private void doUndoRedo(UndoMemento undo, String redoResult) throws Exception {
-		fProcessor.add(undo);
-		UndoMemento redo= fProcessor.performEdits();
+		UndoMemento redo= undo.apply(fDocument);
 		assertBufferContent();
-		fProcessor.add(redo);
-		undo= fProcessor.performEdits();
+		undo= redo.apply(fDocument);
 		assertEquals("Buffer content redo", redoResult, fDocument.get());
-		fProcessor.add(undo);
-		fProcessor.performEdits();
+		undo.apply(fDocument);
 		assertBufferContent();
 	}
 	
-	private void assertEquals(IRegion r, int offset, int length) {
-		assertEquals("Offset", offset, r.getOffset());
-		assertEquals("Length", length, r.getLength());	
+	private void assertEquals(TextEdit edit, int offset, int length) {
+		assertEquals("Offset", offset, edit.getOffset());
+		assertEquals("Length", length, edit.getLength());	
 	}
 	
 	private void assertBufferContent() {

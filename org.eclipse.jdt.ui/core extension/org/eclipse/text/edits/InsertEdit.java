@@ -10,18 +10,24 @@
  *******************************************************************************/
 package org.eclipse.text.edits;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+
 /**
  * Text edit to insert a text at a given position in a 
  * document.
+ * 
+ * @since 3.0
  */
-public final class InsertEdit extends SimpleTextEdit {
+public final class InsertEdit extends TextEdit {
 	
 	private String fText;
 	
 	/**
 	 * Constructs a new insert edit.
 	 * 
-	 * @param offset the offset of the range to replace
+	 * @param offset the insertion offset
 	 * @param text the text to insert
 	 */
 	public InsertEdit(int offset, String text) {
@@ -29,31 +35,50 @@ public final class InsertEdit extends SimpleTextEdit {
 		fText= text;
 	}
 	
-	/**
+	/*
 	 * Copy constructor
-	 * 
-	 * @param other the edit to copy from
 	 */
 	private InsertEdit(InsertEdit other) {
 		super(other);
 		fText= other.fText;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit#getText()
+	/**
+	 * Returns the new text inserted at the offset denoted
+	 * by this edit. 
+	 * 
+	 * @return the edit's text.
 	 */
 	public String getText() {
 		return fText;
 	}
 	
+	/* non Java-doc
+	 * @see TextEdit#doCopy
+	 */	
 	protected TextEdit doCopy() {
 		return new InsertEdit(this);
 	}
 	
 	/* non Java-doc
+	 * @see TextEdit#perform
+	 */	
+	/* package */ void perform(IDocument document) throws BadLocationException {
+		document.replace(getOffset(), getLength(), fText);
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#update
+	 */	
+	/* package */ void update(DocumentEvent event, TreeIterationInfo info) {
+		markChildrenAsDeleted();
+		super.update(event, info);
+	}
+			
+	/* non Java-doc
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
 		return super.toString() + " <<" + fText; //$NON-NLS-1$
-	}	
+	}
 }
