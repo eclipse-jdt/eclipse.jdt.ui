@@ -365,6 +365,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}
 
+	public void test_nonstatic_36() throws Exception{
+		printTestDisabledMessage("test for bug 34591");
+//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+	}
+
 	public void testFail_nonstatic_0() throws Exception{
 		validateFailingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", RefactoringStatus.ERROR);
 	}
