@@ -25,11 +25,11 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.part.Page;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the source and generate actions to a context menu and
@@ -51,6 +51,8 @@ public class GenerateActionGroup extends ActionGroup {
 	private ExternalizeStringsAction fExternalizeStrings;
 	private FindStringsToExternalizeAction fFindStringsToExternalize;
 	
+	private OrganizeImportsAction fOrganizeImports;
+	
 	/**
 	 * Creates a new <code>GenerateActionGroup</code>.
 	 * <p>
@@ -63,6 +65,9 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fExternalizeStrings= new ExternalizeStringsAction(editor);
 		fExternalizeStrings.update(selection);
+		
+		fOrganizeImports= new OrganizeImportsAction(editor);
+		fOrganizeImports.update(selection);
 	}
 	
 	/**
@@ -94,6 +99,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddBookmark= new AddBookmarkAction(site.getShell());
 		fExternalizeStrings= new ExternalizeStringsAction(site);
 		fFindStringsToExternalize= new FindStringsToExternalizeAction(site);
+		fOrganizeImports= new OrganizeImportsAction(site);
 		
 		fOverrideMethods.update(selection);
 		fAddGetterSetter.update(selection);
@@ -107,6 +113,7 @@ public class GenerateActionGroup extends ActionGroup {
 		} else {
 			fAddBookmark.setEnabled(false);
 		}
+		fOrganizeImports.update(selection);
 		
 		provider.addSelectionChangedListener(fOverrideMethods);
 		provider.addSelectionChangedListener(fAddGetterSetter);
@@ -115,6 +122,7 @@ public class GenerateActionGroup extends ActionGroup {
 		provider.addSelectionChangedListener(fAddBookmark);
 		provider.addSelectionChangedListener(fExternalizeStrings);
 		provider.addSelectionChangedListener(fFindStringsToExternalize);
+		provider.addSelectionChangedListener(fOrganizeImports);
 	}
 	
 	/* (non-Javadoc)
@@ -135,6 +143,7 @@ public class GenerateActionGroup extends ActionGroup {
 		appendToGroup(menu, fAddUnimplementedConstructors);
 		appendToGroup(menu, fAddJavaDocStub);
 		appendToGroup(menu, fAddBookmark);
+		appendToGroup(menu, fOrganizeImports);
 		addSubMenu(menu);
 	}
 
@@ -146,6 +155,7 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(IWorkbenchActionConstants.BOOKMARK, fAddBookmark);
 		actionBar.setGlobalActionHandler(RetargetActionIDs.EXTERNALIZE_STRINGS, fExternalizeStrings);
 		actionBar.setGlobalActionHandler(RetargetActionIDs.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
+		actionBar.setGlobalActionHandler(RetargetActionIDs.ORGANIZE_IMPORTS, fOrganizeImports);
 	}
 	
 	private void addSubMenu(IMenuManager menu) {
