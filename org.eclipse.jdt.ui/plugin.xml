@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 
 <plugin
-    name = "Java Development Tools UI"
-    id = "org.eclipse.jdt.ui"
-    version = "0.9"
-    provider-name = "Object Technology International, Inc."
-    class="org.eclipse.jdt.internal.ui.JavaPlugin">
+	name="%pluginName"
+	id = "org.eclipse.jdt.ui"
+	version = "0.9"
+	provider-name = "Object Technology International, Inc."
+	class="org.eclipse.jdt.internal.ui.JavaPlugin">
 
 <requires> 
   <import plugin="org.eclipse.ui"/>
