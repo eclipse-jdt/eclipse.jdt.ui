@@ -10,7 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
+import java.io.IOException;
 import java.io.Reader;
+import java.net.URL;
+
+import org.osgi.framework.Bundle;
+
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -102,8 +108,9 @@ public class JavadocView extends AbstractInfoView {
 	private TextPresentation fPresentation= new TextPresentation();
 	/** The select all action */
 	private SelectAllAction fSelectAllAction;
-
-
+	/** The URL of the style sheet (css) */
+	private URL fStyleSheetURL;
+	/** The Browser widget */
 	private boolean fIsUsingBrowserWidget;
 
 	/**
@@ -239,6 +246,7 @@ public class JavadocView extends AbstractInfoView {
 			fBrowser= new Browser(parent, SWT.NONE);
 			fIsUsingBrowserWidget= true;
 		} catch (SWTError er) {
+			
 			/* The Browser widget throws an SWTError if it fails to
 			 * instantiate properly. Application code should catch
 			 * this SWTError and disable any feature requiring the
@@ -272,8 +280,21 @@ public class JavadocView extends AbstractInfoView {
 				}
 			});
 		}
-		
+		initStyleSheetURL();
 		getViewSite().setSelectionProvider(new SelectionProvider(getControl()));
+	}
+	
+	private void initStyleSheetURL() {
+		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
+		fStyleSheetURL= bundle.getEntry("/JavadocViewStyleSheet.css"); //$NON-NLS-1$
+		if (fStyleSheetURL == null)
+			return;
+		
+		try {
+			fStyleSheetURL= Platform.asLocalURL(fStyleSheetURL);
+		} catch (IOException ex) {
+			JavaPlugin.log(ex);
+		}
 	}
 	
 	/*
@@ -399,7 +420,7 @@ public class JavadocView extends AbstractInfoView {
 		}
 		
 		if (buffer.length() > 0) {
-			HTMLPrinter.insertPageProlog(buffer, 0);
+			HTMLPrinter.insertPageProlog(buffer, 0, fStyleSheetURL);
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}

@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URL;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.graphics.RGB;
@@ -92,6 +94,25 @@ public class HTMLPrinter {
 		return null;
 	}
 
+	public static void insertPageProlog(StringBuffer buffer, int position, RGB bgRGB, URL styleSheetURL) {
+		
+		if (bgRGB == null)
+			insertPageProlog(buffer, position, styleSheetURL);
+		else {
+			StringBuffer pageProlog= new StringBuffer(300);
+			
+			pageProlog.append("<html>"); //$NON-NLS-1$
+			
+			appendStyleSheetLink(pageProlog, styleSheetURL);
+			
+			pageProlog.append("<body text=\"#000000\" bgcolor=\""); //$NON-NLS-1$
+			appendColor(pageProlog, bgRGB);
+			pageProlog.append("\"><font size=-1>"); //$NON-NLS-1$
+			
+			buffer.insert(position,  pageProlog.toString());
+		}
+	}
+	
 	public static void insertPageProlog(StringBuffer buffer, int position, RGB bgRGB) {
 		if (bgRGB == null)
 			insertPageProlog(buffer, position);
@@ -104,6 +125,19 @@ public class HTMLPrinter {
 		}
 	}
 	
+	private static void appendStyleSheetLink(StringBuffer buffer, URL styleSheetURL) {
+		if (styleSheetURL == null)
+			return;
+
+		buffer.append("<head>"); //$NON-NLS-1$
+		
+		buffer.append("<LINK REL=\"stylesheet\" HREF= \""); //$NON-NLS-1$
+		buffer.append(styleSheetURL);
+		buffer.append("\" CHARSET=\"ISO-8859-1\" TYPE=\"text/css\">"); //$NON-NLS-1$
+
+		buffer.append("</head>"); //$NON-NLS-1$
+	}
+	
 	private static void appendColor(StringBuffer buffer, RGB rgb) {
 		buffer.append('#');
 		buffer.append(Integer.toHexString(rgb.red));
@@ -113,6 +147,10 @@ public class HTMLPrinter {
 
 	public static void insertPageProlog(StringBuffer buffer, int position) {
 		insertPageProlog(buffer, position, getBgColor()); //$NON-NLS-1$
+	}
+	
+	public static void insertPageProlog(StringBuffer buffer, int position, URL styleSheetURL) {
+		insertPageProlog(buffer, position, getBgColor(), styleSheetURL); //$NON-NLS-1$
 	}
 	
 	private static RGB getBgColor() {

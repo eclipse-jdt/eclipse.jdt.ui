@@ -22,6 +22,7 @@
 			basedir="bin"
 		/>
 		<copy file="plugin.xml" todir="${dest}"/>
+		<copy file="JavadocViewStyleSheet.css" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
