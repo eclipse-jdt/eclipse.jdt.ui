@@ -319,7 +319,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		
 		result.merge(changeReferences(new SubProgressMonitor(pm, 3)));
 		
-		fChange.add(fSource.createChange()); //ASTData#createChange() should add a GroupDescription "Update imports"
+		fChange.add(fSource.createChange());
 
 		HashSet cus= new HashSet();
 		cus.add(fSource.getCu());
