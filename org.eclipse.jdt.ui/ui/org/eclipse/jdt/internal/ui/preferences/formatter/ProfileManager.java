@@ -208,7 +208,7 @@ public class ProfileManager extends Observable {
 	/**
 	 * The keys of the built-in profiles
 	 */
-	public final static String DEFAULT_PROFILE= "org.eclipse.jdt.ui.default_profile"; //$NON-NLS-1$
+	public final static String ECLIPSE21_PROFILE= "org.eclipse.jdt.ui.default_profile"; //$NON-NLS-1$
 	public final static String JAVA_PROFILE= "org.eclipse.jdt.ui.default.sun_profile"; //$NON-NLS-1$
 	
 	
@@ -236,7 +236,7 @@ public class ProfileManager extends Observable {
 	 * The keys of the options to be saved with each profile
 	 */
 	private final static List fUIKeys= Arrays.asList(new CommentFormattingContext().getPreferenceKeys()); 
-	private final static List fCoreKeys= new ArrayList(DefaultCodeFormatterConstants.getDefaultSettings().keySet());
+	private final static List fCoreKeys= new ArrayList(DefaultCodeFormatterConstants.getJavaConventionsSettings().keySet());
 
 	/**
 	 * All keys appearing in a profile, sorted alphabetically
@@ -272,7 +272,7 @@ public class ProfileManager extends Observable {
 		final String id= getUIPreferenceStore().getString(PROFILE_KEY);
 		fSelected= (Profile)fProfiles.get(id);
 		if (fSelected == null) {
-			fSelected= (Profile)fProfiles.get(DEFAULT_PROFILE);
+			fSelected= (Profile)fProfiles.get(JAVA_PROFILE);
 		}
 	}
 	
@@ -329,21 +329,21 @@ public class ProfileManager extends Observable {
 	 * Add all the built-in profiles to the map and to the list.
 	 */
 	private void addBuiltinProfiles(Map profiles, List profilesByName) {
-		final Profile defaultProfile= new BuiltInProfile(DEFAULT_PROFILE, FormatterMessages.getString("ProfileManager.default_profile.name"), getDefaultSettings()); //$NON-NLS-1$
-		profiles.put(defaultProfile.getID(), defaultProfile);
-		profilesByName.add(defaultProfile);
-		
 		final Profile javaProfile= new BuiltInProfile(JAVA_PROFILE, FormatterMessages.getString("ProfileManager.java_conventions_profile.name"), getJavaSettings()); //$NON-NLS-1$
 		profiles.put(javaProfile.getID(), javaProfile);
 		profilesByName.add(javaProfile);
+		
+		final Profile eclipse21Profile= new BuiltInProfile(ECLIPSE21_PROFILE, FormatterMessages.getString("ProfileManager.default_profile.name"), getEclipse21Settings()); //$NON-NLS-1$
+		profiles.put(eclipse21Profile.getID(), eclipse21Profile);
+		profilesByName.add(eclipse21Profile);
 	}
 	
 	
 	/**
 	 * Get the settings for the default profile.
 	 */	
-	public static Map getDefaultSettings() {
-		final Map options= DefaultCodeFormatterConstants.getDefaultSettings();
+	public static Map getEclipse21Settings() {
+		final Map options= DefaultCodeFormatterConstants.getEclipse21Settings();
 		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
 
 		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);

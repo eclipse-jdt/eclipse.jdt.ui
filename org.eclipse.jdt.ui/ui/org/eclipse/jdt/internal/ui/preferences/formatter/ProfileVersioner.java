@@ -33,7 +33,7 @@ public class ProfileVersioner {
 	
 	public static void updateAndComplete(CustomProfile profile) {
 		final Map oldSettings= profile.getSettings();
-		final Map newSettings= ProfileManager.getDefaultSettings();
+		final Map newSettings= ProfileManager.getJavaSettings();
 		
 		switch (profile.getVersion()) {
 

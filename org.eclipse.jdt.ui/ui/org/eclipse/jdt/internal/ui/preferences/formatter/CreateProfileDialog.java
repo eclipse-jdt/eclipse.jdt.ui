@@ -151,7 +151,7 @@ public class CreateProfileDialog extends StatusDialog {
 		fEditCheckbox.setSelection(fOpenEditDialog);
 		
 		fProfileCombo.setItems(fSortedNames);
-		fProfileCombo.setText(fProfileManager.getProfile(ProfileManager.DEFAULT_PROFILE).getName());
+		fProfileCombo.setText(fProfileManager.getProfile(ProfileManager.JAVA_PROFILE).getName());
 		updateStatus(fEmpty);
 		
 		applyDialogFont(composite);
