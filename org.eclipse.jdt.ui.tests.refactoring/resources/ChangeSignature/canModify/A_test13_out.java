@@ -4,8 +4,8 @@ class A{
 	private void m(int j, int k, int i){
 	}
 	private void foo(){
-		m(2000, 
-			/*comment*/3, 
-				19/*comment2*/);
+		m(/*comment*/2000, 
+			3/*comment2*/, 
+				19);
 	}
 }
