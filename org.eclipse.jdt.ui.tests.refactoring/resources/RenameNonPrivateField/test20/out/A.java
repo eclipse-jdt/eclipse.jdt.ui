@@ -5,14 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 class A{
-	List<String> list= new ArrayList<String>();
+	List<String> items= new ArrayList<String>();
 	
 	public List<String> getList() {
-		return list;
+		return items;
 	}
 	
 	public void setList(List<String> list) {
-		this.list= list;
+		this.items= list;
 	}
 }
 
@@ -21,6 +21,6 @@ class B {
 		A a= new A();
 		a.setList(new LinkedList<String>());
 		List<String> list= a.getList();
-		list.addAll(a.list);
+		list.addAll(a.items);
 	}
 }

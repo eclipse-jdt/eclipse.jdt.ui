@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -25,6 +27,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
@@ -35,6 +39,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	private static final Class clazz= RenameNonPrivateFieldTests.class;
 	private static final String REFACTORING_PATH= "RenameNonPrivateField/";
 
+	private static final boolean BUG_79030= true;
+	
 	private Object fPrefixPref;
 	
 	//Test methods can configure these fields:
@@ -92,13 +98,18 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		helper1_0("f", "g");
 	}
 	
+	/**
+	 * Configure options by setting instance fields to non-default values.
+	 * @param fieldName
+	 * @param newFieldName
+	 * @throws Exception
+	 */
 	private void helper2(String fieldName, String newFieldName) throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 		IField field= classA.getField(fieldName);
-		String[] handles= ParticipantTesting.createHandles(field);
-		RenameFieldProcessor processor= field.getDeclaringType().isEnum() ? new RenameEnumConstProcessor(field) : new RenameFieldProcessor(field);
+		RenameFieldProcessor processor= JdtFlags.isEnum(field) ? new RenameEnumConstProcessor(field) : new RenameFieldProcessor(field);
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setNewElementName(newFieldName);
 		
@@ -107,14 +118,30 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		processor.setRenameGetter(fRenameGetter);
 		processor.setRenameSetter(fRenameSetter);
 		
+		int numbers= 1;
+		List elements= new ArrayList();
+		elements.add(field);
+		List args= new ArrayList();
+		args.add(new RenameArguments(newFieldName, fUpdateReferences));
+		if (fRenameGetter) {
+			elements.add(processor.getGetter());
+			args.add(new RenameArguments(processor.getNewGetterName(), fUpdateReferences));
+			numbers++;
+		}
+		if (fRenameSetter) {
+			elements.add(processor.getSetter());
+			args.add(new RenameArguments(processor.getNewSetterName(), fUpdateReferences));
+			numbers++;
+		}
+		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
+
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("was supposed to pass", null, result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
 		ParticipantTesting.testRename(
-			handles,
-			new RenameArguments[] {
-				new RenameArguments(newFieldName, fUpdateReferences)});
+			renameHandles, 
+			(RenameArguments[]) args.toArray(new RenameArguments[args.size()]));
 		
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
@@ -291,12 +318,27 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
 //--- test 1.5 features: ---
 	public void test19() throws Exception{
-		printTestDisabledMessage("generics not supported yet");
-		if (true)
+		if (BUG_79030) {
+			printTestDisabledMessage("79030: generics not supported yet");
 			return;
+		}
 		fRenameGetter= true;
 		fRenameSetter= true;
-		helper2("fList", "fItems");
+		helper2("list", "items");
+	}
+	
+	public void test20() throws Exception{
+		helper2("list", "items");
+	}
+	
+	public void test21() throws Exception{
+		helper2("fValue", "fOrdinal");
+	}
+	
+	public void test22() throws Exception{
+		fRenameGetter= true;
+		fRenameSetter= true;
+		helper2("tee", "thing");
 	}
 	
 //--- end test 1.5 features. ---

@@ -94,7 +94,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	public boolean isApplicable() throws CoreException {
-		return isAvailable() && ! fField.getDeclaringType().isEnum();
+		return isAvailable() && ! JdtFlags.isEnum(fField);
 	}
 	
 	protected boolean isAvailable() throws CoreException {
