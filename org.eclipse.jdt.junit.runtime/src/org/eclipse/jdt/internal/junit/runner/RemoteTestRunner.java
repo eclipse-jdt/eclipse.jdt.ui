@@ -556,7 +556,7 @@ public class RemoteTestRunner implements TestListener {
 
 	private boolean isComparisonFailure(Throwable throwable) {
 		// avoid reference to comparison failure to avoid a dependency on 3.8.1
-		return throwable.getClass().getName().equals("junit.framework.ComparisonFailure");
+		return throwable.getClass().getName().equals("junit.framework.ComparisonFailure"); //$NON-NLS-1$
 	}
 
 	/*
