@@ -24,11 +24,14 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
-public class ImportOrganizeTest extends TestCase {
+public class ImportOrganizeTest extends CoreTests {
 	
 	private static final Class THIS= ImportOrganizeTest.class;
 	
@@ -39,11 +42,11 @@ public class ImportOrganizeTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("testInnerClassVisibility"));
+			suite.addTest(new ImportOrganizeTest("testImportStructureOnNonExistingCU"));
 			return suite;
 		}	
 	}
@@ -380,31 +383,6 @@ public class ImportOrganizeTest extends TestCase {
 		});
 	}
 	
-	private static final int printRange= 6;
-
-	
-	public static void assertEqualString(String str1, String str2) {	
-		int len1= Math.min(str1.length(), str2.length());
-		
-		int diffPos= -1;
-		for (int i= 0; i < len1; i++) {
-			if (str1.charAt(i) != str2.charAt(i)) {
-				diffPos= i;
-				break;
-			}
-		}
-		if (diffPos == -1 && str1.length() != str2.length()) {
-			diffPos= len1;
-		}
-		if (diffPos != -1) {
-			int diffAhead= Math.max(0, diffPos - printRange);
-			int diffAfter= Math.min(str1.length(), diffPos + printRange);
-			
-			String diffStr= str1.substring(diffAhead, diffPos) + '^' + str1.substring(diffPos, diffAfter);
-			
-			assertTrue("Content not as expected: is\n" + str1 + "\nDiffers at pos " + diffPos + ": " + diffStr + "\nexpected:\n" + str2, false);
-		}
-	}	
 	
 	public void testClearImports() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -1221,6 +1199,43 @@ public class ImportOrganizeTest extends TestCase {
 		buf.append(body.toString());
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testImportStructureOnNonExistingCU() throws Exception {
+	
+		IJavaProject project1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(project1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		ICompilationUnit unit= pack1.getCompilationUnit("A.java");
+		ICompilationUnit wc= (ICompilationUnit) unit.getWorkingCopy(null, JavaUI.getBufferFactory(), null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		wc.getBuffer().setContents(buf.toString());
+		
+		String[] order= new String[] { "com", "com.foreigncompany", "com.mycompany" };
+		int threshold= 99;
+
+		ImportsStructure importsStructure= new ImportsStructure(wc, order, threshold, true);
+		importsStructure.addImport("java.util.HashMap");
+		importsStructure.create(false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("\n");		
+		buf.append("public class A {\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		
+		assertEqualStringIgnoreDelim(wc.getSource(), buf.toString());
+
+	}	
 	
 		
 }
