@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.HashSet;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -28,8 +31,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
@@ -42,6 +43,8 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -61,6 +64,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	private Hyperlink fChangeWorkspaceSettings;
 	private SelectionButtonDialogField fUseProjectSettings;
 	private IStatus fBlockStatus;
+	private Composite fParentComposite;
 	
 	private IProject fProject; // project or null
 	private Object fData; // page data
@@ -93,6 +97,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	}
 	
     protected Label createDescriptionLabel(Composite parent) {
+		fParentComposite= parent;
 		if (isProjectPreferencePage()) {
 			Composite composite= new Composite(parent, SWT.NONE);
 			GridLayout layout= new GridLayout();
@@ -130,7 +135,6 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			fChangeWorkspaceSettings.setText(PreferencesMessages.getString("PropertyAndPreferencePage.showprojectspecificsettings.label")); //$NON-NLS-1$
 			fChangeWorkspaceSettings.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
 		}
-		
 		return super.createDescriptionLabel(parent);
     }
 	
@@ -196,16 +200,21 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	
 	final void doLinkActivated(Hyperlink link) {
 		if (isProjectPreferencePage()) {
-			openWorkspacePreferences();
+			openWorkspacePreferences(NO_LINK_DATA);
 		} else {
-			ProjectSelectionDialog dialog= new ProjectSelectionDialog(getShell(), new ViewerFilter() {
-				public boolean select(Viewer viewer, Object parentElement, Object element) {
-					if (element instanceof IJavaProject) {
-						return hasProjectSpecificOptions(((IJavaProject) element).getProject());
+			HashSet projectsWithSpecifics= new HashSet();
+			try {
+				IJavaProject[] projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
+				for (int i= 0; i < projects.length; i++) {
+					IJavaProject curr= projects[i];
+					if (hasProjectSpecificOptions(curr.getProject())) {
+						projectsWithSpecifics.add(curr);
 					}
-					return false;
 				}
-			});
+			} catch (JavaModelException e) {
+				// ignore
+			}
+			ProjectSelectionDialog dialog= new ProjectSelectionDialog(getShell(), projectsWithSpecifics);
 			if (dialog.open() == Window.OK) {
 				IJavaProject res= (IJavaProject) dialog.getFirstResult();
 				openProjectProperties(res.getProject(), NO_LINK_DATA);
@@ -213,9 +222,9 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		}
 	}
 	
-	protected final void openWorkspacePreferences() {
+	protected final void openWorkspacePreferences(Object data) {
 		String id= getPreferencePageID();
-		PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
+		PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, data).open();
 	}
 	
 	protected final void openProjectProperties(IProject project, Object data) {
@@ -235,7 +244,10 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		if (isProjectPreferencePage()) {
 			fChangeWorkspaceSettings.setVisible(offerLink() && !useProjectSettings());
 		} else {
-			fChangeWorkspaceSettings.setVisible(offerLink());
+			if (!offerLink()) {
+				fChangeWorkspaceSettings.dispose();
+			}
+			fParentComposite.layout(true, true);
 		}
 	}
 	

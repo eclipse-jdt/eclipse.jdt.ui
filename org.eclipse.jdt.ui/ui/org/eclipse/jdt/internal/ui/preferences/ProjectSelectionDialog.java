@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.Set;
+
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -30,6 +32,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
@@ -41,27 +44,38 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class ProjectSelectionDialog extends SelectionStatusDialog {
 
 	// the visual selection widget group
 	private TableViewer fTableViewer;
+	private Set fProjectsWithSpecifics;
 
 	// sizing constants
 	private final static int SIZING_SELECTION_WIDGET_HEIGHT= 250;
 	private final static int SIZING_SELECTION_WIDGET_WIDTH= 300;
+	
+	private final static String DIALOG_SETTINGS_FILTER= "ProjectSelectionDialog.fiter_non_specifics"; //$NON-NLS-1$
 
 	private ViewerFilter fFilter;
 
-	public ProjectSelectionDialog(Shell parentShell, ViewerFilter hasProjectSettingsFilter) {
+	public ProjectSelectionDialog(Shell parentShell, Set projectsWithSpecifics) {
 		super(parentShell);
 		setTitle(PreferencesMessages.getString("ProjectSelectionDialog.title"));  //$NON-NLS-1$
 		setMessage(PreferencesMessages.getString("ProjectSelectionDialog.desciption")); //$NON-NLS-1$
-		fFilter= hasProjectSettingsFilter;
+		fProjectsWithSpecifics= projectsWithSpecifics;
 		
         int shellStyle = getShellStyle();
         setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
+		
+		fFilter= new ViewerFilter() {
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				return fProjectsWithSpecifics.contains(element);
+			}
+		};
+		
 	}
 
 	/* (non-Javadoc)
@@ -108,6 +122,10 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 				updateFilter(((Button) e.widget).getSelection());
 			}
 		});
+		boolean doFilter= JavaPlugin.getDefault().getDialogSettings().getBoolean(DIALOG_SETTINGS_FILTER)
+			&& !fProjectsWithSpecifics.isEmpty();
+		checkbox.setSelection(doFilter);
+		updateFilter(doFilter);
 		
 		IJavaModel input= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 		fTableViewer.setInput(input);
@@ -123,6 +141,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 		} else {
 			fTableViewer.removeFilter(fFilter);
 		}
+		JavaPlugin.getDefault().getDialogSettings().put(DIALOG_SETTINGS_FILTER, selected);
 	}
 
 	private void doSelectionChanged(Object[] objects) {

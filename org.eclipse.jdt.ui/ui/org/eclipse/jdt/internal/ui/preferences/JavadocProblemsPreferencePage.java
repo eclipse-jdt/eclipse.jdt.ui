@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.JavadocProblemsPreferencePage"; //$NON-NLS-1$
-	public static final String PROP_ID= "org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"; //$NON-NLS-1$
+	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.JavadocProblemsPreferencePage"; //$NON-NLS-1$
 
 	private JavadocProblemsConfigurationBlock fConfigurationBlock;
 
