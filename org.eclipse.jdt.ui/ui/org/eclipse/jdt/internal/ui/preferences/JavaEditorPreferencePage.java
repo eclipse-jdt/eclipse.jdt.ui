@@ -1286,10 +1286,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		initializeDefaultColors();
 		
-		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(fOverlayStore);
+		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(this, fOverlayStore);
 		fOccurrencesConfigurationBlock= new MarkOccurrencesConfigurationBlock(this, fOverlayStore);
 		fFoldingConfigurationBlock= new FoldingConfigurationBlock(fOverlayStore);
 		fAnnotationsConfigurationBlock= new AnnotationsConfigurationBlock(fOverlayStore);
+		fQuickDiffBlock= new QuickdiffConfigurationBlock(fOverlayStore, "JavaEditorPreferencePage"); //$NON-NLS-1$
 		
 		fOverlayStore.load();
 		fOverlayStore.start();
@@ -1332,7 +1333,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.quickdiff.title")); //$NON-NLS-1$
-		fQuickDiffBlock= new QuickdiffConfigurationBlock(fOverlayStore, "JavaEditorPreferencePage"); //$NON-NLS-1$
 		item.setControl(fQuickDiffBlock.createControl(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
@@ -1652,7 +1652,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		}	
 		status= StatusUtil.getMoreSevere(fOccurrencesConfigurationBlock.getStatus(), status);
 		status= StatusUtil.getMoreSevere(fJavaEditorHoverConfigurationBlock.getStatus(), status);
-		status= StatusUtil.getMoreSevere(fAnnotationsConfigurationBlock.getStatus(), status);
 		status= StatusUtil.getMoreSevere(getBrowserLikeLinksKeyModifierStatus(), status);
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);

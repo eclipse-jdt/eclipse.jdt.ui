@@ -95,8 +95,10 @@ class JavaEditorHoverConfigurationBlock {
 	};
 	
 
-	public JavaEditorHoverConfigurationBlock(OverlayPreferenceStore store) {
+	public JavaEditorHoverConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, OverlayPreferenceStore store) {
+		Assert.isNotNull(mainPreferencePage);
 		Assert.isNotNull(store);
+		fMainPreferencePage= mainPreferencePage;
 		fStore= store;
 		fStore.addKeys(createOverlayStoreKeys());
 	}
