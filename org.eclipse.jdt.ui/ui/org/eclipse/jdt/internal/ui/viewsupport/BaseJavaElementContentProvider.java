@@ -38,6 +38,15 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 
 	protected static final Object[] NO_CHILDREN= new Object[0];
 
+	private boolean fProvideSourceReferenceChildren= false;
+	
+	public BaseJavaElementContentProvider() {
+	}
+	
+	public BaseJavaElementContentProvider(boolean provideSourceReferenceChildren) {
+		fProvideSourceReferenceChildren= provideSourceReferenceChildren;
+	}
+	
 	/* (non-Javadoc)
 	 * Method declared on IStructuredContentProvider.
 	 */
@@ -80,6 +89,10 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 			if (element instanceof IFolder)
 				return getResources((IFolder)element);
 			
+			if (fProvideSourceReferenceChildren &&
+				element instanceof ISourceReference && element instanceof IParent)
+				return ((IParent)element).getChildren();
+			
 		} catch (JavaModelException e) {
 			return NO_CHILDREN;
 		}		
@@ -91,11 +104,19 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 	 * @see ITreeContentProvider
 	 */
 	public boolean hasChildren(Object element) {
-		// don't allow to drill down into a compilation unit or class file
-		if (element instanceof ICompilationUnit ||
+		if (fProvideSourceReferenceChildren) {
+			// assume CUs and class files are never empty
+			if (element instanceof ICompilationUnit ||
+				element instanceof IClassFile) {
+				return true;
+			}
+		} else {
+			// don't allow to drill down into a compilation unit or class file
+			if (element instanceof ICompilationUnit ||
 				element instanceof IClassFile ||
 				element instanceof IFile)
 			return false;
+		}
 			
 		if (element instanceof IJavaProject) {
 			IJavaProject jp= (IJavaProject)element;

@@ -67,6 +67,12 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 	public JavaElementContentProvider() {
 	}
 
+	/**
+	 * Creates a new content provider for Java elements.
+	 */
+	public JavaElementContentProvider(boolean provideSourceReferenceChildren) {
+		super(provideSourceReferenceChildren);
+	}
 
 	/* (non-Javadoc)
 	 * Method declared on IElementChangedListener.
@@ -130,7 +136,13 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 				postAdd(parent, element);
 			}						
 		}
-		// we don't show the contents of a compilation or IClassFile, so don't go any deeper
+
+		if (element instanceof ICompilationUnit) {
+			if (kind == IJavaElementDelta.CHANGED) {
+				postRefresh(element);
+			}
+		}
+		// we don't show the contents of a compilation or IClassFile, so don't go any deeper
 		if ((element instanceof ICompilationUnit) || (element instanceof IClassFile))
 			return;
 		

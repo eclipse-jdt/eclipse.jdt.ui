@@ -6,28 +6,25 @@ package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.Iterator;
 
-import org.eclipse.swt.widgets.Shell;
-
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.SelectionProviderAction;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
  
 /**
@@ -36,7 +33,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  */
 class OpenResourceAction extends SelectionProviderAction implements ISelectionChangedListener {	
 	
-	OpenResourceAction(ISelectionProvider provider) {
+	public OpenResourceAction(ISelectionProvider provider) {
 		super(provider, PackagesMessages.getString("OpenResource.action.label")); //$NON-NLS-1$
 		setDescription(PackagesMessages.getString("OpenResource.action.description")); //$NON-NLS-1$
 	}
@@ -47,10 +44,12 @@ class OpenResourceAction extends SelectionProviderAction implements ISelectionCh
 		
 		while (iter.hasNext()) {
 			Object element= iter.next();
-			try {				
-				EditorUtility.openInEditor(element);			
+			
+			try {	  
+				IEditorPart part= EditorUtility.openInEditor(element);
+				if (element instanceof ISourceReference) 	
+					EditorUtility.revealInEditor(part, (ISourceReference)element);
 			} catch (JavaModelException e) {
-				
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
 					JavaStatusConstants.INTERNAL_ERROR, PackagesMessages.getString("OpenResource.error.message"), e)); //$NON-NLS-1$
 				

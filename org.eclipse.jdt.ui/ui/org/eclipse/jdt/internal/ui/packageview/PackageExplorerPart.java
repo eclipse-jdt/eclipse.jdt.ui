@@ -9,27 +9,49 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DragSource;
-import org.eclipse.swt.dnd.FileTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.ScrollBar;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Tree;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
+import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
+import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
+import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
+import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
+import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
+import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import org.eclipse.jdt.internal.ui.wizards.NewGroup;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.JavaElementContentProvider;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -46,10 +68,24 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
-
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.ScrollBar;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -75,41 +111,6 @@ import org.eclipse.ui.views.internal.framelist.ForwardAction;
 import org.eclipse.ui.views.internal.framelist.FrameList;
 import org.eclipse.ui.views.internal.framelist.GoIntoAction;
 import org.eclipse.ui.views.internal.framelist.UpAction;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IPackagesViewPart;
-import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
-import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
-import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
-import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
-import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
-import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
-import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-import org.eclipse.jdt.internal.ui.wizards.NewGroup;
 
 
 /**
@@ -178,6 +179,18 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		public void partOpened(IWorkbenchPart part) {
 		}
 	};
+	
+	private ITreeViewerListener fExpansionListener= new ITreeViewerListener() {
+		public void treeCollapsed(TreeExpansionEvent event) {
+		}
+		
+		public void treeExpanded(TreeExpansionEvent event) {
+			Object element= event.getElement();
+			if (element instanceof ICompilationUnit || 
+				element instanceof IClassFile)
+				expandMainType(element);
+		}
+	};
 
 
 	public PackageExplorerPart() {
@@ -229,6 +242,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (fContextMenu != null && !fContextMenu.isDisposed())
 			fContextMenu.dispose();
 		getSite().getPage().removePartListener(fPartListener);
+		if (fViewer != null)
+			fViewer.removeTreeListener(fExpansionListener);
 		super.dispose();	
 	}
 	/**
@@ -237,7 +252,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	public void createPartControl(Composite parent) {
 		fViewer= new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		
-		fViewer.setContentProvider(new JavaElementContentProvider());
+		boolean showCUChildren= JavaBasePreferencePage.showCompilationUnitChildren();
+		fViewer.setContentProvider(new JavaElementContentProvider(showCUChildren));
+		
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fViewer);		
 
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
@@ -294,6 +311,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 		IStatusLineManager slManager= getViewSite().getActionBars().getStatusLineManager();
 		fViewer.addSelectionChangedListener(new StatusBarUpdater(slManager));
+		fViewer.addTreeListener(fExpansionListener);
+	
 		if (fMemento != null)
 			restoreState(fMemento);
 		fMemento= null;
@@ -410,7 +429,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		addOpenToMenu(menu, selection);
 		addRefactoring(menu);
-				
+		// TODO should also add add from local history
+		if (selection.size() == 1)
+			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fViewer));	
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
 		
 		if (fAddBookmarkAction.canOperateOnSelection())
@@ -573,15 +594,19 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private void handleDoubleClick(DoubleClickEvent event) {
 		IStructuredSelection s= (IStructuredSelection) event.getSelection();
 		Object element= s.getFirstElement();
+		
+		// if the resource is already open then always open it
+		if (EditorUtility.isOpenInEditor(element) == null) {
+			if (fOpenCUAction.isEnabled()) {
+				fOpenCUAction.run();
+				return;
+			}
+		}
 		if (fViewer.isExpandable(element)) {
 			if (JavaBasePreferencePage.doubleClockGoesInto())
 				fZoomInAction.run();
 			else
 				fViewer.setExpandedState(element, !fViewer.getExpandedState(element));
-			return;
-		}
-		if (fOpenCUAction.isEnabled()) {
-			fOpenCUAction.run();
 		}
 	}
 
@@ -637,33 +662,34 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Links to editor (if option enabled)
 	 */
 	private void linkToEditor(IStructuredSelection selection) {	
-		if (!isLinkingEnabled())
-			return; 
+		//if (!isLinkingEnabled())
+		//	return; 
 
 		Object obj= selection.getFirstElement();
 		Object element= null;
 
-		if (selection.size() != 1)
-			return;
-
-		if (obj instanceof ICompilationUnit) 
-			element= getResourceFor(obj);
-		else if (obj instanceof IClassFile) 
-			element= obj;
-		else if (obj instanceof IFile)
-			element= obj;
-			
-		if (element == null)
-			return;
-
-		IWorkbenchPage page= getSite().getPage();
-		IEditorPart editorArray[]= page.getEditors();
-		for (int i= 0; i < editorArray.length; i++) {
-			IEditorPart editor= editorArray[i];
-			Object input= getElementOfInput(editor.getEditorInput());					
-			if (element.equals(input)) {
-				page.bringToTop(editor);
+		if (selection.size() == 1) {
+			if (obj instanceof ISourceReference) 
+				element= getResourceFor(obj);
+			else if (obj instanceof IClassFile) 
+				element= obj;
+			else if (obj instanceof IFile)
+				element= obj;
+				
+			if (element == null)
 				return;
+
+			IWorkbenchPage page= getSite().getPage();
+			IEditorPart editorArray[]= page.getEditors();
+			for (int i= 0; i < editorArray.length; ++i) {
+				IEditorPart editor= editorArray[i];
+				Object input= getElementOfInput(editor.getEditorInput());					
+				if (input != null && input.equals(element)) {
+					page.bringToTop(editor);
+					if (obj instanceof ISourceReference) 
+						EditorUtility.revealInEditor(editor, (ISourceReference)obj);
+					return;
+				}
 			}
 		}
 	}
@@ -671,7 +697,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private IResource getResourceFor(Object element) {
 		if (element instanceof IJavaElement) {
 			try {
-				element= ((IJavaElement)element).getCorrespondingResource();
+				element= ((IJavaElement)element).getUnderlyingResource();
 			} catch (JavaModelException e) {
 				return null;
 			}
@@ -858,10 +884,47 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			element= input;
 			
 		if (element != null) {
+			// if the current selection is a child of the new
+			// selection then ignore it.
+			IStructuredSelection oldSelection= (IStructuredSelection)getSelection();
+			if (oldSelection.size() == 1) {
+				Object o= oldSelection.getFirstElement();
+				if (o instanceof IMember) {
+					IMember m= (IMember)o;
+					if (element.equals(m.getCompilationUnit()))
+						return;
+					if (element.equals(m.getClassFile())) 
+						return;
+				}
+			}
 			ISelection newSelection= new StructuredSelection(element);
 			if (!fViewer.getSelection().equals(newSelection)) {
 				 fViewer.setSelection(newSelection);
 			}
+		}
+	}
+	
+	/**
+	 * A compilation unit or class was expanded, expand
+	 * the main type.  
+	 */
+	void expandMainType(Object element) {
+		try {
+			IType type= null;
+			if (element instanceof ICompilationUnit) {
+				ICompilationUnit cu= (ICompilationUnit)element;
+				IType[] types= cu.getTypes();
+				if (types.length > 0)
+					type= types[0];
+			}
+			if (element instanceof IClassFile) {
+				IClassFile cf= (IClassFile)element;
+				type= cf.getType();
+			}			
+			if (type != null) 
+				fViewer.expandToLevel(type, 1);
+		} catch(JavaModelException e) {
+			// no reveal
 		}
 	}
 	
