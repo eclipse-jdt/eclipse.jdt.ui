@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -103,9 +104,10 @@ public final class ImportsStructure implements IImportsStructure {
 		
 		fPackageEntries= new ArrayList(20);
 		
+		IProgressMonitor monitor= new NullProgressMonitor();
 		IDocument document= null;
 		try {
-			document= aquireDocument();
+			document= aquireDocument(monitor);
 			if (restoreExistingImports && container.exists()) {
 				addExistingImports(document, cu.getImports());
 			}
@@ -115,7 +117,7 @@ public final class ImportsStructure implements IImportsStructure {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
 			if (document != null) {
-				releaseDocument(document);
+				releaseDocument(document, monitor);
 			}
 		 }
 		
@@ -575,58 +577,61 @@ public final class ImportsStructure implements IImportsStructure {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
+		monitor.beginTask(CodeGenerationMessages.getString("ImportsStructure.operation.description"), 4); //$NON-NLS-1$
 		
 		IDocument document= null;
 		try {
-			document= aquireDocument();
-			MultiTextEdit edit= getResultingEdits(document);
+			document= aquireDocument(new SubProgressMonitor(monitor, 1));
+			MultiTextEdit edit= getResultingEdits(document, new SubProgressMonitor(monitor, 1));
 			if (edit.hasChildren()) {
 				edit.apply(document);
 				if (save) {
-					commitDocument(document);
+					commitDocument(document, new SubProgressMonitor(monitor, 1));
 				}
 			}
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
 			if (document != null) {
-				releaseDocument(document);
+				releaseDocument(document, new SubProgressMonitor(monitor, 1));
 			}
 			monitor.done();
 		}
 	}
 	
-	private IDocument aquireDocument() throws CoreException {
+	private IDocument aquireDocument(IProgressMonitor monitor) throws CoreException {
 		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
 			IFile file= (IFile) fCompilationUnit.getResource();
 			if (file.exists()) {
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 				IPath path= fCompilationUnit.getPath();
-				bufferManager.connect(path, null);
+				bufferManager.connect(path, monitor);
 				return bufferManager.getTextFileBuffer(path).getDocument();
 			}
 		}
+		monitor.done();
 		return new Document(fCompilationUnit.getSource());
 	}
 	
-	private void releaseDocument(IDocument document) throws CoreException {
+	private void releaseDocument(IDocument document, IProgressMonitor monitor) throws CoreException {
 		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
 			IFile file= (IFile) fCompilationUnit.getResource();
 			if (file.exists()) {
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.disconnect(file.getFullPath(), null);
+				bufferManager.disconnect(file.getFullPath(), monitor);
 				return;
 			}
 		}
 		fCompilationUnit.getBuffer().setContents(document.get());
+		monitor.done();
 	}
 	
-	private void commitDocument(IDocument document) throws CoreException {
+	private void commitDocument(IDocument document, IProgressMonitor monitor) throws CoreException {
 		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
 			IFile file= (IFile) fCompilationUnit.getResource();
 			if (file.exists()) {
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.getTextFileBuffer(file.getFullPath()).commit(null, true);
+				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
 			}
 		}
 	}
@@ -658,88 +663,96 @@ public final class ImportsStructure implements IImportsStructure {
 		}		
 	}
 	
-	public MultiTextEdit getResultingEdits(IDocument document) throws JavaModelException, BadLocationException {
-		int importsStart=  fReplaceRange.getOffset();
-		int importsLen= fReplaceRange.getLength();
-				
-		String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
-		boolean useSpaceBetween= useSpaceBetweenGroups();
-		
-		StringBuffer buf= new StringBuffer();
-				
-		int nCreated= 0;
-		PackageEntry lastPackage= null;
-		
-		Set onDemandConflicts= null;
-		if (fFindAmbiguousImports) {
-			onDemandConflicts= evaluateStarImportConflicts();
+	public MultiTextEdit getResultingEdits(IDocument document, IProgressMonitor monitor) throws JavaModelException, BadLocationException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
 		}
+		try {
 		
-		int nPackageEntries= fPackageEntries.size();
-		for (int i= 0; i < nPackageEntries; i++) {
-			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
-			int nImports= pack.getNumberOfImports();
-
-			if (fFilterImplicitImports && isImplicitImport(pack.getName(), fCompilationUnit)) {
-				pack.removeAllNew();
-				nImports= pack.getNumberOfImports();
-			}
-			if (nImports == 0) {
-				continue;
+			int importsStart=  fReplaceRange.getOffset();
+			int importsLen= fReplaceRange.getLength();
+					
+			String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
+			boolean useSpaceBetween= useSpaceBetweenGroups();
+			
+			StringBuffer buf= new StringBuffer();
+					
+			int nCreated= 0;
+			PackageEntry lastPackage= null;
+			
+			Set onDemandConflicts= null;
+			if (fFindAmbiguousImports) {
+				onDemandConflicts= evaluateStarImportConflicts(monitor);
 			}
 			
-			if (useSpaceBetween) {
-				// add a space between two different groups by looking at the two adjacent imports
-				if (lastPackage != null && !pack.isComment() && !pack.isSameGroup(lastPackage)) {
-					ImportDeclEntry last= lastPackage.getImportAt(lastPackage.getNumberOfImports() - 1);
-					ImportDeclEntry first= pack.getImportAt(0);
-					if (!lastPackage.isComment() && (last.isNew() || first.isNew())) {
+			int nPackageEntries= fPackageEntries.size();
+			for (int i= 0; i < nPackageEntries; i++) {
+				PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
+				int nImports= pack.getNumberOfImports();
+	
+				if (fFilterImplicitImports && isImplicitImport(pack.getName(), fCompilationUnit)) {
+					pack.removeAllNew();
+					nImports= pack.getNumberOfImports();
+				}
+				if (nImports == 0) {
+					continue;
+				}
+				
+				if (useSpaceBetween) {
+					// add a space between two different groups by looking at the two adjacent imports
+					if (lastPackage != null && !pack.isComment() && !pack.isSameGroup(lastPackage)) {
+						ImportDeclEntry last= lastPackage.getImportAt(lastPackage.getNumberOfImports() - 1);
+						ImportDeclEntry first= pack.getImportAt(0);
+						if (!lastPackage.isComment() && (last.isNew() || first.isNew())) {
+							buf.append(lineDelim);
+						}
+					}
+				}
+				lastPackage= pack;
+				
+				boolean doStarImport= pack.hasStarImport(fImportOnDemandThreshold, onDemandConflicts);
+				if (doStarImport && (pack.find("*") == null)) { //$NON-NLS-1$
+					String starImportString= pack.getName() + ".*"; //$NON-NLS-1$
+					appendImportToBuffer(buf, starImportString, lineDelim);
+					nCreated++;
+				}
+				
+				for (int k= 0; k < nImports; k++) {
+					ImportDeclEntry currDecl= pack.getImportAt(k);
+					String content= currDecl.getContent();
+					
+					if (content == null) { // new entry
+						if (!doStarImport || currDecl.isOnDemand() || (onDemandConflicts != null && onDemandConflicts.contains(currDecl.getSimpleName()))) {
+							appendImportToBuffer(buf, currDecl.getElementName(), lineDelim);
+							nCreated++;
+						}
+					} else {
+						buf.append(content);
+					}
+				}
+			}
+			
+			if (importsLen == 0 && nCreated > 0) { // new import container
+				if (fCompilationUnit.getPackageDeclarations().length > 0) { // package statement
+					buf.insert(0, lineDelim);
+				}
+				// check if a space between import and first type is needed
+				IType[] types= fCompilationUnit.getTypes();
+				if (types.length > 0) {
+					if (types[0].getSourceRange().getOffset() == importsStart) {
 						buf.append(lineDelim);
 					}
 				}
 			}
-			lastPackage= pack;
+			fNumberOfImportsCreated= nCreated;
 			
-			boolean doStarImport= pack.hasStarImport(fImportOnDemandThreshold, onDemandConflicts);
-			if (doStarImport && (pack.find("*") == null)) { //$NON-NLS-1$
-				String starImportString= pack.getName() + ".*"; //$NON-NLS-1$
-				appendImportToBuffer(buf, starImportString, lineDelim);
-				nCreated++;
-			}
+			String newContent= buf.toString();
+			String oldContent= document.get(importsStart, importsLen);
 			
-			for (int k= 0; k < nImports; k++) {
-				ImportDeclEntry currDecl= pack.getImportAt(k);
-				String content= currDecl.getContent();
-				
-				if (content == null) { // new entry
-					if (!doStarImport || currDecl.isOnDemand() || (onDemandConflicts != null && onDemandConflicts.contains(currDecl.getSimpleName()))) {
-						appendImportToBuffer(buf, currDecl.getElementName(), lineDelim);
-						nCreated++;
-					}
-				} else {
-					buf.append(content);
-				}
-			}
+			return getTextEdit(oldContent, importsStart, newContent);
+		} finally {
+			monitor.done();
 		}
-		
-		if (importsLen == 0 && nCreated > 0) { // new import container
-			if (fCompilationUnit.getPackageDeclarations().length > 0) { // package statement
-				buf.insert(0, lineDelim);
-			}
-			// check if a space between import and first type is needed
-			IType[] types= fCompilationUnit.getTypes();
-			if (types.length > 0) {
-				if (types[0].getSourceRange().getOffset() == importsStart) {
-					buf.append(lineDelim);
-				}
-			}
-		}
-		fNumberOfImportsCreated= nCreated;
-		
-		String newContent= buf.toString();
-		String oldContent= document.get(importsStart, importsLen);
-		
-		return getTextEdit(oldContent, importsStart, newContent);
 	}
 	
 	private MultiTextEdit getTextEdit(String oldContent, int offset, String newContent) {
@@ -785,7 +798,7 @@ public final class ImportsStructure implements IImportsStructure {
 		return true;
 	}
 
-	private Set evaluateStarImportConflicts() throws JavaModelException {
+	private Set evaluateStarImportConflicts(IProgressMonitor monitor) {
 		int nPackageEntries= fPackageEntries.size();
 		HashSet starImportPackages= new HashSet(nPackageEntries);
 		for (int i= 0; i < nPackageEntries; i++) {
@@ -801,7 +814,7 @@ public final class ImportsStructure implements IImportsStructure {
 		starImportPackages.add(fCompilationUnit.getParent().getElementName());
 		starImportPackages.add(JAVA_LANG);
 		
-		TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
+		TypeInfo[] allTypes= AllTypesCache.getAllTypes(monitor); // all types in workspace, sorted by type name
 		if (allTypes.length < 2) {
 			return null;
 		}

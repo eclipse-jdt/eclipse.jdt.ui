@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -52,8 +53,12 @@ public final class ImportRewrite {
 	}
 	
 	public final TextEdit createEdit(IDocument document) throws CoreException {
+		return createEdit(document, null);
+	}
+	
+	public final TextEdit createEdit(IDocument document, IProgressMonitor monitor) throws CoreException {
 		try {
-			return fImportsStructure.getResultingEdits(document);
+			return fImportsStructure.getResultingEdits(document, monitor);
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		}

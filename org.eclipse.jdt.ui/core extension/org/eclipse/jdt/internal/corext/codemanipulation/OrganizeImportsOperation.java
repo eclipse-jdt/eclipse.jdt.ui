@@ -147,7 +147,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		 * Tries to find the given type name and add it to the import structure.
 		 * Returns array of coices if user needs to select a type.
 		 */
-		public TypeInfo[] process(SimpleName ref) throws CoreException {
+		public TypeInfo[] process(SimpleName ref, IProgressMonitor monitor) throws CoreException {
 			String typeName= ref.getIdentifier();
 			
 			if (fImportsAdded.contains(typeName)) {
@@ -174,7 +174,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						
 				ArrayList typeRefsFound= fTypeRefsFound; // reuse
 				
-				findTypeRefs(typeName, typeRefsFound);				
+				findTypeRefs(typeName, typeRefsFound, monitor);				
 				int nFound= typeRefsFound.size();
 				if (nFound == 0) {
 					// nothing found
@@ -218,14 +218,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			return null;
 		}
 		
-		private void findTypeRefs(String simpleTypeName, Collection typeRefsFound) throws JavaModelException {
+		private void findTypeRefs(String simpleTypeName, Collection typeRefsFound, IProgressMonitor monitor) throws JavaModelException {
 			if (fDoIgnoreLowerCaseNames && simpleTypeName.length() > 0) {
 				char ch= simpleTypeName.charAt(0);
 				if (Strings.isLowerCase(ch) && Character.isLetter(ch)) {
 					return;
 				}
 			}
-			TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, fSearchScope, null);
+			TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, fSearchScope, monitor);
 			for (int i= 0; i < infos.length; i++) {
 				TypeInfo curr= infos[i];
 				IType type= curr.resolveType(fSearchScope);
@@ -284,12 +284,12 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			ICompilationUnit cu= fImportsStructure.getCompilationUnit();
 			fNumberOfImportsAdded= 0;
 			
-			monitor.beginTask(CodeGenerationMessages.getFormattedString("OrganizeImportsOperation.description", cu.getElementName()), 2); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getFormattedString("OrganizeImportsOperation.description", cu.getElementName()), 4); //$NON-NLS-1$
 
 			ArrayList oldSingleImports= new ArrayList();
 			ArrayList oldDemandImports= new ArrayList();
 			
-			Iterator references= findTypeReferences(oldSingleImports, oldDemandImports);
+			Collection references= findTypeReferences(oldSingleImports, oldDemandImports);
 			if (references == null) {
 				return;
 			}
@@ -305,13 +305,22 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, fASTRoot, fImportsStructure, fIgnoreLowerCaseNames);
 			ArrayList openChoices= new ArrayList();
 			ArrayList sourceRanges= new ArrayList();
-			while (references.hasNext()) {
-				SimpleName typeRef= (SimpleName) references.next();
-				TypeInfo[] openChoice= processor.process(typeRef);
-				if (openChoice != null) {
-					openChoices.add(openChoice);
-					sourceRanges.add(new SourceRange(typeRef.getStartPosition(), typeRef.getLength()));
-				}	
+			
+			SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 2);
+			try {
+				subMonitor.beginTask("", references.size()); //$NON-NLS-1$
+				
+				Iterator refIterator= references.iterator();
+				while (refIterator.hasNext()) {
+					SimpleName typeRef= (SimpleName) refIterator.next();
+					TypeInfo[] openChoice= processor.process(typeRef, new SubProgressMonitor(subMonitor, 1));
+					if (openChoice != null) {
+						openChoices.add(openChoice);
+						sourceRanges.add(new SourceRange(typeRef.getStartPosition(), typeRef.getLength()));
+					}	
+				}
+			} finally {
+				subMonitor.done();
 			}
 			
 			processor= null;
@@ -343,7 +352,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 	
 	// find type references in a compilation unit
-	private Iterator findTypeReferences(ArrayList oldSingleImports, ArrayList oldDemandImports) {
+	private Collection findTypeReferences(ArrayList oldSingleImports, ArrayList oldDemandImports) {
 		IProblem[] problems= fASTRoot.getProblems();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem curr= problems[i];
@@ -367,7 +376,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		ImportReferencesCollector visitor = new ImportReferencesCollector(fRange, result);
 		fASTRoot.accept(visitor);
 
-		return result.iterator();
+		return result;
 	}	
 	
 	/**
