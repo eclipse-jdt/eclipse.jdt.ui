@@ -27,8 +27,12 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
@@ -40,8 +44,6 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 /**
  * Helper class to use the search engine in refactorings.
@@ -173,19 +175,51 @@ public final class RefactoringSearchEngine2 {
 	}
 
 	/**
-	 * Returns the compilation units of the previous search queries.
+	 * Returns the affected compilation units of the previous search queries.
 	 * <p>
 	 * In order to retrieve the compilation units, grouping by resource must have been enabled before searching.
 	 * 
 	 * @return the compilation units of the previous queries
 	 */
-	public final ICompilationUnit[] getCompilationUnits() {
+	public final ICompilationUnit[] getAffectedCompilationUnits() {
 		Assert.isTrue(fGrouping);
 		final SearchResultGroup[] groups= getGroupedMatches();
 		final ICompilationUnit[] units= new ICompilationUnit[groups.length];
 		for (int index= 0; index < groups.length; index++)
 			units[index]= groups[index].getCompilationUnit();
 		return units;
+	}
+
+	/**
+	 * Returns the affected java projects of the previous search queries.
+	 * <p>
+	 * In order to retrieve the java projects, grouping by resource must have been enabled before searching.
+	 * 
+	 * @return the java projects of the previous queries (element type: <code>&ltIJavaProject, Collection&ltSearchResultGroup&gt&gt</code>)
+	 */
+	public final Map getAffectedProjects() {
+		Assert.isTrue(fGrouping);
+		final Map map= new HashMap();
+		final SearchResultGroup[] groups= getGroupedMatches();
+		IJavaProject project= null;
+		ICompilationUnit unit= null;
+		SearchResultGroup group= null;
+		for (int index= 0; index < groups.length; index++) {
+			group= groups[index];
+			unit= group.getCompilationUnit();
+			if (unit != null) {
+				project= unit.getJavaProject();
+				if (project != null) {
+					Set set= (Set) map.get(project);
+					if (set == null) {
+						set= new HashSet();
+						map.put(project, set);
+					}
+					set.add(group);
+				}
+			}
+		}
+		return map;
 	}
 
 	/**
