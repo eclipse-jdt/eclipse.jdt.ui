@@ -3,17 +3,17 @@
 <schema targetNamespace="org.eclipse.jdt.junit">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.jdt.junit" id="junitLaunchConfigs" name="JUnit Launch Configurations"/>
+         <meta.schema plugin="org.eclipse.jdt.junit" id="internal-testRunTabs" name="%testRunTabs.name"/>
       </appInfo>
       <documentation>
-         Extension point to register JUnit launch configs that need to be updated during refactorings.
+         [Enter description of this extension point.]
       </documentation>
    </annotation>
 
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="launchConfigType"/>
+            <element ref="testRunTab"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -39,13 +39,16 @@
       </complexType>
    </element>
 
-   <element name="launchConfigType">
+   <element name="testRunTab">
       <complexType>
-         <attribute name="configTypeID" type="string" use="required">
+         <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.eclipse.jdt.internal.junit.ui.TestRunTab"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
@@ -56,7 +59,7 @@
          <meta.section type="since"/>
       </appInfo>
       <documentation>
-         3.0
+         [Enter the first release in which this extension point appears.]
       </documentation>
    </annotation>
 
