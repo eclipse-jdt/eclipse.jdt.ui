@@ -62,8 +62,8 @@ public abstract class DisplayHelper {
 			return false;
 
 		// repeatedly sleep until condition becomes true or timeout elapses
-		DisplayWaiter waiter= new DisplayWaiter(display, timeout);
-		DisplayWaiter.Timeout timeoutState= waiter.start();
+		DisplayWaiter waiter= new DisplayWaiter(display);
+		DisplayWaiter.Timeout timeoutState= waiter.start(timeout);
 		boolean condition;
 		do {
 			if (display.sleep())
@@ -152,7 +152,6 @@ final class DisplayWaiter {
 	
 	// configuration
 	private final Display fDisplay;
-	private final long fTimeout;
 	private final Object fMutex= new Object();
 	private final boolean fKeepRunningOnTimeout;
 	
@@ -181,24 +180,20 @@ final class DisplayWaiter {
 	 * Creates a new instance on the given display and timeout.
 	 * 
 	 * @param display the display to run the event loop of
-	 * @param timeout the timeout to wait, must be &gt; 0
 	 */
-	public DisplayWaiter(Display display, long timeout) {
-		this(display, timeout, false);
+	public DisplayWaiter(Display display) {
+		this(display, false);
 	}
 	
 	/**
 	 * Creates a new instance on the given display and timeout.
 	 * 
 	 * @param display the display to run the event loop of
-	 * @param timeout the timeout to wait, must be &gt; 0
 	 * @param keepRunning <code>true</code> if the thread should be kept running after timing out
 	 */
-	public DisplayWaiter(Display display, long timeout, boolean keepRunning) {
+	public DisplayWaiter(Display display, boolean keepRunning) {
 		Assert.assertNotNull(display);
-		Assert.assertTrue(timeout > 0);
 		fDisplay= display;
-		fTimeout= timeout;
 		fState= STOPPED;
 		fKeepRunningOnTimeout= keepRunning;
 	}
@@ -207,18 +202,20 @@ final class DisplayWaiter {
 	 * Starts the timeout thread if it is not currently running. Nothing happens
 	 * if a thread is already running.
 	 * 
+	 * @param delay the delay from now in milliseconds
 	 * @return the timeout state which can be queried for its timed out status
 	 */
-	public Timeout start() {
+	public Timeout start(long delay) {
+		Assert.assertTrue(delay > 0);
 		synchronized (fMutex) {
 			switch (fState) {
 				case STOPPED:
 					startThread();
+					fNextTimeout= System.currentTimeMillis() + delay;
 					break;
 				case IDLE:
 					unhold();
-					break;
-				case RUNNING:
+					fNextTimeout= System.currentTimeMillis() + delay;
 					break;
 			}
 			
@@ -230,9 +227,11 @@ final class DisplayWaiter {
 	 * Starts the thread if it is not currently running; resets the timeout if
 	 * it is.
 	 * 
+	 * @param delay the delay from now in milliseconds
 	 * @return the timeout state which can be queried for its timed out status
 	 */
-	public Timeout restart() {
+	public Timeout restart(long delay) {
+		Assert.assertTrue(delay > 0);
 		synchronized (fMutex) {
 			switch (fState) {
 				case STOPPED:
@@ -241,18 +240,16 @@ final class DisplayWaiter {
 				case IDLE:
 					unhold();
 					break;
-				case RUNNING:
-					restartTimeout();
-					break;
 			}
-			
+			fNextTimeout= System.currentTimeMillis() + delay;
+
 			return fCurrentTimeoutState;
 		}
 	}
 
 	/**
 	 * Stops the thread if it is running. If not, nothing happens. Another
-	 * thread may be started by calling {@link #start()} or {@link #restart()}.
+	 * thread may be started by calling {@link #start(long)} or {@link #restart(long)}.
 	 */
 	public void stop() {
 		synchronized (fMutex) {
@@ -263,7 +260,7 @@ final class DisplayWaiter {
 	
 	/**
 	 * Puts the reaper thread on hold but does not stop it. It may be restarted
-	 * by calling {@link #start()} or {@link #restart()}.
+	 * by calling {@link #start(long)} or {@link #restart(long)}.
 	 */
 	public void hold() {
 		synchronized (fMutex) {
@@ -271,14 +268,6 @@ final class DisplayWaiter {
 			if (tryTransition(RUNNING, IDLE))
 				fMutex.notifyAll();
 		}
-	}
-
-	/**
-	 * Resets the timeout. Assume current state is RUNNING.
-	 */
-	private void restartTimeout() {
-		assertStates(RUNNING);
-		fNextTimeout= System.currentTimeMillis() + fTimeout;
 	}
 
 	/**
@@ -364,8 +353,6 @@ final class DisplayWaiter {
 			 * @throws ThreadChangedException if the thread changed
 			 */
 			private void waitForTimeout() throws InterruptedException, ThreadChangedException {
-				fNextTimeout= System.currentTimeMillis() + fTimeout;
-				
 				long delta;
 				while (isState(RUNNING) && (delta = fNextTimeout - System.currentTimeMillis()) > 0) {
 					fMutex.wait(delta);

@@ -185,7 +185,11 @@ public class EditorTestHelper {
 	}
 	
 	public static void runEventQueue(Shell shell) {
-		while (shell.getDisplay().readAndDispatch()) {
+		runEventQueue(shell.getDisplay());
+	}
+	
+	public static void runEventQueue(Display display) {
+		while (display.readAndDispatch()) {
 			// do nothing
 		}
 	}
