@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -30,6 +32,11 @@ public class ASTNodeSearchUtil {
 
 	public static ASTNode[] findReferenceNodes(IJavaElement[] elements, ASTNodeMappingManager astManager, IProgressMonitor pm, IJavaSearchScope scope) throws JavaModelException{
 		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(elements, IJavaSearchConstants.REFERENCES);
+		return searchNodes(scope, pattern, astManager, pm);
+	}
+	
+	public static ASTNode[] findOccurrenceNodes(IJavaElement[] elements, ASTNodeMappingManager astManager, IProgressMonitor pm, IJavaSearchScope scope) throws JavaModelException{
+		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(elements, IJavaSearchConstants.ALL_OCCURRENCES);
 		return searchNodes(scope, pattern, astManager, pm);
 	}
 	
@@ -73,7 +80,17 @@ public class ASTNodeSearchUtil {
 	private static ASTNode getAstNode(CompilationUnit cuNode, int start, int length){
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(start, length), true);
 		cuNode.accept(analyzer);
-		return analyzer.getFirstSelectedNode();
+		//XXX workaround for bug 23527
+		ASTNode node= analyzer.getFirstSelectedNode();
+		if (node != null && node.getParent() instanceof SuperConstructorInvocation){
+			if (node.getParent().getLength() == length + 1)
+				return node.getParent();
+		}
+		if (node != null && node.getParent() instanceof ConstructorInvocation){
+			if (node.getParent().getLength() == length + 1)
+				return node.getParent();
+		}
+		return node;
 	}
 	
 }
