@@ -576,7 +576,7 @@ public class JavaModelUtil {
 		}	
 	}
 	
-	private static boolean PRIMARY_ONLY= true;
+	private static boolean PRIMARY_ONLY= false;
 
 	/**
 	 * Returns the original cu if the given cu is a working copy. If the cu is already
