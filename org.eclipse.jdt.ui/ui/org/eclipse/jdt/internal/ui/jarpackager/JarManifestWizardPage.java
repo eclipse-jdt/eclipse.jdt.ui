@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +45,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -65,11 +66,9 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -904,7 +903,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		dialog.addFilter(new EmptyInnerPackageFilter());		
 		dialog.addFilter(new LibraryFilter());
 		dialog.addFilter(new SealPackagesFilter(packages));
-		dialog.setValidator(new ISelectionValidator() {
+		dialog.setValidator(new ISelectionStatusValidator() {
 			public IStatus validate(Object[] selection) {
 				StatusInfo res= new StatusInfo();
 				for (int i= 0; i < selection.length; i++) {
@@ -941,7 +940,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		ILabelProvider labelProvider= new JavaElementLabelProvider(labelFlags);
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, contentProvider); 
 		dialog.setAllowMultiple(false);
-		dialog.setValidator(new ISelectionValidator() {
+		dialog.setValidator(new ISelectionStatusValidator() {
 			public IStatus validate(Object[] selection) {
 				StatusInfo res= new StatusInfo();
 				// only single selection
