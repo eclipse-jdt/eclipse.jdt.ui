@@ -39,7 +39,7 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 	protected void setUp(IEditorPart editor) throws Exception {
 		super.setUp(editor);
 		createAnnotations(editor);
-		EditorTestHelper.calmDown(1000, 20000, 100);
+		EditorTestHelper.joinJobs(1000, 20000, 100);
 	}
 	
 	private void createAnnotations(IEditorPart editor) throws BadLocationException, JavaModelException {

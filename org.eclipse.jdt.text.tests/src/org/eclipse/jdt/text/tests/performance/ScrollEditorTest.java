@@ -86,7 +86,7 @@ public abstract class ScrollEditorTest extends TestCase {
 		IEditorPart editor= null;
 		try {
 			editor= EditorTestHelper.openInEditor(ResourceTestHelper.findFile(file), true);
-			EditorTestHelper.calmDown(3000, 10000, 100);
+			EditorTestHelper.joinJobs(3000, 10000, 100);
 			
 			setUp(editor);
 			

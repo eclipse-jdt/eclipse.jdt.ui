@@ -54,7 +54,7 @@ public class OpenQuickOutlineTest extends TestCase {
 		ResourceTestHelper.replicate(ORIG_FILE, PATH + ORIG_NAME, ".java", N_OF_RUNS, ORIG_NAME, ORIG_NAME);
 		ResourceTestHelper.incrementalBuild();
 		EditorTestHelper.bringToTop();
-		EditorTestHelper.calmDown(1000, 10000, 100);
+		EditorTestHelper.joinJobs(1000, 10000, 100);
 	}
 	
 	protected void tearDown() throws Exception {
@@ -71,7 +71,7 @@ public class OpenQuickOutlineTest extends TestCase {
 			String name= ORIG_NAME + i;
 			String file= PATH + name + ".java";
 			ITextEditor editor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(file), true);
-			EditorTestHelper.calmDown(5000, 10000, 100);
+			EditorTestHelper.joinJobs(5000, 10000, 100);
 			
 			measureOpenQuickOutline(editor, fFirstMeter);
 			measureOpenQuickOutline(editor, fSecondMeter);
@@ -86,7 +86,7 @@ public class OpenQuickOutlineTest extends TestCase {
 
 	private void measureOpenQuickOutline(ITextEditor editor, PerformanceMeter performanceMeter) {
 		IAction showOutline= editor.getAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
-		EditorTestHelper.calmDown(500, 1000, 100);
+		EditorTestHelper.joinJobs(500, 1000, 100);
 		performanceMeter.start();
 		runAction(showOutline);
 		performanceMeter.stop();

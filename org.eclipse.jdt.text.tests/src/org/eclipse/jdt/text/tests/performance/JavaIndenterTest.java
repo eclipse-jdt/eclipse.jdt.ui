@@ -50,7 +50,7 @@ public class JavaIndenterTest extends TestCase {
 		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
 		runAction(fEditor.getAction("ToggleComment"));
 		SWTEventHelper.pressKeyCodeCombination(EditorTestHelper.getActiveDisplay(), CTRL_END);
-		EditorTestHelper.calmDown(2000, 5000, 100);
+		EditorTestHelper.joinJobs(2000, 5000, 100);
 	}
 
 	protected void tearDown() throws Exception {

@@ -145,7 +145,7 @@ public abstract class MouseScrollEditorTest extends TestCase {
 	protected void measureScrolling(int nOfRuns, Poster poster, IFile file) throws PartInitException {
 		try {
 			IEditorPart editor= EditorTestHelper.openInEditor(file, true);
-			EditorTestHelper.calmDown(5000, 10000, 100);
+			EditorTestHelper.joinJobs(5000, 10000, 100);
 			
 			fText= (StyledText) editor.getAdapter(Control.class);
 			fDisplay= fText.getDisplay();
@@ -153,7 +153,7 @@ public abstract class MouseScrollEditorTest extends TestCase {
 			fText.setTopPixel(Integer.MAX_VALUE);
 			fMaxTopPixel= fText.getTopPixel();
 			fText.setTopPixel(0);
-			EditorTestHelper.calmDown(100, 1000, 100);
+			EditorTestHelper.joinJobs(100, 1000, 100);
 			
 			fPoster= poster;
 			
@@ -170,9 +170,9 @@ public abstract class MouseScrollEditorTest extends TestCase {
 					throw fBackgroundError;
 				fPerformanceMeter.stop();
 				assertEquals(fMaxTopPixel, fText.getTopPixel());
-				EditorTestHelper.calmDown(100, 1000, 100);
+				EditorTestHelper.joinJobs(100, 1000, 100);
 				fText.setTopPixel(0);
-				EditorTestHelper.calmDown(100, 1000, 100);
+				EditorTestHelper.joinJobs(100, 1000, 100);
 			}
 			fPerformanceMeter.commit();
 			Performance.getDefault().assertPerformance(fPerformanceMeter);
