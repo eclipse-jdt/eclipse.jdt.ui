@@ -652,13 +652,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		IStructuredSelection s= (IStructuredSelection) event.getSelection();
 		Object element= s.getFirstElement();
 		
-		// if the resource is already open then always open it
-		if (EditorUtility.isOpenInEditor(element) == null) {
-			if (fOpenCUAction.isEnabled()) {
-				fOpenCUAction.run();
-				return;
-			}
+		if (fOpenCUAction.isEnabled()) {
+			fOpenCUAction.run();
+			return;
 		}
+		
 		if (fViewer.isExpandable(element)) {
 			if (JavaBasePreferencePage.doubleClockGoesInto()) {
 				// don't zoom into compilation units and class files
@@ -669,7 +667,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				}
 			} else {
 				fViewer.setExpandedState(element, !fViewer.getExpandedState(element));
-				expandMainType(element);
+				//expandMainType(element);
 			}
 		}
 	}
