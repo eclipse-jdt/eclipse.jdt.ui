@@ -741,6 +741,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 			}
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
 			engine.setPattern(fMembersToMove, IJavaSearchConstants.REFERENCES);
+			engine.setGranularity(RefactoringSearchEngine2.GRANULARITY_COMPILATION_UNIT);
 			engine.setFiltering(true, true);
 			engine.setScope(RefactoringScopeFactory.create(fMembersToMove));
 			engine.setStatus(status);

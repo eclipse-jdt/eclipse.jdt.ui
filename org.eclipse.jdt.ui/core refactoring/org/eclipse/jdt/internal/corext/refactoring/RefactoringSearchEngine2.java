@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -60,8 +61,68 @@ public final class RefactoringSearchEngine2 {
 		}
 	}
 
-	/** Search match collector to perform reporting */
-	private class RefactoringSearchCollector extends SearchRequestor {
+	/** Search requestor which only collects compilation units */
+	private class RefactoringCompilationUnitCollector extends RefactoringSearchCollector {
+
+		/** The collected compilation units */
+		private final Set fCollectedUnits= new HashSet();
+
+		/** The inaccurate matches */
+		private final Set fInaccurateMatches= new HashSet();
+
+		public final void acceptSearchMatch(final SearchMatch match) throws CoreException {
+
+			final SearchMatch accepted= fRequestor.acceptSearchMatch(match);
+			if (accepted != null) {
+				final IResource resource= accepted.getResource();
+				if (!resource.equals(fLastResource)) {
+					final IJavaElement element= JavaCore.create(resource);
+					if (element instanceof ICompilationUnit)
+						fCollectedUnits.add(element);
+				}
+			}
+			if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
+				fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.inaccurate.match", accepted.getResource().getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
+				fInaccurateMatches.add(accepted);
+			}
+		}
+
+		public final void clearResults() {
+			super.clearResults();
+			fCollectedUnits.clear();
+			fInaccurateMatches.clear();
+		}
+
+		public final Collection getBinaryResources() {
+			return Collections.EMPTY_SET;
+		}
+
+		public final Collection getCollectedMatches() {
+			return fCollectedUnits;
+		}
+
+		public final Collection getInaccurateMatches() {
+			return fInaccurateMatches;
+		}
+	}
+
+	private abstract class RefactoringSearchCollector extends SearchRequestor {
+
+		protected IResource fLastResource= null;
+
+		public void clearResults() {
+			fLastResource= null;
+		}
+
+		public abstract Collection getBinaryResources();
+
+		public abstract Collection getCollectedMatches();
+
+		public abstract Collection getInaccurateMatches();
+	}
+
+	/** Search requestor which collects every search match */
+	private class RefactoringSearchMatchCollector extends RefactoringSearchCollector {
 
 		/** The binary resources */
 		private final Set fBinaryResources= new HashSet();
@@ -73,35 +134,32 @@ public final class RefactoringSearchEngine2 {
 		private final Set fInaccurateMatches= new HashSet();
 
 		public final void acceptSearchMatch(final SearchMatch match) throws CoreException {
-			Assert.isNotNull(match);
 			final SearchMatch accepted= fRequestor.acceptSearchMatch(match);
 			if (accepted != null) {
 				fCollectedMatches.add(accepted);
-				if (fBinary) {
-					final IResource resource= accepted.getResource();
-					final IJavaElement element= JavaCore.create(resource);
-					if (!(element instanceof ICompilationUnit)) {
-						final IProject project= resource.getProject();
-						if (!fGrouping)
-							fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.binary.match.ungrouped", project.getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
-						else if (!fBinaryResources.contains(resource))
-							fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.binary.match.grouped", project.getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
-						fBinaryResources.add(resource);
-					}
-				}
-				if (fInaccurate) {
-					final IResource resource= accepted.getResource();
-					if (accepted.getAccuracy() == SearchMatch.A_INACCURATE) {
-						if (!fInaccurateMatches.contains(accepted)) {
-							fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.inaccurate.match", resource.getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
-							fInaccurateMatches.add(accepted);
+				final IResource resource= accepted.getResource();
+				if (!resource.equals(fLastResource)) {
+					if (fBinary) {
+						final IJavaElement element= JavaCore.create(resource);
+						if (!(element instanceof ICompilationUnit)) {
+							final IProject project= resource.getProject();
+							if (!fGrouping)
+								fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.binary.match.ungrouped", project.getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
+							else if (!fBinaryResources.contains(resource))
+								fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.binary.match.grouped", project.getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
+							fBinaryResources.add(resource);
 						}
+					}
+					if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
+						fStatus.addEntry(fSeverity, RefactoringCoreMessages.getFormattedString("RefactoringSearchEngine.inaccurate.match", resource.getName()), null, null, RefactoringStatusEntry.NO_CODE); //$NON-NLS-1$
+						fInaccurateMatches.add(accepted);
 					}
 				}
 			}
 		}
 
 		public final void clearResults() {
+			super.clearResults();
 			fCollectedMatches.clear();
 			fInaccurateMatches.clear();
 			fBinaryResources.clear();
@@ -120,11 +178,20 @@ public final class RefactoringSearchEngine2 {
 		}
 	}
 
+	/** The compilation unit granularity */
+	public static final int GRANULARITY_COMPILATION_UNIT= 2;
+
+	/** The search match granularity */
+	public static final int GRANULARITY_SEARCH_MATCH= 1;
+
 	/** Should binary matches be filtered? */
 	private boolean fBinary= false;
 
-	/** The search match collector */
-	private final RefactoringSearchCollector fCollector= new RefactoringSearchCollector();
+	/** The refactoring search collector */
+	private RefactoringSearchCollector fCollector= null;
+
+	/** The search granularity */
+	private int fGranularity= GRANULARITY_SEARCH_MATCH;
 
 	/** Should the matches be grouped by resource? */
 	private boolean fGrouping= true;
@@ -171,7 +238,7 @@ public final class RefactoringSearchEngine2 {
 	 * Clears all results found so far, and sets resets the status to {@link RefactoringStatus#OK}.
 	 */
 	public final void clearResults() {
-		fCollector.clearResults();
+		getCollector().clearResults();
 		fStatus= new RefactoringStatus();
 	}
 
@@ -183,12 +250,20 @@ public final class RefactoringSearchEngine2 {
 	 * @return the compilation units of the previous queries
 	 */
 	public final ICompilationUnit[] getAffectedCompilationUnits() {
-		Assert.isTrue(fGrouping);
-		final SearchResultGroup[] groups= getGroupedMatches();
-		final ICompilationUnit[] units= new ICompilationUnit[groups.length];
-		for (int index= 0; index < groups.length; index++)
-			units[index]= groups[index].getCompilationUnit();
-		return units;
+		if (fGranularity == GRANULARITY_COMPILATION_UNIT) {
+			final Collection collection= getCollector().getCollectedMatches();
+			final ICompilationUnit[] units= new ICompilationUnit[collection.size()];
+			int index= 0;
+			for (final Iterator iterator= collection.iterator(); iterator.hasNext(); index++)
+				units[index]= (ICompilationUnit) iterator.next();
+			return units;
+		} else {
+			final SearchResultGroup[] groups= getGroupedMatches();
+			final ICompilationUnit[] units= new ICompilationUnit[groups.length];
+			for (int index= 0; index < groups.length; index++)
+				units[index]= groups[index].getCompilationUnit();
+			return units;
+		}
 	}
 
 	/**
@@ -199,16 +274,13 @@ public final class RefactoringSearchEngine2 {
 	 * @return the java projects of the previous queries (element type: <code>&ltIJavaProject, Collection&ltSearchResultGroup&gt&gt</code>)
 	 */
 	public final Map getAffectedProjects() {
-		Assert.isTrue(fGrouping);
 		final Map map= new HashMap();
-		final SearchResultGroup[] groups= getGroupedMatches();
 		IJavaProject project= null;
 		ICompilationUnit unit= null;
-		SearchResultGroup group= null;
-		for (int index= 0; index < groups.length; index++) {
-			group= groups[index];
-			unit= group.getCompilationUnit();
-			if (unit != null) {
+		if (fGranularity == GRANULARITY_COMPILATION_UNIT) {
+			final ICompilationUnit[] units= getAffectedCompilationUnits();
+			for (int index= 0; index < units.length; index++) {
+				unit= units[index];
 				project= unit.getJavaProject();
 				if (project != null) {
 					Set set= (Set) map.get(project);
@@ -216,11 +288,46 @@ public final class RefactoringSearchEngine2 {
 						set= new HashSet();
 						map.put(project, set);
 					}
-					set.add(group);
+					set.add(unit);
+				}
+			}
+		} else {
+			final SearchResultGroup[] groups= getGroupedMatches();
+			SearchResultGroup group= null;
+			for (int index= 0; index < groups.length; index++) {
+				group= groups[index];
+				unit= group.getCompilationUnit();
+				if (unit != null) {
+					project= unit.getJavaProject();
+					if (project != null) {
+						Set set= (Set) map.get(project);
+						if (set == null) {
+							set= new HashSet();
+							map.put(project, set);
+						}
+						set.add(group);
+					}
 				}
 			}
 		}
 		return map;
+	}
+
+	/**
+	 * Returns the refactoring search collector.
+	 * 
+	 * @return the refactoring search collector
+	 */
+	private RefactoringSearchCollector getCollector() {
+		if (fCollector == null) {
+			if (fGranularity == GRANULARITY_COMPILATION_UNIT)
+				fCollector= new RefactoringCompilationUnitCollector();
+			else if (fGranularity == GRANULARITY_SEARCH_MATCH)
+				fCollector= new RefactoringSearchMatchCollector();
+			else
+				Assert.isTrue(false);
+		}
+		return fCollector;
 	}
 
 	/**
@@ -242,7 +349,7 @@ public final class RefactoringSearchEngine2 {
 			matches.add(match);
 		}
 		if (fBinary) {
-			final Collection collection= fCollector.getBinaryResources();
+			final Collection collection= getCollector().getBinaryResources();
 			for (final Iterator iterator= grouped.keySet().iterator(); iterator.hasNext();) {
 				resource= (IResource) iterator.next();
 				if (collection.contains(resource))
@@ -271,15 +378,23 @@ public final class RefactoringSearchEngine2 {
 	/**
 	 * Returns the results of the previous search queries.
 	 * <p>
-	 * If grouping by resource is enabled, the results are elements of type {@link SearchResultGroup}, otherwise the elements are of type {@link SearchMatch}.
+	 * The result depends on the following conditions:
+	 * <ul>
+	 * <li>If the search granularity is {@link #GRANULARITY_COMPILATION_UNIT}, the results are elements of type {@link ICompilationUnit}.</li>
+	 * <li>If grouping by resource is enabled, the results are elements of type {@link SearchResultGroup}, otherwise the elements are of type {@link SearchMatch}.</li>
+	 * </ul>
 	 * 
 	 * @return the results of the previous queries
 	 */
 	public final Object[] getResults() {
-		if (fGrouping)
-			return getGroupedMatches();
-		else
-			return getUngroupedMatches();
+		if (fGranularity == GRANULARITY_COMPILATION_UNIT)
+			return getAffectedCompilationUnits();
+		else {
+			if (fGrouping)
+				return getGroupedMatches();
+			else
+				return getUngroupedMatches();
+		}
 	}
 
 	/**
@@ -290,8 +405,8 @@ public final class RefactoringSearchEngine2 {
 	private Collection getSearchMatches() {
 		Collection results= null;
 		if (fInaccurate) {
-			results= new LinkedList(fCollector.getCollectedMatches());
-			final Collection collection= fCollector.getInaccurateMatches();
+			results= new LinkedList(getCollector().getCollectedMatches());
+			final Collection collection= getCollector().getInaccurateMatches();
 			SearchMatch match= null;
 			for (final Iterator iterator= results.iterator(); iterator.hasNext();) {
 				match= (SearchMatch) iterator.next();
@@ -299,7 +414,7 @@ public final class RefactoringSearchEngine2 {
 					iterator.remove();
 			}
 		} else
-			results= fCollector.getCollectedMatches();
+			results= getCollector().getCollectedMatches();
 		return results;
 	}
 
@@ -321,7 +436,7 @@ public final class RefactoringSearchEngine2 {
 		Collection results= null;
 		if (fBinary) {
 			results= new LinkedList(getSearchMatches());
-			final Collection collection= fCollector.getBinaryResources();
+			final Collection collection= getCollector().getBinaryResources();
 			SearchMatch match= null;
 			for (final Iterator iterator= results.iterator(); iterator.hasNext();) {
 				match= (SearchMatch) iterator.next();
@@ -352,7 +467,7 @@ public final class RefactoringSearchEngine2 {
 					engine= new SearchEngine(fOwner);
 				else
 					engine= new SearchEngine();
-				engine.search(fPattern, SearchUtils.getDefaultSearchParticipants(), fScope, fCollector, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				engine.search(fPattern, SearchUtils.getDefaultSearchParticipants(), fScope, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
 			}
@@ -379,7 +494,7 @@ public final class RefactoringSearchEngine2 {
 					engine= new SearchEngine(fOwner);
 				else
 					engine= new SearchEngine();
-				engine.searchDeclarationsOfAccessedFields(element, fCollector, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				engine.searchDeclarationsOfAccessedFields(element, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
 			}
@@ -406,7 +521,7 @@ public final class RefactoringSearchEngine2 {
 					engine= new SearchEngine(fOwner);
 				else
 					engine= new SearchEngine();
-				engine.searchDeclarationsOfSentMessages(element, fCollector, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				engine.searchDeclarationsOfSentMessages(element, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
 			}
@@ -433,7 +548,7 @@ public final class RefactoringSearchEngine2 {
 					engine= new SearchEngine(fOwner);
 				else
 					engine= new SearchEngine();
-				engine.searchDeclarationsOfReferencedTypes(element, fCollector, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				engine.searchDeclarationsOfReferencedTypes(element, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
 			}
@@ -467,6 +582,18 @@ public final class RefactoringSearchEngine2 {
 	public final void setFiltering(final boolean inaccurate, final boolean binary) {
 		fInaccurate= inaccurate;
 		fBinary= binary;
+	}
+
+	/**
+	 * Sets the granularity to use during the searches.
+	 * <p>
+	 * This method must be called before start searching. The default is a granularity of {@link #GRANULARITY_SEARCH_MATCH}.
+	 * 
+	 * @param granularity The granularity to use. Must be one of the <code>GRANULARITY_XXX</code> constants.
+	 */
+	public final void setGranularity(final int granularity) {
+		Assert.isTrue(granularity == GRANULARITY_COMPILATION_UNIT || granularity == GRANULARITY_SEARCH_MATCH);
+		fGranularity= granularity;
 	}
 
 	/**

@@ -333,6 +333,7 @@ abstract class TargetProvider {
 			IMethod method= (IMethod)fMethod.resolveBinding().getJavaElement();
 			Assert.isTrue(method != null);
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+			engine.setGranularity(RefactoringSearchEngine2.GRANULARITY_COMPILATION_UNIT);
 			engine.setFiltering(true, true);
 			engine.setScope(RefactoringScopeFactory.create(method));
 			engine.searchPattern(new SubProgressMonitor(pm, 1));
