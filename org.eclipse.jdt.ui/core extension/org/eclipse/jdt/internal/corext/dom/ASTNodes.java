@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -341,12 +342,29 @@ public class ASTNodes {
 		return null;			
 	}
 	
+	/**
+	 * Returns true if a node at a given location is a body of a control statement. Such body nodes are
+	 * interesting as when replacing them, it has to be evaluates if a Block is needed instead.
+	 * E.g. <code> if (x) do(); -> if (x) { do1(); do2() } </code>
+	 *
+	 * @param locationInParent Location of the body node
+	 * @return Returns true if the location is a bod node location of a control statement.
+	 */
+	public static boolean isControlStatementBody(StructuralPropertyDescriptor locationInParent) {
+		return locationInParent == IfStatement.THEN_STATEMENT_PROPERTY
+			|| locationInParent == IfStatement.ELSE_STATEMENT_PROPERTY
+			|| locationInParent == ForStatement.BODY_PROPERTY
+			|| locationInParent == WhileStatement.BODY_PROPERTY
+			|| locationInParent == DoStatement.BODY_PROPERTY;
+	}
+	
 	public static boolean needsParentheses(Expression expression) {
 		int type= expression.getNodeType();
 		return type == ASTNode.INFIX_EXPRESSION || type == ASTNode.CONDITIONAL_EXPRESSION ||
 			type == ASTNode.PREFIX_EXPRESSION || type == ASTNode.POSTFIX_EXPRESSION ||
 			type == ASTNode.CAST_EXPRESSION;
 	}
+	
 	
 	public static boolean substituteMustBeParenthesized(Expression substitute, Expression location) {
     	if (!needsParentheses(substitute))

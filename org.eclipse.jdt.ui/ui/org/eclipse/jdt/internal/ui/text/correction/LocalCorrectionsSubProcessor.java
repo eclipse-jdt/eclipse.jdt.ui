@@ -692,7 +692,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		ASTRewrite rewrite= ASTRewrite.create(root.getAST());
-		ASTNode placeholder=QuickAssistProcessor.getCopyOfInner(rewrite, ifStatement.getElseStatement());
+		ASTNode placeholder=QuickAssistProcessor.getCopyOfInner(rewrite, ifStatement.getElseStatement(), false);
 		if (placeholder == null) {
 			return;
 		}
