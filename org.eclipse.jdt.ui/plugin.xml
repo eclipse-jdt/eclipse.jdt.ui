@@ -1514,6 +1514,21 @@
             <separator name="typeGroup"/>
             <separator name="codingGroup"/>
          </menu>
+<!-- undo/redo group  -->
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
+               label="%Refactoring.redoAction.label"
+               class="org.eclipse.ltk.ui.refactoring.RedoRefactoringAction"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
+               id="RedoAction">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
+               label="%Refactoring.undoAction.label"
+               class="org.eclipse.ltk.ui.refactoring.UndoRefactoringAction"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
+               id="UndoAction">
+         </action>
 <!-- reorg group  -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
@@ -2794,6 +2809,58 @@
             string="Command+Alt+T"
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <command
+            name="%ActionDefinition.refactorUndo.name"
+            description="%ActionDefinition.refactorUndo.description"
+            category="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.edit.text.java.refactor.undo">
+      </command>
+      <keyBinding
+            string="Alt+Shift+Z"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+Z"
+            scope="org.eclipse.ui.globalScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Alt+Z"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.refactor.undo"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <command
+            name="%ActionDefinition.refactorRedo.name"
+            description="%ActionDefinition.refactorRedo.description"
+            category="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.edit.text.java.refactor.redo">
+      </command>
+      <keyBinding
+            string="Alt+Shift+Y"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+Y"
+            scope="org.eclipse.ui.globalScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Alt+Y"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.refactor.redo"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <command
