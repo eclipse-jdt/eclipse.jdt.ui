@@ -204,7 +204,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, runnable);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), getActionName(), "Error occurred while performing this operation."); 
+			ExceptionHandler.handle(e, getShell(), getActionName(), ReorgMessages.getString("ReorgDestinationAction.error_occurred"));  //$NON-NLS-1$
 			return;
 		} catch (InterruptedException e) {
 			Assert.isTrue(false); //cannot happen - not cancelable

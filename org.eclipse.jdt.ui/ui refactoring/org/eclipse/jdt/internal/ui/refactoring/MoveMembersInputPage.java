@@ -144,8 +144,8 @@ class MoveMembersInputPage extends UserInputWizardPage {
 			return RefactoringScopeFactory.create(getMoveRefactoring().getDeclaringType().getJavaProject());
 		} catch (JavaModelException e) {
 			//fallback is the whole workspace scope
-			String title= "Move Members";
-			String message= "Internal error occurred. See log for details.";
+			String title= RefactoringMessages.getString("MoveMembersInputPage.move"); //$NON-NLS-1$
+			String message= RefactoringMessages.getString("MoveMembersInputPage.internal_error"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, getShell(), title, message);
 			return SearchEngine.createJavaSearchScope(new IJavaElement[]{getMoveRefactoring().getDeclaringType().getJavaProject()}, true);
 		}
