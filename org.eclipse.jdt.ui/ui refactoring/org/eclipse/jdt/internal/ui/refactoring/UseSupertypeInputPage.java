@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +42,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class UseSupertypeInputPage extends UserInputWizardPage{
 
@@ -183,14 +181,14 @@ class UseSupertypeInputPage extends UserInputWizardPage{
 				return superText;
 			int count= ((Integer)fFileCount.get(element)).intValue();
 			if (count == 0){
-				String pattern= RefactoringMessages.getString("UseSupertypeInputPage.no_possible_updates"); //$NON-NLS-1$
-				return MessageFormat.format(pattern, new String[]{superText});
+				String[] keys= {superText};
+				return RefactoringMessages.getFormattedString("UseSupertypeInputPage.no_possible_updates", keys); //$NON-NLS-1$
 			} else if (count == 1){
-				String pattern= RefactoringMessages.getString("UseSupertypeInputPage.updates_possible_in_file"); //$NON-NLS-1$
-				return MessageFormat.format(pattern, new String[]{superText});
+				String [] keys= {superText};
+				return RefactoringMessages.getFormattedString("UseSupertypeInputPage.updates_possible_in_file", keys); //$NON-NLS-1$
 			}	else {
-				String pattern= RefactoringMessages.getString("UseSupertypeInputPage.updates_possible_in_files"); //$NON-NLS-1$
-				return MessageFormat.format(pattern, new String[]{superText, String.valueOf(count)});
+				String[] keys= {superText, String.valueOf(count)};
+				return RefactoringMessages.getFormattedString("UseSupertypeInputPage.updates_possible_in_files", keys); //$NON-NLS-1$
 			}	
 		}
 	}

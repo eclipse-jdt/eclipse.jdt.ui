@@ -1,6 +1,5 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,7 +30,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class ExtractInterfaceInputPage extends TextInputWizardPage {
 
@@ -152,8 +150,8 @@ class ExtractInterfaceInputPage extends TextInputWizardPage {
 	}
 
 	private void addReplaceAllCheckbox(Composite result) {
-		String key= RefactoringMessages.getString("ExtractInterfaceInputPage.change_references");  //$NON-NLS-1$
-		String title= MessageFormat.format(key, new String[]{getExtractInterfaceRefactoring().getInputType().getElementName()});
+		String[] keys= {getExtractInterfaceRefactoring().getInputType().getElementName()};
+		String title= RefactoringMessages.getFormattedString("ExtractInterfaceInputPage.change_references", keys);  //$NON-NLS-1$
 		boolean defaultValue= getExtractInterfaceRefactoring().isReplaceOccurrences();
 		fReplaceAllCheckbox= createCheckbox(result,  title, defaultValue);
 		getExtractInterfaceRefactoring().setReplaceOccurrences(fReplaceAllCheckbox.getSelection());

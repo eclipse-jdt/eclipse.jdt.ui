@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,10 +57,11 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.JavaConventions;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
 /**
  * A special control to edit and reorder method parameters.
@@ -407,8 +407,8 @@ public class ChangeParametersControl extends Composite {
 					ParameterInfo[] selected= getSelectedItems();
 					Assert.isTrue(selected.length == 1);
 					ParameterInfo parameterInfo= selected[0];
-					String key= RefactoringMessages.getString("ChangeParametersControl.inputdialog.message"); //$NON-NLS-1$
-					String message= MessageFormat.format(key, new String[] { parameterInfo.getOldName()});
+					String[] keys= { parameterInfo.getOldName()};
+					String message= RefactoringMessages.getFormattedString("ChangeParametersControl.inputdialog.message", keys); //$NON-NLS-1$
 					IInputValidator validator= createParameterNameValidator();
 					InputDialog dialog= new InputDialog(getShell(), RefactoringMessages.getString("ChangeParametersControl.inputDialog.title"), message, parameterInfo.getNewName(), validator); //$NON-NLS-1$
 					if (dialog.open() == InputDialog.CANCEL) {
