@@ -9,17 +9,17 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jdt.core.ISourceRange;
 
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class SelectionHistory {
 
 	private List fHistory;
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	private ISelectionChangedListener fSelectionListener;
 	private int fSelectionChangeListenerCounter;
 	private StructureSelectHistoryAction fHistoryAction;
 
-	public SelectionHistory(CompilationUnitEditor editor) {
+	public SelectionHistory(JavaEditor editor) {
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		fHistory= new ArrayList(3);

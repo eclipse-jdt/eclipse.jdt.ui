@@ -96,12 +96,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
@@ -560,8 +554,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
 	/** The editor's tab converter */
 	private TabConverter fTabConverter;
-	/** History for structure select action */
-	private SelectionHistory fSelectionHistory;
 	/** The preference property change listener for java core. */
 	private IPropertyChangeListener fPropertyChangeListener= new PropertyChangeListener();
 	/** The remembered java element */
@@ -638,25 +630,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);				
 		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
 		
-		fSelectionHistory= new SelectionHistory(this);
-
-		action= new StructureSelectEnclosingAction(this, fSelectionHistory);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_ENCLOSING);				
-		setAction(StructureSelectionAction.ENCLOSING, action);
-
-		action= new StructureSelectNextAction(this, fSelectionHistory);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_NEXT);
-		setAction(StructureSelectionAction.NEXT, action);
-
-		action= new StructureSelectPreviousAction(this, fSelectionHistory);
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_PREVIOUS);
-		setAction(StructureSelectionAction.PREVIOUS, action);
-
-		StructureSelectHistoryAction historyAction= new StructureSelectHistoryAction(this, fSelectionHistory);
-		historyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_LAST);		
-		setAction(StructureSelectionAction.HISTORY, historyAction);
-		fSelectionHistory.setHistoryAction(historyAction);		
-
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		
@@ -1006,11 +979,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			fJavaEditorErrorTickUpdater= null;
 		}
 		
-		if (fSelectionHistory != null) {
-			fSelectionHistory.dispose();
-			fSelectionHistory= null;
-		}
-				
 		if (fActionGroups != null) {
 			fActionGroups.dispose();
 			fActionGroups= null;

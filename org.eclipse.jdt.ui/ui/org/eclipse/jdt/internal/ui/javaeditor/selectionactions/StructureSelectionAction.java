@@ -3,11 +3,16 @@ package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 import java.util.Collection;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.ui.IEditorInput;
+
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -20,8 +25,9 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 public abstract class StructureSelectionAction extends Action {
 
@@ -30,16 +36,15 @@ public abstract class StructureSelectionAction extends Action {
 	public static final String ENCLOSING= "SelectEnclosingElement"; //$NON-NLS-1$
 	public static final String HISTORY= "RestoreLastSelection"; //$NON-NLS-1$
 
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	private SelectionHistory fSelectionHistory;
 
-	protected StructureSelectionAction(String text, CompilationUnitEditor editor, SelectionHistory history) {
+	protected StructureSelectionAction(String text, JavaEditor editor, SelectionHistory history) {
 		super(text);
 		Assert.isNotNull(editor);
 		Assert.isNotNull(history);
 		fEditor= editor;
 		fSelectionHistory= history;
-		setEnabled(null != SelectionConverter.getInputAsCompilationUnit(fEditor));
 	}
 	
 	/*
@@ -54,7 +59,19 @@ public abstract class StructureSelectionAction extends Action {
 	 */
 	public final  void run() {
 		ITextSelection selection= getTextSelection();
-		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection), getCompilationUnit());
+		ISourceReference source= getSourceReference();
+		ISourceRange sourceRange;
+		try {
+			sourceRange= source.getSourceRange();
+			if (sourceRange == null || sourceRange.getLength() == 0) {
+				MessageDialog.openInformation(fEditor.getEditorSite().getShell(), 
+					JavaEditorMessages.getString("StructureSelect.error.title"), 
+					JavaEditorMessages.getString("StructureSelect.error.message"));
+				return;
+			}
+		} catch (JavaModelException e) {
+		}
+		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection), source);
 		// Check if new selection differs from current selection
 		if (selection.getOffset() == newRange.getOffset() && selection.getLength() == newRange.getLength())
 			return;
@@ -67,15 +84,17 @@ public abstract class StructureSelectionAction extends Action {
 		}
 	}
 	
-	public final ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu){
+	public final ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr) {
 		try{
-			if (! cu.isStructureKnown())
+			if (! isStructureKnown(sr))
 				return oldSourceRange;
-			CompilationUnit root= AST.parseCompilationUnit(cu, false);
+			CompilationUnit root= getAST(sr);
+			if (root == null)
+				return oldSourceRange;
 			Selection selection= Selection.createFromStartLength(oldSourceRange.getOffset(), oldSourceRange.getLength());
 			SelectionAnalyzer selAnalyzer= new SelectionAnalyzer(selection, true);
 			root.accept(selAnalyzer);
-			return internalGetNewSelectionRange(oldSourceRange, cu, selAnalyzer);
+			return internalGetNewSelectionRange(oldSourceRange, sr, selAnalyzer);
 	 	}	catch (JavaModelException e){
 	 		JavaPlugin.log(e); //dialog would be too heavy here
 	 		return new SourceRange(oldSourceRange.getOffset(), oldSourceRange.getLength());
@@ -86,26 +105,22 @@ public abstract class StructureSelectionAction extends Action {
 	 * This is the default implementation - it goes up one level in the AST.
 	 * Subclasses may implement different behavior and/or use this implementation as a fallback for cases they do not handle..
 	 */
-	abstract ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, SelectionAnalyzer selAnalyzer) throws JavaModelException;
-	
-	protected final ICompilationUnit getCompilationUnit() {
-		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
-	}
+	abstract ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException;
 	
 	protected final ITextSelection getTextSelection() {
 		return (ITextSelection)fEditor.getSelectionProvider().getSelection();
 	}
 	
-	protected static ISourceRange getLastCoveringNodeRange(ISourceRange oldSourceRange, ICompilationUnit cu, SelectionAnalyzer selAnalyzer) throws JavaModelException {
+	protected static ISourceRange getLastCoveringNodeRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException {
 		if (selAnalyzer.getLastCoveringNode() == null)
 			return oldSourceRange;		
 		else	
-			return getSelectedNodeSourceRange(cu, selAnalyzer.getLastCoveringNode());
+			return getSelectedNodeSourceRange(sr, selAnalyzer.getLastCoveringNode());
 	}
 	
-	protected static ISourceRange getSelectedNodeSourceRange(ICompilationUnit cu, ASTNode nodeToSelect) throws JavaModelException {
+	protected static ISourceRange getSelectedNodeSourceRange(ISourceReference sr, ASTNode nodeToSelect) throws JavaModelException {
 		int offset= nodeToSelect.getStartPosition();
-		int end= Math.min(cu.getSourceRange().getLength(), nodeToSelect.getStartPosition() + nodeToSelect.getLength() - 1);
+		int end= Math.min(sr.getSourceRange().getLength(), nodeToSelect.getStartPosition() + nodeToSelect.getLength() - 1);
 		return createSourceRange(offset, end);
 	}
 	
@@ -113,6 +128,31 @@ public abstract class StructureSelectionAction extends Action {
 	
 	private static ISourceRange createSourceRange(ITextSelection ts){
 		return new SourceRange(ts.getOffset(), ts.getLength());
+	}
+	
+	private ISourceReference getSourceReference() {
+		IEditorInput input= fEditor.getEditorInput();
+		if (input instanceof IClassFileEditorInput) {
+			return ((IClassFileEditorInput)input).getClassFile();
+		} else {
+			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input);
+		}
+	}
+	
+	private boolean isStructureKnown(ISourceReference sr) throws JavaModelException {
+		if (sr instanceof ICompilationUnit)
+			return ((ICompilationUnit)sr).isStructureKnown();
+		else return true;
+	}
+	
+	private CompilationUnit getAST(ISourceReference sr) {
+		if (sr instanceof ICompilationUnit) {
+			return AST.parseCompilationUnit((ICompilationUnit)sr, false);
+		} else if (sr instanceof IClassFile) {
+			// Work-around http://dev.eclipse.org/bugs/show_bug.cgi?id=30471
+			return AST.parseCompilationUnit((IClassFile)sr, true);
+		}
+		return null;
 	}
 	
 	//-- helper methods for this class and subclasses

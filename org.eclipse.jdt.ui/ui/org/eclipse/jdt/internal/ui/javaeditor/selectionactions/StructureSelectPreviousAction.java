@@ -2,20 +2,20 @@ package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
-
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
-public class StructureSelectPreviousAction extends StructureSelectionAction{
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
+
+public class StructureSelectPreviousAction extends StructureSelectionAction {
 	
-	public StructureSelectPreviousAction(CompilationUnitEditor editor, SelectionHistory history) {
+	public StructureSelectPreviousAction(JavaEditor editor, SelectionHistory history) {
 		super(JavaEditorMessages.getString("StructureSelectPrevious.label"), editor, history); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("StructureSelectPrevious.tooltip")); //$NON-NLS-1$
 		setDescription(JavaEditorMessages.getString("StructureSelectPrevious.description")); //$NON-NLS-1$
@@ -31,18 +31,18 @@ public class StructureSelectPreviousAction extends StructureSelectionAction{
 	/* non java doc
 	 * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, SelectionAnalyzer)
 	 */	
-	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, SelectionAnalyzer selAnalyzer) throws JavaModelException{
+	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException{
 		ASTNode first= selAnalyzer.getFirstSelectedNode();
 		if (first == null) 
-			return getLastCoveringNodeRange(oldSourceRange, cu, selAnalyzer); 
+			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer); 
 		
 		ASTNode parent= first.getParent();
 		if (parent == null)	
-			return getLastCoveringNodeRange(oldSourceRange, cu, selAnalyzer); 
+			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer); 
 		
 		ASTNode previousNode= getPreviousNode(parent, selAnalyzer.getSelectedNodes()[0]);
 		if (previousNode == parent)
-			return getSelectedNodeSourceRange(cu, parent);	
+			return getSelectedNodeSourceRange(sr, parent);	
 			
 		int offset= previousNode.getStartPosition();
 		int end= oldSourceRange.getOffset() + oldSourceRange.getLength() - 1;

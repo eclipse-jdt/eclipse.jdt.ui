@@ -20,6 +20,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -38,6 +39,7 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
 
 /**
@@ -130,11 +132,11 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private RetargetAction fRetargetShowJavaDoc;
 	private RetargetTextEditorAction fShowJavaDoc;
 	
+	private RetargetTextEditorAction fStructureSelectEnclosingAction;
+	private RetargetTextEditorAction fStructureSelectNextAction;
+	private RetargetTextEditorAction fStructureSelectPreviousAction;
+	private RetargetTextEditorAction fStructureSelectHistoryAction;	
 
-
-
-	
-	
 	public BasicJavaEditorActionContributor() {
 		super();
 		
@@ -187,6 +189,15 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		
 		fOpenStructure= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "OpenStructure."); //$NON-NLS-1$
 		fOpenStructure.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
+		
+		fStructureSelectEnclosingAction= new RetargetTextEditorAction(b, "StructureSelectEnclosing."); //$NON-NLS-1$
+		fStructureSelectEnclosingAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_ENCLOSING);
+		fStructureSelectNextAction= new RetargetTextEditorAction(b, "StructureSelectNext."); //$NON-NLS-1$
+		fStructureSelectNextAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_NEXT);
+		fStructureSelectPreviousAction= new RetargetTextEditorAction(b, "StructureSelectPrevious."); //$NON-NLS-1$
+		fStructureSelectPreviousAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_PREVIOUS);
+		fStructureSelectHistoryAction= new RetargetTextEditorAction(b, "StructureSelectHistory."); //$NON-NLS-1$
+		fStructureSelectHistoryAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_LAST);
 	}
 	
 	protected final void markAsPartListener(RetargetAction action) {
@@ -232,8 +243,15 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fShowOutline);
 			editMenu.appendToGroup(IWorkbenchActionConstants.FIND_EXT, fShowReferencesAction);
+
+			MenuManager structureSelection= new MenuManager(JavaEditorMessages.getString("ExpandSelectionMenu.label")); //$NON-NLS-1$
+			structureSelection.add(fStructureSelectEnclosingAction);
+			structureSelection.add(fStructureSelectNextAction);
+			structureSelection.add(fStructureSelectPreviousAction);
+			structureSelection.add(fStructureSelectHistoryAction);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
 		}
-		
+
 //		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
 //		if (navigateMenu != null) {
 //			navigateMenu.appendToGroup("open.ext", fOpenStructure); //$NON-NLS-1$
@@ -276,6 +294,11 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fShowOutline.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
 		fOpenStructure.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));
 
+		fStructureSelectEnclosingAction.setAction(getAction(textEditor, StructureSelectionAction.ENCLOSING));
+		fStructureSelectNextAction.setAction(getAction(textEditor, StructureSelectionAction.NEXT));
+		fStructureSelectPreviousAction.setAction(getAction(textEditor, StructureSelectionAction.PREVIOUS));
+		fStructureSelectHistoryAction.setAction(getAction(textEditor, StructureSelectionAction.HISTORY));
+				
 		if (part instanceof JavaEditor) {
 			JavaEditor javaEditor= (JavaEditor) part;
 			javaEditor.getActionGroup().fillActionBars(getActionBars());

@@ -43,10 +43,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
@@ -81,15 +85,6 @@ import org.eclipse.jface.text.source.IVerticalRulerColumn;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.GroupMarker;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
@@ -98,6 +93,11 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
@@ -138,6 +138,23 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -149,17 +166,6 @@ import org.eclipse.jdt.ui.actions.ShowActionGroup;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
-import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
-import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
-import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
 
 
@@ -1073,6 +1079,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected SourceViewerDecorationSupport fSourceViewerDecorationSupport;
 	/** The overview ruler */
 	protected OverviewRuler fOverviewRuler;
+	/** History for structure select action */
+	private SelectionHistory fSelectionHistory;
 	
 	protected CompositeActionGroup fActionGroups;
 	private CompositeActionGroup fContextMenuGroup;
@@ -1515,6 +1523,11 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			fBracketMatcher= null;
 		}
 		
+		if (fSelectionHistory != null) {
+			fSelectionHistory.dispose();
+			fSelectionHistory= null;
+		}
+				
 		super.dispose();
 	}
 	
@@ -1559,6 +1572,25 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		fEncodingSupport= new DefaultEncodingSupport();
 		fEncodingSupport.initialize(this);
 		
+		fSelectionHistory= new SelectionHistory(this);
+
+		action= new StructureSelectEnclosingAction(this, fSelectionHistory);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_ENCLOSING);				
+		setAction(StructureSelectionAction.ENCLOSING, action);
+
+		action= new StructureSelectNextAction(this, fSelectionHistory);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_NEXT);
+		setAction(StructureSelectionAction.NEXT, action);
+
+		action= new StructureSelectPreviousAction(this, fSelectionHistory);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_PREVIOUS);
+		setAction(StructureSelectionAction.PREVIOUS, action);
+
+		StructureSelectHistoryAction historyAction= new StructureSelectHistoryAction(this, fSelectionHistory);
+		historyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_LAST);		
+		setAction(StructureSelectionAction.HISTORY, historyAction);
+		fSelectionHistory.setHistoryAction(historyAction);
+				
 		if (fMouseListener == null) {
 			fMouseListener= new MouseClickListener();
 			fMouseListener.install();	

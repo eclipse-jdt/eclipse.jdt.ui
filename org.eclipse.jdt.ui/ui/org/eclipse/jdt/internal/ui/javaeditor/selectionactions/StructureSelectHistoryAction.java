@@ -9,15 +9,14 @@ import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 public class StructureSelectHistoryAction extends Action implements IUpdate {
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	private SelectionHistory fHistory;
 	
-	public StructureSelectHistoryAction(CompilationUnitEditor editor, SelectionHistory history) {
+	public StructureSelectHistoryAction(JavaEditor editor, SelectionHistory history) {
 		super(JavaEditorMessages.getString("StructureSelectHistory.label")); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("StructureSelectHistory.tooltip")); //$NON-NLS-1$
 		setDescription(JavaEditorMessages.getString("StructureSelectHistory.description")); //$NON-NLS-1$
@@ -30,7 +29,7 @@ public class StructureSelectHistoryAction extends Action implements IUpdate {
 	}
 	
 	public void update() {
-		setEnabled(null != SelectionConverter.getInputAsCompilationUnit(fEditor) && !fHistory.isEmpty());
+		setEnabled(!fHistory.isEmpty());
 	}
 	
 	public void run() {

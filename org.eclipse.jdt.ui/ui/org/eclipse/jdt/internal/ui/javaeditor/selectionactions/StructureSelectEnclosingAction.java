@@ -2,20 +2,20 @@ package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
-
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
 public class StructureSelectEnclosingAction extends StructureSelectionAction {
 
-	public StructureSelectEnclosingAction(CompilationUnitEditor editor, SelectionHistory history) {
+	public StructureSelectEnclosingAction(JavaEditor editor, SelectionHistory history) {
 		super(JavaEditorMessages.getString("StructureSelectEnclosing.label"), editor, history); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("StructureSelectEnclosing.tooltip")); //$NON-NLS-1$
 		setDescription(JavaEditorMessages.getString("StructureSelectEnclosing.description")); //$NON-NLS-1$
@@ -31,11 +31,11 @@ public class StructureSelectEnclosingAction extends StructureSelectionAction {
     /*
      * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, SelectionAnalyzer)
      */
-	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, SelectionAnalyzer selAnalyzer) throws JavaModelException{
+	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException{
 		ASTNode first= selAnalyzer.getFirstSelectedNode();	
 		if (first == null || first.getParent() == null) 
-			return getLastCoveringNodeRange(oldSourceRange, cu, selAnalyzer);
+			return getLastCoveringNodeRange(oldSourceRange, sr, selAnalyzer);
 			
-		return getSelectedNodeSourceRange(cu, first.getParent());
+		return getSelectedNodeSourceRange(sr, first.getParent());
 	}
 }
