@@ -49,11 +49,7 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 	 * Method declared in IUpdate.
 	 */
 	public void update() {
-		setEnabled(canOperateOn());
-	}
-	
-	protected boolean canOperateOnEmptySelection(){
-		return false;
+		setEnabled(canOperateOnCurrentSelection());
 	}
 	
 	//-- accessors ---
@@ -86,7 +82,7 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 		IWorkbenchPart part= fWorkbenchWindow.getPartService().getActivePart();
 		if (part instanceof JavaEditor) {
 			setEditor((JavaEditor)part);
-			if (!canOperateOn()) {
+			if (!canOperateOnCurrentSelection()) {
 				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), 
 					fOperationNotAvailableDialogTitle,
 					fOperationNotAvailableDialogMessage);
@@ -145,10 +141,8 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 			}
 		});
 	}	
-	
-	//---- private helpers --------------------------------------------------------------------------
 		
-	private boolean canOperateOn() {
+	protected boolean canOperateOnCurrentSelection() {
 		if (getEditor() == null)
 			return false;
 		ISelection selection= getEditor().getSelectionProvider().getSelection();
@@ -158,12 +152,7 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 		if (getCompilationUnit() == null)
 			return false;		
 		
-		Assert.isTrue(((ITextSelection)selection).getLength() >= 0);	
-		
-		if (((ITextSelection)selection).getLength() == 0)
-			return canOperateOnEmptySelection();
-		
-		return true;	
+		return (((ITextSelection)selection).getLength() > 0);
 	}	
 }
 

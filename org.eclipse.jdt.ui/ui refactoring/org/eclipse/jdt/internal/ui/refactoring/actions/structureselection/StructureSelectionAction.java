@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions.structureselection;
 
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
@@ -15,7 +16,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.util.AST;
 import org.eclipse.jdt.internal.corext.refactoring.util.ASTUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.actions.*;
+import org.eclipse.jdt.internal.ui.refactoring.actions.TextSelectionAction;
 
 /**
  * Action used to structurally select a fragment of source code.
@@ -32,11 +33,27 @@ public class StructureSelectionAction extends TextSelectionAction {
 		this("Structure Select");
 	}
 	
-	//overridden
-	protected boolean canOperateOnEmptySelection(){
-		return true;
-	}
+	/* non java-doc
+	 * Method declared in TextSelectionAction
+	 * 
+	 */
+	protected boolean canOperateOnCurrentSelection() {
+		if (super.canOperateOnCurrentSelection())
+			return true;
 		
+		if (getEditor() == null)
+			return false;
+		ISelection selection= getEditor().getSelectionProvider().getSelection();
+		if (!(selection instanceof ITextSelection))
+			return false;
+		
+		if (getCompilationUnit() == null)
+			return false;		
+		
+		Assert.isTrue(((ITextSelection)selection).getLength() >= 0);	
+		return true;				
+	}
+	
 	/* (non-JavaDoc)
 	 * Method declared in IAction.
 	 */
