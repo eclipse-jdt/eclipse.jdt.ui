@@ -4,34 +4,93 @@
  */
 package org.eclipse.jdt.internal.ui.reorg;
 
+import java.text.MessageFormat;
+
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;
+import org.eclipse.jdt.internal.corext.refactoring.base.IReorgExceptionHandler;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Class used to handle exceptions occurring during reorg actions.
  */
-class ReorgExceptionHandler implements IChangeExceptionHandler{
+class ReorgExceptionHandler implements IReorgExceptionHandler{
 
 	private MultiStatus fStatus;
+	private boolean fForceOutOfSyncDelete;
 
 	ReorgExceptionHandler() {
-		String id = JavaPlugin.getDefault().getDescriptor().getUniqueIdentifier();
-		fStatus = new MultiStatus(id, IStatus.OK, ReorgMessages.getString("ReorgExceptionHandler.see_details"), null); //$NON-NLS-1$
+		String id= JavaPlugin.getDefault().getDescriptor().getUniqueIdentifier();
+		fStatus= new MultiStatus(id, IStatus.OK, ReorgMessages.getString("ReorgExceptionHandler.see_details"), null); //$NON-NLS-1$
+		fForceOutOfSyncDelete= false;
 	}
 
-	public void handle(ChangeContext context, IChange change, Exception e) {
-		if (e instanceof RuntimeException)
-			throw (RuntimeException) e;
+	public void handle(ChangeContext context, IChange change, Exception e) {		
 		if (e instanceof CoreException)
 			fStatus.merge(((CoreException) e).getStatus());
 	}
+
+	public boolean forceDeletingResourceOutOfSynch(String name, CoreException e) {
+		if (fForceOutOfSyncDelete)
+			return true;
+	
+		int result= queryDeleteOutOfSync(name);
+	
+		if (result == IDialogConstants.YES_ID) 
+			return true;
+		else if (result == IDialogConstants.YES_TO_ALL_ID) {
+			fForceOutOfSyncDelete = true;
+			return true;			
+		} else
+			return false;
+	}
+	
 	
 	MultiStatus getStatus(){
 		return fStatus;
 	}	
+	
+	private static int queryDeleteOutOfSync(String name) {
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		final MessageDialog dialog=
+			new MessageDialog(
+				shell,
+				"Problems Deleting",
+				null,
+				MessageFormat.format("Resource {0} is out of synch with the file system. Do you want to delete it anyway?", new Object[] {name}),	
+				MessageDialog.QUESTION,
+				new String[] {
+					IDialogConstants.YES_LABEL,
+					IDialogConstants.YES_TO_ALL_LABEL,
+					IDialogConstants.NO_LABEL,
+					},
+				0);
+		shell.getDisplay().syncExec(new Runnable() {
+			public void run() {
+				dialog.open();
+			}
+		});
+		int result= dialog.getReturnCode();
+		if (result == 0)
+			return IDialogConstants.YES_ID;
+		if (result == 1)
+			return IDialogConstants.YES_TO_ALL_ID;
+		return IDialogConstants.NO_ID;
+	}
+	
 }

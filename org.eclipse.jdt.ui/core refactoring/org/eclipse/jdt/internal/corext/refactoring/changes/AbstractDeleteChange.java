@@ -4,20 +4,22 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.*;
-import org.eclipse.jdt.internal.corext.refactoring.*;
 
 abstract class AbstractDeleteChange extends Change {
 	
-	protected abstract void doDelete(IProgressMonitor pm) throws Exception;
+	protected abstract void doDelete(ChangeContext context, IProgressMonitor pm) throws CoreException;
 	
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
@@ -27,7 +29,7 @@ abstract class AbstractDeleteChange extends Change {
 			pm.beginTask(RefactoringCoreMessages.getString("AbstractDeleteChange.deleting"), 1); //$NON-NLS-1$
 			if (!isActive())
 				return;
-			doDelete(new SubProgressMonitor(pm, 1));
+			doDelete(context, new SubProgressMonitor(pm, 1));
 		} catch (Exception e) {
 			handleException(context, e);
 			setActive(false);
