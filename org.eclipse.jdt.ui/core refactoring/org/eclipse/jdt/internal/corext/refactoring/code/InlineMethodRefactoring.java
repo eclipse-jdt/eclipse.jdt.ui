@@ -293,6 +293,10 @@ public class InlineMethodRefactoring extends Refactoring {
 	private static SourceProvider resolveSourceProvider(RefactoringStatus status, ICompilationUnit unit, ASTNode invocation) throws JavaModelException {
 		CompilationUnit root= (CompilationUnit)invocation.getRoot();
 		IMethodBinding methodBinding= Invocations.resolveBinding(invocation);
+		if (methodBinding == null) {
+			status.addFatalError(RefactoringCoreMessages.getString("InlineMethodRefactoring.error.noMethodDeclaration")); //$NON-NLS-1$
+			return null;
+		}
 		MethodDeclaration declaration= (MethodDeclaration)root.findDeclaringNode(methodBinding);
 		if (declaration != null) {
 			return new SourceProvider(unit, declaration);
