@@ -65,18 +65,21 @@ public class ExternalizeAction implements IWorkbenchWindowActionDelegate{
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
+			openExternalizeStringsWizard(getCompilationUnit(getSelection()));
+	}
+	
+	public static void openExternalizeStringsWizard(ICompilationUnit unit){
 		try{
-			ICompilationUnit unit= getCompilationUnit(getSelection());
 			if (unit == null)
 				return;
-	
+			
 			Refactoring refactoring= createNewRefactoringInstance(unit);
 			ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
 			String title= NLSUIMessages.getString("action.name"); //$NON-NLS-1$
 			RefactoringAction.activateRefactoringWizard(refactoring, wizard, title, true);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, "Externalize Strings", "Unexpected exception. See log for details.");
-		}
+		}	
 	}
 
 	/*
