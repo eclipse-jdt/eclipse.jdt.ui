@@ -85,6 +85,9 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					return getMemberCategory(MembersOrderPreferenceCache.TYPE_INDEX);
 				case ASTNode.ENUM_CONSTANT_DECLARATION :
 					return getMemberCategory(MembersOrderPreferenceCache.ENUM_CONSTANTS_INDEX);
+				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+					return getMemberCategory(MembersOrderPreferenceCache.METHOD_INDEX); // reusing the method index
+					
 			}
 			return 0; // should never happen
 		}
@@ -171,14 +174,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						String name2= ((VariableDeclarationFragment) field2.fragments().get(0)).getName().getIdentifier();
 
 						// field declarations are sorted by name
-						int cmp= this.fCollator.compare(name1, name2);
-						if (cmp != 0) {
-							return cmp;
-						}
-						// preserve relative order
-						int value1= ((Integer) bodyDeclaration1.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-						int value2= ((Integer) bodyDeclaration2.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-						return value1 - value2;
+						return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);
 					}
 				case ASTNode.INITIALIZER :
 					{
@@ -198,15 +194,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						String name2= type2.getName().getIdentifier();
 
 						// typedeclarations are sorted by name
-						int cmp= this.fCollator.compare(name1, name2);
-						if (cmp != 0) {
-							return cmp;
-						}
-
-						// preserve relative order
-						int value1= ((Integer) bodyDeclaration1.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-						int value2= ((Integer) bodyDeclaration2.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-						return value1 - value2;
+						return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);					
 					}
 				case ASTNode.ENUM_CONSTANT_DECLARATION :
 					{
@@ -217,17 +205,32 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						String name2= decl2.getName().getIdentifier();
 						
 						// enum constants declarations are sorted by name
-						int cmp= this.fCollator.compare(name1, name2);
-						if (cmp != 0) {
-							return cmp;
-						}
-						// preserve relative order
-						int value1= ((Integer) bodyDeclaration1.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-						int value2= ((Integer) bodyDeclaration2.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-						return value1 - value2;
+						return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);					
+					}
+				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION :
+					{
+						AnnotationTypeMemberDeclaration decl1= (AnnotationTypeMemberDeclaration) bodyDeclaration1;
+						AnnotationTypeMemberDeclaration decl2= (AnnotationTypeMemberDeclaration) bodyDeclaration2;
+						
+						String name1= decl1.getName().getIdentifier();
+						String name2= decl2.getName().getIdentifier();
+						
+						// enum constants declarations are sorted by name
+						return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);
 					}
 			}
 			return 0;
+		}
+
+		private int compareNames(BodyDeclaration bodyDeclaration1, BodyDeclaration bodyDeclaration2, String name1, String name2) {
+			int cmp= this.fCollator.compare(name1, name2);
+			if (cmp != 0) {
+				return cmp;
+			}
+			// preserve relative order
+			int value1= ((Integer) bodyDeclaration1.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
+			int value2= ((Integer) bodyDeclaration2.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
+			return value1 - value2;
 		}
 
 		private String buildSignature(Type type) {
