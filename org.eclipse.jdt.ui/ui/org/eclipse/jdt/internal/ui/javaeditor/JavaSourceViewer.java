@@ -32,6 +32,7 @@ import org.eclipse.jface.text.ITextPresentationListener;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.information.IInformationPresenter;
+import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -405,5 +406,25 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		
 		fTextPresentationListeners.remove(listener);
 		fTextPresentationListeners.add(0, listener);
+	}
+
+	/**
+	 * Sets the given reconciler.
+	 *  
+	 * @param reconciler the reconciler
+	 * @since 3.0
+	 */
+	void setReconciler(IReconciler reconciler) {
+		fReconciler= reconciler;
+	}
+
+	/**
+	 * Returns the reconciler.
+	 * 
+	 * @return the reconciler or <code>null</code> if not set
+	 * @since 3.0
+	 */
+	Object getReconciler() {
+		return fReconciler;
 	}
 }

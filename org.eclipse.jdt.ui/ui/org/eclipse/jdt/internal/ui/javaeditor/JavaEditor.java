@@ -110,6 +110,7 @@ import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
@@ -2800,6 +2801,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	
 	private void internalDoSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
+		
+		if (getSourceViewer() instanceof JavaSourceViewer) {
+			JavaSourceViewer viewer= (JavaSourceViewer)getSourceViewer();
+			if (viewer.getReconciler() == null) {
+				IReconciler reconciler= getSourceViewerConfiguration().getReconciler(viewer);
+				if (reconciler != null) {
+					reconciler.install(viewer);
+					viewer.setReconciler(reconciler);
+				}
+			}
+		}
 		
 		if (fEncodingSupport != null)
 			fEncodingSupport.reset();
