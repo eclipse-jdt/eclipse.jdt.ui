@@ -1,0 +1,80 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package org.eclipse.jdt.text.tests.performance;
+
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.ITextEditor;
+
+public abstract class RevertEditorTest extends TextPerformanceTestCase {
+	
+	private static final int WARM_UP_RUNS= 10;
+	
+	private static final int MEASURED_RUNS= 5;
+	
+	private static final String REPLACE_TEXT= "XXX"; //$NON-NLS-1$
+	
+	private PerformanceMeter fPerformanceMeter;
+	
+	protected void setUp() throws Exception {
+		Performance performance= Performance.getDefault();
+		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		setWarmUpRuns(WARM_UP_RUNS);
+		setMeasuredRuns(MEASURED_RUNS);
+	}
+	
+	protected void measureRevert(IFile file) throws PartInitException, BadLocationException {
+		int warmUpRuns= getWarmUpRuns();
+		int measuredRuns= getMeasuredRuns();
+		ITextEditor part= (ITextEditor) EditorTestHelper.openInEditor(file, true);
+		for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
+			dirtyEditor(part);
+			if (i >= warmUpRuns)
+				fPerformanceMeter.start();
+			EditorTestHelper.revertEditor(part, true);
+			if (i >= warmUpRuns)
+				fPerformanceMeter.stop();
+			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
+			EditorTestHelper.runEventQueue(part);
+		}
+		
+		fPerformanceMeter.commit();
+		Performance.getDefault().assertPerformance(fPerformanceMeter);
+	}
+	
+	protected void tearDown() throws Exception {
+		fPerformanceMeter.dispose();
+		EditorTestHelper.closeAllEditors();
+	}
+
+	private synchronized void sleep(int time) {
+		try {
+			wait(time);
+		} catch (InterruptedException e) {
+		}
+	}
+
+	protected void dirtyEditor(ITextEditor part) throws BadLocationException {
+		IDocument document= EditorTestHelper.getDocument(part);
+		int line= document.getNumberOfLines() / 2; // dirty middle line
+		int offset= document.getLineOffset(line);
+		document.replace(offset, 0, REPLACE_TEXT);
+		EditorTestHelper.runEventQueue(part);
+	}
+}
