@@ -662,6 +662,10 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @throws JavaModelException
      */
     private List getAvailableActions(List selectedElements, IJavaProject project) throws JavaModelException {
+		if (project == null || !project.exists()) {
+			return new ArrayList();
+		}
+		
         List actions= new ArrayList();
         int[] types= new int[selectedElements.size()];
         for(int i= 0; i < types.length; i++) {

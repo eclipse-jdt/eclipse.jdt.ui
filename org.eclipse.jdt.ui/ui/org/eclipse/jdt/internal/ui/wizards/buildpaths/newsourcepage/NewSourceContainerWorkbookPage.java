@@ -186,7 +186,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 				fPackageExplorer.showOutputFolders(isUseFolders);
                 try {
                     ISelection selection= fPackageExplorer.getSelection();
-                    actionGroup.refresh(new DialogExplorerActionContext(selection, fHintTextGroup.getJavaProject()));
+                    actionGroup.refresh(new DialogExplorerActionContext(selection, fJavaProject));
                 } catch (JavaModelException e) {
                     ExceptionHandler.handle(e, getShell(),
                             NewWizardMessages.getString("NewSourceContainerWorkbookPage.Exception.refresh"), e.getMessage()); //$NON-NLS-1$
