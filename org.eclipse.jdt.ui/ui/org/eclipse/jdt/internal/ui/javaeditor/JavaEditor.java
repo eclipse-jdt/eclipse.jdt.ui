@@ -144,7 +144,7 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
-import org.eclipse.ui.texteditor.ExtendedTextEditor;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -219,7 +219,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 /**
  * Java specific text editor.
  */
-public abstract class JavaEditor extends ExtendedTextEditor implements IViewPartInputProvider {
+public abstract class JavaEditor extends AbstractDecoratedTextEditor implements IViewPartInputProvider {
 	
 	/**
 	 * Internal implementation class for a change listener.
@@ -2149,14 +2149,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 	
 	/*
-	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#initializeKeyBindingScopes()
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
 	 */
 	protected void initializeKeyBindingScopes() {
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
 	}
 	
 	/*
-	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#initializeEditor()
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeEditor()
 	 */
 	protected void initializeEditor() {
 		IPreferenceStore newStore= createNewPreferenceStore(null);
@@ -3850,7 +3850,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 	
 	/*
-	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#createChangeHover()
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#createChangeHover()
 	 */
 	protected LineChangeHover createChangeHover() {
 		return new JavaChangeHover(IJavaPartitions.JAVA_PARTITIONING);
@@ -3908,7 +3908,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 
 	/*
-	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#createCompositeRuler()
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#createCompositeRuler()
 	 */
 	protected CompositeRuler createCompositeRuler() {
 		if (!getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))

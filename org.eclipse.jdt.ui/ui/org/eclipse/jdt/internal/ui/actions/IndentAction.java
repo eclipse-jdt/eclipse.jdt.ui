@@ -35,7 +35,7 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
@@ -252,7 +252,7 @@ public class IndentAction extends TextEditorAction {
 				wsStart= offset + slashes;
 				
 				StringBuffer computed= indenter.computeIndentation(offset);
-				int tabSize= JavaPlugin.getDefault().getPreferenceStore().getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
+				int tabSize= JavaPlugin.getDefault().getPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
 				while (slashes > 0 && computed.length() > 0) {
 					char c= computed.charAt(0);
 					if (c == '\t')
@@ -326,7 +326,7 @@ public class IndentAction extends TextEditorAction {
 		else {
 			int size= 0;
 			int l= indent.length();
-			int tabSize= JavaPlugin.getDefault().getPreferenceStore().getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
+			int tabSize= JavaPlugin.getDefault().getPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
 			
 			for (int i= 0; i < l; i++)
 				size += indent.charAt(i) == '\t' ? tabSize : 1;

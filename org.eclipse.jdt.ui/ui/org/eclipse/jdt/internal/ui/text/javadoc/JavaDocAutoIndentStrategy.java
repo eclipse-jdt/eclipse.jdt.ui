@@ -30,7 +30,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -633,7 +633,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 */
 	private static int calculateDisplayedWidth(String string) {
 
-		final int tabWidth= getPreferenceStore().getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH); 
+		final int tabWidth= getPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH); 
 		
 		int column= 0;
 		for (int i= 0; i < string.length(); i++)
@@ -698,7 +698,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 
 	private static int getMargin() {
-		return getPreferenceStore().getInt(ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN);
+		return getPreferenceStore().getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN);
 	}
 
 	private static final String[] fgInlineTags= {

@@ -59,7 +59,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ConfigurationElementSorter;
-import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
@@ -356,7 +356,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		 * pre-3.0 plug-in to the new preference key. This is done only once.
 		 */
 		final String oldTabWidthKey= PreferenceConstants.EDITOR_TAB_WIDTH;
-		final String newTabWidthKey= ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH;
+		final String newTabWidthKey= AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH;
 		String tabWidthPropagatedKey= "tabWidthPropagated"; //$NON-NLS-1$
 		if (getPreferenceStore().contains(oldTabWidthKey) && !getPreferenceStore().isDefault(oldTabWidthKey)) {
 			if (!getPreferenceStore().getBoolean(tabWidthPropagatedKey))

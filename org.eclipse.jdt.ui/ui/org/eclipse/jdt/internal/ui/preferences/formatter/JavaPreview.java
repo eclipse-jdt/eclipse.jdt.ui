@@ -30,7 +30,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -110,7 +110,7 @@ public abstract class JavaPreview {
 		
 		fMarginPainter= new MarginPainter(fSourceViewer);
 		final IPreferenceStore prefStore= JavaPlugin.getDefault().getPreferenceStore();
-		final RGB rgb= PreferenceConverter.getColor(prefStore, ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR);
+		final RGB rgb= PreferenceConverter.getColor(prefStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR);
 		fMarginPainter.setMarginRulerColor(fTextTools.getColorManager().getColor(rgb));
 		fSourceViewer.addPainter(fMarginPainter);
 		

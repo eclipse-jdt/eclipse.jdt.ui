@@ -34,7 +34,7 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
-import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -202,9 +202,9 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fBackgroundColor= color;
 			
 			// ----------- selection foreground color --------------------
-			color= fPreferenceStore.getBoolean(ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR)
+			color= fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR)
 				? null
-				: createColor(fPreferenceStore, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, styledText.getDisplay());
+				: createColor(fPreferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, styledText.getDisplay());
 			styledText.setSelectionForeground(color);
 				
 			if (fSelectionForegroundColor != null)
@@ -213,9 +213,9 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fSelectionForegroundColor= color;
 			
 			// ---------- selection background color ----------------------
-			color= fPreferenceStore.getBoolean(ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR)
+			color= fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR)
 				? null
-				: createColor(fPreferenceStore, ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, styledText.getDisplay());
+				: createColor(fPreferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, styledText.getDisplay());
 			styledText.setSelectionBackground(color);
 				
 			if (fSelectionBackgroundColor != null)
@@ -308,10 +308,10 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 				|| PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR.equals(property)
 				|| PreferenceConstants.EDITOR_BACKGROUND_COLOR.equals(property)
 				|| PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR.equals(property)
-				|| ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR.equals(property)
-				|| ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR.equals(property)
-				|| ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR.equals(property)
-				|| ExtendedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR.equals(property))
+				|| AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR.equals(property)
+				|| AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR.equals(property)
+				|| AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR.equals(property)
+				|| AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR.equals(property))
 		{
 			initializeViewerColors();
 		}		

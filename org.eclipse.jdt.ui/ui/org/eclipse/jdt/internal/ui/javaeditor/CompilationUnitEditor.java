@@ -89,7 +89,7 @@ import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
-import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -1752,13 +1752,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 
 	/*
-	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#isPrefQuickDiffAlwaysOn()
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#isPrefQuickDiffAlwaysOn()
 	 */
 	protected boolean isPrefQuickDiffAlwaysOn() {
-		// reestablishes the behaviour from ExtendedTextEditor which was hacked by JavaEditor
+		// reestablishes the behaviour from AbstractDecoratedTextEditor which was hacked by JavaEditor
 		// to disable the change bar for the class file (attached source) java editor.
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
+		return store.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
 	}
 
 }
