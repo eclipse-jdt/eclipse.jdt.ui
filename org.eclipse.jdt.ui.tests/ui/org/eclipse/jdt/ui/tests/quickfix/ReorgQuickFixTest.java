@@ -59,7 +59,6 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);			
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);
 		store.setValue(PreferenceConstants.CODEGEN__JAVADOC_STUBS, false);
 		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");

@@ -60,7 +60,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);			
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);
 		store.setValue(PreferenceConstants.CODEGEN__JAVADOC_STUBS, false);
 		
 		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
