@@ -321,6 +321,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		layout.numColumns= 2; layout.makeColumnsEqualWidth= true;
 		layout.horizontalSpacing= 10;
 		result.setLayout(layout);
+		result.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		RowLayouter layouter= new RowLayouter(layout.numColumns);
 		gd= new GridData();
