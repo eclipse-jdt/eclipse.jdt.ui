@@ -238,7 +238,7 @@ class JavaEditorHoverConfigurationBlock {
 		addColumnLayoutData(layouter);
 		
 		// Hover table
-		fHoverTable= new Table(layouter, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
+		fHoverTable= new Table(layouter, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
 		fHoverTable.setHeaderVisible(true);
 		fHoverTable.setLinesVisible(true);
 		
