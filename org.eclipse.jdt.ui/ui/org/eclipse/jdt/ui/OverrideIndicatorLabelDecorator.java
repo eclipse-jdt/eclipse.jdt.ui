@@ -142,12 +142,10 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		if (type.isAnonymous() && !SuperTypeHierarchyCache.hasInCache(type)) {
 			int flags= method.getFlags();
 			// for performance reasons: cheat
-			if (Flags.isPublic(flags) && !type.getSuperclassName().endsWith("Adapter")) { //$NON-NLS-1$
-				return JavaElementImageDescriptor.IMPLEMENTS;
-			} else if (Flags.isProtected(flags)) {
+			if (!Flags.isPublic(flags) || type.getSuperclassName().endsWith("Adapter")) { //$NON-NLS-1$
 				return JavaElementImageDescriptor.OVERRIDES;
 			}
-			return 0;
+			return JavaElementImageDescriptor.IMPLEMENTS;
 		}
 		
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
