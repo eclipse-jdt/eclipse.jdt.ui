@@ -13,12 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.core.compiler.IProblem;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * An immutable tuple (message, severity) representing an entry in the list in 
