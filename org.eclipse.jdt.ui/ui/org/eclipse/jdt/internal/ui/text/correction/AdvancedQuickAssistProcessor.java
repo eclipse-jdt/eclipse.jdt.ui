@@ -184,16 +184,17 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression inversedExpression = getInversedBooleanExpression(ast, rewrite, ifStatement.getExpression());
 		Statement thenPlaceholder = (Statement) rewrite.createMoveTarget(ifStatement.getThenStatement());
 		Statement elsePlaceholder = (Statement) rewrite.createMoveTarget(ifStatement.getElseStatement());
-		// create inversed 'if' statement
-		IfStatement newIf = ast.newIfStatement();
-		newIf.setExpression(inversedExpression);
-		newIf.setThenStatement(elsePlaceholder);
-		newIf.setElseStatement(thenPlaceholder);
-		// replace original 'if' statement with inversed one
-		Block sourceBlock = (Block) ifStatement.getParent();
-		ListRewrite listRewriter = rewrite.getListRewrite(sourceBlock,
-				(ChildListPropertyDescriptor) coveringStatement.getLocationInParent());
-		listRewriter.replace(ifStatement, newIf, null);
+		// set new nodes
+		rewrite.set(ifStatement, IfStatement.EXPRESSION_PROPERTY, inversedExpression, null);
+		if (ifStatement.getThenStatement() instanceof Block && ! (ifStatement.getElseStatement() instanceof Block)) {
+			// heuristic for if (..) {...} else if (..) {...} constructs (bug 74580)
+			Block elseBlock= ast.newBlock();
+			elseBlock.statements().add(elsePlaceholder);
+			rewrite.set(ifStatement, IfStatement.THEN_STATEMENT_PROPERTY, elseBlock, null);
+		} else {
+			rewrite.set(ifStatement, IfStatement.THEN_STATEMENT_PROPERTY, elsePlaceholder, null);
+		}
+		rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, thenPlaceholder, null);
 		// add correction proposal
 		String label = CorrectionMessages.getString("AdvancedQuickAssistProcessor.inverseIf.description"); //$NON-NLS-1$
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
