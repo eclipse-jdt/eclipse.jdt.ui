@@ -88,6 +88,8 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
                     performDeletion(selection, pm);
                 } catch (CoreException e) {
                 	throw new InvocationTargetException(e);
+                } finally {
+                	pm.done();
                 }
             }
 		};
@@ -151,6 +153,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		
 		IField[] fields= getFields(refs);
 		delete(fields, new SubProgressMonitor(pm, fields.length));
+		pm.done();
 	}
 
 	private static void delete(IFile file, ISourceReference[] nonFields, IProgressMonitor pm) throws CoreException{
@@ -171,6 +174,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		} finally{
 			if (tb != null)
 				TextBuffer.release(tb);
+		    pm.done();
 		}	
 	}
 	
@@ -181,6 +185,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 		}
+	    pm.done();
 	}
 			
 	private static TextEdit createDeleteEdit(ISourceReference ref) throws JavaModelException{
@@ -209,7 +214,8 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 				continue;
 			cusToDelete[i].delete(false, new SubProgressMonitor(pm, 1));
 			notDeletedCus.remove(cusToDelete[i]);
-		}	
+		}
+	    pm.done();
 		return (ICompilationUnit[]) notDeletedCus.toArray(new ICompilationUnit[notDeletedCus.size()]);
 	}
 	
