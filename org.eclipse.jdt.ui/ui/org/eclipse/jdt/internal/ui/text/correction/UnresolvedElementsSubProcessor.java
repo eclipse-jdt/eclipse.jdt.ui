@@ -24,7 +24,9 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -36,6 +38,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -215,21 +218,35 @@ public class UnresolvedElementsSubProcessor {
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		ASTNode selectedNode= ASTResolving.findCoveringNode(astRoot, problemPos.getOffset(), problemPos.getLength());
 		
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
 		SimpleName nameNode= (SimpleName) selectedNode;
+
+		List arguments;
+		Expression sender;
+		boolean isSuperInvocation;
 		
-		if (!(selectedNode.getParent() instanceof MethodInvocation)) {
+		ASTNode invocationNode= nameNode.getParent();
+		if (invocationNode instanceof MethodInvocation) {
+			MethodInvocation methodImpl= (MethodInvocation) invocationNode;
+			arguments= methodImpl.arguments();
+			sender= methodImpl.getExpression();
+			isSuperInvocation= false;
+		} else if (invocationNode instanceof SuperMethodInvocation) {
+			SuperMethodInvocation methodImpl= (SuperMethodInvocation) invocationNode;
+			arguments= methodImpl.arguments();
+			sender= methodImpl.getQualifier();
+			isSuperInvocation= true;
+		} else {
 			return;
 		}
-		MethodInvocation invocationNode= (MethodInvocation) nameNode.getParent();
+		
+		String methodName= nameNode.getIdentifier();
 		
 		// corrections
-		String methodName= nameNode.getIdentifier();
-				
 		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, nameNode, SimilarElementsRequestor.METHODS);
 		for (int i= 0; i < elements.length; i++) {
 			String curr= elements[i].getName();
@@ -242,16 +259,9 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		// new method
-		Expression sender= invocationNode.getExpression();
-		
 		ITypeBinding binding= null;
-		ICompilationUnit targetCU= cu;
 		if (sender != null) {
 			binding= sender.resolveTypeBinding();
-			if (binding != null && astRoot.findDeclaringNode(binding) == null) {
-				targetCU= Binding2JavaModel.findCompilationUnit(binding, cu.getJavaProject());
-				targetCU= JavaModelUtil.toWorkingCopy(targetCU);
-			}
 		} else {
 			ASTNode typeDecl= ASTResolving.findParentType(invocationNode);
 			if (typeDecl instanceof TypeDeclaration) {
@@ -259,15 +269,21 @@ public class UnresolvedElementsSubProcessor {
 			} else {
 				binding= ((AnonymousClassDeclaration) typeDecl).resolveBinding();
 			}
+			if (isSuperInvocation && binding != null) {
+				binding= binding.getSuperclass();
+			}				
 		}
-		if (binding != null && targetCU != null) {	
-			String label;
-			if (cu.equals(targetCU)) {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
-			} else {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, targetCU.getElementName() } ); //$NON-NLS-1$
+		if (binding != null && binding.isFromSource()) {
+			ICompilationUnit targetCU= getCompilationUnit(binding, cu, astRoot);
+			if (targetCU != null) {			
+				String label;
+				if (cu.equals(targetCU)) {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, targetCU.getElementName() } ); //$NON-NLS-1$
+				}
+				proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, binding, 1));
 			}
-			proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, binding, 1));
 		}
 	}
 	
@@ -276,63 +292,57 @@ public class UnresolvedElementsSubProcessor {
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-		
+		ASTNode selectedNode= ASTResolving.findCoveringNode(astRoot, problemPos.getOffset(), problemPos.getLength());
 		if (selectedNode == null) {
 			return;
 		}
+		
+		ITypeBinding targetBinding= null;
+		List arguments= null;
+		
 		int type= selectedNode.getNodeType();
 		if (type == ASTNode.CLASS_INSTANCE_CREATION) {
 			ClassInstanceCreation creation= (ClassInstanceCreation) selectedNode;
 			
 			IBinding binding= creation.getName().resolveBinding();
-			if (binding != null && binding.getKind() == IBinding.TYPE) {
-				getConstructorProposals((ITypeBinding) binding, creation.arguments(), cu, proposals);
+			if (binding instanceof ITypeBinding) {
+				targetBinding= (ITypeBinding) binding;
+				arguments= creation.arguments();		
 			}
 		} else if (type == ASTNode.SUPER_CONSTRUCTOR_INVOCATION) {
-			ASTNode node= selectedNode.getParent();
-			while (node != null && node.getNodeType() != ASTNode.TYPE_DECLARATION) {
-				node= node.getParent();
-			}
-			if (node != null) {
-				TypeDeclaration decl= (TypeDeclaration) node;
-				Name name= decl.getSuperclass();
-				if (name != null) {
-					IBinding binding= name.resolveBinding();
-					if (binding != null && binding.getKind() == IBinding.TYPE) {
-						getConstructorProposals((ITypeBinding) binding, ((SuperConstructorInvocation) selectedNode).arguments(), cu, proposals);
-					}
+			ASTNode typeDecl= ASTResolving.findParentType(selectedNode);
+			if (typeDecl instanceof TypeDeclaration) {
+				ITypeBinding typeBinding= ((TypeDeclaration) typeDecl).resolveBinding();
+				if (typeBinding != null) {
+					targetBinding= typeBinding.getSuperclass();
+					arguments= ((SuperConstructorInvocation) selectedNode).arguments();
 				}
 			}
 		} else if (type == ASTNode.CONSTRUCTOR_INVOCATION) {
-			ASTNode node= selectedNode.getParent();
-			while (node != null && node.getNodeType() != ASTNode.TYPE_DECLARATION) {
-				node= node.getParent();
-			}
-			if (node != null) {
-				TypeDeclaration decl= (TypeDeclaration) node;
-				IBinding binding= decl.getName().resolveBinding();
-				if (binding != null && binding.getKind() == IBinding.TYPE) {
-					getConstructorProposals((ITypeBinding) binding, ((ConstructorInvocation) selectedNode).arguments(), cu, proposals);
-				}
+			ASTNode typeDecl= ASTResolving.findParentType(selectedNode);
+			if (typeDecl instanceof TypeDeclaration) {
+				targetBinding= ((TypeDeclaration) typeDecl).resolveBinding();
+				arguments= ((ConstructorInvocation) selectedNode).arguments();
 			}			
+		}
+		if (targetBinding != null && targetBinding.isFromSource()) {
+			ICompilationUnit targetCU= getCompilationUnit(targetBinding, cu, astRoot);
+			if (targetCU != null) {
+				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", targetBinding.getName()); //$NON-NLS-1$
+				proposals.add(new NewMethodCompletionProposal(label, targetCU, selectedNode, arguments, targetBinding, 1));
+			}
 		}
 	}
 	
-	private static void getConstructorProposals(ITypeBinding typeBinding, List arguments, ICompilationUnit cu, ArrayList proposals) throws CoreException {
-		if (typeBinding.isFromSource() && typeBinding.isTopLevel()|| typeBinding.isMember()) {
-			IType type= Binding2JavaModel.find(typeBinding, cu.getJavaProject());
-			if (type == null) {
-				return;
+	private static ICompilationUnit getCompilationUnit(ITypeBinding binding, ICompilationUnit cu, CompilationUnit astRoot) throws JavaModelException {
+		if (binding != null && astRoot.findDeclaringNode(binding) == null) {
+			ICompilationUnit targetCU= Binding2JavaModel.findCompilationUnit(binding, cu.getJavaProject());
+			if (targetCU != null) {
+				return JavaModelUtil.toWorkingCopy(targetCU);
 			}
-			IType workingCopyType= (IType) EditorUtility.getWorkingCopy(type);
-			if (workingCopyType != null) {
-				type= workingCopyType;
-			}
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", type.getElementName()); //$NON-NLS-1$
-			proposals.add(new NewConstructorCompletionProposal(label, cu, type, arguments, 1));
-		}		
-	
+			return null;
+		}
+		return cu;
 	}
-	
+
 }

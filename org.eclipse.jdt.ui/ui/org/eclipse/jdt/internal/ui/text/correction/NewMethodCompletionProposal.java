@@ -23,6 +23,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -58,14 +59,16 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 
-	private MethodInvocation fNode;
+	private ASTNode fNode; // MethodInvocation, ConstructorInvocation, SuperConstructorInvocation, ClassInstanceCreation, SuperMethodInvocation
+	private List fArguments;
 	private ITypeBinding fSenderBinding;
 	private boolean fIsLocalChange;
 	
-	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, MethodInvocation node, ITypeBinding binding, int relevance) throws CoreException {
+	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode,  List arguments, ITypeBinding binding, int relevance) {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
 		
-		fNode= node;
+		fNode= invocationNode;
+		fArguments= arguments;
 		fSenderBinding= binding;
 	}
 		
@@ -96,8 +99,11 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 				methods= ((TypeDeclaration) newTypeDecl).bodyDeclarations();
 			}
 			MethodDeclaration newStub= getStub(newTypeDecl.getAST());
+			
 			if (fIsLocalChange) {
 				methods.add(findInsertIndex(methods, fNode.getStartPosition()), newStub);
+			} else if (isConstructor()) {
+				methods.add(0, newStub);
 			} else {
 				methods.add(newStub);
 			}
@@ -106,19 +112,21 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		
 		return rewrite;
 	}
+	
+	private boolean isConstructor() {
+		return fNode.getNodeType() != ASTNode.METHOD_INVOCATION && fNode.getNodeType() != ASTNode.SUPER_METHOD_INVOCATION;
+	}
 
 
 	private MethodDeclaration getStub(AST ast) {
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		Type returnType= evaluateMethodType(ast);
 		
-		decl.setConstructor(false);
+		decl.setConstructor(isConstructor());
 		decl.setModifiers(evaluateModifiers());
-		decl.setReturnType(returnType);
-		decl.setName(ast.newSimpleName(fNode.getName().getIdentifier()));
+		decl.setName(ast.newSimpleName(getMethodName()));
 		
 		NameProposer nameProposer= new NameProposer();
-		List arguments= fNode.arguments();
+		List arguments= fArguments;
 		List params= decl.parameters();
 		
 		int nArguments= arguments.size();
@@ -132,19 +140,27 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			params.add(param);
 		}
 		
-		ReturnStatement returnStatement= ast.newReturnStatement();
-		returnStatement.setExpression(ASTResolving.getInitExpression(returnType));
-		
 		Block body= ast.newBlock();
-		body.statements().add(returnStatement);
-		
+		if (!isConstructor()) {
+			Type returnType= evaluateMethodType(ast);
+			decl.setReturnType(returnType);
+			ReturnStatement returnStatement= ast.newReturnStatement();
+			returnStatement.setExpression(ASTResolving.getInitExpression(returnType));
+			body.statements().add(returnStatement);
+		}
 		decl.setBody(body);
 
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (settings.createComments && !fSenderBinding.isAnonymous()) {
 			StringBuffer buf= new StringBuffer();
 			String[] namesArray= (String[]) names.toArray(new String[names.size()]);
-			StubUtility.genJavaDocStub("Method " + fNode.getName().getIdentifier(), namesArray, Signature.createTypeSignature(ASTNodes.asString(returnType), true), null, buf);
+			String name= decl.getName().getIdentifier();
+			if (isConstructor()) {
+				StubUtility.genJavaDocStub("Constructor " + name, namesArray, null, null, buf);
+			} else {
+				String returnTypeSig= Signature.createTypeSignature(ASTNodes.asString(decl.getReturnType()), true);
+				StubUtility.genJavaDocStub("Method " + name, namesArray, returnTypeSig, null, buf);
+			}	
 			Javadoc javadoc= ast.newJavadoc();
 			javadoc.setComment(buf.toString());
 			decl.setJavadoc(javadoc);
@@ -169,32 +185,47 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	}
 		
 	private int findInsertIndex(List decls, int currPos) {
-		for (int i= decls.size() - 1; i >= 0; i--) {
+		int nDecls= decls.size();
+		for (int i= 0; i < nDecls; i++) {
 			ASTNode curr= (ASTNode) decls.get(i);
-			if (curr instanceof MethodDeclaration && currPos > curr.getStartPosition() + curr.getLength()) {
+			if (curr instanceof MethodDeclaration && currPos < curr.getStartPosition() + curr.getLength()) {
 				return i + 1;
 			}
 		}
-		return 0;
+		return nDecls;
+	}
+	
+	private String getMethodName() {
+		if (fNode instanceof MethodInvocation) {
+			return ((MethodInvocation)fNode).getName().getIdentifier();
+		} else if (fNode instanceof SuperMethodInvocation) {
+			return ((SuperMethodInvocation)fNode).getName().getIdentifier();
+		} else {
+			return fSenderBinding.getName(); // name of the class
+		}
 	}
 	
 	private int evaluateModifiers() {
-		int modifiers= 0;
-		Expression expression= fNode.getExpression();
-		if (expression != null) {
-			if (expression instanceof Name && ((Name) expression).resolveBinding().getKind() == IBinding.TYPE) {
+		if (fNode instanceof MethodInvocation) {
+			int modifiers= 0;
+			Expression expression= ((MethodInvocation)fNode).getExpression();
+			if (expression != null) {
+				if (expression instanceof Name && ((Name) expression).resolveBinding().getKind() == IBinding.TYPE) {
+					modifiers |= Modifier.STATIC;
+				}
+			} else if (ASTResolving.isInStaticContext(fNode)) {
 				modifiers |= Modifier.STATIC;
 			}
-		} else if (ASTResolving.isInStaticContext(fNode)) {
-			modifiers |= Modifier.STATIC;
+			
+			if (fIsLocalChange) {
+				modifiers |= Modifier.PRIVATE;
+			} else if (!fSenderBinding.isInterface()) {
+				modifiers |= Modifier.PUBLIC;
+			}
+			return modifiers;
 		}
+		return Modifier.PUBLIC;
 		
-		if (fIsLocalChange) {
-			modifiers |= Modifier.PRIVATE;
-		} else if (!fSenderBinding.isInterface()) {
-			modifiers |= Modifier.PUBLIC;
-		}
-		return modifiers;
 	}
 	
 	
