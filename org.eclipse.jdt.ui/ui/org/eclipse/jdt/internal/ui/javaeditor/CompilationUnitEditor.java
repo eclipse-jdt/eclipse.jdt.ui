@@ -64,13 +64,14 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
+import org.eclipse.ui.editors.text.IStorageDocumentProvider;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.editors.text.IStorageDocumentProvider;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
@@ -93,7 +94,9 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.BlockCommentAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.RemoveBlockCommentAction;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
@@ -665,7 +668,21 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		markAsStateDependentAction("Format", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("Format", true); //$NON-NLS-1$		
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.FORMAT_ACTION);
+		
+		action= new BlockCommentAction(JavaEditorMessages.getResourceBundle(), "AddBlockComment.", this);  //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_BLOCK_COMMENT);		
+		setAction("AddBlockComment", action); //$NON-NLS-1$
+		markAsStateDependentAction("AddBlockComment", true); //$NON-NLS-1$
+		markAsSelectionDependentAction("AddBlockComment", true); //$NON-NLS-1$		
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.ADD_BLOCK_COMMENT_ACTION);
 
+		action= new RemoveBlockCommentAction(JavaEditorMessages.getResourceBundle(), "RemoveBlockComment.", this);  //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.REMOVE_BLOCK_COMMENT);		
+		setAction("RemoveBlockComment", action); //$NON-NLS-1$
+		markAsStateDependentAction("RemoveBlockComment", true); //$NON-NLS-1$
+		markAsSelectionDependentAction("RemoveBlockComment", true); //$NON-NLS-1$		
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.REMOVE_BLOCK_COMMENT_ACTION);
+		
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		
@@ -711,7 +728,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					
 			} catch (JavaModelException x) {
 				if (!x.isDoesNotExist())
-					JavaPlugin.log(x.getStatus());
+				JavaPlugin.log(x.getStatus());
 				// nothing found, be tolerant and go on
 			}
 		}
