@@ -45,8 +45,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -109,7 +107,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 				return res;
 			}
 		}
-		return new IClasspathEntry[] { JavaRuntime.getJREVariableEntry() };	
+		return new IClasspathEntry[] { getJREContainerEntry() };	
 	}			
 	
 	// JRE Entry
@@ -253,20 +251,27 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		store.setDefault(SRCBIN_BINNAME, "bin"); //$NON-NLS-1$
 		
 		store.setDefault(CLASSPATH_JRELIBRARY_LIST, getDefaultJRELibraries());
-		store.setDefault(CLASSPATH_JRELIBRARY_INDEX, "carbon".equals(SWT.getPlatform()) ? 1 : 0); //$NON-NLS-1$
+		store.setDefault(CLASSPATH_JRELIBRARY_INDEX, 0); //$NON-NLS-1$
 	}
 	
 	private static String getDefaultJRELibraries() {
 		StringBuffer buf= new StringBuffer();
-		IClasspathEntry varentry= JavaRuntime.getJREVariableEntry();
-		buf.append(encodeJRELibrary(JavaUIMessages.getString("NewJavaProjectPreferencePage.jre_variable.description"), new IClasspathEntry[] { varentry })); //$NON-NLS-1$
-		buf.append(';');
-		IClasspathEntry cntentry= JavaRuntime.getDefaultJREContainerEntry();
+		IClasspathEntry cntentry= getJREContainerEntry();
 		buf.append(encodeJRELibrary(JavaUIMessages.getString("NewJavaProjectPreferencePage.jre_container.description"), new IClasspathEntry[] { cntentry} )); //$NON-NLS-1$
+		buf.append(';');
+		IClasspathEntry varentry= getJREVariableEntry();
+		buf.append(encodeJRELibrary(JavaUIMessages.getString("NewJavaProjectPreferencePage.jre_variable.description"), new IClasspathEntry[] { varentry })); //$NON-NLS-1$
 		buf.append(';');
 		return buf.toString();
 	}
 	
+	private static IClasspathEntry getJREContainerEntry() {
+		return JavaCore.newContainerEntry(new Path("org.eclipse.jdt.launching.JRE_CONTAINER"));
+	}
+	
+	private static IClasspathEntry getJREVariableEntry() {
+		return JavaCore.newLibraryEntry(new Path("JRE_LIB"), new Path("JRE_SRC"), new Path("JRE_SRCROOT"));
+	}	
 
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)
