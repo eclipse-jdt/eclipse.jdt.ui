@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -200,8 +201,10 @@ public class NLSRefactoring extends Refactoring {
 		if (fCu.isReadOnly())
 			return RefactoringStatus.createFatalErrorStatus(fCu.getElementName() + NLSMessages.getString("NLSrefactoring.read_only"));	 //$NON-NLS-1$
 		
-		if (NLSHolder.create(fCu).getSubstitutions().length == 0)	
-			return RefactoringStatus.createFatalErrorStatus("No strings to externalize found in '" + fCu.getElementName() + "'");
+		if (NLSHolder.create(fCu).getSubstitutions().length == 0)	{
+			String message= RefactoringCoreMessages.getFormattedString("NLSRefactoring.no_strings", fCu.getElementName());//$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}	
 		
 		return new RefactoringStatus();
 	}
@@ -503,7 +506,9 @@ public class NLSRefactoring extends Refactoring {
 	//---- modified source files
 			
 	private IChange createSourceModification() throws CoreException{
-		TextChange change= new CompilationUnitChange("Externalize strings in '" + fCu.getElementName()+ "'", fCu); 
+		String message= RefactoringCoreMessages.getFormattedString("NLSRefactoring.externalize_strings", //$NON-NLS-1$
+							fCu.getElementName());
+		TextChange change= new CompilationUnitChange(message, fCu); 
 		for (int i= 0; i < fNlsSubs.length; i++){
 			addNLS(fNlsSubs[i], change);
 		}
@@ -530,7 +535,7 @@ public class NLSRefactoring extends Refactoring {
 		}	
 			
 		String newImportText= fgLineDelimiter + "import " + fAddedImport + ";"; //$NON-NLS-2$ //$NON-NLS-1$
-		String name= NLSMessages.getString("NLSrefactoring.add_import_declaration") + fAddedImport;
+		String name= NLSMessages.getString("NLSrefactoring.add_import_declaration") + fAddedImport; //$NON-NLS-1$
 		builder.addTextEdit(name, SimpleTextEdit.createInsert(start + 1, newImportText));
 	}
 
@@ -601,19 +606,21 @@ public class NLSRefactoring extends Refactoring {
 		if (! propertyFileExists())
 			return new CreateTextFileChange(getPropertyFilePath(), createPropertyFileSource());
 			
-		String name= NLSMessages.getString("NLSrefactoring.Append_to_property_file") + getPropertyFilePath();
+		String name= NLSMessages.getString("NLSrefactoring.Append_to_property_file") + getPropertyFilePath(); //$NON-NLS-1$
 		TextChange tfc= new TextFileChange(name, getPropertyFile());
 		
 		StringBuffer old= new StringBuffer(getOldPropertyFileSource());
 
 		if (needsLineDelimiter(old))
-			tfc.addTextEdit("add line delimiter", SimpleTextEdit.createInsert(old.length(), fgLineDelimiter));
+			tfc.addTextEdit(NLSMessages.getString("NLSRefactoring.add_line_delimiter"), SimpleTextEdit.createInsert(old.length(), fgLineDelimiter)); //$NON-NLS-1$
 		
 		for (int i= 0; i < fNlsSubs.length; i++){
 			if (fNlsSubs[i].task == NLSSubstitution.TRANSLATE){
 				if (fNlsSubs[i].putToPropertyFile){
 					String entry= createEntry(fNlsSubs[i].value, fNlsSubs[i].key).toString();
-					tfc.addTextEdit("add entry for " + fNlsSubs[i].key, SimpleTextEdit.createInsert(old.length(), entry));
+					String message= RefactoringCoreMessages.getFormattedString("NLSRefactoring.add_entry", //$NON-NLS-1$
+										fNlsSubs[i].key);
+					tfc.addTextEdit(message, SimpleTextEdit.createInsert(old.length(), entry));
 				}	
 			}	
 		}	
@@ -777,7 +784,7 @@ public class NLSRefactoring extends Refactoring {
 
 	private static Map getFormatterOptions() {
 		Map formatterOptions= JavaCore.getOptions();
-		formatterOptions.put(FORMATTER_LINE_LENGTH_OPTION, "0");
+		formatterOptions.put(FORMATTER_LINE_LENGTH_OPTION, "0"); //$NON-NLS-1$
 		return formatterOptions;
 	}
 	
@@ -847,7 +854,7 @@ public class NLSRefactoring extends Refactoring {
 		StringBuffer b= new StringBuffer();
 		b.append("\tpublic static String getString(String key) {").append(ld) //$NON-NLS-1$
 		 .append("\t\ttry {").append(ld) //$NON-NLS-1$
-		 .append("\t\t\treturn ")
+		 .append("\t\t\treturn ") //$NON-NLS-1$
 		 .append(getResourceBundleConstantName())
 		 .append(".getString(key);").append(ld) //$NON-NLS-1$
 		 .append("\t\t} catch (MissingResourceException e) {").append(ld) //$NON-NLS-1$
