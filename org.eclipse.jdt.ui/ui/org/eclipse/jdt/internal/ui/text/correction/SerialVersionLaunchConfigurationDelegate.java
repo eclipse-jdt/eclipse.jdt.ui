@@ -20,15 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.AbstractVMRunner;
@@ -39,8 +39,6 @@ import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.LibraryLocation;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-
-import org.eclipse.jdt.internal.launching.StandardVMType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -104,7 +102,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			if (map != null)
 				command= (String) map.get(IJavaLaunchConfigurationConstants.ATTR_JAVA_COMMAND);
 			if (command == null) {
-				final File executable= StandardVMType.findJavaExecutable(fInstall.getInstallLocation());
+				final File executable= findJavaExecutable(fInstall.getInstallLocation());
 				if (executable == null)
 					abort(CorrectionMessages.getFormattedString("SerialVersionHashProposal.unable.locate.executable", new String[] { fInstall.getName()}), null, IJavaLaunchConfigurationConstants.ERR_INTERNAL_ERROR); //$NON-NLS-1$
 				return executable.getAbsolutePath();
@@ -217,6 +215,28 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 
 	/** The serial version computation error prefix */
 	public static final String ERROR_PREFIX= "SerialVersionComputationError: "; //$NON-NLS-1$
+
+	/** The list of java executable locations */
+	private static final String[] fgExecutableLocations= { "bin" + File.separatorChar + "javaw", "bin" + File.separatorChar + "javaw.exe", "jre" + File.separatorChar + "bin" + File.separatorChar + "javaw", "jre" + File.separatorChar + "bin" + File.separatorChar + "javaw.exe", "bin" + File.separatorChar + "java", "bin" + File.separatorChar + "java.exe", "jre" + File.separatorChar + "bin" + File.separatorChar + "java", "jre" + File.separatorChar + "bin" + File.separatorChar + "java.exe"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$ //$NON-NLS-15$ //$NON-NLS-16$ //$NON-NLS-17$ //$NON-NLS-18$ //$NON-NLS-19$ //$NON-NLS-20$
+
+	/**
+	 * Attempts to find the java executable in the specified location.
+	 * 
+	 * @param location the location of the vm installation
+	 * @return the corresponding java executable, or <code>null</code>
+	 */
+	public static File findJavaExecutable(final File location) {
+		Assert.isNotNull(location);
+
+		File file= null;
+		for (int index= 0; index < fgExecutableLocations.length; index++) {
+
+			file= new File(location, fgExecutableLocations[index]);
+			if (file.isFile())
+				return file;
+		}
+		return null;
+	}
 
 	/** The error message */
 	protected String fErrorMessage= null;
