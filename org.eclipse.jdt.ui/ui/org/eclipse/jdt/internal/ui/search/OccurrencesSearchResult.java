@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.text.MessageFormat;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IClassFile;
@@ -50,7 +51,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 		JavaElementLine jel= (JavaElementLine) elements[0];
 		try {
 			if (file.equals(jel.getJavaElement().getCorrespondingResource()))
-				return getMatches(jel);
+				return collectMatches(elements);
 		} catch (JavaModelException e) {
 			// no resource
 		}
@@ -77,7 +78,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 			//all matches from same file:
 			JavaElementLine jel= (JavaElementLine) elements[0];
 			if (jel.getJavaElement().equals(classFile))
-				return getMatches(jel);
+				return collectMatches(elements);
 		}
 		return NO_MATCHES;
 	}
@@ -161,4 +162,15 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 		return this;
 	}
 
+	private Match[] collectMatches(Object[] elements) {
+		Match[] matches= new Match[getMatchCount()];
+		int writeIndex= 0;
+		for (int i= 0; i < elements.length; i++) {
+			Match[] perElement= getMatches(elements[i]);
+			for (int j= 0; j < perElement.length; j++) {
+				matches[writeIndex++]= perElement[j];
+			}
+		}
+		return matches;
+	}
 }
