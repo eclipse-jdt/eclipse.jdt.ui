@@ -16,7 +16,7 @@ public interface IRequestQuery {
 	public static final int YES_ALL= 3;
 	
 	/**
-	 * Do the callback.
+	 * Do the callback. Returns YES, NO, YES_ALL or CANCEL
 	 */
 	int doQuery(IMember member);
 }

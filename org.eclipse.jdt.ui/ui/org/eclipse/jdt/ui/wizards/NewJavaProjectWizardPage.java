@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -33,10 +32,11 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -140,11 +140,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 		if (entries != null && appendDefaultJRE) {
 			IClasspathEntry[] newEntries= new IClasspathEntry[entries.length + 1];
 			System.arraycopy(entries, 0, newEntries, 0, entries.length);
-			IPath libPath= new Path(ClasspathVariablesPreferencePage.JRELIB_VARIABLE);
-			IPath attachPath= new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);
-			IPath attachRoot= new Path(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
-
-			newEntries[entries.length]= JavaCore.newVariableEntry(libPath, attachPath, attachRoot);
+			newEntries[entries.length]= JavaRuntime.getJREVariableEntry();
 			entries= newEntries;
 		}
 		fClasspathEntries= entries;

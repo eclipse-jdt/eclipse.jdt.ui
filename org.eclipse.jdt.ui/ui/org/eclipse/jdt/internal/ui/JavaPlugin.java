@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
+import org.eclipse.jdt.launching.JavaRuntime;
 
 /**
  * Represents the java plugin. It provides a series of convenience methods such as
@@ -175,7 +176,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		manager.registerAdapters(new ResourceAdapterFactory(), IResource.class);
 		
 		try {
-			VMPreferencePage.initializeVMInstall();
+			JavaRuntime.initializeJREVariables(null);
 		} catch (CoreException e) {
 			log(e.getStatus());
 		}

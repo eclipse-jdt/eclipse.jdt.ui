@@ -51,6 +51,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -58,7 +60,6 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
@@ -74,8 +75,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class BuildPathsBlock {
 
@@ -369,9 +370,9 @@ public class BuildPathsBlock {
 		}
 		list.add(new CPListElement(IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder));
 
-		IPath libPath= new Path(ClasspathVariablesPreferencePage.JRELIB_VARIABLE);
-		IPath attachPath= new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);
-		IPath attachRoot= new Path(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
+		IPath libPath= new Path(JavaRuntime.JRELIB_VARIABLE);
+		IPath attachPath= new Path(JavaRuntime.JRESRC_VARIABLE);
+		IPath attachRoot= new Path(JavaRuntime.JRESRCROOT_VARIABLE);
 		CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, libPath, null, attachPath, attachRoot, false);
 		list.add(elem);
 

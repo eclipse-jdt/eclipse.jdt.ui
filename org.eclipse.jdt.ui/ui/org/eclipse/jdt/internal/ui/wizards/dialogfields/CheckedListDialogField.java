@@ -122,7 +122,7 @@ public class CheckedListDialogField extends ListDialogField {
 	 * Sets the checked elements.
 	 */	
 	public void setCheckedElements(List list) {
-		fCheckElements= list;
+		fCheckElements= new ArrayList(list);
 		if (fTable != null) {
 			((CheckboxTableViewer)fTable).setCheckedElements(list.toArray());
 		}

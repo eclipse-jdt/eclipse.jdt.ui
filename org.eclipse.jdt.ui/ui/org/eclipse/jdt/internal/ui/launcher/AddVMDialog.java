@@ -218,7 +218,7 @@ public class AddVMDialog extends StatusDialog {
 			fSelectedVMType= fVMTypes[selIndex];
 		}
 		fStati[1]= validateJDKLocation();
-		useDefaultSystemLibrary();
+		updateDefaultButton();
 		updateStatusLine();
 	}
 
@@ -227,7 +227,7 @@ public class AddVMDialog extends StatusDialog {
 		if (fUseDefaultLibrary.isSelected()) {
 			useDefaultSystemLibrary();
 		} else {
-			useCustomSystemLibrary();
+			useCustomSystemLibrary(null);
 		}
 	}	
 	
@@ -271,36 +271,15 @@ public class AddVMDialog extends StatusDialog {
 			LibraryLocation desc= fEditedVM.getLibraryLocation();
 			fUseDefaultLibrary.setSelection(desc == null);
 			if (desc == null) {
-				desc= getVMType().getDefaultLibraryLocation(fEditedVM.getInstallLocation());
 				useDefaultSystemLibrary();
 			} else {
-				useCustomSystemLibrary();
-				setSystemLibraryFields(desc);
+				useCustomSystemLibrary(desc);
 			}
 		}
 	}
 	
 	private IVMInstallType getVMType() {
 		return fSelectedVMType;
-	}
-	
-	private void setSystemLibraryFields(LibraryLocation description) {
-		fSystemLibrary.setText(description.getSystemLibrary().getPath());
-		fSystemLibrarySource.setText(description.getSystemLibrarySource().getPath());
-	}
-	
-	private void setSystemLibraryDefaults(LibraryLocation description) {
-		File systemLibrary= description.getSystemLibrary();
-		if (systemLibrary.isFile())
-			fSystemLibrary.setText(systemLibrary.getPath());
-		else 
-			fSystemLibrary.setText(""); //$NON-NLS-1$
-			
-		File librarySource= description.getSystemLibrarySource();
-		if (librarySource.isFile())
-			fSystemLibrarySource.setText(librarySource.getPath());
-		else 
-			fSystemLibrarySource.setText(""); //$NON-NLS-1$
 	}
 	
 	
@@ -353,7 +332,22 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	private void updateLibraryFieldDefaults() {
-		setSystemLibraryDefaults(fSelectedVMType.getDefaultLibraryLocation(getInstallLocation()));
+		LibraryLocation location= fSelectedVMType.getDefaultLibraryLocation(getInstallLocation());
+		String libJar= "";
+		String srcJar= "";
+		
+		File systemLibrary= location.getSystemLibrary();
+		if (systemLibrary.isFile()) {
+			libJar= systemLibrary.getPath();
+		}
+
+		File librarySource= location.getSystemLibrarySource();
+		if (librarySource.isFile()) {
+			srcJar= librarySource.getPath();
+		}
+
+		fSystemLibrary.setText(libJar);
+		fSystemLibrarySource.setText(srcJar);
 	}
 	
 	private IStatus validateSystemLibrary() {
@@ -507,17 +501,15 @@ public class AddVMDialog extends StatusDialog {
 		updateLibraryFieldDefaults();
 		fSystemLibrary.setEnabled(false);
 		fSystemLibrarySource.setEnabled(false);
-		fStati[3]= validateSystemLibrary();
-		fStati[4]= validateSystemLibrarySource();
-		updateStatusLine();
 	}
 	
-	private void useCustomSystemLibrary() {
+	private void useCustomSystemLibrary(LibraryLocation newValues) {
 		fSystemLibrary.setEnabled(true);
 		fSystemLibrarySource.setEnabled(true);
-		fStati[3]= validateSystemLibrary();
-		fStati[4]= validateSystemLibrarySource();
-		updateStatusLine();
+		if (newValues != null) {
+			fSystemLibrary.setText(newValues.getSystemLibrary().getPath());
+			fSystemLibrarySource.setText(newValues.getSystemLibrarySource().getPath());
+		}
 	}
 
 	protected void okPressed() {

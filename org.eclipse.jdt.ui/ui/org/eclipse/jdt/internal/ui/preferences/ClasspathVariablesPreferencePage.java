@@ -2,10 +2,6 @@
 
 public class ClasspathVariablesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String JRELIB_VARIABLE= "JRE_LIB"; //$NON-NLS-1$
-	public static final String JRESRC_VARIABLE= "JRE_SRC"; //$NON-NLS-1$
-	public static final String JRESRCROOT_VARIABLE= "JRE_SRCROOT"; //$NON-NLS-1$
-	
 	private VariableBlock fVariableBlock;
 	
 	/**

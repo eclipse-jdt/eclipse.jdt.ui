@@ -8,7 +8,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jdt.internal.ui.codemanipulation.*;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * A <code>IRunnableWithProgress</code> that runs a wrapped 
@@ -28,7 +29,7 @@ public class WorkbenchRunnableWrapper implements IRunnableWithProgress {
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		try {
-			fWorkspaceRunnable.run(monitor);
+			JavaPlugin.getWorkspace().run(fWorkspaceRunnable, monitor);
 		} catch (OperationCanceledException e) {
 			throw new InterruptedException(e.getMessage());
 		} catch (CoreException e) {
