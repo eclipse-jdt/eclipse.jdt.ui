@@ -24,11 +24,13 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -592,6 +594,60 @@ public class JavaModelUtil {
 			}
 		}
 		return member;
+	}
+
+	/**
+	 * Returns the working copy of the given package declaration. If the package declaration is already in a
+	 * working copy or the package declaration does not exist in the working copy the input is returned.
+	 */
+	public static IPackageDeclaration toWorkingCopy(IPackageDeclaration declaration) {
+		ICompilationUnit cu= (ICompilationUnit)declaration.getAncestor(IJavaElement.COMPILATION_UNIT);
+		if (cu != null && !cu.isWorkingCopy()) {
+			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
+			if (workingCopy != null) {
+				IJavaElement[] elements= workingCopy.findElements(declaration);
+				if (elements != null && elements.length > 0) {
+					return (IPackageDeclaration) elements[0];
+				}
+			}
+		}
+		return declaration;
+	}
+
+	/**
+	 * Returns the working copy of the given import container. If the import container is already in a
+	 * working copy or the import container does not exist in the working copy the input is returned.
+	 */
+	public static IImportContainer toWorkingCopy(IImportContainer container) {
+		ICompilationUnit cu= (ICompilationUnit)container.getAncestor(IJavaElement.COMPILATION_UNIT);
+		if (cu != null && !cu.isWorkingCopy()) {
+			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
+			if (workingCopy != null) {
+				IJavaElement[] elements= workingCopy.findElements(container);
+				if (elements != null && elements.length > 0) {
+					return (IImportContainer) elements[0];
+				}
+			}
+		}
+		return container;
+	}
+
+	/**
+	 * Returns the working copy of the given import declaration. If the import declaration is already in a
+	 * working copy or the import declaration does not exist in the working copy the input is returned.
+	 */
+	public static IImportDeclaration toWorkingCopy(IImportDeclaration importDeclaration) {
+		ICompilationUnit cu= (ICompilationUnit)importDeclaration.getAncestor(IJavaElement.COMPILATION_UNIT);
+		if (cu != null && !cu.isWorkingCopy()) {
+			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
+			if (workingCopy != null) {
+				IJavaElement[] elements= workingCopy.findElements(importDeclaration);
+				if (elements != null && elements.length > 0) {
+					return (IImportDeclaration) elements[0];
+				}
+			}
+		}
+		return importDeclaration;
 	}
 
 
