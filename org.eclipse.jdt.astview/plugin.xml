@@ -2,9 +2,9 @@
 <?eclipse version="3.0"?>
 <plugin
    id="org.eclipse.jdt.astview"
-   name="AST View Plug-in"
+   name="%pluginName"
    version="1.0.1"
-   provider-name="Eclipse.org"
+   provider-name="%providerName"
    class="org.eclipse.jdt.astview.ASTViewPlugin">
 
    <runtime>
@@ -23,6 +23,7 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
       <import plugin="org.eclipse.core.filebuffers"/>
+      <import plugin="org.eclipse.jdt.ui"/>
    </requires>
 
 

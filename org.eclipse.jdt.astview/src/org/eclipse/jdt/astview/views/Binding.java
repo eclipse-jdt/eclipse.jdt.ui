@@ -12,15 +12,15 @@ package org.eclipse.jdt.astview.views;
 
 import java.util.ArrayList;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.jdt.core.Flags;
-
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+
+import org.eclipse.swt.graphics.Image;
 
 /**
  *
@@ -92,36 +92,47 @@ public class Binding extends ASTAttribute {
 					break;
 				case IBinding.TYPE:
 					ITypeBinding typeBinding= (ITypeBinding) fBinding;
-					res.add(new BindingProperty(this, "IS TOP LEVEL", typeBinding.isTopLevel())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS NESTED", typeBinding.isNested())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS MEMBER", typeBinding.isMember())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS LOCAL", typeBinding.isLocal())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS ANONYMOUS", typeBinding.isAnonymous())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS CLASS", typeBinding.isClass())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS INTERFACE", typeBinding.isInterface())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS ENUM", typeBinding.isEnum())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS ANNOTATION", typeBinding.isAnnotation())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS PRIMITIVE", typeBinding.isPrimitive())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS NULL TYPE", typeBinding.isNullType())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS ARRAY", typeBinding.isArray())); //$NON-NLS-1$
+					StringBuffer kinds= new StringBuffer("KIND:"); //$NON-NLS-1$
+					if (typeBinding.isAnnotation()) kinds.append(" isAnnotation"); //$NON-NLS-1$
+					if (typeBinding.isAnonymous()) kinds.append(" isAnonymous"); //$NON-NLS-1$
+					if (typeBinding.isArray()) kinds.append(" isArray"); //$NON-NLS-1$
+					if (typeBinding.isClass()) kinds.append(" isClass"); //$NON-NLS-1$
+					if (typeBinding.isEnum()) kinds.append(" isEnum"); //$NON-NLS-1$
+					if (typeBinding.isInterface()) kinds.append(" isInterface"); //$NON-NLS-1$
+					if (typeBinding.isNullType()) kinds.append(" isNullType"); //$NON-NLS-1$
+					if (typeBinding.isPrimitive()) kinds.append(" isPrimitive"); //$NON-NLS-1$
+					if (typeBinding.isTypeVariable()) kinds.append(" isTypeVariable"); //$NON-NLS-1$
+					res.add(new BindingProperty(this, kinds.toString())); //$NON-NLS-1$
+
 					res.add(new Binding(this, "ELEMENT TYPE", typeBinding.getElementType(), typeBinding.isArray())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "DIMENSIONS", typeBinding.getDimensions())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS TYPEVARIABLE", typeBinding.isTypeVariable())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE BOUNDS", typeBinding.getTypeBounds())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS PARAMETRIZED TYPE", typeBinding.isParameterizedType())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "TYPE ARGUMENTS", typeBinding.getTypeArguments())); //$NON-NLS-1$			
-					res.add(new Binding(this, "ERASURE", typeBinding.getErasure(), true)); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS RAW TYPE", typeBinding.isRawType())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS WILCARD TYPE", typeBinding.isWildcardType())); //$NON-NLS-1$
-					res.add(new Binding(this, "BOUND", typeBinding.getBound(), typeBinding.isWildcardType())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS UPPERBOUND", typeBinding.isUpperbound())); //$NON-NLS-1$
-
+					
+					StringBuffer origin= new StringBuffer("ORIGIN:"); //$NON-NLS-1$
+					if (typeBinding.isTopLevel()) origin.append(" isTopLevel"); //$NON-NLS-1$
+					if (typeBinding.isNested()) origin.append(" isNested"); //$NON-NLS-1$
+					if (typeBinding.isLocal()) origin.append(" isLocal"); //$NON-NLS-1$
+					if (typeBinding.isMember()) origin.append(" isMember"); //$NON-NLS-1$
+					if (typeBinding.isFromSource()) origin.append(" isFromSource"); //$NON-NLS-1$
+					res.add(new BindingProperty(this, origin.toString()));
+					
 					res.add(new Binding(this, "PACKAGE", typeBinding.getPackage(), true)); //$NON-NLS-1$
-
 					res.add(new Binding(this, "DECLARING CLASS", typeBinding.getDeclaringClass(), false)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "BINARY NAME", typeBinding.getBinaryName())); //$NON-NLS-1$
+
+					StringBuffer generics= new StringBuffer("GENERICS:"); //$NON-NLS-1$
+					if (typeBinding.isRawType()) generics.append(" isRawType"); //$NON-NLS-1$
+					if (typeBinding.isGenericType()) generics.append(" isGenericType"); //$NON-NLS-1$
+					if (typeBinding.isParameterizedType()) generics.append(" isParameterizedType"); //$NON-NLS-1$
+					if (typeBinding.isWildcardType()) generics.append(" isWildcardType"); //$NON-NLS-1$
+					res.add(new BindingProperty(this, generics.toString()));
+					
+					res.add(new Binding(this, "ERASURE", typeBinding.getErasure(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", typeBinding.getTypeParameters())); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "TYPE ARGUMENTS", typeBinding.getTypeArguments())); //$NON-NLS-1$
+					res.add(new Binding(this, "BOUND", typeBinding.getBound(), typeBinding.isWildcardType())); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "IS UPPERBOUND", typeBinding.isUpperbound())); //$NON-NLS-1$
 
 					res.add(new Binding(this, "SUPERCLASS", typeBinding.getSuperclass(), false)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "INTERFACES", typeBinding.getInterfaces())); //$NON-NLS-1$			
@@ -131,7 +142,6 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "DECLARED METHODS", typeBinding.getDeclaredMethods())); //$NON-NLS-1$			
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS FROM SOURCE", typeBinding.isFromSource())); //$NON-NLS-1$
 					break;
 				case IBinding.METHOD:
 					IMethodBinding methodBinding= (IMethodBinding) fBinding;
@@ -141,16 +151,29 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "RETURN TYPE", methodBinding.getReturnType(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "PARAMETER TYPES", methodBinding.getParameterTypes())); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "IS VARARGS", methodBinding.isVarargs())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "EXCEPTION TYPES", methodBinding.getExceptionTypes())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "TYPE PARAMETERS", methodBinding.getTypeParameters())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS PARAMETRIZED METHOD", methodBinding.isParameterizedMethod())); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "TYPE ARGUMENTS", methodBinding.getTypeArguments())); //$NON-NLS-1$			
+					
+					StringBuffer genericsM= new StringBuffer("GENERICS:"); //$NON-NLS-1$
+					if (methodBinding.isRawMethod()) genericsM.append(" isRawMethod"); //$NON-NLS-1$
+					if (methodBinding.isGenericMethod()) genericsM.append(" isGenericMethod"); //$NON-NLS-1$
+					if (methodBinding.isParameterizedMethod()) genericsM.append(" isParameterizedMethod"); //$NON-NLS-1$
+					res.add(new BindingProperty(this, genericsM.toString()));
+					
 					res.add(new Binding(this, "ERASURE", methodBinding.getErasure(), true)); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS RAW METHOD", methodBinding.isRawMethod())); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "TYPE PARAMETERS", methodBinding.getTypeParameters())); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "TYPE ARGUMENTS", methodBinding.getTypeArguments())); //$NON-NLS-1$			
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated())); //$NON-NLS-1$
 
 					break;
+			}
+			try {
+				IJavaElement javaElement= fBinding.getJavaElement();
+				res.add(new JavaElement(this, javaElement));
+			} catch (RuntimeException e) {
+				String msg= e.getMessage() == null ? e.getClass().getName() : e.getMessage();
+				res.add(new Error(this, "!!! java element: " + msg)); //$NON-NLS-1$
 			}
 			return res.toArray();
 		}

@@ -11,6 +11,10 @@
 
 package org.eclipse.jdt.astview;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPluginDescriptor;
@@ -30,17 +34,39 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns the shared instance.
+	 * @return the shared instance
 	 */
 	public static ASTViewPlugin getDefault() {
 		return fDefault;
 	}
 
 	/**
-	 * Returns the workspace instance.
+	 * @return the workspace instance
 	 */
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
+	}
+	
+	public static void log(IStatus status) {
+		getDefault().getLog().log(status);
+	}
+	
+	public static void logErrorMessage(String message) {
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, null));
+	}
+	
+	public static void logErrorStatus(String message, IStatus status) {
+		if (status == null) {
+			logErrorMessage(message);
+			return;
+		}
+		MultiStatus multi= new MultiStatus(getPluginId(), IStatus.ERROR, message, null);
+		multi.add(status);
+		log(multi);
+	}
+	
+	public static void log(Throwable e) {
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, e.getLocalizedMessage(), e)); //$NON-NLS-1$
 	}
 	
 }

@@ -33,7 +33,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	private int fSelectionStart;
 	private int fSelectionLength;
 	
-	private Color fBlue, fRed, fDarkGray, fYellow;
+	private Color fBlue, fRed, fDarkGray, fYellow, fDarkGreen;
 	private Font fBold;
 	
 	public ASTViewLabelProvider() {
@@ -46,6 +46,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		fDarkGray= display.getSystemColor(SWT.COLOR_DARK_GRAY);
 		fBlue= display.getSystemColor(SWT.COLOR_DARK_BLUE);
 		fYellow= display.getSystemColor(SWT.COLOR_YELLOW);
+		fDarkGreen= display.getSystemColor(SWT.COLOR_DARK_GREEN);
 		
 		fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
 
@@ -115,6 +116,14 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			return null; // normal color
 		} else if (element instanceof BindingProperty) {
 			return fBlue;
+		} else if (element instanceof JavaElement) {
+			JavaElement javaElement= (JavaElement) element;
+			if (javaElement.getJavaElement() == null) {
+				return fRed;
+			}
+			return fDarkGreen;
+		} else if (element instanceof Error) {
+			return fRed;
 		}
 		return fDarkGray; // all extra properties
 	}

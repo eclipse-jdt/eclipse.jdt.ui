@@ -12,6 +12,18 @@
 package org.eclipse.jdt.astview.views;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.IFileBuffer;
+import org.eclipse.core.filebuffers.IFileBufferListener;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.jdt.astview.ASTViewImages;
 import org.eclipse.jdt.astview.ASTViewPlugin;
@@ -19,14 +31,19 @@ import org.eclipse.jdt.astview.EditorUtility;
 import org.eclipse.jdt.astview.NodeFinder;
 import org.eclipse.jdt.astview.TreeInfoCollector;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.IFileBuffer;
-import org.eclipse.core.filebuffers.IFileBufferListener;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -43,11 +60,13 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -64,25 +83,44 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.DrillDownAdapter;
+import org.eclipse.ui.part.IShowInSource;
+import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IOpenable;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
-
-public class ASTView extends ViewPart {
+public class ASTView extends ViewPart implements IShowInSource {
 	
+	private class ASTViewSelectionProvider implements ISelectionProvider {
+		ListenerList fListeners= new ListenerList();
+
+		public void addSelectionChangedListener(ISelectionChangedListener listener) {
+			fListeners.add(listener);
+		}
+
+		public ISelection getSelection() {
+			IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
+			ArrayList externalSelection= new ArrayList();
+			for (Iterator iter= selection.iterator(); iter.hasNext();) {
+				Object element= iter.next();
+				if (element instanceof JavaElement)
+					externalSelection.add(((JavaElement) element).getJavaElement());
+				else
+					;//TODO
+			}
+			return new StructuredSelection(externalSelection);
+		}
+
+		public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+			fListeners.remove(listener);
+		}
+
+		public void setSelection(ISelection selection) {
+			//not supported
+		}
+	}
+
 	private class ASTLevelToggle extends Action {
 		private int fLevel;
 
@@ -441,6 +479,7 @@ public class ASTView extends ViewPart {
 		makeActions();
 		hookContextMenu();
 		contributeToActionBars();
+		getSite().setSelectionProvider(new ASTViewSelectionProvider());
 		
 		try {
 			IEditorPart part= EditorUtility.getActiveEditor();
@@ -756,6 +795,21 @@ public class ASTView extends ViewPart {
 			ProblemNode problemNode= (ProblemNode) obj;
 			EditorUtility.selectInEditor(fEditor, problemNode.getOffset(), problemNode.getLength());
 			return;
+		} else if (obj instanceof JavaElement) {
+			JavaElement javaElement= (JavaElement) obj;
+			try {
+				IEditorPart editorPart= JavaUI.openInEditor(javaElement.getJavaElement());
+				if (editorPart != null)
+					JavaUI.revealInEditor(editorPart, javaElement.getJavaElement());
+			} catch (PartInitException e) {
+				IStatus status= getErrorStatus(e.getMessage(), e);
+				ASTViewPlugin.log(status);
+				ErrorDialog.openError(getSite().getShell(), "AST View", "Could not open editor.", status);  //$NON-NLS-1$//$NON-NLS-2$
+			} catch (JavaModelException e) {
+				IStatus status= getErrorStatus(e.getMessage(), e);
+				ASTViewPlugin.log(status);
+				ErrorDialog.openError(getSite().getShell(), "AST View", "Could not open editor.", status);  //$NON-NLS-1$//$NON-NLS-2$
+			}
 		}
 		
 		if (node != null) {
@@ -768,5 +822,9 @@ public class ASTView extends ViewPart {
 
 	public void setFocus() {
 		fViewer.getControl().setFocus();
+	}
+
+	public ShowInContext getShowInContext() {
+		return new ShowInContext(null, getSite().getSelectionProvider().getSelection());
 	}
 }

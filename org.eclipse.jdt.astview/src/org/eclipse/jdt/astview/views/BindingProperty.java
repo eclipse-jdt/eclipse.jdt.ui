@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.astview.views;
 
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.dom.IBinding;
+
+import org.eclipse.swt.graphics.Image;
 
 /**
  *
@@ -55,10 +56,12 @@ public class BindingProperty extends ASTAttribute {
 		}
 	}
 	
-	/**
-	 * @param bindings
-	 * @return
-	 */
+	public BindingProperty(Binding parent, String label) {
+		fParent= parent;
+		fName= label;
+		fValues= null;
+	}
+	
 	private Binding[] createBindings(IBinding[] bindings) {
 		Binding[] res= new Binding[bindings.length];
 		for (int i= 0; i < res.length; i++) {
