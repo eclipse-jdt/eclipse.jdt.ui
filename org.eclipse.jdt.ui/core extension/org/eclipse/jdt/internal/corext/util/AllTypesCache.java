@@ -21,7 +21,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -34,6 +33,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jface.util.Assert;
 
 /**
  * Manages a search cache for types in the workspace. Instead of returning objects of type <code>IType</code>
@@ -41,20 +41,135 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class AllTypesCache {
 	
-
-	private static TypeInfo[] fgTypeCache= null;
-	private static int fgSizeHint= 2000;
+	private static final boolean DEBUG= true;
 	
-	private static int fgNumberOfCacheFlushes= 0;
+	private static final int INITIAL_DELAY= 6000;
+	private static final int TIMEOUT= 3000;
+	private static final int INITIAL_SIZE= 2000;
+
+	static class TypeCacher extends Thread {
+		
+		private int fDelay;
+		private int fSizeHint;
+		private volatile boolean fReset;
+		private volatile boolean fAbort;
+		private IProgressMonitor fMonitor;
+		
+		TypeCacher(int sizeHint, int delay, IProgressMonitor monitor) {
+			super("AllTypesCacher"); //$NON-NLS-1$
+			fSizeHint= sizeHint;
+			fDelay= delay;
+			fMonitor= monitor;
+			setPriority(Thread.NORM_PRIORITY-1);
+		}
+		
+		void reset() {
+			fReset= true;
+			interrupt();
+		}
+		
+		public void abort() {
+			fReset= fAbort= true;
+			interrupt();
+		}
+		
+		public void run() {
+			if (DEBUG) System.out.println("thread started"); //$NON-NLS-1$
+			while (true) {
+				if (fDelay > 0) {
+					try {
+						Thread.sleep(fDelay);
+					} catch (InterruptedException e) {
+						if (DEBUG) System.out.println("timer restarted"); //$NON-NLS-1$
+						if (fAbort)
+							return;
+						continue;
+					}
+				}
+								
+				fReset= false;
+				try {
+					if (DEBUG) System.out.println("query started"); //$NON-NLS-1$
+					Collection searchResult= doSearchTypes(SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE);
+					if (searchResult != null) {
+						TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
+						Arrays.sort(result, getTypeNameComperator());
+						if (!fAbort && !fReset)
+							setCache(result);
+						if (!fReset)
+							return;
+					}
+					if (fAbort)
+						return;
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+			}
+		}
+
+		private Collection doSearchTypes(IJavaSearchScope scope, int style) throws JavaModelException {
+
+			final ArrayList typesFound= new ArrayList(fSizeHint);
+			final TypeInfoFactory factory= new TypeInfoFactory();
+
+			class RequestorAbort extends Error { }
+		
+			ITypeNameRequestor requestor= new ITypeNameRequestor() {
+				public void acceptInterface(char[] packageName, char[] typeName, char[][] enclosingTypeNames,String path) {
+					if (fReset)
+						throw new RequestorAbort();
+					typesFound.add(factory.create(packageName, typeName, enclosingTypeNames, true, path));
+				}
+				public void acceptClass(char[] packageName, char[] typeName, char[][] enclosingTypeNames, String path) {
+					if (fReset)
+						throw new RequestorAbort();
+					typesFound.add(factory.create(packageName, typeName, enclosingTypeNames, false, path));
+				}
+			};
+
+			if (fMonitor == null)
+				fMonitor= new NullProgressMonitor();
+			try {
+				new SearchEngine().searchAllTypeNames(ResourcesPlugin.getWorkspace(),
+					null,
+					null,
+					IJavaSearchConstants.PATTERN_MATCH,
+					IJavaSearchConstants.CASE_INSENSITIVE,
+					style,
+					scope,
+					requestor,
+					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+					fMonitor);
+			} catch (RequestorAbort e) {
+				if (DEBUG) System.out.println("  **** query cancelled"); //$NON-NLS-1$
+				return null;
+			}
+			return typesFound;
+		}
+
+	}
+	
+	/**
+	 * The lock for synchronizing all activity in the AllTypesCache.
+	 */
+	private static Object fgLock= new Object();
+	private static TypeCacher fgTypeCacherThread;
+
+	private static TypeInfo[] fgTypeCache;
+	private static int fgSizeHint= INITIAL_SIZE;
+	
+	private static int fgNumberOfCacheFlushes;
+	
+	private static TypeCacheDeltaListener fgDeltaListener;
 
 	private static class TypeNameComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
 			return ((TypeInfo)o1).getTypeName().compareTo(((TypeInfo)o2).getTypeName());
 		}
 	}
-	
 	private static Comparator fgTypeNameComparator= new TypeNameComparator();
-
+	
+	
 	/**
 	 * Returns all types in the given scope.
 	 * @param kind IJavaSearchConstants.CLASS, IJavaSearchConstants.INTERFACE
@@ -79,29 +194,49 @@ public class AllTypesCache {
 		}
 	}
 	
+	private static void setCache(TypeInfo[] cache) {
+		synchronized(fgLock) {
+			fgTypeCache= cache;
+			if (fgTypeCache != null)
+				fgSizeHint= fgTypeCache.length;
+			fgTypeCacherThread= null;
+			fgLock.notifyAll();
+		}		
+		if (DEBUG) System.out.println("  setCache: " + fgSizeHint); //$NON-NLS-1$
+	}
 
 	/**
 	 * Returns all types in the workspace. The returned array must not be
 	 * modified. The elements in the array are sorted by simple type name.
 	 */
-	public static synchronized TypeInfo[] getAllTypes(IProgressMonitor monitor) throws JavaModelException { 	
-		if (fgTypeCache == null) {
-			ArrayList searchResult= new ArrayList(fgSizeHint);
-			doSearchTypes(SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE, monitor, searchResult);
-			if (monitor != null && monitor.isCanceled()) {
-				return null;
+	public static TypeInfo[] getAllTypes(IProgressMonitor monitor) throws JavaModelException {
+		
+		synchronized(fgLock) {
+			
+			if (fgTypeCache == null) {
+				
+				if (fgTypeCacherThread == null) {
+					fgTypeCacherThread= new TypeCacher(fgSizeHint, 0, null);
+					fgTypeCacherThread.start();
+				}
+				
+				// wait for the thread to finished
+				if (fgTypeCacherThread != null) {
+					try {
+						while (fgTypeCache == null)
+							fgLock.wait();
+					} catch (InterruptedException e) {
+						JavaPlugin.log(e);
+					}
+				}
+				Assert.isNotNull(fgTypeCache);
 			}
-			monitor= null; // prevents duplicated invocation of monitor.done
-			fgTypeCache= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
-			Arrays.sort(fgTypeCache, getTypeNameComperator());
-			fgSizeHint= fgTypeCache.length;
-	
-			JavaCore.addElementChangedListener(new TypeCacheDeltaListener());
+			
+			if (monitor != null)
+				monitor.done();
+			
+			return fgTypeCache;
 		}
-		if (monitor != null) {
-			monitor.done();
-		}		
-		return fgTypeCache;
 	}
 	
 	/**
@@ -125,19 +260,6 @@ public class AllTypesCache {
 		return fgTypeNameComparator;
 	}	
 
-
-	private static void doSearchTypes(IJavaSearchScope scope, int style, IProgressMonitor monitor, Collection typesFound) throws JavaModelException {
-		new SearchEngine().searchAllTypeNames(ResourcesPlugin.getWorkspace(),
-			null,
-			null,
-			IJavaSearchConstants.PATTERN_MATCH,
-			IJavaSearchConstants.CASE_INSENSITIVE,
-			style,
-			scope,
-			new TypeInfoRequestor(typesFound),
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-			monitor);
-	}
 	
 	private static class TypeCacheDeltaListener implements IElementChangedListener {
 		
@@ -147,9 +269,17 @@ public class AllTypesCache {
 		public void elementChanged(ElementChangedEvent event) {
 			boolean needsFlushing= processDelta(event.getDelta());
 			if (needsFlushing) {
-				fgTypeCache= null;
-				fgNumberOfCacheFlushes++;
-				JavaCore.removeElementChangedListener(this); // it's ok to remove listener while delta processing
+				synchronized(fgLock) {
+					fgTypeCache= null;
+					fgNumberOfCacheFlushes++;
+					
+					if (fgTypeCacherThread != null) {
+						fgTypeCacherThread.reset();
+					} else {
+						fgTypeCacherThread= new TypeCacher(fgSizeHint, TIMEOUT, null);
+						fgTypeCacherThread.start();
+					}
+				}
 			}
 		}
 		
@@ -284,5 +414,23 @@ public class AllTypesCache {
 		} catch (TypeFoundException e) {
 		}
 		return true;
-	}		
+	}
+
+	public static void initialize() {
+		fgTypeCacherThread= new TypeCacher(fgSizeHint, INITIAL_DELAY, null);
+		fgTypeCacherThread.start();
+		fgDeltaListener= new TypeCacheDeltaListener();
+		JavaCore.addElementChangedListener(fgDeltaListener);
+	}
+	
+	public static void terminate() {
+		if (fgDeltaListener != null)
+			JavaCore.removeElementChangedListener(fgDeltaListener);
+		fgDeltaListener= null;
+		synchronized(fgLock) {
+			if (fgTypeCacherThread != null)
+				fgTypeCacherThread.abort();
+			fgTypeCacherThread= null;
+		}
+	}
 }
