@@ -220,7 +220,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 	
 	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
-		return RefactoringScope.create(fMethod);
+		return RefactoringScopeFactory.create(fMethod);
 	}
 	
 	ISearchPattern createSearchPattern(IProgressMonitor pm) throws JavaModelException{

@@ -215,7 +215,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private IJavaSearchScope createRefactoringScope()  throws JavaModelException{
-		return RefactoringScope.create(fPackage);
+		return RefactoringScopeFactory.create(fPackage);
 	}
 	
 	private ISearchPattern createSearchPattern(){

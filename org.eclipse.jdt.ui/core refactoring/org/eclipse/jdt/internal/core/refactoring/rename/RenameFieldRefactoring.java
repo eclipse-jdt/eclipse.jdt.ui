@@ -319,7 +319,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 	
 	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
-		return RefactoringScope.create(fField);
+		return RefactoringScopeFactory.create(fField);
 	}
 	
 	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws JavaModelException{

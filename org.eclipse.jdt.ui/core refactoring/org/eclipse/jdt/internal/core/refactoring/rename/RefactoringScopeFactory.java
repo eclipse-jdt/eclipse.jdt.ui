@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 
-class RefactoringScope {
+class RefactoringScopeFactory {
 	private static IJavaSearchScope create(IJavaProject javaProject){
 		IProject project = javaProject.getProject();
 		Set projects= new  HashSet();
@@ -33,7 +33,7 @@ class RefactoringScope {
 		if (javaElement instanceof IMember){
 			IMember member= (IMember)javaElement;
 			if (Flags.isPrivate(member.getFlags()))
-				return SearchEngine.createJavaSearchScope(new IJavaElement[]{member});
+				return SearchEngine.createJavaSearchScope(new IJavaElement[]{member.getCompilationUnit()});
 			if (! Flags.isPublic(member.getFlags()) && !Flags.isProtected(member.getFlags())){
 				IPackageFragment pack= (IPackageFragment)member.getCompilationUnit().getParent();
 				return SearchEngine.createJavaSearchScope(new IJavaElement[]{pack});
