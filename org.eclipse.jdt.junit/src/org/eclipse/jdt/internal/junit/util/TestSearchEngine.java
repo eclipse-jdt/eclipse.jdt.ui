@@ -18,6 +18,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
@@ -26,7 +28,9 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -47,8 +51,10 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.core.Region;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 /**
  * Custom Search engine for suite() methods
@@ -95,10 +101,8 @@ public class TestSearchEngine {
 	private List searchMethod(final List v, IJavaSearchScope scope, final IProgressMonitor progressMonitor) throws CoreException {		
 		SearchRequestor requestor= new JUnitSearchResultCollector(v);
 		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE); //$NON-NLS-1$
-		SearchPattern testPattern= SearchPattern.createPattern("test*() void", IJavaSearchConstants.METHOD , IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE); //$NON-NLS-1$
-		SearchPattern pattern= SearchPattern.createOrPattern(suitePattern, testPattern);
 		SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
-		new SearchEngine().search(pattern, participants, scope, requestor, progressMonitor); 
+		new SearchEngine().search(suitePattern, participants, scope, requestor, progressMonitor); 
 		return v;
 	}
 	
@@ -129,7 +133,7 @@ public class TestSearchEngine {
 		}
 		return (IType[]) result.toArray(new IType[result.size()]) ;
 	}
-
+	
 	public static void doFindTests(Object[] elements, Set result, IProgressMonitor pm) throws InterruptedException {
 		int nElements= elements.length;
 		pm.beginTask(JUnitMessages.getString("TestSearchEngine.message.searching"), nElements);  //$NON-NLS-1$
@@ -149,29 +153,71 @@ public class TestSearchEngine {
 		}
 	}
 
+
 	private static void collectTypes(Object element, IProgressMonitor pm, Set result) throws CoreException/*, InvocationTargetException*/ {
-		element= computeScope(element);
-		while((element instanceof IJavaElement) && !(element instanceof ICompilationUnit) && (element instanceof ISourceReference)) {
-			if(element instanceof IType) {
-				if (hasSuiteMethod((IType)element) || isTestType((IType)element)) {
-					result.add(element);
-					return;
+		pm.beginTask(JUnitMessages.getString("TestSearchEngine.message.searching"), 10);  //$NON-NLS-1$
+	    element= computeScope(element);
+	    try {
+			while((element instanceof ISourceReference) && !(element instanceof ICompilationUnit)) {
+				if(element instanceof IType) {
+					if (hasSuiteMethod((IType)element) || isTestType((IType)element)) {
+						result.add(element);
+						return;
+					}
 				}
+				element= ((IJavaElement)element).getParent();
 			}
-			element= ((IJavaElement)element).getParent();
-		}
-		if (element instanceof ICompilationUnit) {
-			ICompilationUnit cu= (ICompilationUnit)element;
-			IType[] types= cu.getAllTypes();
-			for (int i= 0; i < types.length; i++) {
-				if (hasSuiteMethod(types[i])  || isTestType(types[i]))
-					result.add(types[i]);
+			if (element instanceof ICompilationUnit) {
+				ICompilationUnit cu= (ICompilationUnit)element;
+				IType[] types= cu.getAllTypes();
+	
+				for (int i= 0; i < types.length; i++) {
+					if (hasSuiteMethod(types[i])  || isTestType(types[i]))
+						result.add(types[i]);
+				}
+			} 
+			else if (element instanceof IJavaElement) {
+			    List testCases= findTestCases((IJavaElement)element, new SubProgressMonitor(pm, 7));
+				List suiteMethods= searchSuiteMethods(new SubProgressMonitor(pm, 3), (IJavaElement)element);			
+				while (!suiteMethods.isEmpty()) {
+					if (!testCases.contains(suiteMethods.get(0))) {
+						testCases.add(suiteMethods.get(0));
+					}
+					suiteMethods.remove(0);
+				}
+				result.addAll(testCases);
 			}
-		} 
-		else if (element instanceof IJavaElement) {
-			List found= searchSuiteMethods(pm, (IJavaElement)element);
-			result.addAll(found);
+	    } finally {
+	        pm.done();
+	    }
+	}
+	
+	private static List findTestCases(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
+		List found = new ArrayList();
+		IJavaProject javaProject= element.getJavaProject();
+
+		IType testCaseType= javaProject.findType("junit.framework.TestCase"); //$NON-NLS-1$
+		IType[] subtypes= javaProject.newTypeHierarchy(testCaseType, getRegion(javaProject), pm).getAllSubtypes(testCaseType);
+			
+		if (subtypes == null)
+		    throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE, JUnitMessages.getString("JUnitBaseLaunchConfiguration.error.notests"), null))); //$NON-NLS-1$
+
+		for (int i = 0; i < subtypes.length; i++) {
+			if (subtypes[i].getAncestor(element.getElementType()).equals(element))
+			    found.add(subtypes[i]);
 		}
+		return found;
+	}
+	
+	private static Region getRegion(IJavaProject javaProject) throws JavaModelException{
+	    Region region = new Region();
+	    IJavaElement[] elements= javaProject.getChildren();
+	    for(int i=0; i<elements.length; i++) {
+	        if (((IPackageFragmentRoot)elements[i]).isArchive())
+	            continue;
+	        region.add(elements[i]);
+	    }
+	    return region;
 	}
 
 	private static Object computeScope(Object element) throws JavaModelException {
@@ -187,9 +233,9 @@ public class TestSearchEngine {
 	}
 	
 	private static List searchSuiteMethods(IProgressMonitor pm, IJavaElement element) throws CoreException {	
-		// fix for bug 36449  JUnit should constrain tests to selected project [JUnit] 
+		// fix for bug 36449  JUnit should constrain tests to selected project [JUnit]
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element },
-				IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES);
+				IJavaSearchScope.SOURCES);
 		TestSearchEngine searchEngine= new TestSearchEngine(); 
 		return searchEngine.searchMethod(pm, scope);
 	}

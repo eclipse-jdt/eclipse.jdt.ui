@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.junit.launcher;
  
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -669,6 +670,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		acceptedClasses= new Class[] { IJavaModel.class, IPackageFragmentRoot.class, IJavaProject.class, IPackageFragment.class };
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses) {
 			public boolean select(Viewer viewer, Object parent, Object element) {
+			    if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot)element).isArchive())
+			        return false;
 				return super.select(viewer, parent, element);
 			}
 		};		
