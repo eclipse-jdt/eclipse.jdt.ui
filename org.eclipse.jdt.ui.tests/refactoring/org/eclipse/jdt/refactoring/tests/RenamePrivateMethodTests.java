@@ -55,31 +55,40 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		helper1_0("m", "k", new String[0]);
 	}
 	
-	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
+	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(fgChangeCreator, classA.getMethod(methodName, signatures));
+		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
-		assert("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
-		assert("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 		
 		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assert("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
-		assert("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 		
 		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
+	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
+		helper2_0(methodName, newMethodName, signatures, true);
+	}
+	
+	private void helper2(boolean updateReferences) throws Exception{
+		helper2_0("m", "k", new String[0], updateReferences);
+	}
+	
 	private void helper2() throws Exception{
-		helper2_0("m", "k", new String[0]);
+		helper2(true);
 	}
 
 	/******* tests ******************/
@@ -175,6 +184,10 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 	
 	public void test26() throws Exception{
 		helper2_0("m", "k", new String[0]);
+	}
+	
+	public void test27() throws Exception{
+		helper2_0("m", "k", new String[0], false);
 	}
 
 	public void testAnon0() throws Exception{

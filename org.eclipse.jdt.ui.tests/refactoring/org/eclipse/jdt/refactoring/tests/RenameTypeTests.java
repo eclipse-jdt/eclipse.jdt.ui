@@ -45,6 +45,10 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 		
 	/******* shortcuts **********/
+	
+	private IType getClassFromTestFile(IPackageFragment pack, String className) throws Exception{
+		return getType(createCUfromTestFile(pack, className), className);
+	}
 		
 	private RenameTypeRefactoring createRefactoring(IType type, String newName){
 		RenameTypeRefactoring ref= new RenameTypeRefactoring(fgChangeCreator, type);
@@ -64,37 +68,33 @@ public class RenameTypeTests extends RefactoringTest {
 	private void helper1() throws Exception{
 		helper1_0("A", "B");
 	}
-	
-	private void helper2(String oldName, String newName) throws Exception{
-		helper2_0(oldName, newName, newName);
-	}
-	
-	private void helper2_0(String oldName, String newName, String newCUName) throws Exception{
+		
+	private void helper2_0(String oldName, String newName, String newCUName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), oldName);
 		IPath path= cu.getUnderlyingResource().getFullPath();
 		IType classA= getType(cu, oldName);
 		
-		//IPath newpath= path;
-		//ICompilationUnit newcu= cu;
-	/*	if (!oldName.equals(newCUName)){
-			newcu= createCU(getPackageP(), newCUName +".java", getFileContents(getOutputTestFileName(newCUName)));
-			//newpath= RenameResourceChange.renamedResourcePath(path, newName);
-			//newcu= (ICompilationUnit) fFactory.create(JavaPlugin.getWorkspace().findResource(newpath));	
-		}*/
-		
-		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
-		IRefactoring ref= createRefactoring(classA, newName);
+		RenameTypeRefactoring ref= createRefactoring(classA, newName);
+		ref.setUpdateReferences(updateReferences);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
-		assert("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
-		assertEquals("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());
-	}
-		
-	private IType getClassFromTestFile(IPackageFragment pack, String className) throws Exception{
-		return getType(createCUfromTestFile(pack, className), className);
+		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
+		assertEquals("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());	
 	}
 	
+	private void helper2_0(String oldName, String newName, String newCUName) throws Exception{
+		helper2_0(oldName, newName, newCUName, true);
+	}
+	
+	private void helper2(String oldName, String newName, boolean updateReferences) throws Exception{
+		helper2_0(oldName, newName, newName, updateReferences);
+	}
+
+	private void helper2(String oldName, String newName) throws Exception{
+		helper2_0(oldName, newName, newName, true);
+	}
+				
 	/****** tests ***********/
 	
 	public void testIllegalInnerClass() throws Exception {
@@ -577,12 +577,12 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 
 	public void testFail92() throws Exception {
-		System.out.println("\nRenameTypeTest::" + name() + " disabled (needs fixing)");
+		System.out.println("\nRenameTypeTest::" + getName() + " disabled (needs fixing)");
 		//helper1();
 	}
 
 	public void testFail93() throws Exception {
-		System.out.println("\nRenameTypeTest::" + name() + " disabled (needs fixing)");
+		System.out.println("\nRenameTypeTest::" + getName() + " disabled (needs fixing)");
 		//helper1();
 	}
 	
@@ -807,7 +807,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void test40() throws Exception { 
-		System.out.println("\nRenameTypeTest::" + name() + " disabled (search engine bug)");
+		printTestDisabledMessage("search engine bug");
 		//helper2("A", "B");		
 	}
 	
@@ -882,10 +882,14 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void test52() throws Exception {
-		System.out.println("\nRenameTypeTest::" + name() + " disabled (1GJY2XN: ITPJUI:WIN2000 - rename type: error when with reference)");
+		printTestDisabledMessage("1GJY2XN: ITPJUI:WIN2000 - rename type: error when with reference");
 		//helper2("A", "B");		
 	}
-	
+
+	public void test53() throws Exception { 
+		helper2("A", "B", false);		
+	}
+		
 	public void test5() throws Exception { 
 		helper2("A", "B");		
 	}

@@ -60,30 +60,39 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		helper1_0("f", "g");
 	}
 	
-	private void helper2(String fieldName, String newFieldName) throws Exception{
+	private void helper2(String fieldName, String newFieldName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 		RenameFieldRefactoring ref= new RenameFieldRefactoring(fgChangeCreator, classA.getField(fieldName));
 		ref.setNewName(newFieldName);
+		ref.setUpdateReferences(updateReferences);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("was supposed to pass", null, result);
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
-		assert("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
-		assert("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 		
 		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assert("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
-		assert("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 		
 		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
+	private void helper2(String fieldName, String newFieldName) throws Exception{
+		helper2(fieldName, newFieldName, true);
+	}
+	
 	private void helper2() throws Exception{
-		helper2("f", "g");
+		helper2(true);
+	}
+	
+	private void helper2(boolean updateReferences) throws Exception{
+		helper2("f", "g", updateReferences);
 	}
 
 	//--------- tests ----------	
@@ -181,7 +190,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 	
 	public void test8() throws Exception{
-		System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GD79XM: ITPJCORE:WINNT - Search - search for field references - not all found");
+		printTestDisabledMessage("1GD79XM: ITPJCORE:WINNT - Search - search for field references - not all found");
 		//helper2();
 	}
 	
@@ -207,4 +216,11 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		helper2();
 	}
 	
+	public void test14() throws Exception{
+		helper2(false);
+	}
+	
+	public void test15() throws Exception{
+		helper2(false);
+	}
 }

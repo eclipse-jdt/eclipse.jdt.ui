@@ -38,8 +38,8 @@ public class UndoManagerTests extends RefactoringTest {
 	}
 	
 	private void checkState(int iterationCount, boolean undo, boolean redo, int undoCount, int redoCount){
-		assert(iterationCount + " undo", undo == Refactoring.getUndoManager().anythingToUndo());
-		assert(iterationCount + " redo", redo == Refactoring.getUndoManager().anythingToRedo());
+		assertTrue(iterationCount + " undo", undo == Refactoring.getUndoManager().anythingToUndo());
+		assertTrue(iterationCount + " redo", redo == Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals(iterationCount + "undo stack", undoCount, Refactoring.getUndoManager().getRefactoringLog().size());
 		//assertEquals(iterationCount + "redo stack", redoCount, Refactoring.getUndoManager().getRedoStack().size());
 	}

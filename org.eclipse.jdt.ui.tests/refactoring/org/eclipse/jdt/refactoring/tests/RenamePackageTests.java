@@ -21,7 +21,6 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	public RenamePackageTests(String name) {
 		super(name);
-		//fgIsVerbose= true;
 	}
 
 	public static void main(String[] args) {
@@ -41,7 +40,6 @@ public class RenamePackageTests extends RefactoringTest {
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
-	
 	
 	// -------------
 	private RenamePackageRefactoring createRefactoring(IPackageFragment pack, String newName) {
@@ -98,7 +96,7 @@ public class RenamePackageTests extends RefactoringTest {
 		helper1(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
-	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName) throws Exception{
+	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName, boolean updateReferences) throws Exception{
 		IPackageFragment[] packages= new IPackageFragment[packageNames.length];
 		ICompilationUnit[][] cus= new ICompilationUnit[packageFileNames.length][packageFileNames[0].length];
 		for (int i= 0; i < packageNames.length; i++){
@@ -108,14 +106,16 @@ public class RenamePackageTests extends RefactoringTest {
 			}
 		}
 		IPackageFragment thisPackage= packages[0];
-		RefactoringStatus result= performRefactoring(createRefactoring(thisPackage, newPackageName));
+		RenamePackageRefactoring ref= createRefactoring(thisPackage, newPackageName);
+		ref.setUpdateReferences(updateReferences);
+		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("preconditions were supposed to pass", null, result);
 		
 		//---
 		
-		assert("package not renamed", ! getRoot().getPackageFragment(packageNames[0]).exists());
+		assertTrue("package not renamed", ! getRoot().getPackageFragment(packageNames[0]).exists());
 		IPackageFragment newPackage= getRoot().getPackageFragment(newPackageName);
-		assert("new package does not exist", newPackage.exists());
+		assertTrue("new package does not exist", newPackage.exists());
 		
 		for (int i= 0; i < packageFileNames.length; i++){
 			String packageName= (i == 0) 
@@ -143,13 +143,17 @@ public class RenamePackageTests extends RefactoringTest {
 		
 	}
 	
+	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName) throws Exception{
+		helper2(packageNames, packageFileNames, newPackageName, true);
+	}
+	
 	// ---------- tests -------------	
 	public void testFail0() throws Exception{
 		helper1(new String[]{"r"}, new String[][]{{"A"}}, "9");
 	}
 	
 	public void testFail1() throws Exception{
-		System.out.println("\nRenamePackageTest::" + name() + " disabled (needs revisiting)");
+		printTestDisabledMessage("needs revisiting");
 		//helper1(new String[]{"r.p1"}, new String[][]{{"A"}}, "r");
 	}
 	
@@ -174,7 +178,8 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void testFail7() throws Exception{
-		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+		printTestDisabledMessage("1GK90H4: ITPJCORE:WIN2000 - search: missing package reference");
+		//helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
 	public void testFail8() throws Exception{
@@ -183,7 +188,7 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	//native method used r.A as a paramter
 	public void testFail9() throws Exception{
-		System.out.println("\nRenamePackageTest::" + name() + " disabled (corner case)");
+		printTestDisabledMessage("corner case");
 		//helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 	
@@ -214,5 +219,9 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	public void test4() throws Exception{
 		helper2(new String[]{"r.p1", "r"}, new String[][]{{"A"}, {"A"}}, "q");
+	}
+	
+	public void test5() throws Exception{
+		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1", false);
 	}
 }

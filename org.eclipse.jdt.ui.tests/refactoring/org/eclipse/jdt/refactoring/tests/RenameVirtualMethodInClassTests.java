@@ -56,40 +56,49 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		helper1_0("m", "k", new String[0]);
 	}
 	
-	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
+	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 		RenameMethodRefactoring ref=  RenameMethodRefactoring.createInstance(fgChangeCreator, classA.getMethod(methodName, signatures));
+		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newMethodName);
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		if (!shouldPass){
-			assert("incorrect renaming because of java model", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
+			assertTrue("incorrect renaming because of java model", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
 			return;
 		}
 		assertEquals("incorrect renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
-		assert("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
-		assert("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 		
 		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assert("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
-		assert("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 		
 		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
+	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
+		helper2_0(methodName, newMethodName, signatures, shouldPass, true);
+	}
+	
 	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		helper2_0(methodName, newMethodName, signatures, true);
 	}
 	
+	private void helper2(boolean updateReferences) throws Exception{
+		helper2_0("m", "k", new String[0], true, updateReferences);
+	}
+
 	private void helper2() throws Exception{
-		helper2_0("m", "k", new String[0]);
+		helper2(true);
 	}
 	
 	private void helper2_fail() throws Exception{
@@ -246,7 +255,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void testFail38() throws Exception{
-		System.out.println("\nRenameVirtualMethod::"+ name() + " disabled (needs fixing)");
+		printTestDisabledMessage("needs fixing");
 		//helper1();
 	}
 	
@@ -283,7 +292,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}		
 	
 	public void test17() throws Exception{
-		System.out.println("\nRenameVirtualMethod::" + name() + " disabled()");
+		printTestDisabledMessage("");
 		//helper2_0("m", "kk", new String[]{Signature.SIG_INT});
 	}		
 	
@@ -330,7 +339,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}		
 	
 	public void test25() throws Exception{
-		System.out.println("\nRenameVirtualMethod::" + name() + " is waiting for 1GIIBC3: ITPJCORE:WINNT - search for method references - missing matches");
+		printTestDisabledMessage("waiting for 1GIIBC3: ITPJCORE:WINNT - search for method references - missing matches");
 		//helper2();
 	}		
 	
@@ -357,7 +366,11 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	public void test31() throws Exception{
 		helper2();
 	}
-
+	
+	public void test32() throws Exception{
+		helper2(false);
+	}
+	
 	//anonymous inner class
 	public void testAnon0() throws Exception{
 		helper2_fail();

@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
@@ -61,42 +62,52 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		helper1_0("m", "k", new String[0]);
 	}
 	
-	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
+	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
 		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(fgChangeCreator, interfaceI.getMethod(methodName, signatures));
+		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		if (!shouldPass){
-			assert("incorrect renaming because of a java model bug", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
+			assertTrue("incorrect renaming because of a java model bug", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
 			return;
 		}
 		assertEquals("incorrect renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
-		assert("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
-		assert("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 		
 		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assert("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
-		assert("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 		
 		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
+	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
+		helper2_0(methodName, newMethodName, signatures, shouldPass, true);
+	}
+	
 	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		helper2_0(methodName, newMethodName, signatures, true);
 	}
 	
+	private void helper2(boolean updateReferences) throws Exception{
+		helper2_0("m", "k", new String[0], true, updateReferences);
+	}
+	
 	private void helper2() throws Exception{
-		helper2_0("m", "k", new String[0]);
+		helper2(true);
 	}
 	
 	private void helper2_fail() throws Exception{
+		printTestDisabledMessage("search engine bug");
 		helper2_0("m", "k", new String[0], false);
 	}
 	
@@ -387,4 +398,8 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	public void test45() throws Exception{
 		helper2();
 	}
+	public void test46() throws Exception{
+		helper2(false);
+	}
+
 }

@@ -64,7 +64,7 @@ public abstract class RefactoringTest extends TestCase {
 		
 		if (fIsVerbose){
 			System.out.println("---------------------------------------------");
-			System.out.println("Test:" + getClass() + "." + name());
+			System.out.println("Test:" + getClass() + "." + getName());
 		}	
 		Refactoring.getUndoManager().flush();
 	}
@@ -184,7 +184,7 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	private String createTestFileName(String cuName, String infix) {
-		return getTestPath() + name() + infix + cuName + ".java";
+		return getTestPath() + getName() + infix + cuName + ".java";
 	}
 	
 	protected String getInputTestFileName(String cuName) {
@@ -230,6 +230,10 @@ public abstract class RefactoringTest extends TestCase {
 			: getFileContents(getOutputTestFileName(cuName, subDirName));
 		
 		return createCU(pack, cuName + ".java", contents);
+	}
+	
+	protected void printTestDisabledMessage(String explanation){
+		System.out.println("\n" +getClass().getName() + "::"+ getName() + " disabled (" + explanation + ")");
 	}
 }
 

@@ -56,29 +56,38 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}
 	
 	private void helper2(String fieldName, String newFieldName) throws Exception{
+		helper2(fieldName, newFieldName, true);
+	}
+	
+	private void helper2(String fieldName, String newFieldName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 		RenameFieldRefactoring ref= new RenameFieldRefactoring(fgChangeCreator, classA.getField(fieldName));
+		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newFieldName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("was supposed to pass", null, result);
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
-		assert("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
-		assert("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
 		
 		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assert("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
-		assert("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
 		
 		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
 	private void helper2() throws Exception{
-		helper2("f", "g");
+		helper2(true);
+	}
+	
+	private void helper2(boolean updateReferences) throws Exception{
+		helper2("f", "g", updateReferences);
 	}
 
 	//--------- tests ----------	
@@ -118,5 +127,8 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	public void test1() throws Exception{
 		helper2();
 	}
-	
+
+	public void test2() throws Exception{
+		helper2(false);
+	}	
 }

@@ -32,7 +32,7 @@ import junit.framework.Test;import junit.framework.TestSuite;import org.eclip
 	}
 		
 	private String getSimpleTestFileName(boolean canRename, boolean input){
-		String fileName = "A_" + name();
+		String fileName = "A_" + getName();
 		if (canRename)
 			fileName += input ? "_in": "_out";
 		return fileName + ".java"; 
@@ -74,7 +74,7 @@ import junit.framework.Test;import junit.framework.TestSuite;import org.eclip
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
-		assert(newCuName + " does not exist", newcu.exists());
+		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());		
 	}
 	

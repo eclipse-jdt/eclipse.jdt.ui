@@ -42,7 +42,7 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 		
 	private String getSimpleTestFileName(boolean canReorder, boolean input){
-		String fileName = "A_" + name();
+		String fileName = "A_" + getName();
 		if (canReorder)
 			fileName += input ? "_in": "_out";
 		return fileName + ".java"; 
@@ -81,7 +81,7 @@ public class ReorderParametersTests extends RefactoringTest {
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
-		assert(newCuName + " does not exist", newcu.exists());
+		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());		
 	}
 	

@@ -46,8 +46,8 @@ public class CopyPackageChangeTest extends RefactoringTest {
 		CopyPackageChange change= new CopyPackageChange(getPackageP(), newRoot);
 		performChange(change);
 		IPackageFragment copied= newRoot.getPackageFragment(packName);
-		assert("copied.exists()", copied.exists());
-		assert(copied.getChildren().length == 1);
+		assertTrue("copied.exists()", copied.exists());
+		assertTrue(copied.getChildren().length == 1);
 	}
 }
 

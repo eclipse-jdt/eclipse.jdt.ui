@@ -54,12 +54,12 @@ public class MultiMoveTests extends RefactoringTest {
 		final String outDir= "/out/";
 		
 		IPackageFragment packP1= createPackage(p1Name);
-		ICompilationUnit p1A= createCu(packP1, name() + inDir + p1Name + "/A.java", "A.java");
-		ICompilationUnit p1B= createCu(packP1, name() + inDir + p1Name + "/B.java", "B.java");
+		ICompilationUnit p1A= createCu(packP1, getName() + inDir + p1Name + "/A.java", "A.java");
+		ICompilationUnit p1B= createCu(packP1, getName() + inDir + p1Name + "/B.java", "B.java");
 		
 		String p2Name= "p2";
 		IPackageFragment packP2= createPackage(p2Name);
-		ICompilationUnit p2C= createCu(packP2, name() + inDir + p2Name + "/C.java", "C.java");
+		ICompilationUnit p2C= createCu(packP2, getName() + inDir + p2Name + "/C.java", "C.java");
 		
 		List elems= new ArrayList();
 		elems.add(p1A);
@@ -74,13 +74,13 @@ public class MultiMoveTests extends RefactoringTest {
 		assertEquals("p1 files", 0, packP1.getChildren().length);
 		assertEquals("p2 files", 3, packP2.getChildren().length);
 
-		String expectedSource= getFileContents(getRefactoringPath() + name() + outDir + p2Name + "/A.java");
+		String expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/A.java");
 		assertEquals("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());		
 		
-		expectedSource= getFileContents(getRefactoringPath() + name() + outDir + p2Name + "/B.java");
+		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/B.java");
 		assertEquals("incorrect update of B", expectedSource, packP2.getCompilationUnit("B.java").getSource());
 		
-		expectedSource= getFileContents(getRefactoringPath() + name() + outDir + p2Name + "/C.java");
+		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/C.java");
 		assertEquals("incorrect update of C", expectedSource ,p2C.getSource());
 		
 		packP1.delete(true, null);
@@ -95,12 +95,12 @@ public class MultiMoveTests extends RefactoringTest {
 		
 		IPackageFragment packP1= createPackage(p1Name);
 		IPackageFragment packP3= createPackage(p3Name);
-		ICompilationUnit p1A= createCu(packP1, name() + inDir + p1Name + "/A.java", "A.java");
-		ICompilationUnit p3B= createCu(packP3, name() + inDir + p3Name + "/B.java", "B.java");
+		ICompilationUnit p1A= createCu(packP1, getName() + inDir + p1Name + "/A.java", "A.java");
+		ICompilationUnit p3B= createCu(packP3, getName() + inDir + p3Name + "/B.java", "B.java");
 		
 		String p2Name= "p2";
 		IPackageFragment packP2= createPackage(p2Name);
-		ICompilationUnit p2C= createCu(packP2, name() + inDir + p2Name + "/C.java", "C.java");
+		ICompilationUnit p2C= createCu(packP2, getName() + inDir + p2Name + "/C.java", "C.java");
 		
 		List elems= new ArrayList();
 		elems.add(p1A);
@@ -116,13 +116,13 @@ public class MultiMoveTests extends RefactoringTest {
 		assertEquals("p2 files", 3, packP2.getChildren().length);
 		assertEquals("p1 files", 0, packP3.getChildren().length);
 				
-		String expectedSource= getFileContents(getRefactoringPath() + name() + outDir + p2Name + "/A.java");
+		String expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/A.java");
 		assertEquals("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());
 		
-		expectedSource= getFileContents(getRefactoringPath() + name() + outDir + p2Name + "/B.java");
+		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/B.java");
 		assertEquals("incorrect update of B", expectedSource, packP2.getCompilationUnit("B.java").getSource());
 		
-		expectedSource= getFileContents(getRefactoringPath() + name() + outDir + p2Name + "/C.java");
+		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/C.java");
 		assertEquals("incorrect update of C", expectedSource ,p2C.getSource());
 		
 		packP1.delete(true, null);
@@ -136,12 +136,12 @@ public class MultiMoveTests extends RefactoringTest {
 		final String outDir= "/out/";
 		
 		IPackageFragment packP1= createPackage(p1Name);
-		ICompilationUnit p1A= createCu(packP1, name() + inDir + p1Name + "/A.java", "A.java");
-		ICompilationUnit p1B= createCu(packP1, name() + inDir + p1Name + "/B.java", "B.java");
+		ICompilationUnit p1A= createCu(packP1, getName() + inDir + p1Name + "/A.java", "A.java");
+		ICompilationUnit p1B= createCu(packP1, getName() + inDir + p1Name + "/B.java", "B.java");
 		
 		String p2Name= "p2";
 		IPackageFragment packP2= createPackage(p2Name);
-		ICompilationUnit p2C= createCu(packP2, name() + inDir + p2Name + "/C.java", "C.java");
+		ICompilationUnit p2C= createCu(packP2, getName() + inDir + p2Name + "/C.java", "C.java");
 		
 		List elems= new ArrayList();
 		elems.add(p1A);
@@ -155,13 +155,13 @@ public class MultiMoveTests extends RefactoringTest {
 		assertEquals("p1 files", 1, packP1.getChildren().length);
 		assertEquals("p2 files", 2, packP2.getChildren().length);
 
-		String expectedSource= getFileContents(getRefactoringPath() + name() + outDir + p2Name + "/A.java");
+		String expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/A.java");
 		assertEquals("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());		
 		
-		expectedSource= getFileContents(getRefactoringPath() + name() + outDir + p1Name + "/B.java");
+		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p1Name + "/B.java");
 		assertEquals("incorrect update of B", expectedSource, packP1.getCompilationUnit("B.java").getSource());
 		
-		expectedSource= getFileContents(getRefactoringPath() + name() + outDir + p2Name + "/C.java");
+		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/C.java");
 		assertEquals("incorrect update of C", expectedSource, p2C.getSource());
 		
 		packP1.delete(true, null);

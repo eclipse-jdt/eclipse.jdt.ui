@@ -38,16 +38,16 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 		IPackageFragmentRoot oldRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), oldName);
 		//testProject.addSourceContainer(oldName);
 		
-		assert("old folder should exist here", oldRoot.exists());
+		assertTrue("old folder should exist here", oldRoot.exists());
 		
 		RenameSourceFolderChange change= new RenameSourceFolderChange(oldRoot, newName);
 		performChange(change);
 		
-		assert("old folder should not exist", ! oldRoot.exists());
+		assertTrue("old folder should not exist", ! oldRoot.exists());
 		assertEquals("expected 3 pfr's", 3, testProject.getPackageFragmentRoots().length);
 		IPackageFragmentRoot[] newRoots= testProject.getPackageFragmentRoots();
 		for (int i= 0; i < newRoots.length; i++){
-			assert("should exist " + i, newRoots[i].exists());
+			assertTrue("should exist " + i, newRoots[i].exists());
 		}
 	}
 }

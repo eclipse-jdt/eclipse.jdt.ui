@@ -1,0 +1,32 @@
+<!-- build script to run refactoring tests -->
+<project name="org.eclipse.jdt.ui.tests" default="init" basedir="bin">
+	<path id="tests.class.path">
+    		<pathelement path="."/>
+  			<pathelement location="../../Eclipse Core Launcher/startup.jar"/>
+  			<pathelement location="../../org.eclipse.jdt.ui/bin"/>
+  			<pathelement location="../../org.eclipse.jdt.core/bin"/>
+  			<pathelement location="../../org.eclipse.core.runtime/runtime.jar"/>
+     </path>
+       
+	<target name="init">
+		<tstamp/>
+	</target>
+	
+	<target name="change tests" depends="init">
+	    	<java classname="org.eclipse.jdt.refactoring.tests.AllChangeTests"  fork="yes" >
+		    	<classpath refid="tests.class.path"/>
+      	</java>
+	</target>
+	
+	<target name="movecu" depends="init">
+	    	<java classname="org.eclipse.jdt.refactoring.tests.MoveCUTests"  fork="yes" >
+    			 <classpath refid="tests.class.path"/>
+      		</java>
+	</target>
+	
+	<target name="extract method" depends="init">
+	    	<java classname="org.eclipse.jdt.refactoring.tests.ExtractMethodTests"  fork="yes" >
+    			 <classpath refid="tests.class.path"/>
+      		</java>
+	</target>
+</project>
