@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;

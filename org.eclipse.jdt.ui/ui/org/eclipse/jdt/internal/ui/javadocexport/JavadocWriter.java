@@ -7,8 +7,6 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
-import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -21,7 +19,6 @@ import org.apache.xml.serialize.Serializer;
 import org.apache.xml.serialize.SerializerFactory;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.util.Assert;
 
@@ -33,9 +30,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavadocWriter {
 	protected OutputStream fOutputStream;

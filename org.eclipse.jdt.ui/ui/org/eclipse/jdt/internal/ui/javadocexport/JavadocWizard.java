@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -130,9 +129,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		fDestination= new Path(fStore.getDestination(fStore.getJavaProject()));
 		fDestination.toFile().mkdirs();
 
-		if (fJSWPage.openInBrowser()) {
-			this.fOpenInBrowser= true;
-		}
+		this.fOpenInBrowser= fStore.doOpenInBrowser();
 
 		try {
 			URL currURL= JavaDocLocations.getProjectJavadocLocation(fStore.getJavaProject());
@@ -159,12 +156,6 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 		try {
 			String[] args= fStore.createArgumentArray();
-//			//@test
-//			for (int i = 0; i < args.length; i++) {
-//				String string = args[i];
-//				System.out.print(string+" ");	
-//		}
-//			
 		
 			if (!executeJavadocGeneration(args))
 				return false;

@@ -88,6 +88,8 @@ public class JavadocOptionsManager {
 	private boolean fVersion;
 	private boolean fUse;
 	
+	private boolean fOpenInBrowser;
+	
 	//list of hrefs in string format
 	private Map fLinks;
 
@@ -112,6 +114,7 @@ public class JavadocOptionsManager {
 	public final static String SOURCEPATH= "sourcepath"; //$NON-NLS-1$
 	public final static String CLASSPATH= "classpath"; //$NON-NLS-1$
 	public final static String DESTINATION= "destdir"; //$NON-NLS-1$
+	public final static String OPENINBROWSER= "openinbrowser"; //$NON-NLS-1$	
 
 	public final static String VISIBILITY= "access"; //$NON-NLS-1$
 	public final static String PACKAGENAMES= "packagenames"; //$NON-NLS-1$
@@ -123,6 +126,7 @@ public class JavadocOptionsManager {
 	public final String PATH= "path"; //$NON-NLS-1$
 	private final String FROMSTANDARD= "fromStandard"; //$NON-NLS-1$
 	private final String ANTPATH= "antpath"; //$NON-NLS-1$
+
 	
 	/**
 	 * @param xmlJavadocFile The ant file to take initl values from or null, if not started from an ant file.
@@ -205,6 +209,7 @@ public class JavadocOptionsManager {
 		fNoindex= loadbutton(settings.get(NOINDEX));
 		fNotree= loadbutton(settings.get(NOTREE));
 		fSplitindex= loadbutton(settings.get(SPLITINDEX));
+		fOpenInBrowser= loadbutton(settings.get(OPENINBROWSER));
 
 		loadLinksFromDialogSettings(settings);
 		
@@ -304,6 +309,7 @@ public class JavadocOptionsManager {
 		fNoindex= false;
 		fNotree= false;
 		fSplitindex= true;
+		fOpenInBrowser= false;
 		
 		//by default it is empty all project map to the empty string
 		fFromStandard= true;
@@ -517,6 +523,10 @@ public class JavadocOptionsManager {
 			return fLinks;
 	}
 	
+	public boolean doOpenInBrowser() {
+		return fOpenInBrowser;
+	}	
+	
 	public boolean getBoolean(String flag) {
 
 		if (flag.equals(AUTHOR))
@@ -685,6 +695,7 @@ public class JavadocOptionsManager {
 		settings.put(NOINDEX, fNoindex);
 		settings.put(NOTREE, fNotree);
 		settings.put(NONAVBAR, fNonavbar);
+		settings.put(OPENINBROWSER, fOpenInBrowser);
 
 		if (!fAdditionalParams.equals("")) //$NON-NLS-1$
 			settings.put(EXTRAOPTIONS, fAdditionalParams);
@@ -784,6 +795,10 @@ public class JavadocOptionsManager {
 			ProjectData data= (ProjectData)fLinks.get(project);
 			data.setlinks(hrefs);
 	}
+	
+	public void setOpenInBrowser(boolean openInBrowser) {
+		this.fOpenInBrowser= openInBrowser;
+	}	
 
 	public void setBoolean(String flag, boolean value) {
 
@@ -982,5 +997,6 @@ public class JavadocOptionsManager {
 		}
 			
 	}
+
 
 }

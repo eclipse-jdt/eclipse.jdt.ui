@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -21,7 +20,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -29,7 +27,6 @@ import org.eclipse.jface.dialogs.ControlEnableState;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.javadocexport.JavadocWizardPage.ToggleSelectionAdapter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class JavadocSpecificsWizardPage extends JavadocWizardPage {
@@ -169,6 +166,8 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		fAntBrowseButton.setEnabled(false);
 		
 		fCheckbrowser= createButton(c, SWT.CHECK, JavadocExportMessages.getString("JavadocSpecificsWizardPage.openbrowserbutton.label"), createGridData(3));		 //$NON-NLS-1$
+		fCheckbrowser.setSelection(fStore.doOpenInBrowser());
+		
 		
 		fAntButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fAntText, fAntBrowseButton }) {
 			public void validate() {
@@ -259,6 +258,9 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		if (fAntText.getEnabled())
 			fStore.setAntpath(fWizard.getProject(), fAntText.getText());
 		else fStore.setAntpath(fWizard.getProject(), ""); //$NON-NLS-1$
+		
+		fStore.setOpenInBrowser(fCheckbrowser.getSelection());
+		
 	}
 
 	public void setVisible(boolean visible) {
@@ -281,9 +283,5 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		return fAntButton.getSelection();
 	}
 	
-	public boolean openInBrowser() {
-		return fCheckbrowser.getSelection();
-	}
-
 
 } //JavadocSpecificsWizardPage
