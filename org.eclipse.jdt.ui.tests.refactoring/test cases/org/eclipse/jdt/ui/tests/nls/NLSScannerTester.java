@@ -33,8 +33,8 @@ public class NLSScannerTester extends TestCase {
 	
 	public void test0() throws Exception{
 		String text= "fred";
-		List l= NLSScanner.scan(text);
-		assertEquals("empty", true, l.isEmpty());
+		NLSLine[] l= NLSScanner.scan(text);
+		assertEquals("empty", true, l.length == 0);
 	}
 	
 	public void test1() throws Exception{
@@ -47,81 +47,81 @@ public class NLSScannerTester extends TestCase {
 	
 	public void test1a() throws Exception{
 		String text= "fred\n\"x\"";
-		List l= NLSScanner.scan(text);
-		assertEquals("non empty", false, l.isEmpty());
-		assertEquals("1 line", 1, l.size());
+		NLSLine[] l= NLSScanner.scan(text);
+		assertEquals("non empty", false, l.length == 0);
+		assertEquals("1 line", 1,l.length);
 	}
 	
 	public void test2() throws Exception{
 //		String text= "fred\"x\" \"xx\"";
-//		List l= NLSScanner.scan(text);
+//		NLSLine[] l= NLSScanner.scan(text);
 //		assertEquals("non empty", false, l.isEmpty());
-//		assertEquals("2 line", 2, l.size());
+//		assertEquals("2 line", 2,l.length);
 		printDisabledMessage("Scanner does not handle strings in the first line");
 	}
 	
 	public void test2a() throws Exception{
 		String text= "fred\n\"x\" \"xx\"";
-		List l= NLSScanner.scan(text);
-		assertEquals("non empty", false, l.isEmpty());
-		assertEquals("1 lines", 1, l.size());
+		NLSLine[] l= NLSScanner.scan(text);
+		assertEquals("non empty", false, l.length == 0);
+		assertEquals("1 lines", 1,l.length);
 	}
 	
 	public void test3() throws Exception{
 //		String text= "fred\"x\"\n \"xx\"";
-//		List l= NLSScanner.scan(text);
-//		assertEquals("non empty", false, l.isEmpty());
-//		assertEquals("2 lines", 2, l.size());
+//		NLSLine[] l= NLSScanner.scan(text);
+//		assertEquals("non empty", false, l.length == 0);
+//		assertEquals("2 lines", 2,l.length);
 		printDisabledMessage("Scanner does not handle strings in the first line");
 	}
 
 
 	public void test4() throws Exception{
 		String text= "fred\n \"xx\"";
-		List l= NLSScanner.scan(text);
-		assertEquals("non empty", false, l.isEmpty());
-		assertEquals("1 line", 1, l.size());
+		NLSLine[] l= NLSScanner.scan(text);
+		assertEquals("non empty", false, l.length == 0);
+		assertEquals("1 line", 1,l.length);
 	}
 	
 	public void test5() throws Exception{
 		String text= "\n \"xx\"";
-		List l= NLSScanner.scan(text);
-		NLSLine line= ((NLSLine)l.get(0));
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
 		assertEquals("1 string", 1, line.size());
 	}	
 	
 	public void test6() throws Exception{
 		String text= "\n \"xx\" \"dff\"";
-		List l= NLSScanner.scan(text);
-		NLSLine line= ((NLSLine)l.get(0));
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
 		assertEquals("2 string", 2, line.size());
 	}	
 	
 	public void test7() throws Exception{
 		String text= "\n \"xx\" \n\"dff\"";
-		List l= NLSScanner.scan(text);
-		NLSLine line= ((NLSLine)l.get(0));
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
 		assertEquals("1 string A", 1, line.size());
 		
-		line= ((NLSLine)l.get(1));
+		line= l[1];
 		assertEquals("1 string B", 1, line.size());
 	}	
 
 
 	public void test8() throws Exception{
 		String text= "\n \"xx\" \n\"dff\" \"ccc\"";
-		List l= NLSScanner.scan(text);
-		NLSLine line= ((NLSLine)l.get(0));
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
 		assertEquals("1 string A", 1, line.size());
 		
-		line= ((NLSLine)l.get(1));
+		line= l[1];
 		assertEquals("2 strings B", 2, line.size());
 	}
 	
 	public void test9() throws Exception{
 		String text= "fred\n \"xx\"" + NLSElement.createTagText(1) + "\n";
-		List l= NLSScanner.scan(text);
-		NLSLine line= ((NLSLine)l.get(0));
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
 		NLSElement el= line.get(0);
 		assertEquals("has tag", true, el.hasTag());
 	}
@@ -129,8 +129,8 @@ public class NLSScannerTester extends TestCase {
 
 	public void test10() throws Exception{
 		String text= "fred\n \"xx\"\n";
-		List l= NLSScanner.scan(text);
-		NLSLine line= ((NLSLine)l.get(0));
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
 		NLSElement el= line.get(0);
 		assertEquals("has tag", false, el.hasTag());
 	}
@@ -141,8 +141,8 @@ public class NLSScannerTester extends TestCase {
 				+ NLSElement.createTagText(2) 
 				+ NLSElement.createTagText(1) 
 				+ "\n";
-		List l= NLSScanner.scan(text);
-		NLSLine line= ((NLSLine)l.get(0));
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
 		assertEquals("2 strings", 2, line.size());
 		
 		NLSElement el= line.get(0);
@@ -158,8 +158,8 @@ public class NLSScannerTester extends TestCase {
 				+ NLSElement.createTagText(1) 
 				+ NLSElement.createTagText(2) 
 				+ "\n";
-		List l= NLSScanner.scan(text);
-		NLSLine line= ((NLSLine)l.get(0));
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
 		assertEquals("2 strings", 2, line.size());
 		
 		NLSElement el= line.get(0);
@@ -174,8 +174,8 @@ public class NLSScannerTester extends TestCase {
 				"\n\"x\" \"y\""
 				+ NLSElement.createTagText(1) 
 				+ "\n";
-		List l= NLSScanner.scan(text);
-		NLSLine line= ((NLSLine)l.get(0));
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
 		assertEquals("2 strings", 2, line.size());
 		
 		NLSElement el= line.get(0);
@@ -190,8 +190,8 @@ public class NLSScannerTester extends TestCase {
 				"\n\"x\" \"y\""
 				+ NLSElement.createTagText(2) 
 				+ "\n";
-		List l= NLSScanner.scan(text);
-		NLSLine line= ((NLSLine)l.get(0));
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
 		assertEquals("2 strings", 2, line.size());
 		
 		NLSElement el= line.get(0);
