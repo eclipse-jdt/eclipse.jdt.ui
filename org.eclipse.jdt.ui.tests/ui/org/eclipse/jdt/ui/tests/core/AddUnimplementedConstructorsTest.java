@@ -245,6 +245,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("     * \n");
 		buf.append("     */\n");
 		buf.append("    public Test1() {\n");
+		buf.append("\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
 		buf.append("    /** Constructor Comment\n");
@@ -431,6 +432,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		StringBuffer buf= new StringBuffer();
 		buf.append("public class Test1 extends A {\n");
 		buf.append("    public Test1() {\n");
+		buf.append("\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
 		buf.append("    public Test1(int a) {\n");
@@ -884,6 +886,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("     * \n");
 		buf.append("     */\n");
 		buf.append("    public Test1() {\n");
+		buf.append("\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
 		if (fOldFormatter) buf.append("\n");
@@ -1049,6 +1052,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	private void checkDefaultConstructorNoCommentNoSuper(String con) throws IOException {
 		StringBuffer buf= new StringBuffer();
 		buf.append("public Test1() {\n");
+		buf.append("\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
 		compareSource(buf.toString(), con);
@@ -1060,6 +1064,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("     * \n");
 		buf.append("     */\n");
 		buf.append("    public Test1() {\n");
+		buf.append("\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
 		compareSource(buf.toString(), con);
