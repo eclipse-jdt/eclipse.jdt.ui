@@ -444,6 +444,24 @@ public class CompilationUnitEditor extends JavaEditor {
 		public IContentAssistant getContentAssistant() {
 			return fContentAssistant;
 		}
+		
+		/*
+		 * @see ITextOperationTarget#doOperation(int)
+		 */
+		public void doOperation(int operation) {
+		
+			if (getTextWidget() == null)
+				return;
+			
+			switch (operation) {
+				case CONTENTASSIST_PROPOSALS:
+					String msg= fContentAssistant.showPossibleCompletions();
+					setStatusLineErrorMessage(msg);
+					return;
+			}
+			
+			super.doOperation(operation);
+		}
 	};
 	
 	/* Preference key for code formatter tab size */
@@ -646,7 +664,7 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 		} else {	
 			
-			getStatusLineManager().setErrorMessage(""); //$NON-NLS-1$
+			setStatusLineErrorMessage(null);
 			
 			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 			ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
@@ -687,23 +705,41 @@ public class CompilationUnitEditor extends JavaEditor {
 				((TaskList) view).setSelection(ss, true);
 			}
 			
-			getStatusLineManager().setErrorMessage(nextError.getAttribute(IMarker.MESSAGE, "")); //$NON-NLS-1$
-			fStatusLineClearer= new ISelectionChangedListener() {
-				public void selectionChanged(SelectionChangedEvent event) {
-					getSelectionProvider().removeSelectionChangedListener(fStatusLineClearer);
-					fStatusLineClearer= null;
-					getStatusLineManager().setErrorMessage(""); //$NON-NLS-1$
-				}
-			};
-			provider.addSelectionChangedListener(fStatusLineClearer);
+			setStatusLineErrorMessage(nextError.getAttribute(IMarker.MESSAGE, ""));
 			
 		} else {
 			
-			getStatusLineManager().setErrorMessage(""); //$NON-NLS-1$
+			setStatusLineErrorMessage(null);
 			
 		}
 	}
 
+	/**
+	 * Sets the given message as error message to this editor's status line.
+	 * @param msg message to be set
+	 */
+	protected void setStatusLineErrorMessage(String msg) {
+		// set error message
+		getStatusLineManager().setErrorMessage(msg);
+		// install message remover
+		if (msg == null || msg.trim().length() == 0) {
+			if (fStatusLineClearer != null) {
+				getSelectionProvider().removeSelectionChangedListener(fStatusLineClearer);
+				fStatusLineClearer= null;
+			}
+		} else if (fStatusLineClearer == null) {
+			fStatusLineClearer= new ISelectionChangedListener() {
+				public void selectionChanged(SelectionChangedEvent event) {
+					getSelectionProvider().removeSelectionChangedListener(fStatusLineClearer);
+					fStatusLineClearer= null;
+					getStatusLineManager().setErrorMessage(null);
+				}
+			};
+			getSelectionProvider().addSelectionChangedListener(fStatusLineClearer);
+		}
+	}
+
+	
 	private IMarker getNextError(int offset, boolean forward) {
 		
 		IMarker nextError= null;
