@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
 
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -27,8 +31,11 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnv
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintOperator2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
@@ -40,6 +47,75 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
  * @since 3.1
  */
 public final class SuperTypeConstraintsModel {
+
+	/** Customized implementation of a hash set */
+	private static class HashedSet extends AbstractSet implements Set {
+
+		/** The backing hash map */
+		private final Map fImplementation= new HashMap();
+
+		/*
+		 * @see java.util.AbstractCollection#add(java.lang.Object)
+		 */
+		public final boolean add(final Object object) {
+			return fImplementation.put(object, object) == null;
+		}
+
+		/**
+		 * Attempts to add the specified object to this set.
+		 * 
+		 * @param object the object to add
+		 * @return An already existing object considered equal to the specified one, or the newly added object
+		 */
+		public final Object addExisting(final Object object) {
+			final Object result= fImplementation.put(object, object);
+			if (result != null)
+				return result;
+			return object;
+		}
+
+		/*
+		 * @see java.util.AbstractCollection#clear()
+		 */
+		public final void clear() {
+			fImplementation.clear();
+		}
+
+		/*
+		 * @see java.util.AbstractCollection#contains(java.lang.Object)
+		 */
+		public final boolean contains(final Object object) {
+			return fImplementation.containsKey(object);
+		}
+
+		/*
+		 * @see java.util.AbstractCollection#isEmpty()
+		 */
+		public final boolean isEmpty() {
+			return fImplementation.isEmpty();
+		}
+
+		/*
+		 * @see java.util.AbstractCollection#iterator()
+		 */
+		public final Iterator iterator() {
+			return fImplementation.keySet().iterator();
+		}
+
+		/*
+		 * @see java.util.AbstractCollection#remove(java.lang.Object)
+		 */
+		public final boolean remove(final Object object) {
+			return fImplementation.remove(object) == object;
+		}
+
+		/*
+		 * @see java.util.AbstractCollection#size()
+		 */
+		public final int size() {
+			return fImplementation.size();
+		}
+	}
 
 	/** The usage data */
 	private static final String DATA_USAGE= "us"; //$NON-NLS-1$
@@ -101,7 +177,7 @@ public final class SuperTypeConstraintsModel {
 	private final Collection fCastVariables= new ArrayList();
 
 	/** The set of constraint variables (element type: <code>ConstraintVariable2</code>) */
-	private final Set fConstraintVariables= new HashSet();
+	private final HashedSet fConstraintVariables= new HashedSet();
 
 	/** The set of type constraints (element type: <code>ITypeConstraint2</code>) */
 	private final Set fTypeConstraints= new HashSet();
@@ -113,7 +189,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param variable the associated constraint variable
 	 * @return the created cast variable
 	 */
-	public final CastVariable2 createCastVariable(final CastExpression expression, final TypeConstraintVariable2 variable) {
+	public final ConstraintVariable2 createCastVariable(final CastExpression expression, final TypeConstraintVariable2 variable) {
 		Assert.isNotNull(expression);
 		Assert.isNotNull(variable);
 		final ITypeBinding binding= expression.resolveTypeBinding();
@@ -126,31 +202,92 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
+	 * Creates an equality constraint.
+	 * 
+	 * @param left the left typeconstraint variable
+	 * @param right the right typeconstraint variable
+	 */
+	public final void createEqualsConstraint(final TypeConstraintVariable2 left, final TypeConstraintVariable2 right) {
+		if (left != null && right != null) {
+			final EquivalenceRepresentative first= left.getRepresentative();
+			final EquivalenceRepresentative second= right.getRepresentative();
+			if (first == null) {
+				if (second == null) {
+					final EquivalenceRepresentative representative= new EquivalenceRepresentative(left, right);
+					left.setRepresentative(representative);
+					right.setRepresentative(representative);
+				} else {
+					second.add(left);
+					left.setRepresentative(second);
+				}
+			} else {
+				if (second == null) {
+					first.add(right);
+					right.setRepresentative(first);
+				} else if (first == second)
+					return;
+				else {
+					final TypeConstraintVariable2[] elements= second.getElements();
+					first.addAll(elements);
+					for (int index= 0; index < elements.length; index++)
+						elements[index].setRepresentative(first);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Creates a new method parameter variable.
 	 * 
-	 * @param method the method
+	 * @param method the method binding
 	 * @param index the index of the parameter
 	 * @return the created method parameter variable
 	 */
-	public final ParameterTypeVariable2 createMethodParameterVariable(final IMethodBinding method, final int index) {
+	public final ConstraintVariable2 createMethodParameterVariable(final IMethodBinding method, final int index) {
 		Assert.isNotNull(method);
 		final ITypeBinding binding= method.getParameterTypes()[index];
-		if (isConstrainedType(binding)) {
-			final ParameterTypeVariable2 variable= new ParameterTypeVariable2(fEnvironment.create(binding), index, method);
-			fConstraintVariables.add(variable);
-			return variable;
+		if (isConstrainedType(binding))
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new ParameterTypeVariable2(fEnvironment.create(binding), index, method));
+		return null;
+	}
+
+	/**
+	 * Creates a plain type variable.
+	 * 
+	 * @param type the type binding
+	 * @return the created plain type variable
+	 */
+	public final ConstraintVariable2 createPlainTypeVariable(final ITypeBinding type) {
+		Assert.isNotNull(type);
+		if (isConstrainedType(type))
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new PlainTypeVariable2(fEnvironment.create(type)));
+		return null;
+	}
+
+	/**
+	 * Creates a new return type variable.
+	 * 
+	 * @param method the method binding
+	 * @return the created return type variable
+	 */
+	public final ConstraintVariable2 createReturnTypeVariable(final IMethodBinding method) {
+		Assert.isNotNull(method);
+		if (!method.isConstructor() && !method.isDefaultConstructor()) {
+			final ITypeBinding binding= method.getReturnType();
+			if (binding != null && isConstrainedType(binding))
+				return (ConstraintVariable2) fConstraintVariables.addExisting(new ReturnTypeVariable2(fEnvironment.create(binding), method));
 		}
 		return null;
 	}
 
 	/**
-	 * Creates a new simple type constraint.
+	 * Creates a subtype constraint.
 	 * 
 	 * @param left the left constraint variable
 	 * @param right the right constraint variable
-	 * @param operator the constraint operator
 	 */
-	protected final void createSimpleTypeConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right, final ConstraintOperator2 operator) {
+	public final void createSubtypeConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right) {
+		ConstraintOperator2 operator= ConstraintOperator2.createSubTypeOperator();
 		Assert.isNotNull(left);
 		Assert.isNotNull(right);
 		Assert.isNotNull(operator);
@@ -163,29 +300,16 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
-	 * Creates a subtype constraint.
-	 * 
-	 * @param left the left constraint variable
-	 * @param right the right constraint variable
-	 */
-	public final void createSubtypeConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right) {
-		createSimpleTypeConstraint(left, right, ConstraintOperator2.createSubTypeOperator());
-	}
-
-	/**
 	 * Creates a type variable.
 	 * 
 	 * @param type the type
 	 * @return the created type variable
 	 */
-	public final TypeVariable2 createTypeVariable(final Type type) {
+	public final ConstraintVariable2 createTypeVariable(final Type type) {
 		Assert.isNotNull(type);
 		final ITypeBinding binding= type.resolveBinding();
-		if (isConstrainedType(binding)) {
-			final TypeVariable2 variable= new TypeVariable2(fEnvironment.create(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(type), type));
-			fConstraintVariables.add(variable);
-			return variable;
-		}
+		if (isConstrainedType(binding))
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(fEnvironment.create(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(type), type)));
 		return null;
 	}
 
