@@ -89,6 +89,7 @@ public class StubUtility {
 					genJavaDocStub(desc, paramNames, retTypeSig, excTypes, buf);
 				}
 			}
+			buf.append('\n');
 		}
 		
 		if (Flags.isPublic(flags) || isConstructor || (declaringtype.isInterface() && !settings.noBody)) {
@@ -241,7 +242,7 @@ public class StubUtility {
 				buf.append(" * @throws "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
 			}
 		}
-		buf.append(" */\n"); //$NON-NLS-1$
+		buf.append(" */"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -283,7 +284,7 @@ public class StubUtility {
 		if (isDeprecated) {
 			buf.append(" * @deprecated\n"); //$NON-NLS-1$
 		}
-		buf.append(" */\n"); //$NON-NLS-1$
+		buf.append(" */"); //$NON-NLS-1$
 	}	
 	
 	

@@ -88,6 +88,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 			String desc= "Method " + meth.getElementName(); //$NON-NLS-1$
 			StubUtility.genJavaDocStub(desc, meth.getParameterNames(), meth.getReturnType(), meth.getExceptionTypes(), buf);
 		}
+		buf.append('\n');
 		return buf.toString();
 	}
 	
