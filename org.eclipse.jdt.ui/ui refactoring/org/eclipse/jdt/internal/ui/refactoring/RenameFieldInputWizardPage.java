@@ -69,7 +69,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 	}
 	
 	private String getRenameGetterLabel(){
-		String defaultLabel= "Rename getter";
+		String defaultLabel= "Rename &getter";
 		if (! isGetterRenamingEnabled())
 			return defaultLabel;
 		try {
@@ -77,7 +77,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 			if (! getter.exists())
 				return defaultLabel;
 			String getterSig= 	JavaElementUtil.createMethodSignature(getter);
-			return "Rename getter: \'" + getterSig + "\' to \'" + createNewGetterName() + "\'";
+			return "Rename &getter: \'" + getterSig + "\' to \'" + createNewGetterName() + "\'";
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 			return defaultLabel;			
@@ -89,7 +89,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 	}
 	
 	private String getRenameSetterLabel(){
-		String defaultLabel= "Rename setter";
+		String defaultLabel= "Rename &setter";
 		if (! isSetterRenamingEnabled())
 			return defaultLabel;
 		try {
@@ -97,7 +97,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 			if (! setter.exists())
 				return defaultLabel;
 			String setterSig= 	JavaElementUtil.createMethodSignature(setter);
-			return "Rename setter: \'" + setterSig + "\' to \'" + createNewSetterName() + "\'";
+			return "Rename &setter: \'" + setterSig + "\' to \'" + createNewSetterName() + "\'";
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 			return defaultLabel;			
