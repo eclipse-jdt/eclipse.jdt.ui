@@ -88,6 +88,7 @@ import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
@@ -345,24 +346,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Selects an member in the methods list or in the current hierarchy.
 	 */	
 	public void selectMember(IMember member) {
-		ICompilationUnit cu= member.getCompilationUnit();
-		if (cu != null && cu.isWorkingCopy()) {
-			member= (IMember) cu.getOriginal(member);
-			if (member == null) {
-				return;
-			}
-		}
 		if (member.getElementType() != IJavaElement.TYPE) {
-			if (fHierarchyLifeCycle.isReconciled() && cu != null) {
-				try {
-					member= (IMember) EditorUtility.getWorkingCopy(member);
-					if (member == null) {
-						return;
-					}
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-					return;
-				}
+			// methods are working copies
+			if (fHierarchyLifeCycle.isReconciled()) {
+				member= JavaModelUtil.toWorkingCopy(member);
 			}
 			Control methodControl= fMethodsViewer.getControl();
 			if (methodControl != null && !methodControl.isDisposed()) {
@@ -375,10 +362,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (viewerControl != null && !viewerControl.isDisposed()) {
 				viewerControl.setFocus();
 			}
-			getCurrentViewer().setSelection(new StructuredSelection(member), true);
+			// types are originals
+			member= JavaModelUtil.toOriginal(member);
+			
+			if (!member.equals(fSelectedType)) {
+				getCurrentViewer().setSelection(new StructuredSelection(member), true);
+			}
 		}	
-	}	
-
+	}
 
 	/**
 	 * @deprecated
