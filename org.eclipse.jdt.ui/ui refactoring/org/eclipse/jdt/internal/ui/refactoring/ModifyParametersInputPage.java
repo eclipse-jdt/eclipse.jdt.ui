@@ -1,8 +1,13 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -114,7 +119,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		gl.marginWidth= 0;
 		composite.setLayout(gl);
 		
-		fTableViewer= new TableViewer(composite, SWT.SINGLE | SWT.BORDER | SWT.HIDE_SELECTION |SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL);
+		fTableViewer= new TableViewer(composite, SWT.MULTI | SWT.BORDER | SWT.HIDE_SELECTION |SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL);
 		fTableViewer.setUseHashlookup(true);
 		fTableViewer.getTable().setHeaderVisible(true);
 		fTableViewer.getTable().setLinesVisible(true);
@@ -134,21 +139,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		fTableViewer.setSelection(new StructuredSelection(inputElems[0]));
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
 			public void selectionChanged(SelectionChangedEvent event){
-				ParameterInfo selected= getSelectedItem();
-				if (selected == null)
-					return;
-				if (doesMethodHaveOneParameter())
-					return; //disabled anyway
-				if (isFirst(selected)){
-					fUpButton.setEnabled(false);
-					fDownButton.setEnabled(true);
-				} else if (isLast(selected)){
-					fUpButton.setEnabled(true);
-					fDownButton.setEnabled(false);
-				} else{
-					fUpButton.setEnabled(true);
-					fDownButton.setEnabled(true);
-				}	
+				updateButtonsEnabledState();
 			}
 		});
 	}
@@ -197,20 +188,16 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		fTableViewer.setCellModifier(new ReorderParametersCellModifier());
 	}
 	
-	private boolean isFirst(ParameterInfo selected){
-		return getModifyParametersRefactoring().getNewParameterPosition(selected.oldName) == 0;
-	}
-	
-	private boolean isLast(ParameterInfo selected){
-		return getModifyParametersRefactoring().getNewParameterPosition(selected.oldName) == 
-					(getModifyParametersRefactoring().getParamaterPermutation().length - 1);
-	}
-	
-	private ParameterInfo getSelectedItem(){
-		ISelection delection= fTableViewer.getSelection();
-		if (! (delection instanceof IStructuredSelection))
-			return null;
-		return (ParameterInfo)((IStructuredSelection)delection).getFirstElement();
+	private ParameterInfo[] getSelectedItems(){
+		ISelection selection= fTableViewer.getSelection();
+		if (selection == null)
+			return new ParameterInfo[0];
+			
+		if (! (selection instanceof IStructuredSelection))
+			return new ParameterInfo[0];
+			
+		List selected= ((IStructuredSelection)selection).toList();
+		return (ParameterInfo[]) selected.toArray(new ParameterInfo[selected.size()]);
 	}
 	
 	private void createButtonComposite(Composite parent){
@@ -223,16 +210,14 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		fUpButton= createButton(buttonComposite, "Move &Up", true);
 		fDownButton= createButton(buttonComposite, "Move &Down", false);
 		
-		fUpButton.setEnabled(false);
-		if (doesMethodHaveOneParameter()){
-			fDownButton.setEnabled(false);
-		}
-	}
-	
-	private boolean doesMethodHaveOneParameter(){
-		return getModifyParametersRefactoring().getMethod().getParameterTypes().length == 1;
+		updateButtonsEnabledState();
 	}
 
+	private void updateButtonsEnabledState() {
+		fDownButton.setEnabled(canMoveDown());
+		fUpButton.setEnabled(canMoveUp());
+	}
+	
 	private Button createButton(Composite buttonComposite, String text, final boolean up) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -240,15 +225,20 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		button.setText(text);
 		button.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
-				ISelection selection= fTableViewer.getSelection();
-				if (selection == null)
+				ISelection savedSelection= fTableViewer.getSelection();
+				if (savedSelection == null)
 					return;
-				if (getSelectedItem() == null)
-					return;	
-				getModifyParametersRefactoring().setNewParameterOrder(move(up, getSelectedItem()));
+				if (getSelectedItems().length == 0)
+					return;
+
+				if (up)
+					setNewParameterOrder(moveUp());
+				else	
+					setNewParameterOrder(moveDown());
+					
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
-				fTableViewer.setSelection(selection);
+				fTableViewer.setSelection(savedSelection);
 				tableModified(getNewParameterNames());
 			}
 		});
@@ -281,31 +271,84 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		
 		return layout;
 	}
-	
-	private String[] move(boolean up, ParameterInfo element){
-		if (up)
-			return moveUp(element);
-		else
-			return moveDown(element);
+
+	private static List moveUp(List elements, List move) {
+		List res= new ArrayList(elements.size());
+		Object floating= null;
+		for(Iterator iter= elements.iterator(); iter.hasNext();){
+			Object curr= iter.next();
+			if (move.contains(curr)) {
+				res.add(curr);
+			} else {
+				if (floating != null)
+					res.add(floating);
+				floating= curr;
+			}
+		}
+		if (floating != null)
+			res.add(floating);
+		return res;
 	}
 	
-	private String[] moveUp(ParameterInfo element){
-		int position= getModifyParametersRefactoring().getNewParameterPosition(element.oldName);
-		Assert.isTrue(position > 0);
-		return swap(getModifyParametersRefactoring().getNewParameterOrder(), position - 1, position);
+	private ParameterInfo[] getTableElements() {
+		return (ParameterInfo[])fTableViewer.getInput();
 	}
 	
-	private String[] moveDown(ParameterInfo element){
-		int position= getModifyParametersRefactoring().getNewParameterPosition(element.oldName);
-		Assert.isTrue(position < getModifyParametersRefactoring().getParamaterPermutation().length - 1);
-		return swap(getModifyParametersRefactoring().getNewParameterOrder(), position + 1, position);
+	private List getSortedTableElements() {
+		List elems= Arrays.asList(getTableElements());
+		Collections.sort(elems, new ParameterInfoComparator(getModifyParametersRefactoring()));
+		return elems;
 	}
 	
-	private static String[] swap(String[] array, int p1, int p2){
-		String temp= array[p1];
-		array[p1]= array[p2];
-		array[p2]= temp;
-		return array;
+	private String[] moveUp() {
+		List toMoveUp= Arrays.asList(getSelectedItems());
+		List elems= getSortedTableElements();
+	
+		List moved= moveUp(elems, toMoveUp);
+	
+		return getNewNames(moved);
+	}
+	
+	private String[] moveDown() {
+		List toMoveDown= Arrays.asList(getSelectedItems());
+		List elems= getSortedTableElements();
+		
+		Collections.reverse(elems);
+		List moved= moveUp(elems, toMoveDown);
+		Collections.reverse(moved);
+		
+		return getNewNames(moved);
+	}
+	
+	private String[] getNewNames(List moved) {
+		return ParameterInfo.getNewNames((ParameterInfo[]) moved.toArray(new ParameterInfo[moved.size()]));
+	}
+	
+	private boolean canMoveUp() {
+		int[] indc= fTableViewer.getTable().getSelectionIndices();
+		if (indc.length == 0)
+			return false;
+		for (int i= 0; i < indc.length; i++) {
+			if (indc[i] != i) 
+				return true;
+		}
+		return false;
+	}
+	
+	private boolean canMoveDown() {
+		int[] indc= fTableViewer.getTable().getSelectionIndices();
+		if (indc.length == 0)
+			return false;
+		
+		for (int i= indc.length - 1, k= getTableElements().length - 1; i >= 0 ; i--, k--) {
+			if (indc[i] != k) 
+				return true;
+		}
+		return false;
+	}
+	
+	private void setNewParameterOrder(String[] newNames){
+		getModifyParametersRefactoring().setNewParameterOrder(newNames);
 	}
 	
 	private ModifyParametersRefactoring getModifyParametersRefactoring(){
@@ -370,6 +413,14 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 			this.oldName= oldName;
 			this.newName= newName;
 		}
+		
+		public static String[] getNewNames(ParameterInfo[] elems){
+			String[] result= new String[elems.length];
+			for (int i= 0; i < elems.length; i++) {
+				result[i]= elems[i].newName;
+			}
+			return result;
+		}
 	}
 	
 	private static class ParameterInfoContentProvider implements IStructuredContentProvider {
@@ -405,18 +456,31 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		}
 	}
 	
-	private static class ParameterInfoListSorter extends ViewerSorter{
+	private static class ParameterInfoComparator implements Comparator{
 		
 		private ModifyParametersRefactoring fRefactoring;
 		
-		ParameterInfoListSorter(ModifyParametersRefactoring ref){
+		ParameterInfoComparator(ModifyParametersRefactoring ref){
 			fRefactoring= ref;
+		}		
+		
+		public int compare(Object o1, Object o2) {
+			ParameterInfo param1= (ParameterInfo)o1;
+			ParameterInfo param2= (ParameterInfo)o2;
+			return fRefactoring.getNewParameterPosition(param1.oldName) - fRefactoring.getNewParameterPosition(param2.oldName);
+		}
+	}
+	
+	private static class ParameterInfoListSorter extends ViewerSorter{
+		
+		private Comparator fParameterInfoComparator;
+		
+		ParameterInfoListSorter(ModifyParametersRefactoring ref){
+			fParameterInfoComparator= new ParameterInfoComparator(ref);
 		}
 		
 		public int compare(Viewer viewer, Object e1, Object e2) {
-			ParameterInfo param1= (ParameterInfo)e1;
-			ParameterInfo param2= (ParameterInfo)e2;
-			return fRefactoring.getNewParameterPosition(param1.oldName) - fRefactoring.getNewParameterPosition(param2.oldName);
+			return fParameterInfoComparator.compare(e1, e2);
 		}
 	}
 	
