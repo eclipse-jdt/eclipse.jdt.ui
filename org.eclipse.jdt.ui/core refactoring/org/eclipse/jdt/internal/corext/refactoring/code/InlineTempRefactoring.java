@@ -12,11 +12,11 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -108,15 +107,17 @@ public class InlineTempRefactoring extends Refactoring {
 		
 		if (fTempDeclaration == null)
 			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
+
+		if (fTempDeclaration.getParent() instanceof MethodDeclaration)
+			return RefactoringStatus.createFatalErrorStatus("Cannot inline method parameters.");
 		
-		if (! isTempInitializedAtDeclaration())
+		if (fTempDeclaration.getParent() instanceof CatchClause)
+			return RefactoringStatus.createFatalErrorStatus("Cannot inline exceptions declared in 'catch' clauses.");
+		
+		if (fTempDeclaration.getInitializer() == null)
 			return RefactoringStatus.createFatalErrorStatus("Local variable '" + getTempName() + "' is not initialized at declaration.");
-		
+				
 		return checkAssignments();
-	}
-	
-	private boolean isTempInitializedAtDeclaration(){
-		return fTempDeclaration.getInitializer() != null;
 	}
 	
 	private RefactoringStatus checkAssignments() throws JavaModelException {
@@ -185,7 +186,6 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private String getInitializerSource() throws JavaModelException{
-		Assert.isTrue(isTempInitializedAtDeclaration());
 		int start= fTempDeclaration.getInitializer().getStartPosition();
 		int length= fTempDeclaration.getInitializer().getLength();
 		int end= start + length;

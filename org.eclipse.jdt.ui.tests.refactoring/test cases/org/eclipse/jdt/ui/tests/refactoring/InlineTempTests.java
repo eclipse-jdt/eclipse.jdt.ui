@@ -217,6 +217,14 @@ public class InlineTempTests extends RefactoringTest {
 	public void testFail6() throws Exception{
 		helper2();
 	}
+
+	public void testFail7() throws Exception{
+		helper2();
+	}
+
+	public void testFail8() throws Exception{
+		helper2();
+	}
 	
 }
 
