@@ -30,17 +30,26 @@ public class JavaColorManager implements IColorManager {
 	}
 	
 	protected void initializeColorMapping() {
-		put(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, new RGB(42, 127, 170));
-		put(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT, new RGB(42, 127, 170));
+		
+//		put(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, new RGB(42, 127, 170));
+//		put(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT, new RGB(42, 127, 170));
+		put(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, new RGB(63, 127, 95));
+		put(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT, new RGB(63, 127, 95));
+		
 		put(IJavaColorConstants.JAVA_KEYWORD, new RGB(127, 0, 85));
 		put(IJavaColorConstants.JAVA_TYPE, new RGB(127, 0, 85));
 		put(IJavaColorConstants.JAVA_STRING, new RGB(42, 0, 255));
 		put(IJavaColorConstants.JAVA_DEFAULT, new RGB(0, 0, 0));
 		
-		put(IJavaColorConstants.JAVADOC_KEYWORD, new RGB(127, 159, 95));
-		put(IJavaColorConstants.JAVADOC_TAG, new RGB(127, 159, 95));
-		put(IJavaColorConstants.JAVADOC_LINK, new RGB(159, 191, 95));
-		put(IJavaColorConstants.JAVADOC_DEFAULT, new RGB(63, 127, 95));
+//		put(IJavaColorConstants.JAVADOC_KEYWORD, new RGB(127, 159, 95));
+//		put(IJavaColorConstants.JAVADOC_TAG, new RGB(127, 159, 95));
+//		put(IJavaColorConstants.JAVADOC_LINK, new RGB(159, 191, 95));
+//		put(IJavaColorConstants.JAVADOC_DEFAULT, new RGB(63, 127, 95));
+		
+		put(IJavaColorConstants.JAVADOC_KEYWORD, new RGB(127, 159, 191));
+		put(IJavaColorConstants.JAVADOC_TAG, new RGB(127, 127, 159));
+		put(IJavaColorConstants.JAVADOC_LINK, new RGB(63, 63, 191));
+		put(IJavaColorConstants.JAVADOC_DEFAULT, new RGB(63, 95, 191));
 	}
 	
 	public void put(String key, RGB rgb) {
