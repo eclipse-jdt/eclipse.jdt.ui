@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
  
-import java.io.File;import java.io.IOException;import java.net.MalformedURLException;import java.net.URL;import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Map;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRunnable;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Platform;import org.eclipse.debug.core.DebugEvent;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IDebugEventListener;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.debug.core.ILauncher;import org.eclipse.debug.core.Launch;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.ISourceLocator;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.debug.ui.IDebugUIEventFilter;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.debug.core.DebugJavaUtils;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;import org.eclipse.jdt.internal.ui.launcher.JavaLaunchUtils;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jdt.launching.WorkspaceSourceLocator;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.viewers.IStructuredSelection;
+import java.io.File;import java.io.IOException;import java.net.MalformedURLException;import java.net.URL;import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Map;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRunnable;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Platform;import org.eclipse.debug.core.DebugEvent;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IDebugEventListener;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.debug.core.ILauncher;import org.eclipse.debug.core.Launch;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.ISourceLocator;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.debug.ui.IDebugUIEventFilter;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.debug.core.DebugJavaUtils;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;import org.eclipse.jdt.internal.ui.launcher.JavaLaunchUtils;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.ProjectSourceLocator;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.viewers.IStructuredSelection;
 
 public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebugEventListener {
 	
@@ -59,7 +59,6 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		}
 		
 		IJavaProject javaProject= JavaCore.create(page.getProject());
-		ISourceLocator locator= new WorkspaceSourceLocator(javaProject.getProject().getWorkspace());
 			
 		URL pluginInstallURL= JavaPlugin.getDefault().getDescriptor().getInstallURL();
 		URL jarURL = null;
@@ -88,7 +87,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 			}
 			
 			VMRunnerConfiguration config= new VMRunnerConfiguration("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain", classPath);
-			ISourceLocator sl = new WorkspaceSourceLocator(p.getProject().getWorkspace());
+			ISourceLocator sl= new ProjectSourceLocator(p);
 			try {
 				IPath outputLocation =	p.getOutputLocation();
 				IResource outputFolder = p.getProject().getWorkspace().getRoot().findMember(outputLocation);

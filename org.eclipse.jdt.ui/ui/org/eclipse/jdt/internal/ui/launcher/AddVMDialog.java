@@ -360,7 +360,7 @@ public class AddVMDialog extends StatusDialog {
 	private void browseForInstallDir() {
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
 		dialog.setFilterPath(fJDKRoot.getText());
-		dialog.setMessage("Select the root directory the JRE Installation");
+		dialog.setMessage("Select the root directory of the JRE installation");
 		String newPath= dialog.open();
 		if  (newPath != null)
 			fJDKRoot.setText(newPath);
@@ -369,7 +369,7 @@ public class AddVMDialog extends StatusDialog {
 	private void browseForSystemLibrary() {
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setFilterPath(fSystemLibrary.getText());
-		dialog.setText("Select the library JAR file for the JRE Installation");
+		dialog.setText("Select the library JAR file for the JRE installation");
 		dialog.setFilterExtensions(new String[] { "*.jar", "*.zip"});
 		String newPath= dialog.open();
 		if  (newPath != null)
