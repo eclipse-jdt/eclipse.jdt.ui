@@ -22,7 +22,7 @@ public class BreakpointLocationVerifier {
 
 		Scanner scanner= new Scanner();
 		boolean found= false;
-		int start= 0, length= 0, token= 0;
+		int start= 0, length= 0, token= 0, lastToken= 0;
 
 		while (!found) {
 			try {
@@ -31,19 +31,48 @@ public class BreakpointLocationVerifier {
 				char[] txt= doc.get(start, length).toCharArray();
 				scanner.setSourceBuffer(txt);
 				token= scanner.getNextToken();
+				lastToken= 0;
 
 				while (token != TerminalSymbols.TokenNameEOF) {
-					if (token == TerminalSymbols.TokenNamebreak ||
-						token == TerminalSymbols.TokenNamecontinue ||
-						token == TerminalSymbols.TokenNameIdentifier ||
-						token == TerminalSymbols.TokenNamereturn ||
-						token == TerminalSymbols.TokenNamethis||
-						token == TerminalSymbols.TokenNamesuper) {
+					if (token == TerminalSymbols.TokenNameIdentifier) {
+						if (lastToken == TerminalSymbols.TokenNameIdentifier || isPrimitiveTypeToken(lastToken)
+						|| lastToken == TerminalSymbols.TokenNameRBRACKET) {
+							//var declaration..is there initialization
+							lastToken= token;
+							token= scanner.getNextToken();
+							if (token == TerminalSymbols.TokenNameSEMICOLON) {
+								//no init
+								break;
+							} else if (token == TerminalSymbols.TokenNameEQUAL) {
+								found= true;
+								break;
+							}
+							continue;
+						}
+					} else if (isNonIdentifierValidToken(token)) {
 						found= true;
 						break;
-					} else {
-						token= scanner.getNextToken();
+					} else if (lastToken == TerminalSymbols.TokenNameIdentifier 
+								&& token != TerminalSymbols.TokenNameLBRACKET) {
+						found= true;
+						break;
+					} else if (lastToken == TerminalSymbols.TokenNameLBRACKET 
+								&& token == TerminalSymbols.TokenNameRBRACKET) {
+							//var declaration..is there initialization
+							lastToken= token;
+							token= scanner.getNextToken();
+							if (token == TerminalSymbols.TokenNameSEMICOLON) {
+								//no init
+								break;
+							} else if (token == TerminalSymbols.TokenNameEQUAL) {
+								found= true;
+								break;
+							}
+							continue;
 					}
+						
+					lastToken= token;
+					token= scanner.getNextToken();
 				}
 				if (!found) {
 					lineNumber++;
@@ -56,5 +85,35 @@ public class BreakpointLocationVerifier {
 		}
 		// add 1 to the line number - Document is 0 based, JDI is 1 based
 		return lineNumber + 1;
+	}
+	
+	
+	protected boolean isPrimitiveTypeToken(int token) {
+		switch(token) {
+			case TerminalSymbols.TokenNameboolean:
+			case TerminalSymbols.TokenNameint:
+			case TerminalSymbols.TokenNamechar:
+			case TerminalSymbols.TokenNamebyte:
+			case TerminalSymbols.TokenNamefloat:
+			case TerminalSymbols.TokenNamedouble:
+			case TerminalSymbols.TokenNamelong:
+			case TerminalSymbols.TokenNameshort:
+				return true;
+			default : 
+				return false;
+		}		
+	}
+	
+	protected boolean isNonIdentifierValidToken(int token) {
+		switch(token) {
+			case TerminalSymbols.TokenNamebreak:
+			case TerminalSymbols.TokenNamecontinue:
+			case TerminalSymbols.TokenNamereturn:
+			case TerminalSymbols.TokenNamethis:
+			case TerminalSymbols.TokenNamesuper:
+				return true;	
+			default:
+				return false;
+		}
 	}
 }
