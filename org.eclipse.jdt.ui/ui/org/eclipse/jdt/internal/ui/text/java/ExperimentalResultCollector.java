@@ -66,10 +66,6 @@ public class ExperimentalResultCollector extends ResultCollector {
 		char[][] parameterTypePackageNames, char[][] parameterTypeNames, char[][] parameterNames,
 		char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance)
 	{		
-		JavaCompletionProposal original= super.createMethodCallCompletion(declaringTypeName, name,
-			parameterTypePackageNames, parameterTypeNames, parameterNames, returnTypeName,
-			completionName, modifiers, start, end, relevance);
-		
 		// handle empty code completion
 		if ((completionName.length == 0) || ((completionName.length == 1) && completionName[0] == ')'))
 			return super.createMethodCallCompletion(declaringTypeName, name,
@@ -86,7 +82,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS)) {
 			return new ParameterGuessingProposal(
-				new StringBuffer().append(name).append('(').toString(), start, end - start, getImage(getMemberDescriptor(modifiers)), getMethodDisplayString(declaringTypeName, completionName, parameterTypeNames, parameterNames, returnTypeName).toString(), fTextViewer, relevance,
+				new StringBuffer().append(name).append('(').toString(), start, end - start, getImage(getMemberDescriptor(modifiers)), getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName).toString(), fTextViewer, relevance,
 				name, parameterTypePackageNames, parameterTypeNames, parameterNames, 
 				fCodeAssistOffset, fCompilationUnit);
 				
@@ -120,7 +116,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 				lengths= new int[0];				
 			}
 			
-			ExperimentalProposal experimental= new ExperimentalProposal(buffer.toString(), start, end - start, original.getImage(), original.getDisplayString(), offsets, lengths, fTextViewer, relevance);
+			ExperimentalProposal experimental= new ExperimentalProposal(buffer.toString(), start, end - start, getImage(getMemberDescriptor(modifiers)), getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName).toString(), offsets, lengths, fTextViewer, relevance);
 			return experimental;
 		}
 	}

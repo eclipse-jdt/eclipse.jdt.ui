@@ -218,13 +218,13 @@ public final class SignatureUtil {
 					if (isReturnType)
 						res.append(OBJECT_SIGNATURE); // return type is at least Object
 					else
-						res.append(replaceTypeVariableBySingleBound(signature, pos + 1, end - pos, methodTypeDecls));
+						res.append(replaceTypeVariableBySingleBound(signature, pos + 1, end, methodTypeDecls));
 					pos= end + 1;
 					break;
 				case Signature.C_EXTENDS:
 					end= Util.scanTypeSignature(signature, pos + 1);
 					if (isReturnType)
-						res.append(replaceTypeVariableBySingleBound(signature, pos + 1, end - pos, methodTypeDecls));
+						res.append(replaceTypeVariableBySingleBound(signature, pos + 1, end, methodTypeDecls));
 					else
 						res.append(NULL_TYPE_SIGNATURE);
 					pos= end + 1;
