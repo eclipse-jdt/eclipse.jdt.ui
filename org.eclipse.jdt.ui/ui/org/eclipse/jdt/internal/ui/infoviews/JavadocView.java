@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.infoviews;
 
 import java.io.Reader;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
@@ -23,6 +24,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -33,6 +35,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.Document;
@@ -42,6 +45,7 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.actions.ActionFactory;
@@ -53,8 +57,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
@@ -69,8 +74,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  */
 public class JavadocView extends AbstractInfoView {
 
-	private static final String PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW= "org.eclipse.jdt.ui.browserWidgetInJavadocView"; //$NON-NLS-1$
-	// PreferenceConstants.APPEARANCE_BROWSER_WIDGET_IN_JAVADOC_VIEW;
 
 	/** Flags used to render a label in the text widget. */
 	private static final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
@@ -221,26 +224,20 @@ public class JavadocView extends AbstractInfoView {
 	 * @see AbstractInfoView#internalCreatePartControl(Composite)
 	 */
 	protected void internalCreatePartControl(Composite parent) {
-		fIsUsingBrowserWidget= JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW);
-		
-		if (fIsUsingBrowserWidget) {
-			try {
-				fBrowser= new Browser(parent, SWT.NONE);
-			} catch (SWTError er) {
-				/* The Browser widget throws an SWTError if it fails to
-				 * instantiate properly. Application code should catch
-				 * this SWTError and disable any feature requiring the
-				 * Browser widget.
-				 * Platform requirements for the SWT Browser widget are available
-				 * from the SWT FAQ web site. 
-				 */
-				fIsUsingBrowserWidget= false;
-				String title= InfoViewMessages.getString("JavadocView.error.noBrowser.title"); //$NON-NLS-1$
-				String message= InfoViewMessages.getString("JavadocView.error.noBrowser.message"); //$NON-NLS-1$
-				MessageDialog.openError(parent.getShell(), title, message);
-			}
-		}
-		if (!fIsUsingBrowserWidget) {
+		try {
+			fBrowser= new Browser(parent, SWT.NONE);
+		} catch (SWTError er) {
+			/* The Browser widget throws an SWTError if it fails to
+			 * instantiate properly. Application code should catch
+			 * this SWTError and disable any feature requiring the
+			 * Browser widget.
+			 * Platform requirements for the SWT Browser widget are available
+			 * from the SWT FAQ web site. 
+			 */
+			String title= InfoViewMessages.getString("JavadocView.error.noBrowser.title"); //$NON-NLS-1$
+			String message= InfoViewMessages.getString("JavadocView.error.noBrowser.message"); //$NON-NLS-1$
+			MessageDialog.openError(parent.getShell(), title, message);
+			
 			fText= new StyledText(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 			fText.setEditable(false);
 			fPresenter= new HTMLTextPresenter(false);
