@@ -153,8 +153,11 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		int offset= partition.getOffset();
 		int length= partition.getLength();
 
-		if (command.offset == offset)
+		if (command.offset == offset) {
+			// we are really just before the string partition -> feet the event through the java indenter
+			new JavaAutoIndentStrategy(fPartitioning).customizeDocumentCommand(document, command);
 			return;
+		}
 		
 		if (command.offset == offset + length && document.getChar(offset + length - 1) == '\"')
 			return;
