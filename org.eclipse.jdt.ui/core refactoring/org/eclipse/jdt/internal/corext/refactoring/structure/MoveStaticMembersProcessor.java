@@ -819,7 +819,12 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	
 	private ITypeBinding getDestinationBinding() throws JavaModelException {
 		ASTNode node= NodeFinder.perform(fTarget.getRoot(), fDestinationType.getNameRange());
-		return (ITypeBinding)((SimpleName)node).resolveBinding();
+		if (!(node instanceof SimpleName))
+			return null;
+		IBinding binding= ((SimpleName)node).resolveBinding();
+		if (!(binding instanceof ITypeBinding))
+			return null;
+		return (ITypeBinding)binding;
 	}
 	
 	private ITypeBinding getSourceBinding() throws JavaModelException {
