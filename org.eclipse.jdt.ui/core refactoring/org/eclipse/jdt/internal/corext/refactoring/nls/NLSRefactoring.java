@@ -802,7 +802,7 @@ public class NLSRefactoring extends Refactoring {
 		return JavaCore.getOptions();
 	}
 	
-	private StringBuffer createClass() throws JavaModelException{
+	private StringBuffer createClass() throws CoreException{
 		String ld= fgLineDelimiter; //want shorter name
 		StringBuffer b= new StringBuffer();
 		//XXX should the class be public?
@@ -835,28 +835,51 @@ public class NLSRefactoring extends Refactoring {
 		return "RESOURCE_BUNDLE";//$NON-NLS-1$
 	}
 	
-	private StringBuffer createConstructor(){
-		String ld= fgLineDelimiter; //want shorter name
-		StringBuffer b= new StringBuffer();
-		b.append("private ").append(fAccessorClassName).append("() {").append(ld) //$NON-NLS-2$ //$NON-NLS-1$
-		 .append("}").append(ld); //$NON-NLS-1$
-		return b;
+	private String createConstructor() throws CoreException{
+		String constructorBody= StubUtility.getMethodBodyContent(true, fCu.getJavaProject(), fAccessorClassName, fAccessorClassName, ""); //$NON-NLS-1$
+		if (constructorBody == null)
+			constructorBody= ""; //$NON-NLS-1$
+		return createNewConstructorComment() + "private " + fAccessorClassName + "(){" +  //$NON-NLS-2$//$NON-NLS-1$
+				fgLineDelimiter + constructorBody + fgLineDelimiter + '}';
 	}
 	
-	private StringBuffer createGetStringMethod(){
-		String ld= fgLineDelimiter; //want shorter name
-		StringBuffer b= new StringBuffer();
-		b.append("public static String getString(String key) {").append(ld) //$NON-NLS-1$
-		 .append("try {").append(ld) //$NON-NLS-1$
-		 .append("return ") //$NON-NLS-1$
-		 .append(getResourceBundleConstantName())
-		 .append(".getString(key);").append(ld) //$NON-NLS-1$
-		 .append("} catch (MissingResourceException e) {").append(ld) //$NON-NLS-1$
-		 .append("return '!' + key + '!';").append(ld) //$NON-NLS-1$
-		 .append("}").append(ld) //$NON-NLS-1$
-		 .append("}").append(ld); //$NON-NLS-1$
-		return b;
+	private String createNewConstructorComment() throws CoreException {
+		if (fCodeGenerationSettings.createComments){
+			String comment= StubUtility.getMethodComment(fCu, fAccessorClassName, fAccessorClassName, new String[0], new String[0], null, null);
+			if (comment == null)
+				return ""; //$NON-NLS-1$
+			return comment;
+		}else
+			return "";//$NON-NLS-1$
 	}
+
+	private String createGetStringMethod() throws CoreException{
+		String bodyStatement = 	new StringBuffer()
+		.append("try {").append(fgLineDelimiter) //$NON-NLS-1$
+		.append("return ") //$NON-NLS-1$
+		.append(getResourceBundleConstantName())
+		.append(".getString(key);").append(fgLineDelimiter) //$NON-NLS-1$
+		.append("} catch (MissingResourceException e) {").append(fgLineDelimiter) //$NON-NLS-1$
+		.append("return '!' + key + '!';").append(fgLineDelimiter) //$NON-NLS-1$
+		.append("}").toString(); //$NON-NLS-1$
+		
+		String methodBody= StubUtility.getMethodBodyContent(false, fCu.getJavaProject(), fAccessorClassName, "getString", bodyStatement); //$NON-NLS-1$
+		if (methodBody == null)
+			methodBody= "";  //$NON-NLS-1$
+		return createNewGetStringMethodComment() + "public static String getString(String key) {"  //$NON-NLS-2$//$NON-NLS-1$
+						+ fgLineDelimiter + methodBody + fgLineDelimiter + '}';
+	}
+
+	private String createNewGetStringMethodComment() throws CoreException {
+		if (fCodeGenerationSettings.createComments){
+			String comment= StubUtility.getMethodComment(fCu, fAccessorClassName, "getString", new String[]{"key"}, new String[0], "QString;", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (comment == null)
+				return "";//$NON-NLS-1$
+			return comment;	
+		}else
+			return "";//$NON-NLS-1$
+	}
+
 	
 	//together with the .properties extension
 	private String getPropertyFileName() throws JavaModelException{
