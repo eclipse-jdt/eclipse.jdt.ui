@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -27,6 +29,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -73,6 +76,8 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	private static final String PREF_PB_SYNTHETIC_ACCESS_EMULATION= JavaCore.COMPILER_PB_SYNTHETIC_ACCESS_EMULATION;
 	private static final String PREF_PB_NON_EXTERNALIZED_STRINGS= JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL;
 	private static final String PREF_PB_ASSERT_AS_IDENTIFIER= JavaCore.COMPILER_PB_ASSERT_IDENTIFIER;
+	private static final String PREF_PB_MAX_PER_UNIT= JavaCore.COMPILER_PB_MAX_PER_UNIT;
+
 	private static final String PREF_SOURCE_COMPATIBILITY= JavaCore.COMPILER_SOURCE;
 	private static final String PREF_COMPLIANCE= JavaCore.COMPILER_COMPLIANCE;
 
@@ -103,7 +108,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 			PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_UNREACHABLE_CODE, PREF_PB_INVALID_IMPORT, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
 			PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
 			PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
-			PREF_PB_ASSERT_AS_IDENTIFIER, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE
+			PREF_PB_ASSERT_AS_IDENTIFIER, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, PREF_PB_MAX_PER_UNIT
 		};	
 	}
 
@@ -149,8 +154,10 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 
 	private ArrayList fCheckBoxes;
 	private ArrayList fComboBoxes;
+	private ArrayList fTextBoxes;
 	
 	private SelectionListener fSelectionListener;
+	private ModifyListener fTextModifyListener;
 	
 	private ArrayList fComplianceControls;
 
@@ -163,6 +170,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		
 		fCheckBoxes= new ArrayList();
 		fComboBoxes= new ArrayList();
+		fTextBoxes= new ArrayList(2); 
 		
 		fComplianceControls= new ArrayList();
 		
@@ -174,6 +182,11 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 			}
 		};
 		
+		fTextModifyListener= new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				textChanged((Text) e.widget);
+			}
+		};
 	}
 	
 	/**
@@ -274,6 +287,10 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_non_externalized_strings.label"); //$NON-NLS-1$
 		addComboBox(warningsComposite, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= JavaUIMessages.getString("CompilerPreferencePage.pb_max_per_unit.label"); //$NON-NLS-1$
+		addTextField(warningsComposite, label, PREF_PB_MAX_PER_UNIT);
+
 		
 		return warningsComposite;
 	}
@@ -395,7 +412,30 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		comboBox.select(data.getSelection(currValue));
 		
 		fComboBoxes.add(comboBox);
+	}
+	
+	private Text addTextField(Composite parent, String label, String key) {	
+		Label labelControl= new Label(parent, SWT.NONE);
+		labelControl.setText(label);
+		labelControl.setLayoutData(new GridData());
+				
+		Text textBox= new Text(parent, SWT.BORDER | SWT.SINGLE | SWT.RIGHT);
+		textBox.setData(key);
+		textBox.setLayoutData(new GridData());
+		
+		String currValue= (String) fWorkingValues.get(key);	
+		textBox.setText(currValue);
+		textBox.setTextLimit(6);
+		textBox.addModifyListener(fTextModifyListener);
+
+		GridData gd= new GridData();
+		gd.widthHint= convertWidthInCharsToPixels(8);
+		textBox.setLayoutData(gd);
+
+		fTextBoxes.add(textBox);
+		return textBox;
 	}	
+	
 	
 	private void controlChanged(Widget widget) {
 		ControlData data= (ControlData) widget.getData();
@@ -411,6 +451,13 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		
 		validateSettings(data.getKey(), newValue);
 	}
+	
+	private void textChanged(Text textControl) {
+		String key= (String) textControl.getData();
+		String number= textControl.getText();
+		fWorkingValues.put(key, number);
+		validateSettings(key, number);
+	}	
 
 	private boolean checkValue(String key, String value) {
 		return value.equals(fWorkingValues.get(key));
@@ -433,7 +480,8 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 				}
 			} else if (!PREF_SOURCE_COMPATIBILITY.equals(changedKey) &&
 					!PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey) &&
-					!PREF_PB_ASSERT_AS_IDENTIFIER.equals(changedKey)) {
+					!PREF_PB_ASSERT_AS_IDENTIFIER.equals(changedKey) &&
+					!PREF_PB_MAX_PER_UNIT.equals(changedKey)) {
 				return;
 			}
 		} else {
@@ -464,9 +512,27 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 				status.setError(JavaUIMessages.getString("CompilerPreferencePage.src14tgt14.error")); //$NON-NLS-1$
 				return status;
 			}
-		}		
+		}
+		String maxNumberProblems= (String) fWorkingValues.get(PREF_PB_MAX_PER_UNIT);
+		return validatePositiveNumber(maxNumberProblems);
+	}
+	
+	private IStatus validatePositiveNumber(String number) {
+		StatusInfo status= new StatusInfo();
+		if (number.length() == 0) {
+			status.setError(JavaUIMessages.getString("CompilerPreferencePage.empty_input")); //$NON-NLS-1$
+		} else {
+			try {
+				int value= Integer.parseInt(number);
+				if (value <= 0) {
+					status.setError(JavaUIMessages.getFormattedString("CompilerPreferencePage.invalid_input", number)); //$NON-NLS-1$
+				}
+			} catch (NumberFormatException e) {
+				status.setError(JavaUIMessages.getFormattedString("CompilerPreferencePage.invalid_input", number)); //$NON-NLS-1$
+			}
+		}
 		return status;
-	}		
+	}
 
 	/*
 	 * Update the compliance controls' enable state
@@ -605,8 +671,14 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 					
 			String currValue= (String) fWorkingValues.get(data.getKey());	
 			curr.select(data.getSelection(currValue));			
+		}
+		for (int i= fTextBoxes.size() - 1; i >= 0; i--) {
+			Text curr= (Text) fTextBoxes.get(i);
+			String key= (String) curr.getData();
+			
+			String currValue= (String) fWorkingValues.get(key);
+			curr.setText(currValue);
 		}		
-		
 	}
 	
 	private void updateStatus(IStatus status) {
@@ -615,5 +687,3 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	}
 
 }
-
-
