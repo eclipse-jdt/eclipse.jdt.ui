@@ -1096,6 +1096,12 @@
 			definitionId="org.eclipse.jdt.ui.edit.text.java.pull.up"
 			retarget="true" />
 
+		<action id="org.eclipse.jdt.ui.actions.PushDown"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup"
+      		label="%Refactoring.pushDownAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.push.down"
+			retarget="true" />
+
 		<!-- coding group  -->
 			
 		<action id="org.eclipse.jdt.ui.actions.SelfEncapsulateField"
@@ -1660,6 +1666,11 @@
 		description= "%ActionDefinition.pullUp.description"
 	/>
 	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.push.down"
+		name= "%ActionDefinition.pushDown.name"
+		description= "%ActionDefinition.pushDown.description"
+	/>
+	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.rename.element"
 		name= "%ActionDefinition.renameElement.name"
 		description= "%ActionDefinition.renameElement.description"
@@ -1905,6 +1916,7 @@
 		<accelerator key="Ctrl+Shift+Y" id="org.eclipse.jdt.ui.edit.text.java.refactor.redo" />
 		<accelerator key="Ctrl+Shift+Z" id="org.eclipse.jdt.ui.edit.text.java.refactor.undo" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.push.down" />
 		<accelerator key="Alt+Shift+R" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
 		<accelerator key="Alt+Shift+V" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
@@ -1992,6 +2004,7 @@
 		<accelerator key="Ctrl+Shift+Y" id="org.eclipse.jdt.ui.edit.text.java.refactor.redo" />
 		<accelerator key="Ctrl+Shift+Z" id="org.eclipse.jdt.ui.edit.text.java.refactor.undo" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.push.down" />
 		<accelerator key="Alt+Shift+R" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
 		<accelerator key="Alt+Shift+V" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
