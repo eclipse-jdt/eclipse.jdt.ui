@@ -39,7 +39,6 @@ public class RenameTypeTests extends RefactoringTest {
 	private static final Class clazz= RenameTypeTests.class;
 	private static final String REFACTORING_PATH= "RenameType/";
 	
-	private static final boolean BUG_83593_core_rename_enum_cu= true;
 	private static final boolean BUG_83012_core_annotation_search= true;
 	
 	public RenameTypeTests(String name) {
@@ -1080,9 +1079,6 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testEnum1() throws Exception {		
-		if (BUG_83593_core_rename_enum_cu)
-			return;
-		
 		IPackageFragment p2= getRoot().createPackageFragment("p2", true, null);
 		String folder= "p2/";
 		String type= "A";
@@ -1094,9 +1090,6 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 
 	public void testEnum2() throws Exception {
-		if (BUG_83593_core_rename_enum_cu)
-			return;
-		
 		helper2("A", "B");
 	}
 	
@@ -1111,9 +1104,6 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testEnum5() throws Exception {
-		if (BUG_83593_core_rename_enum_cu)
-			return;
-		
 		helper2("A", "B");
 	}
 	
