@@ -438,7 +438,7 @@ public class StubUtility {
 	 */
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
 		String retType= method.isConstructor() ? null : method.getReturnType();
-		String[] paramNames= suggestArgumentNames(method.getJavaProject(), method.getParameterNames());
+		String[] paramNames= method.getParameterNames();
 		
 		return getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
 			method.getElementName(), paramNames, method.getExceptionTypes(), retType, overridden, lineDelimiter);
