@@ -57,7 +57,7 @@ class PackageSelectionStringButtonAdapter implements IStringButtonAdapter {
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(field.getLabelControl(null).getShell(),
 			new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
-		dialog.setIgnoreCase(false);
+		dialog.setIgnoreCase(true);
 
 		dialog.setTitle(fTitle);
 		dialog.setMessage(fMessage);
