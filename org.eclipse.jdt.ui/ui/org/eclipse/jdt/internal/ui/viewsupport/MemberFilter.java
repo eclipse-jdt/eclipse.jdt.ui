@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.typehierarchy;
+package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -17,15 +17,14 @@ import org.eclipse.jdt.core.JavaModelException;
  * Filter for the methods viewer.
  * Changing a filter property does not trigger a refiltering of the viewer
  */
-public class MethodsViewerFilter extends ViewerFilter {
-	
+public class MemberFilter extends ViewerFilter {
+
 	public static final int FILTER_NONPUBLIC= 1;
 	public static final int FILTER_STATIC= 2;
 	public static final int FILTER_FIELDS= 4;
 	
 	private int fFilterProperties;
-	
-	
+
 	/**
 	 * Modifies filter and add a property to filter for
 	 */

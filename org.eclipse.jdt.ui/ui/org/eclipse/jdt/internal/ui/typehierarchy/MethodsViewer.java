@@ -36,9 +36,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
@@ -47,6 +45,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterActionGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
@@ -57,16 +56,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
  */
 public class MethodsViewer extends ProblemTableViewer {
 	
-	private static final String TAG_HIDEFIELDS= "hidefields"; //$NON-NLS-1$
-	private static final String TAG_HIDESTATIC= "hidestatic"; //$NON-NLS-1$
-	private static final String TAG_HIDENONPUBLIC= "hidenonpublic"; //$NON-NLS-1$
 	private static final String TAG_SHOWINHERITED= "showinherited";		 //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "mv_vertical_scroll";		 //$NON-NLS-1$
 	
 	private static final int LABEL_BASEFLAGS= StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS;
 	
-	private MethodsViewerFilterAction[] fFilterActions;
-	private MethodsViewerFilter fFilter;
+	private MemberFilterActionGroup fMemberFilterActionGroup;
 	
 	private JavaUILabelProvider fLabelProvider;
 		
@@ -96,40 +91,8 @@ public class MethodsViewer extends ProblemTableViewer {
 				fOpen.run();
 			}
 		});
-				
-		fFilter= new MethodsViewerFilter();
 		
-		// fields
-		String title= TypeHierarchyMessages.getString("MethodsViewer.hide_fields.label"); //$NON-NLS-1$
-		String helpContext= IJavaHelpContextIds.FILTER_FIELDS_ACTION;
-		MethodsViewerFilterAction hideFields= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_FIELDS, helpContext, false);
-		hideFields.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.description")); //$NON-NLS-1$
-		hideFields.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.checked")); //$NON-NLS-1$
-		hideFields.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(hideFields, "fields_co.gif"); //$NON-NLS-1$
-		
-		// static
-		title= TypeHierarchyMessages.getString("MethodsViewer.hide_static.label"); //$NON-NLS-1$
-		helpContext= IJavaHelpContextIds.FILTER_STATIC_ACTION;
-		MethodsViewerFilterAction hideStatic= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_STATIC, helpContext, false);
-		hideStatic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_static.description")); //$NON-NLS-1$
-		hideStatic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.checked")); //$NON-NLS-1$
-		hideStatic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(hideStatic, "static_co.gif"); //$NON-NLS-1$
-		
-		// non-public
-		title= TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.label"); //$NON-NLS-1$
-		helpContext= IJavaHelpContextIds.FILTER_PUBLIC_ACTION;
-		MethodsViewerFilterAction hideNonPublic= new MethodsViewerFilterAction(this, title, MethodsViewerFilter.FILTER_NONPUBLIC, helpContext, false);
-		hideNonPublic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.description")); //$NON-NLS-1$
-		hideNonPublic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.checked")); //$NON-NLS-1$
-		hideNonPublic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(hideNonPublic, "public_co.gif"); //$NON-NLS-1$
-		
-		// order corresponds to order in toolbar
-		fFilterActions= new MethodsViewerFilterAction[] { hideFields, hideStatic, hideNonPublic };
-		
-		addFilter(fFilter);
+		fMemberFilterActionGroup= new MemberFilterActionGroup(this, "HierarchyMethodView");
 		
 		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);
 		showInheritedMethods(false);
@@ -180,36 +143,11 @@ public class MethodsViewer extends ProblemTableViewer {
 	}
 
 	/**
-	 * Filters the method list
-	 */	
-	public void setMemberFilter(int filterProperty, boolean set) {
-		if (set) {
-			fFilter.addFilter(filterProperty);
-		} else {
-			fFilter.removeFilter(filterProperty);
-		}
-		for (int i= 0; i < fFilterActions.length; i++) {
-			if (fFilterActions[i].getFilterProperty() == filterProperty) {
-				fFilterActions[i].setChecked(set);
-			}
-		}
-		refresh();
-	}
-
-	/**
-	 * Returns <code>true</code> if the given filter is set.
-	 */	
-	public boolean hasMemberFilter(int filterProperty) {
-		return fFilter.hasFilter(filterProperty);
-	}
-	
-	/**
 	 * Saves the state of the filter actions
 	 */
 	public void saveState(IMemento memento) {
-		memento.putString(TAG_HIDEFIELDS, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_FIELDS)));
-		memento.putString(TAG_HIDESTATIC, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_STATIC)));
-		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_NONPUBLIC)));
+		fMemberFilterActionGroup.saveState(memento);
+		
 		memento.putString(TAG_SHOWINHERITED, String.valueOf(isShowInheritedMethods()));
 
 		ScrollBar bar= getTable().getVerticalBar();
@@ -221,14 +159,9 @@ public class MethodsViewer extends ProblemTableViewer {
 	 * Restores the state of the filter actions
 	 */	
 	public void restoreState(IMemento memento) {
-		boolean set= Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue();
-		setMemberFilter(MethodsViewerFilter.FILTER_FIELDS, set);
-		set= Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue();
-		setMemberFilter(MethodsViewerFilter.FILTER_STATIC, set);
-		set= Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue();
-		setMemberFilter(MethodsViewerFilter.FILTER_NONPUBLIC, set);		
+		fMemberFilterActionGroup.restoreState(memento);
 		
-		set= Boolean.valueOf(memento.getString(TAG_SHOWINHERITED)).booleanValue();
+		boolean set= Boolean.valueOf(memento.getString(TAG_SHOWINHERITED)).booleanValue();
 		showInheritedMethods(set);
 		
 		ScrollBar bar= getTable().getVerticalBar();
@@ -271,9 +204,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	public void contributeToToolBar(ToolBarManager tbm) {
 		tbm.add(fShowInheritedMembersAction);
 		tbm.add(new Separator());
-		tbm.add(fFilterActions[0]); // fields
-		tbm.add(fFilterActions[1]); // static
-		tbm.add(fFilterActions[2]); // public
+		fMemberFilterActionGroup.contributeToToolBar(tbm);
 	}
 
 	/*

@@ -2,25 +2,26 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.typehierarchy;
+package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.jface.action.Action;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Action used to enable / disable method filter properties
  */
-public class MethodsViewerFilterAction extends Action {
+public class MemberFilterAction extends Action {
 
 	private int fFilterProperty;
-	private MethodsViewer fViewer;
+	private MemberFilterActionGroup fFilterActionGroup;
 	
 	private String fCheckedTooltip;
 	private String fUncheckedTooltip;
 	
-	public MethodsViewerFilterAction(MethodsViewer viewer, String title, int property, String contextHelpId, boolean initValue) {
+	public MemberFilterAction(MemberFilterActionGroup actionGroup, String title, int property, String contextHelpId, boolean initValue) {
 		super(title);
-		fViewer= viewer;
+		fFilterActionGroup= actionGroup;
 		fFilterProperty= property;
 		
 		fCheckedTooltip= ""; //$NON-NLS-1$
@@ -61,7 +62,7 @@ public class MethodsViewerFilterAction extends Action {
 	 * @see Action#actionPerformed
 	 */
 	public void run() {	
-		fViewer.setMemberFilter(fFilterProperty, isChecked());
+		fFilterActionGroup.setMemberFilter(fFilterProperty, isChecked());
 	}
 	
 	private void updateToolTip(boolean on) {

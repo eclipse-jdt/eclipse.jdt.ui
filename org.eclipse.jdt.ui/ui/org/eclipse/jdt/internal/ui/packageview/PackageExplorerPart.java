@@ -122,11 +122,12 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.ui.typehierarchy.MethodsViewerFilter;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyMessages;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.*;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -163,7 +164,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
 	private BinaryProjectFilter fBinaryFilter= new BinaryProjectFilter();
 	private WorkingSetFilter fWorkingSetFilter= new WorkingSetFilter();
-	private MethodsViewerFilter fMemberFilter;
+	private MemberFilter fMemberFilter;
 
 	private ProblemTreeViewer fViewer; 
 	private StandardJavaUILabelProvider fJavaElementLabelProvider;
@@ -311,7 +312,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		// fields
 		String title= TypeHierarchyMessages.getString("MethodsViewer.hide_fields.label"); //$NON-NLS-1$
 		String helpContext= IJavaHelpContextIds.FILTER_FIELDS_ACTION;
-		MembersFilterAction hideFields= new MembersFilterAction(this, title, MethodsViewerFilter.FILTER_FIELDS, helpContext, false);
+		MembersFilterAction hideFields= new MembersFilterAction(this, title, MemberFilter.FILTER_FIELDS, helpContext, false);
 		hideFields.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.description")); //$NON-NLS-1$
 		hideFields.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.checked")); //$NON-NLS-1$
 		hideFields.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.unchecked")); //$NON-NLS-1$
@@ -320,7 +321,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		// static
 		title= TypeHierarchyMessages.getString("MethodsViewer.hide_static.label"); //$NON-NLS-1$
 		helpContext= IJavaHelpContextIds.FILTER_STATIC_ACTION;
-		MembersFilterAction hideStatic= new MembersFilterAction(this, title, MethodsViewerFilter.FILTER_STATIC, helpContext, false);
+		MembersFilterAction hideStatic= new MembersFilterAction(this, title, MemberFilter.FILTER_STATIC, helpContext, false);
 		hideStatic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_static.description")); //$NON-NLS-1$
 		hideStatic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.checked")); //$NON-NLS-1$
 		hideStatic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.unchecked")); //$NON-NLS-1$
@@ -329,7 +330,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		// non-public
 		title= TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.label"); //$NON-NLS-1$
 		helpContext= IJavaHelpContextIds.FILTER_PUBLIC_ACTION;
-		MembersFilterAction hideNonPublic= new MembersFilterAction(this, title, MethodsViewerFilter.FILTER_NONPUBLIC, helpContext, false);
+		MembersFilterAction hideNonPublic= new MembersFilterAction(this, title, MemberFilter.FILTER_NONPUBLIC, helpContext, false);
 		hideNonPublic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.description")); //$NON-NLS-1$
 		hideNonPublic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.checked")); //$NON-NLS-1$
 		hideNonPublic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.unchecked")); //$NON-NLS-1$
@@ -340,7 +341,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			new ActionContributionItem(hideStatic), 
 			new ActionContributionItem(hideNonPublic) 
 		};
-		fMemberFilter= new MethodsViewerFilter();
+		fMemberFilter= new MemberFilter();
 		fViewer.addFilter(fMemberFilter);
 	
 		fViewer.addFilter(fWorkingSetFilter);
@@ -943,9 +944,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Saves the state of the filter actions
 	 */
 	public void saveMemberFilterState(IMemento memento) {
-		memento.putString(TAG_HIDEFIELDS, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_FIELDS)));
-		memento.putString(TAG_HIDESTATIC, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_STATIC)));
-		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_NONPUBLIC)));
+		memento.putString(TAG_HIDEFIELDS, String.valueOf(hasMemberFilter(MemberFilter.FILTER_FIELDS)));
+		memento.putString(TAG_HIDESTATIC, String.valueOf(hasMemberFilter(MemberFilter.FILTER_STATIC)));
+		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(hasMemberFilter(MemberFilter.FILTER_NONPUBLIC)));
 	}
 
 	/**
@@ -953,11 +954,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 */	
 	public void restoreMemberFilterState(IMemento memento) {
 		boolean set= Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue();
-		setMemberFilter(MethodsViewerFilter.FILTER_FIELDS, set);
+		setMemberFilter(MemberFilter.FILTER_FIELDS, set);
 		set= Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue();
-		setMemberFilter(MethodsViewerFilter.FILTER_STATIC, set);
+		setMemberFilter(MemberFilter.FILTER_STATIC, set);
 		set= Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue();
-		setMemberFilter(MethodsViewerFilter.FILTER_NONPUBLIC, set);		
+		setMemberFilter(MemberFilter.FILTER_NONPUBLIC, set);		
 	}
 
 	void restoreState(IMemento memento) {

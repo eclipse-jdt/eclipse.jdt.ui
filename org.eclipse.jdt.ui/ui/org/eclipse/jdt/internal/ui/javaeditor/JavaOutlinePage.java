@@ -45,10 +45,8 @@ import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IMember;
@@ -75,6 +73,7 @@ import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterActionGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.OverrideAdornmentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -88,8 +87,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  */
 class JavaOutlinePage extends Page implements IContentOutlinePage {
 	
-			
-			
 			/**
 			 * The element change listener of the java outline viewer.
 			 * @see IElementChangedListener
@@ -570,137 +567,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 						JavaPlugin.getDefault().getPreferenceStore().setValue("LexicalSortingAction.isChecked", on); //$NON-NLS-1$
 				}
 			};
-			
-			class FieldFilter extends ViewerFilter {
-				public boolean select(Viewer viewer, Object parentElement, Object element) {
-					return !(element instanceof IField);
-				}
-			}; 
-			
-			class VisibilityFilter extends ViewerFilter {
-				
-				public final static int PUBLIC=		0;
-				public final static int PROTECTED=	1;
-				public final static int PRIVATE=	2;
-				public final static int DEFAULT=	3;
-				public final static int NOT_STATIC=	4;
-				
-				private int fVisibility;
-				
-				public VisibilityFilter(int visibility) {
-					fVisibility= visibility;
-				}
-				
-				/* 
-				 * 1GEWBY4: ITPJUI:ALL - filtering incorrect on interfaces.
-				 */
-				private boolean belongsToInterface(IMember member) {
-					
-					IType type= member.getDeclaringType();
-					
-					if (type != null) {
-						try {
-							return type.isInterface();
-						} catch (JavaModelException x) {
-							// ignore
-						}
-					}
-					
-					return false;
-				}
-				
-				public boolean select(Viewer viewer, Object parentElement, Object element) {
-					
-					if ( !(element instanceof IMember))
-						return true;
-					
-					if (element instanceof IType) {
-						IType type= (IType) element;
-						IJavaElement parent= type.getParent();
-						if (parent == null)
-							return true;
-						int elementType= parent.getElementType();
-						if (elementType == IJavaElement.COMPILATION_UNIT || elementType == IJavaElement.CLASS_FILE)
-							return true;
-					}
-						
-					IMember member= (IMember) element;
-					try {
-						
-						int flags= member.getFlags();
-						switch (fVisibility) {
-							case PUBLIC:
-							    /* 1GEWBY4: ITPJUI:ALL - filtering incorrect on interfaces */
-								return Flags.isPublic(flags) || belongsToInterface(member);
-							case PROTECTED:
-								return Flags.isProtected(flags);
-							case PRIVATE:
-								return Flags.isPrivate(flags);
-							case DEFAULT: {
-								/* 1GEWBY4: ITPJUI:ALL - filtering incorrect on interfaces */
-								boolean dflt= !(Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags));
-								return dflt ? !belongsToInterface(member) : dflt;
-							}
-							case NOT_STATIC:
-								return !Flags.isStatic(flags);
-						}
-					} catch (JavaModelException x) {
-					}
-					
-					// unreachable
-					return false;
-				}
-			}; 
-			
-			class FilterAction extends Action {
-								
-				private ViewerFilter fFilter;
-				private String fCheckedDesc;
-				private String fUncheckedDesc;
-				private String fCheckedTooltip;
-				private String fUncheckedTooltip;
-				private String fPreferenceKey;
-				
-				public FilterAction(ViewerFilter filter, String label, String checkedDesc, String uncheckedDesc, String checkedTooltip, String uncheckedTooltip, String prefKey) {
-					super();
-		
-					fFilter= filter;
-					
-					setText(label);
-					fCheckedDesc= checkedDesc;
-					fUncheckedDesc= uncheckedDesc;
-					fCheckedTooltip= checkedTooltip;
-					fUncheckedTooltip= uncheckedTooltip;
-					fPreferenceKey= prefKey;
-					
-					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fPreferenceKey);
-					valueChanged(checked, false);
-				}
-				
-				public void run() {
-					valueChanged(isChecked(), true);
-				}
-				
-				private void valueChanged(boolean on, boolean store) {
-					
-					setChecked(on);
-					
-					if (on) {
-						fOutlineViewer.addFilter(fFilter);
-						setToolTipText(fCheckedTooltip);
-						setDescription(fCheckedDesc);
-					} else {
-						fOutlineViewer.removeFilter(fFilter);
-						setToolTipText(fUncheckedTooltip);
-						setDescription(fUncheckedDesc);
-					}
-					
-					if (store)
-						JavaPlugin.getDefault().getPreferenceStore().setValue(fPreferenceKey, on);
-				}
-			};
-			
-			
 
 			
 	private IJavaElement fInput;
@@ -708,6 +574,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private Menu fMenu;
 	private JavaOutlineViewer fOutlineViewer;
 	private JavaEditor fEditor;
+	
+	private MemberFilterActionGroup fMemberFilterActionGroup;
 		
 	private ListenerList fSelectionChangedListeners= new ListenerList();
 	private Hashtable fActions= new Hashtable();
@@ -765,19 +633,10 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		if (toolBarManager != null) {
 			
 			Action action= new LexicalSortingAction();
-			toolBarManager.add(action);		
+			toolBarManager.add(action);
 			
-			action= new FilterAction(new FieldFilter(), JavaEditorMessages.getString("JavaOutlinePage.HideFields.label"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideFields.tooltip.unchecked"), "HideFields.isChecked"); //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-			JavaPluginImages.setLocalImageDescriptors(action, "fields_co.gif"); //$NON-NLS-1$
-			toolBarManager.add(action);
-						
-			action= new FilterAction(new VisibilityFilter(VisibilityFilter.NOT_STATIC), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.label"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideStaticMembers.tooltip.unchecked"), "HideStaticMembers.isChecked");		 //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-			JavaPluginImages.setLocalImageDescriptors(action, "static_co.gif"); //$NON-NLS-1$
-			toolBarManager.add(action);
-					
-			action= new FilterAction(new VisibilityFilter(VisibilityFilter.PUBLIC), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.label"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.description.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.description.unchecked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.tooltip.checked"), JavaEditorMessages.getString("JavaOutlinePage.HideNonePublicMembers.tooltip.unchecked"), "HideNonePublicMembers.isChecked"); //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-			JavaPluginImages.setLocalImageDescriptors(action, "public_co.gif"); //$NON-NLS-1$
-			toolBarManager.add(action);
+			fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "JavaOutlineViewer");
+			fMemberFilterActionGroup.contributeToToolBar(toolBarManager);
 		}
 	}
 	
