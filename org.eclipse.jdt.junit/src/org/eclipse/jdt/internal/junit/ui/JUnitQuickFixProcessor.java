@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -32,7 +31,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#getCorrections(org.eclipse.jdt.ui.text.java.IInvocationContext, org.eclipse.jdt.ui.text.java.IProblemLocation[])
 	 */
-	public IJavaCompletionProposal[] getCorrections(final IInvocationContext context, IProblemLocation[] locations) throws CoreException {
+	public IJavaCompletionProposal[] getCorrections(final IInvocationContext context, IProblemLocation[] locations)  {
 		if (isJUnitProblem(context, locations))
 			return new IJavaCompletionProposal[] { new JUnitAddLibraryProposal(context) };
 		return new IJavaCompletionProposal[] {};
@@ -50,7 +49,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 						|| s.equals("Test"))
 					return true; //$NON-NLS-1$
 			} catch (JavaModelException e) {
-				e.printStackTrace();
+			    JUnitPlugin.log(e.getStatus());
 			}
 		}
 		return false;
