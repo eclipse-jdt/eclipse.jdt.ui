@@ -55,7 +55,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		result.setLayout(layout);
 		GridData gd= null;
 
-		boolean all= fRefactoring.getInitialMode() == InlineMethodRefactoring.INLINE_ALL;
+		boolean all= fRefactoring.getInitialMode() == InlineMethodRefactoring.Mode.INLINE_ALL;
 		fInlineMode= new Group(result, SWT.NONE);
 		fInlineMode.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fInlineMode.setLayout(new GridLayout());
@@ -69,7 +69,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 			public void widgetSelected(SelectionEvent event) {
 				fRemove.setEnabled(true);
 				if (((Button)event.widget).getSelection())
-					changeRefactoring(InlineMethodRefactoring.INLINE_ALL);
+					changeRefactoring(InlineMethodRefactoring.Mode.INLINE_ALL);
 			}
 		});
 
@@ -98,13 +98,13 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 			public void widgetSelected(SelectionEvent event) {
 				fRemove.setEnabled(false);
 				if (((Button)event.widget).getSelection())
-					changeRefactoring(InlineMethodRefactoring.INLINE_SINGLE);
+					changeRefactoring(InlineMethodRefactoring.Mode.INLINE_SINGLE);
 			}
 		});		
 		Dialog.applyDialogFont(result);
 	}
 	
-	private void changeRefactoring(int mode) {
+	private void changeRefactoring(InlineMethodRefactoring.Mode mode) {
 		RefactoringStatus status;
 		try {
 			status= fRefactoring.setCurrentMode(mode);

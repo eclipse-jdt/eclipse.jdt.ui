@@ -77,8 +77,12 @@ import org.eclipse.ltk.core.refactoring.TextChange;
  */
 public class InlineMethodRefactoring extends Refactoring {
 
-	public static final int INLINE_ALL= ASTNode.METHOD_DECLARATION;
-	public static final int INLINE_SINGLE= ASTNode.METHOD_INVOCATION;
+	public static class Mode {
+		private Mode() {
+		}
+		public static final Mode INLINE_ALL= new Mode();
+		public static final Mode INLINE_SINGLE= new Mode();
+	}
 
 	private ICompilationUnit fInitialCUnit;
 	private ASTNode fInitialNode;
@@ -87,33 +91,36 @@ public class InlineMethodRefactoring extends Refactoring {
 	private SourceProvider fSourceProvider;
 	private TargetProvider fTargetProvider;
 	private boolean fDeleteSource;
-	private int fCurrentMode;
-	
+	private Mode fCurrentMode;
+	private Mode fInitialMode;
+
 	private InlineMethodRefactoring(ICompilationUnit unit, ASTNode node, CodeGenerationSettings settings) {
 		Assert.isNotNull(unit);
 		Assert.isNotNull(node);
 		Assert.isNotNull(settings);
 		fInitialCUnit= unit;
 		fInitialNode= node;
-		fCurrentMode= node.getNodeType();
 		fCodeGenerationSettings= settings;
 	}
 
 	private InlineMethodRefactoring(ICompilationUnit unit, MethodInvocation node, CodeGenerationSettings settings) {
 		this(unit, (ASTNode)node, settings);
 		fTargetProvider= TargetProvider.create(unit, node);
+		fInitialMode= fCurrentMode= Mode.INLINE_SINGLE;
 		fDeleteSource= false;
 	}
 
 	private InlineMethodRefactoring(ICompilationUnit unit, SuperMethodInvocation node, CodeGenerationSettings settings) {
 		this(unit, (ASTNode)node, settings);
 		fTargetProvider= TargetProvider.create(unit, node);
+		fInitialMode= fCurrentMode= Mode.INLINE_SINGLE;
 		fDeleteSource= false;
 	}
 
 	private InlineMethodRefactoring(ICompilationUnit unit, ConstructorInvocation node, CodeGenerationSettings settings) {
 		this(unit, (ASTNode)node, settings);
 		fTargetProvider= TargetProvider.create(unit, node);
+		fInitialMode= fCurrentMode= Mode.INLINE_SINGLE;
 		fDeleteSource= false;
 	}
 
@@ -121,6 +128,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		this(unit, (ASTNode)node, settings);
 		fSourceProvider= new SourceProvider(unit, node);
 		fTargetProvider= TargetProvider.create(unit, node);
+		fInitialMode= fCurrentMode= Mode.INLINE_ALL;
 		fDeleteSource= true;
 	}
 	
@@ -156,14 +164,14 @@ public class InlineMethodRefactoring extends Refactoring {
 		fDeleteSource= remove;
 	}
 	
-	public int getInitialMode() {
-		return fInitialNode.getNodeType();
+	public Mode getInitialMode() {
+		return fInitialMode;
 	}
 	
-	public RefactoringStatus setCurrentMode(int mode) throws JavaModelException {
-		Assert.isTrue(getInitialMode() == INLINE_SINGLE);
+	public RefactoringStatus setCurrentMode(Mode mode) throws JavaModelException {
+		Assert.isTrue(getInitialMode() == Mode.INLINE_SINGLE);
 		fCurrentMode= mode;
-		if (mode == INLINE_SINGLE) {
+		if (mode == Mode.INLINE_SINGLE) {
 			fTargetProvider= TargetProvider.create(fInitialCUnit, (MethodInvocation)fInitialNode);
 		} else {
 			fTargetProvider= TargetProvider.create(
@@ -253,7 +261,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		if (fDeleteSource && fCurrentMode == INLINE_ALL) {
+		if (fDeleteSource && fCurrentMode == Mode.INLINE_ALL) {
 			TextChange change= fChangeManager.get(fSourceProvider.getCompilationUnit());
 			TextEdit delete= fSourceProvider.getDeleteEdit();
 			TextEditGroup description= new TextEditGroup(
