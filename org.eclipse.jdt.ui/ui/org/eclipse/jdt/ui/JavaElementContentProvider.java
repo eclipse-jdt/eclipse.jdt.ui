@@ -70,8 +70,8 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
-	public JavaElementContentProvider(boolean provideMembers) {
-		super(provideMembers);
+	public JavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
+		super(provideMembers, provideWorkingCopy);
 	}
 	
 	/* (non-Javadoc)
@@ -95,10 +95,10 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
 
-		if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
+		if (!getProvideWorkingCopy() && element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
 			return;
 		}
-		
+			 
 		// handle open and closing of a solution or project
 		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {			
 			postRefresh(element);
@@ -142,8 +142,14 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 		}
 
 		if (element instanceof ICompilationUnit) {
+			if (getProvideWorkingCopy()) {
+				IJavaElement original= ((IWorkingCopy)element).getOriginalElement();
+				if (original != null)
+					element= original;
+			}
 			if (kind == IJavaElementDelta.CHANGED) {
 				postRefresh(element);
+				return;
 			}
 		}
 		// we don't show the contents of a compilation or IClassFile, so don't go any deeper

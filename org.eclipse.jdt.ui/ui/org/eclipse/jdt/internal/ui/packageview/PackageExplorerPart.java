@@ -265,12 +265,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer= new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		
 		boolean showCUChildren= JavaBasePreferencePage.showCompilationUnitChildren();
-		fViewer.setContentProvider(new JavaElementContentProvider(showCUChildren));
+		fViewer.setContentProvider(new JavaElementContentProvider(showCUChildren, true));
 		
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fViewer);		
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		
-		JavaElementLabelProvider labelProvider = new JavaElementLabelProvider(getLabelProviderFlags());
+		JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(getLabelProviderFlags());
 		labelProvider.setErrorTickManager(new MarkerErrorTickProvider());
 		fViewer.setLabelProvider(new DecoratingLabelProvider(labelProvider, null));
 		fViewer.setSorter(new JavaElementSorter());
