@@ -49,8 +49,10 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
@@ -518,12 +520,12 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @return an information control creator
 	 * @since 2.1
 	 */
-	private IInformationControlCreator getOutlinePresenterControlCreator(ISourceViewer sourceViewer) {
+	private IInformationControlCreator getOutlinePresenterControlCreator(ISourceViewer sourceViewer, final String commandId) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				int shellStyle= SWT.RESIZE;
 				int treeStyle= SWT.V_SCROLL | SWT.H_SCROLL;
-				return new JavaOutlineInformationControl(parent, shellStyle, treeStyle);
+				return new JavaOutlineInformationControl(parent, shellStyle, treeStyle, commandId);
 			}
 		};
 	}
@@ -563,7 +565,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 2.1
 	 */
 	public IInformationPresenter getOutlinePresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
-		InformationPresenter presenter= new InformationPresenter(getOutlinePresenterControlCreator(sourceViewer));
+		InformationPresenter presenter;
+		if (doCodeResolve)
+			presenter= new InformationPresenter(getOutlinePresenterControlCreator(sourceViewer, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));
+		else
+			presenter= new InformationPresenter(getOutlinePresenterControlCreator(sourceViewer, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
 		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 		presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);

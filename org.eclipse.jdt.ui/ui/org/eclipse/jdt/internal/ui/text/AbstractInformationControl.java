@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
@@ -25,6 +27,8 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
@@ -42,9 +46,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
-import org.eclipse.jface.text.IInformationControl;
-import org.eclipse.jface.text.IInformationControlExtension;
-import org.eclipse.jface.text.IInformationControlExtension2;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -52,6 +54,16 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlExtension;
+import org.eclipse.jface.text.IInformationControlExtension2;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommand;
+import org.eclipse.ui.commands.ICommandManager;
+import org.eclipse.ui.commands.IKeySequenceBinding;
+import org.eclipse.ui.keys.KeySequence;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
@@ -61,7 +73,9 @@ import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 /**
- * @author dmegert
+ * Abstract class for Show hierarchy in light-weight controls.
+ * 
+ * @since 2.1
  */
 public abstract class AbstractInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2 {
 
@@ -186,7 +200,12 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	//private int fMaxHeight= -1;
 	/** The current string matcher */
 	private StringMatcher fStringMatcher;
-
+	private ICommand fInvokingCommand;
+	private Label fStatusField;
+	private Font fStatusTextFont;
+//	private Controle fFocusWidget;
+	private KeySequence[] fInvokingCommandKeySequences;
+	
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
 	 * styles are applied to the shell and the tree widget.
@@ -194,8 +213,17 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * @param parent the parent shell
 	 * @param shellStyle the additional styles for the shell
 	 * @param treeStyle the additional styles for the tree widget
+	 * @param invokingCommandId the id of the command that invoked this control or <code>null</code>
+	 * @param showStatusField <code>true</code> iff the control has a status field at the bottom
 	 */
-	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle) {
+	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle, String invokingCommandId, boolean showStatusField) {
+		if (invokingCommandId != null) {
+			ICommandManager commandManager= PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
+			fInvokingCommand= commandManager.getCommand(invokingCommandId);
+			if (fInvokingCommand != null && !fInvokingCommand.isDefined())
+				fInvokingCommand= null;
+		}
+		
 		fShell= new Shell(parent, shellStyle);
 		Display display= fShell.getDisplay();
 		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
@@ -207,9 +235,11 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fComposite.setLayout(layout);
 		fComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		createFilterText(fComposite);
-		
+		fFilterText= createFilterText(fComposite);
 		fTreeViewer= createTreeViewer(fComposite, treeStyle);
+		
+		if (showStatusField)
+			createStatusField(fComposite);
 		
 		final Tree tree= fTreeViewer.getTree();
 		tree.addKeyListener(new KeyListener() {
@@ -283,16 +313,34 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
 		fShell.setLayout(new BorderFillLayout(border));
 		
+		fComposite.setTabList(new Control[] {fFilterText, fTreeViewer.getTree()});
+		
 		setInfoSystemColor();
 		installFilter();
 	}
 	
+	/**
+	 * Creates a tree information control with the given shell as parent. The given
+	 * styles are applied to the shell and the tree widget.
+	 *
+	 * @param parent the parent shell
+	 * @param shellStyle the additional styles for the shell
+	 * @param treeStyle the additional styles for the tree widget
+	 */
+	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle) {
+		this(parent, shellStyle, treeStyle, null, false);
+	}
+
 	protected abstract TreeViewer createTreeViewer(Composite parent, int style);
 
 	protected TreeViewer getTreeViewer() {
 		return fTreeViewer;
 	}
 
+	protected Text getFilterText() {
+		return fFilterText;
+	}
+	
 	protected Text createFilterText(Composite parent) {
 		fFilterText= new Text(parent, SWT.FLAT);
 
@@ -302,7 +350,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		FontMetrics fontMetrics= gc.getFontMetrics();
 		gc.dispose();
 
-		data.heightHint= org.eclipse.jface.dialogs.Dialog.convertHeightInCharsToPixels(fontMetrics, 1);
+		data.heightHint= Dialog.convertHeightInCharsToPixels(fontMetrics, 1);
 		data.horizontalAlignment= GridData.FILL;
 		data.verticalAlignment= GridData.BEGINNING;
 		fFilterText.setLayoutData(data);
@@ -328,6 +376,97 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		return fFilterText;
+	}
+	
+	private void createStatusField(Composite parent) {
+		
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		composite.setLayout(layout);
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		// Horizontal separator line
+		Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.LINE_DOT);
+		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		// Status field label
+		fStatusField= new Label(parent, SWT.RIGHT);
+		fStatusField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fStatusField.setText(getStatusFieldText());
+		Font font= fStatusField.getFont();
+		Display display= parent.getDisplay();
+		FontData[] fontDatas= font.getFontData();
+		for (int i= 0; i < fontDatas.length; i++)
+			fontDatas[i].setHeight(fontDatas[i].getHeight() * 9 / 10);
+		fStatusTextFont= new Font(display, fontDatas);
+		fStatusField.setFont(fStatusTextFont);
+
+		// Regarding the color see bug 41128
+		fStatusField.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
+
+//		fStatusField= new Button(parent, SWT.CENTER | SWT.FLAT);
+//		fStatusField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//		fStatusField.setText(getStatusFieldText());
+//		Font font= fStatusField.getFont();
+//		Display display= parent.getDisplay();
+//		FontData[] fontDatas= font.getFontData();
+//		for (int i= 0; i < fontDatas.length; i++)
+//			fontDatas[i].setHeight(fontDatas[i].getHeight() * 9 / 10);
+//		fStatusTextFont= new Font(display, fontDatas);
+//		fStatusField.setFont(fStatusTextFont);
+//		
+//		getFilterText().addFocusListener(new FocusAdapter() {
+//			/**
+//			 * {@inheritDoc}
+//			 */
+//			public void focusGained(FocusEvent e) {
+//				fFocusWidget= getFilterText();
+//			}
+//		});
+//		fTreeViewer.getTree().addFocusListener(new FocusAdapter() {
+//			/**
+//			 * {@inheritDoc}
+//			 */
+//			public void focusGained(FocusEvent e) {
+//				fFocusWidget= fTreeViewer.getTree();
+//			}
+//		});
+//		
+//		fStatusField.addSelectionListener(new SelectionAdapter() {
+//			/**
+//			 * {@inheritDoc}
+//			 */
+//			public void widgetSelected(SelectionEvent e) {
+//				handleStatusFieldClicked();
+//				if (fFocusWidget != null)
+//					fFocusWidget.setFocus();
+//				else
+//					getFilterText().setFocus();
+//			}
+//		});
+//
+//		// Regarding the color see bug 41128
+//		fStatusField.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
+	}
+	
+	protected void updateStatusFieldText() {
+		if (fStatusField != null)
+			fStatusField.setText(getStatusFieldText());
+	}
+	
+	/**
+	 * Handles click in status field.
+	 * <p>
+	 * Default does nothing.
+	 * </p> 
+	 */
+	protected void handleStatusFieldClicked() {
+	}
+
+	protected String getStatusFieldText() {
+		return ""; //$NON-NLS-1$
 	}
 	
 	private void setInfoSystemColor() {
@@ -477,6 +616,9 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			fComposite= null;
 			fFilterText= null;
 		}
+
+		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
+			fStatusTextFont.dispose();
 	}
 
 	/* 
@@ -540,6 +682,8 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fTreeViewer.getTree().setForeground(foreground);
 		fFilterText.setForeground(foreground);
 		fComposite.setForeground(foreground);
+		if (fStatusField != null)
+			fStatusField.getParent().setForeground(foreground);
 	}
 
 	/*
@@ -549,6 +693,10 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fTreeViewer.getTree().setBackground(background);
 		fFilterText.setBackground(background);
 		fComposite.setBackground(background);
+		if (fStatusField != null) {
+			fStatusField.setBackground(background);
+			fStatusField.getParent().setBackground(background);
+		}
 	}
 
 	/*
@@ -578,5 +726,23 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 */
 	public void removeFocusListener(FocusListener listener) {
 		fShell.removeFocusListener(listener);
+	}
+	
+	final protected ICommand getInvokingCommand() {
+		return fInvokingCommand;
+	}
+	
+	final protected KeySequence[] getInvokingCommandKeySequences() {
+		if (getInvokingCommand() != null) {
+			List list= getInvokingCommand().getKeySequenceBindings();
+			if (!list.isEmpty()) {
+				fInvokingCommandKeySequences= new KeySequence[list.size()];
+				for (int i= 0; i < fInvokingCommandKeySequences.length; i++) {
+					fInvokingCommandKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
+				}
+				return fInvokingCommandKeySequences;
+			}		
+		}
+		return null;
 	}
 }

@@ -11,18 +11,13 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -34,14 +29,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommand;
-import org.eclipse.ui.commands.ICommandManager;
-import org.eclipse.ui.commands.IKeySequenceBinding;
 import org.eclipse.ui.keys.KeySequence;
-import org.eclipse.ui.keys.KeyStroke;
 import org.eclipse.ui.keys.SWTKeySupport;
-import org.eclipse.ui.keys.SpecialKey;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -57,6 +46,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.AbstractInformationControl;
 import org.eclipse.jdt.internal.ui.typehierarchy.SuperTypeHierarchyViewer.SuperTypeHierarchyContentProvider;
@@ -65,15 +55,15 @@ import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
- *
+ * Show hierarchy in light-weight control.
+ * 
+ * @since 3.0
  */
 public class HierarchyInformationControl extends AbstractInformationControl {
 	
 	private TypeHierarchyLifeCycle fLifeCycle;
 	private HierarchyLabelProvider fLabelProvider;
 	private Label fHeaderLabel;
-	private Label fStatusTextLabel;
-	private Font fStatusTextFont;
 	private KeyAdapter fKeyAdapter;
 	
 	private Object[] fOtherExpandedElements;
@@ -81,36 +71,11 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	
 	private IMethod fFocus; // method to filter for or null if type hierarchy
 	private boolean fDoFilter;
-	
-	private KeySequence[] fKeySequences;
 
 	public HierarchyInformationControl(Shell parent, int shellStyle, int treeStyle) {
-		super(parent, shellStyle, treeStyle);
+		super(parent, shellStyle, treeStyle, IJavaEditorActionDefinitionIds.OPEN_HIERARCHY, true);
 		fOtherExpandedElements= null;
-		fKeySequences= null;
 		fDoFilter= true;
-	}
-	
-	private KeySequence[] getKeySequences() {
-		if (fKeySequences == null) {
-			ICommandManager commandManager = PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
-			ICommand command = commandManager.getCommand(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
-			if (command.isDefined()) {
-				List list= command.getKeySequenceBindings();
-				if (!list.isEmpty()) {
-					fKeySequences= new KeySequence[list.size()];
-					for (int i= 0; i < fKeySequences.length; i++) {
-						fKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
-					}
-					return fKeySequences;
-				}		
-			}
-			// default key is F12
-			fKeySequences= new KeySequence[] { 
-				KeySequence.getInstance(KeyStroke.getInstance(SpecialKey.F12))
-			};
-		}
-		return fKeySequences;
 	}
 	
 	private KeyAdapter getKeyAdapter() {
@@ -119,10 +84,11 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 				public void keyPressed(KeyEvent e) {
 					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
-					KeySequence[] sequences= getKeySequences();
+					KeySequence[] sequences= getInvokingCommandKeySequences();
 					
 					for (int i= 0; i < sequences.length; i++) {
 						if (sequences[i].equals(keySequence)) {
+							e.doit= false;
 							toggleHierarchy();
 							return;
 						}
@@ -178,32 +144,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		
 		treeViewer.getTree().addKeyListener(getKeyAdapter());	
 		
-		Composite composite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout(1, false);
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		composite.setLayout(layout);
-		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
-		// Horizontal separator line
-		Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.LINE_DOT);
-		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		// Status field label
-		fStatusTextLabel= new Label(parent, SWT.RIGHT);
-		fStatusTextLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fStatusTextLabel.setText(getInfoLabel());
-		Font font= fStatusTextLabel.getFont();
-		Display display= parent.getDisplay();
-		FontData[] fontDatas= font.getFontData();
-		for (int i= 0; i < fontDatas.length; i++)
-			fontDatas[i].setHeight(fontDatas[i].getHeight() * 9 / 10);
-		fStatusTextFont= new Font(display, fontDatas);
-		fStatusTextLabel.setFont(fStatusTextFont);
-
-		// Regarding the color see bug 41128
-		fStatusTextLabel.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
-		
 		return treeViewer;
 	}
 	
@@ -237,7 +177,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	public void setForegroundColor(Color foreground) {
 		super.setForegroundColor(foreground);
 		fHeaderLabel.setForeground(foreground);
-		fStatusTextLabel.getParent().setForeground(foreground);
 	}
 
 	/* (non-Javadoc)
@@ -246,23 +185,11 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	public void setBackgroundColor(Color background) {
 		super.setBackgroundColor(background);
 		fHeaderLabel.setBackground(background);
-		fStatusTextLabel.setBackground(background);
-		fStatusTextLabel.getParent().setBackground(background);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#dispose()
-	 */
-	public void dispose() {
-		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
-			fStatusTextFont.dispose();
-		
-		super.dispose();
 	}
 	
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl#setInput(java.lang.Object)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setInput(Object information) {
 		if (!(information instanceof IJavaElement)) {
@@ -381,7 +308,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		fOtherContentProvider= contentProvider;
 		fOtherExpandedElements= expandedElements;
 		
-		fStatusTextLabel.setText(getInfoLabel());
+		updateStatusFieldText();
 	}
 	
 	
@@ -397,9 +324,11 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 	}
 	
-	private String getInfoLabel() {
-		KeySequence[] sequences= getKeySequences();
-		String keyName= sequences[0].format();
+	protected String getStatusFieldText() {
+		KeySequence[] sequences= getInvokingCommandKeySequences();
+		String keyName= ""; //$NON-NLS-1$
+		if (sequences != null && sequences.length > 0)
+			keyName= sequences[0].format();
 		
 		if (fOtherContentProvider instanceof TraditionalHierarchyContentProvider) {
 			return TypeHierarchyMessages.getFormattedString("HierarchyInformationControl.toggle.traditionalhierarchy.label", keyName); //$NON-NLS-1$
@@ -408,9 +337,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#getSelectedElement()
+	/**
+	 * {@inheritDoc}
 	 */
 	protected Object getSelectedElement() {
 		Object selectedElement= super.getSelectedElement();
@@ -422,5 +350,4 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 		return selectedElement;
 	}
-
 }
