@@ -309,7 +309,7 @@ public class StubUtility {
 		ArrayList newMethods= new ArrayList(superMethods.length);
 		for (int i= 0; i < superMethods.length; i++) {
 			IMethod curr= superMethods[i];
-			if (curr.isConstructor() && JavaModelUtil.isVisible(curr, type.getPackageFragment())) {
+			if (curr.isConstructor() && (JavaModelUtil.isVisible(curr, type.getPackageFragment()) || Flags.isProtected(curr.getFlags()))) {
 				if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null) {
 					String newStub= genStub(typeName, superMethods[i], genStubSettings, imports);
 					newMethods.add(newStub);
@@ -318,7 +318,6 @@ public class StubUtility {
 		}
 		return (String[]) newMethods.toArray(new String[newMethods.size()]);
 	}
-
 
 	/**
 	 * Searches for unimplemented methods of a type.
