@@ -351,7 +351,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			if (target != null)
 				target.beginCompoundChange();
 			try {
-				AddCustomConstructorOperation operation= new AddCustomConstructorOperation(type, dialog.getElementPosition(), variables, constructor, settings, false);
+				AddCustomConstructorOperation operation= new AddCustomConstructorOperation(type, dialog.getElementPosition(), variables, constructor, settings, true, false);
 				operation.setVisibility(dialog.getVisibilityModifier());
 				if (constructor.getParameterTypes().length == 0)
 					operation.setOmitSuper(dialog.isOmitSuper());

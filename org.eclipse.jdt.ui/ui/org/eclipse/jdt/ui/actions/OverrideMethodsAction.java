@@ -209,7 +209,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			if (target != null)
 				target.beginCompoundChange();
 			try {
-				final AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, dialog.getElementPosition(), keys, settings, dialog.getGenerateAnnotation(), false);
+				final AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, dialog.getElementPosition(), keys, settings, dialog.getGenerateAnnotation(), true, true, false);
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null)
 					context= new BusyIndicatorRunnableContext();
