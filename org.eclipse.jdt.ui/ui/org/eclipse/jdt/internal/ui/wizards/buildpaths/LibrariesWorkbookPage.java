@@ -736,13 +736,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private class JavadocPropertyDialog extends StatusDialog implements IStatusChangeListener {
 
 		private JavadocConfigurationBlock fJavadocConfigurationBlock;
-		private CPListElement fElement;
-
+		
 		public JavadocPropertyDialog(Shell parent, CPListElement element) {
 			super(parent);
 			setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.JavadocPropertyDialog.title", element.getPath().toString())); //$NON-NLS-1$
-			fElement= element;
-			
 			URL initialLocation= JavaUI.getLibraryJavadocLocation(element.getPath());
 			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation);
 		}
