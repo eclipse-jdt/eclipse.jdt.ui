@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
  */
 public abstract class UserInputWizardPage extends RefactoringWizardPage {
 
-	private boolean fIsLastUserPage;
+	private final boolean fIsLastUserPage;
 	
 	/**
 	 * Creates a new user input page.
