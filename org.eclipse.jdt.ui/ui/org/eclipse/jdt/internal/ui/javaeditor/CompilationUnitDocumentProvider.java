@@ -1053,6 +1053,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			addUnchangedElementListeners(element, info);
 			
 			fireElementContentReplaced(element);
+			fireElementDirtyStateChanged(element, false);
 			
 		} else {
 			super.resetDocument(element);
