@@ -109,19 +109,19 @@ public class ExtractInterfaceRefactoring extends Refactoring {
     private final WorkingCopyOwner fWorkingCopyOwner;
 	private String fSource;
 	
-	private ExtractInterfaceRefactoring(IType type, CodeGenerationSettings codeGenerationSettings){
+	private ExtractInterfaceRefactoring(IType type, CodeGenerationSettings settings){
 		Assert.isNotNull(type);
-		Assert.isNotNull(codeGenerationSettings);
+		Assert.isNotNull(settings);
 		fInputType= type;
-		fCodeGenerationSettings= codeGenerationSettings;
+		fCodeGenerationSettings= settings;
 		fExtractedMembers= new IMember[0];
 		fWorkingCopyOwner= new RefactoringWorkingCopyOwner();
 	}
 	
-	public static ExtractInterfaceRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
+	public static ExtractInterfaceRefactoring create(IType type, CodeGenerationSettings settings) throws JavaModelException{
 		if (! isAvailable(type))
 			return null;
-		return new ExtractInterfaceRefactoring(type, codeGenerationSettings);
+		return new ExtractInterfaceRefactoring(type, settings);
 	}
 	
 	public static boolean isAvailable(IType type) throws JavaModelException {
@@ -319,7 +319,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			IType theInterface= newCuWC.getType(fNewInterfaceName);
 			
 			CompilationUnitRange[] updatedRanges= ExtractInterfaceUtil.updateReferences(manager, theType, theInterface, fWorkingCopyOwner, 
-			        false, new SubProgressMonitor(pm, 9), status, fCodeGenerationSettings);
+			        false, new SubProgressMonitor(pm, 9), status);
 			if (status.hasFatalError())
 				return manager;
 			TextEdit[] edits= description.getTextEdits();
