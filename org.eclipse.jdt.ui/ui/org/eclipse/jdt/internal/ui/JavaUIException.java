@@ -21,6 +21,8 @@ import org.eclipse.core.runtime.IStatus;
 
 public class JavaUIException extends CoreException {
 	
+	private static final long serialVersionUID= 1L;
+
 	public JavaUIException(IStatus status) {
 		super(status);
 	}	
