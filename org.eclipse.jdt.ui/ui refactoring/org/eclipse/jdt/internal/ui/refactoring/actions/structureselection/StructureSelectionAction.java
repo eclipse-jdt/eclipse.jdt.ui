@@ -104,22 +104,11 @@ public class StructureSelectionAction extends TextSelectionAction {
 		return new SourceRange(Math.max(0, offset), length);
 	}
 	
-	static boolean containsStatements(AstNode parent) {
-		if (parent instanceof Block) 
-			return true;
-			
-		if (parent instanceof AbstractMethodDeclaration)
-			return ((AbstractMethodDeclaration)parent).statements != null;
-			
-		return false;	
-	}
-	
 	static Statement[] getStatements(AstNode node){
 		if (node instanceof Block)
 			return ((Block)node).statements;
 		if (node instanceof AbstractMethodDeclaration)
 			return ((AbstractMethodDeclaration)node).statements;		
-		Assert.isTrue(false);	
 		return null;	
 	}
 

@@ -37,11 +37,9 @@ public class StructureSelectNextAction extends StructureSelectionAction{
 	}
 	
 	private static AstNode getNextNode(AstNode parent, AstNode node){
-		if (! containsStatements(parent))
-			return parent;
 		Statement[] statements= getStatements(parent);
-		Assert.isNotNull(statements);
-		Assert.isTrue(statements.length > 0);
+		if (statements == null || statements.length == 0)
+			return parent;
 		if (node == statements[statements.length -1 ])
 			return parent;
 		else
