@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
@@ -82,35 +88,36 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialog
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
- * <code>NewTypeWizardPage</code> contains controls and validation routines for a 'New Type WizardPage'
- * Implementors decide which components to add and to enable. Implementors can also
- * customize the validation code.
- * <code>NewTypeWizardPage</code> is intended to serve as base class of all wizards that create types.
- * Applets, Servlets, Classes, Interfaces...
+ * The class <code>NewTypeWizardPage</code> contains controls and validation routines 
+ * for a 'New Type WizardPage'. Implementors decide which components to add and to enable. 
+ * Implementors can also customize the validation code. <code>NewTypeWizardPage</code> 
+ * is intended to serve as base class of all wizards that create types like applets, servlets, classes, 
+ * interfaces, etc.
+ * <p>
  * See <code>NewClassWizardPage</code> or <code>NewInterfaceWizardPage</code> for an
- * example usage of NewTypeWizardPage.
+ * example usage of <code>NewTypeWizardPage</code>.
+ * </p>
+ * 
+ * @see org.eclipse.jdt.ui.wizards.NewClassWizardPage
+ * @see org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage
+ * 
  * @since 2.0
  */
 public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	/**
-	 * Class used in stub creation routines to add imports needed in the created stubs.
+	 * Class used in stub creation routines to add needed imports to a 
+	 * compilation unit.
 	 */
 	public static class ImportsManager {
 
 		private IImportsStructure fImportsStructure;
 
-		/**
-		 * For internal use only. Package visible.
-		 */
-		ImportsManager(IImportsStructure structure) {
+		/* package */ ImportsManager(IImportsStructure structure) {
 			fImportsStructure= structure;
 		}
 
-		/**
-		 * For internal use only. Package visible.
-		 */	
-		IImportsStructure getImportsStructure() {
+		/* package */ IImportsStructure getImportsStructure() {
 			return fImportsStructure;
 		}
 				
@@ -118,40 +125,47 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		 * Adds a new import declaration that is sorted in the existing imports.
 		 * If an import already exists or the import would conflict with another import
 		 * of an other type with the same simple name  the import is not added.
+		 * 
 		 * @param qualifiedTypeName The fully qualified name of the type to import
-		 *        (dot separated)
+		 * (dot separated)
 		 * @return Retuns the simple type name that can be used in the code or the
-		 * fully qualified type name if an import conflict prevented the import.
+		 * fully qualified type name if an import conflict prevented the import
 		 */				
 		public String addImport(String qualifiedTypeName) {
 			return fImportsStructure.addImport(qualifiedTypeName);
 		}
-
-
 	}
 	
-	/**
-	 * Flags used in setModifiers and getModifiers (compatible with
-	 * org.eclipse.jdt.core.Flags)
-	 */
+	/** Public access flag. See The Java Virtual Machine Specification for more details. */
 	public int F_PUBLIC = IConstants.AccPublic;
+	/** Private access flag. See The Java Virtual Machine Specification for more details. */
 	public int F_PRIVATE = IConstants.AccPrivate;
+	/**  Protected access flag. See The Java Virtual Machine Specification for more details. */
 	public int F_PROTECTED = IConstants.AccProtected;
+	/** Static access flag. See The Java Virtual Machine Specification for more details. */
 	public int F_STATIC = IConstants.AccStatic;
+	/** Final access flag. See The Java Virtual Machine Specification for more details. */
 	public int F_FINAL = IConstants.AccFinal;
+	/** Abstract property flag. See The Java Virtual Machine Specification for more details. */
 	public int F_ABSTRACT = IConstants.AccAbstract;
 
-	
 	private final static String PAGE_NAME= "NewTypeWizardPage"; //$NON-NLS-1$
 	
+	/** Field ID of the package input field */
 	protected final static String PACKAGE= PAGE_NAME + ".package";	 //$NON-NLS-1$
+	/** Field ID of the eclosing type input field */
 	protected final static String ENCLOSING= PAGE_NAME + ".enclosing"; //$NON-NLS-1$
+	/** Field ID of the enclosing type checkbox */
 	protected final static String ENCLOSINGSELECTION= ENCLOSING + ".selection"; //$NON-NLS-1$
-	
+	/** Field ID of the type name input field */	
 	protected final static String TYPENAME= PAGE_NAME + ".typename"; //$NON-NLS-1$
+	/** Field ID of the super type input field */
 	protected final static String SUPER= PAGE_NAME + ".superclass"; //$NON-NLS-1$
+	/** Field ID of the super interfaces input field */
 	protected final static String INTERFACES= PAGE_NAME + ".interfaces"; //$NON-NLS-1$
+	/** Field ID of the modifier checkboxes */
 	protected final static String MODIFIERS= PAGE_NAME + ".modifiers"; //$NON-NLS-1$
+	/** Field ID of the method stubs checkboxes */
 	protected final static String METHODS= PAGE_NAME + ".methods"; //$NON-NLS-1$
 
 	private class InterfacesListLabelProvider extends LabelProvider {
@@ -204,6 +218,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private final int PUBLIC_INDEX= 0, DEFAULT_INDEX= 1, PRIVATE_INDEX= 2, PROTECTED_INDEX= 3;
 	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1;
 
+	/**
+	 * Creates a new <code>NewTypeWizardPage</code>
+	 * 
+	 * @param isClass <code>true</code> if a new class is to be created; otherwise
+	 * an interface is to be created
+	 * @param pageName the wizard page's name
+	 */
 	public NewTypeWizardPage(boolean isClass, String pageName) {
 		super(pageName);
 		fCreatedType= null;
@@ -293,11 +314,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Initializes all fields provided by the type page with a given
-	 * Java element as selection. To implement a different selection strategy do not call this
-	 * method or overwrite it.
-	 * @param elem The initial selection of this page or null if no
-	 *             selection was available
+	 * Initializes all fields provided by the page with a given selection.
+	 * 
+	 * @param elem the selection used to intialize this page or <code>
+	 * null</code> if no selection was available
 	 */
 	protected void initTypePage(IJavaElement elem) {
 		String initSuperclass= "java.lang.Object"; //$NON-NLS-1$
@@ -352,18 +372,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	// -------- UI Creation ---------
 	
 	/**
-	 * Creates a separator line. Expects a GridLayout with at least 1 column.
-	 * @param composite The parent composite
-	 * @param nColumns Number of columns to span
+	 * Creates a separator line. Expects a <code>GridLayout</code> with at least 1 column.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
 	 */
 	protected void createSeparator(Composite composite, int nColumns) {
 		(new Separator(SWT.SEPARATOR | SWT.HORIZONTAL)).doFillIntoGrid(composite, nColumns, convertHeightInCharsToPixels(1));		
 	}
 
 	/**
-	 * Creates the controls for the package name field. Expects a GridLayout with at least 4 columns.
-	 * @param composite The parent composite
-	 * @param nColumns Number of columns to span
+	 * Creates the controls for the package name field. Expects a <code>GridLayout</code> with at 
+	 * least 4 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
 	 */	
 	protected void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns);
@@ -372,9 +395,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Creates the controls for the enclosing type name field. Expects a GridLayout with at least 4 columns.
-	 * @param composite The parent composite
-	 * @param nColumns Number of columns to span
+	 * Creates the controls for the enclosing type name field. Expects a <code>GridLayout</code> with at 
+	 * least 4 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
 	 */		
 	protected void createEnclosingTypeControls(Composite composite, int nColumns) {
 		// #6891
@@ -400,9 +425,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 
 	/**
-	 * Creates the controls for the type name field. Expects a GridLayout with at least 2 columns.
-	 * @param composite The parent composite
-	 * @param nColumns Number of columns to span
+	 * Creates the controls for the type name field. Expects a <code>GridLayout</code> with at 
+	 * least 2 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
 	 */		
 	protected void createTypeNameControls(Composite composite, int nColumns) {
 		fTypeNameDialogField.doFillIntoGrid(composite, nColumns - 1);
@@ -412,9 +439,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Creates the controls for the modifiers radio/ceckbox buttons. Expects a GridLayout with at least 3 columns.
-	 * @param composite The parent composite
-	 * @param nColumns Number of columns to span
+	 * Creates the controls for the modifiers radio/ceckbox buttons. Expects a 
+	 * <code>GridLayout</code> with at least 3 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
 	 */		
 	protected void createModifierControls(Composite composite, int nColumns) {
 		LayoutUtil.setHorizontalSpan(fAccMdfButtons.getLabelControl(composite), 1);
@@ -437,9 +466,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Creates the controls for the superclass name field. Expects a GridLayout with at least 3 columns.
-	 * @param composite The parent composite
-	 * @param nColumns Number of columns to span
+	 * Creates the controls for the superclass name field. Expects a <code>GridLayout</code> 
+	 * with at least 3 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
 	 */		
 	protected void createSuperClassControls(Composite composite, int nColumns) {
 		fSuperClassDialogField.doFillIntoGrid(composite, nColumns);
@@ -447,9 +478,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Creates the controls for the superclass name field. Expects a GridLayout with at least 3 columns.
-	 * @param composite The parent composite
-	 * @param nColumns Number of columns to span
+	 * Creates the controls for the superclass name field. Expects a <code>GridLayout</code> with 
+	 * at least 3 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
 	 */			
 	protected void createSuperInterfacesControls(Composite composite, int nColumns) {
 		fSuperInterfacesDialogField.doFillIntoGrid(composite, nColumns);
@@ -465,7 +498,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	
 	/**
-	 * Sets the focus on the type name.
+	 * Sets the focus on the type name input field.
 	 */		
 	protected void setFocus() {
 		fTypeNameDialogField.setFocus();
@@ -573,15 +606,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		handleFieldChanged(fieldName);
 	}		
 	
-	
-		
 	// -------- update message ----------------		
-
-	/**
-	 * Called whenever a content of a field has changed.
-	 * Implementors of NewTypeWizardPage can hook in.
-	 * @see ContainerPage#handleFieldChanged
-	 */			
+	
+	/*
+	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
+	 */
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (fieldName == CONTAINER) {
@@ -596,14 +625,18 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	// ---- set / get ----------------
 	
 	/**
-	 * Gets the text of package field.
+	 * Returns the text of the package input field.
+	 * 
+	 * @return the text of the package input field
 	 */
 	public String getPackageText() {
 		return fPackageDialogField.getText();
 	}
 
 	/**
-	 * Gets the text of enclosing type field.
+	 * Returns the text of the enclosing type input field.
+	 * 
+	 * @return the text of the enclosing type input field
 	 */	
 	public String getEnclosingTypeText() {
 		return fEnclosingTypeDialogField.getText();
@@ -612,7 +645,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	/**
 	 * Returns the package fragment corresponding to the current input.
-	 * @return Returns <code>null</code> if the input could not be resolved.
+	 * 
+	 * @return a package fragement or <code>null</code> if the input 
+	 * could not be resolved.
 	 */
 	public IPackageFragment getPackageFragment() {
 		if (!isEnclosingTypeSelected()) {
@@ -626,9 +661,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Sets the package fragment.
-	 * This will update model and the text of the control.
-	 * @param canBeModified Selects if the package fragment can be changed by the user
+	 * Sets the package fragment to the given value. The method updates the model 
+	 * and the text of the control.
+	 * 
+	 * @param pack the package fragement to be set
+	 * @param canBeModified if <code>true</code> the package fragment is
+	 * editable; otherwise it is read-only.
 	 */
 	public void setPackageFragment(IPackageFragment pack, boolean canBeModified) {
 		fCurrPackage= pack;
@@ -640,8 +678,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * Returns the enclosing type corresponding to the current input.
-	 * @return Returns <code>null</code> if enclosing type is not selected or the input could not
-	 * be resolved.
+	 * 
+	 * @return the enclosing type or <code>null</code> if the enclosing type is 
+	 * not selected or the input could not be resolved
 	 */
 	public IType getEnclosingType() {
 		if (isEnclosingTypeSelected()) {
@@ -651,9 +690,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Sets the enclosing type.
-	 * This will update model and the text of the control.
-	 * @param canBeModified Selects if the enclosing type can be changed by the user
+	 * Sets the enclosing type. The method updates the underlying model 
+	 * and the text of the control.
+	 * 
+	 * @param type the enclosing type
+	 * @param canBeModified if <code>true</code> the enclosing type field is
+	 * editable; otherwise it is read-only.
 	 */	
 	public void setEnclosingType(IType type, boolean canBeModified) {
 		fCurrEnclosingType= type;
@@ -664,16 +706,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Returns <code>true</code> if the enclosing type selection check box is enabled.
+	 * Returns the selection state of the enclosing type checkbox.
+	 * 
+	 * @return the seleciton state of the enclosing type checkbox
 	 */
 	public boolean isEnclosingTypeSelected() {
 		return fEnclosingTypeSelection.isSelected();
 	}
 
 	/**
-	 * Sets the enclosing type selection checkbox.
-	 * @param canBeModified Selects if the enclosing type selection can be changed by the user
-	 */	
+	 * Sets the enclosing type checkbox's selection state.
+	 * 
+	 * @param isSelected the checkbox's selection state
+	 * @param canBeModified if <code>true</code> the enclosing type checkbox is
+	 * modifiable; otherwise it is read-only.
+	 */
 	public void setEnclosingTypeSelection(boolean isSelected, boolean canBeModified) {
 		fEnclosingTypeSelection.setSelection(isSelected);
 		fEnclosingTypeSelection.setEnabled(canBeModified);
@@ -681,15 +728,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Gets the type name.
+	 * Returns the type name entered into the type input field.
+	 * 
+	 * @return the type name
 	 */
 	public String getTypeName() {
 		return fTypeNameDialogField.getText();
 	}
 
 	/**
-	 * Sets the type name.
-	 * @param canBeModified Selects if the type name can be changed by the user
+	 * Sets the type name input field's text to the given value. Method doesn't update
+	 * the model.
+	 * 
+	 * @param name the new type name
+	 * @param canBeModified if <code>true</code> the enclosing type name field is
+	 * editable; otherwise it is read-only.
 	 */	
 	public void setTypeName(String name, boolean canBeModified) {
 		fTypeNameDialogField.setText(name);
@@ -697,7 +750,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 	
 	/**
-	 * Gets the selected modifiers.
+	 * Returns the selected modifiers.
+	 * 
+	 * @return the selected modifiers
 	 * @see Flags 
 	 */	
 	public int getModifiers() {
@@ -723,9 +778,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * Sets the modifiers.
-	 * @param modifiers F_PUBLIC, F_PRIVATE, F_PROTECTED, F_ABSTRACT, F_FINAL
-	 * or  F_STATIC or a valid combination.
-	 * @param canBeModified Selects if the modifiers can be changed by the user
+	 * 
+	 * @param modifiers <code>F_PUBLIC</code>, <code>F_PRIVATE</code>, 
+	 * <code>F_PROTECTED</code>, <code>F_ABSTRACT, F_FINAL</code>
+	 * or <code>F_STATIC</code> or, a valid combination.
+	 * @param canBeModified if <code>true</code> the modifier fields are
+	 * editable; otherwise they are read-only
 	 * @see Flags 
 	 */		
 	public void setModifiers(int modifiers, boolean canBeModified) {
@@ -753,7 +811,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 		
 	/**
-	 * Gets the content of the super class text field.
+	 * Returns the content of the superclass input field.
+	 * 
+	 * @return the superclass name
 	 */
 	public String getSuperClass() {
 		return fSuperClassDialogField.getText();
@@ -761,7 +821,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * Sets the super class name.
-	 * @param canBeModified Selects if the super class can be changed by the user
+	 * 
+	 * @param name the new superclass name
+	 * @param canBeModified  if <code>true</code> the superclass name field is
+	 * editable; otherwise it is read-only.
 	 */		
 	public void setSuperClass(String name, boolean canBeModified) {
 		fSuperClassDialogField.setText(name);
@@ -769,8 +832,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 	
 	/**
-	 * Gets the currently chosen super interfaces.
-	 * @return returns a list of String
+	 * Returns the chosen super interfaces.
+	 * 
+	 * @return a list of chosen super interfaces. The list's elements
+	 * are of type <code>String</code>
 	 */
 	public List getSuperInterfaces() {
 		return fSuperInterfacesDialogField.getElements();
@@ -778,8 +843,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * Sets the super interfaces.
-	 * @param canBeModified Selects if the modifiers can be changed by the user.
-	 * @param interfacesNames a list of String
+	 * 
+	 * @param interfacesNames a list of super interface. The method requires that
+	 * the list's elements are of type <code>String</code>
+	 * @param canBeModified if <code>true</code> the super interface field is
+	 * editable; otherwise it is read-only.
 	 */	
 	public void setSuperInterfaces(List interfacesNames, boolean canBeModified) {
 		fSuperInterfacesDialogField.setElements(interfacesNames);
@@ -789,10 +857,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	// ----------- validation ----------
 		
 	/**
-	 * Called when the package field has changed.
-	 * The method validates the package name and returns the status of the validation
-	 * This also updates the package fragment model.
-	 * Can be extended to add more validation
+	 * A hook method that gets called when the package field has changed. The method 
+	 * validates the package name and returns the status of the validation. The validation
+	 * also updates the package fragment model.
+	 * <p>
+	 * Subclasses may extend this method to perform their own validation.
+	 * </p>
+	 * 
+	 * @return the status of the validation
 	 */
 	protected IStatus packageChanged() {
 		StatusInfo status= new StatusInfo();
@@ -861,10 +933,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 
 	/**
-	 * Called when the enclosing type name has changed.
-	 * The method validates the enclosing type and returns the status of the validation
-	 * This also updates the enclosing type model.
-	 * Can be extended to add more validation
+	 * Hook method that gets called when the enclosing type name has changed. The method 
+	 * validates the enclosing type and returns the status of the validation. It also updates the 
+	 * enclosing type model.
+	 * <p>
+	 * Subclasses may extend this method to perform their own validation.
+	 * </p>
+	 * 
+	 * @return the status of the validation
 	 */
 	protected IStatus enclosingTypeChanged() {
 		StatusInfo status= new StatusInfo();
@@ -913,9 +989,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Called when the type name has changed.
-	 * The method validates the type name and returns the status of the validation.
-	 * Can be extended to add more validation
+	 * Hook method that gets called when the type name has changed. The method validates the 
+	 * type name and returns the status of the validation.
+	 * <p>
+	 * Subclasses may extend this method to perform their own validation.
+	 * </p>
+	 * 
+	 * @return the status of the validation
 	 */
 	protected IStatus typeNameChanged() {
 		StatusInfo status= new StatusInfo();
@@ -962,9 +1042,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Called when the superclass name has changed.
-	 * The method validates the superclass name and returns the status of the validation.
-	 * Can be extended to add more validation
+	 * Hook method that gets called when the superclass name has changed. The method 
+	 * validates the superclass name and returns the status of the validation.
+	 * <p>
+	 * Subclasses may extend this method to perform their own validation.
+	 * </p>
+	 * 
+	 * @return the status of the validation
 	 */
 	protected IStatus superClassChanged() {
 		StatusInfo status= new StatusInfo();
@@ -1048,9 +1132,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}		
 	
 	/**
-	 * Called when the list of super interface has changed.
-	 * The method validates the superinterfaces and returns the status of the validation.
-	 * Can be extended to add more validation.
+	 * Hook method that gets called when the list of super interface has changed. The method 
+	 * validates the superinterfaces and returns the status of the validation.
+	 * <p>
+	 * Subclasses may extend this method to perform their own validation.
+	 * </p>
+	 * 
+	 * @return the status of the validation
 	 */
 	protected IStatus superInterfacesChanged() {
 		StatusInfo status= new StatusInfo();
@@ -1088,9 +1176,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Called when the modifiers have changed.
-	 * The method validates the modifiers and returns the status of the validation.
-	 * Can be extended to add more validation.
+	 * Hook method that gets called when the modifiers have changed. The method validates 
+	 * the modifiers and returns the status of the validation.
+	 * <p>
+	 * Subclasses may extend this method to perform their own validation.
+	 * </p>
+	 * 
+	 * @return the status of the validation
 	 */
 	protected IStatus modifiersChanged() {
 		StatusInfo status= new StatusInfo();
@@ -1102,7 +1194,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	// selection dialogs
-	
 	
 	private IPackageFragment choosePackage() {
 		IPackageFragmentRoot froot= getPackageFragmentRoot();
@@ -1197,7 +1288,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	// ---- creation ----------------
 
 	/**
-	 * Creates a type using the current field values.
+	 * Creates the new type using the entered field values.
+	 * 
+	 * @param monitor a progress monitor to report progress. The progress
+	 * monitor must not be <code>null</code>
 	 */
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
 		monitor.beginTask(NewWizardMessages.getString("NewTypeWizardPage.operationdesc"), 10); //$NON-NLS-1$
@@ -1305,7 +1399,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 
 	/**
-	 * Returns the created type. Only valid after createType has been invoked
+	 * Returns the created type. The method only returns a valid type 
+	 * after <code>createType</code> has been called.
+	 * 
+	 * @return the created type
+	 * @see #createType(IProgressMonitor)
 	 */			
 	public IType getCreatedType() {
 		return fCreatedType;
@@ -1378,12 +1476,23 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Called from createType to allow adding methods, fields, inner types ect for the newly created type.
-	 * Implementors can use the create methods on IType.
-	 * Formatting will be applied to the content by the createType. Imports are added after this call by the wizard
-	 * @param newType The new type to add members to
-	 * @param imports To add the needed imports to. 
-	 * @param monitor Progress monitor
+	 * Hook method that gets called from <code>createType</code> to support adding of 
+	 * unanticipated methods, fields, inner types, etc. for the newly created type.
+	 * <p>
+	 * Implementers can use any methods defined on <code>IType</code> to manipulate the
+	 * new type.
+	 * </p>
+	 * <p>
+	 * The source code of the new type will be formtted using the platform's formatter. Needed 
+	 * imports are added by the wizard at the end of the type creation process using the given 
+	 * import manager.
+	 * </p>
+	 * 
+	 * @param newType the new type created via <code>createType</code>
+	 * @param imports an import manager responsible to add the needed imports
+	 * @param monitor a progress monitor to report progress. Must not be <code>null</code>
+	 * 
+	 * @see #createType(IProgressMonitor)
 	 */		
 	protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		// call for compatibility
@@ -1398,9 +1507,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 		
 	/**
-	 * Called from createType to get a file comment. By default the content of template
-	 * 'filecomment' is taken.
-	 * Returns source or null, if no file comment should be added
+	 * Hook mathod that gets called from <code>createType</code> to retrieve 
+	 * a file comment. This default implementation returns the content of the 
+	 * 'filecomment' template.
+	 * 
+	 * @return the file comment or <code>null</code> if a file comment 
+	 * is not desired
 	 */		
 	protected String getFileComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doFileComments()) {
@@ -1410,8 +1522,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Called from createType to get a type comment. 
-	 * Returns source or null, if no type comment should be added
+	 * Hook method that gets called from <code>createType</code> to retrieve 
+	 * a type comment. This default implementation returns the content of the 
+	 * 'typecomment' template.
+	 * 
+	 * @return the type comment or <code>null</code> if a type comment 
+	 * is not desired
 	 */		
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doCreateComments()) {
@@ -1430,7 +1546,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Gets the template of the given name, evaluated in the context of a CU.
+	 * Returns the string resulting from evaluation the given template in
+	 * the context of the given compilation unit.
+	 * 
+	 * @param name the template to be evaluated
+	 * @param parentCU the templates evaluation context
+	 * @param pos a source offset into the parent compilation unit. The
+	 * template is evalutated at the given source offset
 	 */
 	protected String getTemplate(String name, ICompilationUnit parentCU, int pos) {
 		try {
@@ -1454,8 +1576,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 
 	/**
-	 * Creates the bodies of all unimplemented methods or/and all constructors and adds them to the type
-	 * Can be used by implementors of NewTypeWizardPage to add method stub checkboxes.
+	 * Creates the bodies of all unimplemented methods and constructors and adds them to the type.
+	 * Method is typically called by implementers of <code>NewTypeWizardPage</code> to add
+	 * needed method and constructors.
+	 * 
+	 * @param type the type for which the new methods and constructor are to be created
+	 * @param doConstructors if <code>true</code> unimplemented constructors are created
+	 * @param doUnimplementedMethods if <code>true</code> unimplemented methods are created
+	 * @param imports an import manager to add all neded import statements
+	 * @param monitor a progress monitor to report progress
 	 */
 	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		ArrayList newMethods= new ArrayList();
@@ -1493,8 +1622,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	// ---- creation ----------------
 
 	/**
-	 * Returns a runnable that creates a type using the current settings.
-	 * To be called in the UI thread.
+	 * Returns the runnable that creates the type using the current settings.
+	 * The returned runnable must be executed in the UI thread.
+	 * 
+	 * @return the runnable to create the new type
 	 */		
 	public IRunnableWithProgress getRunnable() {				
 		return new IRunnableWithProgress() {

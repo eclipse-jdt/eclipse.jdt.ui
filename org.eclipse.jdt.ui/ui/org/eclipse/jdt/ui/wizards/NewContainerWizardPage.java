@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
 import org.eclipse.core.resources.IProject;
@@ -48,19 +54,18 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 /**
- * Base class for Java wizards. Provides source folder selection UI, validation and creation.
+ * Wizard page that acts as a base class for wizard pages that create new Java elements. 
+ * The class provides a input field for source folders (called container in this class) and
+ * API to validate the enter source folder name.
+ * 
  * @since 2.0
  */
 public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	
-	/**
-	 * container field id
-	 */
+	/** Id of the container field */
 	protected static final String CONTAINER= "NewContainerWizardPage.container"; //$NON-NLS-1$
 
-	/**
-	 * Status of last validation
-	 */
+	/** The status of the last validation. */
 	protected IStatus fContainerStatus;
 
 	private StringButtonDialogField fContainerDialogField;
@@ -72,6 +77,11 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	
 	private IWorkspaceRoot fWorkspaceRoot;
 	
+	/**
+	 * Create a new <code>NewContainerWizardPage</code>
+	 * 
+	 * @param name the wizard page's name
+	 */
 	public NewContainerWizardPage(String name) {
 		super(name);
 		fWorkspaceRoot= ResourcesPlugin.getWorkspace().getRoot();	
@@ -87,10 +97,11 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	}
 			
 	/**
-	 * Initializes the fields provided by the container page with a given
-	 * Java element as selection.
-	 * @param elem The initial selection of this page or null if no
-	 *             selection was available
+	 * Initializes the source folder field with a valid package fragement root.
+	 * The package fragement root is computed from the given Java element.
+	 * 
+	 * @param elem the Java element used to compute the initial package
+	 *    fragment root used as the source folder
 	 */
 	protected void initContainerPage(IJavaElement elem) {
 		IPackageFragmentRoot initRoot= null;
@@ -119,9 +130,11 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	}
 	
 	/**
-	 * Utility method to inspect a selection to find a Java element as initial element.
-	 * @return Returns a Java element to use as initial selection, or <code>null</code>,
-	 * if none is found.
+	 * Utility method to inspect a selection to find a Java element. 
+	 * 
+	 * @param selection the selection to be inspected
+	 * @return a Java element to be used as the initial selection, or <code>null</code>,
+	 * if no Java element exists in the given selection
 	 */
 	protected IJavaElement getInitialJavaElement(IStructuredSelection selection) {
 		IJavaElement jelem= null;
@@ -158,9 +171,12 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	}
 	
 	/**
-	 * Returns the recommended maximum width for text fields (in pixels)
-	 * Not valid until entering createContent.
-	 * Overwrite to change value.
+	 * Returns the recommended maximum width for text fields (in pixels). This
+	 * method requires that createContent has been called before this method is
+	 * call. Subclasses may override to change the maximum width for text 
+	 * fields.
+	 * 
+	 * @return the recommended maximum width for text fields.
 	 */
 	protected int getMaxFieldWidth() {
 		return convertWidthInCharsToPixels(40);
@@ -168,15 +184,23 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	
 	
 	/**
-	 * Creates the controls for the container field. Expects a GridLayout with at least 3 columns.
-	 * @param parent The parent composite
-	 * @param nColumns The number of columns to span
+	 * Creates the necessary controls (label, text field and browse button) to edit
+	 * the source folder location. The method expects that the parent composite
+	 * uses a <code>GridLayout</code> as its layout manager and that the
+	 * grid layout has at least 3 columns.
+	 * 
+	 * @param parent the parent composite
+	 * @param nColumns the number of columns to span. This number must be
+	 *  greater or equal three
 	 */
 	protected void createContainerControls(Composite parent, int nColumns) {
 		fContainerDialogField.doFillIntoGrid(parent, nColumns);
 		LayoutUtil.setWidthHint(fContainerDialogField.getTextControl(null), getMaxFieldWidth());
 	}
-	
+
+	/**
+	 * Sets the focus to the source folder's text field.
+	 */	
 	protected void setFocusOnContainer() {
 		fContainerDialogField.setFocus();
 	}
@@ -216,9 +240,12 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	// ----------- validation ----------
 			
 	/**
-	 * Called after the container field has changed.
-	 * Updates the model and returns the status.
-	 * Model is only valid if returned status is OK
+	 * This method is a hook which gets called after the source folder's
+	 * text input field has changed. This default implementation updates
+	 * the model and returns an error status. The underlying model
+	 * is only valid if the returned status is OK.
+	 * 
+	 * @return the model's error status
 	 */
 	protected IStatus containerChanged() {
 		StatusInfo status= new StatusInfo();
@@ -280,12 +307,16 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	// -------- update message ----------------
 	
 	/**
-	 * Called when a field on a page changed. Every sub type is responsible to
-	 * call this method when a field on its page has changed.
-	 * Subtypes override (extend) the method to add verification when own field has a
-	 * dependency to an other field. (for example the class name input must be verified
-	 * again, when the package field changes (check for duplicated class names))
-	 * @param fieldName The name of the field that has changed (field id)
+	 * Hook method that gets called when a field on this page has changed. For this page the 
+	 * method gets called when the source folder field changes.
+	 * <p>
+	 * Every sub type is responsible to call this method when a field on its page has changed.
+	 * Subtypes override (extend) the method to add verification when a own field has a
+	 * dependency to an other field. For example the class name input must be verified
+	 * again when the package field changes (check for duplicated class names).
+	 * 
+	 * @param fieldName The name of the field that has changed (field id). For the
+	 * source folder the field id is <code>CONTAINER</code>
 	 */
 	protected void handleFieldChanged(String fieldName) {
 	}	
@@ -295,22 +326,29 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	
 	/**
 	 * Returns the workspace root.
+	 * 
+	 * @return the workspace root
 	 */ 
 	protected IWorkspaceRoot getWorkspaceRoot() {
 		return fWorkspaceRoot;
 	}	
 	
 	/**
-	 * Returns the PackageFragmentRoot corresponding to the current input.
-	 * @return the PackageFragmentRoot or <code>null</code> if the current
-	 * input is not a valid source folder
+	 * Returns the <code>IPackageFragmentRoot</code> that corresponds to the current
+	 * value of the source folder field.
+	 * 
+	 * @return the IPackageFragmentRoot or <code>null</code> if the current source
+	 * folder value is not a valid package fragment root
+	 * 
 	 */ 
 	public IPackageFragmentRoot getPackageFragmentRoot() {
 		return fCurrRoot;
 	}
 
 	/**
-	 * Returns the text of the container field.
+	 * Returns the current text of source folder text field.
+	 * 
+	 * @return the text of the source folder text field
 	 */ 	
 	public String getPackageFragmentRootText() {
 		return fContainerDialogField.getText();
@@ -318,8 +356,11 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	
 	
 	/**
-	 * Sets the current PackageFragmentRoot (model and text field).
-	 * @param canBeModified Selects if the container field can be changed by the user
+	 * Sets the current source folder (model and text field) to the given package
+	 * fragment root.
+	 * 
+	 * @param canBeModified if <code>false</code> the source folder field can 
+	 * not be changed by the user. If <code>true</code> the field is editable
 	 */ 
 	public void setPackageFragmentRoot(IPackageFragmentRoot root, boolean canBeModified) {
 		fCurrRoot= root;

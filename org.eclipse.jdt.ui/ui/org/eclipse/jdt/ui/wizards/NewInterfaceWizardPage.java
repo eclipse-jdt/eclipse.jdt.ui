@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
 import org.eclipse.core.runtime.IStatus;
@@ -20,14 +26,21 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
- * Wizard page for a new interface. This class is not intended to be subclassed.
- * To implement a different kind of new type wizard, extend <code>NewTypeWizardPage</code>.
+ * Wizard page to create a new interface.
+ * <p>
+ * Note: This class is not intended to be subclassed. To implement a different kind of 
+ * a new interface wizard page, extend <code>NewTypeWizardPage</code>.
+ * </p>
+ * 
  * @since 2.0
  */
 public class NewInterfaceWizardPage extends NewTypeWizardPage {
 	
 	private final static String PAGE_NAME= "NewInterfaceWizardPage"; //$NON-NLS-1$
-		
+	
+	/**
+	 * Create a new <code>NewInterfaceWizardPage</code>
+	 */	
 	public NewInterfaceWizardPage() {
 		super(false, PAGE_NAME);
 		
@@ -38,7 +51,11 @@ public class NewInterfaceWizardPage extends NewTypeWizardPage {
 	// -------- Initialization ---------
 
 	/**
-	 * Called from the wizard with the initial selection.
+	 * The wizard owning this page is responsible for calling this method with the
+	 * current selection. The selection is used to initialize the fields of the wizard 
+	 * page.
+	 * 
+	 * @param selection used to initialize the fields
 	 */
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);

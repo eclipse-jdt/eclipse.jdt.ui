@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
 import org.eclipse.core.runtime.IStatus;
@@ -12,6 +18,10 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 
 /**
+ * Base class for wizard page responsible to create Java elements. The class
+ * provides API to update the wizard's statis line and OK button according to
+ * the value of a <code>IStatus</code> object.
+ * 
  * @since 2.0
  */
 public abstract class NewElementWizardPage extends WizardPage {
@@ -19,7 +29,12 @@ public abstract class NewElementWizardPage extends WizardPage {
 	private IStatus fCurrStatus;
 	
 	private boolean fPageVisible;
-	
+
+	/**
+	 * Creates a <code>NewElementWizardPage</code>.
+	 * 
+	 * @param name the wizard page's name
+	 */	
 	public NewElementWizardPage(String name) {
 		super(name);
 		fPageVisible= false;	
@@ -43,7 +58,9 @@ public abstract class NewElementWizardPage extends WizardPage {
 	}	
 
 	/**
-	 * Updates the status line and the ok button depending on the status
+	 * Updates the status line and the ok button according to the given status
+	 * 
+	 * @param status status to apply
 	 */
 	protected void updateStatus(IStatus status) {
 		fCurrStatus= status;
@@ -54,8 +71,11 @@ public abstract class NewElementWizardPage extends WizardPage {
 	}
 	
 	/**
-	 * Updates the status line and the ok button depending on the most severe error.
-	 * In case of two errors with the same severity, the status with lower index is taken.
+	 * Updates the status line and the ok button according to the status evaluate from
+	 * an array of status. The most severe error is taken.  In case that two status with 
+	 * the same severity exists, the status with lower index is taken.
+	 * 
+	 * @param status the array of status
 	 */
 	protected void updateStatus(IStatus[] status) {
 		updateStatus(StatusUtil.getMostSevere(status));

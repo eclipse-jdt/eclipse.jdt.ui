@@ -979,7 +979,7 @@ public class PreferenceConstants {
 	 * 
 	 * @param description a string value describing the JRE library. The description is used
 	 * to indentify the JDR library in the UI
-	 * @param entries an array of class path entries to be encoded
+	 * @param entries an array of classpath entries to be encoded
 	 * 
 	 * @return the encoded string.
 	*/

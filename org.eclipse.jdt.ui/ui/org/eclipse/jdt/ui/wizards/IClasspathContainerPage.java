@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Copyright (c) 2002 International Business Machines Corp. and others.
  * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v0.5 
+ * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v05.html
+ * http://www.eclipse.org/legal/cpl-v10.html
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -15,18 +15,17 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jdt.core.IClasspathEntry;
 
 /**
- * A classpath container page allows the user to create a
- * new or edit an existing classpatch container entry.
+ * A classpath container page allows the user to create a new or edit an 
+ * existing classpatch container entry.
  * <p>
- * Clients should implement this interface and include the 
- * name of their class in an extension contributed to the 
- * jdt.ui's classpath container page extension point 
- * (named <code>"org.eclipse.jdt.ui.classpathContainerPage"</code>) if they 
- * want to provide a classpath container entry 
+ * Clients should implement this interface and include the name of their 
+ * class in an extension contributed to the jdt.ui's classpath container page 
+ * extension point (named <code>org.eclipse.jdt.ui.classpathContainerPage
+ * </code>).
  * </p>
  * <p>
  * Clients implementing this interface may subclass from 
- * org.eclipse.jface.wizard.WizardPage.
+ * <code>org.eclipse.jface.wizard.WizardPage</code>.
  * </p>
  *
  * @since 2.0
@@ -35,30 +34,32 @@ public interface IClasspathContainerPage extends IWizardPage {
 	
 	/**
 	 * Called when the classpath container wizard is closed by selecting 
-	 * the finish button.
-	 * Implementers may store the page result (new/changed classpath 
-	 * entry returned in getSelection) here.
-	 * @param Return if the operation was succesful. Only when returned
+	 * the finish button. Implementers typically override this method to 
+	 * store the page result (new/changed classpath entry returned in 
+	 * getSelection) into its model.
+	 * 
+	 * @return if the operation was succesful. Only when returned
 	 * <code>true</code>, the wizard will close.
 	 */
 	public boolean finish();
 	
 	/**
-	 * Returns the classpath container entry edited or created on the page 
-	 * after the wizard has closed.
-	 * If an entry was set with setSelection, the returned entry
-	 * will replace this entry.
-	 * The entry must be of kind IClasspathEntry.CPE_CONTAINER
+	 * Returns the edited or created classpath container entry. This method
+	 * may return <code>null</code> if no classpath container entry exists.
+	 * The returned classpath entry is of kind <code>IClasspathEntry.CPE_CONTAINER
+	 * </code>.
 	 * 
 	 * @return the classpath entry edited or created on the page.
 	 */
 	public IClasspathEntry getSelection();
 	
 	/**
-	 * Sets the classpath container entry to be edited or
-	 * <code>null</code> if a new entry should be created.
+	 * Sets the classpath container entry to be edited or <code>null</code> 
+	 * if a new entry should be created.
 	 * 
-	 * @param containerEntry the classpath entry to edit or <code>null</code>
+	 * @param containerEntry the classpath entry to edit or <code>null</code>.
+	 * If unequals <code>null</code> then the classpath entry must be of
+	 * kind <code>IClasspathEntry.CPE_CONTAINER</code>
 	 */
 	public void setSelection(IClasspathEntry containerEntry);
 		

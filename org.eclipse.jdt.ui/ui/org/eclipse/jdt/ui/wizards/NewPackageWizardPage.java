@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
@@ -38,8 +44,13 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
- * Wizard page for a new class. This class is not intended to be subclassed.
- * To implement a different new package wizard, extend <code>ContainerPage</code>.
+ * Wizard page to create a new package. 
+ * 
+ * <p>
+ * Note: This class is not intended to be subclassed. To implement a different kind of 
+ * a new package wizard page, extend <code>NewContainerWizardPage</code>.
+ * </p>
+ * 
  * @since 2.0
  */
 public class NewPackageWizardPage extends NewContainerWizardPage {
@@ -57,6 +68,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	
 	private IPackageFragment fCreatedPackageFragment;
 	
+	/**
+	 * Creates a new <code>NewPackageWizardPage</code>
+	 */
 	public NewPackageWizardPage() {
 		super(PAGE_NAME);
 		
@@ -76,9 +90,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	// -------- Initialization ---------
 
-
 	/**
-	 * Should be called from the wizard with the input element.
+	 * The wizard owning this page is responsible for calling this method with the
+	 * current selection. The selection is used to initialize the fields of the wizard 
+	 * page.
+	 * 
+	 * @param selection used to initialize the fields
 	 */
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);	
@@ -120,8 +137,8 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_PACKAGE_WIZARD_PAGE);
 	}
 	
-	/*
-	 * @see WizardPage#becomesVisible
+	/**
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
 		if (visible) {
@@ -131,7 +148,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Sets the focus on the package name.
+	 * Sets the focus to the package name input field.
 	 */		
 	protected void setFocus() {
 		fPackageDialogField.setFocus();
@@ -160,10 +177,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		
 	// -------- update message ----------------		
 
-	/**
-	 * Called when a dialog field on this page changed.
-	 * @see NewContainerCreationPage#fieldUpdated
-	 */	
+	/*
+	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(String)
+	 */
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (fieldName == CONTAINER) {
@@ -224,15 +240,21 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		return status;
 	}
 
-	/*
-	 * Returns the content of the package field.
+	/**
+	 * Returns the content of the package input field.
+	 * 
+	 * @returns the content of the package input field
 	 */
 	public String getPackageText() {
 		return fPackageDialogField.getText();
 	}
 
-	/*
-	 * Sets the content of the package text.
+	/**
+	 * Sets the content of the package input field to the given value.
+	 * 
+	 * @param str the new package input field text
+	 * @param canBeModified if <code>true</code> the package input
+	 * field can be modified; otherwise it is read-only.
 	 */	
 	public void setPackageText(String str, boolean canBeModified) {
 		fPackageDialogField.setText(str);
@@ -245,6 +267,8 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * Returns a runnable that creates a package using the current settings.
+	 * 
+	 * @return the runnable that creates the new package
 	 */	
 	public IRunnableWithProgress getRunnable() {
 		return new IRunnableWithProgress() {
@@ -259,7 +283,11 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Returns the created package fragment. Only valid after creation has been performed.
+	 * Returns the created package fragment. This method only returns a valid value
+	 * after the runnable returned from <code>getRunnable</code> has been 
+	 * executed.
+	 * 
+	 * @return the create package fragment
 	 */	
 	public IPackageFragment getNewPackageFragment() {
 		return fCreatedPackageFragment;

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
@@ -30,11 +40,14 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
 /**
  * Standard wizard page for creating new Java projects. This page can be used in 
- * project creation wizards for projects and in capability install wizards. The page
- * shows UI to configure the project with a Java build path and output location. On
- * finish the page will also configure the Java nature. 
- * This is a replace for <code>NewJavaProjectWizardPage</code> with a cleaner API.
-  */
+ * project creation wizards. The page shows UI to configure the project with a Java 
+ * build path and output location. On finish the page will also configure the Java nature.
+ * <p>
+ * This is a replacement for <code>NewJavaProjectWizardPage</code> with a cleaner API.
+ * </p>
+ * 
+ * @since 2.0
+ */
 public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 
 	private static final String PAGE_NAME= "JavaCapabilityConfigurationPage"; //$NON-NLS-1$
@@ -43,8 +56,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	private BuildPathsBlock fBuildPathsBlock;
 	
 	/**
-	 * Creates a wizard page that can be used in a Java project creation wizard or
-	 * in a capability install wizard.
+	 * Creates a wizard page that can be used in a Java project creation wizard.
 	 * It contains UI to configure a the classpath and the output folder.
 	 * 
 	 * <p>
@@ -73,8 +85,8 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * The default classpath entries must correspond the the given project.
 	 * </p>
 	 * <p>
-	 * The caller of this method is responsible for creating the underlying project. The page will create the output folder
-	 * and source and library folders if required.
+	 * The caller of this method is responsible for creating the underlying project. The page will create the output,
+	 * source and library folders if required.
 	 * </p>
 	 * <p>
 	 * The project does not have to exist at the time of initialization, but must exist when executing the runnable
@@ -107,22 +119,30 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	}
 		
 	/**
-	 * Returns the currently configured output location. Note that the returned path might not be a valid path.
+	 * Returns the currently configured output location. Note that the returned path 
+	 * might not be a valid path.
+	 * 
+	 * @return the currently configured output location
 	 */
 	public IPath getOutputLocation() {
 		return fBuildPathsBlock.getOutputLocation();
 	}
 
 	/**
-	 * Returns the currently configured class path. Note that the class path might not be valid.
+	 * Returns the currently configured classpath. Note that the classpath might 
+	 * not be valid.
+	 * 
+	 * @return the currently configured classpath
 	 */	
 	public IClasspathEntry[] getRawClassPath() {
 		return fBuildPathsBlock.getRawClassPath();
 	}
 	
 	/**
-	 * Returns the Java project that was passed in <code>init</code> or <code>null</code> if the page has not
-	 * been initialized yet.
+	 * Returns the Java project that was passed in <code>init</code> or <code>null</code> if the 
+	 * page has not been initialized yet.
+	 * 
+	 * @return the managed Java project or <code>null</code>
 	 */	
 	public IJavaProject getJavaProject() {
 		return fJavaProject;
@@ -130,11 +150,12 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	
 
 	/**
-	 * Returns the runnable that will create the Java project or <code>null</code> if the page has not been initialized.
-	 * The runnable sets the project's classpath and output location to the values configured in the page and
-	 * adds the Java nature if not yet set. It assumes that the project is created and opened.
+	 * Returns the runnable that will create the Java project or <code>null</code> if the page has 
+	 * not been initialized. The runnable sets the project's classpath and output location to the values 
+	 * configured in the page and adds the Java nature if not set yet. The method requires that the 
+	 * project is created and opened.
 	 *
-	 * @return the runnable
+	 * @return the runnable that creates the new Java project
 	 */		
 	public IRunnableWithProgress getRunnable() {
 		if (getJavaProject() != null) {
@@ -152,7 +173,10 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	}
 	
 	/**
-	 * Adds the Java nature to the project (if not yet set) and configures the build class paths
+	 * Adds the Java nature to the project (if not set yet) and configures the build classpath.
+	 * 
+	 * @param monitor a progress monitor to report progress or <code>null</code> if
+	 * progress reporting is not desired
 	 */
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		if (monitor == null) {

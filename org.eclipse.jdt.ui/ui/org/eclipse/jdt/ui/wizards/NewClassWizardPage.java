@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
 import java.util.ArrayList;
@@ -34,8 +40,12 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
 
 /**
- * Wizard page for creating a new class. This class is not intended to be subclassed.
- * To implement a different kind of type wizard, extend <code>NewTypeWizardPage</code>.
+ * Wizard page to  create a new class. 
+ * <p>
+ * Note: This class is not intended to be subclassed. To implement a different kind of 
+ * a new class wizard page, extend <code>NewTypeWizardPage</code>.
+ * </p>
+ * 
  * @since 2.0
  */
 public class NewClassWizardPage extends NewTypeWizardPage {
@@ -48,6 +58,9 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	
 	private SelectionButtonDialogFieldGroup fMethodStubsButtons;
 	
+	/**
+	 * Creates a new <code>NewClassWizardPage</code>
+	 */
 	public NewClassWizardPage() {
 		super(true, PAGE_NAME);
 		
@@ -63,8 +76,13 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	}
 	
 	// -------- Initialization ---------
+	
 	/**
-	 * Called from the wizard with the initial selection.
+	 * The wizard owning this page is responsible for calling this method with the
+	 * current selection. The selection is used to initialize the fields of the wizard 
+	 * page.
+	 * 
+	 * @param selection used to initialize the fields
 	 */
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);
@@ -171,32 +189,41 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	}
 	
 	/**
-	 * Returns the current selection of the 'Create Main' checkbox.
+	 * Returns the current selection state of the 'Create Main' checkbox.
+	 * 
+	 * @return the selection state of the 'Create Main' checkbox
 	 */
 	public boolean isCreateMain() {
 		return fMethodStubsButtons.isSelected(0);
 	}
 
 	/**
-	 * Returns the current selection of the 'Create Constructors' checkbox.
+	 * Returns the current selection state of the 'Create Constructors' checkbox.
+	 * 
+	 * @return the selection state of the 'Create Constructors' checkbox
 	 */
 	public boolean isCreateConstructors() {
 		return fMethodStubsButtons.isSelected(1);
 	}
 	
 	/**
-	 * Returns the current selection of the 'Create inherited abstract methods' checkbox.
+	 * Returns the current selection state of the 'Create inherited abstract methods' 
+	 * checkbox.
+	 * 
+	 * @return the selection state of the 'Create inherited abstract methods' checkbox
 	 */
 	public boolean isCreateInherited() {
 		return fMethodStubsButtons.isSelected(2);
 	}
 
 	/**
-	 * Sets the selection of the method stub buttons.
-	 * @param createMain Selection of the 'Create Main' checkbox.
-	 * @param createConstructors Selection of the 'Create Constructors' checkbox.
-	 * @param createInherited Selection of the 'Create inherited abstract methods' checkbox.
-	 * @param canBeModified Selects if the method stub buttons can be changed by the user
+	 * Sets the selection state of the method stub checkboxes.
+	 * 
+	 * @param createMain initial selection state of the 'Create Main' checkbox.
+	 * @param createConstructors initial selection state of the 'Create Constructors' checkbox.
+	 * @param createInherited initial selection state of the 'Create inherited abstract methods' checkbox.
+	 * @param canBeModified if <code>true</code> the method stub checkboxes can be changed by 
+	 * the user. If <code>false</code> the buttons are "read-only"
 	 */
 	public void setMethodStubSelection(boolean createMain, boolean createConstructors, boolean createInherited, boolean canBeModified) {
 		fMethodStubsButtons.setSelection(0, createMain);
