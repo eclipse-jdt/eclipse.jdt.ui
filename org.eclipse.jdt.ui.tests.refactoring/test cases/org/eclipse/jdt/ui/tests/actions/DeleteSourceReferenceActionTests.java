@@ -214,5 +214,16 @@ public class DeleteSourceReferenceActionTests extends RefactoringTest{
 		SourceReferenceTestUtil.delete(elems);
 		check();
 	}
+
+	public void test18() throws Exception{
+//		printTestDisabledMessage("test for bug#16314");		
+//		if (true)
+//			return;
+		
+		Object elem0= fCuA.getType("A").getMethod("fs", new String[0]);
+		Object[] elems= new Object[]{elem0};
+		SourceReferenceTestUtil.delete(elems);
+		check();
+	}
 	
 }
