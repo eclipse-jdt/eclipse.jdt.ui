@@ -5,7 +5,7 @@ public class A_test952 {
 		extracted();
 		extracted();
 	}
-	
+
 	protected void extracted() {
 		/*[*/bar();/*]*/
 	}

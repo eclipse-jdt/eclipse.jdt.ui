@@ -34,8 +34,10 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -67,8 +69,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class ASTNodes {
@@ -272,6 +276,19 @@ public class ASTNodes {
 		return null;
 	}
 	
+	public static ChildListPropertyDescriptor getBodyDeclarationsProperty(ASTNode node) {
+		if (node instanceof AbstractTypeDeclaration) {
+			return ((AbstractTypeDeclaration)node).getBodyDeclarationsProperty();
+		} else if (node instanceof AnonymousClassDeclaration) {
+			return AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
+		} else if (node instanceof EnumConstantDeclaration) {
+			return EnumConstantDeclaration.BODY_DECLARATIONS_PROPERTY;
+		}
+		// should not happen.
+		Assert.isTrue(false); 
+		return null;
+	}
+	
 	public static String getTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();
 		ASTVisitor visitor= new ASTVisitor() {
@@ -345,6 +362,7 @@ public class ASTNodes {
 		return locationInParent == IfStatement.THEN_STATEMENT_PROPERTY
 			|| locationInParent == IfStatement.ELSE_STATEMENT_PROPERTY
 			|| locationInParent == ForStatement.BODY_PROPERTY
+			|| locationInParent == EnhancedForStatement.BODY_PROPERTY
 			|| locationInParent == WhileStatement.BODY_PROPERTY
 			|| locationInParent == DoStatement.BODY_PROPERTY;
 	}
@@ -502,11 +520,14 @@ public class ASTNodes {
 
 	public static ITypeBinding getDeclaringType(ASTNode declaration) {
 		ASTNode node= declaration;
-		while (node != null) {
-			if (node instanceof AbstractTypeDeclaration)
-				return ((AbstractTypeDeclaration) node).resolveBinding();
-			else if (node instanceof AnonymousClassDeclaration)
-				return ((AnonymousClassDeclaration) node).resolveBinding();
+		while(node != null) {
+			if (node instanceof AbstractTypeDeclaration) {
+				return ((AbstractTypeDeclaration)node).resolveBinding();
+			} else if (node instanceof AnonymousClassDeclaration) {
+				return ((AnonymousClassDeclaration)node).resolveBinding();
+			} else if (node instanceof EnumConstantDeclaration) {
+				Assert.isTrue(false, "Not implemented yet");
+			}
 			node= node.getParent();
 		}
 		return null;
@@ -515,15 +536,10 @@ public class ASTNodes {
 	/**
 	 * Expands the range of the node passed in <code>nodes</code> to cover all comments
 	 * determined by <code>start</code> and <code>length</code> in the given text buffer. 
-	 * @param nodes
-	 * @param buffer
-	 * @param start
-	 * @param length
-	 * @throws CoreException
 	 */
-	public static void expandRange(ASTNode[] nodes, TextBuffer buffer, int start, int length) throws CoreException {
+	public static void expandRange(ASTNode[] nodes, IDocument document, int start, int length) throws CoreException, BadLocationException {
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		scanner.setSource(buffer.getContent(start, length).toCharArray());
+		scanner.setSource(document.get(start, length).toCharArray());
 		TokenScanner tokenizer= new TokenScanner(scanner);
 		ASTNode node= nodes[0]; 
 		int pos= tokenizer.getNextStartOffset(0, false);
@@ -809,6 +825,4 @@ public class ASTNodes {
 		}
 		return null;
 	}
-	
-	
 }

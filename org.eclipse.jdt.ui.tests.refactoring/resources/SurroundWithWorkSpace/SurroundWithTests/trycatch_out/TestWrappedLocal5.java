@@ -7,7 +7,7 @@ public class TestWrappedLocal5 {
 
 	public void foo() {
 		File file= null;
-		
+
 		/*[*/int i, x;
 		try {
 			file.toURL();/*]*/

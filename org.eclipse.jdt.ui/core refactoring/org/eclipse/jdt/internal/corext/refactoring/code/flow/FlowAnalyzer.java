@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -90,7 +91,6 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
 /**
@@ -672,13 +672,21 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	public void endVisit(SimpleName node) {
 		if (skipNode(node) || node.isDeclaration())
 			return;
-		IVariableBinding binding= ASTNodes.getLocalVariableBinding(node);
-		if (binding == null)
-			return;
-		setFlowInfo(node, new LocalFlowInfo(
-			binding,
-			FlowInfo.READ,
-			fFlowContext));
+		IBinding binding= node.resolveBinding();
+		if (binding instanceof IVariableBinding) {
+			IVariableBinding variable= (IVariableBinding)binding;
+			if (!variable.isField()) {
+				setFlowInfo(node, new LocalFlowInfo(
+					variable,
+					FlowInfo.READ,
+					fFlowContext));
+			}
+		} else if (binding instanceof ITypeBinding) {
+			ITypeBinding type= (ITypeBinding)binding;
+			if (type.isTypeVariable()) {
+				setFlowInfo(node, new TypeVariableFlowInfo(type, fFlowContext));
+			}
+		}
 	}
 	
 	public void endVisit(SimpleType node) {

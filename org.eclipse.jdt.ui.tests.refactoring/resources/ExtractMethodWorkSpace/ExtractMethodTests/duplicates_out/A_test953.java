@@ -8,7 +8,7 @@ public class A_test953 {
 		int j= 10;
 		extracted(j);
 	}
-	
+
 	protected void extracted(int i) {
 		/*[*/bar(i);/*]*/
 	}

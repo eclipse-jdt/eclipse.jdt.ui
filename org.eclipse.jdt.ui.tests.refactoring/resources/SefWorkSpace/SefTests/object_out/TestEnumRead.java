@@ -3,9 +3,9 @@ package object_out;
 public enum TestEnumRead {
 	TEST;
 	private String field;
-	
+
 	public void foo() {
-		String s= getField();
+		String s = getField();
 	}
 
 	public void setField(String field) {
@@ -16,4 +16,3 @@ public enum TestEnumRead {
 		return field;
 	}
 }
-

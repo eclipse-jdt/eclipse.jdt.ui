@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -37,6 +36,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
 	private static final boolean BUG_79512= true;
+	private static final boolean BUG_79752= true;
+	private static final boolean BUG_79760= true;
 
 	private static ExtractMethodTestSetup fgTestSetup;
 	
@@ -49,10 +50,6 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		return fgTestSetup;
 	}
 
-	protected IPackageFragmentRoot getRoot() {
-		return fgTestSetup.getRoot();
-	}
-	
 	protected String getResourceLocation() {
 		return "ExtractMethodWorkSpace/ExtractMethodTests/";
 	}
@@ -184,6 +181,14 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	protected void destinationTest(int destination) throws Exception {
 		performTest(fgTestSetup.getDestinationPackage(), "A", COMPARE_WITH_OUTPUT, "destination_out",
 			null, null, destination);
+	}
+	
+	protected void genericTest() throws Exception {
+		performTest(fgTestSetup.getGenericsPackage(), "A", COMPARE_WITH_OUTPUT, "generics_out");
+	}
+	
+	protected void enumTest() throws Exception {
+		performTest(fgTestSetup.getEnumsPackage(), "A", COMPARE_WITH_OUTPUT, "enums_out");
 	}
 	
 	//=====================================================================================
@@ -875,7 +880,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	public void test363() throws Exception {
 		if (BUG_79512) {
-			System.out.println("test363 disabled (bug 79512)");
+			System.out.println("test 363 disabled due to bug 79512");
 			return;
 		}
 		validSelectionTestChecked();
@@ -886,6 +891,22 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test365() throws Exception {
+		validSelectionTestChecked();
+	}
+	
+	public void test366() throws Exception {
+		if (BUG_79760) {
+			System.out.println("test 366 disabled due to bug 79760");
+			return;
+		}
+		validSelectionTestChecked();
+	}
+	
+	public void test367() throws Exception {
+		if (BUG_79760) {
+			System.out.println("test 367 disabled due to bug 79760");
+			return;
+		}
 		validSelectionTestChecked();
 	}
 	
@@ -1016,6 +1037,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test508() throws Exception {
+		if (BUG_79760) {
+			System.out.println("test 508 disabled due to bug 79760");
+			return;
+		}
 		localsTest();
 	}
 	
@@ -1032,6 +1057,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 		
 	public void test512() throws Exception {
+		if (BUG_79760) {
+			System.out.println("test 512 disabled due to bug 79760");
+			return;
+		}
 		localsTest();
 	}
 	
@@ -1635,6 +1664,66 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	public void test1051() throws Exception {
 		destinationTest(1);
+	}
+	
+	//---- Test Generics --------------------------------------------------
+	
+	public void test1100() throws Exception {
+		genericTest();
+	}
+	
+	public void test1101() throws Exception {
+		genericTest();
+	}
+	
+	public void test1102() throws Exception {
+		genericTest();
+	}
+	
+	public void test1103() throws Exception {
+		genericTest();
+	}
+	
+	public void test1104() throws Exception {
+		genericTest();
+	}
+	
+	public void test1105() throws Exception {
+		genericTest();
+	}
+	
+	public void test1106() throws Exception {
+		genericTest();
+	}
+	
+	public void test1107() throws Exception {
+		genericTest();
+	}
+	
+	public void test1108() throws Exception {
+		if (BUG_79512) {
+			System.out.println("test 1108 disabled due to bug 79512");
+			return;
+		}
+		genericTest();
+	}
+	
+	//---- Test enums ---------------------------------
+	
+	public void test1150() throws Exception {
+		enumTest();
+	}
+	
+	public void test1151() throws Exception {
+		enumTest();
+	}
+	
+	public void test1152() throws Exception {
+		if (BUG_79752) {
+			System.out.println("test 1152 disabled due to bug 79752");
+			return;
+		}
+		enumTest();
 	}
 	
 	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod

@@ -11,15 +11,17 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -33,6 +35,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
@@ -40,6 +43,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -84,6 +88,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	
 	private IVariableBinding[] fArguments;
 	private IVariableBinding[] fMethodLocals;
+	private ITypeBinding[] fTypeVariables;
 	
 	private IVariableBinding fReturnValue;
 	private IVariableBinding[] fCallerLocals;
@@ -150,6 +155,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	
 	public boolean getForceStatic() {
 		return fForceStatic;
+	}
+	
+	public ITypeBinding[] getTypeVariables() {
+		return fTypeVariables;
 	}
 	
 	//---- Activation checking ---------------------------------------------------------------------------
@@ -335,19 +344,58 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 	private void computeInput() {
 		int argumentMode= FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN;
-		fArguments= fInputFlowInfo.get(fInputFlowContext, argumentMode);
-		removeSelectedDeclarations(fArguments);
-		fMethodLocals= fInputFlowInfo.get(fInputFlowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL);
-		removeSelectedDeclarations(fMethodLocals);
+		fArguments= removeSelectedDeclarations(fInputFlowInfo.get(fInputFlowContext, argumentMode));
+		fMethodLocals= removeSelectedDeclarations(fInputFlowInfo.get(fInputFlowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL));
+		fTypeVariables= computeTypeVariables(fInputFlowInfo.getTypeVariables());
 	}
 	
-	private void removeSelectedDeclarations(IVariableBinding[] bindings) {
+	private IVariableBinding[] removeSelectedDeclarations(IVariableBinding[] bindings) {
+		List result= new ArrayList(bindings.length);
 		Selection selection= getSelection();
 		for (int i= 0; i < bindings.length; i++) {
 			ASTNode decl= ((CompilationUnit)fEnclosingBodyDeclaration.getRoot()).findDeclaringNode(bindings[i]);
-			if (selection.covers(decl))
-				bindings[i]= null;
+			if (!selection.covers(decl))
+				result.add(bindings[i]);
 		}
+		return (IVariableBinding[])result.toArray(new IVariableBinding[result.size()]);
+	}
+	
+	private ITypeBinding[] computeTypeVariables(ITypeBinding[] bindings) {
+		Selection selection= getSelection();
+		Set result= new HashSet();
+		// first remove all type variables that come from outside of the method
+		// or are covered by the selection
+		CompilationUnit compilationUnit= (CompilationUnit)fEnclosingBodyDeclaration.getRoot();
+		for (int i= 0; i < bindings.length; i++) {
+			ASTNode decl= findDeclaringNode(compilationUnit, bindings[i]);
+			if (decl == null || (!selection.covers(decl) && decl.getParent() instanceof MethodDeclaration))
+				result.add(bindings[i]);
+		}
+		// all all type variables which are needed since a local variable uses it
+		for (int i= 0; i < fArguments.length; i++) {
+			IVariableBinding arg= fArguments[i];
+			ITypeBinding type= arg.getType();
+			if (type != null && type.isTypeVariable()) {
+				ASTNode decl= findDeclaringNode(compilationUnit, type);
+				if (decl == null || (!selection.covers(decl) && decl.getParent() instanceof MethodDeclaration))
+					result.add(type);
+			}
+		}
+		return (ITypeBinding[])result.toArray(new ITypeBinding[result.size()]);
+	}
+	
+	private static ASTNode findDeclaringNode(CompilationUnit root, final ITypeBinding binding) {
+		if (!binding.isTypeVariable())
+			return root.findDeclaringNode(binding);
+		final ASTNode[] result= new ASTNode[1];
+		root.accept(new ASTVisitor() {
+			public boolean visit(TypeParameter node) {
+				if (node.resolveBinding().isEqualTo(binding))
+					result[0]= node;
+				return false;
+			}
+		});
+		return result[0];
 	}
 	
 	private void computeOutput(RefactoringStatus status) {

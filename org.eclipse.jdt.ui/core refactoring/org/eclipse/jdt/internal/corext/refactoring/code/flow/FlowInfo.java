@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -37,7 +38,7 @@ public abstract class FlowInfo {
 	public static final int READ= 				1 << 1;
 	public static final int READ_POTENTIAL=		1 << 2;
 	public static final int WRITE= 				1 << 3;
-	public static final int WRITE_POTENTIAL=     1 << 4;
+	public static final int WRITE_POTENTIAL=    1 << 4;
 	public static final int UNKNOWN= 			1 << 5;
 	
 	// Table to merge access modes for condition statements (e.g branch[x] || branch[y]). 
@@ -86,8 +87,9 @@ public abstract class FlowInfo {
 
 	protected int fReturnKind;
 	protected int[] fAccessModes;
-	protected HashSet fBranches;
-	protected HashSet fExceptions;
+	protected Set fBranches;
+	protected Set fExceptions;
+	protected Set fTypeVariables;
 	
 	protected FlowInfo() {
 		this(UNDEFINED);
@@ -117,11 +119,13 @@ public abstract class FlowInfo {
 	protected void mergeConditional(FlowInfo info, FlowContext context) {
 		mergeAccessModeConditional(info, context);
 		mergeExecutionFlowConditional(info, context);
+		mergeTypeVariablesConditional(info, context);
 	}
 	
 	protected void mergeSequential(FlowInfo info, FlowContext context) {
 		mergeAccessModeSequential(info, context);
 		mergeExecutionFlowSequential(info, context);
+		mergeTypeVariablesSequential(info, context);
 	}
 	
 	//---- Return Kind ------------------------------------------------------------------
@@ -164,7 +168,7 @@ public abstract class FlowInfo {
 		return fBranches != null && !fBranches.isEmpty();
 	}
 	
-	protected HashSet getBranches() {
+	protected Set getBranches() {
 		return fBranches;
 	}
 	
@@ -233,6 +237,28 @@ public abstract class FlowInfo {
 		}
 	}
 	
+	//---- Type parameters -----------------------------------------------------------------
+	
+	public ITypeBinding[] getTypeVariables() {
+		if (fTypeVariables == null)
+			return new ITypeBinding[0];
+		return (ITypeBinding[])fTypeVariables.toArray(new ITypeBinding[fTypeVariables.size()]);
+	}
+	
+	protected void addTypeVariable(ITypeBinding typeParameter) {
+		if (fTypeVariables == null)
+			fTypeVariables= new HashSet();
+		fTypeVariables.add(typeParameter);
+	}
+	
+	private void mergeTypeVariablesSequential(FlowInfo otherInfo, FlowContext context) {
+		fTypeVariables= mergeSets(fTypeVariables, otherInfo.fTypeVariables);
+	}
+	
+	private void mergeTypeVariablesConditional(FlowInfo otherInfo, FlowContext context) {
+		fTypeVariables= mergeSets(fTypeVariables, otherInfo.fTypeVariables);
+	}
+	
 	//---- Execution flow -------------------------------------------------------------------
 	
 	private void mergeExecutionFlowSequential(FlowInfo otherInfo, FlowContext context) {
@@ -251,14 +277,14 @@ public abstract class FlowInfo {
 	}
 	
 	private void mergeBranches(FlowInfo otherInfo, FlowContext context) {
-		fBranches= mergeHashSets(fBranches, otherInfo.fBranches);
+		fBranches= mergeSets(fBranches, otherInfo.fBranches);
 	}
 
 	private void mergeExceptions(FlowInfo otherInfo, FlowContext context) {
-		fExceptions= mergeHashSets(fExceptions, otherInfo.fExceptions);
+		fExceptions= mergeSets(fExceptions, otherInfo.fExceptions);
 	}
 	
-	private static HashSet mergeHashSets(HashSet thisSet, HashSet otherSet) {
+	private static Set mergeSets(Set thisSet, Set otherSet) {
 		if (otherSet != null) {
 			if (thisSet == null) {
 				thisSet= otherSet;

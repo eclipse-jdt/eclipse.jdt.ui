@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.surround;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,9 +19,16 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -33,15 +39,24 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -49,22 +64,18 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Surround a set of statements with a try/catch block.
@@ -87,12 +98,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 	private ICompilationUnit fCUnit;
 	private CompilationUnit fRootNode;
-	private OldASTRewrite fRewriter;
+	private ASTRewrite fRewriter;
 	private ImportRewrite fImportRewrite;
 	private CodeScopeBuilder.Scope fScope;
-	private ASTNode fSelectedNode;
-	private List fStatementsOfSelectedNode;
-	private List fTryBody;
+	private ASTNode[] fSelectedNodes;
 
 	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
 		fCUnit= cu;
@@ -160,62 +169,47 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		final String NN= ""; //$NON-NLS-1$
-		TextBuffer buffer= null;
+		pm.beginTask(NN, 2);
+		// This is cheap since the compilation unit is already open in a editor.
+		IPath path= getFile().getFullPath();
+		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 		try {
+			bufferManager.connect(path, new SubProgressMonitor(pm, 1));
+			IDocument document= bufferManager.getTextFileBuffer(path).getDocument();
 			final CompilationUnitChange result= new CompilationUnitChange(getName(), fCUnit);
 			if (fLeaveDirty)
 				result.setSaveMode(TextFileChange.LEAVE_DIRTY);
 			MultiTextEdit root= new MultiTextEdit();
 			result.setEdit(root);
-			buffer= TextBuffer.acquire(getFile());
-			ASTNodes.expandRange(fAnalyzer.getSelectedNodes(), buffer, fSelection.getOffset(), fSelection.getLength());
-			fRewriter= new OldASTRewrite(fAnalyzer.getEnclosingBodyDeclaration());
+			ASTNodes.expandRange(fAnalyzer.getSelectedNodes(), document, fSelection.getOffset(), fSelection.getLength());
+			fRewriter= ASTRewrite.create(fAnalyzer.getEnclosingBodyDeclaration().getAST());
 			fImportRewrite= new ImportRewrite(fCUnit);
 			
 			fScope= CodeScopeBuilder.perform(fAnalyzer.getEnclosingBodyDeclaration(), fSelection).
 				findScope(fSelection.getOffset(), fSelection.getLength());
 			fScope.setCursor(fSelection.getOffset());
 			
-			computeTargetNode();
+			fSelectedNodes= fAnalyzer.getSelectedNodes();
 			
-			fTryBody= new ArrayList(2);
-			List newStatements= createLocals();
-			newStatements.add(createTryCatchStatement(buffer.getLineDelimiter()));
-			if (newStatements.size() == 1) {
-				fRewriter.replace(fSelectedNode, (ASTNode)newStatements.get(0), null);
-			} else {
-				List container= getSelectedNodeContainer();
-				if (selectedNodeIsDeclaration()) {
-					int index= container.indexOf(fSelectedNode);
-					for (Iterator iter= newStatements.iterator(); iter.hasNext();) {
-						ASTNode element= (ASTNode)iter.next();
-						fRewriter.markAsInserted(element);
-						container.add(++index, element);
-					}
-				} else {
-					if (newStatements.isEmpty()) {
-						fRewriter.remove(fSelectedNode, null);
-					} else {
-						Statement[] collapsedTargetStatements= ((Statement[])newStatements.toArray(new Statement[newStatements.size()]));
-						fRewriter.replace(fSelectedNode, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements), null);
-					}
-				}
-			}
+			StatementRewrite statementRewrite= new StatementRewrite(fRewriter, fAnalyzer.getSelectedNodes());
+			List replacements= createTryCatchStatement(document.getLineDelimiter(0));
+			statementRewrite.replace((ASTNode[])replacements.toArray(new ASTNode[replacements.size()]), null);
 			
 			if (!fImportRewrite.isEmpty()) {
-				TextEdit edit= fImportRewrite.createEdit(buffer.getDocument());
+				TextEdit edit= fImportRewrite.createEdit(document);
 				root.addChild(edit);
 				result.addTextEditGroup(new TextEditGroup(NN, new TextEdit[] {edit} ));
 			}
-			MultiTextEdit change= new MultiTextEdit();
-			fRewriter.rewriteNode(buffer, change);
+			TextEdit change= fRewriter.rewriteAST(document, null);
 			root.addChild(change);
 			result.addTextEditGroup(new TextEditGroup(NN, new TextEdit[] {change} ));
 			return result;
+		} catch (BadLocationException e) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+				e.getMessage(), e));
 		} finally {
-			fRewriter.removeModifications();
-			if (buffer != null)
-				TextBuffer.release(buffer);
+			bufferManager.disconnect(path, new SubProgressMonitor(pm, 1));
+			pm.done();
 		}
 	}
 	
@@ -223,97 +217,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		return fRootNode.getAST();
 	}
 	
-	private void computeTargetNode() {
-		ASTNode[] nodes= fAnalyzer.getSelectedNodes();
-		if (nodes.length == 1) {
-			fSelectedNode= nodes[0];
-		} else {
-			List container= ASTNodes.getContainingList(nodes[0]);
-			fSelectedNode= fRewriter.collapseNodes(container, container.indexOf(nodes[0]), nodes.length);
-		}
-	}
-	
-	private List getStatementsOfSelectedNode() {
-		if (fStatementsOfSelectedNode != null)
-			return fStatementsOfSelectedNode;
-			
-		if (fRewriter.isCollapsed(fSelectedNode)) {
-			fStatementsOfSelectedNode= ((Block) fSelectedNode).statements();
-		} else {
-			fStatementsOfSelectedNode= ASTNodes.getContainingList(fSelectedNode);
-			if (fStatementsOfSelectedNode == null) {
-				Block block= getAST().newBlock();
-				fStatementsOfSelectedNode= block.statements();
-				fStatementsOfSelectedNode.add(fRewriter.createCopyTarget(fSelectedNode));
-				fRewriter.remove(fSelectedNode, null);
-			}
-		}
-		return fStatementsOfSelectedNode;
-	}
-	
-	private List getSelectedNodeContainer() {
-		List result= ASTNodes.getContainingList(fSelectedNode);
-		if (result != null)
-			return result;
-		return getStatementsOfSelectedNode();
-	}
-	
-	private List createLocals() {
-		List result= new ArrayList(3);
-		final List locals= new ArrayList(Arrays.asList(fAnalyzer.getAffectedLocals()));
-		if (locals.size() > 0) {
-			final VariableDeclarationStatement[] statements= getStatements(locals);
-			for (int i= 0; i < statements.length; i++) {
-				VariableDeclarationStatement st= statements[i];
-				result.addAll(handle(st, locals));
-			}
-		}
-		return result;
-	}
-	
-	private VariableDeclarationStatement[] getStatements(List locals) {
-		List result= new ArrayList(locals.size());
-		for (int i= 0; i < locals.size(); i++) {
-			ASTNode parent= ((ASTNode)locals.get(i)).getParent();
-			if (parent instanceof VariableDeclarationStatement && !result.contains(parent))
-				result.add(parent);
-		}
-		return (VariableDeclarationStatement[])result.toArray(new VariableDeclarationStatement[result.size()]);
-	}
-	
-	private List handle(VariableDeclarationStatement statement, List locals) {
-		boolean isSelectedNode= statement == fSelectedNode;
-		List result= new ArrayList();
-		List fragments= statement.fragments();
-		result.add(fRewriter.createCopyTarget(statement));
-		AST ast= getAST();
-		List newAssignments= new ArrayList(2);
-		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
-			VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
-			Expression initializer= fragment.getInitializer();
-			if (initializer != null) {
-				Assignment assignment= ast.newAssignment();
-				assignment.setLeftHandSide((Expression)ASTNode.copySubtree(ast, fragment.getName()));
-				assignment.setRightHandSide((Expression)fRewriter.createCopyTarget(initializer));
-				fRewriter.remove(initializer, null);
-				ExpressionStatement es= ast.newExpressionStatement(assignment);
-				if (isSelectedNode) {
-					fTryBody.add(es);
-				} else {
-					newAssignments.add(es);
-				}
-			}
-		}
-		if (newAssignments.isEmpty()) {
-			fRewriter.remove(statement, null);
-		} else {
-			Statement[] collapsedTargetStatements= ((Statement[]) newAssignments.toArray(new Statement[newAssignments.size()]));
-			fRewriter.replace(statement, fRewriter.getCollapseTargetPlaceholder(collapsedTargetStatements), null);
-		}
-		return result;
-	}
-	
-	private TryStatement createTryCatchStatement(String lineDelimiter) throws CoreException {
+	private List createTryCatchStatement(String lineDelimiter) throws CoreException {
+		List result= new ArrayList(1);
 		TryStatement tryStatement= getAST().newTryStatement();
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		for (int i= 0; i < exceptions.length; i++) {
@@ -333,13 +238,44 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				catchClause.getBody().statements().add(st);
 			}
 		}
-		List statements= tryStatement.getBody().statements();
-		if (selectedNodeIsDeclaration()) {
-			statements.addAll(fTryBody);
-		} else {
-			statements.add(fRewriter.createCopyTarget(fSelectedNode));
+		List variableDeclarations= getSpecialVariableDeclarationStatements();
+		ListRewrite statements= fRewriter.getListRewrite(tryStatement.getBody(), Block.STATEMENTS_PROPERTY);
+		for (int i= 0; i < fSelectedNodes.length; i++) {
+			ASTNode node= fSelectedNodes[i];
+			if (node instanceof VariableDeclarationStatement && variableDeclarations.contains(node)) {
+				VariableDeclarationStatement statement= (VariableDeclarationStatement)node;
+				result.add(fRewriter.createCopyTarget(node));
+				List fragments= statement.fragments();
+				AST ast= getAST();
+				for (Iterator iter= fragments.iterator(); iter.hasNext();) {
+					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
+					Expression initializer= fragment.getInitializer();
+					if (initializer != null) {
+						Assignment assignment= ast.newAssignment();
+						assignment.setLeftHandSide((Expression)ASTNode.copySubtree(ast, fragment.getName()));
+						assignment.setRightHandSide((Expression)fRewriter.createCopyTarget(initializer));
+						statements.insertLast(ast.newExpressionStatement(assignment), null);
+						fRewriter.remove(initializer, null);
+					}
+				}
+			} else {
+				statements.insertLast(fRewriter.createCopyTarget(node), null);
+			}
 		}
-		return tryStatement;
+		result.add(tryStatement);
+		return result;
+	}
+	
+	private List getSpecialVariableDeclarationStatements() {
+		List result= new ArrayList(3);
+		VariableDeclaration[] locals= fAnalyzer.getAffectedLocals();
+		for (int i= 0; i < locals.length; i++) {
+			ASTNode parent= locals[i].getParent();
+			if (parent instanceof VariableDeclarationStatement && !result.contains(parent))
+				result.add(parent);
+		}
+		return result;
+		
 	}
 	
 	private Statement getCatchBody(String type, String name, String lineSeparator) throws CoreException {
@@ -354,8 +290,4 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private IFile getFile() {
 		return (IFile) JavaModelUtil.toOriginal(fCUnit).getResource();
 	}
-	
-	private boolean selectedNodeIsDeclaration() {
-		return fTryBody.size() > 0; 
-	}	
 }

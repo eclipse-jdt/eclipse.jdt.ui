@@ -10,34 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import java.util.Hashtable;
-
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
-public class ExtractMethodTestSetup extends TestSetup {
+public class ExtractMethodTestSetup extends RefactoringTestSetup {
 	
-	private IJavaProject fJavaProject;
-	private IPackageFragmentRoot fRoot;
-	private static final String CONTAINER= "src";
-
 	private IPackageFragment fSelectionPackage;
 	private IPackageFragment fInvalidSelectionPackage;
 	private IPackageFragment fValidSelectionPackage;
@@ -55,53 +37,38 @@ public class ExtractMethodTestSetup extends TestSetup {
 	private IPackageFragment fDuplicatesPackage;
 	private IPackageFragment fInitializerPackage;
 	private IPackageFragment fDestinationPackage;
+	private IPackageFragment fGenericsPackage;
+	private IPackageFragment fEnumsPackage;
 	
 	public ExtractMethodTestSetup(Test test) {
 		super(test);
 	}	
 	
-	public IPackageFragmentRoot getRoot() {
-		return fRoot;
-	}
-		
 	protected void setUp() throws Exception {
 		super.setUp();
-		
-		Hashtable options= TestOptions.getFormatterOptions();
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
-		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
-		JavaCore.setOptions(options);
-		TestOptions.initializeCodeGenerationOptions();
-		JavaPlugin.getDefault().getCodeTemplateStore().load();		
-		
-		fJavaProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
-		JavaProjectHelper.addRTJar(fJavaProject);
-		fRoot= JavaProjectHelper.addSourceContainer(fJavaProject, CONTAINER);
-		
+			
 		RefactoringCore.getUndoManager().flush();
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IWorkspaceDescription description= workspace.getDescription();
-		description.setAutoBuilding(false);
-		workspace.setDescription(description);
 		
-		fSelectionPackage= getRoot().createPackageFragment("selection", true, null);
-		fInvalidSelectionPackage= fRoot.createPackageFragment("invalidSelection", true, null);
-		fValidSelectionPackage= fRoot.createPackageFragment("validSelection", true, null);
-		fValidSelectionCheckedPackage= fRoot.createPackageFragment("validSelection_in", true, null);
-		fSemicolonPackage= getRoot().createPackageFragment("semicolon_in", true, null);
-		fTryPackage= getRoot().createPackageFragment("try_in", true, null);
-		fLocalsPackage= getRoot().createPackageFragment("locals_in", true, null);
-		fExpressionPackage= getRoot().createPackageFragment("expression_in", true, null);
-		fNestedPackage= getRoot().createPackageFragment("nested_in", true, null);
-		fReturnPackage= getRoot().createPackageFragment("return_in", true, null);
-		fBranchPackage= getRoot().createPackageFragment("branch_in", true, null);
-		fErrorPackage= getRoot().createPackageFragment("error_in", true, null);
-		fWikiPackage= getRoot().createPackageFragment("wiki_in", true, null);
-		fParameterNamePackage= getRoot().createPackageFragment("parameterName_in", true, null);
-		fDuplicatesPackage= getRoot().createPackageFragment("duplicates_in", true, null);
-		fInitializerPackage= getRoot().createPackageFragment("initializer_in", true, null);
-		fDestinationPackage= getRoot().createPackageFragment("destination_in", true, null);
+		IPackageFragmentRoot root= getDefaultSourceFolder();
+		fSelectionPackage= root.createPackageFragment("selection", true, null);
+		fInvalidSelectionPackage= root.createPackageFragment("invalidSelection", true, null);
+		fValidSelectionPackage= root.createPackageFragment("validSelection", true, null);
+		fValidSelectionCheckedPackage= root.createPackageFragment("validSelection_in", true, null);
+		fSemicolonPackage= root.createPackageFragment("semicolon_in", true, null);
+		fTryPackage= root.createPackageFragment("try_in", true, null);
+		fLocalsPackage= root.createPackageFragment("locals_in", true, null);
+		fExpressionPackage= root.createPackageFragment("expression_in", true, null);
+		fNestedPackage= root.createPackageFragment("nested_in", true, null);
+		fReturnPackage= root.createPackageFragment("return_in", true, null);
+		fBranchPackage= root.createPackageFragment("branch_in", true, null);
+		fErrorPackage= root.createPackageFragment("error_in", true, null);
+		fWikiPackage= root.createPackageFragment("wiki_in", true, null);
+		fParameterNamePackage= root.createPackageFragment("parameterName_in", true, null);
+		fDuplicatesPackage= root.createPackageFragment("duplicates_in", true, null);
+		fInitializerPackage= root.createPackageFragment("initializer_in", true, null);
+		fDestinationPackage= root.createPackageFragment("destination_in", true, null);
+		fGenericsPackage= root.createPackageFragment("generics_in", true, null);
+		fEnumsPackage= root.createPackageFragment("enums_in", true, null);
 		
 		ICompilationUnit cu= fExpressionPackage.createCompilationUnit(
 			"A.java", 
@@ -115,12 +82,6 @@ public class ExtractMethodTestSetup extends TestSetup {
 		cu.save(null, true);
 	}
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		RefactoringTest.performDummySearch(fJavaProject);
-		JavaProjectHelper.delete(fJavaProject);
-	}
-	
 	public IPackageFragment getExpressionPackage() {
 		return fExpressionPackage;
 	}
@@ -188,5 +149,13 @@ public class ExtractMethodTestSetup extends TestSetup {
 	public IPackageFragment getDestinationPackage() {
 		return fDestinationPackage;
 	}
+	
+	public IPackageFragment getGenericsPackage() {
+		return fGenericsPackage;
+	}	
+	
+	public IPackageFragment getEnumsPackage() {
+		return fEnumsPackage;
+	}	
 }
 

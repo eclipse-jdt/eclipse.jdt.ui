@@ -825,7 +825,7 @@ public class ASTFlattener extends GenericVisitor {
 						this.fBuffer.append(",");//$NON-NLS-1$
 					}
 				}
-				this.fBuffer.append(">");//$NON-NLS-1$
+				this.fBuffer.append("> ");//$NON-NLS-1$
 			}
 		}
 		if (!node.isConstructor()) {

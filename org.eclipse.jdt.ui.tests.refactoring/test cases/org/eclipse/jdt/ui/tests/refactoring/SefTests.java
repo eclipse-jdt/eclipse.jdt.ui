@@ -22,13 +22,12 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class SefTests extends AbstractSelectionTestCase {
 
@@ -47,10 +46,6 @@ public class SefTests extends AbstractSelectionTestCase {
 		return new SefTestSetup(test);
 	}
 
-	protected IPackageFragmentRoot getRoot() {
-		return fgTestSetup.getRoot();
-	}
-	
 	protected String getResourceLocation() {
 		return "SefWorkSpace/SefTests/";
 	}
@@ -103,28 +98,16 @@ public class SefTests extends AbstractSelectionTestCase {
 		return result;
 	}
 
-	private IPackageFragment getObjectPackage() throws JavaModelException {
-		return fgTestSetup.getObjectPackage();
- 	}
-	
-	private IPackageFragment getBasePackage() throws JavaModelException {
-		return fgTestSetup.getBasePackage();
- 	}
-	
-	private IPackageFragment getInvalidPackage() throws JavaModelException {
-		return fgTestSetup.getInvalidPackage();
-	}
-	
 	private void objectTest(String fieldName) throws Exception {
-		performTest(getObjectPackage(), getName(), "object_out", fieldName);
+		performTest(fgTestSetup.getObjectPackage(), getName(), "object_out", fieldName);
 	}
 	
 	private void baseTest(String fieldName) throws Exception {
-		performTest(getBasePackage(), getName(), "base_out", fieldName);
+		performTest(fgTestSetup.getBasePackage(), getName(), "base_out", fieldName);
 	}
 	
 	private void invalidTest(String fieldName) throws Exception {
-		performInvalidTest(getInvalidPackage(), getName(), fieldName);
+		performInvalidTest(fgTestSetup.getInvalidPackage(), getName(), fieldName);
 	}
 	
 	//=====================================================================================
@@ -188,11 +171,11 @@ public class SefTests extends AbstractSelectionTestCase {
 	}
 
 	public void testEnumRead() throws Exception {
-//		objectTest("field");
+		objectTest("field");
 	}
 
 	public void testEnumReadWrite() throws Exception {
-//		objectTest("field");
+		objectTest("field");
 	}
 	
 	public void testNestedRead() throws Exception {
@@ -233,5 +216,13 @@ public class SefTests extends AbstractSelectionTestCase {
 	
 	public void testFinalField() throws Exception {
 		objectTest("field");
-	}	
+	}
+	
+	public void testGenericRead() throws Exception {
+		objectTest("field");
+	}
+
+	public void testGenericReadWrite() throws Exception {
+		objectTest("field");
+	}
 }
