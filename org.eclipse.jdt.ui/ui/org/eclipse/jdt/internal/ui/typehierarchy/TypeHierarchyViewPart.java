@@ -55,6 +55,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.util.TransferDragSourceListener;
+import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.ISelection;
@@ -64,7 +66,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.ui.*;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
@@ -74,6 +75,7 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
@@ -83,8 +85,10 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.PageBook;
+import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -115,8 +119,7 @@ import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
-import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
-import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -711,31 +714,35 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 	private void initDragAndDrop() {
-		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance() };
-		int ops= DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK;
-
 		for (int i= 0; i < fAllViewers.length; i++) {
-			addDragAdapters(fAllViewers[i], ops, transfers);
-			addDropAdapters(fAllViewers[i], ops | DND.DROP_DEFAULT, transfers);
+			addDragAdapters(fAllViewers[i]);
+			addDropAdapters(fAllViewers[i]);
 		}	
-		addDragAdapters(fMethodsViewer, ops, transfers);
+		addDragAdapters(fMethodsViewer);
 
 		//DND on empty hierarchy
-		DropTarget dropTarget = new DropTarget(fNoHierarchyShownLabel, ops | DND.DROP_DEFAULT);
-		dropTarget.setTransfer(transfers);
+		DropTarget dropTarget = new DropTarget(fPagebook, DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT);
+		dropTarget.setTransfer(new Transfer[] { LocalSelectionTransfer.getInstance() });
 		dropTarget.addDropListener(new TypeHierarchyTransferDropAdapter(this, fAllViewers[0]));
 	}
 	
-	private void addDropAdapters(AbstractTreeViewer viewer, int ops, Transfer[] transfers){
+	private void addDropAdapters(AbstractTreeViewer viewer) {
+		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance() };
+		int ops= DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT;
+		
 		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
 			new TypeHierarchyTransferDropAdapter(this, viewer)
 		};
 		viewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
 	}
 
-	private void addDragAdapters(StructuredViewer viewer, int ops, Transfer[] transfers) {
+	private void addDragAdapters(StructuredViewer viewer) {
+		int ops= DND.DROP_COPY | DND.DROP_LINK;
+		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance()};
+
 		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
-			new SelectionTransferDragAdapter(viewer)
+			new SelectionTransferDragAdapter(viewer),
+			new ResourceTransferDragAdapter(viewer)
 		};
 		viewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(viewer, dragListeners));
 	}	

@@ -23,22 +23,23 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
 
+import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkingSet;
+
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+
+import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
-import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 

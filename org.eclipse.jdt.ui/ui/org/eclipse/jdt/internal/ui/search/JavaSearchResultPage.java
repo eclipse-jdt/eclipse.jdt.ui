@@ -17,20 +17,15 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.search.ui.IContextMenuConstants;
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.ISearchResultViewPart;
-import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.search.ui.text.AbstractTextSearchResult;
-import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
-import org.eclipse.search.ui.text.Match;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Table;
@@ -41,6 +36,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.TransferDragSourceListener;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -60,10 +56,22 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.IShowInTargetList;
+import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+
+import org.eclipse.ui.ide.IDE;
+
+import org.eclipse.search.ui.IContextMenuConstants;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.ISearchResultViewPart;
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -74,6 +82,9 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -295,6 +306,18 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		if (fContentProvider != null)
 			fContentProvider.clear();
 	}
+	
+	private void addDragAdapters(StructuredViewer viewer) {
+		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance() };
+		int ops= DND.DROP_COPY | DND.DROP_LINK;
+		
+		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
+			new SelectionTransferDragAdapter(viewer),
+			new ResourceTransferDragAdapter(viewer)
+		};
+		
+		viewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(viewer, dragListeners));
+	}	
 
 	protected void configureTableViewer(TableViewer viewer) {
 		viewer.setUseHashlookup(true);
@@ -304,6 +327,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		viewer.setContentProvider(fContentProvider);
 		viewer.setSorter(new DecoratorIgnoringViewerSorter(sortingLabelProvider));
 		setSortOrder(fCurrentSortOrder);
+		addDragAdapters(viewer);
 	}
 
 	protected void configureTreeViewer(TreeViewer viewer) {
@@ -313,6 +337,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		viewer.setLabelProvider(new ColorDecoratingLabelProvider(postfixLabelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider= new LevelTreeContentProvider(this, fCurrentGrouping);
 		viewer.setContentProvider(fContentProvider);
+		addDragAdapters(viewer);
 	}
 	
 	protected TreeViewer createTreeViewer(Composite parent) {

@@ -15,21 +15,22 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
@@ -37,7 +38,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
-import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgCopyStarter;
@@ -158,8 +158,17 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private int handleValidateDefault(Object target, DropTargetEvent event) throws JavaModelException{
 		if (target == null)
 			return DND.DROP_NONE;
-			
-		return handleValidateMove(target, event);	
+		
+		if ((event.operations & DND.DROP_MOVE) != 0) {
+			return handleValidateMove(target, event);
+		}
+		if ((event.operations & DND.DROP_COPY) != 0) {
+			return handleValidateCopy(target, event);
+		}
+		if ((event.operations & DND.DROP_LINK) != 0) {
+			return handleValidateLink(target, event);
+		}
+		return DND.DROP_NONE;
 	}
 	
 	private int handleValidateMove(Object target, DropTargetEvent event) throws JavaModelException{

@@ -21,6 +21,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.TransferDragSourceListener;
 
 /**
  * A delegating drag adapter negotiates between a set of <code>TransferDragSourceListener</code>s

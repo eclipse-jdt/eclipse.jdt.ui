@@ -14,6 +14,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
@@ -22,20 +29,17 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.TransferDragSourceListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-
 import org.eclipse.ui.part.ResourceTransfer;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -92,12 +96,15 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 		List result= new ArrayList(selection.size());
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
-			if (element instanceof IAdaptable) {
-				IAdaptable adaptable= (IAdaptable)element;
-				IResource resource= (IResource)adaptable.getAdapter(IResource.class);
-				if (resource != null)
-					result.add(resource);
+			IResource resource= null;
+			if (element instanceof IJavaElement) {
+				// don't use IAdaptable as for members only the top level type adapts
+				resource= ((IJavaElement) element).getResource();
+			} else if (element instanceof IAdaptable) {
+				resource= (IResource) ((IAdaptable) element).getAdapter(IResource.class);
 			}
+			if (resource != null)
+				result.add(resource);
 		}
 		return result;
 	}

@@ -20,6 +20,7 @@ import org.eclipse.swt.dnd.TransferData;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.SafeRunnable;
+import org.eclipse.jface.util.TransferDropTargetListener;
 
 /**
  * A delegating drop adapter negotiates between a set of
