@@ -93,6 +93,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	  	DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
     	factory.setValidating(false);
 		DocumentBuilder parser= null;
+		
 		try {
 			parser= factory.newDocumentBuilder();
 		} catch (ParserConfigurationException ex) {

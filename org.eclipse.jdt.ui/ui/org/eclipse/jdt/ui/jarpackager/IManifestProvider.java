@@ -11,7 +11,6 @@ Contributors:
 
 package org.eclipse.jdt.ui.jarpackager;
 
-import java.io.IOException;
 import java.util.jar.Manifest;
 
 import org.eclipse.core.runtime.CoreException;
@@ -31,9 +30,8 @@ public interface IManifestProvider {
 	 * 
 	 * @param	jarPackage		the JAR package specification
 	 * @throws	CoreException	if access to any resource described by the JAR package has failed
-	 * @throws	IOException		if opening, writing or closing of the manifest's underlying stream has failed
 	 */	
-	Manifest create(JarPackageData jarPackage) throws IOException, CoreException;
+	Manifest create(JarPackageData jarPackage) throws CoreException;
 
 	/**
 	 * Creates a default manifest.

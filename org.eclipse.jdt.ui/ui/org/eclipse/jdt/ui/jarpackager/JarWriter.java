@@ -25,16 +25,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.Assert;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
@@ -50,62 +45,86 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 public class JarWriter {
 	private JarOutputStream fJarOutputStream;
 	private JarPackageData fJarPackage;
+	
 	/**
 	 * Creates an instance which is used to create a JAR based
 	 * on the given JarPackage.
 	 *
-	 * @param jarPackage the JAR specification
-	 * @throws	java.io.IOException
-	 * @throws	org.eclipse.core.runtime.CoreException
+	 * @param jarPackage		the JAR specification
+	 * @throws	CoreException	to signal any other unusal termination.
+	 * 								This can also be used to return information
+	 * 								in the status object.
 	 */
-	public JarWriter(JarPackageData jarPackage, Shell parent) throws IOException, CoreException {
+	public JarWriter(JarPackageData jarPackage, Shell parent) throws CoreException {
 		Assert.isNotNull(jarPackage, "The JAR specification is null"); //$NON-NLS-1$
 		fJarPackage= jarPackage;
 		Assert.isTrue(fJarPackage.isValid(), "The JAR package specification is invalid"); //$NON-NLS-1$
 		if (!canCreateJar(parent))
 			throw new OperationCanceledException();
-		if (fJarPackage.usesManifest() && fJarPackage.areClassFilesExported()) {
-			Manifest manifest=  fJarPackage.getManifestProvider().create(fJarPackage);
-			fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()), manifest);
-		} else
-			fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()));
+
+		try {
+			if (fJarPackage.usesManifest() && fJarPackage.areClassFilesExported()) {
+				Manifest manifest=  fJarPackage.getManifestProvider().create(fJarPackage);
+				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()), manifest);
+			} else
+				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()));
+		} catch (IOException ex) {
+			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
+		}
 	}
+	
 	/**
 	 * Closes the archive and does all required cleanup.
 	 *
-     * @throws IOException if an I/O error has occurred
+	 * @throws	CoreException	to signal any other unusal termination.
+	 * 								This can also be used to return information
+	 * 								in the status object.
 	 */
-	public void close() throws IOException {
+	public void close() throws CoreException {
 		if (fJarOutputStream != null)
-			fJarOutputStream.close();
+			try {
+				fJarOutputStream.close();
+			} catch (IOException ex) {
+				throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
+			}
 	}
+	
 	/**
 	 * Writes the passed resource to the current archive.
 	 *
 	 * @param resource			the file to be written
 	 * @param destinationPath	the path for the file inside the archive
-	 * @throws CoreException	if getting the resource's contents has failed
-     * @throws IOException		if an I/O error has occurred
+	 * @throws	CoreException	to signal any other unusal termination.
+	 * 								This can also be used to return information
+	 * 								in the status object.
 	 */
-	public void write(IFile resource, IPath destinationPath) throws IOException, CoreException {
+	public void write(IFile resource, IPath destinationPath) throws CoreException {
 		ByteArrayOutputStream output= null;
 		BufferedInputStream contentStream= null;
 		
 		try {
 			output= new ByteArrayOutputStream();
-			if (!resource.isLocal(IResource.DEPTH_ZERO))
-				throw new IOException(JarPackagerMessages.getFormattedString("JarWriter.error.fileNotAccessible", resource.getFullPath())); //$NON-NLS-1$
+			if (!resource.isLocal(IResource.DEPTH_ZERO)) {
+				String message= JarPackagerMessages.getFormattedString("JarWriter.error.fileNotAccessible", resource.getFullPath()); //$NON-NLS-1$
+				throw JarPackagerUtil.createCoreException(message, null);
+			}
 			contentStream= new BufferedInputStream(resource.getContents(false));
 			int chunkSize= 4096;
 			byte[] readBuffer= new byte[chunkSize];
 			int count;
 			while ((count= contentStream.read(readBuffer, 0, chunkSize)) > 0)
 				output.write(readBuffer, 0, count);
+		} catch (IOException ex) {
+			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
 		} finally {
-			if (output != null)
-				output.close();
-			if (contentStream != null)
-				contentStream.close();
+			try {
+				if (output != null)
+					output.close();
+				if (contentStream != null)
+					contentStream.close();
+			} catch (IOException ex) {
+				throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
+			}
 		}
 		try {
 			IPath fileLocation= resource.getLocation();
@@ -118,21 +137,23 @@ public class JarWriter {
 			write(destinationPath, output.toByteArray(), lastModified);
 		} catch (IOException ex) {
 			// Ensure full path is visible
-			String message= JarPackagerMessages.getFormattedString("JarWriter.writeProblem", resource.getFullPath()); //$NON-NLS-1$
+			String message= null;
 			if (ex.getLocalizedMessage() != null)
-				message += ": " + ex.getLocalizedMessage();  //$NON-NLS-1$
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
-											JavaStatusConstants.INTERNAL_ERROR, message, ex));
-		}		
+				message= JarPackagerMessages.getFormattedString("JarWriter.writeProblemWithMessage", resource.getFullPath(), ex.getLocalizedMessage()); //$NON-NLS-1$;
+			else
+				message= JarPackagerMessages.getFormattedString("JarWriter.writeProblem", resource.getFullPath()); //$NON-NLS-1$
+			throw JarPackagerUtil.createCoreException(message, ex);
+		}					
 	}
+	
 	/**
 	 * Creates a new JarEntry with the passed path and contents, and writes it
 	 * to the current archive.
 	 *
-	 * @param path			the path inside the archive
-	 * @param contents		the bytes to write
-	 * @param lastModified	a long which represents the last modification date
-     * @throws IOException if an I/O error has occurred
+	 * @param	path			the path inside the archive
+	 * @param	contents		the bytes to write
+	 * @param	lastModified	a long which represents the last modification date
+     * @throws	IOException		if an I/O error has occurred
 	 */
 	protected void write(IPath path, byte[] contents, long lastModified) throws IOException {
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
@@ -149,8 +170,8 @@ public class JarWriter {
 		
 		// Set modification time
 		newEntry.setTime(lastModified);
-		
-		try {
+
+		try {		
 			fJarOutputStream.putNextEntry(newEntry);
 			fJarOutputStream.write(contents);
 		} finally  {
@@ -163,6 +184,7 @@ public class JarWriter {
 			// fJarOutputStream.closeEntry();
 		}
 	}
+	
 	/**
 	 * Checks if the JAR file can be overwritten.
 	 * If the JAR package setting does not allow to overwrite the JAR

@@ -16,6 +16,9 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -25,7 +28,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -102,6 +109,7 @@ public class JarPackagerUtil {
 			return jarPackage.getManifestMainClass().getFullyQualifiedName();
 	}
 
+
 	private static boolean queryDialog(final Shell parent, final String title, final String message) {
 		Display display= parent.getDisplay();
 		if (display == null || display.isDisposed())
@@ -114,5 +122,18 @@ public class JarPackagerUtil {
 		};
 		display.syncExec(runnable);	
 		return returnValue[0];
+	}
+	
+	/**
+	 * Creates a <code>CoreException</code> with the given parameters.
+	 * 
+	 * @param	message	a string with the message
+	 * @param	ex		the exception to be wrapped or <code>null</code> if none
+	 * @return a CoreException
+	 */
+	public static CoreException createCoreException(String message, Exception ex) {
+		if (message == null)
+			message= ""; //$NON-NLS-1$
+		return new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, JavaStatusConstants.INTERNAL_ERROR, message, ex));
 	}
 }

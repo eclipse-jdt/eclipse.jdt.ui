@@ -593,10 +593,10 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 				Manifest manifest= null;
 				try {
 					manifest= fJarPackage.getManifestProvider().create(fJarPackage);
-				} catch (IOException ex) {
 				} catch (CoreException ex) {
+					// nothing reported in the wizard
 				}
-				if (manifest.getMainAttributes().getValue(Attributes.Name.MANIFEST_VERSION) == null)
+				if (manifest != null && manifest.getMainAttributes().getValue(Attributes.Name.MANIFEST_VERSION) == null)
 					setMessage(JarPackagerMessages.getString("JarManifestWizardPage.warning.noManifestVersion"), WizardPage.WARNING_MESSAGE); //$NON-NLS-1$
 			} else {
 				if (fJarPackage.getManifestLocation().toString().length() == 0)

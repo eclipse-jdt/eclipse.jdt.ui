@@ -25,7 +25,6 @@ import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 
@@ -114,7 +113,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			jarPackage.setSaveDescription(false);
 		} catch (CoreException ex) {
 				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.errorReadingFile", description.getFullPath(), ex.getStatus().getException().getLocalizedMessage()); //$NON-NLS-1$
-				addError(readStatus, jarPackage, message, ex.getStatus().getException()); //$NON-NLS-1$
+				addToStatus(readStatus, jarPackage, message, ex);
 				return null;
 		} finally {
 			if ((jarPackage == null || jarPackage.logWarnings()) && reader != null)
@@ -125,14 +124,22 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 					reader.close();
 			}
 			catch (CoreException ex) {
-				addError(readStatus, jarPackage,JarPackagerMessages.getFormattedString("JarFileExportOperation.errorClosingJarPackageDescriptionReader", description.getFullPath()), ex); //$NON-NLS-1$
+				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.errorClosingJarPackageDescriptionReader", description.getFullPath()); //$NON-NLS-1$
+				addToStatus(readStatus, jarPackage, message, ex);
 			}
 		}
 		return jarPackage;
 	}
 
-	private void addError(MultiStatus problems, JarPackageData jarPackage, String message, Throwable error) {
-		if (jarPackage == null || jarPackage.logErrors())
-			problems.add(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, error));
+	protected void addToStatus(MultiStatus multiStatus, JarPackageData jarPackage, String defaultMessage, CoreException ex) {
+		IStatus status= ex.getStatus();
+		int severity= status.getSeverity();
+		if (jarPackage == null || (severity == IStatus.ERROR && jarPackage.logErrors()) || (severity == IStatus.WARNING && jarPackage.logWarnings())) {
+			String message= ex.getLocalizedMessage();
+			if (message == null || message.length() < 1) {
+				status= new Status(status.getSeverity(), status.getPlugin(), status.getCode(), defaultMessage, ex);
+			}		
+			multiStatus.add(status);
+		}
 	}
 }

@@ -17,13 +17,12 @@ public class ManifestProvider implements IManifestProvider {
 	 * 
 	 * @param	jarPackage	the JAR package specification
 	 */	
-	public Manifest create(JarPackageData jarPackage) throws IOException, CoreException {
+	public Manifest create(JarPackageData jarPackage) throws CoreException {
 		Assert.isNotNull(jarPackage);
 		if (jarPackage.isManifestGenerated())
 			return createGeneratedManifest(jarPackage);
-		else
-			return createSuppliedManifest(jarPackage);
-	}
+		try {
+			return createSuppliedManifest(jarPackage);		} catch (IOException ex) {			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);		}	}
 	/**
 	 * Creates a default manifest.
 	 * 
