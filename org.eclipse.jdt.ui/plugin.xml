@@ -417,7 +417,7 @@
       </wizard>
       <wizard
             name="%NewAnnotationType.label"
-            icon="icons/full/etool16/newannot_wiz.gif"
+            icon="icons/full/etool16/newannotation_wiz.gif"
             category="org.eclipse.jdt.ui.java"
             id="org.eclipse.jdt.ui.wizards.NewAnnotationCreationWizard">
          <class class="org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard">

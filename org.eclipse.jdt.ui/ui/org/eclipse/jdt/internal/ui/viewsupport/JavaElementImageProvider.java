@@ -391,10 +391,22 @@ public class JavaElementImageProvider {
 	
 	public static ImageDescriptor getTypeImageDescriptor(boolean isInner, boolean isInInterface, int flags, boolean useLightIcons) {
 		if (Flags.isEnum(flags)) {
-			return JavaPluginImages.DESC_OBJS_ENUM;
+			if (useLightIcons) {
+				return JavaPluginImages.DESC_OBJS_ENUM_ALT;
+			}
+			if (isInner) {
+				return getInnerEnumImageDescriptor(isInInterface, flags);
+			}
+			return getEnumImageDescriptor(flags);
 		} else if (Flags.isAnnotation(flags)) {
-			return JavaPluginImages.DESC_OBJS_ANNOTATION;
-		} else if (Flags.isInterface(flags)) {
+			if (useLightIcons) {
+				return JavaPluginImages.DESC_OBJS_ANNOTATION_ALT;
+			}
+			if (isInner) {
+				return getInnerAnnotationImageDescriptor(isInInterface, flags);
+			}
+			return getAnnotationImageDescriptor(flags);
+		}  else if (Flags.isInterface(flags)) {
 			if (useLightIcons) {
 				return JavaPluginImages.DESC_OBJS_INTERFACEALT;
 			}
@@ -435,6 +447,42 @@ public class JavaElementImageProvider {
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PROTECTED;
 		else
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_DEFAULT;
+	}
+	
+	private static ImageDescriptor getEnumImageDescriptor(int flags) {
+		if (Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags))
+			return JavaPluginImages.DESC_OBJS_ENUM;
+		else
+			return JavaPluginImages.DESC_OBJS_ENUM_DEFAULT;
+	}
+	
+	private static ImageDescriptor getInnerEnumImageDescriptor(boolean isInInterface, int flags) {
+		if (Flags.isPublic(flags) || isInInterface)
+			return JavaPluginImages.DESC_OBJS_ENUM;
+		else if (Flags.isPrivate(flags))
+			return JavaPluginImages.DESC_OBJS_ENUM_PRIVATE;
+		else if (Flags.isProtected(flags))
+			return JavaPluginImages.DESC_OBJS_ENUM_PROTECTED;
+		else
+			return JavaPluginImages.DESC_OBJS_ENUM_DEFAULT;
+	}
+	
+	private static ImageDescriptor getAnnotationImageDescriptor(int flags) {
+		if (Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags))
+			return JavaPluginImages.DESC_OBJS_ANNOTATION;
+		else
+			return JavaPluginImages.DESC_OBJS_ANNOTATION_DEFAULT;
+	}
+	
+	private static ImageDescriptor getInnerAnnotationImageDescriptor(boolean isInInterface, int flags) {
+		if (Flags.isPublic(flags) || isInInterface)
+			return JavaPluginImages.DESC_OBJS_ANNOTATION;
+		else if (Flags.isPrivate(flags))
+			return JavaPluginImages.DESC_OBJS_ANNOTATION_PRIVATE;
+		else if (Flags.isProtected(flags))
+			return JavaPluginImages.DESC_OBJS_ANNOTATION_PROTECTED;
+		else
+			return JavaPluginImages.DESC_OBJS_ANNOTATION_DEFAULT;
 	}
 	
 	private static ImageDescriptor getInterfaceImageDescriptor(int flags) {

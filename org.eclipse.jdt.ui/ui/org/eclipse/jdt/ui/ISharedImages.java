@@ -211,13 +211,66 @@ public interface ISharedImages {
 	 * @since 3.0
 	 */
 	public static final String IMG_FIELD_DEFAULT= JavaPluginImages.IMG_FIELD_DEFAULT;
-	
-	
+		
 	/**
 	 * Key to access the shared image or image descriptor for a local variable.
 	 * @since 3.0
 	 */
 	public static final String IMG_OBJS_LOCAL_VARIABLE= JavaPluginImages.IMG_OBJS_LOCAL_VARIABLE;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a enum type.
+	 * @since 3.1
+	 */
+	public static final String IMG_OBJS_ENUM= JavaPluginImages.IMG_OBJS_ENUM;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a enum type
+	 * with default visibility.
+	 * @since 3.1
+	 */
+	public static final String IMG_OBJS_ENUM_DEFAULT= JavaPluginImages.IMG_OBJS_ENUM_DEFAULT;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a enum type
+	 * with protected visibility.
+	 * @since 3.1
+	 */
+	public static final String IMG_OBJS_ENUM_PROTECTED= JavaPluginImages.IMG_OBJS_ENUM_PROTECTED;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a enum type
+	 * with private visibility.
+	 * @since 3.1
+	 */
+	public static final String IMG_OBJS_ENUM_PRIVATE= JavaPluginImages.IMG_OBJS_ENUM_PRIVATE;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a annotation type.
+	 * @since 3.1
+	 */
+	public static final String IMG_OBJS_ANNOTATION= JavaPluginImages.IMG_OBJS_ANNOTATION;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a annotation type
+	 * with default visibility.
+	 * @since 3.1
+	 */
+	public static final String IMG_OBJS_ANNOTATION_DEFAULT= JavaPluginImages.IMG_OBJS_ANNOTATION_DEFAULT;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a annotation type
+	 * with protected visibility.
+	 * @since 3.1
+	 */
+	public static final String IMG_OBJS_ANNOTATION_PROTECTED= JavaPluginImages.IMG_OBJS_ANNOTATION_PROTECTED;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a annotation type
+	 * with private visibility.
+	 * @since 3.1
+	 */
+	public static final String IMG_OBJS_ANNOTATION_PRIVATE= JavaPluginImages.IMG_OBJS_ANNOTATION_PRIVATE;
 	
 	/**
 	 * Returns the shared image managed under the given key.

@@ -93,7 +93,16 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_INNER_INTERFACE_PRIVATE= NAME_PREFIX + "innerinterface_private_obj.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_OBJS_ANNOTATION= NAME_PREFIX + "annotation_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ANNOTATION_DEFAULT= NAME_PREFIX + "annotation_default_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ANNOTATION_PROTECTED= NAME_PREFIX + "annotation_protected_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ANNOTATION_PRIVATE= NAME_PREFIX + "annotation_private_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ANNOTATION_ALT= NAME_PREFIX + "annotation_alt_obj.gif"; //$NON-NLS-1$
+	
 	public static final String IMG_OBJS_ENUM= NAME_PREFIX + "enum_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM_DEFAULT= NAME_PREFIX + "enum_default_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM_PROTECTED= NAME_PREFIX + "enum_protected_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM_PRIVATE= NAME_PREFIX + "enum_private_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM_ALT= NAME_PREFIX + "enum_alt_obj.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_CUNIT_RESOURCE= NAME_PREFIX + "jcu_resource_obj.gif"; 				//$NON-NLS-1$
@@ -222,7 +231,16 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_INTERFACEALT= createManaged(T_OBJ, IMG_OBJS_INTERFACEALT);
 	
 	public static final ImageDescriptor DESC_OBJS_ANNOTATION= createManaged(T_OBJ, IMG_OBJS_ANNOTATION);
+	public static final ImageDescriptor DESC_OBJS_ANNOTATION_DEFAULT= createManaged(T_OBJ, IMG_OBJS_ANNOTATION_DEFAULT);
+	public static final ImageDescriptor DESC_OBJS_ANNOTATION_PROTECTED= createManaged(T_OBJ, IMG_OBJS_ANNOTATION_PROTECTED);
+	public static final ImageDescriptor DESC_OBJS_ANNOTATION_PRIVATE= createManaged(T_OBJ, IMG_OBJS_ANNOTATION_PRIVATE);
+	public static final ImageDescriptor DESC_OBJS_ANNOTATION_ALT= createManaged(T_OBJ, IMG_OBJS_ANNOTATION_ALT);
+	
 	public static final ImageDescriptor DESC_OBJS_ENUM= createManaged(T_OBJ, IMG_OBJS_ENUM);
+	public static final ImageDescriptor DESC_OBJS_ENUM_DEFAULT= createManaged(T_OBJ, IMG_OBJS_ENUM_DEFAULT);
+	public static final ImageDescriptor DESC_OBJS_ENUM_PROTECTED= createManaged(T_OBJ, IMG_OBJS_ENUM_PROTECTED);
+	public static final ImageDescriptor DESC_OBJS_ENUM_PRIVATE= createManaged(T_OBJ, IMG_OBJS_ENUM_PRIVATE);
+	public static final ImageDescriptor DESC_OBJS_ENUM_ALT= createManaged(T_OBJ, IMG_OBJS_ENUM_ALT);
 	
 	public static final ImageDescriptor DESC_OBJS_JAR= createManaged(T_OBJ, IMG_OBJS_JAR);
 	public static final ImageDescriptor DESC_OBJS_MISSING_JAR= createManaged(T_OBJ, IMG_OBJS_MISSING_JAR);
@@ -320,7 +338,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= create(T_WIZBAN, "newclass_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWINT= create(T_WIZBAN, "newint_wiz.gif"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWENUM= create(T_WIZBAN, "newenum_wiz.gif"); 				//$NON-NLS-1$
-	public static final ImageDescriptor DESC_WIZBAN_NEWANNOT= create(T_WIZBAN, "newannot_wiz.gif"); 				//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWANNOT= create(T_WIZBAN, "newannotation_wiz.gif"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= create(T_WIZBAN, "newjprj_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSRCFOLDR= create(T_WIZBAN, "newsrcfldr_wiz.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWMETH= create(T_WIZBAN, "newmeth_wiz.gif"); 			//$NON-NLS-1$
