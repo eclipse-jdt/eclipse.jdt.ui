@@ -675,11 +675,11 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 				return isEqualOrEnclosedType(accessingType, newMemberDeclaringType);
 				
 			case Modifier.NONE :
-				return accessingType.getPackageFragment().equals(newMemberDeclaringType.getPackageFragment());
+				return JavaModelUtil.isSamePackage(accessingType.getPackageFragment(), newMemberDeclaringType.getPackageFragment());
 					
 			case Modifier.PROTECTED :
-				return accessingType.getPackageFragment().equals(newMemberDeclaringType.getPackageFragment())
-					|| accessingType.newSupertypeHierarchy(null).contains(newMemberDeclaringType);
+				return JavaModelUtil.isSamePackage(accessingType.getPackageFragment(), newMemberDeclaringType.getPackageFragment())
+						|| accessingType.newSupertypeHierarchy(null).contains(newMemberDeclaringType);
 			
 			case Modifier.PUBLIC :
 				return true;

@@ -659,14 +659,14 @@ public class PushDownRefactoring extends Refactoring {
 			if (! JdtFlags.isPackageVisible(member))
 				return false;
 			
-			return ((IType)member).getPackageFragment().equals(newHome.getPackageFragment());		
+			return JavaModelUtil.isSamePackage(((IType)member).getPackageFragment(), newHome.getPackageFragment());		
 		} else {
 			IType enclosingType= member.getDeclaringType();
 			
 			if (! canBeAccessedFrom(enclosingType, newHome))
 				return false;
 
-			boolean samePackage= enclosingType.getPackageFragment().equals(newHome.getPackageFragment());
+			boolean samePackage= JavaModelUtil.isSamePackage(enclosingType.getPackageFragment(), newHome.getPackageFragment());
 			if (samePackage)
 				return true; //private checked before
 

@@ -287,7 +287,7 @@ public final class JavaModelUtil {
 		}		
 		
 		IPackageFragment otherpack= (IPackageFragment) findParentOfKind(member, IJavaElement.PACKAGE_FRAGMENT);
-		return (pack != null && pack.equals(otherpack));
+		return (pack != null && otherpack != null && isSamePackage(pack, otherpack));
 	}
 	
 	/**
@@ -452,6 +452,15 @@ public final class JavaModelUtil {
 			}
 		}
 		return false;
+	}
+	
+
+	/**
+	 * Tests if two <code>IPackageFragment</code>s represent the same logical java package.
+	 * @return <code>true</code> if the package fragments' names are equal.
+	 */
+	public static boolean isSamePackage(IPackageFragment pack1, IPackageFragment pack2) throws JavaModelException {
+		return pack1.getElementName().equals(pack2.getElementName());
 	}
 	
 	/**

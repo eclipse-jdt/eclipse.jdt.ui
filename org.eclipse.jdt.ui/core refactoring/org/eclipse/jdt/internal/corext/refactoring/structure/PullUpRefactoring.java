@@ -1041,7 +1041,7 @@ public class PullUpRefactoring extends Refactoring {
 			if (! JdtFlags.isPackageVisible(member))
 				return false;
 			
-			return ((IType)member).getPackageFragment().equals(newHome.getPackageFragment());		
+			return JavaModelUtil.isSamePackage(((IType)member).getPackageFragment(), newHome.getPackageFragment());		
 		} else {
 			IType enclosingType= member.getDeclaringType();
 			
@@ -1055,7 +1055,7 @@ public class PullUpRefactoring extends Refactoring {
 				return true;
 		 
 			//FIX ME: protected and default treated the same
-			return (enclosingType.getPackageFragment().equals(newHome.getPackageFragment()));		
+			return JavaModelUtil.isSamePackage(enclosingType.getPackageFragment(), newHome.getPackageFragment());		
 		}
 	}
 	
