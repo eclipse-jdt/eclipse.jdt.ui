@@ -256,14 +256,13 @@ public class PushDownWizard extends RefactoringWizard {
 			layouter.addColumnData(new ColumnWeightData(60, true));
 			layouter.addColumnData(new ColumnWeightData(40, true));
 
-			final Table table= new Table(layouter, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
+			final Table table= new Table(layouter, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
 			table.setHeaderVisible(true);
 			table.setLinesVisible(true);
 		
-			GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			gd.heightHint= table.getHeaderHeight() + (table.getGridLineWidth() + table.getItemHeight()) * ROW_COUNT;
+			GridData gd= new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING);
+			gd.heightHint= SWTUtil.getTableHeightHint(table, ROW_COUNT);
 			layouter.setLayoutData(gd);
-
 				
 			TableLayout tableLayout= new TableLayout();
 			table.setLayout(tableLayout);

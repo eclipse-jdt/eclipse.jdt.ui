@@ -477,7 +477,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		
 		fTable= new Table(c, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.BORDER);
 		GridData tableGD= new GridData(GridData.FILL_BOTH);
-		tableGD.heightHint= fTable.getGridLineWidth() + fTable.getItemHeight() * ROW_COUNT;
+		tableGD.heightHint= SWTUtil.getTableHeightHint(fTable, ROW_COUNT);	
 		tableGD.widthHint= 40;
 		fTable.setLayoutData(tableGD);
 		

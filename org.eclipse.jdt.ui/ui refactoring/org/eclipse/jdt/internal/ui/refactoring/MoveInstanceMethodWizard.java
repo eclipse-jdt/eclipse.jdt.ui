@@ -45,6 +45,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -228,7 +229,7 @@ public class MoveInstanceMethodWizard extends RefactoringWizard {
 			});
 
 			GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
-			gd.heightHint= table.getGridLineWidth() + table.getItemHeight() * ROW_COUNT;
+			gd.heightHint= SWTUtil.getTableHeightHint(table, ROW_COUNT);
 			gd.horizontalSpan= 2;
 			layouter.setLayoutData(gd);
 		}

@@ -621,10 +621,9 @@ public class PullUpWizard extends RefactoringWizard {
 			table.setHeaderVisible(true);
 			table.setLinesVisible(true);
 		
-			GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			gd.heightHint= table.getHeaderHeight() + (table.getGridLineWidth() + table.getItemHeight()) * ROW_COUNT;
+			GridData gd= new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING);
+			gd.heightHint= SWTUtil.getTableHeightHint(table, ROW_COUNT);
 			layouter.setLayoutData(gd);
-
 				
 			TableLayout tableLayout= new TableLayout();
 			table.setLayout(tableLayout);
