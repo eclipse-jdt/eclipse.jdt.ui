@@ -18,7 +18,6 @@ import java.util.Set;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -72,19 +71,20 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class ExternalizeWizardPage extends UserInputWizardPage {
 
@@ -215,7 +215,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	
 	private Text fPrefixField;
 	private Table fTable;
-	private TableEditor fTableEditor;
 	private TableViewer fViewer;
 	private SourceViewer fSourceViewer;
 	private Label fTranslateLabel, fNoTranslateLabel, fSkipLabel;
@@ -483,7 +482,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fTable.setLayoutData(tableGD);
 		
 		fTable.setLinesVisible(true);
-		fTableEditor= new TableEditor(fTable);
 		
 		TableLayout layout= new TableLayout();
 		fTable.setLayout(layout);
@@ -680,7 +678,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fSkipLabel= null;
 		fSourceViewer= null;
 		fTable= null;
-		fTableEditor= null;
 		fTranslateLabel= null;
 		fViewer= null;
 		fEditButton= null;
