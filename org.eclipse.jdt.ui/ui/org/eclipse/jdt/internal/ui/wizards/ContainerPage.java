@@ -92,7 +92,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	}
 			
 	/**
-	 * Initializes the field provided by the container page with a give
+	 * Initializes the fields provided by the container page with a given
 	 * java element as selection.
 	 * @param elem The initial selection of this page or null if no
 	 *             selection was available
@@ -199,16 +199,13 @@ public abstract class ContainerPage extends NewElementWizardPage {
 						}
 					} catch (CoreException e) {
 						status.setWarning(getResourceString(WARNING_CONTAINER_NOJPROJECT));
-						return status;
 					}
 					try {
 						if (!JavaModelUtility.isOnBuildPath(fCurrRoot)) {
 							status.setWarning(getFormattedString(WARNING_CONTAINER_NOTONCP, str));
-							return status;
 						}		
 					} catch (JavaModelException e) {
 						status.setWarning(getFormattedString(WARNING_CONTAINER_NOTONCP, str));
-						return status;
 					}					
 					if (fCurrRoot.isArchive()) {
 						status.setError(getFormattedString(ERROR_CONTAINER_ISBINARY, str));

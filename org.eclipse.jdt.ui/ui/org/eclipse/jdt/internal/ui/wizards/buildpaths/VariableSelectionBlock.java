@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class VariableSelectionBlock {
 	
@@ -29,14 +29,16 @@ public class VariableSelectionBlock {
 	
 	private boolean fIsEmptyAllowed;
 	
+	private String fLastVariableSelection;
+	
 	/**
 	 * Constructor for VariableSelectionBlock
 	 */
-	public VariableSelectionBlock(IStatusChangeListener context, List existingPaths, IPath varInitValue, boolean emptyAllowed) {	
+	public VariableSelectionBlock(IStatusChangeListener context, List existingPaths, IPath varPath, String lastVarSelection, boolean emptyAllowed) {	
 		fContext= context;
 		fExistingPaths= existingPaths;
 		fIsEmptyAllowed= emptyAllowed;
-		
+		fLastVariableSelection= lastVarSelection;
 			
 		fVariableStatus= new StatusInfo();
 		fExistsStatus= new StatusInfo();
@@ -52,9 +54,9 @@ public class VariableSelectionBlock {
 		fExtensionField.setLabelText(JavaPlugin.getResourceString(EXTENSION + ".label"));
 		fExtensionField.setButtonLabel(JavaPlugin.getResourceString(EXTENSION + ".button"));
 
-		if (varInitValue != null) {
-			fVariableField.setText(varInitValue.segment(0));
-			fExtensionField.setText(varInitValue.removeFirstSegments(1).toString());
+		if (varPath != null) {
+			fVariableField.setText(varPath.segment(0));
+			fExtensionField.setText(varPath.removeFirstSegments(1).toString());
 		} else {
 			fVariableField.setText("");
 			fExtensionField.setText("");
@@ -154,18 +156,6 @@ public class VariableSelectionBlock {
 		fContext.statusChanged(StatusTool.getMoreSevere(fVariableStatus, fExistsStatus));
 	}		
 	
-	
-	private boolean findVariableName(String name) {
-		String[] names= JavaCore.getClasspathVariableNames();
-		for (int i= 0; i < names.length; i++) {
-			if (names[i].equals(name)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-
 	protected IStatus variableUpdated() {
 		fVariable= null;
 		
@@ -177,25 +167,15 @@ public class VariableSelectionBlock {
 			} else {
 				fVariable= "";
 			}
-		} else if (!findVariableName(name)) {
+		} else if (JavaCore.getClasspathVariable(name) == null) {
 			status.setError(JavaPlugin.getResourceString(ERR_NAMENOTEXISTS));
 		} else {
 			fVariable= name;
 		}
 		fExtensionField.enableButton(fVariable != null);
 		return status;
-	}
-	
-	private boolean findPath(IPath path) {
-		for (int i= fExistingPaths.size() -1; i >=0; i--) {
-			IPath curr= (IPath) fExistingPaths.get(i);
-			if (curr.equals(path)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
+	}	
+		
 	private IStatus getExistsStatus() {
 		StatusInfo status= new StatusInfo();
 		if (fVariable != null) {
@@ -207,6 +187,16 @@ public class VariableSelectionBlock {
 		}
 		return status;
 	}
+	
+	private boolean findPath(IPath path) {
+		for (int i= fExistingPaths.size() -1; i >=0; i--) {
+			IPath curr= (IPath) fExistingPaths.get(i);
+			if (curr.equals(path)) {
+				return true;
+			}
+		}
+		return false;
+	}	
 
 	private void updateFullTextField() {
 		if (fFullPath != null && !fFullPath.isDisposed()) {
@@ -251,29 +241,28 @@ public class VariableSelectionBlock {
 	}
 
 	private String chooseVariable() {
-		ChooseVariableDialog dialog= new ChooseVariableDialog(getShell());
+		ChooseVariableDialog dialog= new ChooseVariableDialog(getShell(), fLastVariableSelection);
 		if (dialog.open() == dialog.OK) {
 			return 	dialog.getSelectedVariable();
 		}
 		
 		return null;
 		
-	}		
-	
-	
-	private class ChooseVariableDialog extends StatusDialog implements IStatusChangeListener {
+	}
+		
+	private class ChooseVariableDialog extends StatusDialog implements IStatusChangeListener, IDoubleClickListener {
 		private VariableBlock fVariableBlock;
 				
-		public ChooseVariableDialog(Shell parent) {
+		public ChooseVariableDialog(Shell parent, String lastVariableSelection) {
 			super(parent);
 			setTitle(JavaPlugin.getResourceString(DIALOG_CHOOSEVARIABLE + ".title"));
-			
-			fVariableBlock= new VariableBlock(this, true);
+			fVariableBlock= new VariableBlock(this, true, lastVariableSelection);
 		}
 				
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite)super.createDialogArea(parent);
 			fVariableBlock.createContents(composite);
+			fVariableBlock.addDoubleClickListener(this);
 			return composite;
 		}
 		
@@ -293,6 +282,16 @@ public class VariableSelectionBlock {
 			updateStatus(status);
 			
 		}
+		
+		/**
+	 	 * @see IDoubleClickListener#doubleClick(DoubleClickEvent)
+	 	 */
+		public void doubleClick(DoubleClickEvent event) {
+			if (getStatus().isOK()) {
+				okPressed();
+			}
+		}
+
 	}	
 
 }

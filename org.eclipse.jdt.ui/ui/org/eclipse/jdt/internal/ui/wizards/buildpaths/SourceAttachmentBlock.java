@@ -67,6 +67,7 @@ public class SourceAttachmentBlock {
 		
 		IPath attachPath= (oldEntry != null) ? oldEntry.getSourceAttachmentPath() : new Path("");
 		IPath attachRoot= (oldEntry != null) ? oldEntry.getSourceAttachmentRootPath() : new Path("");
+		fJARPath= (oldEntry != null) ? oldEntry.getPath() : new Path("");
 		
 		SourceAttachmentAdapter adapter= new SourceAttachmentAdapter();
 
@@ -86,7 +87,8 @@ public class SourceAttachmentBlock {
 					variableUpdated(status);
 				}
 			};
-			fVariableSelectionBlock= new VariableSelectionBlock(listener, new ArrayList(), attachPath, true);
+			String initSelection= (oldEntry != null) ? oldEntry.getPath().segment(0) : null;
+			fVariableSelectionBlock= new VariableSelectionBlock(listener, new ArrayList(), attachPath, initSelection, true);
 			variableUpdated(fNameStatus);
 		} else {		
 			fFileNameField= new StringButtonDialogField(adapter);
@@ -110,8 +112,7 @@ public class SourceAttachmentBlock {
 		} else {
 			fPrefixField.setText("");
 		}		
-		
-		fJARPath= (oldEntry != null) ? oldEntry.getPath() : new Path("");
+
 	}
 	
 	

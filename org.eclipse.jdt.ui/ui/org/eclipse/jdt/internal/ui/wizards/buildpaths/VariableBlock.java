@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 
 public class VariableBlock {
@@ -19,25 +19,20 @@ public class VariableBlock {
 	private IStatusChangeListener fContext;
 	private boolean fUseAsSelectionDialog;
 	
-	private String fSelectedVariable;
-	
 	private boolean fRemovingSelection= false;
+	private String fSelectedVariable;
 	
 	/**
 	 * Constructor for VariableBlock
 	 */
-	public VariableBlock(IStatusChangeListener context, boolean useAsSelectionDialog) {	
+	public VariableBlock(IStatusChangeListener context, boolean useAsSelectionDialog, String initSelection) {	
 		fContext= context;
 		fUseAsSelectionDialog= useAsSelectionDialog;
-		fSelectionStatus= new StatusInfo();
+		fSelectionStatus= new StatusInfo();	
 		
 		String[] buttonLabels= new String[] { 
 			JavaPlugin.getResourceString(ADD), JavaPlugin.getResourceString(EDIT)
-		};			
-		
-		ArrayList reserved= new ArrayList(3);
-		CPVariableElement rtlib= new CPVariableElement(ClasspathVariablesPreferencePage.JDKLIB_VARIABLE, null);
-		reserved.add(rtlib);
+		};
 				
 		VariablesAdapter adapter= new VariablesAdapter();
 		
@@ -52,6 +47,22 @@ public class VariableBlock {
 		fReservedList.setDialogFieldListener(adapter);
 		fReservedList.setLabelText(JavaPlugin.getResourceString(RESERVED + ".label"));
 		
+		CPVariableElement initSelectedElement= null;
+		
+		String[] reservedName= getReservedVariableNames();
+		ArrayList reserved= new ArrayList(reservedName.length);
+		for (int i= 0; i < reservedName.length; i++) {
+			String name= reservedName[i];
+			CPVariableElement resVar= new CPVariableElement(name, null);
+			reserved.add(resVar);
+			
+			if (name.equals(initSelection)) {
+				initSelectedElement= resVar;
+			}
+		}
+		
+		boolean isInReserved= (initSelectedElement != null);
+		
 		String[] entries= JavaCore.getClasspathVariableNames();
 		ArrayList elements= new ArrayList(entries.length);
 		for (int i= 0; i < entries.length; i++) {
@@ -61,6 +72,9 @@ public class VariableBlock {
 				CPVariableElement elem= new CPVariableElement(name, entryPath);
 				if (!reserved.contains(elem)) {
 					elements.add(elem);
+					if (name.equals(initSelection)) {
+						initSelectedElement= elem;
+					}
 				}
 			} else {
 				JavaPlugin.log(new Exception("classpath variable not found: " + name));
@@ -69,21 +83,43 @@ public class VariableBlock {
 		fVariablesList.setElements(elements);
 		fReservedList.setElements(reserved);
 		
+		Object selElement= null;
+		if (initSelectedElement != null) {
+			ISelection sel= new StructuredSelection(new StructuredSelection(initSelectedElement));
+			if (isInReserved) {
+				fReservedList.selectElements(sel);
+			} else {
+				fVariablesList.selectElements(sel);
+			}
+		} else {
+			if (fVariablesList.getSize() > 0) {
+				fVariablesList.selectElements(new StructuredSelection(fVariablesList.getElement(0)));
+			} else if (fReservedList.getSize() > 0) {
+				fReservedList.selectElements(new StructuredSelection(fReservedList.getElement(0)));
+			}
+		}
+		
 	}
+	
+	private String[] getReservedVariableNames() {
+		return new String[] {
+			ClasspathVariablesPreferencePage.JRELIB_VARIABLE,
+			ClasspathVariablesPreferencePage.JRESRC_VARIABLE
+		};
+	}
+	
 
 	public Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList, fReservedList }, true, 420, 0);
-		
-		Object selElement= null;
-		if (fVariablesList.getSize() > 0) {
-			fVariablesList.selectElements(new StructuredSelection(fVariablesList.getElement(0)));
-		} else if (fReservedList.getSize() > 0) {
-			fReservedList.selectElements(new StructuredSelection(fReservedList.getElement(0)));
-		}
-		
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList, fReservedList }, true, 420, 0);	
 		return composite;
 	}
+	
+	public void addDoubleClickListener(IDoubleClickListener listener) {
+		fVariablesList.getTableViewer().addDoubleClickListener(listener);
+		fReservedList.getTableViewer().addDoubleClickListener(listener);
+	}
+		
 	
 	private Shell getShell() {
 		return JavaPlugin.getActiveWorkbenchShell();
@@ -162,33 +198,39 @@ public class VariableBlock {
 		CPVariableElement newEntry= dialog.getClasspathElement();
 		if (entry == null) {
 			fVariablesList.addElement(newEntry);
+			entry= newEntry;
 		} else {
 			entry.setName(newEntry.getName());
 			entry.setPath(newEntry.getPath());
 			fVariablesList.refresh();
 		}
+		fVariablesList.selectElements(new StructuredSelection(entry));
 	}
 	
 	public void performDefaults() {
 		fVariablesList.removeAllElements();
-		IPath jdkPath= JavaBasePreferencePage.getJDKPath();
-		if (jdkPath == null) {
-			jdkPath= new Path("");
-		}
-		CPVariableElement entry= new CPVariableElement(ClasspathVariablesPreferencePage.JDKLIB_VARIABLE, jdkPath);
-		fVariablesList.addElement(entry);
 	}
 
 	public boolean performOk() {
 		try {
 			List existing= new ArrayList();
 			existing.addAll(Arrays.asList(JavaCore.getClasspathVariableNames()));
+			existing.removeAll(Arrays.asList(getReservedVariableNames()));
 			
 			List elements= fVariablesList.getElements();
+			
 			for (int i= 0; i < elements.size(); i++) {
 				CPVariableElement curr= (CPVariableElement) elements.get(i);
-				JavaCore.setClasspathVariable(curr.getName(), curr.getPath());
-				existing.remove(curr.getName());
+				String name= curr.getName();
+				IPath path= curr.getPath();
+				
+				IPath prevPath= JavaCore.getClasspathVariable(name);
+				if (prevPath == null || !prevPath.equals(path)) {
+					JavaCore.setClasspathVariable(name, path);
+				}
+				if (prevPath != null) {
+					existing.remove(curr.getName());
+				}
 			}
 			
 			for (int i= 0; i < existing.size(); i++) {

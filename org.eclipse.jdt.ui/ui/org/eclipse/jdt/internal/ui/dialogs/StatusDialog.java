@@ -48,7 +48,11 @@ public abstract class StatusDialog extends Dialog {
 			updateButtonsEnableState(status);
 			StatusTool.applyToStatusLine(fStatusLine, status);	
 		}
-	}	
+	}
+	
+	protected IStatus getStatus() {
+		return fLastStatus;
+	}
 
 	/**
 	 * Update the status of the ok button to reflect the given status. Subclasses

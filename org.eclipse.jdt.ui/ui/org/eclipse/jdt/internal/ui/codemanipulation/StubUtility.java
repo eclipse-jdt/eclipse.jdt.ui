@@ -47,7 +47,7 @@ public class StubUtility {
 			buf.append(method.getElementName());
 			buf.append('(');
 			for (int i= 0; i <= lastParam; i++) {
-				buf.append(Signature.toString(paramTypes[i]));
+				buf.append(Signature.getSimpleName(Signature.toString(paramTypes[i])));
 				if (i < lastParam) {
 					buf.append(", ");
 				}

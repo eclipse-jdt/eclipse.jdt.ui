@@ -1,8 +1,9 @@
-package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.util.IPropertyChangeListener;import org.eclipse.jface.util.PropertyChangeEvent;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;
+package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.util.IPropertyChangeListener;import org.eclipse.jface.util.PropertyChangeEvent;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;
 
 public class ClasspathVariablesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String JDKLIB_VARIABLE= "JDK_LIBRARY";
+	public static final String JRELIB_VARIABLE= "JRE_LIB";
+	public static final String JRESRC_VARIABLE= "JRE_SRC";
 	
 	private VariableBlock fVariableBlock;
 	
@@ -16,7 +17,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 				updateStatus(status);
 			}
 		};
-		fVariableBlock= new VariableBlock(listener, false);
+		fVariableBlock= new VariableBlock(listener, false, null);
 	}
 
 	/**
@@ -58,42 +59,53 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	 */
 	public static void initDefaults(IPreferenceStore prefs) {
 	}	
-	
-	public static void initClasspathVariables() throws JavaModelException {
-		initSharedJDKVariable();
-	}
-	
+		
 	// ------------- shared jdk variable
 	
 	
-	private static void initSharedJDKVariable() throws JavaModelException {
-		updateJDKLibraryEntry();
+	public static void initJREVariables() {
+		try {
+			updateJRELibEntry();
+			updateJRESrcEntry();
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, "Error", "");
+		}				
 		
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.addPropertyChangeListener(new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
-				if (event.getProperty().equals(JavaBasePreferencePage.PROP_JDK)) {
-					try {
-						updateJDKLibraryEntry();
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e.getStatus());
+				try {
+					String prop= event.getProperty();
+					if (prop.equals(JavaBasePreferencePage.PROP_JDK)) {
+						updateJRELibEntry();
+					} else if (prop.equals(JDKZipFieldEditor.PROP_SOURCE) 
+						|| prop.equals(JDKZipFieldEditor.PROP_PREFIX)) {
+						updateJRESrcEntry();
 					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e.getStatus());
 				}
-			}
+			}				
 		});
 	}
 	
-	private static void updateJDKLibraryEntry() throws JavaModelException {
-		IPath jdkPath= JavaBasePreferencePage.getJDKPath();
-		if (jdkPath == null) {
-			jdkPath= new Path("");
-		}
-		JavaCore.setClasspathVariable(JDKLIB_VARIABLE, jdkPath);		
+	private static void updateJRELibEntry() throws JavaModelException {
+			IPath jrePath= JavaBasePreferencePage.getJDKPath();
+			if (jrePath == null) {
+				jrePath= new Path("");
+			}
+			JavaCore.setClasspathVariable(JRELIB_VARIABLE, jrePath);
 	}
 	
-	
-
-
-
+	private static void updateJRESrcEntry() throws JavaModelException {
+		IPath[] srcAttachPath= JavaBasePreferencePage.getJDKSourceAttachment();
+		IPath srcPath;
+		if (srcAttachPath == null) {
+			srcPath= new Path("");
+		} else {
+			srcPath= srcAttachPath[0];
+		}
+		JavaCore.setClasspathVariable(JRESRC_VARIABLE, srcPath);		
+	}
 
 }

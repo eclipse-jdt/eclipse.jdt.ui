@@ -32,7 +32,7 @@ public class NewClassCreationWizardPage extends TypePage {
 	/**
 	 * Should be called from the wizard with the input element.
 	 */
-	public final void init(IStructuredSelection selection) {
+	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= null;
 		
 		if (selection != null && !selection.isEmpty()) {

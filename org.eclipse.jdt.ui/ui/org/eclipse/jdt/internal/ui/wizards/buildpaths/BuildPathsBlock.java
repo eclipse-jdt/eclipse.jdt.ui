@@ -295,13 +295,14 @@ public class BuildPathsBlock {
 		if (fAddJDKToDefault || fClassPathDefault == null) {
 			IPath jdkPath= JavaBasePreferencePage.getJDKPath();
 			if (jdkPath != null) {
-				IResource res= fWorkspaceRoot.findMember(jdkPath);
+				/*IResource res= fWorkspaceRoot.findMember(jdkPath);
 				CPListElement elem= new CPListElement(IClasspathEntry.CPE_LIBRARY, jdkPath, res);
-				//CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, new Path(ClasspathVariablesPreferencePage.JDKLIB_VARIABLE), null);
 				IPath[] attach= JavaBasePreferencePage.getJDKSourceAttachment();
 				if (attach != null) {
 					elem.setSourceAttachment(attach[0], attach[1]);
-				}
+				}*/
+				CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, new Path(ClasspathVariablesPreferencePage.JRELIB_VARIABLE), null);
+				elem.setSourceAttachment(new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE), new Path("src"));
 				vec.add(elem);
 			}
 		}

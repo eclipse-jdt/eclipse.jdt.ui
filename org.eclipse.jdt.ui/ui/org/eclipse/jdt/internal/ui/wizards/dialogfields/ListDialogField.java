@@ -59,7 +59,7 @@ public class ListDialogField extends DialogField {
 		fConfiguration= config;
 		fWrappedLabelProvider= new WrappedTableLabelProvider(lprovider);
 		fListViewerAdapter= new ListViewerAdapter();
-		fParentElement= this;		
+		fParentElement= this;
 
 		fElements= new ArrayList(10);
 					
@@ -178,9 +178,14 @@ public class ListDialogField extends DialogField {
 			
 			fTable.setInput(fParentElement);
 			
+			fTable.setSelection(fSelectionWhenEnabled);
 			fTableControl.setEnabled(isEnabled());
 		}
 		return fTableControl;
+	}
+	
+	public TableViewer getTableViewer() {
+		return fTable;
 	}
 	
 	/* 
@@ -528,6 +533,7 @@ public class ListDialogField extends DialogField {
 	
 
 	public void selectElements(ISelection selection) {
+		fSelectionWhenEnabled= selection;
 		if (fTable != null) {
 			fTable.setSelection(selection);
 		}

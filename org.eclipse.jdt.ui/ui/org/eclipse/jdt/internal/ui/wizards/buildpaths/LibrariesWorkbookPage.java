@@ -378,8 +378,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		public VariableSelectionDialog(Shell parent, List existingPaths) {
 			super(parent);
 			setTitle(JavaPlugin.getResourceString(DIALOG_VARIABLE_SELECTION + ".title"));
-			IPath initVar= new Path(fDialogSettings.get(IUIConstants.DIALOGSTORE_LASTVARIABLE));
-			fVariableSelectionBlock= new VariableSelectionBlock(this, existingPaths, initVar, false);
+			String initVar= fDialogSettings.get(IUIConstants.DIALOGSTORE_LASTVARIABLE);
+			fVariableSelectionBlock= new VariableSelectionBlock(this, existingPaths, null, initVar, false);
 		}
 
 		/**
