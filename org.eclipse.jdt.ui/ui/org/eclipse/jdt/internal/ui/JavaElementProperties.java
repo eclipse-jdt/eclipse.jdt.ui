@@ -48,7 +48,7 @@ public class JavaElementProperties implements IPropertySource {
 	}
 	
 	public Object getEditableValue() {
-		return null;
+		return this;
 	}
 	
 	public boolean isPropertySet(Object property) {
