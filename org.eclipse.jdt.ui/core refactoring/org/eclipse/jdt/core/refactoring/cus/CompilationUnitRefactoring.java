@@ -1,4 +1,4 @@
-package org.eclipse.jdt.core.refactoring.cus;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.internal.core.refactoring.Assert;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.core.refactoring.cus;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;import org.eclipse.jdt.internal.core.refactoring.Assert;
 public abstract class CompilationUnitRefactoring extends Refactoring{
 	
 	private ICompilationUnit fCu;

@@ -44,11 +44,11 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 			RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
 			RefactoringPreferences.PREF_ERROR_PAGE_SEVERITY_THRESHOLD,
 			getResourceString(prefix + "label"),
-			2,
+			1,
 			new String[] [] {
 				{ getResourceString(prefix + "fatal"), 			RefactoringPreferences.FATAL_SEVERITY },
-				{ getResourceString(prefix + "warning"), 		RefactoringPreferences.WARNING_SEVERITY },
 				{ getResourceString(prefix + "error"), 			RefactoringPreferences.ERROR_SEVERITY },
+				{ getResourceString(prefix + "warning"), 		RefactoringPreferences.WARNING_SEVERITY },
 				{ getResourceString(prefix + "information"),	RefactoringPreferences.INFO_SEVERITY }				
 			},
 			parent

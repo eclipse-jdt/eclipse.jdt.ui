@@ -5,7 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.dialogs.ListSelectionDialog;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.dialogs.ListSelectionDialog;import org.eclipse.jdt.core.refactoring.IChange;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 /**
  * An abstract wizard page that can be used to implement user input pages for 
@@ -17,6 +17,27 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 
 	private boolean fIsLastUserPage;
 
+	private static class SaveDialog extends ListSelectionDialog {
+		public SaveDialog(Shell parent, Object input,
+				IStructuredContentProvider contentProvider,
+				ILabelProvider labelProvider,
+				String message) {
+			super(parent, input, contentProvider, labelProvider, message);
+		}
+		protected Control createDialogArea(Composite parent) {
+			Composite result= (Composite)super.createDialogArea(parent);
+			final Button check= new Button(result, SWT.CHECK);
+			check.setText(RefactoringResources.getResourceString("SaveEditorsDialog.alwaysSaveMessage"));
+			check.setSelection(RefactoringPreferences.getSaveAllEditors());
+			check.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					RefactoringPreferences.setSaveAllEditors(check.getSelection());
+				}
+			});
+			return result;
+		}
+	}
+	
 	/**
 	 * Creates a new user input page.
 	 * @param name the page's name.
@@ -140,7 +161,7 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		String message= RefactoringResources.getResourceString("SaveEditorsDialog.message");
 		String title= RefactoringResources.getResourceString("SaveEditorsDialog.title");
-		ListSelectionDialog dialog= new ListSelectionDialog(parent, unsavedEditorsList, new ListContentProvider(),	createLabelProvider(), message);
+		SaveDialog dialog= new SaveDialog(parent, unsavedEditorsList, new ListContentProvider(),	createLabelProvider(), message);
 		dialog.setTitle(title);
 		dialog.setBlockOnOpen(true);
 		dialog.setInitialSelections(unsavedEditors);	

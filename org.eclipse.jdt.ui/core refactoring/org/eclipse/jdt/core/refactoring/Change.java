@@ -1,9 +1,4 @@
-/*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 2000
- */
-package org.eclipse.jdt.core.refactoring;import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.core.JavaModelException;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.core.refactoring;import org.eclipse.core.runtime.CoreException;import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * An abstract default implementation for a change object - suitable for subclassing. This class manages

@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package com.ibm.jdt.ui.tests;
 
 import java.util.ArrayList;import junit.framework.Test;import junit.framework.TestCase;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.search.IJavaSearchConstants;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.ITypeNameRequestor;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.testplugin.JavaTestPlugin;import org.eclipse.jdt.testplugin.JavaTestProject;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;

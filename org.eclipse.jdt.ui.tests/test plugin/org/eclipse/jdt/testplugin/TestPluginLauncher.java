@@ -1,4 +1,4 @@
-package org.eclipse.jdt.testplugin;import java.net.URL;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.testplugin;import java.net.URL;
 public class TestPluginLauncher {
 	
 	public static void run(String application, String location, Class testCase, String[] args) {

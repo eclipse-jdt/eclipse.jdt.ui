@@ -102,6 +102,8 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 	private CheckboxTreeViewer fTreeViewer;
 	
 	public static final String PAGE_NAME= "PreviewPage";
+	
+	private boolean fExpandFirstNode;
 
 	/**
 	 * Creates a new proposed changes wizard page.
@@ -133,6 +135,16 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 			
 		if (fTreeViewerInput != null)
 			checkAllActiveNodes(fTreeViewerInput);
+	}
+	
+	/**
+	 * Defines whether the frist node in the preview page is supposed to be expanded.
+	 * 
+	 * @param expand <code>true</code> if the first node is to be expanded. Otherwise
+	 *  <code>false</code>
+	 */
+	public void setExpandFirstNode(boolean expand) {
+		fExpandFirstNode= expand;
 	}
 	
 	/**
@@ -197,7 +209,16 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 				ITreeContentProvider provider= (ITreeContentProvider)fTreeViewer.getContentProvider();
 				Object[] elements= provider.getElements(fTreeViewerInput);
 				if (elements != null && elements.length > 0) {
-					fTreeViewer.setSelection(new StructuredSelection(elements[0]));
+					Object element= elements[0];
+					if (fExpandFirstNode) {
+						Object[] subElements= provider.getElements(element);
+						if (subElements != null && subElements.length > 0) {
+							fTreeViewer.expandToLevel(element, 1);
+							checkAllActiveNodes((IChange)element);
+							element= subElements[0];
+						}
+					}
+					fTreeViewer.setSelection(new StructuredSelection(element));
 				}
 			}
 		}

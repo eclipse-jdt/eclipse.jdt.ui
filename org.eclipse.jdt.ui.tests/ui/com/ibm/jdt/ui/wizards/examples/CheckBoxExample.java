@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package com.ibm.jdt.ui.wizards.examples;
 
 import java.util.List;

@@ -5,21 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.wizard.WizardDialog;
-
-import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.IUpdate;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-
-import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.JavaUIAction;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
-import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
+import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.wizard.WizardDialog;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
 
 /**
  * Extracts a new method from the text editor's text selection by using the
@@ -60,7 +46,11 @@ public class ExtractMethodAction extends JavaUIAction implements IUpdate {
 	}
 	
 	private boolean canOperateOn() {
-		return true;
+		ISelection selection= fEditor.getSelectionProvider().getSelection();
+		if (!(selection instanceof ITextSelection))
+			return false;
+			
+		return ((ITextSelection)selection).getLength() > 0;
 	}
 	
 	private ICompilationUnit getCompilationUnit() {

@@ -41,5 +41,10 @@ public class RefactoringPreferences {
 	static public boolean getSaveAllEditors() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(PREF_SAVE_ALL_EDITORS);
-	}	
+	}
+	
+	static public void setSaveAllEditors(boolean value) {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PREF_SAVE_ALL_EDITORS, value);
+	}
 }

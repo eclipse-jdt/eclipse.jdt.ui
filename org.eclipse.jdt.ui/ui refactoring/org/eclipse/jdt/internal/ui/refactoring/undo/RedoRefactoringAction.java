@@ -24,7 +24,7 @@ public class RedoRefactoringAction extends UndoManagerAction {
 	public void update() {
 		String text= Refactoring.getUndoManager().peekRedoName();
 		if (text != null) {
-			text= fText + " " + text;
+			text= fText + " - " + text;
 		} else {
 			text= fText;
 		}

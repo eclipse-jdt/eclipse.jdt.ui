@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000, 2001
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.core.refactoring.code;
 
@@ -64,8 +63,8 @@ public class ExtractMethodRefactoring extends Refactoring{
 	/* (non-Javadoc)
 	 * Method declared in IRefactoring
 	 */
-	 public String getName(){
-	 	return "Extract Method";
+	 public String getName() {
+	 	return "Extract Method " + fMethodName + " in " + fCUnit.getElementName();
 	 }
 
 	/**
@@ -208,17 +207,19 @@ public class ExtractMethodRefactoring extends Refactoring{
 		
 		adjustSelection();
 			
-		ITextBufferChange result= fTextBufferChangeCreator.create("Extract Method", fCUnit);
-		
-		
 		AbstractMethodDeclaration method= fStatementAnalyzer.getEnclosingMethod();
+		String sourceMethodName= new String(method.selector);
+		
+		ITextBufferChange result= fTextBufferChangeCreator.create("extract method " +
+			fMethodName + " from method " + sourceMethodName, fCUnit);
+		
 		
 		final int methodStart= method.declarationSourceStart;
 		final int methodEnd= method.declarationSourceEnd;			
 		final int insertPosition= methodEnd + 1;
 		
 		// Inserting the new method
-		result.addSimpleTextChange(new SimpleReplaceTextChange("Extracted method", insertPosition) {
+		result.addSimpleTextChange(new SimpleReplaceTextChange("add new method " + fMethodName, insertPosition) {
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
 				int startLine= buffer.getLineOfOffset(methodStart);
 				int endLine= buffer.getLineOfOffset(methodEnd);
@@ -230,7 +231,7 @@ public class ExtractMethodRefactoring extends Refactoring{
 		});
 		
 		// Replacing the old statements with the new method call.
-		result.addSimpleTextChange(new SimpleReplaceTextChange("Changed method", fSelectionStart, fSelectionLength, null) {
+		result.addSimpleTextChange(new SimpleReplaceTextChange("substitue statement(s) with call to " + fMethodName, fSelectionStart, fSelectionLength, null) {
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(methodStart));
 				setText(computeCall(buffer, delimiter));

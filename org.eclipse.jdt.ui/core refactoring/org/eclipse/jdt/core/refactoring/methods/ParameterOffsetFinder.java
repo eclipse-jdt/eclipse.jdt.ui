@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.core.refactoring.methods;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;import org.eclipse.jdt.internal.compiler.ast.*;import org.eclipse.jdt.internal.compiler.lookup.*;import org.eclipse.jdt.internal.compiler.util.CharOperation;import org.eclipse.jdt.internal.core.CompilationUnit;import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 /*
