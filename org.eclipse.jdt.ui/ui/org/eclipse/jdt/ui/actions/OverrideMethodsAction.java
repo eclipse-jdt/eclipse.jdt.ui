@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.core.runtime.CoreException;
@@ -24,6 +25,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -35,7 +38,9 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.OverrideMethodQuery;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
@@ -53,6 +58,8 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
  */
 public class OverrideMethodsAction extends SelectionDispatchAction {
 
+	private CompilationUnitEditor fEditor;
+
 	/**
 	 * Creates a new <code>OverrideMethodsAction</code>.
 	 * 
@@ -67,6 +74,17 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION);
 	}
 
+	/**
+	 * Creates a new <code>OverrideMethodsAction</code>.
+	 * <p>
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * </p>
+	 */
+	public OverrideMethodsAction(CompilationUnitEditor editor) {
+		this(editor.getEditorSite());
+		fEditor= editor;
+	}
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -80,10 +98,37 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		setEnabled(enabled);
 	}	
 	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */
+	protected void selectionChanged(ITextSelection selection) {
+		setEnabled(fEditor != null);
+	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
+	protected void run(ITextSelection selection) {
+		IType type= null;
+		Shell shell= getShell();
+		try {
+			IJavaElement element= SelectionConverter.elementAtOffset(fEditor);
+			type= (IType)element.getAncestor(IJavaElement.TYPE);
+			if (type == null) {
+				ICompilationUnit unit= SelectionConverter.getInputAsCompilationUnit(fEditor);
+				if (unit != null)
+					type= unit.findPrimaryType();
+			}
+			if (type != null)
+				run(shell, type, fEditor);
+			else
+				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			ErrorDialog.openError(getShell(), getDialogTitle(), null, e.getStatus()); 			
+		}
+	}
+	
 	protected void run(IStructuredSelection selection) {
 		Shell shell= getShell();
 		try {
@@ -91,6 +136,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			if (type == null) {
 				return;
 			}
+			
 			// open an editor and work on a working copy
 			IEditorPart editor= EditorUtility.openInEditor(type);
 			type= (IType)EditorUtility.getWorkingCopy(type);
@@ -100,28 +146,32 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 				return;
 			}
 			
-			OverrideMethodQuery selectionQuery= new OverrideMethodQuery(shell, false);
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selectionQuery, false);
-			try {
-				BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-				context.run(false, true, new WorkbenchRunnableAdapter(op));
-				IMethod[] res= op.getCreatedMethods();
-				if (res == null || res.length == 0) {
-					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.nothing_found")); //$NON-NLS-1$
-				} else if (editor != null) {
-					EditorUtility.revealInEditor(editor, res[0]);
-				}
-			} catch (InvocationTargetException e) {
-				JavaPlugin.log(e);
-				MessageDialog.openError(shell, getDialogTitle(), e.getTargetException().getMessage()); 
-			} catch (InterruptedException e) {
-				// Do nothing. Operation has been canceled by user.
-			}
+			run(shell, type, editor);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			ErrorDialog.openError(shell, getDialogTitle(), null, e.getStatus()); 
 		}			
+	}
+
+	private void run(Shell shell, IType type, IEditorPart editor) {
+		OverrideMethodQuery selectionQuery= new OverrideMethodQuery(shell, false);
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selectionQuery, false);
+		try {
+			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
+			context.run(false, true, new WorkbenchRunnableAdapter(op));
+			IMethod[] res= op.getCreatedMethods();
+			if (res == null || res.length == 0) {
+				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.nothing_found")); //$NON-NLS-1$
+			} else if (editor != null) {
+				EditorUtility.revealInEditor(editor, res[0]);
+			}
+		} catch (InvocationTargetException e) {
+			JavaPlugin.log(e);
+			MessageDialog.openError(shell, getDialogTitle(), e.getTargetException().getMessage()); 
+		} catch (InterruptedException e) {
+			// Do nothing. Operation has been canceled by user.
+		}
 	}
 		
 	private IType getSelectedType(IStructuredSelection selection) throws JavaModelException {

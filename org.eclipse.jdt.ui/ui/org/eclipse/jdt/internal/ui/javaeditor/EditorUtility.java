@@ -222,6 +222,8 @@ public class EditorUtility {
 	public static ICompilationUnit getWorkingCopy(ICompilationUnit cu) throws JavaModelException {
 		if (cu == null)
 			return null;
+		if (cu.isWorkingCopy())
+			return cu;
 			
 		return (ICompilationUnit)cu.findSharedWorkingCopy(JavaUI.getBufferFactory());
 	}

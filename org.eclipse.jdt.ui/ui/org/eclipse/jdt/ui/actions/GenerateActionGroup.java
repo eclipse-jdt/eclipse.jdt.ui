@@ -78,6 +78,9 @@ public class GenerateActionGroup extends ActionGroup {
 		fOrganizeImports= new OrganizeImportsAction(editor);
 		fOrganizeImports.update(selection);
 
+		fOverrideMethods= new OverrideMethodsAction(editor);
+		fOverrideMethods.update(selection);
+		
 		fConvertToWindows= new ConvertLineDelimitersAction(editor, "\r\n"); //$NON-NLS-1$
 		fConvertToUNIX= new ConvertLineDelimitersAction(editor, "\n"); //$NON-NLS-1$
 		fConvertToMac= new ConvertLineDelimitersAction(editor, "\r"); //$NON-NLS-1$
