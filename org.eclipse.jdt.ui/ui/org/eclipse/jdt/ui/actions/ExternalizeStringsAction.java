@@ -17,6 +17,7 @@ import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -107,7 +108,8 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		Object first= selection.getFirstElement();
 		if (first instanceof ICompilationUnit) 
 			return (ICompilationUnit) first;
-		
+		if (first instanceof IType)
+			return ((IType) first).getCompilationUnit();
 		return null;
 	}
 	
