@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.UndoManagerAdapter;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -59,21 +60,20 @@ public class UndoRefactoringAction extends UndoManagerAction {
 	 */
 	protected UndoManagerAdapter createUndoManagerListener() {
 		return new UndoManagerAdapter() {
-			public void undoAdded() {
+			public void undoStackChanged(IUndoManager manager) {
 				IAction action= getAction();
 				if (action == null)
 					return;
-				action.setEnabled(true);
-				action.setText(RefactoringMessages.getFormattedString(
-					"UndoRefactoringAction.extendedLabel", //$NON-NLS-1$
-					Refactoring.getUndoManager().peekUndoName()));
-			}
-			public void noMoreUndos() {
-				IAction action= getAction();
-				if (action == null)
-					return;
-				action.setText(RefactoringMessages.getString("UndoRefactoringAction.label")); //$NON-NLS-1$
-				action.setEnabled(false);
+				boolean enabled= false;
+				String text= null;
+				if (manager.anythingToUndo()) {
+					enabled= true;
+					text= getActionText();
+				} else {
+					text= RefactoringMessages.getString("UndoRefactoringAction.label"); //$NON-NLS-1$
+				}
+				action.setEnabled(enabled);
+				action.setText(text);
 			}
 		};
 	}	
@@ -84,7 +84,20 @@ public class UndoRefactoringAction extends UndoManagerAction {
 	public void selectionChanged(IAction action, ISelection s) {
 		if (!isHooked()) {
 			hookListener(action);
-			action.setEnabled(Refactoring.getUndoManager().anythingToUndo());
+			IUndoManager undoManager = Refactoring.getUndoManager();
+			if (undoManager.anythingToUndo()) {
+				if (undoManager.peekUndoName() != null)
+					action.setText(getActionText());
+				action.setEnabled(true);
+			} else {
+				action.setEnabled(false);
+			}
 		}
+	}	
+	
+	private String getActionText() {
+		return RefactoringMessages.getFormattedString(
+			"UndoRefactoringAction.extendedLabel", //$NON-NLS-1$
+			Refactoring.getUndoManager().peekUndoName());
 	}	
 }

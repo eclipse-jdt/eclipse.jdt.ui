@@ -12,25 +12,13 @@ public class UndoManagerAdapter implements IUndoManagerListener {
 	/* (non-Javadoc)
 	 * Method declared in IUndoManagerListener
 	 */
-	public void undoAdded() {
+	public void undoStackChanged(IUndoManager manager) {
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared in IUndoManagerListener
 	 */
-	public void redoAdded() {
-	}
-	
-	/* (non-Javadoc)
-	 * Method declared in IUndoManagerListener
-	 */
-	public void noMoreUndos() {
-	}
-	 
-	/* (non-Javadoc)
-	 * Method declared in IUndoManagerListener
-	 */
-	public void noMoreRedos() {
+	public void redoStackChanged(IUndoManager manager) {
 	}
 }
 

@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
@@ -57,6 +58,16 @@ public class UndoManager implements IUndoManager {
 						return false;
 					}
 					break;
+				case IJavaElement.COMPILATION_UNIT:
+					ICompilationUnit unit= (ICompilationUnit)delta.getElement();
+					// If we change a working copy we do nothing
+					if (unit.isWorkingCopy()) {
+						// Don't examine children of a working copy but keep processing siblings.
+						return true;
+					} else {
+						flush();
+						return false;
+					}
 				case IJavaElement.CLASS_FILE:
 					// Don't examine children of a class file but keep on examining siblings.
 					return true;
@@ -143,13 +154,13 @@ public class UndoManager implements IUndoManager {
 	private void flushUndo(){
 		fUndoChanges= new Stack();
 		fUndoNames= new Stack();
-		fireNoMoreUndos();
+		fireUndoStackChanged();
 	}
 	
 	private void flushRedo(){
 		fRedoChanges= new Stack();
 		fRedoNames= new Stack();
-		fireNoMoreRedos();
+		fireRedoStackChanged();
 	}
 		
 	/* (Non-Javadoc)
@@ -165,7 +176,7 @@ public class UndoManager implements IUndoManager {
 			fFlushListener= new FlushListener();
 			JavaCore.addElementChangedListener(fFlushListener);
 		}
-		fireUndoAdded();
+		fireUndoStackChanged();
 	}
 	
 	/* (Non-Javadoc)
@@ -184,11 +195,10 @@ public class UndoManager implements IUndoManager {
 		
 		if (!result.hasError()) {
 			fUndoChanges.pop();
-			if (fUndoChanges.size() == 0)
-				fireNoMoreUndos();
 			fRedoNames.push(fUndoNames.pop());
 			fRedoChanges.push(change.getUndoChange());
-			fireRedoAdded();
+			fireUndoStackChanged();
+			fireRedoStackChanged();
 		}
 		return result;	
 	}
@@ -210,11 +220,10 @@ public class UndoManager implements IUndoManager {
 		
 		if (!result.hasError()) {
 			fRedoChanges.pop();
-			if (fRedoChanges.size() == 0)
-				fireNoMoreRedos();	
 			fUndoNames.push(fRedoNames.pop());
 			fUndoChanges.push(change.getUndoChange());
-			fireUndoAdded();
+			fireRedoStackChanged();
+			fireUndoStackChanged();
 		}
 		
 		return result;
@@ -277,39 +286,21 @@ public class UndoManager implements IUndoManager {
 		return null;	
 	}
 	
-	private void fireUndoAdded() {
+	private void fireUndoStackChanged() {
 		if (fListeners == null)
 			return;
 		Object[] listeners= fListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
-			((IUndoManagerListener)listeners[i]).undoAdded();
+			((IUndoManagerListener)listeners[i]).undoStackChanged(this);
 		}
 	}
 	
-	private void fireNoMoreUndos() {
+	private void fireRedoStackChanged() {
 		if (fListeners == null)
 			return;
 		Object[] listeners= fListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
-			((IUndoManagerListener)listeners[i]).noMoreUndos();
-		}
-	}
-	
-	private void fireRedoAdded() {
-		if (fListeners == null)
-			return;
-		Object[] listeners= fListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			((IUndoManagerListener)listeners[i]).redoAdded();
-		}
-	}
-	
-	private void fireNoMoreRedos() {
-		if (fListeners == null)
-			return;
-		Object[] listeners= fListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			((IUndoManagerListener)listeners[i]).noMoreRedos();
+			((IUndoManagerListener)listeners[i]).redoStackChanged(this);
 		}
 	}	
 }
