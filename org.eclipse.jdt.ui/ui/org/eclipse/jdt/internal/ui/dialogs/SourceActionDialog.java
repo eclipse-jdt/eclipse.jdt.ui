@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,7 +46,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.core.dom.Modifier;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -81,9 +80,11 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private final String SETTINGS_SECTION_CONSTRUCTORS= "SourceActionDialog.constructors"; //$NON-NLS-1$
 	
 	private final String SETTINGS_INSERTPOSITION= "InsertPosition"; //$NON-NLS-1$
-	private final String VISIBILITY_MODIFIER= "VisibilityModifier"; //$NON-NLS-1$
-	private final String FINAL_MODIFIER= "FinalModifier"; //$NON-NLS-1$
-	private final String SYNCHRONIZED_MODIFIER= "SynchronizedModifier"; //$NON-NLS-1$
+	private final String SETTINGS_VISIBILITY_MODIFIER= "VisibilityModifier"; //$NON-NLS-1$
+	private final String SETTINGS_FINAL_MODIFIER= "FinalModifier"; //$NON-NLS-1$
+	private final String SETTINGS_SYNCHRONIZED_MODIFIER= "SynchronizedModifier"; //$NON-NLS-1$
+	private final String SETTINGS_COMMENTS= "Comments"; //$NON-NLS-1$
+
 	
 	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type, boolean isConstructor) throws JavaModelException {
 		super(parent, labelProvider, contentProvider);
@@ -94,28 +95,27 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 
 		fWidth= 60;
 		fHeight= 18;
-		
-		// Take the default from the default for generating comments from the code gen prefs
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		fGenerateComment= settings.createComments;		
-		
+			
 		int insertionDefault= isConstructor ? 0 : 1;
+		boolean generateCommentsDefault= JavaPreferencesSettings.getCodeGenerationSettings().createComments;
 		
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		String sectionId= isConstructor ? SETTINGS_SECTION_CONSTRUCTORS : SETTINGS_SECTION_METHODS;
 		fSettings= dialogSettings.getSection(sectionId);		
 		if (fSettings == null)  {
 			fSettings= dialogSettings.addNewSection(sectionId);
-			fSettings.put(VISIBILITY_MODIFIER, StringConverter.asString(Modifier.PUBLIC));
-			fSettings.put(FINAL_MODIFIER, StringConverter.asString(false));
-			fSettings.put(SYNCHRONIZED_MODIFIER, StringConverter.asString(false));
+			fSettings.put(SETTINGS_VISIBILITY_MODIFIER, StringConverter.asString(Modifier.PUBLIC));
+			fSettings.put(SETTINGS_FINAL_MODIFIER, StringConverter.asString(false));
+			fSettings.put(SETTINGS_SYNCHRONIZED_MODIFIER, StringConverter.asString(false));
 			fSettings.put(SETTINGS_INSERTPOSITION, insertionDefault);
+			fSettings.put(SETTINGS_COMMENTS, generateCommentsDefault);
 		}
 		
-		fVisibilityModifier= StringConverter.asInt(fSettings.get(VISIBILITY_MODIFIER), Modifier.PUBLIC);
-		fFinal= StringConverter.asBoolean(fSettings.get(FINAL_MODIFIER), false);
-		fSynchronized= StringConverter.asBoolean(fSettings.get(SYNCHRONIZED_MODIFIER), false);
+		fVisibilityModifier= StringConverter.asInt(fSettings.get(SETTINGS_VISIBILITY_MODIFIER), Modifier.PUBLIC);
+		fFinal= StringConverter.asBoolean(fSettings.get(SETTINGS_FINAL_MODIFIER), false);
+		fSynchronized= StringConverter.asBoolean(fSettings.get(SETTINGS_SYNCHRONIZED_MODIFIER), false);
 		fCurrentPositionIndex= StringConverter.asInt(fSettings.get(SETTINGS_INSERTPOSITION), insertionDefault);
+		fGenerateComment= StringConverter.asBoolean(fSettings.get(SETTINGS_COMMENTS), generateCommentsDefault);
 		
 		fInsertPositions= new ArrayList();
 		fLabels= new ArrayList(); 
@@ -180,13 +180,14 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#close()
 	 */
 	public boolean close() {
-		fSettings.put(VISIBILITY_MODIFIER, StringConverter.asString(fVisibilityModifier));
-		fSettings.put(FINAL_MODIFIER, StringConverter.asString(fFinal));
-		fSettings.put(SYNCHRONIZED_MODIFIER, StringConverter.asString(fSynchronized));
+		fSettings.put(SETTINGS_VISIBILITY_MODIFIER, StringConverter.asString(fVisibilityModifier));
+		fSettings.put(SETTINGS_FINAL_MODIFIER, StringConverter.asString(fFinal));
+		fSettings.put(SETTINGS_SYNCHRONIZED_MODIFIER, StringConverter.asString(fSynchronized));
 		
 		if (fCurrentPositionIndex == 0 || fCurrentPositionIndex == 1) {
 			fSettings.put(SETTINGS_INSERTPOSITION, StringConverter.asString(fCurrentPositionIndex));
 		}
+		fSettings.put(SETTINGS_COMMENTS, fGenerateComment);
 		return super.close();
 	}
 	
