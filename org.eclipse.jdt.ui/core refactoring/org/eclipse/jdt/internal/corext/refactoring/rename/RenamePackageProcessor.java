@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -692,7 +693,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	private static void updateImport(ImportRewrite importRewrite, IImportDeclaration importDeclaration, String updatedImport) throws JavaModelException {
 		if (Flags.isStatic(importDeclaration.getFlags())) {
 			importRewrite.removeStaticImport(importDeclaration.getElementName());
-			importRewrite.addStaticImport(updatedImport);
+			importRewrite.addStaticImport(Signature.getQualifier(updatedImport), Signature.getSimpleName(updatedImport), true);
 		} else {
 			importRewrite.removeImport(importDeclaration.getElementName());
 			importRewrite.addImport(updatedImport);
