@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
@@ -186,6 +187,12 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		final AST ast= newMethod.getAST();
 		for (int index= 0, n= oldMethod.thrownExceptions().size(); index < n; index++)
 			newMethod.thrownExceptions().add(index, ASTNode.copySubtree(ast, (Name) oldMethod.thrownExceptions().get(index)));
+	}
+
+	protected static void copyTypeParameters(MethodDeclaration oldMethod, MethodDeclaration newMethod) {
+		final AST ast= newMethod.getAST();
+		for (int index= 0, n= oldMethod.typeParameters().size(); index < n; index++)
+			newMethod.typeParameters().add(index, ASTNode.copySubtree(ast, (TypeParameter) oldMethod.typeParameters().get(index)));
 	}
 
 	protected static String createFieldLabel(final IField field) {

@@ -766,6 +766,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		copyReturnType(rewrite, method.getCompilationUnit(), oldMethod, newMethod, mapping);
 		copyParameters(rewrite, method.getCompilationUnit(), oldMethod, newMethod, mapping);
 		copyThrownExceptions(oldMethod, newMethod);
+		copyTypeParameters(oldMethod, newMethod);
 		return newMethod;
 	}
 

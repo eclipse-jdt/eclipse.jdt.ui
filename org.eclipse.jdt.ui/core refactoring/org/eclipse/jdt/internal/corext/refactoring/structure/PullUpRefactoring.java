@@ -1109,6 +1109,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		copyReturnType(rewrite, getDeclaringType().getCompilationUnit(), oldMethod, newMethod, mapping);
 		copyParameters(rewrite, getDeclaringType().getCompilationUnit(), oldMethod, newMethod, mapping);
 		copyThrownExceptions(oldMethod, newMethod);
+		copyTypeParameters(oldMethod, newMethod);
 		return newMethod;
 	}
 
