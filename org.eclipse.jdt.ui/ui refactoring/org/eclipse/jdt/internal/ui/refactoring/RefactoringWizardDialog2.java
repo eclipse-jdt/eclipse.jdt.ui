@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -28,7 +29,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
@@ -75,29 +75,10 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	private static final Image INFO= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_INFO);
 	private static final Image WARNING= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_WARNING);
 	private static final Image ERROR= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_ERROR);
-	private static final Image FATAL= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_FATAL);
 	
-	private static class MessageBox extends Composite {
-		GridLayout fLayout;
-		Label fImage;
-		Label fMessage;
-		public MessageBox(Composite parent, int style, int width) {
+	private static class MessageBox extends CLabel {
+		public MessageBox(Composite parent, int style) {
 			super(parent, style);
-			fLayout= new GridLayout();
-			fLayout.marginHeight= 0;
-			fLayout.numColumns= 2;
-			setLayout(fLayout);
-			fImage= new Label(this, SWT.NONE);
-			GridData gd= new GridData();
-			gd.verticalAlignment= GridData.BEGINNING;
-			Rectangle bounds= INFO.getBounds();
-			gd.widthHint= bounds.width; gd.heightHint= bounds.height;
-			fImage.setLayoutData(gd);
-			fMessage= new Label(this, SWT.LEFT | SWT.WRAP);
-			fMessage.setText(" \n "); //$NON-NLS-1$
-			gd= new GridData(GridData.FILL_BOTH);
-			gd.widthHint= width;
-			fMessage.setLayoutData(gd);
 		}
 		public void setMessage(IWizardPage page) {
 			String msg= page.getErrorMessage();
@@ -122,8 +103,10 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 			}
 			if (msg == null)
 				msg= ""; //$NON-NLS-1$
-			fMessage.setText(msg);
-			fImage.setImage(image);
+			setText(msg);
+			if (image == null && msg.length() > 0)
+				image= INFO;
+			setImage(image);
 		}
 	}
 	
@@ -486,7 +469,9 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 		}
 		
 		fStatusContainer= new PageBook(result, SWT.NONE);
-		fStatusContainer.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.widthHint= convertWidthInCharsToPixels(fWizard.getMessageLineWidthInChars());
+		fStatusContainer.setLayoutData(gd);
 		createProgressMonitorPart();
 		createMessageBox();
 		fStatusContainer.showPage(fMessageBox);
@@ -510,7 +495,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	}
 	
 	private void createMessageBox() {
-		fMessageBox= new MessageBox(fStatusContainer, SWT.NONE, convertWidthInCharsToPixels(fWizard.getMessageLineWidthInChars()));
+		fMessageBox= new MessageBox(fStatusContainer, SWT.NONE);
 	}
 	
 	protected void createButtonsForButtonBar(Composite parent) {
