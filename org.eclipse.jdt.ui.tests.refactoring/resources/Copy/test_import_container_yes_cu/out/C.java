@@ -1,9 +1,8 @@
 package p;
+
 import java.util.*;
-class A {
+import java.lang.Object;
+class C {
 	void foo() {
-	}
-	{
-		int fred= 0; //comment
 	}
 }
