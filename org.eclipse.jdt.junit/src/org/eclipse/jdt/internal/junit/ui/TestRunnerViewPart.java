@@ -1097,21 +1097,24 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	}
 
 	void codeHasChanged() {
-		postSyncRunnable(new Runnable() {
+		if (fDirtyListener != null) {
+			JavaCore.removeElementChangedListener(fDirtyListener);
+			fDirtyListener= null;
+		}
+		if (fViewImage == fTestRunOKIcon) 
+			fViewImage= fTestRunOKDirtyIcon;
+		else if (fViewImage == fTestRunFailIcon)
+			fViewImage= fTestRunFailDirtyIcon;
+		
+		Runnable r= new Runnable() {
 			public void run() {
 				if (isDisposed())
 					return;
-				if (fDirtyListener != null) {
-					JavaCore.removeElementChangedListener(fDirtyListener);
-					fDirtyListener= null;
-				}
-				if (fViewImage == fTestRunOKIcon) 
-					fViewImage= fTestRunOKDirtyIcon;
-				else if (fViewImage == fTestRunFailIcon)
-					fViewImage= fTestRunFailDirtyIcon;
 				firePropertyChange(IWorkbenchPart.PROP_TITLE);
 			}
-		});
+		};
+		if (!isDisposed())
+			getDisplay().asyncExec(r);
 	}
 	
 	boolean isCreated() {
