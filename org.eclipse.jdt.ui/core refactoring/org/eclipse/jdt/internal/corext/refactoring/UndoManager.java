@@ -17,7 +17,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -33,6 +40,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManagerListener;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Default implementation of IUndoManager.
@@ -65,6 +74,11 @@ public class UndoManager implements IUndoManager {
 					}
 					break;
 				case IJavaElement.COMPILATION_UNIT:
+					// if we have changed a primary working copy (e.g created, removed, ...)
+					// then we do nothing.
+					if ((details & IJavaElementDelta.F_PRIMARY_WORKING_COPY) != 0) {
+						return true;
+					}
 					ICompilationUnit unit= (ICompilationUnit)delta.getElement();
 					// If we change a working copy we do nothing
 					if (unit.isWorkingCopy()) {
@@ -93,6 +107,35 @@ public class UndoManager implements IUndoManager {
 			return true;			
 		}
 	}
+	
+	private class SaveListener implements IResourceChangeListener {
+		public void resourceChanged(IResourceChangeEvent event) {
+			IResourceDeltaVisitor visitor= new IResourceDeltaVisitor() {
+				public boolean visit(IResourceDelta delta) throws CoreException {
+					IResource resource= delta.getResource();
+					if (resource.getType() == IResource.FILE && delta.getKind() == IResourceDelta.CHANGED &&
+							(delta.getFlags() & IResourceDelta.CONTENT) != 0) {
+						String ext= ((IFile)resource).getFileExtension();
+						if (ext != null && "java".equals(ext)) { //$NON-NLS-1$
+							ICompilationUnit unit= JavaCore.createCompilationUnitFrom((IFile)resource);
+							if (unit != null && unit.exists()) {
+								flush();
+								return false;
+							}
+						}
+					}
+					return true;
+				}
+			};
+			try {
+				IResourceDelta delta= event.getDelta();
+				if (delta != null)
+					delta.accept(visitor);
+			} catch (CoreException e) {
+				JavaPlugin.log(e.getStatus());
+			}
+		}
+	}
 
 	private Stack fUndoChanges;
 	private Stack fRedoChanges;
@@ -100,6 +143,7 @@ public class UndoManager implements IUndoManager {
 	private Stack fRedoNames;
 	private ListenerList fListeners;
 	private FlushListener fFlushListener;
+	private SaveListener fSaveListener;
 	
 	/**
 	 * Creates a new undo manager with an empty undo and redo stack.
@@ -133,6 +177,8 @@ public class UndoManager implements IUndoManager {
 		// Remove the resource change listener since we are changing code.
 		if (fFlushListener != null)
 			JavaCore.removeElementChangedListener(fFlushListener);
+		if (fSaveListener != null)
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fSaveListener);
 	}
 	
 	/* (Non-Javadoc)
@@ -142,6 +188,8 @@ public class UndoManager implements IUndoManager {
 		if (success) {
 			if (fFlushListener != null)
 				JavaCore.addElementChangedListener(fFlushListener);
+			if (fSaveListener != null)
+				ResourcesPlugin.getWorkspace().addResourceChangeListener(fSaveListener);
 		} else {
 			flush();
 		}
@@ -150,11 +198,16 @@ public class UndoManager implements IUndoManager {
 	/* (Non-Javadoc)
 	 * Method declared in IUndoManager.
 	 */
-	public void flush(){
+	public void flush() {
 		flushUndo();
 		flushRedo();
-		JavaCore.removeElementChangedListener(fFlushListener);
+		if (fFlushListener != null)
+			JavaCore.removeElementChangedListener(fFlushListener);
+		if (fSaveListener != null)
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fSaveListener);
+		
 		fFlushListener= null;
+		fSaveListener= null;
 	}
 	
 	private void flushUndo(){
@@ -181,6 +234,10 @@ public class UndoManager implements IUndoManager {
 		if (fFlushListener == null) {
 			fFlushListener= new FlushListener();
 			JavaCore.addElementChangedListener(fFlushListener);
+		}
+		if (fSaveListener == null) {
+			fSaveListener= new SaveListener();
+			ResourcesPlugin.getWorkspace().addResourceChangeListener(fSaveListener);
 		}
 		fireUndoStackChanged();
 	}
@@ -236,7 +293,10 @@ public class UndoManager implements IUndoManager {
 	}
 
 	private void executeChange(RefactoringStatus status, final ChangeContext context, final IChange change, IProgressMonitor pm) throws JavaModelException {
-		JavaCore.removeElementChangedListener(fFlushListener);
+		if (fFlushListener != null)
+			JavaCore.removeElementChangedListener(fFlushListener);
+		if (fSaveListener != null)
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fSaveListener);
 		try {
 			pm.beginTask("", 10); //$NON-NLS-1$
 			status.merge(change.aboutToPerform(context, new SubProgressMonitor(pm, 2)));
@@ -256,7 +316,10 @@ public class UndoManager implements IUndoManager {
 			throw new JavaModelException(e);
 		} finally {
 			change.performed();
-			JavaCore.addElementChangedListener(fFlushListener);
+			if (fFlushListener != null)
+				JavaCore.addElementChangedListener(fFlushListener);
+			if (fSaveListener != null)
+				ResourcesPlugin.getWorkspace().addResourceChangeListener(fSaveListener);
 			pm.done();
 		}
 	}
