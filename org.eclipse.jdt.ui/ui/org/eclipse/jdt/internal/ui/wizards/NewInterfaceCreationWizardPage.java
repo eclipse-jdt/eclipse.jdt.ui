@@ -100,7 +100,7 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 		createTypeNameControls(composite, nColumns);
 		createModifierControls(composite, nColumns);
 
-		createSeparator(composite, nColumns);
+		// createSeparator(composite, nColumns);
 		
 		createSuperInterfacesControls(composite, nColumns);
 						

@@ -113,12 +113,12 @@ public class NewClassCreationWizardPage extends TypePage {
 		createTypeNameControls(composite, nColumns);
 		createModifierControls(composite, nColumns);
 
-		createSeparator(composite, nColumns);
+		// createSeparator(composite, nColumns);
 				
 		createSuperClassControls(composite, nColumns);
 		createSuperInterfacesControls(composite, nColumns);
 				
-		createSeparator(composite, nColumns);
+		// createSeparator(composite, nColumns);
 		
 		createMethodStubSelectionControls(composite, nColumns);
 		
