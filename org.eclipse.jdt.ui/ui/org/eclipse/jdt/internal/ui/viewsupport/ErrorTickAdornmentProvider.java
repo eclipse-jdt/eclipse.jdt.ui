@@ -19,24 +19,18 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ErrorTickAdornmentProvider implements IAdornmentProvider {
 	
-	private static final int ERRORTICK_WARNING= JavaElementImageDescriptor.WARNING;
-	private static final int ERRORTICK_ERROR= JavaElementImageDescriptor.ERROR;	
+	private static final int ERRORTICK_WARNING= JavaElementImageProvider.OVERLAY_WARNING;
+	private static final int ERRORTICK_ERROR= JavaElementImageProvider.OVERLAY_ERROR;	
 	
 	/*
 	 * @see IAdornmentProvider#computeAdornmentFlags(Object, int)
 	 */
-	public int computeAdornmentFlags(Object obj, int renderFlags) {
-		if ((renderFlags & JavaElementImageProvider.ERROR_TICKS) == 0) {
-			return 0;
-		}		
-		
+	public int computeAdornmentFlags(Object obj) {
 		try {
 			if (obj instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement) obj;

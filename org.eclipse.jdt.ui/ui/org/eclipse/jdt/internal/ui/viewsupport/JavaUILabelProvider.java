@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.swt.graphics.Image;
@@ -14,6 +16,8 @@ public class JavaUILabelProvider extends LabelProvider {
 	
 	private JavaElementImageProvider fImageLabelProvider;
 	private StorageLabelProvider fStorageLabelProvider;
+	
+	private IAdornmentProvider[] fAdornmentProviders;
 
 	private int fImageFlags;
 	private int fTextFlags;
@@ -22,15 +26,17 @@ public class JavaUILabelProvider extends LabelProvider {
 	 * Creates a new label provider with default flags.
 	 */
 	public JavaUILabelProvider() {
-		this(JavaElementLabels.M_PARAMETER_TYPES, JavaElementImageProvider.OVERLAY_ICONS);
+		this(JavaElementLabels.M_PARAMETER_TYPES, JavaElementImageProvider.OVERLAY_ICONS, null);
 	}
 
 	/**
 	 * @param textFlags Flags defined in <code>JavaElementLabels</code>.
 	 * @param imageFlags Flags defined in <code>JavaElementImageProvider</code>.
 	 */
-	public JavaUILabelProvider(int textFlags, int imageFlags) {
+	public JavaUILabelProvider(int textFlags, int imageFlags, IAdornmentProvider[] adormentProviders) {
 		fImageLabelProvider= new JavaElementImageProvider();
+		fAdornmentProviders= adormentProviders; 
+		
 		fStorageLabelProvider= new StorageLabelProvider();
 		fImageFlags= imageFlags;
 		fTextFlags= textFlags;
@@ -45,7 +51,7 @@ public class JavaUILabelProvider extends LabelProvider {
 	}
 
 	/**
-	 * Sets the imageFlags.
+	 * Sets the imageFlags 
 	 * @param imageFlags The imageFlags to set
 	 */
 	public void setImageFlags(int imageFlags) {
@@ -53,10 +59,11 @@ public class JavaUILabelProvider extends LabelProvider {
 	}
 	
 	/**
-	 * Gets the image flags. Can be overwriten by super classes.
+	 * Gets the image flags.
+	 * Can be overwriten by super classes.
 	 * @return Returns a int
 	 */
-	protected int getImageFlags() {
+	public int getImageFlags() {
 		return fImageFlags;
 	}
 
@@ -64,12 +71,19 @@ public class JavaUILabelProvider extends LabelProvider {
 	 * Gets the text flags. Can be overwriten by super classes.
 	 * @return Returns a int
 	 */
-	protected int getTextFlags() {
+	public int getTextFlags() {
 		return fTextFlags;
 	}	
 
 	public Image getImage(Object element) {
-		Image result= fImageLabelProvider.getImageLabel(element, getImageFlags());
+		int imageFlags= getImageFlags();
+		if (fAdornmentProviders != null) {
+			for (int i= 0; i < fAdornmentProviders.length; i++) {
+				imageFlags |= fAdornmentProviders[i].computeAdornmentFlags(element);
+			}
+		}
+		
+		Image result= fImageLabelProvider.getImageLabel(element, imageFlags);
 		if (result != null) {
 			return result;
 		}
@@ -100,10 +114,29 @@ public class JavaUILabelProvider extends LabelProvider {
 	 * @see IBaseLabelProvider#dispose
 	 */
 	public void dispose() {
+		if (fAdornmentProviders != null) {
+			for (int i= 0; i < fAdornmentProviders.length; i++) {
+				fAdornmentProviders[i].dispose();
+			}
+		}
+		
 		fStorageLabelProvider.dispose();
 		fImageLabelProvider.dispose();
 	}
 	
+	public static IAdornmentProvider[] getAdornmentProviders(boolean errortick, IAdornmentProvider extra) {
+		if (errortick) {
+			if (extra == null) {
+				return new IAdornmentProvider[] { new ErrorTickAdornmentProvider() };
+			} else {
+				return new IAdornmentProvider[] { new ErrorTickAdornmentProvider(), extra };
+			}
+		}
+		if (extra != null) {
+			return new IAdornmentProvider[] { extra };
+		}
+		return null;
+	}
 
 
 }

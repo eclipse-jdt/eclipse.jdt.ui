@@ -10,9 +10,9 @@ public interface IAdornmentProvider {
 	
 	/**
 	 * Computes the adornment flags for the given element.
-	 * Flags defined in <code>JavaElementImageDescriptor</code>.
+	 * Flags defined in <code>JavaElementImageProvider</code>.
 	 */
-	int computeAdornmentFlags(Object element, int renderFlags);
+	int computeAdornmentFlags(Object element);
 	
 	
 	/**

@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 public class MembersView extends JavaBrowsingPart {
 	
@@ -41,9 +42,11 @@ public class MembersView extends JavaBrowsingPart {
 	 * @see	ILabelProvider
 	 */
 	protected ILabelProvider createLabelProvider() {
-		return new JavaUILabelProvider(
-						JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES,
-						JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.ERROR_TICKS);
+		return new StandardJavaUILabelProvider(
+						StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
+						StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
+						StandardJavaUILabelProvider.getAdornmentProviders(true, null)
+						);
 	}
 
 	/**

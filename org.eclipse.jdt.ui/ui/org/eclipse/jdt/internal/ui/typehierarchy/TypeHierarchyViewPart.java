@@ -89,6 +89,7 @@ import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 /**
@@ -432,22 +433,32 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		super.dispose();
 	}
+	
+	private DecoratingLabelProvider createHierarchyLabelProvider() {
+		ILabelProvider baseLProvider= new StandardJavaUILabelProvider(
+			StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
+			StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
+			StandardJavaUILabelProvider.getAdornmentProviders(true, new HierarchyAdornmentProvider(this, fHierarchyLifeCycle))
+		);
+		
+		return new DecoratingLabelProvider(baseLProvider, getSite().getDecoratorManager());
+	}
+	
+	
 		
 	private Control createTypeViewerControl(Composite parent) {
 		fViewerbook= new PageBook(parent, SWT.NULL);
 				
 		KeyListener keyListener= createKeyListener();
-		
-		ILabelProvider lprovider= new DecoratingLabelProvider(new HierarchyLabelProvider(this), getSite().getDecoratorManager());
-				
+						
 		// Create the viewers
-		TypeHierarchyViewer superTypesViewer= new SuperTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, lprovider, this);
+		TypeHierarchyViewer superTypesViewer= new SuperTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, createHierarchyLabelProvider(), this);
 		initializeTypesViewer(superTypesViewer, keyListener, IContextMenuConstants.TARGET_ID_SUPERTYPES_VIEW);
 		
-		TypeHierarchyViewer subTypesViewer= new SubTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, lprovider, this);
+		TypeHierarchyViewer subTypesViewer= new SubTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, createHierarchyLabelProvider(), this);
 		initializeTypesViewer(subTypesViewer, keyListener, IContextMenuConstants.TARGET_ID_SUBTYPES_VIEW);
 		
-		TypeHierarchyViewer vajViewer= new TraditionalHierarchyViewer(fViewerbook, fHierarchyLifeCycle, lprovider, this);
+		TypeHierarchyViewer vajViewer= new TraditionalHierarchyViewer(fViewerbook, fHierarchyLifeCycle, createHierarchyLabelProvider(), this);
 		initializeTypesViewer(vajViewer, keyListener, IContextMenuConstants.TARGET_ID_HIERARCHY_VIEW);
 
 		fAllViewers= new TypeHierarchyViewer[3];
@@ -508,7 +519,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 	private Control createMethodViewerControl(Composite parent) {
-		fMethodsViewer= new MethodsViewer(parent, this);
+		fMethodsViewer= new MethodsViewer(parent, createHierarchyLabelProvider(), this);
 		fMethodsViewer.initContextMenu(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager menu) {
 				fillMethodsViewerContextMenu(menu);

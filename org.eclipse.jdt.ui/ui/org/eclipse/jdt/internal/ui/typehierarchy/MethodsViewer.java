@@ -21,6 +21,7 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -43,11 +44,11 @@ import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 /**
  * Method viewer shows a list of methods of a input type. 
@@ -62,7 +63,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	private static final String TAG_SHOWINHERITED= "showinherited";		 //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "mv_vertical_scroll";		 //$NON-NLS-1$
 	
-	private static final int LABEL_BASEFLAGS= JavaElementLabels.M_PARAMETER_TYPES;
+	private static final int LABEL_BASEFLAGS= StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS;
 	
 	private MethodsViewerFilterAction[] fFilterActions;
 	private MethodsViewerFilter fFilter;
@@ -75,16 +76,17 @@ public class MethodsViewer extends ProblemTableViewer {
 
 	private ContextMenuGroup[] fStandardGroups;	
 	
-	public MethodsViewer(Composite parent, IWorkbenchPart part) {
+	public MethodsViewer(Composite parent, DecoratingLabelProvider labelProvider, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
 		
-		fLabelProvider= new JavaUILabelProvider(LABEL_BASEFLAGS, JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.ERROR_TICKS);
-		
+		ILabelProvider inner= ((DecoratingLabelProvider) labelProvider).getLabelProvider();
+		if (inner instanceof JavaUILabelProvider) {
+			fLabelProvider= (JavaUILabelProvider) inner;
+		}
+			
 		MethodsContentProvider contentProvider= new MethodsContentProvider();
 
-		setLabelProvider(new DecoratingLabelProvider(
-			fLabelProvider, part.getSite().getDecoratorManager())
-		);
+		setLabelProvider(labelProvider);
 		setContentProvider(contentProvider);
 				
 		fOpen= new OpenJavaElementAction(this);
@@ -148,12 +150,14 @@ public class MethodsViewer extends ProblemTableViewer {
 			getTable().setRedraw(false);
 			cprovider.showInheritedMethods(on);
 			fShowInheritedMembersAction.setChecked(on);
-			if (on) {
-				fLabelProvider.setTextFlags(LABEL_BASEFLAGS | JavaElementLabels.ALL_POST_QUALIFIED);
-			} else {
-				fLabelProvider.setTextFlags(LABEL_BASEFLAGS);
+			if (fLabelProvider != null) {
+				if (on) {
+					fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() | JavaElementLabels.ALL_POST_QUALIFIED);
+				} else {
+					fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() & (-1 ^ JavaElementLabels.ALL_POST_QUALIFIED));
+				}
+				refresh();
 			}
-			refresh();
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getControl().getShell(), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.title"), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		} finally {

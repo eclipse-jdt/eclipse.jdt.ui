@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.*;
 
 /**
  * Content provider used for the method view.
@@ -168,14 +169,16 @@ public class MethodsContentProvider implements IStructuredContentProvider, IType
 	}
 	
 	private void doTypeHierarchyChanged(TypeHierarchyLifeCycle lifeCycle, IType[] changedTypes) {
+		if (fViewer == null) {
+			return; // runing async, be prepared fro everything
+		}
+		
 		try {
 			if (changedTypes == null) {
 			 	fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputType);
-		 		if (fViewer != null) {
-		 			fViewer.refresh();
-		 		}
+	 			fViewer.refresh();
 			} else {
-				if (fShowInheritedMethods) {
+				if (fShowInheritedMethods || AppearancePreferencePage.showOverrideIndicators()) {
 					fViewer.refresh();
 				} else {
 					for (int i= 0; i < changedTypes.length; i++) {

@@ -72,7 +72,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 		 		
 		boolEditor= new BooleanFieldEditor(
 			PREF_SYNC_OUTLINE_ON_CURSOR_MOVE,
-			"Synchronize &outliner selection on cursor move", //$NON-NLS-1$
+			"Synchronize &outline selection on cursor move", //$NON-NLS-1$
 			parent
         );
 		addField(boolEditor);

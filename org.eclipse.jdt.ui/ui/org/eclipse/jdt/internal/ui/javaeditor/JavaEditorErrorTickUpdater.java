@@ -12,6 +12,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 
 /**
  * The <code>JavaEditorErrorTickUpdater</code> will register as a AnnotationModelListener
@@ -22,7 +23,7 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 
 	private JavaEditor fJavaEditor;
 	private IAnnotationModel fAnnotationModel;
-	private JavaElementImageProvider fImageProvider;
+	private JavaUILabelProvider fLabelProvider;
 
 	public JavaEditorErrorTickUpdater(JavaEditor editor) {
 		fJavaEditor= editor;
@@ -41,17 +42,17 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 		}
 				
 		if (model != null) {
-			if (fImageProvider == null) {
-				fImageProvider= new JavaElementImageProvider();
+			if (fLabelProvider == null) {
+				fLabelProvider= new JavaUILabelProvider(0, JavaElementImageProvider.SMALL_ICONS, JavaUILabelProvider.getAdornmentProviders(true, null));
 			}
 			fAnnotationModel=model;
 			fAnnotationModel.addAnnotationModelListener(this);
 			modelChanged(fAnnotationModel);
 		} else {
-			if (fImageProvider != null) {
-				fImageProvider.dispose();
+			if (fLabelProvider != null) {
+				fLabelProvider.dispose();
 			}
-			fImageProvider= null;
+			fLabelProvider= null;
 			fAnnotationModel= null;
 		}	
 	}
@@ -67,8 +68,8 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 		IEditorInput input= fJavaEditor.getEditorInput();
 		if (input != null) { // might run async, tests needed
 			IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);
-			if (fImageProvider != null && jelement != null) {
-				Image newImage= fImageProvider.getImageLabel(jelement, JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS | JavaElementImageProvider.ERROR_TICKS);
+			if (fLabelProvider != null && jelement != null) {
+				Image newImage= fLabelProvider.getImage(jelement);
 				if (titleImage != newImage) {
 					updatedTitleImage(newImage);
 				}

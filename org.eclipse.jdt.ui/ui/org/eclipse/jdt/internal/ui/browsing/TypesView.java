@@ -15,9 +15,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 public class TypesView extends JavaBrowsingPart {
 
@@ -28,9 +26,11 @@ public class TypesView extends JavaBrowsingPart {
 	 * @see	ILabelProvider
 	 */
 	protected ILabelProvider createLabelProvider() {
-		return new JavaUILabelProvider(
-						JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES,
-						JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.ERROR_TICKS);
+		return new StandardJavaUILabelProvider(
+						StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
+						StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
+						StandardJavaUILabelProvider.getAdornmentProviders(true, null)
+						);
 	}
 
 	/**

@@ -108,6 +108,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -592,9 +593,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	protected ILabelProvider createLabelProvider() {
-		return new JavaUILabelProvider(
-						JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES,
-						JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS | JavaElementImageProvider.ERROR_TICKS);
+		return new StandardJavaUILabelProvider(
+						StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
+						StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
+						StandardJavaUILabelProvider.getAdornmentProviders(true, null)
+						);
 	}
 
 	protected ILabelProvider createTitleProvider() {

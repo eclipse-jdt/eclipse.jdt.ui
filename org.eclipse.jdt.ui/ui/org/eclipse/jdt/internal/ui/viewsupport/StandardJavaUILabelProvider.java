@@ -4,10 +4,9 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
 public class StandardJavaUILabelProvider extends JavaUILabelProvider implements IPropertyChangeListener {
 
@@ -22,25 +21,26 @@ public class StandardJavaUILabelProvider extends JavaUILabelProvider implements 
 	 * @param textFlags possible text flags
 	 * @param imageFlags possible image flags
 	 */
-	public StandardJavaUILabelProvider(int textFlags, int imageFlags) {
-		super(textFlags, imageFlags);
+	public StandardJavaUILabelProvider(int textFlags, int imageFlags, IAdornmentProvider[] adormentProviders) {
+		super(textFlags, imageFlags, adormentProviders);
 		initMasks();
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 	
 	public StandardJavaUILabelProvider() {
-		this(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
-	}	
+		this(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS, new IAdornmentProvider[] { new ErrorTickAdornmentProvider() });
+	}
 	
 	private void initMasks() {
 		fTextFlagMask= -1;
 		if (!AppearancePreferencePage.showMethodReturnType()) {
 			fTextFlagMask ^= JavaElementLabels.M_APP_RETURNTYPE;
 		}
+		if (!WorkInProgressPreferencePage.isCompressingPkgNameInPackagesView()) {
+			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
+		}
+		
 		fImageFlagMask= -1;
-		if (!AppearancePreferencePage.showOverrideIndicators()) {
-			fImageFlagMask ^= JavaElementImageProvider.OVERRIDE_INDICATORS;
-		}		
 	}
 
 	/*
@@ -49,7 +49,8 @@ public class StandardJavaUILabelProvider extends JavaUILabelProvider implements 
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (property.equals(AppearancePreferencePage.PREF_METHOD_RETURNTYPE)
-				|| property.equals(AppearancePreferencePage.PREF_OVERRIDE_INDICATOR)) {
+				|| property.equals(AppearancePreferencePage.PREF_OVERRIDE_INDICATOR)
+				|| property.equals(WorkInProgressPreferencePage.PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW)) {
 			initMasks();
 			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(this, null); // refresh all
 			fireLabelProviderChanged(lpEvent);
@@ -67,14 +68,14 @@ public class StandardJavaUILabelProvider extends JavaUILabelProvider implements 
 	/*
 	 * @see JavaUILabelProvider#getImageFlags()
 	 */
-	protected int getImageFlags() {
+	public int getImageFlags() {
 		return super.getImageFlags() & fImageFlagMask;
 	}
 
 	/*
 	 * @see JavaUILabelProvider#getTextFlags()
 	 */
-	protected int getTextFlags() {
+	public int getTextFlags() {
 		return super.getTextFlags() & fTextFlagMask;
 	}
 
