@@ -497,16 +497,32 @@ public class RemoteTestRunner implements TestListener {
 		}
 		else if(test instanceof TestSuite){
 			TestSuite suite= (TestSuite) test;
-			notifyTestTreeEntry(getTestId(test)+','+suite.toString().trim() + ',' + true + ',' + suite.testCount());
+			notifyTestTreeEntry(getTestId(test)+','+escapeComma(suite.toString().trim()) + ',' + true + ',' + suite.testCount());
 			for(int i=0; i < suite.testCount(); i++){	
 				sendTree(suite.testAt(i));		
 			}				
 		}
 		else {
-			notifyTestTreeEntry(getTestId(test)+ ',' + getTestName(test).trim() + ',' + false + ',' +  test.countTestCases());
+			notifyTestTreeEntry(getTestId(test)+ ',' + escapeComma(getTestName(test).trim()) + ',' + false + ',' +  test.countTestCases());
 		}
 	}
 	
+	private String escapeComma(String s) {
+		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0))
+			return s;
+		StringBuffer sb= new StringBuffer(s.length()+10);
+		for (int i= 0; i < s.length(); i++) {
+			char c= s.charAt(i);
+			if (c == ',') 
+				sb.append("\\,");
+			else if (c == '\\')
+				sb.append("\\\\");
+			else
+				sb.append(c);
+		}
+		return sb.toString();
+	}
+
 	private String getTestId(Test test) {
 		return Integer.toString(System.identityHashCode(test));
 	}

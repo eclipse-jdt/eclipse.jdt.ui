@@ -312,12 +312,12 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	public void newTreeEntry(String treeEntry) {
 		// format: testId","testName","isSuite","testcount
 		int index0= treeEntry.indexOf(',');
-		int index1= treeEntry.indexOf(',', index0+1);
+		StringBuffer testName= new StringBuffer(100);
+		int index1= scanTestName(treeEntry, index0+1, testName);
 		int index2= treeEntry.indexOf(',', index1+1);
-		String label= treeEntry.substring(index0+1, index1).trim();
+		String label= testName.toString().trim();
 		String id= treeEntry.substring(0, index0);
 		TestRunInfo testInfo= new TestRunInfo(id, label);
-		//fTestInfo.addElement(testInfo);
 		int index3;
 		if((index3= label.indexOf('(')) > 0)
 			label= label.substring(0, index3);
@@ -351,6 +351,26 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		treeItem.setData(testInfo);
 	}
 	
+	private int scanTestName(String s, int start, StringBuffer testName) {
+		boolean inQuote= false;
+		int i= start;
+		for (; i < s.length(); i++) {
+			char c= s.charAt(i);
+			if (c == '\\' && !inQuote) {
+				inQuote= true;
+				continue;
+			} else if (inQuote) {
+				inQuote= false;
+				testName.append(c);
+			} else if (c == ',')
+				break;
+			else
+				testName.append(c);
+		}
+		return i;
+	}
+
+
 	private void mapTest(TestRunInfo info, TreeItem item) {
 		fTreeItemMap.put(info.getTestId(), item);
 	}

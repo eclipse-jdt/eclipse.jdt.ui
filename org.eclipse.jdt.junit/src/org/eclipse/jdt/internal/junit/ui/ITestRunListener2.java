@@ -21,7 +21,7 @@ public interface ITestRunListener2 extends ITestRunListener {
 	 * Information about a member of the test suite that is about to be run.
 	 * The format of the string is: 
 	 * <pre>
-	 * testId","testName","isSuite","testcount
+	 * "testId","testName","isSuite","testcount"
 	 * 
 	 * testId: a unique id for the test
 	 * testName: the name of the test
