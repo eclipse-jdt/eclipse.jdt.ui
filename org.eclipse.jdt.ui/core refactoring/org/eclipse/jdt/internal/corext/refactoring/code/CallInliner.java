@@ -14,6 +14,8 @@
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38471)
  *       o inline call that is used in a field initializer 
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
+ *       o inline call a field initializer: could detect self reference 
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=44417)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
