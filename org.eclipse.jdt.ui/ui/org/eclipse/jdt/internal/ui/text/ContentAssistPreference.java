@@ -61,6 +61,8 @@ public class ContentAssistPreference {
 	private final static String ADD_IMPORT= PreferenceConstants.CODEASSIST_ADDIMPORT;
 	/** Preference key for filling argument names on method completion */
 	private static final String FILL_METHOD_ARGUMENTS= PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES;
+	/** Preference key for prefix completion. */
+	private static final String PREFIX_COMPLETION= PreferenceConstants.CODEASSIST_PREFIX_COMPLETION;
 
 	
 	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
@@ -157,6 +159,9 @@ public class ContentAssistPreference {
 		enabled= store.getBoolean(AUTOINSERT);
 		assistant.enableAutoInsert(enabled);
 
+		enabled= store.getBoolean(PREFIX_COMPLETION);
+		assistant.enablePrefixCompletion(enabled);
+
 		configureJavaProcessor(assistant, store);
 		configureJavaDocProcessor(assistant, store);
 	}
@@ -235,6 +240,9 @@ public class ContentAssistPreference {
 		} else if (AUTOINSERT.equals(p)) {
 			boolean enabled= store.getBoolean(AUTOINSERT);
 			assistant.enableAutoInsert(enabled);
+		} else if (PREFIX_COMPLETION.equals(p)) {
+			boolean enabled= store.getBoolean(PREFIX_COMPLETION);
+			assistant.enablePrefixCompletion(enabled);
 		}
 		
 		changeJavaProcessor(assistant, store, p);

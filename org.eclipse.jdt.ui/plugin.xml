@@ -2348,12 +2348,6 @@
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <command
-            name="%ActionDefinition.completePrefix.name"
-            description="%ActionDefinition.completePrefix.description"
-            category="org.eclipse.ui.category.edit"
-            id="org.eclipse.jdt.ui.edit.text.java.complete.prefix">
-      </command>
-      <command
             name="%ActionDefinition.showJavadoc.name"
             description="%ActionDefinition.showJavadoc.description"
             category="org.eclipse.ui.category.edit"

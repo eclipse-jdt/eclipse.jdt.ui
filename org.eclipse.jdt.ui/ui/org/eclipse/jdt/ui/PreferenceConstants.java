@@ -408,14 +408,14 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that holds a list of possible JRE libraries used by the New Java Project wizard. An library 
 	 * consists of a description and an arbitrary number of <code>IClasspathEntry</code>s, that will represent the 
-	 * JRE on the new project's class path. 
+	 * JRE on the new project's classpath. 
 	 * <p>
 	 * Value is of type <code>String</code>: a semicolon separated list of encoded JRE libraries. 
 	 * <code>NEWPROJECT_JRELIBRARY_INDEX</code> defines the currently used library. Clients
 	 * should use the method <code>encodeJRELibrary</code> to encode a JRE library into a string
 	 * and the methods <code>decodeJRELibraryDescription(String)</code> and <code>
 	 * decodeJRELibraryClasspathEntries(String)</code> to decode the description and the array
-	 * of class path entries from an encoded string.
+	 * of classpath entries from an encoded string.
 	 * </p>
 	 * 
 	 * @see #NEWPROJECT_JRELIBRARY_INDEX
@@ -1416,7 +1416,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_LINK_COLOR= "linkColor"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether hover tool tips in the editor are turned on or off.
+	 * A named preference that controls whether hover tooltips in the editor are turned on or off.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -1886,7 +1886,7 @@ public class PreferenceConstants {
 	public final static String CODEASSIST_AUTOACTIVATION= "content_assist_autoactivation"; //$NON-NLS-1$
 
 	/**
-	 * A name preference that holds the auto activation delay time in milliseconds.
+	 * A name preference that holds the auto activation delay time in milli seconds.
 	 * <p>
 	 * Value is of type <code>Integer</code>.
 	 * </p>
@@ -2176,6 +2176,16 @@ public class PreferenceConstants {
 	 */
 	public static final String EDITOR_ANNOTATION_ROLL_OVER= "editor_annotation_roll_over"; //$NON-NLS-1$
 	
+	/**
+	 * A named preference that controls if content assist inserts the common
+	 * prefix of all proposals before presenting choices.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.0
+	 */
+	public final static String CODEASSIST_PREFIX_COMPLETION= "content_assist_prefix_completion"; //$NON-NLS-1$
+
 		
 	/**
 	 * Initializes the given preference store with the default values.
@@ -2351,6 +2361,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
+		store.setDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, false);
 
 		store.setDefault(PreferenceConstants.EDITOR_SMART_HOME_END, true);
 		store.setDefault(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, true);
@@ -2429,7 +2440,7 @@ public class PreferenceConstants {
 	 * 
 	 * @param description a string value describing the JRE library. The description is used
 	 * to identify the JDR library in the UI
-	 * @param entries an array of class path entries to be encoded
+	 * @param entries an array of classpath entries to be encoded
 	 * 
 	 * @return the encoded string.
 	*/
@@ -2449,9 +2460,9 @@ public class PreferenceConstants {
 	}
 	
 	/**
-	 * Decodes an encoded JRE library and returns its class path entries.
+	 * Decodes an encoded JRE library and returns its classpath entries.
 	 * 
-	 * @return the array of class path entries of an encoded JRE library.
+	 * @return the array of classpath entries of an encoded JRE library.
 	 * 
 	 * @see #encodeJRELibrary(String, IClasspathEntry[])
 	 */
@@ -2464,7 +2475,7 @@ public class PreferenceConstants {
 	 * This is a convenience method to access the named preference <code>NEWPROJECT_JRELIBRARY_LIST
 	 * </code> with the index defined by <code> NEWPROJECT_JRELIBRARY_INDEX</code>.
 	 *
-	 * @return the current default set of class path entries
+	 * @return the current default set of classpath entries
 	 *  
 	 * @see #NEWPROJECT_JRELIBRARY_LIST
 	 * @see #NEWPROJECT_JRELIBRARY_INDEX
