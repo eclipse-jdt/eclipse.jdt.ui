@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -71,7 +73,7 @@ public abstract class StructureSelectionAction extends Action {
 				return oldSourceRange;
 			CompilationUnit root= AST.parseCompilationUnit(cu, false);
 			Selection selection= Selection.createFromStartLength(oldSourceRange.getOffset(), oldSourceRange.getLength());
-			StructureSelectionAnalyzer selAnalyzer= new StructureSelectionAnalyzer(selection, true);
+			SelectionAnalyzer selAnalyzer= new SelectionAnalyzer(selection, true);
 			root.accept(selAnalyzer);
 			return internalGetNewSelectionRange(oldSourceRange, cu, selAnalyzer);
 	 	}	catch (JavaModelException e){
@@ -84,7 +86,7 @@ public abstract class StructureSelectionAction extends Action {
 	 * This is the default implementation - it goes up one level in the AST.
 	 * Subclasses may implement different behavior and/or use this implementation as a fallback for cases they do not handle..
 	 */
-	abstract ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, StructureSelectionAnalyzer selAnalyzer) throws JavaModelException;
+	abstract ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, SelectionAnalyzer selAnalyzer) throws JavaModelException;
 	
 	protected final ICompilationUnit getCompilationUnit() {
 		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
@@ -94,7 +96,7 @@ public abstract class StructureSelectionAction extends Action {
 		return (ITextSelection)fEditor.getSelectionProvider().getSelection();
 	}
 	
-	protected static ISourceRange getLastCoveringNodeRange(ISourceRange oldSourceRange, ICompilationUnit cu, StructureSelectionAnalyzer selAnalyzer) throws JavaModelException {
+	protected static ISourceRange getLastCoveringNodeRange(ISourceRange oldSourceRange, ICompilationUnit cu, SelectionAnalyzer selAnalyzer) throws JavaModelException {
 		if (selAnalyzer.getLastCoveringNode() == null)
 			return oldSourceRange;		
 		else	

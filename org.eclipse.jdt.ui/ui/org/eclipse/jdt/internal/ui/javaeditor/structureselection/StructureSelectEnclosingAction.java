@@ -8,6 +8,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+
 public class StructureSelectEnclosingAction extends StructureSelectionAction {
 
 	public StructureSelectEnclosingAction(CompilationUnitEditor editor, SelectionHistory history) {
@@ -22,7 +24,10 @@ public class StructureSelectEnclosingAction extends StructureSelectionAction {
 	public StructureSelectEnclosingAction() {
 	}
 		
-	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, StructureSelectionAnalyzer selAnalyzer) throws JavaModelException{
+    /*
+     * @see StructureSelectionAction#internalGetNewSelectionRange(ISourceRange, ICompilationUnit, SelectionAnalyzer)
+     */
+	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, SelectionAnalyzer selAnalyzer) throws JavaModelException{
 		ASTNode first= selAnalyzer.getFirstSelectedNode();	
 		if (first == null || first.getParent() == null) 
 			return getLastCoveringNodeRange(oldSourceRange, cu, selAnalyzer);
