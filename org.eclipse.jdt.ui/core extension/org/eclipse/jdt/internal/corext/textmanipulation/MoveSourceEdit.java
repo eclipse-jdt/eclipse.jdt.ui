@@ -22,7 +22,7 @@ import org.eclipse.jface.text.DocumentEvent;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public class MoveSourceEdit extends AbstractTransferEdit {
+public final class MoveSourceEdit extends AbstractTransferEdit {
 
 	/* package */ int fCounter;
 	private MoveTargetEdit fTarget;

@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.text.DocumentEvent;
 
-public class CopySourceEdit extends AbstractTransferEdit {
+public final class CopySourceEdit extends AbstractTransferEdit {
 
 	private String fContent;
 	private CopyTargetEdit fTarget;
