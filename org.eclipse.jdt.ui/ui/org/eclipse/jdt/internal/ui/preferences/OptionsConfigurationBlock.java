@@ -20,10 +20,14 @@ import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -40,6 +44,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -428,39 +433,44 @@ public abstract class OptionsConfigurationBlock {
 	protected abstract String[] getFullBuildDialogStrings(boolean workspaceSettings);
 		
 	protected boolean doFullBuild() {
-		GoToBackProgressMonitorDialog dialog= new GoToBackProgressMonitorDialog(getShell());
-		try {
-			dialog.run(true, true, new IRunnableWithProgress() { 
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("", 2); //$NON-NLS-1$
-					try {
-						if (fProject != null) {
-							monitor.setTaskName(PreferencesMessages.getFormattedString("OptionsConfigurationBlock.buildproject.taskname", fProject.getElementName())); //$NON-NLS-1$
-							fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
-							JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
-						} else {
-							monitor.setTaskName(PreferencesMessages.getString("OptionsConfigurationBlock.buildall.taskname")); //$NON-NLS-1$
-							JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
-						}
-					} catch (OperationCanceledException e) {
-						throw new InterruptedException();
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					} finally {
-						monitor.done();
+		
+		Job buildJob = new Job("Rebuilding"){ 
+			/* (non-Javadoc)
+			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+			 */
+			protected IStatus run(IProgressMonitor monitor) {
+				
+				final MultiStatus status = new MultiStatus(
+						JavaPlugin.getPluginId(),
+						0,
+						PreferencesMessages.getString("OptionsConfigurationBlock.builderror.title"),
+						null);
+				try {
+					if (fProject != null) {
+						monitor.setTaskName(PreferencesMessages.getFormattedString("OptionsConfigurationBlock.buildproject.taskname", fProject.getElementName())); //$NON-NLS-1$
+						fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
+						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
+					} else {
+						monitor.setTaskName(PreferencesMessages.getString("OptionsConfigurationBlock.buildall.taskname")); //$NON-NLS-1$
+						JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
 					}
+				} catch (CoreException e) {
+					status.add(e.getStatus());
 				}
-			});
-			return true;
-		} catch (InterruptedException e) {
-			// cancelled by user
-			return false;
-		} catch (InvocationTargetException e) {
-			String title= PreferencesMessages.getString("OptionsConfigurationBlock.builderror.title"); //$NON-NLS-1$
-			String message= PreferencesMessages.getString("OptionsConfigurationBlock.builderror.message"); //$NON-NLS-1$
-			ExceptionHandler.handle(e, getShell(), title, message);
-			return false;
-		}
+				finally {
+					monitor.done();
+				}
+				return status;
+			}
+			public boolean belongsTo(Object family) {
+				return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
+			}
+		};
+		
+		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		buildJob.setUser(true); 
+		buildJob.schedule();
+		return true;
 	}		
 	
 	public void performDefaults() {
