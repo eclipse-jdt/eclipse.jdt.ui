@@ -143,7 +143,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 	
 	private void addSortActions(IMenuManager mgr) {
-		if (!isFlatLayout())
+		if (getLayout() != FLAG_LAYOUT_FLAT)
 			return;
 		MenuManager sortMenu= new MenuManager(SearchMessages.getString("JavaSearchResultPage.sortBylabel")); //$NON-NLS-1$
 		sortMenu.add(fSortByNameAction);
@@ -159,7 +159,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	
 	protected void fillToolbar(IToolBarManager tbm) {
 		super.fillToolbar(tbm);
-		if (!isFlatLayout())
+		if (getLayout() != FLAG_LAYOUT_FLAT)
 			addGroupActions(tbm);
 	}
 		
