@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
@@ -35,7 +36,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -143,8 +143,8 @@ public class ExtractTempRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
 			pm.worked(1);			
 			
-			if (! isSelectionUsedAsExpression()) //XXX should enable at some point
-				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
+			if (getSelectedExpression().getParent() instanceof ExpressionStatement)
+				return RefactoringStatus.createFatalErrorStatus("Cannot extract expressions used as statements.");
 			pm.worked(1);				
 
 			RefactoringStatus result= new RefactoringStatus();
@@ -247,22 +247,6 @@ public class ExtractTempRefactoring extends Refactoring {
 				return true;
 		}
 		return false;
-	}
-	
-	private boolean isSelectionUsedAsExpression() throws JavaModelException {		
-		ASTNode[] parents= getParents(getSelectedExpression());
-		for (int i= parents.length - 1; i >= 0; i--) {
-			if (parents[i] instanceof Expression)
-				return true;
-			if ((parents[i] instanceof Statement)){
-				 if (parents[i] instanceof Block)
-				 	continue;
-				  if (parents[i] instanceof TypeDeclaration)
-				 	continue;
-				 return true;
-			}	 
-		}	
-		return false;		
 	}
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {		
