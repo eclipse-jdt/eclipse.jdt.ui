@@ -230,6 +230,11 @@
 		class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
+	<page name="Classpath Variables"
+		id="org.eclipse.jdt.ui.preferences.ClasspathVariablesPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage"
+		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>	
 </extension>
 
 <extension

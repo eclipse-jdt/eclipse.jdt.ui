@@ -40,7 +40,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 	public static final String KEY_DESCRIPTION= "org.eclipse.jdt.ui.build.jdk.library.description";
 	public static final String KEY_LINK_RENAME_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkRenameToRefactoring";
 
-	public static final String JDKLIB_VARIABLE= "JDK_LIBRARY";
+
 
 	public JavaBasePreferencePage() {
 		super(GRID);
@@ -112,44 +112,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 		}
 		return null;
 	}
-	
-	
-	// ------------- shared jdk variable
-	
-	
-	public static void initSharedJDKVariable() throws JavaModelException {
-		updateJDKLibraryEntry();
-		
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.addPropertyChangeListener(new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				if (event.getProperty().equals(JavaBasePreferencePage.PROP_JDK)) {
-					try {
-						updateJDKLibraryEntry();
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e.getStatus());
-					}
-				}
-			}
-		});
-	}
-		
-	
-	private static IJavaProject getJavaProject() {
-		// workaround (1GDKGEO: ITPJUI:WINNT - no JavaCore.newVariableEntry)
-		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProject("p");
-	}
-	
-	
-	private static void updateJDKLibraryEntry() throws JavaModelException {
-		IPath jdkPath= JavaBasePreferencePage.getJDKPath();
-		if (jdkPath == null) {
-			jdkPath= new Path("");
-		}
-		IClasspathEntry entry= getJavaProject().newLibraryEntry(jdkPath);
-		JavaCore.setClasspathVariable(JDKLIB_VARIABLE, entry);
-	}
-	
+
 
 }
 

@@ -22,7 +22,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.jdt.core.JavaConventions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StringInputDialog;
+import org.eclipse.jdt.internal.ui.dialogs.StringInputDialog;import org.eclipse.jdt.ui.JavaUI;
 
 /*
  * The page for setting the organize import settings
@@ -30,8 +30,8 @@ import org.eclipse.jdt.internal.ui.dialogs.StringInputDialog;
 public class ImportOrganizePreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	// Preference store keys
-	private static final String PREF_IMPORTORDER= "org.eclipse.jdt.ui.importorder";
-	private static final String PREF_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui.ondemandthreshold";
+	private static final String PREF_IMPORTORDER= JavaUI.ID_PLUGIN + ".importorder";
+	private static final String PREF_ONDEMANDTHRESHOLD= JavaUI.ID_PLUGIN + ".ondemandthreshold";
 	
 	private static final String IMPORTORDER_LABEL= "ImportOrganizePreferencePage.importorder.label";
 	private static final String ONDEMANDTHRESHOLD_LABEL= "ImportOrganizePreferencePage.ondemandthreshold.label";
@@ -103,8 +103,7 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 	 * Initializes the default values of this page in the preference bundle.
 	 * Will be called on startup of the JavaPlugin
 	 */
-	public static void initDefaults() {
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+	public static void initDefaults(IPreferenceStore prefs) {
 		prefs.setDefault(PREF_IMPORTORDER, "java;javax;com");
 		prefs.setDefault(PREF_ONDEMANDTHRESHOLD, 99);
 	}

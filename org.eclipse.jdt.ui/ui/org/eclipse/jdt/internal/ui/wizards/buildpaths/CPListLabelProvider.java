@@ -19,7 +19,7 @@ import org.eclipse.ui.IWorkbench;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
@@ -70,8 +70,16 @@ class CPListLabelProvider extends LabelProvider {
 						return path.lastSegment() + " - " + path.removeLastSegments(1).toString();
 					}
 				}
-				case IClasspathEntry.CPE_VARIABLE:
-					return cpentry.getPath().lastSegment();
+				case IClasspathEntry.CPE_VARIABLE: {
+					String name= cpentry.getPath().lastSegment();
+					StringBuffer buf= new StringBuffer(name);
+					IClasspathEntry entry= JavaCore.getClasspathVariable(name);
+					if (entry != null) {
+						buf.append(" - ");
+						buf.append(entry.getPath());
+					}
+					return buf.toString();
+				}
 				case IClasspathEntry.CPE_PROJECT:
 					return cpentry.getPath().lastSegment();
 				case IClasspathEntry.CPE_SOURCE: {

@@ -59,6 +59,7 @@ public class ListDialogField extends DialogField {
 	private Button fUncheckAllButton;	
 	
 	private String fRemoveButtonLabel, fUpButtonLabel, fDownButtonLabel;
+	private boolean fRemoveButtonEnabled;
 	
 	private Label fLastSeparator;
 	
@@ -105,6 +106,8 @@ public class ListDialogField extends DialogField {
 		fRemoveButtonLabel= "!Remove!";
 		fUpButtonLabel= "!Up!";
 		fDownButtonLabel= "!Down!";
+		
+		fRemoveButtonEnabled= true;
 		
 		fTable= null;
 		fTableControl= null;
@@ -278,6 +281,8 @@ public class ListDialogField extends DialogField {
 				}
 				createSeparator(contents);			
 				fRemoveButton= createButton(contents, fRemoveButtonLabel, listener);
+				fRemoveButton.setEnabled(isEnabled() && fRemoveButtonEnabled);
+				
 				createSeparator(contents);
 			}
 			
@@ -343,7 +348,7 @@ public class ListDialogField extends DialogField {
 			ISelection sel= fTable.getSelection();
 			boolean enabled= !sel.isEmpty() && isEnabled();
 			if (isOkToUse(fRemoveButton)) {
-				fRemoveButton.setEnabled(enabled);
+				fRemoveButton.setEnabled(isEnabled() && fRemoveButtonEnabled);
 			}
 			
 			if (hasUpDown()) {
@@ -392,6 +397,13 @@ public class ListDialogField extends DialogField {
 					button.setEnabled(isEnabled() && enable);
 				}
 			}
+		}
+	}
+	
+	public void enableRemoveButton(boolean enable) {
+		fRemoveButtonEnabled= enable;
+		if (isOkToUse(fRemoveButton)) {
+			fRemoveButton.setEnabled(isEnabled() && enable);
 		}
 	}
 		

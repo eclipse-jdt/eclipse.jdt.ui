@@ -282,7 +282,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	}
 	
 	protected Point computeInitialSize() {
-		return new Point(convertWidthInCharsToPixels(40), convertHeightInCharsToPixels(18));
+		return new Point(convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(18));
 	}
 
 	/*
