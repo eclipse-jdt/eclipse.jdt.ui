@@ -163,10 +163,12 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 	
 	public void test17() throws Exception{
+		//exception because of bug 11151
 		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
 	}
 	
 	public void test18() throws Exception{
+		//exception because of bug 11151
 		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
 	}
 	
