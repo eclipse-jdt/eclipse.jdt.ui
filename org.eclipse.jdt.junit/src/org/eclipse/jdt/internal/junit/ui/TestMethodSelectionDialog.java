@@ -14,7 +14,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
@@ -83,12 +85,19 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	 */
 	public int open() {
 		Object[] elements;
+		IType testType= findTestType();
+		
+		if (testType == null) {
+			MessageDialog.openError(getShell(), "Select Test", "Cannot find '"+JUnitPlugin.TEST_INTERFACE_NAME+"' - make sure that JUnit is on the project's classpath.");
+			return CANCEL;
+		}
+		
 		try {
-			elements= searchTestMethods(fElement, fRunnableContext);
+			elements= searchTestMethods(fElement, testType, fRunnableContext);
 		} catch (InterruptedException e) {
 			return CANCEL;
 		} catch (InvocationTargetException e) {
-			MessageDialog.openError(getShell(), "Select Test", e.getMessage());
+			MessageDialog.openError(getShell(), "Select Test", e.getTargetException().getMessage());
 			return CANCEL;
 		}
 		
@@ -100,13 +109,30 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		return super.open();
 	}
 	
-	public Object[] searchTestMethods(final IJavaElement element, IRunnableContext context) throws InvocationTargetException, InterruptedException  {
+	private IType findTestType() {
+		String qualifiedName= JUnitPlugin.TEST_INTERFACE_NAME;
+		IJavaProject[] projects;
+		try {
+			projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
+			for (int i= 0; i < projects.length; i++) {
+				IJavaProject project= projects[i];
+				IType type= project.findType(qualifiedName);
+				if (type != null) {
+					return type;
+				}
+			}
+		} catch (JavaModelException e) {
+		}
+		return null;
+	}
+	
+	public Object[] searchTestMethods(final IJavaElement element, final IType testType, IRunnableContext context) throws InvocationTargetException, InterruptedException  {
 		final TestReferenceCollector[] col= new TestReferenceCollector[1];
 		
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
-					col[0]= doSearchTestMethods(element, pm);
+					col[0]= doSearchTestMethods(element, testType, pm);
 				} catch (JavaModelException e) {
 					throw new InvocationTargetException(e);
 				}
@@ -116,9 +142,8 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		return col[0].getResult();
 	}
 
-	private TestReferenceCollector doSearchTestMethods(IJavaElement element, IProgressMonitor pm) throws JavaModelException{
-		IType type= element.getJavaProject().findType(JUnitPlugin.TEST_INTERFACE_NAME);
-		IJavaSearchScope scope= SearchEngine.createHierarchyScope(type);
+	private TestReferenceCollector doSearchTestMethods(IJavaElement element, IType testType, IProgressMonitor pm) throws JavaModelException{
+		IJavaSearchScope scope= SearchEngine.createHierarchyScope(testType);
 		TestReferenceCollector collector= new TestReferenceCollector(pm);
 		new SearchEngine().search(ResourcesPlugin.getWorkspace(), element, IJavaSearchConstants.REFERENCES, scope, collector);
 		return collector;
