@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
  * <p>
  * CustomHashtable allows a custom comparator and hash code provider.
  */
-/* package */final class CustomHashtable {
+public final class CustomHashtable {
 
 	/**
 	 * HashMapEntry is an internal class which is used to hold the entries of a
