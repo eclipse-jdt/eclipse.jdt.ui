@@ -14,6 +14,10 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jface.dialogs.DialogSettings;
@@ -28,8 +32,10 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 /**
@@ -64,7 +70,10 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 					((IAboutToRunOperation)page).aboutToRunOperation();
 				}
 			}
-			getContainer().run(true, false, op);  
+			//run with false, false due to issue: 
+			//PlatformUI.getWorkbench().getProgressService().runInUI(getContainer(), op, ResourcesPlugin.getWorkspace().getRoot()); 
+			getContainer().run(false, false, op);  
+			
 		} catch (InvocationTargetException e) {
 			Shell shell= getShell();
 			String title= WizardMessages.getString("NewJUnitWizard.op_error.title"); //$NON-NLS-1$
@@ -81,7 +90,7 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 		if (resource.getType() == IResource.FILE) {
 			final IWorkbenchPage activePage= JUnitPlugin.getActivePage();
 			if (activePage != null) {
-				final Display display= getShell().getDisplay();
+				final Display display= Display.getDefault();
 				if (display != null) {
 					display.asyncExec(new Runnable() {
 						public void run() {
