@@ -16,7 +16,7 @@
 		<delete dir="${dest}" />
 		<mkdir dir="${dest}" />
 		<jar 
-			jarfile="${dest}/jsp.jar"
+			jarfile="${dest}/javafamily.jar"
 			basedir="bin"
 		/>
 		<copy file="plugin.xml" todir="${dest}"/>
@@ -24,7 +24,7 @@
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
 		</copy>
-		<zip zipfile="${dest}/jspsrc.zip">
+		<zip zipfile="${dest}/javafamilysrc.zip">
 		    <fileset dir="src" />
   		</zip>				
 	</target>
