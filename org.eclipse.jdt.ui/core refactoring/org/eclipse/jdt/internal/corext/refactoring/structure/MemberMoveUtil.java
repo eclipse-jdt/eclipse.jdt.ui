@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -48,7 +48,7 @@ public class MemberMoveUtil {
 	}
 	
 	private String computeNewSource(IMember member, IProgressMonitor pm) throws JavaModelException {
-		String originalSource= SourceReferenceSourceRangeComputer.computeSource(member);
+		String originalSource= SourceRangeComputer.computeSource(member);
 		StringBuffer modifiedSource= new StringBuffer(originalSource);
 		
 		//ISourceRange -> String (new source)
@@ -56,7 +56,7 @@ public class MemberMoveUtil {
 		ISourceRange[] ranges= (ISourceRange[]) accessModifications.keySet().toArray(new ISourceRange[accessModifications.keySet().size()]);
 		ISourceRange[] sortedRanges= SourceRange.reverseSortByOffset(ranges);
 		
-		ISourceRange originalRange= SourceReferenceSourceRangeComputer.computeSourceRange(member, member.getCompilationUnit().getSource());
+		ISourceRange originalRange= SourceRangeComputer.computeSourceRange(member, member.getCompilationUnit().getSource());
 		
 		for (int i= 0; i < sortedRanges.length; i++) {
 			int start= sortedRanges[i].getOffset() - originalRange.getOffset();

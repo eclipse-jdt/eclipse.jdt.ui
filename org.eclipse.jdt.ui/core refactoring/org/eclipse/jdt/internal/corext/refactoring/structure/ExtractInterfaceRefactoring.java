@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TemplateUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -493,10 +493,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (fieldDeclaration == null)
 			return ""; //$NON-NLS-1$
 
-		StringBuffer fieldSource= new StringBuffer(SourceReferenceSourceRangeComputer.computeSource(iField));
+		StringBuffer fieldSource= new StringBuffer(SourceRangeComputer.computeSource(iField));
 		
 		if (fUpdatedTypeReferenceNodes != null){
-			int offset= SourceReferenceSourceRangeComputer.computeSourceRange(iField, iField.getCompilationUnit().getSource()).getOffset();
+			int offset= SourceRangeComputer.computeSourceRange(iField, iField.getCompilationUnit().getSource()).getOffset();
 			replaceReferencesInFieldDeclaration(fieldDeclaration, offset, fieldSource);
 		}	
 			
@@ -520,9 +520,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		        replaceReferencesInMethodDeclaration(methodDeclaration, methodDeclarationOffset, methodDeclarationSource);
 			return methodDeclarationSource.toString();		
 		} else {
-			StringBuffer source= new StringBuffer(SourceReferenceSourceRangeComputer.computeSource(iMethod));
+			StringBuffer source= new StringBuffer(SourceRangeComputer.computeSource(iMethod));
 			if (fUpdatedTypeReferenceNodes != null){
-				int offset= SourceReferenceSourceRangeComputer.computeSourceRange(iMethod, iMethod.getCompilationUnit().getSource()).getOffset();
+				int offset= SourceRangeComputer.computeSourceRange(iMethod, iMethod.getCompilationUnit().getSource()).getOffset();
 				replaceReferencesInMethodDeclaration(methodDeclaration, offset, source);
 			}
 			return source.toString();

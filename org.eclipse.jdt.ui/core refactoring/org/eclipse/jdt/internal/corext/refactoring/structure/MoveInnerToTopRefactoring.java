@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.CodeRefactoringUtil;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TemplateUtil;
@@ -650,7 +650,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private int getTypeDefinitionOffset() throws JavaModelException {
-		return SourceReferenceSourceRangeComputer.computeSourceRange(fType, fType.getCompilationUnit().getSource()).getOffset();
+		return SourceRangeComputer.computeSourceRange(fType, fType.getCompilationUnit().getSource()).getOffset();
 	}
 
 	private ISourceRange[] getRangesOfUnneededModifiers() throws JavaModelException {

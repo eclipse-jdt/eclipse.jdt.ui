@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -819,7 +819,7 @@ public class PullUpRefactoring extends Refactoring {
 		if (member.getElementType() == IJavaElement.METHOD)
 			source= replaceSuperCalls((IMethod)member);
 		else
-			source= SourceReferenceSourceRangeComputer.computeSource(member);
+			source= SourceRangeComputer.computeSource(member);
 
 		if (! needsToChangeVisibility(member))
 			return source;
@@ -853,8 +853,8 @@ public class PullUpRefactoring extends Refactoring {
 	private String replaceSuperCalls(IMethod method) throws JavaModelException {
 		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method, getSuperType(new NullProgressMonitor())));
 		
-		StringBuffer source= new StringBuffer(SourceReferenceSourceRangeComputer.computeSource(method));
-		ISourceRange originalMethodRange= SourceReferenceSourceRangeComputer.computeSourceRange(method, method.getCompilationUnit().getSource());
+		StringBuffer source= new StringBuffer(SourceRangeComputer.computeSource(method));
+		ISourceRange originalMethodRange= SourceRangeComputer.computeSourceRange(method, method.getCompilationUnit().getSource());
 		
 		for (int i= 0; i < superRefOffsert.length; i++) {
 			int start= superRefOffsert[i].getOffset() - originalMethodRange.getOffset();
