@@ -193,7 +193,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkTypeName(fNewName));
 		if (Checks.isAlreadyNamed(getType(), fNewName))
-			result.addFatalError("The same name chosen");	
+			result.addFatalError("Please choose another name.");	
 		return result;
 	}
 	
