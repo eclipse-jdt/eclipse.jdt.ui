@@ -13,6 +13,8 @@ import org.eclipse.jface.viewers.IInputSelectionProvider;
  * Since actions managed by a context menu contributor form a logical set
  * the contributor can also be used to decide whether the managed actions
  * should be added at all.
+ * 
+ * @deprecated Use ActionGroup instead
  */
 public abstract class ContextMenuGroup {
 

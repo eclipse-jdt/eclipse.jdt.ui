@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
@@ -42,7 +44,8 @@ import org.eclipse.jdt.internal.ui.wizards.NewGroup;
  
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	
-	private OpenJavaElementAction fOpen;
+	private OpenAction fOpen;
+	// We should use the JavaSearchActionGroup as soon as is is following the new stanadard.
 	private ContextMenuGroup[] fStandardGroups;
 			
 	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, TypeHierarchyLifeCycle lifeCycle,  IWorkbenchPart part) {
@@ -75,15 +78,14 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 			}
 		});
 		
-		fOpen= new OpenJavaElementAction(this);
+		fOpen= new OpenAction(part.getSite());
 		addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				fOpen.run();
 			}
 		});
-		fStandardGroups= new ContextMenuGroup[] {
-			new JavaSearchGroup(), new NewGroup(), new GenerateGroup()
-		};
+		
+		fStandardGroups= new ContextMenuGroup[] {new JavaSearchGroup()};
 		
 		JavaUIHelp.setHelp(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 	}
@@ -105,9 +107,6 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	 * Should be called by the creator of the context menu
 	 */	
 	public void contributeToContextMenu(IMenuManager menu) {
-		if (fOpen.canActionBeAdded()) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);
-		}
 		ContextMenuGroup.add(menu, fStandardGroups, this);
 	}
 

@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -51,6 +52,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 public class OpenViewActionGroup extends ActionGroup {
 
 	private boolean fEditorIsOwner;
+	private boolean fIsTypeHiararchyViewerOwner;
 	private IWorkbenchSite fSite;
 
 	private OpenSuperImplementationAction fOpenSuperImplementation;
@@ -74,6 +76,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	 */
 	public OpenViewActionGroup(IViewPart part) {
 		createSiteActions(part.getSite());
+		fIsTypeHiararchyViewerOwner= part instanceof TypeHierarchyViewPart;
 	}
 	
 	/**
@@ -131,7 +134,8 @@ public class OpenViewActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		appendToGroup(menu, fOpenTypeHierarchy);
+		if (!fIsTypeHiararchyViewerOwner)
+			appendToGroup(menu, fOpenTypeHierarchy);
 		appendToGroup(menu, fOpenSuperImplementation);
 		IStructuredSelection selection= getStructuredSelection();
 		if (fOpenPropertiesDialog != null && fOpenPropertiesDialog.isEnabled() && selection != null &&fOpenPropertiesDialog.isApplicableForSelection(selection))

@@ -57,6 +57,7 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -91,6 +92,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
@@ -118,6 +120,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private static final String TAG_RATIO= "ratio"; //$NON-NLS-1$
 	private static final String TAG_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "vertical_scroll"; //$NON-NLS-1$
+	
+	private static final String GROUP_FOCUS= "group.focus"; //$NON-NLS-1$
 
 	// the selected type in the hierarchy view
 	private IType fSelectedType;
@@ -173,8 +177,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private IPartListener fPartListener;
 	
-	private CompositeActionGroup fStandardActionGroups;
-
+	private CompositeActionGroup fActionGroups;
 	private CCPActionGroup fCCPActionGroup;
 	
 	public TypeHierarchyViewPart() {
@@ -439,8 +442,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (fMethodsViewer != null) {
 			JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fMethodsViewer);
 		}
-		if (fStandardActionGroups != null)
-			fStandardActionGroups.dispose();
+		if (fActionGroups != null)
+			fActionGroups.dispose();
 		super.dispose();
 	}
 			
@@ -658,7 +661,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		WorkbenchHelp.setHelp(fPagebook, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 		
-		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
+		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
 				new ShowActionGroup(this), 
@@ -666,7 +669,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				new RefactorActionGroup(this),
 				new GenerateActionGroup(this)});
 		
-		fStandardActionGroups.fillActionBars(getViewSite().getActionBars());
+		fActionGroups.fillActionBars(getViewSite().getActionBars());
 	}
 
 
@@ -742,24 +745,30 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	private void fillTypesViewerContextMenu(TypeHierarchyViewer viewer, IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
+		
+		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, new Separator(GROUP_FOCUS));
 		// viewer entries
 		viewer.contributeToContextMenu(menu);
-		IStructuredSelection selection= (IStructuredSelection)viewer.getSelection();
-		if (JavaBasePreferencePage.openTypeHierarchyInPerspective()) {
-			addOpenPerspectiveItem(menu, selection);
-		}
-		addOpenWithMenu(menu, selection);
+//		IStructuredSelection selection= (IStructuredSelection)viewer.getSelection();
+//		if (JavaBasePreferencePage.openTypeHierarchyInPerspective()) {
+//			addOpenPerspectiveItem(menu, selection);
+//		}
+//		addOpenWithMenu(menu, selection);
 		
-		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fFocusOnTypeAction);
+		menu.appendToGroup(GROUP_FOCUS, fFocusOnTypeAction);
 		if (fFocusOnSelectionAction.canActionBeAdded())
-			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fFocusOnSelectionAction);
-		
-		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false)}, viewer);
-		
-		// XXX workaround until we have fully converted the code to use the new action groups
-		fStandardActionGroups.get(2).fillContextMenu(menu);		
-		fStandardActionGroups.get(3).fillContextMenu(menu);		
-		fStandardActionGroups.get(4).fillContextMenu(menu);		
+			menu.appendToGroup(GROUP_FOCUS, fFocusOnSelectionAction);
+
+		fActionGroups.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
+		fActionGroups.fillContextMenu(menu);
+
+//		
+//		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false)}, viewer);
+//		
+//		// XXX workaround until we have fully converted the code to use the new action groups
+//		fActionGroups.get(2).fillContextMenu(menu);		
+//		fActionGroups.get(3).fillContextMenu(menu);		
+//		fActionGroups.get(4).fillContextMenu(menu);		
 	}
 
 	/**
@@ -772,14 +781,18 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (fSelectedType != null &&  fAddStubAction.init(fSelectedType, fMethodsViewer.getSelection())) {
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fAddStubAction);
 		}
-		//menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fMethodsViewer));	
-		addOpenWithMenu(menu, (IStructuredSelection)fMethodsViewer.getSelection());
-		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false)}, fMethodsViewer);
+		fActionGroups.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
+		fActionGroups.fillContextMenu(menu);
 		
-		// XXX workaround until we have fully converted the code to use the new action groups
-		fStandardActionGroups.get(2).fillContextMenu(menu);
-		fStandardActionGroups.get(3).fillContextMenu(menu);		
-		fStandardActionGroups.get(4).fillContextMenu(menu);		
+		
+//		//menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fMethodsViewer));	
+//		addOpenWithMenu(menu, (IStructuredSelection)fMethodsViewer.getSelection());
+//		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false)}, fMethodsViewer);
+//		
+//		// XXX workaround until we have fully converted the code to use the new action groups
+//		fActionGroups.get(2).fillContextMenu(menu);
+//		fActionGroups.get(3).fillContextMenu(menu);		
+//		fActionGroups.get(4).fillContextMenu(menu);		
 	}
 	
 	private void addOpenWithMenu(IMenuManager menu, IStructuredSelection selection) {

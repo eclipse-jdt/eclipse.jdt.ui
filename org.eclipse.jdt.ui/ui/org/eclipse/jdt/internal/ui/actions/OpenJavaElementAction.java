@@ -26,6 +26,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Open a java element in an editor
+ * 
+ * @deprecated Use org.eclipse.jdt.ui.actions.OpenAction instead
  */
 public class OpenJavaElementAction extends AbstractOpenJavaElementAction {
 	

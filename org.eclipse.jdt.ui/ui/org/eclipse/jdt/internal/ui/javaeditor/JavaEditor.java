@@ -63,7 +63,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
@@ -245,7 +244,6 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		page.addSelectionChangedListener(fSelectionChangedListener);
 		setOutlinePageInput(page, getEditorInput());
 		
-		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page)); //$NON-NLS-1$
 		return page;
 	}
 	

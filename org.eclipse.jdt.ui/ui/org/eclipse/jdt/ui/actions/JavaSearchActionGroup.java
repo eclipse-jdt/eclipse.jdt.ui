@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.IInputSelectionProvider;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
@@ -45,6 +46,20 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 * </p>
 	 */
 	public JavaSearchActionGroup(IViewPart part, IInputSelectionProvider provider) {
+		fOldGroup= new JavaSearchGroup();
+		fOldContext= new GroupContext(provider);
+	}
+	
+	/**
+	 * Creates a new <code>JavaSearchActionGroup</code>.
+	 * 
+	 * @param page the page that owns this action group
+	 * <p>
+	 * Note: this constructor will go away. The final constructor will only take
+	 *  an <code>Page</code>
+	 * </p>
+	 */
+	public JavaSearchActionGroup(Page page, IInputSelectionProvider provider) {
 		fOldGroup= new JavaSearchGroup();
 		fOldContext= new GroupContext(provider);
 	}

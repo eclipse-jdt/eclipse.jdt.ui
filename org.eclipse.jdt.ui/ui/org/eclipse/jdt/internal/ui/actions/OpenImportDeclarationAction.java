@@ -27,6 +27,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Open a resource (ClassFile or CompilationUnit) from the PackageViewer
+ * 
+ * @deprecated Use org.eclipse.jdt.ui.actions.OpenAction instead
  */
 public class OpenImportDeclarationAction extends Action implements IUpdate {
 

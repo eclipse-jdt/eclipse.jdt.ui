@@ -73,6 +73,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.OpenAction;
@@ -717,7 +718,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				new ShowActionGroup(this), 
 				fCCPActionGroup= new CCPActionGroup(this),
 				new RefactorActionGroup(this), 
-				new GenerateActionGroup(this)});
+				new GenerateActionGroup(this),
+				new JavaSearchActionGroup(this, fOutlineViewer)});
 				
 		// register global actions
 		IActionBars bars= site.getActionBars();
@@ -766,6 +768,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			fMenu.dispose();
 			fMenu= null;
 		}
+		
+		if (fActionGroups != null)
+			fActionGroups.dispose();
 		
 		super.dispose();
 	}

@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
+import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -63,15 +64,14 @@ public class MethodsViewer extends ProblemTableViewer {
 	
 	private static final int LABEL_BASEFLAGS= StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS;
 	
-	private MemberFilterActionGroup fMemberFilterActionGroup;
-	
 	private JavaUILabelProvider fLabelProvider;
 		
-	private OpenJavaElementAction fOpen;
-
+	private MemberFilterActionGroup fMemberFilterActionGroup;
+	
+	private OpenAction fOpen;
 	private ShowInheritedMembersAction fShowInheritedMembersAction;
-
-	private ContextMenuGroup[] fStandardGroups;	
+	// We should use the JavaSearchActionGroup as soon as is is following the new stanadard.
+	private ContextMenuGroup[] fStandardGroups;
 	
 	public MethodsViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
@@ -85,8 +85,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		setLabelProvider(new DecoratingLabelProvider(fLabelProvider, PlatformUI.getWorkbench().getDecoratorManager()));
 		setContentProvider(new MethodsContentProvider(lifeCycle));
 				
-		fOpen= new OpenJavaElementAction(this);
-		
+		fOpen= new OpenAction(part.getSite());		
 		addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				fOpen.run();
@@ -98,9 +97,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);
 		showInheritedMethods(false);
 		
-		fStandardGroups= new ContextMenuGroup[] {
-			new JavaSearchGroup(), new GenerateGroup()
-		};
+		fStandardGroups= new ContextMenuGroup[] {new JavaSearchGroup()};
 		
 		setSorter(new JavaElementSorter());
 		
@@ -194,9 +191,6 @@ public class MethodsViewer extends ProblemTableViewer {
 	 * Should be called by the creator of the context menu
 	 */	
 	public void contributeToContextMenu(IMenuManager menu) {
-		if (fOpen.canActionBeAdded()) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);
-		}
 		ContextMenuGroup.add(menu, fStandardGroups, this);
 	}
 

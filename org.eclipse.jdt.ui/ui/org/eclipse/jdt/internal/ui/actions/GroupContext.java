@@ -17,6 +17,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
  * A group context can be used to access the current selection,
  * the current input element and the common super type, if the
  * selection contains multiple elements.
+ * 
+ * @deprecated Use ActionContext instead
  */
 public class GroupContext {
 

@@ -11,6 +11,9 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 
+/**
+ * @deprecated Use org.eclipse.jdt.ui.actions.GenerateActionGroup instead
+ */
 public class GenerateGroup extends ContextMenuGroup {
 
 	public static final String GROUP_NAME= IContextMenuConstants.GROUP_GENERATE;
