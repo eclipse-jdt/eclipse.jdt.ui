@@ -43,9 +43,17 @@ class JavaTokenComparator implements ITokenComparator {
 		Scanner scanner= new Scanner(true, true);	// returns comments & whitespace
 		scanner.setSource(fText.toCharArray());
 		try {
+			int endPos= 0;
 			while (scanner.getNextToken() != ITerminalSymbols.TokenNameEOF) {
 				fStarts[fCount]= scanner.startPosition;
-				fLengths[fCount]= scanner.currentPosition - fStarts[fCount];
+				fLengths[fCount]= scanner.currentPosition - scanner.startPosition;
+				endPos= scanner.currentPosition;
+				fCount++;
+			}
+			// workaround for #13907
+			if (endPos < length) {
+				fStarts[fCount]= endPos;
+				fLengths[fCount]= length-endPos;
 				fCount++;
 			}
 		} catch (InvalidInputException ex) {
@@ -65,9 +73,11 @@ class JavaTokenComparator implements ITokenComparator {
 	 * see ITokenComparator.getTokenStart
 	 */
 	public int getTokenStart(int index) {
-		if (index < fCount)
+		if (index >= 0 && index < fCount)
 			return fStarts[index];
-		return fText.length();
+		if (fCount > 0)
+			return fStarts[fCount-1] + fLengths[fCount-1];
+		return 0;
 	}
 
 	/* (non Javadoc)
