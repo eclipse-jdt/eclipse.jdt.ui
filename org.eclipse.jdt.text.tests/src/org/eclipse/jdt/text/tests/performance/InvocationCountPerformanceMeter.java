@@ -47,8 +47,8 @@ import org.eclipse.jdi.Bootstrap;
  * To use this performance meter add the following VM arguments:
  * 	-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=PORT,suspend=n,server=y -Decilpse.perf.debugPort=PORT
  * where PORT is the port on which the debugger will listen and connect to.
- * This performance meter cannot be debugged, as itself uses the VM's debugging
- * facility. A {@link org.eclipse.test.performance.Performance#getNullPerformanceMeter()}
+ * Because the performance meter uses the VM's debugging facility, it cannot be
+ * debugged itself. A {@link org.eclipse.test.performance.Performance#getNullPerformanceMeter()}
  * could be used while debugging clients.
  * 
  * @since 3.1
