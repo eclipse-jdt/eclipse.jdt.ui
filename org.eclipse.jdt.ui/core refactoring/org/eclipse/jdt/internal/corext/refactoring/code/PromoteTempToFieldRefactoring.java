@@ -19,11 +19,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -44,6 +46,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -63,6 +67,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class PromoteTempToFieldRefactoring extends Refactoring {
 
@@ -84,11 +89,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	//------ fields used for computations ---------//
     private CompilationUnit fCompilationUnitNode;
     private VariableDeclaration fTempDeclarationNode;
+    private final CodeGenerationSettings fCodeGenerationSettings;
 	
-	public PromoteTempToFieldRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength){
+	public PromoteTempToFieldRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
+		Assert.isNotNull(codeGenerationSettings);
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
@@ -98,6 +105,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         fDeclareStatic= false;
         fDeclareFinal= false;
         fInitializeIn= INITIALIZE_IN_METHOD;
+        fCodeGenerationSettings= codeGenerationSettings;
 	}
 	
     /*
@@ -414,6 +422,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     		if (! fFieldName.equals(fTempDeclarationNode.getName().getIdentifier()))	
     			addTempRenames(rewrite);
             return createChange(rewrite);
+    	} catch (JavaModelException e){
+    		throw e; 
     	} catch (CoreException e) {
     		throw new JavaModelException(e);
         } finally{
@@ -432,7 +442,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		}
     }
     
-    private void addInitializersToConstructors(ASTRewrite rewrite) throws JavaModelException {
+    private void addInitializersToConstructors(ASTRewrite rewrite) throws CoreException {
     	Assert.isTrue(! isDeclaredInAnonymousClass());
     	TypeDeclaration typeDeclaration= (TypeDeclaration)getMethodDeclaration().getParent();
     	MethodDeclaration[] allConstructors= getAllConstructors(typeDeclaration);
@@ -446,19 +456,45 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
             }
     	}
     }
-    private void addNewConstructorWithInitializing(ASTRewrite rewrite, TypeDeclaration typeDeclaration) throws JavaModelException {
-        MethodDeclaration newConstructor= getAST().newMethodDeclaration();
-        newConstructor.setConstructor(true);
-        newConstructor.setExtraDimensions(0);
-        newConstructor.setModifiers(getModifiersForDefaultConstructor(typeDeclaration));
-        newConstructor.setName(getAST().newSimpleName(typeDeclaration.getName().getIdentifier()));
-        addFieldInitializationToConstructor(rewrite, newConstructor);
+    private void addNewConstructorWithInitializing(ASTRewrite rewrite, TypeDeclaration typeDeclaration) throws CoreException {
+		String constructorSource = format(getNewConstructorSource(typeDeclaration), 0);
+		BodyDeclaration newConstructor= (BodyDeclaration)rewrite.createPlaceholder(constructorSource, ASTRewrite.BODY_DECLARATION);
         rewrite.markAsInserted(newConstructor);
         int constructorInsertIndex= computeInsertIndexForNewConstructor(typeDeclaration);
         typeDeclaration.bodyDeclarations().add(constructorInsertIndex, newConstructor);
     }
     
-    private int computeInsertIndexForNewConstructor(TypeDeclaration typeDeclaration) {
+	private String getEnclosingTypeName() {
+		return ((TypeDeclaration)ASTNodes.getParent(getTempDeclarationStatement(), TypeDeclaration.class)).getName().getIdentifier();
+	}
+	
+	private String format(String src, int indentationLevel){
+		return ToolFactory.createCodeFormatter().format(src, indentationLevel, null, getLineSeperator());
+	}
+
+	private String getNewConstructorSource(TypeDeclaration typeDeclaration) throws CoreException {
+		String bodyStatement= fFieldName + '=' + getTempInitializerCode() + ';';
+		String constructorBody= StubUtility.getMethodBodyContent(true, fCu.getJavaProject(), getEnclosingTypeName(), getEnclosingTypeName(), bodyStatement);
+		return getNewConstructorComment() + getModifierStringForDefaultConstructor(typeDeclaration) + ' ' + getEnclosingTypeName() + '(' + "){" +  //$NON-NLS-1$
+			constructorBody + getLineSeperator() + '}';
+	}
+	
+	private String getLineSeperator() {
+		try {
+			return StubUtility.getLineDelimiterUsed(fCu);
+		} catch (JavaModelException e) {
+			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+
+	private String getNewConstructorComment() throws CoreException {
+		if (fCodeGenerationSettings.createComments)
+			return StubUtility.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null);
+		else
+			return "";//$NON-NLS-1$
+	}
+
+	private int computeInsertIndexForNewConstructor(TypeDeclaration typeDeclaration) {
     	List bodyDeclarations= typeDeclaration.bodyDeclarations();
     	if (bodyDeclarations.isEmpty())
 	        return 0;
@@ -486,15 +522,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         statements.add(initialization);
     }
     
-    private static int getModifiersForDefaultConstructor(TypeDeclaration typeDeclaration) {
-    	if (Modifier.isPublic(typeDeclaration.getModifiers()))
-    		return Modifier.PUBLIC;
-    	else if (Modifier.isProtected(typeDeclaration.getModifiers()))
-    		return Modifier.PROTECTED;
-		else if (Modifier.isPrivate(typeDeclaration.getModifiers()))
-    		return Modifier.PRIVATE;
-        else
-			return Modifier.NONE;
+    private static String getModifierStringForDefaultConstructor(TypeDeclaration typeDeclaration) {
+    	return JdtFlags.getVisibilityString(typeDeclaration.getModifiers());
     }
     
     private static boolean shouldInsertTempInitialization(MethodDeclaration constructor){
@@ -570,7 +599,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         Assignment assignment= getAST().newAssignment();
         SimpleName fieldName= getAST().newSimpleName(fFieldName);
         assignment.setLeftHandSide(fieldName);
-        String initializerCode= fCu.getBuffer().getText(getTempInitializer().getStartPosition(), getTempInitializer().getLength());
+        String initializerCode= getTempInitializerCode();
         Expression tempInitializerCopy= (Expression)rewrite.createPlaceholder(initializerCode, ASTRewrite.EXPRESSION);
         ///XXX workaround for bug 25178
         ///(Expression)rewrite.createCopy(getTempInitializer());
@@ -578,6 +607,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignment);
         return assignmentStatement;
     }
+	private String getTempInitializerCode() throws JavaModelException {
+		return fCu.getBuffer().getText(getTempInitializer().getStartPosition(), getTempInitializer().getLength());
+	}
 
     private void addLocalDeclarationRemoval(ASTRewrite rewrite) {
 		VariableDeclarationStatement tempDeclarationStatement= getTempDeclarationStatement();

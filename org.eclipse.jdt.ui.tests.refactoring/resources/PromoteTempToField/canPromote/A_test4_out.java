@@ -3,8 +3,12 @@ package p;
 class A{
 	private int i;
 
+	/**
+	 * 
+	 */
 	A() {
 		i= 0;
+		// TODO Auto-generated constructor stub
 	}
 
 	void f(){
