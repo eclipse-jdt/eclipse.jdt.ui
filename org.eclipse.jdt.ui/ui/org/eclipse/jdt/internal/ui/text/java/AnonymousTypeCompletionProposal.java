@@ -102,7 +102,7 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 			if (!createStubs(buf, fImportStructure)) {
 				return;
 			}
-			buf.append("};");
+			buf.append("}");
 			
 			// use the code formatter
 			String lineDelim= StubUtility.getLineDelimiterFor(document);
