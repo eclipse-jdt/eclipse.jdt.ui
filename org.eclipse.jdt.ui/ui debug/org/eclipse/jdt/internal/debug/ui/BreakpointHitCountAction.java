@@ -6,12 +6,11 @@
 package org.eclipse.jdt.internal.debug.ui;
 
 import java.util.Iterator;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IBreakpointManager;
-import org.eclipse.jdt.debug.core.IJavaDebugConstants;
-import org.eclipse.jdt.debug.core.JDIDebugModel;
+import org.eclipse.debug.core.*;
+import org.eclipse.jdt.debug.core.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -82,12 +81,15 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 		}
 
 		while (enum.hasNext()) {
-			IMarker breakpoint= (IMarker)enum.next();
-			int newHitCount= hitCountDialog(breakpoint);
+			IBreakpoint breakpoint= getBreakpointManager().getBreakpoint((IMarker)enum.next());
+			if (!(breakpoint instanceof IJavaLineBreakpoint)) {
+				continue;
+			}
+			int newHitCount= hitCountDialog((IJavaLineBreakpoint)breakpoint);
 			if (newHitCount != -1) {				
 				try {
-					JDIDebugModel.setHitCount(breakpoint, newHitCount);
-					getBreakpointManager().setEnabled(breakpoint, true);
+					((IJavaLineBreakpoint)breakpoint).setHitCount(newHitCount);
+					breakpoint.enable();
 				} catch (CoreException ce) {
 					DebugUIUtils.logError(ce);
 				}
@@ -102,7 +104,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 		run(null);
 	}
 
-	protected int hitCountDialog(IMarker marker) {
+	protected int hitCountDialog(IJavaLineBreakpoint breakpoint) {
 		String title= DebugUIUtils.getResourceString(DIALOG_TITLE);
 		String message= DebugUIUtils.getResourceString(DIALOG_MESSAGE);
 		IInputValidator validator= new IInputValidator() {
@@ -122,7 +124,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 			}
 		};
 
-		int currentHitCount= JDIDebugModel.getHitCount(marker);
+		int currentHitCount= breakpoint.getHitCount();
 		String initialValue;
 		if (currentHitCount > 0) {
 			initialValue= Integer.toString(currentHitCount);

@@ -5,44 +5,24 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IBreakpointManager;
-import org.eclipse.debug.core.IDebugConstants;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.source.IVerticalRuler;
-
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
-import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.MarkerRulerAction;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.debug.core.*;
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.debug.core.IJavaDebugConstants;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
-
 import org.eclipse.jdt.internal.debug.ui.BreakpointLocationVerifier;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.text.*;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.texteditor.*;
 
 
 /**
@@ -89,7 +69,8 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 				if (markers != null) {
 					IBreakpointManager breakpointManager= DebugPlugin.getDefault().getBreakpointManager();
 					for (int i= 0; i < markers.length; i++) {
-						if (breakpointManager.isRegistered(markers[i]) && 
+						IBreakpoint breakpoint= breakpointManager.getBreakpoint(markers[i]);
+						if (breakpoint != null && breakpointManager.isRegistered(breakpoint) && 
 								breakpointElementInEditor(breakpointManager, markers[i]) && 
 								includesRulerLine(model.getMarkerPosition(markers[i]), document))
 							breakpoints.add(markers[i]);
@@ -136,8 +117,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 				}
 				if (type != null) {
 					if (!EditorUtility.isDuplicateLineBreakpoint(JDIDebugModel.getPluginIdentifier(), IJavaDebugConstants.JAVA_LINE_BREAKPOINT, type, lineNumber)) {
-							IMarker breakpoint = JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
-							DebugPlugin.getDefault().getBreakpointManager().addBreakpoint(breakpoint);
+							IBreakpoint breakpoint = JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
 					}
 				}
 			}
@@ -162,7 +142,8 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 			
 			Iterator e= markers.iterator();
 			while (e.hasNext()) {
-				breakpointManager.removeBreakpoint((IMarker) e.next(), true);
+				IBreakpoint breakpoint= breakpointManager.getBreakpoint((IMarker) e.next());
+				breakpointManager.removeBreakpoint(breakpoint, true);
 			}
 			
 		} catch (CoreException e) {

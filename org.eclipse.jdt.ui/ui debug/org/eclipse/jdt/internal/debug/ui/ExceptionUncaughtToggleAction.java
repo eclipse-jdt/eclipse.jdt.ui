@@ -4,9 +4,8 @@
  */
 package org.eclipse.jdt.internal.debug.ui;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.internal.debug.core.DebugJavaUtils;
+import org.eclipse.jdt.debug.core.IJavaExceptionBreakpoint;
 
 /**
  * Toggles the uncaught state of an exception breakpoint
@@ -16,15 +15,15 @@ public class ExceptionUncaughtToggleAction extends ExceptionAction {
 	/**
 	 * @see ExceptionException
 	 */
-	public void doAction(IMarker exception) throws CoreException {
-		DebugJavaUtils.setUncaught(exception, !DebugJavaUtils.isUncaught(exception));
+	public void doAction(IJavaExceptionBreakpoint exception) throws CoreException {
+		exception.toggleUncaught();
 	}
 
 	/**
 	 * @see ExceptionException
 	 */
-	protected boolean getToggleState(IMarker exception) {
-		return DebugJavaUtils.isUncaught(exception);
+	protected boolean getToggleState(IJavaExceptionBreakpoint exception) {
+		return exception.isUncaught();
 	}
 
 }

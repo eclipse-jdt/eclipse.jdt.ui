@@ -3,22 +3,21 @@ package org.eclipse.jdt.internal.debug.ui;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IBreakpointManager;
+import org.eclipse.debug.core.*;
 import org.eclipse.debug.internal.ui.BreakpointsView;
-import org.eclipse.jdt.debug.core.JDIDebugModel;
-import org.eclipse.jdt.internal.debug.core.DebugJavaUtils;
+import org.eclipse.jdt.debug.core.IJavaWatchpoint;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.texteditor.IUpdate;
 
-public abstract class WatchpointAction extends Action implements IViewActionDelegate, IUpdate {
+public abstract class WatchpointAction extends Action implements IViewActionDelegate, IBreakpointListener {
 	
 	private IStructuredSelection fCurrentSelection;
 	private IAction fAction;
@@ -39,7 +38,7 @@ public abstract class WatchpointAction extends Action implements IViewActionDele
 	 */
 	public void init(IViewPart viewPart) {
 		if (viewPart instanceof BreakpointsView) {
-			((BreakpointsView) viewPart).addContributedAction(this);
+			((BreakpointsView)viewPart).addBreakpointListenerAction(this);
 		}
 	}
 
@@ -47,13 +46,15 @@ public abstract class WatchpointAction extends Action implements IViewActionDele
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
+		fAction= action;
 		IStructuredSelection selection= getStructuredSelection();
 		Iterator enum= selection.iterator();
 		while (enum.hasNext()) {
 			try {
-				IMarker watchpoint= (IMarker) enum.next();
-				doAction(watchpoint);
-				fixUpState(watchpoint);
+				IBreakpoint breakpoint= getBreakpoint((IMarker) enum.next());
+				if (breakpoint instanceof IJavaWatchpoint) {
+					doAction((IJavaWatchpoint)breakpoint);
+				}
 			} catch (CoreException e) {
 				DebugUIUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(),"watchpoint_action.error", e.getStatus());
 			}			
@@ -64,22 +65,31 @@ public abstract class WatchpointAction extends Action implements IViewActionDele
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
-		if (selection instanceof IStructuredSelection) {
-			fAction= action;			
-			fCurrentSelection= (IStructuredSelection) selection;
-			update();
+		if (selection.isEmpty()) {
+			fCurrentSelection= null;
+		}
+		else if (selection instanceof IStructuredSelection) {
+			fCurrentSelection= (IStructuredSelection)selection;
+			boolean enabled= fCurrentSelection.size() == 1 && isEnabledFor(fCurrentSelection.getFirstElement());
+			action.setEnabled(enabled);
+			if (enabled) {
+				IBreakpoint breakpoint= getBreakpoint((IMarker)fCurrentSelection.getFirstElement());
+				if (breakpoint instanceof IJavaWatchpoint) {
+					action.setChecked(getToggleState((IJavaWatchpoint) breakpoint));
+				}
+			}
 		}
 	}
 
 	/**
 	 * Toggle the state of this action
 	 */
-	public abstract void doAction(IMarker watchpoint) throws CoreException;
+	public abstract void doAction(IJavaWatchpoint watchpoint) throws CoreException;
 	
 	/**
 	 * Returns whether this action is currently toggled on
 	 */
-	protected abstract boolean getToggleState(IMarker watchpoint);
+	protected abstract boolean getToggleState(IJavaWatchpoint watchpoint);
 	
 	/**
 	 * Get the current selection
@@ -89,96 +99,54 @@ public abstract class WatchpointAction extends Action implements IViewActionDele
 	}
 	
 	public boolean isEnabledFor(Object element) {
-		return element instanceof IMarker && JDIDebugModel.isWatchpoint((IMarker)element);
-	}
-
-	/**
-	 * Disable the given watchpoint.
-	 */
-	public void disableWatchpoint(IMarker watchpoint) {
-		try {
-			getBreakpointManager().setEnabled(watchpoint, false);
-			DebugJavaUtils.setAutoDisabled(watchpoint, true);
-		} catch (CoreException ce) {
-			DebugJavaUtils.logError(ce);
+		if (element instanceof IMarker) {
+			IBreakpoint breakpoint= getBreakpoint((IMarker) element);
+			return breakpoint instanceof IJavaWatchpoint;
 		}
-	}
-
-	/**
-	 * Enable the given watchpoint.
-	 */
-	public void enableWatchpoint(IMarker watchpoint) {
-		try {
-			IBreakpointManager manager= getBreakpointManager();
-			if (!manager.isEnabled(watchpoint)) {
-				manager.setEnabled(watchpoint, true);
-				DebugJavaUtils.setAutoDisabled(watchpoint, false);				
-			}
-		} catch (CoreException ce) {
-			DebugJavaUtils.logError(ce);
-		}
+		return false;
 	}
 	
+	/** 
+	 * @see IBreakpointListener
+	 */
+	public void breakpointAdded(IBreakpoint breakpoint) {
+	}
+
+	/** 
+	 * @see IBreakpointListener
+	 */
+	public void breakpointRemoved(IBreakpoint breakpoint, IMarkerDelta delta) {
+	}
+
+	/** 
+	 * @see IBreakpointListener
+	 */
+	public void breakpointChanged(IBreakpoint breakpoint, IMarkerDelta delta) {
+		final Display display= Display.getDefault();
+		if (display.isDisposed()) {
+			return;
+		}
+		display.asyncExec(new Runnable() {
+			public void run() {
+				if (fAction != null && fCurrentSelection != null) {
+					selectionChanged(fAction, fCurrentSelection);
+				}
+			}
+		});
+	}	
+
 	/**
 	 * Get the breakpoint manager for the debug plugin
 	 */
-	private IBreakpointManager getBreakpointManager() {
+	protected IBreakpointManager getBreakpointManager() {
 		return DebugPlugin.getDefault().getBreakpointManager();		
 	}
-
+	
 	/**
-	 * @see IUpdate#update()
+	 * Get the breakpoint associated with the given marker
 	 */
-	public void update() {
-		if (fAction == null) {
-			return;
-		}
-		boolean enabled= fCurrentSelection.size() == 1 && isEnabledFor(fCurrentSelection.getFirstElement());
-		fAction.setEnabled(enabled);
-		if (enabled) {
-			IMarker watchpoint= (IMarker)fCurrentSelection.getFirstElement();
-			if (getBreakpointManager().isEnabled(watchpoint)) {
-				try {
-					fixUpState(watchpoint);					
-					DebugJavaUtils.setAutoDisabled(watchpoint, false);
-				} catch (CoreException ce) {
-					DebugJavaUtils.logError(ce);					
-				}
-			}
-			fAction.setChecked(getToggleState(watchpoint));
-		}		
-	}
-
-	/**
-	 * Fix up the state of the breakpoint such that the enabled/disabled state makes
-	 * sense in relation to the access and modification settings.
-	 * The goal is to ensure that a watchpoint is never displayed as enabled
-	 * with neither access or modification on.
-	 * If access and modification are both deselected, disable the breakpoint.
-	 * If access and modification are both deselected and the user chooses to
-	 * enable the breakpoint, set access and modification to their default value
-	 * (this assumes that the default value is such that ((access || modification) == true).
-	 * If the breakpoint is disabled and the user turns on access or modification,
-	 * enable the breakpoint.
-	 */
-	private void fixUpState(IMarker watchpoint) {
-		boolean access, modification, enabled, auto_disabled;
-		access= DebugJavaUtils.isAccess(watchpoint);
-		modification= DebugJavaUtils.isModification(watchpoint);
-		enabled= getBreakpointManager().isEnabled(watchpoint);
-		auto_disabled= DebugJavaUtils.isAutoDisabled(watchpoint);
-		if (!(access || modification) && enabled && auto_disabled) {
-			try {
-				DebugJavaUtils.setDefaultAccessAndModification(watchpoint);
-				enableWatchpoint(watchpoint);
-			} catch (CoreException ce) {
-				DebugJavaUtils.logError(ce);
-			}
-		} else if (!(access || modification) && enabled) {
-			disableWatchpoint(watchpoint);
-		} else {
-	        enableWatchpoint(watchpoint);
-		}		
+	protected IBreakpoint getBreakpoint(IMarker marker) {
+		return getBreakpointManager().getBreakpoint(marker);
 	}
 
 }

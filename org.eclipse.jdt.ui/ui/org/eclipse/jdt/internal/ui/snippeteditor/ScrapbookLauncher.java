@@ -4,11 +4,33 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
  
-import java.io.File;import java.io.IOException;import java.net.MalformedURLException;import java.net.URL;import java.util.ArrayList;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Map;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRunnable;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Platform;import org.eclipse.debug.core.DebugEvent;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IDebugEventListener;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.debug.core.ILauncher;import org.eclipse.debug.core.Launch;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.ISourceLocator;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.debug.ui.IDebugUIEventFilter;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.debug.core.DebugJavaUtils;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;import org.eclipse.jdt.internal.ui.launcher.JavaLaunchUtils;import org.eclipse.jdt.launching.IVMRunner;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.ProjectSourceLocator;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.viewers.IStructuredSelection;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.*;
+import org.eclipse.debug.core.*;
+import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.debug.core.model.ISourceLocator;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugUIEventFilter;
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
+import org.eclipse.jdt.internal.debug.core.DebugJavaUtils;
+import org.eclipse.jdt.internal.debug.ui.JDIModelPresentation;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;
+import org.eclipse.jdt.internal.ui.launcher.JavaLaunchUtils;
+import org.eclipse.jdt.launching.*;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebugEventListener {
 	
-	IMarker fMagicBreakpoint;
+	IBreakpoint fMagicBreakpoint;
 	DebugException fDebugException;
 	
 	HashMap fScrapbookToVMs = new HashMap(10);
@@ -111,7 +133,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 			VMRunnerResult result= launcher.run(config);
 			if (result != null) {
 				IDebugTarget dt = result.getDebugTarget();
-				IMarker magicBreakpoint = createMagicBreakpoint(getMainType(p));
+				IBreakpoint magicBreakpoint = createMagicBreakpoint(getMainType(p));
 				fScrapbookToVMs.put(page, dt);
 				fVMsToScrapbooks.put(dt, page);
 				fVMsToBreakpoints.put(dt, magicBreakpoint);
@@ -129,62 +151,14 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		return false;
 	}
 
-	IMarker createMagicBreakpoint(IType type) {
+	IBreakpoint createMagicBreakpoint(IType type) {
 		try {
-			return createSnippetSupportBreakpoint(type, 54, -1, -1, 0);
+			fMagicBreakpoint= JDIDebugModel.createSnippetSupportLineBreakpoint(type, 54, -1, -1, 0);
+			return fMagicBreakpoint;
 		} catch (DebugException e) {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-
-	private IMarker createSnippetSupportBreakpoint(final IType type, final int lineNumber, final int charStart, final int charEnd, final int hitCount) throws DebugException {
-		// determine the resource to associate the marker with
-
-		IWorkspaceRunnable wr= new IWorkspaceRunnable() {
-
-			public void run(IProgressMonitor monitor) throws CoreException {
-				IResource resource= type.getJavaProject().getProject();
-				// create the marker
-				try {
-					fMagicBreakpoint = resource.createMarker("org.eclipse.jdt.ui.snippetSupportLineBreakpoint"); //$NON-NLS-1$
-				} catch (CoreException e) {
-					fDebugException = new DebugException(e.getStatus());
-					return;
-				}
-
-				// configure the standard attributes
-				try {
-					DebugPlugin.getDefault().getBreakpointManager().configureLineBreakpoint(fMagicBreakpoint, JDIDebugModel.getPluginIdentifier(), true, lineNumber, charStart, charEnd);
-				} catch (CoreException e) {
-					fDebugException= new DebugException(e.getStatus());
-					return;
-				}
-
-				// configure the type handle and hit count
-				DebugJavaUtils.setTypeAndHitCount(fMagicBreakpoint, type, hitCount);
-
-				// configure the marker as a Java marker
-				Map attributes= fMagicBreakpoint.getAttributes();
-				JavaCore.addJavaElementMarkerAttributes(attributes, type);
-				fMagicBreakpoint.setAttributes(attributes);
-			}
-
-		};
-		
-		try {
-			ResourcesPlugin.getWorkspace().run(wr, null);
-		} catch (CoreException e) {
-			if (fDebugException == null) {
-				fDebugException = new DebugException(e.getStatus());
-			}
-		}
-
-		if (fDebugException != null) {
-			throw fDebugException;
-		}
-		return fMagicBreakpoint;
 	}
 
 	IType getMainType(IJavaProject jp) {	
@@ -231,8 +205,8 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		return (IDebugTarget)fScrapbookToVMs.get(page);
 	}
 	
-	public IMarker getMagicBreakpoint(IDebugTarget target) {
-		return (IMarker)fVMsToBreakpoints.get(target);
+	public IBreakpoint getMagicBreakpoint(IDebugTarget target) {
+		return (IBreakpoint)fVMsToBreakpoints.get(target);
 	}
 	
 	protected void showNoPageDialog() {

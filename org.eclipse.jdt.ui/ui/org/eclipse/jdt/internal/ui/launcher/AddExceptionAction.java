@@ -4,7 +4,16 @@
  */
 package org.eclipse.jdt.internal.ui.launcher;
 
-import org.eclipse.core.resources.IMarker;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jface.action.IAction;import org.eclipse.jface.viewers.ISelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IViewActionDelegate;import org.eclipse.ui.IViewPart;
+import org.eclipse.debug.core.*;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IViewActionDelegate;
+import org.eclipse.ui.IViewPart;
 
 public class AddExceptionAction implements IViewActionDelegate {
 
@@ -22,8 +31,7 @@ public class AddExceptionAction implements IViewActionDelegate {
 			boolean uncaught= dialog.isUncaughtSelected();
 			IBreakpointManager mgr= DebugPlugin.getDefault().getBreakpointManager();
 			try {
-				IMarker e= JDIDebugModel.createExceptionBreakpoint(result, caught, uncaught, exceptionKind == AddExceptionDialog.CHECKED_EXCEPTION);
-				mgr.addBreakpoint(e);
+				IBreakpoint breakpoint= JDIDebugModel.createExceptionBreakpoint(result, caught, uncaught, exceptionKind == AddExceptionDialog.CHECKED_EXCEPTION);
 			} catch (DebugException exc) {
 				ExceptionHandler.handle(exc, LauncherMessages.getString("addExceptionAction.error.title"), LauncherMessages.getString("addExceptionAction.error.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			}

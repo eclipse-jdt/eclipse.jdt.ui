@@ -6,7 +6,20 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.ResourceBundle;import org.eclipse.core.resources.IMarker;import org.eclipse.core.runtime.CoreException;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IDebugConstants;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.debug.core.IJavaDebugConstants;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.debug.ui.BreakpointLocationVerifier;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.IRegion;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.texteditor.AddMarkerAction;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.*;
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.debug.core.IJavaDebugConstants;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
+import org.eclipse.jdt.internal.debug.ui.BreakpointLocationVerifier;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.text.*;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.texteditor.AddMarkerAction;
 
 
 /**
@@ -26,12 +39,12 @@ public class AddBreakpointAction extends AddMarkerAction {
 	 */
 	public void run() {
 		if (fJavaEditor != null) 
-			createMarker(fJavaEditor.getEditorInput());
+			createBreakpoint(fJavaEditor.getEditorInput());
 	}
 	/**
 	 * Creates a breakpoint marker.
 	 */
-	protected IMarker createMarker(IEditorInput editorInput) {
+	protected IBreakpoint createBreakpoint(IEditorInput editorInput) {
 		ISelection s= fJavaEditor.getSelectionProvider().getSelection();
 		if (!s.isEmpty()) {
 			ITextSelection selection= (ITextSelection) s;
@@ -64,8 +77,7 @@ public class AddBreakpointAction extends AddMarkerAction {
 					}
 					if (type != null) {
 						if (!EditorUtility.isDuplicateLineBreakpoint(JDIDebugModel.getPluginIdentifier(), IJavaDebugConstants.JAVA_LINE_BREAKPOINT, type, lineNumber)) {
-							IMarker breakpoint = JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
-							DebugPlugin.getDefault().getBreakpointManager().addBreakpoint(breakpoint);
+							return JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
 						}
 					}
 					

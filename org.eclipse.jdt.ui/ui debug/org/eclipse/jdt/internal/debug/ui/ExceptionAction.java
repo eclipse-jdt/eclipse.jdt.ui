@@ -5,22 +5,28 @@
 package org.eclipse.jdt.internal.debug.ui;
 
 import java.util.Iterator;
+
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.debug.core.JDIDebugModel;
+import org.eclipse.debug.core.*;
+import org.eclipse.debug.internal.ui.BreakpointsView;
+import org.eclipse.jdt.debug.core.IJavaExceptionBreakpoint;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 
 /**
  * Superclass for actions that toggle the caught/uncaught state of an exception breakpoint 
  */
-public abstract class ExceptionAction extends Action implements IViewActionDelegate {
+public abstract class ExceptionAction extends Action implements IViewActionDelegate, IBreakpointListener {
 
+	private IAction fAction= null;
 	protected IStructuredSelection fCurrentSelection;
 
 	public ExceptionAction() {
@@ -31,11 +37,15 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 	 * @see IActionDelegate
 	 */
 	public void run(IAction action) {
+		fAction= action;
 		IStructuredSelection selection= getStructuredSelection();
 		Iterator enum= selection.iterator();
 		while (enum.hasNext()) {
 			try {
-				doAction((IMarker)enum.next());
+				IBreakpoint breakpoint= getBreakpoint((IMarker)enum.next());
+				if (breakpoint instanceof IJavaExceptionBreakpoint) {
+					doAction((IJavaExceptionBreakpoint) breakpoint);
+				}
 			} catch (CoreException e) {
 				DebugUIUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(),"exception_action.error.", e.getStatus());
 			}
@@ -53,12 +63,16 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 	 * @see IActionDelegate
 	 */
 	public void selectionChanged(IAction action, ISelection sel) {
+		fAction= action;
 		if (sel instanceof IStructuredSelection) {
 			fCurrentSelection= (IStructuredSelection)sel;
 			boolean enabled= fCurrentSelection.size() == 1 && isEnabledFor(fCurrentSelection.getFirstElement());
 			action.setEnabled(enabled);
 			if (enabled) {
-				action.setChecked(getToggleState((IMarker)fCurrentSelection.getFirstElement()));
+				IBreakpoint breakpoint= getBreakpoint((IMarker)fCurrentSelection.getFirstElement());
+				if (breakpoint instanceof IJavaExceptionBreakpoint) {
+					action.setChecked(getToggleState((IJavaExceptionBreakpoint) breakpoint));
+				}
 			}
 		}
 	}
@@ -66,17 +80,20 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 	/**
 	 * Toggle the state of this action
 	 */
-	public abstract void doAction(IMarker exception) throws CoreException;
+	public abstract void doAction(IJavaExceptionBreakpoint exception) throws CoreException;
 
 	/**
 	 * Returns whether this action is currently toggled on
 	 */
-	protected abstract boolean getToggleState(IMarker exception);
+	protected abstract boolean getToggleState(IJavaExceptionBreakpoint exception);
 
 	/**
 	 * @see IViewActionDelegate
 	 */
-	public void init(IViewPart view) {
+	public void init(IViewPart viewPart) {
+		if (viewPart instanceof BreakpointsView) {
+			((BreakpointsView)viewPart).addBreakpointListenerAction(this);
+		}		
 	}
 
 	protected IStructuredSelection getStructuredSelection() {
@@ -84,7 +101,54 @@ public abstract class ExceptionAction extends Action implements IViewActionDeleg
 	}
 
 	public boolean isEnabledFor(Object element) {
-		return element instanceof IMarker && JDIDebugModel.isExceptionBreakpoint((IMarker)element);
+		if (element instanceof IMarker) {
+			IBreakpoint breakpoint= getBreakpoint((IMarker) element);
+			return breakpoint instanceof IJavaExceptionBreakpoint;
+		}
+		return false;
 	}
+	
+	/** 
+	 * @see IBreakpointListener
+	 */
+	public void breakpointAdded(IBreakpoint breakpoint) {
+	}
+
+	/** 
+	 * @see IBreakpointListener
+	 */
+	public void breakpointRemoved(IBreakpoint breakpoint, IMarkerDelta delta) {
+	}
+
+	/** 
+	 * @see IBreakpointListener
+	 */
+	public void breakpointChanged(IBreakpoint breakpoint, IMarkerDelta delta) {
+		final Display display= Display.getDefault();
+		if (display.isDisposed()) {
+			return;
+		}
+		display.asyncExec(new Runnable() {
+			public void run() {
+				if (fAction != null && fCurrentSelection != null) {
+					selectionChanged(fAction, fCurrentSelection);
+				}
+			}
+		});
+	}		
+	
+	/**
+	 * Returns the breakpoint manager for this plugin
+	 */
+	private IBreakpointManager getBreakpointManager() {
+		return DebugPlugin.getDefault().getBreakpointManager();
+	}
+	
+	/**
+	 * Returns the breakpoint associated with the given marker
+	 */
+	private IBreakpoint getBreakpoint(IMarker marker) {
+		return getBreakpointManager().getBreakpoint(marker);
+	}	
 
 }

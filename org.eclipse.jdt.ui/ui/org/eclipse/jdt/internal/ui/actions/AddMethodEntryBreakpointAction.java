@@ -6,25 +6,17 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IBreakpointManager;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.texteditor.IUpdate;
-
+import org.eclipse.debug.core.*;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.debug.core.IJavaMethodEntryBreakpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.*;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.texteditor.IUpdate;
 
 
 /**
@@ -34,7 +26,7 @@ public class AddMethodEntryBreakpointAction extends Action implements IUpdate {
 	
 	private ISelectionProvider fSelectionProvider;
 	private IMethod fMethod;
-	private IMarker fMarker;
+	private IBreakpoint fBreakpoint;
 	
 	private String fAddText, fAddDescription, fAddToolTip;
 	private String fRemoveText, fRemoveDescription, fRemoveToolTip;
@@ -60,21 +52,19 @@ public class AddMethodEntryBreakpointAction extends Action implements IUpdate {
 	 * Perform the action
 	 */
 	public void run() {
-		if (fMarker == null) {
+		if (fBreakpoint == null) {
 			// add breakpoint
 			
 			try {
-				fMarker= JDIDebugModel.createMethodEntryBreakpoint(fMethod, 0);
-				DebugPlugin.getDefault().getBreakpointManager().addBreakpoint(fMarker);
+				fBreakpoint= JDIDebugModel.createMethodEntryBreakpoint(fMethod, 0);
 			} catch (DebugException x) {
 				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), "Problems creating breakpoint", x.getMessage());
 			}
 			
 		} else {
 			// remove breakpoint
-			
 			try {
-				DebugPlugin.getDefault().getBreakpointManager().removeBreakpoint(fMarker, true);
+				getBreakpointManager().removeBreakpoint(fBreakpoint, true);
 			} catch (CoreException x) {
 				MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), "Problems removing breakpoint", x.getMessage());
 			}
@@ -85,22 +75,22 @@ public class AddMethodEntryBreakpointAction extends Action implements IUpdate {
 		fMethod= getMethod();
 		if (fMethod != null) {
 			setEnabled(true);
-			fMarker= getMarker(fMethod);
-			setText(fMarker == null ? fAddText : fRemoveText);
-			setDescription(fMarker == null ? fAddDescription : fRemoveDescription);
-			setToolTipText(fMarker == null ? fAddToolTip : fRemoveToolTip);
+			fBreakpoint= getBreakpoint(fMethod);
+			setText(fBreakpoint == null ? fAddText : fRemoveText);
+			setDescription(fBreakpoint == null ? fAddDescription : fRemoveDescription);
+			setToolTipText(fBreakpoint == null ? fAddToolTip : fRemoveToolTip);
 		} else
 			setEnabled(false);
 	}
 	
-	private IMarker getMarker(IMethod method) {
-		IBreakpointManager m= DebugPlugin.getDefault().getBreakpointManager();
-		IMarker[] bps= m.getBreakpoints(JDIDebugModel.getPluginIdentifier());
-		for (int i= 0; i < bps.length; i++) {
-			if (JDIDebugModel.isMethodEntryBreakpoint(bps[i])) {
-				IMethod container= JDIDebugModel.getMethod(bps[i]);
+	private IBreakpoint getBreakpoint(IMethod method) {
+		IBreakpoint[] breakpoints= getBreakpointManager().getBreakpoints(JDIDebugModel.getPluginIdentifier());
+		for (int i= 0; i < breakpoints.length; i++) {
+			IBreakpoint breakpoint= breakpoints[i];
+			if (breakpoint instanceof IJavaMethodEntryBreakpoint) {
+				IMethod container= ((IJavaMethodEntryBreakpoint) breakpoint).getMethod();
 				if (method.equals(container))
-					return bps[i];
+					return breakpoint;
 			}
 		}
 		return null;
@@ -116,8 +106,11 @@ public class AddMethodEntryBreakpointAction extends Action implements IUpdate {
 					return (IMethod) o;
 			}
 		}
-		
 		return null;
+	}
+	
+	private IBreakpointManager getBreakpointManager() {
+		return DebugPlugin.getDefault().getBreakpointManager();
 	}
 }
 

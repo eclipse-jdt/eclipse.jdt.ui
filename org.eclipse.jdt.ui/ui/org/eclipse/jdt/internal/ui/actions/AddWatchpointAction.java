@@ -1,20 +1,12 @@
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IBreakpointManager;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
+import org.eclipse.debug.core.*;
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.debug.core.IJavaWatchpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
-import org.eclipse.jdt.internal.debug.core.DebugJavaUtils;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.*;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.*;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
@@ -41,8 +33,7 @@ public class AddWatchpointAction extends JavaUIAction implements IUpdate {
 		}
 		IField field= (IField)((IStructuredSelection)selection).getFirstElement();
 		try {
-			IMarker breakpoint= JDIDebugModel.createWatchpoint(field, 0);
-			DebugPlugin.getDefault().getBreakpointManager().addBreakpoint(breakpoint);
+			JDIDebugModel.createWatchpoint(field, 0);
 		} catch (DebugException x) {
 			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), JavaUIMessages.getString("AddWatchpointAction.errorTitle"), x.getMessage());
 		}
@@ -65,13 +56,14 @@ public class AddWatchpointAction extends JavaUIAction implements IUpdate {
 			Object obj= structSel.getFirstElement();
 			if (structSel.size() == 1 && obj instanceof IField) {
 				IField field = (IField) obj;
-				IBreakpointManager manager= DebugPlugin.getDefault().getBreakpointManager();
-				IMarker[] breakpoints= manager.getBreakpoints();
+				IBreakpoint[] breakpoints= getBreakpointManager().getBreakpoints();
 				for (int i=0; i<breakpoints.length; i++) {
-					IMarker breakpoint= breakpoints[i];
-					IField breakpointField= DebugJavaUtils.getField(breakpoint);
-					if (breakpointField != null && equalFields(breakpointField, field)) {
-						return false;
+					IBreakpoint breakpoint= breakpoints[i];
+					if (breakpoint instanceof IJavaWatchpoint) {
+						IField breakpointField= ((IJavaWatchpoint) breakpoint).getField();
+						if (breakpointField != null && equalFields(breakpointField, field)) {
+							return false;
+						}
 					}
 				}
 				return true;
@@ -85,10 +77,12 @@ public class AddWatchpointAction extends JavaUIAction implements IUpdate {
 	 * method for <code>IField</code> doesn't give the comparison desired.
 	 */
 	private boolean equalFields(IField breakpointField, IField field) {
-		ICompilationUnit cu= JDIDebugModel.getCompilationUnit(field);
-		return (breakpointField.getCompilationUnit().equals(cu) &&
-		breakpointField.getElementName().equals(field.getElementName()) &&
+		return (breakpointField.getElementName().equals(field.getElementName()) &&
 		breakpointField.getDeclaringType().getElementName().equals(field.getDeclaringType().getElementName()));
+	}
+	
+	private IBreakpointManager getBreakpointManager() {
+		return DebugPlugin.getDefault().getBreakpointManager();
 	}
 }
 
