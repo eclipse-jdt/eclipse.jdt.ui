@@ -55,7 +55,7 @@ public class SourceAttachmentDialog extends StatusDialog {
 	 * <code>getSourceAttachmentRootPath</code>. 
 	 * @param parent Parent shell for the dialog
 	 * @param entry The entry to edit
-	 * @param container Path of the container that contains the given entry or
+	 * @param containerPath Path of the container that contains the given entry or
 	 * <code>null</code> if the entry does not belong to a container.
 	 * @param project Project to which the entry belongs. Can be
 	 * <code>null</code> if <code>applyChanges</code> is false and the entry
@@ -64,7 +64,6 @@ public class SourceAttachmentDialog extends StatusDialog {
 	 * OK. If set to false, no changes are commited. When changes are applied,
 	 * classpath entries which are not found on the classpath will be added as
 	 * new libraries.
-	 * 
 	 */
 	public SourceAttachmentDialog(Shell parent, IClasspathEntry entry, IPath containerPath, IJavaProject project, boolean applyChanges) {
 		super(parent);

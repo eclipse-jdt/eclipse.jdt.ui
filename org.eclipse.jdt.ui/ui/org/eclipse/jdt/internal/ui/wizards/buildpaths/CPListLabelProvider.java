@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.IDE;
 
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
@@ -39,7 +40,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-class CPListLabelProvider extends LabelProvider {
+public class CPListLabelProvider extends LabelProvider {
 		
 	private String fNewLabel, fClassLabel, fCreateLabel;
 	private ImageDescriptor fJarIcon, fExtJarIcon, fJarWSrcIcon, fExtJarWSrcIcon;
@@ -71,10 +72,20 @@ class CPListLabelProvider extends LabelProvider {
 			return getCPListElementText((CPListElement) element);
 		} else if (element instanceof CPListElementAttribute) {
 			return getCPListElementAttributeText((CPListElementAttribute) element);
+		} else if (element instanceof CPUserLibraryElement) {
+			return getCPUserLibraryText((CPUserLibraryElement) element);
 		}
 		return super.getText(element);
 	}
 	
+	public String getCPUserLibraryText(CPUserLibraryElement element) {
+		String name= element.getName();
+		if (element.isSystemLibrary()) {
+			name= NewWizardMessages.getFormattedString("CPListLabelProvider.systemlibrary", name); //$NON-NLS-1$
+		}
+		return name;
+	}
+
 	public String getCPListElementAttributeText(CPListElementAttribute attrib) {
 		String notAvailable= NewWizardMessages.getString("CPListLabelProvider.none"); //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer();
@@ -180,9 +191,14 @@ class CPListLabelProvider extends LabelProvider {
 				return path.lastSegment();
 			case IClasspathEntry.CPE_CONTAINER:
 				try {
-					IClasspathContainer container= JavaCore.getClasspathContainer(cpentry.getPath(), cpentry.getJavaProject());
+					IClasspathContainer container= JavaCore.getClasspathContainer(path, cpentry.getJavaProject());
 					if (container != null) {
 						return container.getDescription();
+					}
+					ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(path.segment(0));
+					if (initializer != null) {
+						String description= initializer.getDescription(path, cpentry.getJavaProject());
+						return NewWizardMessages.getFormattedString("CPListLabelProvider.unbound_library", description); //$NON-NLS-1$
 					}
 				} catch (JavaModelException e) {
 	
@@ -287,6 +303,8 @@ class CPListLabelProvider extends LabelProvider {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB);
 			}
 			return  fRegistry.get(fVariableImage);
+		} else if (element instanceof CPUserLibraryElement) {
+			return fRegistry.get(JavaPluginImages.DESC_OBJS_LIBRARY);
 		}
 		return null;
 	}

@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -21,12 +20,6 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.IPreferenceNode;
-import org.eclipse.jface.preference.IPreferencePage;
-import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.preference.PreferenceManager;
-import org.eclipse.jface.preference.PreferenceNode;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -143,7 +136,7 @@ public class TodoTaskPropertyPage extends PropertyPage {
 	private void doDialogFieldChanged(DialogField field) {
 		if (field == fChangeWorkspaceSettings) {
 			TodoTaskPreferencePage page= new TodoTaskPreferencePage();
-			showPreferencePage(TodoTaskPreferencePage.ID, page);
+			PreferencePageSupport.showPreferencePage(getShell(), TodoTaskPreferencePage.ID, page);
 		} else {
 			updateEnableState();
 			doStatusChanged();
@@ -200,21 +193,4 @@ public class TodoTaskPropertyPage extends PropertyPage {
 		StatusUtil.applyToStatusLine(this, status);
 	}
 	
-	private boolean showPreferencePage(String id, IPreferencePage page) {
-		final IPreferenceNode targetNode = new PreferenceNode(id, page);
-		
-		PreferenceManager manager = new PreferenceManager();
-		manager.addToRoot(targetNode);
-		final PreferenceDialog dialog = new PreferenceDialog(getShell(), manager);
-		final boolean [] result = new boolean[] { false };
-		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
-			public void run() {
-				dialog.create();
-				dialog.setMessage(targetNode.getLabelText());
-				result[0]= (dialog.open() == Window.OK);
-			}
-		});
-		return result[0];
-	}	
-
 }

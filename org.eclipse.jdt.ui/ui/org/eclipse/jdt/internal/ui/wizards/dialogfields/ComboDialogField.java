@@ -193,17 +193,36 @@ public class ComboDialogField extends DialogField {
 	/**
 	 * Selects an item.
 	 */	
-	public void selectItem(int index) {
+	public boolean selectItem(int index) {
+		boolean success= false;
 		if (isOkToUse(fComboControl)) {
 			fComboControl.select(index);
+			success= fComboControl.getSelectionIndex() == index;
 		} else {
 			if (index >= 0 && index < fItems.length) {
 				fText= fItems[index];
-				fSelectionIndex= index;	
+				fSelectionIndex= index;
+				success= true;
 			}
 		}
-		dialogFieldChanged();
+		if (success) {
+			dialogFieldChanged();
+		}
+		return success;
 	}
+	
+	/**
+	 * Selects an item.
+	 */	
+	public boolean selectItem(String name) {
+		for (int i= 0; i < fItems.length; i++) {
+			if (fItems[i].equals(name)) {
+				return selectItem(i);
+			}
+		}
+		return false;
+	}
+	
 	
 	public int getSelectionIndex() {
 		return fSelectionIndex;

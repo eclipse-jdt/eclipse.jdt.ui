@@ -115,13 +115,35 @@ public class CheckedListDialogField extends ListDialogField {
 	 * Gets the checked elements.
 	 */
 	public List getCheckedElements() {
+		if (fTable != null && isOkToUse(fTable.getTable())) {
+			// workaround for bug 53853
+			Object[] checked= ((CheckboxTableViewer) fTable).getCheckedElements();
+			ArrayList res= new ArrayList(checked.length);
+			for (int i= 0; i < checked.length; i++) {
+				res.add(checked[i]);
+			}
+			return res;
+		}
+		
+		
 		return new ArrayList(fCheckElements);
+	}
+	
+	/**
+	 * Returns the number of checked elements.
+	 */
+	public int getCheckedSize() {
+		return fCheckElements.size();
 	}
 	
 	/**
 	 * Returns true if the element is checked.
 	 */
 	public boolean isChecked(Object obj) {
+		if (fTable != null && isOkToUse(fTable.getTable())) {
+			return ((CheckboxTableViewer) fTable).getChecked(obj);
+		}
+	
 		return fCheckElements.contains(obj);
 	}	
 	
@@ -148,8 +170,12 @@ public class CheckedListDialogField extends ListDialogField {
 	 * Sets the checked state of an element. No dialog changed listener is informed.
 	 */		
 	public void setCheckedWithoutUpdate(Object object, boolean state) {
-		if (!fCheckElements.contains(object)) {
-			fCheckElements.add(object);
+		if (state) {
+			if (!fCheckElements.contains(object)) {
+				fCheckElements.add(object);
+			}
+		} else {
+			fCheckElements.remove(object);
 		}
 		if (fTable != null) {
 			((CheckboxTableViewer)fTable).setChecked(object, state);

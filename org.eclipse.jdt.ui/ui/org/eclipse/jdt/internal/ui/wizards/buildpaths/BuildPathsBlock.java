@@ -690,8 +690,7 @@ public class BuildPathsBlock {
 			}
 			
 			classpath[i]= entry.getClasspathEntry();
-						
-			collectJavaDocLocations(entry, paths, urls);
+			entry.collectJavaDocLocations(paths, urls);
 		}	
 		JavaUI.setLibraryJavadocLocations((IPath[]) paths.toArray(new IPath[paths.size()]), (URL[]) urls.toArray(new URL[paths.size()]));
 		
@@ -703,27 +702,6 @@ public class BuildPathsBlock {
 		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));
 		initializeTimeStamps();
 	}
-	
-	private void collectJavaDocLocations(CPListElement entry, List paths, List urls) {
-		int entryKind= entry.getEntryKind();
-		if (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE) {
-			URL javadocLocation= (URL) entry.getAttribute(CPListElement.JAVADOC);
-			IPath path= entry.getPath();
-			if (entryKind == IClasspathEntry.CPE_VARIABLE) {
-				path= JavaCore.getResolvedVariablePath(path);
-			}
-			if (path != null) {
-				paths.add(path);
-				urls.add(javadocLocation);
-			}			
-		} else if (entryKind == IClasspathEntry.CPE_CONTAINER) {
-			Object[] children= entry.getChildren(false);
-			for (int i= 0; i < children.length; i++) {
-				collectJavaDocLocations((CPListElement) children[i], paths, urls);
-			}
-		}
-	}
-	
 	
 	public static boolean hasClassfiles(IResource resource) throws CoreException {
 		if (resource.isDerived()) { //$NON-NLS-1$

@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -42,16 +41,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.IPreferenceNode;
-import org.eclipse.jface.preference.IPreferencePage;
-import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.preference.PreferenceManager;
-import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -72,6 +65,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.jarpackager.CheckboxTreeAndListGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class JavadocTreeWizardPage extends JavadocWizardPage {
@@ -177,7 +171,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		javadocCommandBrowserButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				JavadocPreferencePage page= new JavadocPreferencePage();
-				showPreferencePage(JavadocPreferencePage.ID, page); //$NON-NLS-1$
+				PreferencePageSupport.showPreferencePage(getShell(), JavadocPreferencePage.ID, page); //$NON-NLS-1$
 				fJavadocCommandText.setText(JavadocPreferencePage.getJavaDocCommand());
 			}
 		});
@@ -649,26 +643,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		}
 		return true;
 	}
-
-	protected boolean showPreferencePage(String id, IPreferencePage page) {
-		final IPreferenceNode targetNode = new PreferenceNode(id, page);
-		
-		PreferenceManager manager = new PreferenceManager();
-		manager.addToRoot(targetNode);
-		final PreferenceDialog dialog = new PreferenceDialog(getShell(), manager);
-		final boolean [] result = new boolean[] { false };
-		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
-			public void run() {
-				dialog.create();
-				dialog.setMessage(targetNode.getLabelText());
-				result[0]= (dialog.open() == Window.OK);
-			}
-		});
-		return result[0];
-	}	
-	
-
-
 
 	/**
 	 * Finds the most severe error (if there is one)

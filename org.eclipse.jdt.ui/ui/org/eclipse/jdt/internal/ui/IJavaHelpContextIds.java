@@ -83,6 +83,12 @@ public interface IJavaHelpContextIds {
 	public static final String OPEN_TYPE_ACTION= 												PREFIX + "open_type_action"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_IN_HIERARCHY_ACTION= 							PREFIX + "open_type_in_hierarchy_action"; //$NON-NLS-1$
 	
+	
+	/**
+	 * @since 3.0
+	 */
+	public static final String CONFIG_CONTAINER_ACTION= 									PREFIX + "org.eclipse.jdt.ui.config_container_action"; //$NON-NLS-1$
+	
 	public static final String ADD_JAVADOC_STUB_ACTION= 									PREFIX + "add_javadoc_stub_action"; //$NON-NLS-1$
 	public static final String ADD_TASK_ACTION= 												PREFIX + "add_task_action"; //$NON-NLS-1$
 	public static final String EXTERNALIZE_STRINGS_ACTION= 								PREFIX + "externalize_strings_action"; //$NON-NLS-1$	
@@ -232,6 +238,11 @@ public interface IJavaHelpContextIds {
 	public static final String SORT_ORDER_PREFERENCE_PAGE=		    PREFIX + "sort_order_preference_page_context"; //$NON-NLS-1$
 	public static final String BUILD_PATH_PROPERTY_PAGE= 				PREFIX + "build_path_property_page_context"; //$NON-NLS-1$
 	public static final String CP_VARIABLES_PREFERENCE_PAGE= 		PREFIX + "cp_variables_preference_page_context"; //$NON-NLS-1$
+	/**
+	 * @since 3.0
+	 */
+	public static final String CP_USERLIBRARIES_PREFERENCE_PAGE= 		PREFIX + "cp_userlibraries_preference_page_context"; //$NON-NLS-1$
+	
 	public static final String CODEFORMATTER_PREFERENCE_PAGE= 	PREFIX + "codeformatter_preference_page_context"; //$NON-NLS-1$
 	public static final String SPELLING_PREFERENCE_PAGE= 	PREFIX + "spelling_preference_page_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_PROPERTY_PAGE=	PREFIX + "source_attachment_property_page_context"; //$NON-NLS-1$

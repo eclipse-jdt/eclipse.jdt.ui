@@ -48,6 +48,9 @@ public class DialogField {
 	 */
 	public void setLabelText(String labeltext) {
 		fLabelText= labeltext;
+		if (isOkToUse(fLabel)) {
+			fLabel.setText(labeltext);
+		}
 	}
 		
 	// ------ change listener

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,12 +21,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
@@ -40,29 +37,22 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
-import org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationBlock;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
-import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -255,7 +245,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				CPListElement curr= libentries[i];
 				if (!cplist.contains(curr) && !elementsToAdd.contains(curr)) {
 					elementsToAdd.add(curr);
-					curr.setAttribute(CPListElement.SOURCEATTACHMENT, guessAttachment(curr));
+					curr.setAttribute(CPListElement.SOURCEATTACHMENT, BuildPathSupport.guessSourceAttachment(curr));
 					curr.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(curr.getPath()));
 				}
 			}
@@ -264,6 +254,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 			
 			fLibrariesList.addElements(elementsToAdd);
+			if (index == IDX_ADDLIB) {
+				fLibrariesList.refresh();
+			}
 			fLibrariesList.postSetSelection(new StructuredSelection(libentries));
 		}
 	}
@@ -357,9 +350,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			
 			IPath containerPath= null;
 			boolean applyChanges= false;
-			CPListElement parentContainer= selElement.getParentContainer();
-			if (parentContainer != null) {
-				containerPath= parentContainer.getPath();
+			Object parentContainer= selElement.getParentContainer();
+			if (parentContainer instanceof CPListElement) {
+				containerPath= ((CPListElement) parentContainer).getPath();
 				applyChanges= true;
 			}
 			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry(), containerPath, fCurrJProject, applyChanges);
@@ -423,7 +416,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 		Object elem= selElements.get(0);
 		if (elem instanceof CPListElement) {
-			return !(((CPListElement)elem).getResource() instanceof IFolder);
+			CPListElement curr= (CPListElement) elem;
+			return !(curr.getResource() instanceof IFolder) && curr.getParentContainer() == null;
 		}
 		if (elem instanceof CPListElementAttribute) {
 			return true;
@@ -688,61 +682,21 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.edit.title"); //$NON-NLS-1$
 			elem= existing.getClasspathEntry();
 		}
-		return openContainerDialog(title, new ClasspathContainerWizard(elem, fCurrJProject, getRawClasspath()));
-	}
-	
-
-	private CPListElement[] openContainerDialog(String title, ClasspathContainerWizard wizard) {
+		ClasspathContainerWizard wizard= new ClasspathContainerWizard(elem, fCurrJProject, getRawClasspath());
 		wizard.setWindowTitle(title);
-		WizardDialog dialog= new WizardDialog(getShell(), wizard);
-		PixelConverter converter= new PixelConverter(getShell());
-		
-		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(40), converter.convertHeightInCharsToPixels(20));
-		dialog.create();
-		if (dialog.open() == Window.OK) {
-			IClasspathEntry created= wizard.getNewEntry();
-			if (created != null) {			
-				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_CONTAINER, created.getPath(), null);
-				if (elem != null) {
-					return new CPListElement[] { elem };
+		if (ClasspathContainerWizard.openWizard(getShell(), wizard) == Window.OK) {
+			IClasspathEntry[] created= wizard.getNewEntries();
+			if (created != null) {
+				CPListElement[] res= new CPListElement[created.length];
+				for (int i= 0; i < res.length; i++) {
+					res[i]= new CPListElement(fCurrJProject, IClasspathEntry.CPE_CONTAINER, created[i].getPath(), null);
 				}
+				return res;
 			}
 		}			
 		return null;
-	}	
-	
-	
-	private IPath guessAttachment(CPListElement elem) {
-		if (elem.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-			return null;
-		}
-		
-		try {
-			// try if the jar itself contains the source
-			IJavaModel jmodel= fCurrJProject.getJavaModel();
-			IJavaProject[] jprojects= jmodel.getJavaProjects();
-			for (int i= 0; i < jprojects.length; i++) {
-				IJavaProject curr= jprojects[i];
-				if (!curr.equals(fCurrJProject)) {
-					IClasspathEntry[] entries= curr.getRawClasspath();
-					for (int k= 0; k < entries.length; k++) {
-						IClasspathEntry entry= entries[k];
-						if (entry.getEntryKind() == elem.getEntryKind()
-							&& entry.getPath().equals(elem.getPath())) {
-							IPath attachPath= entry.getSourceAttachmentPath();
-							if (attachPath != null && !attachPath.isEmpty()) {
-								return attachPath;
-							}
-						}
-					}
-				}
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
-		}
-		return null;
 	}
-	
+		
 	private IClasspathEntry[] getRawClasspath() {
 		IClasspathEntry[] currEntries= new IClasspathEntry[fClassPathList.getSize()];
 		for (int i= 0; i < currEntries.length; i++) {
@@ -752,42 +706,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		return currEntries;
 	}
 		
-	private class JavadocPropertyDialog extends StatusDialog implements IStatusChangeListener {
-
-		private JavadocConfigurationBlock fJavadocConfigurationBlock;
-		
-		public JavadocPropertyDialog(Shell parent, CPListElement element) {
-			super(parent);
-			setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.JavadocPropertyDialog.title", element.getPath().toString())); //$NON-NLS-1$
-			URL initialLocation= (URL) element.getAttribute(CPListElement.JAVADOC);
-			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation, false);
-		}
-
-		protected Control createDialogArea(Composite parent) {
-			Composite composite= (Composite) super.createDialogArea(parent);
-			Control inner= fJavadocConfigurationBlock.createContents(composite);
-			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
-			applyDialogFont(composite);		
-			return composite;
-		}
-
-		public void statusChanged(IStatus status) {
-			updateStatus(status);
-		}
-		
-		public URL getJavaDocLocation() {
-			return fJavadocConfigurationBlock.getJavadocLocation();
-		}
-
-		/*
-		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
-		 */
-		protected void configureShell(Shell newShell) {
-			super.configureShell(newShell);
-			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.JAVADOC_PROPERTY_DIALOG);
-		}
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
 	 */

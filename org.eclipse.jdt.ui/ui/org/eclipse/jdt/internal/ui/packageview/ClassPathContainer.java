@@ -39,6 +39,7 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	private IClasspathEntry fClassPathEntry;
 	private IClasspathContainer fContainer;
 
+
 	public ClassPathContainer(IJavaProject parent, IClasspathEntry entry) {
 		fProject= parent;
 		fClassPathEntry= entry;
@@ -110,7 +111,11 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	public IJavaProject getJavaProject() {
 		return fProject;
 	}
-
+	
+	public IClasspathEntry getClasspathEntry() {
+		return fClassPathEntry;
+	}
+	
 	static boolean contains(IJavaProject project, IClasspathEntry entry, IPackageFragmentRoot root) {
 		IPackageFragmentRoot[] roots= project.findPackageFragmentRoots(entry);
 		for (int i= 0; i < roots.length; i++) {

@@ -56,7 +56,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 
 	/**
 	 * Constructor for ClasspathContainerWizardPage.
-	 * @param pageName
+	 * @param containerPages
 	 */
 	protected ClasspathContainerSelectionPage(ClasspathContainerDescriptor[] containerPages) {
 		super("ClasspathContainerWizardPage"); //$NON-NLS-1$

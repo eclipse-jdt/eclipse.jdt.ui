@@ -591,7 +591,6 @@ public class SourceAttachmentBlock {
 
 	/**
 	 * Creates a runnable that sets the source attachment by modifying the project's classpath.
-	 * @deprecated use getRunnable() instead
 	 */
 	public IRunnableWithProgress getRunnable(final IJavaProject jproject, final Shell shell) {
 		fProject= jproject;

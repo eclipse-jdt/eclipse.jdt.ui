@@ -744,12 +744,32 @@
             class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"
             id="org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage">
       </page>
+      
+      <page
+            name="%buildPathPrefName"
+            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.BuildPathPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage">
+      </page>      
       <page
             name="%classPathVarPrefName"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            category="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage"
             id="org.eclipse.jdt.ui.preferences.ClasspathVariablesPreferencePage">
       </page>
+      <page
+            name="%userLibrariesPrefName"
+            category="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.UserLibraryPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.UserLibraryPreferencePage">
+      </page>
+      <page
+            name="%newJavaProjectreferencePageName"
+            category="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.NewJavaProjectPreferencePage">
+      </page>
+      
       <page
             name="%editorPrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
@@ -780,12 +800,7 @@
             class="org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage"
             id="org.eclipse.jdt.ui.preferences.CodeGenerationPreferencePage">
       </page>
-      <page
-            name="%newJavaProjectreferencePageName"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.NewJavaProjectPreferencePage">
-      </page>
+
       <page
             name="%memberSortPrefName"
             category="org.eclipse.jdt.ui.preferences.AppearancePreferencePage"
@@ -1162,7 +1177,8 @@
                id="LaunchJavadocWizard">
          </action>
       </objectContribution>
-   </extension>
+   </extension>  
+
 <!-- NLS Search Page                                                             -->
 <!-- =========================================================================== -->
 <!-- NLS tool 																	 -->
@@ -1308,6 +1324,8 @@
          </action>
       </actionSet>
    </extension>
+   
+   
 <!-- with an A_                                                                -->
 <!-- the open action set is contributed before the CodeActionSet we prefix it  -->
 <!-- Action sets are contributed after they have been sorted. To enfore that   -->
@@ -3589,6 +3607,13 @@
             class="org.eclipse.jdt.internal.ui.text.correction.CorrectionMarkerResolutionGenerator">
       </markerResolutionGenerator>
    </extension>
+   <extension
+         point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+            markerType="org.eclipse.jdt.core.buildpath_problem"
+            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.UserLibraryMarkerResolutionGenerator">
+      </markerResolutionGenerator>
+   </extension>
 <!-- =========================================================================== -->
 <!-- Filter Support                                                              -->
 <!-- =========================================================================== -->
@@ -4202,5 +4227,41 @@
             id="org.eclipse.jdt.ui.JavadocView">
       </view>
    </extension>
+
+<!--- classpath conatainer -->
+   
+   <extension
+         point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            class="org.eclipse.jdt.internal.corext.userlibrary.UserLibraryClasspathContainerInitializer"
+            id="org.eclipse.jdt.USER_LIBRARY">
+      </classpathContainerInitializer>
+   </extension>
+   
+   <extension
+         point="org.eclipse.jdt.ui.classpathContainerPage">
+      <classpathContainerPage
+            name="%userLibrary.name"
+            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.UserLibraryWizardPage"
+            id="org.eclipse.jdt.USER_LIBRARY">
+      </classpathContainerPage>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.popupMenus">    
+      <objectContribution
+            objectClass="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer"
+            id="org.eclipse.jdt.ui.configure.classpathcontainer">
+         <action
+               label="%ConfigClasspathContainer.label"
+               tooltip="%ConfigClasspathContainer.tooltip"
+               class="org.eclipse.jdt.internal.ui.actions.ConfigureContainerAction"
+               menubarPath="properties"
+               enablesFor="1"
+               id="ConfigureContainer">
+         </action>
+      </objectContribution>
+   </extension>
+   
 
 </plugin>

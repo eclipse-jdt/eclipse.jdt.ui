@@ -42,12 +42,17 @@ public class CPListElement {
 	private boolean fIsExported;
 	private boolean fIsMissing;
 	
-	private CPListElement fParentContainer;
+	private Object fParentContainer;
 		
 	private IClasspathEntry fCachedEntry;
 	private ArrayList fChildren;
 	
 	public CPListElement(IJavaProject project, int entryKind, IPath path, IResource res) {
+		this(null, project, entryKind, path, res);
+	}
+	
+	
+	public CPListElement(Object parent, IJavaProject project, int entryKind, IPath path, IResource res) {
 		fProject= project;
 
 		fEntryKind= entryKind;
@@ -58,7 +63,7 @@ public class CPListElement {
 		
 		fIsMissing= false;
 		fCachedEntry= null;
-		fParentContainer= null;
+		fParentContainer= parent;
 		
 		switch (entryKind) {
 			case IClasspathEntry.CPE_SOURCE:
@@ -186,11 +191,11 @@ public class CPListElement {
 		return fChildren.toArray();
 	}
 	
-	private void setParentContainer(CPListElement element) {
+	private void setParentContainer(Object element) {
 		fParentContainer= element;
 	}
 	
-	public CPListElement getParentContainer() {
+	public Object getParentContainer() {
 		return fParentContainer;
 	}	
 	
@@ -379,6 +384,30 @@ public class CPListElement {
 			
 		}
 		return buf;
+	}
+
+
+	/**
+	 * Adds the javadoc location to the given arrays.
+	 */
+	public void collectJavaDocLocations(ArrayList paths, ArrayList urls) {
+		int entryKind= getEntryKind();
+		if (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE) {
+			URL javadocLocation= (URL) getAttribute(CPListElement.JAVADOC);
+			IPath path= getPath();
+			if (entryKind == IClasspathEntry.CPE_VARIABLE) {
+				path= JavaCore.getResolvedVariablePath(path);
+			}
+			if (path != null) {
+				paths.add(path);
+				urls.add(javadocLocation);
+			}			
+		} else if (entryKind == IClasspathEntry.CPE_CONTAINER) {
+			Object[] children= getChildren(false);
+			for (int i= 0; i < children.length; i++) {
+				((CPListElement) children[i]).collectJavaDocLocations(paths, urls);
+			}
+		}
 	}	
 
 }
