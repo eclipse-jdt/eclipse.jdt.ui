@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
@@ -71,10 +70,11 @@ public abstract class StructureSelectionAction extends Action {
 	 * Method declared in IAction.
 	 */
 	public final  void run() {
-		if (!ActionUtil.isProcessable(fEditor.getEditorSite().getShell(), fEditor))
-			return;
 		ITextSelection selection= getTextSelection();
 		ISourceReference source= getSourceReference();
+		if (source == null || ! source.exists())
+			return;
+		
 		ISourceRange sourceRange;
 		try {
 			sourceRange= source.getSourceRange();
