@@ -14,7 +14,6 @@ import java.io.File;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
@@ -28,8 +27,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.core.JavaConventions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IUIConstants;
@@ -197,9 +194,10 @@ public class VariableCreationDialog extends StatusDialog {
 			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.entername")); //$NON-NLS-1$
 			return status;
 		}
-		IStatus val= JavaConventions.validateIdentifier(name);
-		if (val.matches(IStatus.ERROR)) {
-			status.setError(NewWizardMessages.getFormattedString("VariableCreationDialog.error.invalidname", val.getMessage())); //$NON-NLS-1$
+		if (name.trim().length() != name.length()) {
+			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.whitespace")); //$NON-NLS-1$
+		} else if (!Path.ROOT.isValidSegment(name)) {
+			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.invalidname")); //$NON-NLS-1$
 		} else if (nameConflict(name)) {
 			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.nameexists")); //$NON-NLS-1$
 		}
