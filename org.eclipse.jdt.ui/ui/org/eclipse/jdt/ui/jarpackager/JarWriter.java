@@ -72,6 +72,9 @@ public class JarWriter {
 				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()), manifest);
 			} else
 				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()));
+			String comment= jarPackage.getComment();
+			if (comment != null)
+				fJarOutputStream.setComment(comment);
 		} catch (IOException ex) {
 			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
 		}
