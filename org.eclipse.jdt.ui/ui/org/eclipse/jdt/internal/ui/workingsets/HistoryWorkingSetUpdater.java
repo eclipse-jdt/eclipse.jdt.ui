@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -20,16 +21,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jface.util.Assert;
 
@@ -42,6 +38,13 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetUpdater;
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
@@ -163,6 +166,8 @@ public class HistoryWorkingSetUpdater implements IWorkingSetUpdater {
 							elementRemoved(element);
 						}
 					}
+				} else if (type == IJavaElement.JAVA_PROJECT && kind == IJavaElementDelta.CHANGED && (flags & IJavaElementDelta.F_CLOSED) != 0) {
+					projectClosed((IJavaProject)element);
 				} else {
 					IJavaElementDelta[] children= delta.getAffectedChildren();
 					for (int i= 0; i < children.length; i++) {
@@ -233,6 +238,32 @@ public class HistoryWorkingSetUpdater implements IWorkingSetUpdater {
 		fOpenFiles.remove(oldElement);
 		fOpenFiles.add(newElement);
 		setElements(elements);
+	}
+	
+	private void projectClosed(IJavaProject jProject) {
+		IProject project= jProject.getProject();
+		List elements= getElements();
+		int removed= 0;
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			IAdaptable element= (IAdaptable)iter.next();
+			IProject container= getProject(element);
+			if (project.equals(container)) {
+				iter.remove();
+				removed++;
+			}
+		}
+		if (removed > 0) {
+			setElements(elements);
+		}
+	}
+	
+	private IProject getProject(IAdaptable element) {
+		if (element instanceof IResource) {
+			return ((IResource)element).getProject();
+		} else if (element instanceof IJavaElement) {
+			return ((IJavaElement)element).getJavaProject().getProject();
+		}
+		return null;
 	}
 	
 	private void updateHistory(IAdaptable element) {
