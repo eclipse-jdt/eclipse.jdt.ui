@@ -92,7 +92,7 @@ public class CompilationUnitBuffer {
 	}
 
 	private boolean isComment(int token) {
-		return token == Scanner.TokenNameCOMMENT_BLOCK || token == Scanner.TokenNameCOMMENT_JAVADOC 
-			|| token == Scanner.TokenNameCOMMENT_LINE;
+		return token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC 
+			|| token == ITerminalSymbols.TokenNameCOMMENT_LINE;
 	}	
 }

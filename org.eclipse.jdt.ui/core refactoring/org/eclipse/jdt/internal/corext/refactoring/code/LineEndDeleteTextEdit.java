@@ -53,11 +53,11 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 			int token = scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
 				switch (token) {
-					case Scanner.TokenNameWHITESPACE:
+					case ITerminalSymbols.TokenNameWHITESPACE:
 						break;
 					case ITerminalSymbols.TokenNameSEMICOLON:
 						break;	
-					case Scanner.TokenNameCOMMENT_LINE :
+					case ITerminalSymbols.TokenNameCOMMENT_LINE :
 						break;
 					default:
 						return scanner.currentPosition - getTextRange().getOffset() - scanner.getCurrentTokenSource().length;
