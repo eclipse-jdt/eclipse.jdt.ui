@@ -1,4 +1,4 @@
 package p;
 /** typecomment template*/
-public interface I {
+interface I {
 }
