@@ -27,14 +27,8 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
     /** Flag to render the recursive adornment */
     public final static int RECURSIVE=       0x001;
     
-    /** Flag to render the caller adornment */
-    public final static int CALLER=          0x002;
-    
     /** Flag to render the callee adornment */
-    public final static int CALLEE=          0x004;
-
-    /** Flag to render the callee adornment */
-    public final static int MAX_LEVEL=       0x008;
+    public final static int MAX_LEVEL=       0x002;
 
     private ImageDescriptor fBaseImage;
     private int fFlags;
@@ -132,8 +126,6 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
         ImageData bg= getImageData(fBaseImage);
             
         drawImage(bg, 0, 0);
-        drawTopLeft();
-        drawBottomRight();
         drawBottomLeft();
     }  
     
@@ -145,25 +137,6 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
 		}
 		return data;
 	}
-    
-    private void drawTopLeft() {       
-        ImageData data= null;
-        if ((fFlags & CALLER) != 0) {
-            data= getImageData(JavaPluginImages.DESC_OVR_CALLER);
-            drawImage(data, 0, 0);
-        }
-    }       
-    
-    private void drawBottomRight() {
-        Point size= getSize();
-        int x= size.x;
-        ImageData data= null;
-        if ((fFlags & CALLEE) != 0) {
-            data= getImageData(JavaPluginImages.DESC_OVR_CALLEE);
-            x-= data.width;
-            drawImage(data, x, size.y - data.height);
-        }
-    }       
     
     private void drawBottomLeft() {
         Point size= getSize();

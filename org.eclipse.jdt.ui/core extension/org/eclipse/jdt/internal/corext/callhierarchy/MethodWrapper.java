@@ -30,9 +30,6 @@ import org.eclipse.jdt.internal.corext.Assert;
  *
  */
 public abstract class MethodWrapper implements IAdaptable {
-    public static final int DIRECTION_CALLER= 1;
-    public static final int DIRECTION_CALLEE= 2;
-    
     private Map fElements = null;
 
     /*
@@ -250,8 +247,6 @@ public abstract class MethodWrapper implements IAdaptable {
         return false;
     }
 
-    public abstract int getDirection();
-    
     /**
      * This method finds the children of the current IMethod (either callers or
      * callees, depending on the concrete subclass.

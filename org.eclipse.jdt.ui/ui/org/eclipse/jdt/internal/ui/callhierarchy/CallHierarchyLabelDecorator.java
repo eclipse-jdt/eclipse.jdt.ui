@@ -68,11 +68,6 @@ public class CallHierarchyLabelDecorator implements ILabelDecorator {
             if (methodWrapper.isRecursive()) {
                 flags= CallHierarchyImageDescriptor.RECURSIVE;
             }
-            if (methodWrapper.getDirection() == MethodWrapper.DIRECTION_CALLER) {
-                flags|= CallHierarchyImageDescriptor.CALLER;
-            } else {
-                flags|= CallHierarchyImageDescriptor.CALLEE;
-            }
             if (isMaxCallDepthExceeded(methodWrapper)) {
                 flags|= CallHierarchyImageDescriptor.MAX_LEVEL;
             } 

@@ -102,11 +102,4 @@ class CalleeMethodWrapper extends MethodWrapper {
         }
         return new HashMap(0);
     }
-    
-	/* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#getDirection()
-     */
-    public int getDirection() {
-        return DIRECTION_CALLEE;
-    }
 }

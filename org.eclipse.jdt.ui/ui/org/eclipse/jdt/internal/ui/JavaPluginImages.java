@@ -267,8 +267,6 @@ public class JavaPluginImages {
 
     // Call Hierarchy
     public static final ImageDescriptor DESC_OVR_RECURSIVE= create(T_OVR, "recursive_co.gif");              //$NON-NLS-1$
-    public static final ImageDescriptor DESC_OVR_CALLER= create(T_OVR, "caller_co.gif");                    //$NON-NLS-1$
-    public static final ImageDescriptor DESC_OVR_CALLEE= create(T_OVR, "callee_co.gif");                    //$NON-NLS-1$
     public static final ImageDescriptor DESC_OVR_MAX_LEVEL= create(T_OVR, "maxlevel_co.gif");                    //$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= create(T_WIZBAN, "newclass_wiz.gif"); 			//$NON-NLS-1$
