@@ -609,6 +609,8 @@ public final class JavaUI {
 						result.add(wc);
 					}
 				} catch (JavaModelException e) {
+					// could evaluate project. Assuming that element
+					// isn't on class path.
 				}
 			}
 		}
