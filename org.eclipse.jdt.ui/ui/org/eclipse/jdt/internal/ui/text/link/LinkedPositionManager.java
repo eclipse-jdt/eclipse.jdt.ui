@@ -349,7 +349,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		// modification outside editable position
 		if (position == null) {
 			// check for destruction of constraints (spacing of at least 1)
-			if ((event.getText().length() == 0) &&
+			if ((event.getText() == null || event.getText().length() == 0) &&
 				(findCurrentPosition(positions, event.getOffset()) != null) &&
 				(findCurrentPosition(positions, event.getOffset() + event.getLength()) != null))
 			{
@@ -406,7 +406,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 * @see IPositionUpdater#update(DocumentEvent)
 	 */
 	public void update(DocumentEvent event) {
-		int deltaLength= event.getText().length() - event.getLength();
+		int deltaLength= (event.getText() == null ? 0 : event.getText().length()) - event.getLength();
 
 		Position[] positions= getPositions(event.getDocument());
 		TypedPosition currentPosition= (TypedPosition) findCurrentPosition(positions, event.getOffset());
