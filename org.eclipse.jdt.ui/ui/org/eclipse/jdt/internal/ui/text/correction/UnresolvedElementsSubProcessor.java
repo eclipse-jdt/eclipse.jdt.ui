@@ -270,7 +270,7 @@ public class UnresolvedElementsSubProcessor {
 		if (node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
 			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL));
 			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", fullName)); //$NON-NLS-1$
-			proposal.setRelevance(relevance + 2);
+			proposal.setRelevance(relevance + 20);
 		} else {			
 			root.add(SimpleTextEdit.createReplace(node.getStartPosition(), node.getLength(), simpleName)); //$NON-NLS-1$
 			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", simpleName)); //$NON-NLS-1$
