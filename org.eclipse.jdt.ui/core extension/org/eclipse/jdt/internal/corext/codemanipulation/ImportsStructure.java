@@ -75,7 +75,7 @@ public class ImportsStructure implements IImportsStructure {
 		fImportOnDemandThreshold= importThreshold;
 		fRestoreExistingImports= restoreExistingImports && container.exists();
 		fFilterImplicitImports= true;
-		fFindAmbiguousImports= true;
+		fFindAmbiguousImports= !restoreExistingImports;
 		
 		fPackageEntries= new ArrayList(20);
 		
@@ -401,8 +401,8 @@ public class ImportsStructure implements IImportsStructure {
 			if (entry.getName().equals(typeContainerName)) {
 				if (entry.remove(qualifiedTypeName)) {
 					fHasChanges= true;
+					return;
 				}
-				return;
 			}
 		}
 	}
@@ -510,17 +510,9 @@ public class ImportsStructure implements IImportsStructure {
 		
 		HashSet starImportPackages= new HashSet();
 		HashSet onDemandConflicts= new HashSet();
-		
-		int nPackageEntries= fPackageEntries.size();
-		for (int i= 0; i < nPackageEntries; i++) {
-			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
-			if (pack.hasStarImport(fImportOnDemandThreshold)) {
-				starImportPackages.add(pack.getName());
-			}
-		}
-		
+				
 		evaluateStarImportConflicts(starImportPackages, onDemandConflicts);
-		
+		int nPackageEntries= fPackageEntries.size();
 		for (int i= 0; i < nPackageEntries; i++) {
 			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
 			int nImports= pack.getNumberOfImports();
