@@ -30,7 +30,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 class RenameFieldWizard extends RenameRefactoringWizard {
 
@@ -123,10 +122,11 @@ class RenameFieldWizard extends RenameRefactoringWizard {
 				IMethod	getter= getRenameFieldRefactoring().getGetter();
 				if (getter == null || ! getter.exists())
 					return defaultLabel;
-				String getterSig= JavaElementUtil.createMethodSignature(getter);
-				return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.rename_getter_to", new String[]{getterSig, createNewGetterName()}); //$NON-NLS-1$
+				String oldGetterName= getter.getElementName();
+				String newGetterName= createNewGetterName();
+				return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.rename_getter_to", new String[]{oldGetterName, newGetterName}); //$NON-NLS-1$
 			} catch(JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.log(e)	;
 				return defaultLabel;			
 			}
 		}
@@ -139,8 +139,9 @@ class RenameFieldWizard extends RenameRefactoringWizard {
 				IMethod	setter= getRenameFieldRefactoring().getSetter();
 				if (setter == null || ! setter.exists())
 					return defaultLabel;
-				String setterSig= JavaElementUtil.createMethodSignature(setter);
-				return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.rename_setter_to", new String[]{setterSig, createNewSetterName()});//$NON-NLS-1$
+				String oldSetterName= setter.getElementName();
+				String newSetterName= createNewSetterName();
+				return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.rename_setter_to", new String[]{oldSetterName, newSetterName});//$NON-NLS-1$
 			} catch(JavaModelException e) {
 				JavaPlugin.log(e);
 				return defaultLabel;			
