@@ -30,6 +30,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.projection.IProjectionListener;
+import org.eclipse.jface.text.source.projection.IProjectionPosition;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
@@ -77,13 +78,11 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		
 		private IJavaElement fJavaElement;
 		private boolean fIsComment;
-		private int fCaptionOffset;
 		
-		public JavaProjectionAnnotation(IJavaElement element, boolean isCollapsed, boolean isComment, int captionOffset) {
+		public JavaProjectionAnnotation(IJavaElement element, boolean isCollapsed, boolean isComment) {
 			super(isCollapsed);
 			fJavaElement= element;
 			fIsComment= isComment;
-			fCaptionOffset= captionOffset;
 		}
 		
 		public IJavaElement getElement() {
@@ -102,14 +101,6 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			fIsComment= isComment;
 		}
 		
-		protected int getCaptionOffset() {
-			return fCaptionOffset;
-		}
-		
-		void setCaptionOffset(int offset) {
-			fCaptionOffset= offset;
-		}
-		
 		/*
 		 * @see java.lang.Object#toString()
 		 */
@@ -117,8 +108,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			return "JavaProjectionAnnotation:\n" + //$NON-NLS-1$
 					"\telement: \t"+fJavaElement.toString()+"\n" + //$NON-NLS-1$ //$NON-NLS-2$
 					"\tcollapsed: \t" + isCollapsed() + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
-					"\tcomment: \t" + fIsComment + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
-					"\tcaptionOffset: \t" + fCaptionOffset + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+					"\tcomment: \t" + fIsComment + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
@@ -165,6 +155,203 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			
 			return null;
 		}		
+	}
+	
+	/**
+	 * Projection position that will return two foldable regions: one folding away
+	 * the region from after the '/**' to the beginning of the content, the other
+	 * from after the first content line until after the comment.
+	 *  
+	 * @since 3.1
+	 */
+	private static final class CommentPosition extends Position implements IProjectionPosition {
+		CommentPosition(int offset, int length) {
+			super(offset, length);
+		}
+		
+		/*
+		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeFoldingRegions(org.eclipse.jface.text.IDocument)
+		 */
+		public IRegion[] computeProjectionRegions(IDocument document) throws BadLocationException {
+			DocumentCharacterIterator sequence= new DocumentCharacterIterator(document, offset, offset + length);
+			// TODO the commented out sections implement /**content folding which requires UI support for non-entire-line folding
+//			int prefixEnd= findPrefixEnd(sequence);
+			int prefixEnd= 0;
+			int contentStart;
+//			if (prefixEnd == 0)
+//				contentStart= 0; // if there is no prefix, simply fold the first line as always
+//			else
+				contentStart= findFirstContent(sequence, prefixEnd);
+			
+			int firstLine= document.getLineOfOffset(offset + prefixEnd);
+			int captionLine= document.getLineOfOffset(offset + contentStart);
+			int lastLine= document.getLineOfOffset(offset + length);
+			
+			Assert.isTrue(firstLine <= captionLine, "first folded line is greater than the caption line"); //$NON-NLS-1$
+			Assert.isTrue(captionLine <= lastLine, "caption line is greater than the last folded line"); //$NON-NLS-1$
+			
+			IRegion preRegion;
+			if (firstLine < captionLine) {
+//				preRegion= new Region(offset + prefixEnd, contentStart - prefixEnd);
+				int preOffset= document.getLineOffset(firstLine);
+				IRegion preEndLineInfo= document.getLineInformation(captionLine);
+				int preEnd= preEndLineInfo.getOffset();
+				preRegion= new Region(preOffset, preEnd - preOffset);
+			} else {
+				preRegion= null;
+			}
+			
+			if (captionLine < lastLine) {
+				int postOffset= document.getLineOffset(captionLine + 1);
+				IRegion postRegion= new Region(postOffset, offset + length - postOffset);
+				
+				if (preRegion == null)
+					return new IRegion[] { postRegion };
+				
+				return new IRegion[] { preRegion, postRegion };
+			}
+			
+			if (preRegion != null)
+				return new IRegion[] { preRegion };
+			
+			return null;
+		}
+		
+		/**
+		 * Finds the offset of the first identifier part within <code>content</code>.
+		 * Returns 0 if none is found.
+		 * 
+		 * @param content the content to search
+		 * @return the first index of a unicode identifier part, or zero if none can
+		 *         be found
+		 */
+		private int findFirstContent(final CharSequence content, int prefixEnd) {
+			int lenght= content.length();
+			for (int i= prefixEnd; i < lenght; i++) {
+				if (Character.isUnicodeIdentifierPart(content.charAt(i)))
+					return i;
+			}
+			return 0;
+		}
+		
+//		/**
+//		 * Finds the offset of the first identifier part within <code>content</code>.
+//		 * Returns 0 if none is found.
+//		 * 
+//		 * @param content the content to search
+//		 * @return the first index of a unicode identifier part, or zero if none can
+//		 *         be found
+//		 */
+//		private int findPrefixEnd(final CharSequence content) {
+//			// return the index after the leading '/*' or '/**'
+//			int len= content.length();
+//			int i= 0;
+//			while (i < len && isWhiteSpace(content.charAt(i)))
+//				i++;
+//			if (len >= i + 2 && content.charAt(i) == '/' && content.charAt(i + 1) == '*')
+//				if (len >= i + 3 && content.charAt(i + 2) == '*')
+//					return i + 3;
+//				else
+//					return i + 2;
+//			else
+//				return i;
+//		}
+//
+//		private boolean isWhiteSpace(char c) {
+//			return c == ' ' || c == '\t';
+//		}
+
+		/*
+		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeCaptionOffset(org.eclipse.jface.text.IDocument)
+		 */
+		public int computeCaptionOffset(IDocument document) {
+//			return 0;
+			DocumentCharacterIterator sequence= new DocumentCharacterIterator(document, offset, offset + length);
+			return findFirstContent(sequence, 0);
+		}
+	}
+	
+	/**
+	 * Projection position that will return two foldable regions: one folding away
+	 * the lines before the one containing the simple name of the java element, one
+	 * folding away any lines after the caption.
+	 *  
+	 * @since 3.1
+	 */
+	private static final class JavaElementPosition extends Position implements IProjectionPosition {
+
+		private final IMember fMember;
+
+		public JavaElementPosition(int offset, int length, IMember member) {
+			super(offset, length);
+			Assert.isNotNull(member);
+			fMember= member;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeFoldingRegions(org.eclipse.jface.text.IDocument)
+		 */
+		public IRegion[] computeProjectionRegions(IDocument document) throws BadLocationException {
+			int nameStart= offset;
+			try {
+				// TODO - we would need to reconcile here in order to get the correct ranges
+				ISourceRange nameRange= fMember.getNameRange();
+				if (nameRange != null)
+					nameStart= nameRange.getOffset();
+			} catch (JavaModelException e) {
+				// ignore and use default
+			}
+			
+			int firstLine= document.getLineOfOffset(offset);
+			int captionLine= document.getLineOfOffset(nameStart);
+			int lastLine= document.getLineOfOffset(offset + length);
+			
+			Assert.isTrue(firstLine <= captionLine, "first folded line is greater than the caption line"); //$NON-NLS-1$
+			Assert.isTrue(captionLine <= lastLine, "caption line is greater than the last folded line"); //$NON-NLS-1$
+			
+			IRegion preRegion;
+			if (firstLine < captionLine) {
+				int preOffset= document.getLineOffset(firstLine);
+				IRegion preEndLineInfo= document.getLineInformation(captionLine);
+				int preEnd= preEndLineInfo.getOffset();
+				preRegion= new Region(preOffset, preEnd - preOffset);
+			} else {
+				preRegion= null;
+			}
+			
+			if (captionLine < lastLine) {
+				int postOffset= document.getLineOffset(captionLine + 1);
+				IRegion postRegion= new Region(postOffset, offset + length - postOffset);
+				
+				if (preRegion == null)
+					return new IRegion[] { postRegion };
+				
+				return new IRegion[] { preRegion, postRegion };
+			}
+			
+			if (preRegion != null)
+				return new IRegion[] { preRegion };
+			
+			return null;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeCaptionOffset(org.eclipse.jface.text.IDocument)
+		 */
+		public int computeCaptionOffset(IDocument document) throws BadLocationException {
+			int nameStart= offset;
+			try {
+				// need a reconcile here?
+				ISourceRange nameRange= fMember.getNameRange();
+				if (nameRange != null)
+					nameStart= nameRange.getOffset();
+			} catch (JavaModelException e) {
+				// ignore and use default
+			}
+			
+			return nameStart - offset;
+		}
+		
 	}
 	
 	private IDocument fCachedDocument;
@@ -349,7 +536,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			if (regions != null) {
 				// comments
 				for (int i= 0; i < regions.length - 1; i++) {
-					Position position= createProjectionPosition(regions[i]);
+					Position position= createProjectionPosition(regions[i], null);
 					boolean commentCollapse;
 					if (position != null) {
 						if (i == 0 && (regions.length > 2 || fHasHeaderComment) && element == fFirstType) {
@@ -357,13 +544,13 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 						} else {
 							commentCollapse= fAllowCollapsing && fCollapseJavadoc;
 						}
-						map.put(new JavaProjectionAnnotation(element, commentCollapse, true, computeCaptionOffset(position, null)), position);
+						map.put(new JavaProjectionAnnotation(element, commentCollapse, true), position);
 					}
 				}
 				// code
-				Position position= createProjectionPosition(regions[regions.length - 1]);
+				Position position= createProjectionPosition(regions[regions.length - 1], element);
 				if (position != null)
-					map.put(new JavaProjectionAnnotation(element, collapse, false, computeCaptionOffset(position, element)), position);
+					map.put(new JavaProjectionAnnotation(element, collapse, false), position);
 			}
 		}
 	}
@@ -507,48 +694,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		return null;
 	}
 	
-	/**
-	 * Computes the offset of the caption text start relative to
-	 * <code>position</code>.
-	 * 
-	 * @param position the position of the folded region
-	 * @param element the java element belonging to the folded region, or <code>null</code>
-	 * @return the caption offset relative to the position offset
-	 */
-	private int computeCaptionOffset(Position position, IJavaElement element) {
-		Assert.isNotNull(fCachedDocument); // must be non-null as createPosition succeeded
-		if (element instanceof IMember) {
-			try {
-				ISourceRange nameRange= ((IMember) element).getNameRange();
-				if (nameRange != null)
-					return nameRange.getOffset() - position.getOffset();
-			} catch (JavaModelException e) {
-				// ignore and return 0
-			}
-		}
-		
-		return findFirstContent(new DocumentCharacterIterator(fCachedDocument, position.getOffset(), position.getOffset() + position.getLength()));
-	}
-	
-	/**
-	 * Finds the offset of the first identifier part within <code>content</code>.
-	 * Returns 0 if none is found.
-	 * 
-	 * @param content the content to search
-	 * @return the first index of a unicode identifier part, or zero if none can
-	 *         be found
-	 */
-	private int findFirstContent(final CharSequence content) {
-		int lenght= content.length();
-		for (int i= 0; i < lenght; i++) {
-			if (Character.isUnicodeIdentifierPart(content.charAt(i)))
-				return i;
-			i++;
-		}
-		return 0;
-	}
-
-	private Position createProjectionPosition(IRegion region) {
+	private Position createProjectionPosition(IRegion region, IJavaElement element) {
 		
 		if (fCachedDocument == null)
 			return null;
@@ -566,7 +712,10 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					endOffset= fCachedDocument.getLineOffset(end) + fCachedDocument.getLineLength(end);
 				else
 					return null;
-				return new Position(offset, endOffset - offset);
+				if (element instanceof IMember)
+					return new JavaElementPosition(offset, endOffset - offset, (IMember) element);
+				else
+					return new CommentPosition(offset, endOffset - offset);
 			}
 			
 		} catch (BadLocationException x) {
@@ -620,10 +769,9 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 						JavaProjectionAnnotation existingAnnotation= tuple.annotation;
 						Position existingPosition= tuple.position;
 						if (newAnnotation.isComment() == existingAnnotation.isComment()) {
-							if (existingPosition != null && (!newPosition.equals(existingPosition) || existingAnnotation.getCaptionOffset() != newAnnotation.getCaptionOffset())) {
+							if (existingPosition != null && (!newPosition.equals(existingPosition))) {
 								existingPosition.setOffset(newPosition.getOffset());
 								existingPosition.setLength(newPosition.getLength());
-								existingAnnotation.setCaptionOffset(newAnnotation.getCaptionOffset());
 								updates.add(existingAnnotation);
 							}
 							matched= true;
@@ -690,7 +838,6 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 						
 						deletedPosition.setLength(changedPosition.getLength());
 						deleted.setElement(changed.getElement());
-						deleted.setCaptionOffset(changed.getCaptionOffset());
 						
 						deletionIterator.remove();
 						newChanges.add(deleted);
@@ -713,7 +860,6 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 						
 						deletedPosition.setLength(addedPosition.getLength());
 						deleted.setElement(added.getElement());
-						deleted.setCaptionOffset(added.getCaptionOffset());
 						
 						deletionIterator.remove();
 						newChanges.add(deleted);
