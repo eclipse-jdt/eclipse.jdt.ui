@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -53,7 +53,10 @@ import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 </extension>
  */   
 
-
+/**
+ * This example shows how to implement an own project wizard that uses the
+ * JavaCapabilityConfigurationPage to allow the user to configure the Java build path.
+ */
 public class MyProjectCreationWizard extends Wizard implements IExecutableExtension, INewWizard {
 
 	private WizardNewProjectCreationPage fMainPage;
@@ -65,10 +68,26 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 	private IStructuredSelection fSelection;
 	
 	public MyProjectCreationWizard() {
-		setWindowTitle("New");
+		setWindowTitle("New XY Project");
 	}
 
-	/*
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.IExecutableExtension#setInitializationData(org.eclipse.core.runtime.IConfigurationElement, java.lang.String, java.lang.Object)
+	 */
+	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
+		//  The config element will be used in <code>finishPage</code> to set the result perspective.
+		fConfigElement= cfig;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
+	 */
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		fWorkbench= workbench;
+		fSelection= selection; 
+	}
+
+	/* (non-Javadoc)
 	 * @see Wizard#addPages
 	 */	
 	public void addPages() {
@@ -76,15 +95,21 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 		fMainPage= new WizardNewProjectCreationPage("NewProjectCreationWizard");
 		fMainPage.setTitle("New");
 		fMainPage.setDescription("Create a new XY project.");
+		
+		// the main page
 		addPage(fMainPage);
+		
+		// the Java build path configuration page
 		fJavaPage= new JavaCapabilityConfigurationPage() {
 			public void setVisible(boolean visible) {
-				// need to override to set the latest project
+				// need to override to react to changes on first page
 				updatePage();
 				super.setVisible(visible);
 			}
 		};
 		addPage(fJavaPage);
+		
+		//	TODO: add your pages here
 	}
 	
 	private void updatePage() {
@@ -94,8 +119,10 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 		}
 	}
 	
-	
-	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+	private void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
 		try {		
 			monitor.beginTask("Creating XY project...", 3); // 3 steps
 
@@ -104,10 +131,9 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 		
 			// create the project
 			IProjectDescription desc= project.getWorkspace().newProjectDescription(project.getName());
-			if (Platform.getLocation().equals(locationPath)) {
-				locationPath= null;
+			if (!fMainPage.useDefaults()) {
+				desc.setLocation(locationPath);
 			}
-			desc.setLocation(locationPath);
 			project.create(desc, new SubProgressMonitor(monitor, 1));
 			project.open(new SubProgressMonitor(monitor, 1));
 			
@@ -120,13 +146,11 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 			BasicNewResourceWizard.selectAndReveal(project, fWorkbench.getActiveWorkbenchWindow());
 			
 		} finally {
-			if (monitor != null) {
-				monitor.done();
-			}
+			monitor.done();
 		}
 	}
 
-	/*
+	/* (non-Javadoc)
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
@@ -138,27 +162,13 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 		try {
 			getContainer().run(false, true, op);
 		} catch (InvocationTargetException e) {
-			return false; // TODO: open error dialog and log
+			return false; // TODO: should open error dialog and log
 		} catch  (InterruptedException e) {
 			return false; // canceled
 		}
 		return true;
 	}
 			
-	/*
-	 * Stores the configuration element for the wizard.  The config element will be used
-	 * in <code>finishPage</code> to set the result perspective.
-	 */
-	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
-		fConfigElement= cfig;
-	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
-	 */
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		fWorkbench= workbench;
-		fSelection= selection; 
-	}
 
 }
