@@ -12,14 +12,15 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.resource.JFaceResources;
 
 /**
  * Overrides <code>ErrorDialog</code> to provide a dialog with
@@ -131,12 +132,13 @@ public class ProblemDialog extends ErrorDialog {
 		IStatus status,	int displayMask)
 	{
 		Image image;
+		Display display= parent.getDisplay();
 		if (status == null || status.matches(IStatus.ERROR))
-			image= JFaceResources.getImageRegistry().get(DLG_IMG_ERROR);
+			image= display.getSystemImage(SWT.ICON_ERROR);
 		else if (status.matches(IStatus.WARNING))
-			image= JFaceResources.getImageRegistry().get(DLG_IMG_WARNING);
+			image= display.getSystemImage(SWT.ICON_WARNING);
 		else
-			image= JFaceResources.getImageRegistry().get(DLG_IMG_INFO);
+			image= display.getSystemImage(SWT.ICON_INFORMATION);
 			
 		ErrorDialog dialog= new ProblemDialog(parent, title, message, image, status, displayMask);
 		return dialog.open();
