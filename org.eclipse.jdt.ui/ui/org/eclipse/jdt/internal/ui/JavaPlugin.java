@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import java.util.Set;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -59,6 +60,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
@@ -287,5 +289,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 		TemplatePreferencePage.initDefaults(store);		
 		CodeGenerationPreferencePage.initDefaults(store);
+		
+		WorkInProgressPreferencePage.initDefaults(store);
 	}
 }
