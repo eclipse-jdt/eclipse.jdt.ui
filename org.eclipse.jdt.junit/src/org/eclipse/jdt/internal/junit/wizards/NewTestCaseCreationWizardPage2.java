@@ -31,6 +31,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.internal.dialogs.ContainerCheckedTreeViewer;
 
 /**
  * Wizard page to select the methods from a class under test.
@@ -50,7 +51,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	private Button fSelectAllButton;
 	private Button fDeselectAllButton;
 	private Label fSelectedMethodsLabel;
-
+ 
 	/**
 	 * Constructor for NewTestCaseCreationWizardPage2.
 	 */

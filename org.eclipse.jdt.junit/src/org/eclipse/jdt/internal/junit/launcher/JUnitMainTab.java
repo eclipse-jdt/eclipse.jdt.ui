@@ -6,42 +6,13 @@ package org.eclipse.jdt.internal.junit.launcher;
  */
  
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.net.MalformedURLException;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.debug.ui.ILaunchConfigurationDialog;
-import org.eclipse.debug.ui.ILaunchConfigurationTab;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.ILabelProvider;
-
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.dialogs.SelectionDialog;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -51,22 +22,30 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
-import org.eclipse.jdt.launching.JavaRuntime;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.debug.ui.launcher.AddVMDialog;
-import org.eclipse.jdt.internal.debug.ui.launcher.IAddVMDialogRequestor;
-import org.eclipse.jdt.internal.debug.ui.launcher.VMStandin;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
-import org.eclipse.jdt.internal.ui.util.*;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.SelectionDialog;
 
 /**
  * This tab appears in the LaunchConfigurationDialog for launch configurations that
@@ -84,6 +63,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	private Label fTestLabel;
 	private Text fTestText;
 	private Button fSearchButton;
+	private final Image fTestIcon= createImage("obj16/test.gif"); //$NON-NLS-1$
 				
 	/**
 	 * @see ILaunchConfigurationTab#createControl(TabItem)
@@ -155,6 +135,16 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fKeepRunning.setLayoutData(gd);
 	}
 	
+	protected static Image createImage(String path) {
+		try {
+			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL(path));
+			return id.createImage();
+		} catch (MalformedURLException e) {
+			// fall through
+		}  
+		return null;
+	}
+
 
 	/**
 	 * @see ILaunchConfigurationTab#initializeFrom(ILaunchConfiguration)
@@ -205,8 +195,16 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	 * @see ILaunchConfigurationTab#dispose()
 	 */
 	public void dispose() {
+		super.dispose();
+		fTestIcon.dispose();
 	}
-	
+	/**
+	 * @see AbstractLaunchConfigurationTab#getImage()
+	 */
+	public Image getImage() {
+		return fTestIcon;
+	}
+
 	/**
 	 * Show a dialog that lists all main types
 	 */
