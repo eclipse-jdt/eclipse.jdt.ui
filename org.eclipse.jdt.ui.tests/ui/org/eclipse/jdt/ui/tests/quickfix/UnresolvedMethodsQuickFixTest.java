@@ -43,7 +43,6 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.NewMethodCompletionProposal;
 
 public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
-	
 	private static final Class THIS= UnresolvedMethodsQuickFixTest.class;
 	
 	private IJavaProject fJProject1;
@@ -55,11 +54,11 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new UnresolvedMethodsQuickFixTest("testParameterMismatchMoreArguments3"));
+			suite.addTest(new UnresolvedMethodsQuickFixTest("testMethodInForInit"));
 			return suite;
 		}
 	}
@@ -132,6 +131,54 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	
+	private static final boolean bug_37381= true;
+	
+	public void testMethodInForInit() throws Exception {
+		if (bug_37381) {
+			return; 
+		}
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (int i= 0, j= goo(3); i < 0; i++) {\n");
+		buf.append("        }\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (int i= 0, j= goo(3); i < 0; i++) {\n");
+		buf.append("        }\n");	
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private int goo(int i) {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}	
 
 	public void testMethodSpacing0EmptyLines() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
