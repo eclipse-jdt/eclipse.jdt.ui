@@ -61,7 +61,7 @@ public class MethodExitsFinder extends ASTVisitor {
 		Type type= ASTNodes.getTopMostType((Type)node);
 		if (!(type.getParent() instanceof MethodDeclaration))
 			return SearchMessages.getString("MethodExitsFinder.no_return_type_selected"); //$NON-NLS-1$
-		fMethodDeclaration= (MethodDeclaration)node.getParent();
+		fMethodDeclaration= (MethodDeclaration)type.getParent();
 		return null;
 	}
 
