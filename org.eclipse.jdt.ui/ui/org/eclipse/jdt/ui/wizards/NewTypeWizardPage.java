@@ -1545,7 +1545,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IProblem[] problems= root.getProblems();
 		ArrayList res= new ArrayList();
 		for (int i= 0; i < problems.length; i++) {
-			if (problems[i].getID() == IProblem.UnusedImport) {
+			int id= problems[i].getID();
+			if (id == IProblem.UnusedImport || id == IProblem.ImportNotVisible) { // not visibles hide unused -> remove both  	 
 				String imp= problems[i].getArguments()[0];
 				res.add(imp);
 			}
