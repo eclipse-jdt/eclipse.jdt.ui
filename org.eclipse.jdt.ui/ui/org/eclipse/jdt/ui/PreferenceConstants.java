@@ -785,7 +785,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 2.1
 	 */
-	public final static String EDITOR_FORMAT_JAVADOCS= "formatJavaDocs"; //$NON-NLS-1$
+	public final static String EDITOR_FORMAT_JAVADOCS= "autoFormatJavaDocs"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the 'smart paste' feature is
@@ -1769,7 +1769,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_JAVADOCS, true);
 		store.setDefault(PreferenceConstants.EDITOR_WRAP_STRINGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
-		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, true);
+		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, false);
 
 		String ctrl= Action.findModifierString(SWT.CTRL);
 		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + ctrl); //$NON-NLS-1$
