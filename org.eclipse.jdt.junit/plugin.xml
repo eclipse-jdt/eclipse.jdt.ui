@@ -159,12 +159,12 @@
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
-            label="JUnit"
+            label="%JUnitActionSet.label"
             visible="false"
             id="org.eclipse.jdt.junit.JUnitActionSet">
          <action
-               label="Referring Tests..."
-               tooltip="Go to Test Referring to Selection"
+               label="%GotoTestAction.label"
+               tooltip="%GotoTestAction.tooltip"
                class="org.eclipse.jdt.internal.junit.ui.GotoReferencedTestAction"
                menubarPath="navigate/goTo/"
                id="junit.actions.GotoTestAction">
