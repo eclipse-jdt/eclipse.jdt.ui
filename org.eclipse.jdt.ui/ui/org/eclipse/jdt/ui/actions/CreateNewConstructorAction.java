@@ -45,6 +45,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -290,9 +291,12 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 		}		
 
 		IField[] constructorFields= type.getFields();
+		
 		ArrayList constructorFieldsList= new ArrayList();
 		for (int i= 0; i < constructorFields.length; i++) {
-			constructorFieldsList.add(constructorFields[i]);
+			boolean isStatic= Flags.isStatic(constructorFields[i].getFlags());			
+			if (!isStatic)			
+				constructorFieldsList.add(constructorFields[i]);
 		}
 		if (constructorFieldsList.isEmpty()){
 			MessageDialog.openInformation(getShell(), fDialogTitle, ActionMessages.getString("CreateNewConstructorAction.typeContainsNoFields.message")); //$NON-NLS-1$
