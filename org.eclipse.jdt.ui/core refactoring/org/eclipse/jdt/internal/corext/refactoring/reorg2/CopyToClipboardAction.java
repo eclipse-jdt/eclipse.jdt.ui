@@ -47,8 +47,8 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.reorg.TypedSource;
-import org.eclipse.jdt.internal.ui.reorg.TypedSourceTransfer;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSource;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;

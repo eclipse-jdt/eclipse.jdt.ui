@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.reorg.ReorgMessages;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMessages;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 

@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
-import org.eclipse.jdt.internal.ui.reorg.NewNameQueries;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.NewNameQueries;
 
 import org.eclipse.jdt.internal.corext.Assert;
 

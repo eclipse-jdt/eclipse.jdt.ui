@@ -34,7 +34,7 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
-import org.eclipse.jdt.internal.ui.reorg.DestinationContentProvider;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.DestinationContentProvider;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
