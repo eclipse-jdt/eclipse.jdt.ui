@@ -134,7 +134,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	private final String[][] fAnnotationDecorationListModel= new String[][] {
 		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.NONE"), AnnotationPreference.STYLE_NONE}, //$NON-NLS-1$
-		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.SQUIGGLIES"), AnnotationPreference.STYLE_SQUIGGLIES}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.SQUIGGLES"), AnnotationPreference.STYLE_SQUIGGLES}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.UNDERLINE"), AnnotationPreference.STYLE_UNDERLINE}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.BOX"), AnnotationPreference.STYLE_BOX}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.IBEAM"), AnnotationPreference.STYLE_IBEAM} //$NON-NLS-1$
@@ -412,7 +412,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		} else {
 			fDecorationStyleCombo.setEnabled(false);
-			fDecorationStyleCombo.setText(fAnnotationDecorationListModel[1][0]); // set selection to squigglies if the key is not there (legacy support)
+			fDecorationStyleCombo.setText(fAnnotationDecorationListModel[1][0]); // set selection to squiggles if the key is not there (legacy support)
 		}
 		
 		key= fAnnotationColorListModel[i][3];
