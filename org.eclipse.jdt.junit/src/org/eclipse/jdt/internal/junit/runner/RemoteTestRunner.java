@@ -51,6 +51,10 @@ public class RemoteTestRunner implements TestListener {
 	 */
 	private String[] fTestClassNames;
 	/**
+	 * The name of the test (argument -test)
+	 */
+	private String fTestName;
+	/**
 	 * The current test result
 	 */
 	private TestResult fTestResult;
@@ -135,9 +139,11 @@ public class RemoteTestRunner implements TestListener {
 	 * The main entry point.
 	 * Parameters<pre>
 	 * -classnames: the name of the test suite class
-     * -host: the host to connect to - default local host
-     * -port: the port to connect to, mandatory argument
-     * -keepalive: keep the process alive after a test run
+	 * -testfilename: the name of a file containing classnames of test suites
+	 * -test: the test method name (format classname testname) 
+	 * -host: the host to connect to default local host 
+	 * -port: the port to connect to, mandatory argument 
+	 * -keepalive: keep the process alive after a test run
      * </pre>
      */
 	public static void main(String[] args) {
@@ -178,6 +184,15 @@ public class RemoteTestRunner implements TestListener {
 				}
 				fTestClassNames= (String[]) list.toArray(new String[list.size()]);
 			}	
+			else if(args[i].toLowerCase().equals("-test")) {
+				String testName= args[i+1];
+				int p= testName.indexOf(':');
+				if (p == -1)
+					throw new IllegalArgumentException("Testname not separated by \'%\'");
+				fTestName= testName.substring(p+1);
+				fTestClassNames= new String[]{ testName.substring(0, p)  };
+				i++;
+			}			
 			else if(args[i].toLowerCase().equals("-testnamefile")) {
 				String testNameFile= args[i+1];
 				try {
@@ -243,7 +258,7 @@ public class RemoteTestRunner implements TestListener {
 			
 		fTestResult= new TestResult();
 		fTestResult.addListener(this);
-		runTests(fTestClassNames);
+		runTests(fTestClassNames, fTestName);
 		fTestResult.removeListener(this);
 		
 		if (fTestResult != null) {
@@ -276,7 +291,7 @@ public class RemoteTestRunner implements TestListener {
 	/**
 	 * Returns the Test corresponding to the given suite. 
 	 */
-	private Test getTest(String suiteClassName) {
+	private Test getTest(String suiteClassName, String testName) {
 		Class testClass= null;
 		try {
 			testClass= loadSuiteClass(suiteClassName);
@@ -289,6 +304,9 @@ public class RemoteTestRunner implements TestListener {
 		} catch(Exception e) {
 			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.exception", e.toString() )); //$NON-NLS-1$
 			return null;
+		}
+		if (testName != null) {
+			return createTest(testName, testClass);
 		}
 		Method suiteMethod= null;
 		try {
@@ -328,13 +346,12 @@ public class RemoteTestRunner implements TestListener {
 	/**
 	 * Runs a set of tests.
 	 */
-	private void runTests(String[] testClassNames) {
+	private void runTests(String[] testClassNames, String testName) {
 		// instantiate all tests
 		Test[] suites= new Test[testClassNames.length];
 		
 		for (int i= 0; i < suites.length; i++) {
-			Test test= getTest(testClassNames[i]);
-			suites[i]= test;
+			suites[i]= getTest(testClassNames[i], testName);
 		}
 		
 		// count all testMethods and inform ITestRunListeners		
@@ -383,26 +400,50 @@ public class RemoteTestRunner implements TestListener {
 		Test reloadedTest= null;
 		try {
 			Class reloadedTestClass= getClassLoader().loadClass(className);
-			Class[] classArgs= { String.class };
-			Constructor constructor= null;
-			try {
-				constructor= reloadedTestClass.getConstructor(classArgs);
-				reloadedTest= (Test)constructor.newInstance(new Object[]{testName});
-			} catch (NoSuchMethodException e) {
-				// try the no arg constructor supported in 3.8.1
-				constructor= reloadedTestClass.getConstructor(new Class[0]);
-				reloadedTest= (Test)constructor.newInstance(new Object[0]);
-				if (reloadedTest instanceof TestCase)
-					((TestCase) reloadedTest).setName(testName);
-			}
+			reloadedTest= createTest(testName, reloadedTestClass);
 		} catch(Exception e) {
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.load", testName )); //$NON-NLS-1$
-			e.printStackTrace();
-			return;
+			reloadedTest= warning("Could not create test \'"+testName+"\'");
 		}
 		TestResult result= new TestResult();
 		reloadedTest.run(result);
 		notifyTestReran(result, className, testName);
+	}
+
+	/**
+	 * Returns a test which will fail and log a warning message.
+	 */
+	 private Test warning(final String message) {
+		return new TestCase("warning") {
+			protected void runTest() {
+				fail(message);
+			}
+		};		
+	}
+
+	private Test createTest(String testName, Class testClass) {
+		Class[] classArgs= { String.class };
+		Test test;
+		Constructor constructor= null;
+		try {
+			try {
+				constructor= testClass.getConstructor(classArgs);
+				test= (Test)constructor.newInstance(new Object[]{testName});
+			} catch (NoSuchMethodException e) {
+				// try the no arg constructor supported in 3.8.1
+				constructor= testClass.getConstructor(new Class[0]);
+				test= (Test)constructor.newInstance(new Object[0]);
+				if (test instanceof TestCase)
+					((TestCase) test).setName(testName);
+			}
+			if (test != null)
+				return test;
+		} catch (InstantiationException e) {
+		} catch (IllegalAccessException e) {
+		} catch (InvocationTargetException e) {
+		} catch (NoSuchMethodException e) {
+		} catch (ClassCastException e) {
+		}
+		return warning("Could not create test \'"+testName+"\' ");
 	}
 
 

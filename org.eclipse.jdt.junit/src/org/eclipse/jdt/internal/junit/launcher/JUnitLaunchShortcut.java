@@ -17,11 +17,15 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.ui.JavaUISourceLocator;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -44,12 +48,28 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	 * @see ILaunchShortcut#launch(IEditorPart, String)
 	 */
 	public void launch(IEditorPart editor, String mode) {
-		IEditorInput input = editor.getEditorInput();
-		IJavaElement je = (IJavaElement) input.getAdapter(IJavaElement.class);
-		if (je != null) {
-			searchAndLaunch(new Object[] {je}, mode);
+		IJavaElement element= null;
+		if (editor instanceof JavaEditor) {
+			JavaEditor javaEditor= (JavaEditor) editor;
+			element= elementAtOffset(javaEditor);
+		}
+		if (element == null) {
+			IEditorInput input = editor.getEditorInput();
+			element = (IJavaElement) input.getAdapter(IJavaElement.class);
+		}
+		if (element != null) {
+			searchAndLaunch(new Object[] {element}, mode);
 		} 
 	}
+	
+	private IJavaElement elementAtOffset(JavaEditor editor) {
+		try {
+			return SelectionConverter.getElementAtOffset(editor);
+		} catch(JavaModelException e) {
+		}
+		return null;
+	}
+
 
 	/**
 	 * @see ILaunchShortcut#launch(ISelection, String)
@@ -72,12 +92,16 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 					launchContainer(element, mode);
 					return;
 				}
+				if (element.getElementType() == IJavaElement.METHOD) {
+					launchMethod((IMethod)element, mode);
+					return;
+				}
 			}
 			// launch a CU or type
 			launchType(search, mode);
 		}
 	}
-
+	
 	protected void launchType(Object[] search, String mode) {
 		IType[] types= null;
 		try {
@@ -103,14 +127,70 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	}
 
 	private void launchContainer(IJavaElement container, String mode) {
-		ILaunchConfiguration config = findLaunchConfiguration(container, mode);
+		String handleIdentifier= container.getHandleIdentifier();
+		ILaunchConfiguration config = findLaunchConfiguration(
+			mode, 
+			container, 
+			handleIdentifier, 
+			"", 
+			""
+		);
+		if (config == null) {
+			config = createConfiguration(
+				container.getJavaProject(),
+				container.getElementName(),
+				"",
+				handleIdentifier,
+				""
+			);
+		}
 		launchConfiguration(mode, config);
 	}
 	
 	private void launch(IType type, String mode) {
-		ILaunchConfiguration config = findLaunchConfiguration(type, mode);
+		String fullyQualifiedName= type.getFullyQualifiedName();
+		ILaunchConfiguration config = findLaunchConfiguration(
+			mode, 
+			type, 
+			"", 
+			fullyQualifiedName, 
+			""
+		);
+		if (config == null) {
+			config= createConfiguration(
+				type.getJavaProject(),
+				type.getElementName(),
+				fullyQualifiedName,
+				"",
+				""
+			);
+		}
 		launchConfiguration(mode, config);
 	}
+
+	private void launchMethod(IMethod method, String mode) {
+		IType declaringType= method.getDeclaringType();
+		String fullyQualifiedName= declaringType.getFullyQualifiedName();
+		ILaunchConfiguration config = findLaunchConfiguration(
+			mode, 
+			method, 
+			"", 
+			fullyQualifiedName, 
+			method.getElementName()
+		);
+
+		if (config == null) {
+			config= createConfiguration(
+				method.getJavaProject(),
+				declaringType.getElementName()+"."+method.getElementName(),
+				fullyQualifiedName,
+				"",
+				method.getElementName()
+			);
+		}
+		launchConfiguration(mode, config);
+	}
+
 
 	private void launchConfiguration(String mode, ILaunchConfiguration config) {
 		try { 
@@ -121,14 +201,6 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		} catch (CoreException e) {
 			ErrorDialog.openError(getShell(), JUnitMessages.getString("LaunchTestAction.message.launchFailed"), e.getMessage(), e.getStatus());  //$NON-NLS-1$
 		}
-	}
-
-	protected ILaunchConfiguration findLaunchConfiguration(IType type, String mode) {
-		return findLaunchConfiguration(mode, type, IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, type.getFullyQualifiedName());
-	}
-	
-	protected ILaunchConfiguration findLaunchConfiguration(IJavaElement container, String mode) {
-		return findLaunchConfiguration(mode, container, JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, container.getHandleIdentifier());
 	}
 	
 	/**
@@ -152,7 +224,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		return null;
 	}
 	
-	private ILaunchConfiguration findLaunchConfiguration(String mode, IJavaElement element, String attribute, String value) {
+	private ILaunchConfiguration findLaunchConfiguration(String mode, IJavaElement element, String container, String testClass, String testName) {
 		ILaunchConfigurationType configType= getJUnitLaunchConfigType();
 		List candidateConfigs= Collections.EMPTY_LIST;
 		try {
@@ -160,10 +232,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			candidateConfigs= new ArrayList(configs.length);
 			for (int i= 0; i < configs.length; i++) {
 				ILaunchConfiguration config= configs[i];
-				if (config.getAttribute(attribute, "").equals(value)) { //$NON-NLS-1$
-					if (config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(element.getJavaProject().getElementName())) { //$NON-NLS-1$
+				if ((config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, "").equals(container)) &&
+					(config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "").equals(testClass)) &&
+					(config.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR,"").equals(testName)) &&  
+					(config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(element.getJavaProject().getElementName()))) { 
 						candidateConfigs.add(config);
-					}
 				}
 			}
 		} catch (CoreException e) {
@@ -176,7 +249,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		// user to choose one.
 		int candidateCount= candidateConfigs.size();
 		if (candidateCount < 1) {
-			return createConfiguration(element);
+			return null;
 		} else if (candidateCount == 1) {
 			return (ILaunchConfiguration) candidateConfigs.get(0);
 		} else {
@@ -190,7 +263,6 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		}
 		return null;
 	}
-
 
 	/**
 	 * Show a selection dialog that allows the user to choose one of the specified
@@ -216,31 +288,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		return null;		
 	}
 	
-	/**
-	 * Create & return a new configuration based on the specified <code>IType</code>.
-	 */
-	private ILaunchConfiguration createConfiguration(IJavaElement element) {
-		// create a launch configuration for a type
-		if (element instanceof IType) {
-			IType type= (IType)element;
-			return createConfiguration(
-				type.getJavaProject(),
-				type.getElementName(),
-				type.getFullyQualifiedName(),
-				""
-			);
-		}
-		// create a launch configuration for a container	
-		return createConfiguration(
-			element.getJavaProject(),
-			element.getElementName(),
-			"",
-			element.getHandleIdentifier()
-		);
-		
-	}
 
-	protected ILaunchConfiguration createConfiguration(IJavaProject project, String name, String mainType, String container) {
+	protected ILaunchConfiguration createConfiguration(
+			IJavaProject project, String name, String mainType, 
+			String container, String testName) {
+				
 		ILaunchConfiguration config= null;
 		try {
 			ILaunchConfigurationType configType= getJUnitLaunchConfigType();
@@ -252,6 +304,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			wc.setAttribute(ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID, JavaUISourceLocator.ID_PROMPTING_JAVA_SOURCE_LOCATOR);
 			wc.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, false);
 			wc.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, container);
+			if (testName.length() > 0)
+				wc.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);	
 			config= wc.doSave();		
 		} catch (CoreException ce) {
 			JUnitPlugin.log(ce);

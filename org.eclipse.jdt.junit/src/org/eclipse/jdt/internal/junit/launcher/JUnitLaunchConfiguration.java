@@ -41,7 +41,8 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 		String[] classPath= createClassPath(configuration);	
 		String progArgs= getProgramArguments(configuration);
 		VMRunnerConfiguration vmConfig= new VMRunnerConfiguration("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", classPath); //$NON-NLS-1$
-
+		String testName= configuration.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, "");
+		
 		// insert the program arguments
 		Vector argv= new Vector(10);
 		ExecutionArguments execArgs = new ExecutionArguments("", progArgs); //$NON-NLS-1$
@@ -49,7 +50,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 		for (int i= 0; i < pa.length; i++) {
 			argv.add(pa[i]);
 		}
-
+	
 		argv.add("-port"); //$NON-NLS-1$
 		argv.add(Integer.toString(port));
 		//argv("-debugging");
@@ -57,7 +58,11 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 		if (keepAlive(configuration) && runMode.equals(ILaunchManager.DEBUG_MODE))
 			argv.add(0, "-keepalive"); //$NON-NLS-1$
 		
-		if (testTypes.length > 1) {
+		// a testname was specified just run the single test
+		if (testName.length() > 0) {
+			argv.add("-test"); //$NON-NLS-1$
+			argv.add(testTypes[0].getFullyQualifiedName()+":"+testName);			
+		} else if (testTypes.length > 1) {
 			String fileName= createTestNamesFile(testTypes);
 			argv.add("-testNameFile"); //$NON-NLS-1$
 			argv.add(fileName);

@@ -64,6 +64,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
 
 /**
@@ -158,8 +159,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 		}
 	}
 
-	private class RerunAction extends Action{
-		public RerunAction() {
+	private class RerunLastAction extends Action{
+		public RerunLastAction() {
 			setText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
 			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.tooltip")); //$NON-NLS-1$
 			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunch.gif")); //$NON-NLS-1$
@@ -479,9 +480,24 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	}
 
 	public void rerunTest(String className, String testName) {
+		DebugUITools.saveAndBuildBeforeLaunch();
 		if (fTestRunnerClient != null && fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(fLaunchMode))
 			fTestRunnerClient.rerunTest(className, testName);
-		else {
+		else if (fLastLaunch != null) {
+			// run the selected test using the previous launch configuration
+			ILaunchConfiguration launchConfiguration= fLastLaunch.getLaunchConfiguration();
+			if (launchConfiguration != null) {
+				try {
+					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+testName);
+					tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
+					tmp.launch(fLastLaunch.getLaunchMode(), null);	
+					return;	
+				} catch (CoreException e) {
+					ErrorDialog.openError(getSite().getShell(), 
+						JUnitMessages.getString("TestRunnerViewPart.error.cannotrerun"), e.getMessage(), e.getStatus() //$NON-NLS-1$
+					);
+				}
+			}
 			MessageDialog.openInformation(getSite().getShell(), 
 				JUnitMessages.getString("TestRunnerViewPart.cannotrerun.title"),  //$NON-NLS-1$
 				JUnitMessages.getString("TestRunnerViewPart.cannotrerurn.message") //$NON-NLS-1$
@@ -739,7 +755,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		toolBar.add(new StopAction());
-		toolBar.add(new RerunAction());
+		toolBar.add(new RerunLastAction());
 
 		actionBars.updateActionBars();
 		

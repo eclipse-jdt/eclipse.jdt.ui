@@ -74,7 +74,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	private Text fTestText;
 	private Button fSearchButton;
 	private final Image fTestIcon= createImage("obj16/test.gif");
-
+	private Label fTestMethodLabel;
 	private Text fContainerText;
 	private IJavaElement fContainerElement;
 
@@ -190,6 +190,12 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			}
 		});
 		setButtonGridData(fSearchButton);
+		fTestMethodLabel= new Label(comp, SWT.NONE);
+		fTestMethodLabel.setText(""); 
+		gd= new GridData();
+		gd.horizontalSpan = 2;
+		gd.horizontalIndent= 20;
+		fTestMethodLabel.setLayoutData(gd);
 	}
 
 	public void createProjectGroup(Composite comp) {
@@ -269,8 +275,10 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	
 	protected void updateTestTypeFromConfig(ILaunchConfiguration config) {
 		String testTypeName= ""; //$NON-NLS-1$
+		String testMethodName= "";
 		try {
 			testTypeName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
+			testMethodName = config.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
 		} catch (CoreException ce) {			
 		}
 		fTestRadioButton.setSelection(true);
@@ -279,6 +287,12 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fTestContainerRadioButton.setSelection(false);
 		fTestText.setText(testTypeName);
 		fContainerText.setText("");
+		if (!"".equals(testMethodName)) {
+			fTestMethodLabel.setText("Test method: "+testMethodName);
+		} else {
+			fTestMethodLabel.setText("");
+		}
+		
 	}
 
 	protected void updateTestContainerFromConfig(ILaunchConfiguration config) {
@@ -464,6 +478,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	private void setEnableSingleTestGroup(boolean enabled) {
 		fSearchButton.setEnabled(enabled && fProjText.getText().length() > 0);
 		fTestText.setEnabled(enabled);
+		fTestMethodLabel.setEnabled(enabled);
 	}
 
 	/**
