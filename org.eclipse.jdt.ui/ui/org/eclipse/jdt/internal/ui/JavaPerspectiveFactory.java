@@ -1,11 +1,11 @@
-package org.eclipse.jdt.internal.ui;/*
+package org.eclipse.jdt.internal.ui;
+/*
  * Licensed Materials - Property of IBM,
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 1999, 2000
- */
-
-
-import org.eclipse.search.ui.SearchUI;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.ui.IFolderLayout;import org.eclipse.ui.IPageLayout;import org.eclipse.ui.IPerspectiveFactory;import org.eclipse.jdt.ui.JavaUI;
+ */import org.eclipse.ui.IFolderLayout;import org.eclipse.ui.IPageLayout;import org.eclipse.ui.IPerspectiveFactory;import org.eclipse.search.ui.SearchUI;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		
@@ -24,7 +24,11 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		folder.addView(JavaUI.ID_TYPE_HIERARCHY);
 		folder.addView(JavaUI.ID_PACKAGES);
 
-		layout.addView(IPageLayout.ID_TASK_LIST, IPageLayout.BOTTOM, (float) 0.75, editorArea);
+		IFolderLayout outputfolder= layout.createFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea);
+		outputfolder.addView(IPageLayout.ID_TASK_LIST);
+		outputfolder.addView(SearchUI.SEARCH_RESULT_VIEW_ID);
+		outputfolder.addView(IDebugUIConstants.ID_CONSOLE_VIEW);
+		
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, (float)0.75, editorArea);
 		
 		layout.addActionSet(IDebugUIConstants.DEBUG_ACTION_SET);
