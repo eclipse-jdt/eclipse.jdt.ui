@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -21,9 +22,20 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 	private RefactoringAction[] fPossibleTargets;
 	private RefactoringAction fTargetAction;
 	
+	private String fOperationNotAvailableDialogMessage;
+	private String fOperationNotAvailableDialogTitle;
+	
 	protected RefactoringActionDelegate() {
+		this("Refactoring", "Operation not available on current selection.");
 	}
-
+	
+	protected RefactoringActionDelegate(String operationNotAvailableDialogTitle, String operationNotAvailableDialogMessage) {
+		Assert.isNotNull(operationNotAvailableDialogTitle);
+		Assert.isNotNull(operationNotAvailableDialogMessage);
+		fOperationNotAvailableDialogTitle= operationNotAvailableDialogTitle;
+		fOperationNotAvailableDialogMessage= operationNotAvailableDialogMessage;
+	}
+	
 	protected void initPossibleTargets(RefactoringAction[] possibleTargets) {
 		fPossibleTargets= possibleTargets;
 	}
@@ -37,11 +49,11 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 			fTargetAction.run();
 		} else {
 			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), 
-				"Refactoring",
-				"Operation not available on current selection.");
+				fOperationNotAvailableDialogTitle,
+				fOperationNotAvailableDialogMessage);
 		}
 	}
-	
+		
 	/* (non-Javadoc)
 	 * Method declared in IActionDelegate
 	 */
