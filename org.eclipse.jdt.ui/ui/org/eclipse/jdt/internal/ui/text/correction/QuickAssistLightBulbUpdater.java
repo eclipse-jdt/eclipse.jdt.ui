@@ -28,6 +28,7 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
+import org.eclipse.jface.text.source.ImageUtilities;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -95,7 +96,7 @@ public class QuickAssistLightBulbUpdater {
 		 * @see org.eclipse.jface.text.source.Annotation#paint(org.eclipse.swt.graphics.GC, org.eclipse.swt.widgets.Canvas, org.eclipse.swt.graphics.Rectangle)
 		 */
 		public void paint(GC gc, Canvas canvas, Rectangle r) {
-			drawImage(getImage(), gc, canvas, r, SWT.CENTER, SWT.TOP);
+			ImageUtilities.drawImage(getImage(), gc, canvas, r, SWT.CENTER, SWT.TOP);
 		}
 		
 	}

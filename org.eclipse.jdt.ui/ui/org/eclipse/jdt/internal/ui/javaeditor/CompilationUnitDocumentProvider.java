@@ -51,6 +51,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
+import org.eclipse.jface.text.source.ImageUtilities;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
@@ -199,7 +200,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			public void paint(GC gc, Canvas canvas, Rectangle r) {
 				initializeImages();
 				if (fImage != null)
-					drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.TOP);
+					ImageUtilities.drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.TOP);
 			}
 			
 			/*

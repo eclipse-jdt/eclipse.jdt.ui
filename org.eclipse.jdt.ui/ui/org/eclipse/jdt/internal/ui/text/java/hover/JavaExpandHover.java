@@ -35,6 +35,7 @@ import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ImageUtilities;
 
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
@@ -70,7 +71,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		public void paint(GC gc, Canvas canvas, Rectangle bounds) {
 			// draw affordance so the user know she can click here to get a breakpoint
 			Image fImage= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
-			drawImage(fImage, gc, canvas, bounds, SWT.CENTER);
+			ImageUtilities.drawImage(fImage, gc, canvas, bounds, SWT.CENTER);
 		}
 	}
 	
