@@ -23,9 +23,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -46,16 +44,11 @@ public class SourceReferenceUtil {
 	public static ICompilationUnit getCompilationUnit(ISourceReference o){
 		Assert.isTrue(! (o instanceof IClassFile));
 		
-		if (o instanceof IMember)
-			return ((IMember)o).getCompilationUnit();
-		if (o instanceof IImportDeclaration){
-			IImportDeclaration im= (IImportDeclaration)o;
-			return (ICompilationUnit)im.getParent().getParent();
-		}
 		if (o instanceof ICompilationUnit)
 			return (ICompilationUnit)o;
-	   
-	   return (ICompilationUnit)((IJavaElement)o).getParent();
+		if (o instanceof IJavaElement)
+			return (ICompilationUnit) ((IJavaElement)o).getAncestor(IJavaElement.COMPILATION_UNIT);
+		return null;
 	}	
 	
 	private static boolean hasParentInSet(IJavaElement elem, Set set){
@@ -99,7 +92,7 @@ public class SourceReferenceUtil {
 	}	
 	
 	public static ISourceReference[] sortByOffset(ISourceReference[] methods){
-		Comparator comparator= new Comparator(){
+		Arrays.sort(methods, new Comparator(){
 			public int compare(Object o1, Object o2){
 				try{
 					return ((ISourceReference)o2).getSourceRange().getOffset() - ((ISourceReference)o1).getSourceRange().getOffset();
@@ -107,8 +100,7 @@ public class SourceReferenceUtil {
 					return o2.hashCode() - o1.hashCode();
 				}	
 			}
-		};
-		Arrays.sort(methods, comparator);
+		});
 		return methods;
 	}
 }
