@@ -312,7 +312,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		
 	}
 	
-	static final class OrganizeImportError extends Error {
+	static final class OrganizeImportError extends RuntimeException {
 	}
 	
 	private void doRunOnMultiple(ICompilationUnit[] cus, MultiStatus status, IProgressMonitor monitor) throws OperationCanceledException {
