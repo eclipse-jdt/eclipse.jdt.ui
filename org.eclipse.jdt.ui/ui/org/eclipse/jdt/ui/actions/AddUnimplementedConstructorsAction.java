@@ -16,12 +16,25 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -41,7 +54,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -56,6 +69,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -211,7 +225,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		AddUnimplementedConstructorsContentProvider contentProvider = new AddUnimplementedConstructorsContentProvider(constructorMethods);			
 
-		SourceActionDialog dialog= new SourceActionDialog(shell, labelProvider, contentProvider, fEditor, type);
+		AddUnimplementedConstructorsDialog dialog= new AddUnimplementedConstructorsDialog(shell, labelProvider, contentProvider, fEditor, type);
 		dialog.setCommentString(ActionMessages.getString("SourceActionDialog.createConstructorComment")); //$NON-NLS-1$
 		dialog.setTitle(getDialogTitle());
 		dialog.setInitialSelections(constructorMethods);
@@ -242,7 +256,9 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			settings.createComments= dialog.getGenerateComment();
 	
 			IJavaElement elementPosition= dialog.getElementPosition();
-			AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selected, false, elementPosition);
+			AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(type, settings, selected, false, elementPosition);
+			op.setVisbility(dialog.getVisibilityModifier());
+			op.setOmitSuper(dialog.isOmitSuper());
 			
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null) {
@@ -382,4 +398,137 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			return count;
 		}		
 	}	
+	
+	private static class AddUnimplementedConstructorsDialog extends SourceActionDialog {
+		private boolean fOmitSuper;
+		private int fWidth= 60;
+		private int fHeight= 18;
+		private IDialogSettings fAddConstructorsSettings;
+		
+		private final String SETTINGS_SECTION= "AddUnimplementedConstructorsDialog"; //$NON-NLS-1$
+		private final String OMIT_SUPER="OmitCallToSuper"; //$NON-NLS-1$
+
+		public AddUnimplementedConstructorsDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
+			super(parent, labelProvider, contentProvider, editor, type);
+			
+			IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
+			fAddConstructorsSettings= dialogSettings.getSection(SETTINGS_SECTION);
+			if (fAddConstructorsSettings == null) {
+				fAddConstructorsSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
+				fAddConstructorsSettings.put(OMIT_SUPER, false); //$NON-NLS-1$
+			}				
+			
+			fOmitSuper= fAddConstructorsSettings.getBoolean(OMIT_SUPER);
+		}
+	
+		protected Composite createEntryPtCombo(Composite composite) {
+			Composite entryComposite= super.createEntryPtCombo(composite);			
+			addVisibilityAndModifiersChoices(entryComposite);
+				
+			return entryComposite;						
+		}
+		
+		protected Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
+			Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);	
+			return visibilityComposite;			
+		}
+		public boolean isOmitSuper() {
+			return fOmitSuper;
+		}
+
+		public void setOmitSuper(boolean omitSuper) {
+			if (fOmitSuper != omitSuper)  {
+				fOmitSuper= omitSuper;
+				fAddConstructorsSettings.put(OMIT_SUPER, omitSuper);
+			}		
+		}
+				
+		protected Composite createOmitSuper(Composite composite) {
+			Composite omitSuperComposite= new Composite(composite, SWT.NONE);
+			GridLayout layout= new GridLayout();
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			omitSuperComposite.setLayout(layout);
+			omitSuperComposite.setFont(composite.getFont());
+			
+			Button omitSuperButton= new Button(omitSuperComposite, SWT.CHECK);
+			omitSuperButton.setText(ActionMessages.getString("AddUnimplementedConstructorsDialog.omit.super")); //$NON-NLS-1$
+			omitSuperButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+
+			omitSuperButton.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent e) {
+					boolean isSelected= (((Button) e.widget).getSelection());
+					setOmitSuper(isSelected);
+				}
+
+				public void widgetDefaultSelected(SelectionEvent e) {
+					widgetSelected(e);
+				}
+			});
+			omitSuperButton.setSelection(isOmitSuper());
+			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			gd.horizontalSpan= 2;
+			omitSuperButton.setLayoutData(gd);
+
+			return omitSuperComposite;
+		}
+
+		protected Control createDialogArea(Composite parent) {
+			initializeDialogUnits(parent);
+			
+			Composite composite= new Composite(parent, SWT.NONE);
+			GridLayout layout= new GridLayout();
+			GridData gd= null;
+		
+			layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+			layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+			layout.verticalSpacing=	convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+			layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);			
+			composite.setLayout(layout);
+			composite.setFont(parent.getFont());	
+						
+			Label messageLabel = createMessageArea(composite);			
+			if (messageLabel != null) {
+				gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+				gd.horizontalSpan= 2;
+				messageLabel.setLayoutData(gd);	
+			}
+			
+			Composite inner= new Composite(composite, SWT.NONE);
+			GridLayout innerLayout = new GridLayout();
+			innerLayout.numColumns= 2;
+			innerLayout.marginHeight= 0;
+			innerLayout.marginWidth= 0;
+			inner.setLayout(innerLayout);
+			inner.setFont(parent.getFont());		
+			
+			CheckboxTreeViewer treeViewer= createTreeViewer(inner);
+			gd= new GridData(GridData.FILL_BOTH);
+			gd.widthHint = convertWidthInCharsToPixels(fWidth);
+			gd.heightHint = convertHeightInCharsToPixels(fHeight);
+			treeViewer.getControl().setLayoutData(gd);			
+					
+			Composite buttonComposite= createSelectionButtons(inner);
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL);
+			buttonComposite.setLayoutData(gd);
+			
+			gd= new GridData(GridData.FILL_BOTH);
+			inner.setLayoutData(gd);
+		
+			Composite entryComposite= createEntryPtCombo(composite); 
+			entryComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+			Composite commentComposite= createCommentSelection(composite);
+			commentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));		
+			
+			Composite overrideSuperComposite= createOmitSuper(composite);
+			overrideSuperComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+			gd= new GridData(GridData.FILL_BOTH);
+			composite.setLayoutData(gd);
+			
+			return composite;
+		}
+
+	}
 }

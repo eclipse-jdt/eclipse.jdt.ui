@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.IRewriteTarget;
@@ -59,12 +60,16 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddCustomConstructorOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -311,9 +316,16 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			boolean isFinal= Flags.isFinal(constructorFields[i].getFlags());
 			if (!isStatic) {
 				if (isFinal) {
-					// TODO: why doesn't getConstant() work correctly here
-					if (constructorFields[i].getConstant() == null)
+					try {
+						// Do not add final fields which have been set in the <clinit>
+						IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+						scanner.setSource(constructorFields[i].getSource().toCharArray());
+						TokenScanner tokenScanner= new TokenScanner(scanner);
+						tokenScanner.getTokenStartOffset(ITerminalSymbols.TokenNameEQUAL, 0);
+					} catch (JavaModelException e) {
+					} catch (CoreException e) {
 						constructorFieldsList.add(constructorFields[i]);
+					}			
 				} else
 					constructorFieldsList.add(constructorFields[i]);
 			}
@@ -364,7 +376,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			AddCustomConstructorOperation op= new AddCustomConstructorOperation(type, settings, selected, false, elementPosition, dialog.getSuperConstructors()[superIndex]);
 			// Ignore the omit super() checkbox if the default constructor is not chosen
 			if (dialog.getSuperConstructors()[dialog.getSuperIndex()].getParameterNames().length == 0)
-				op.setOmitSuper(dialog.isOverrideSuper());
+				op.setOmitSuper(dialog.isOmitSuper());
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null) {
 				target.beginCompoundChange();
@@ -490,14 +502,18 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		private int fHeight= 18;
 		protected Button[] fButtonControls;
 		private boolean[] fButtonsEnabled;
-		private boolean fOverrideSuper;
+		private boolean fOmitSuper;
 		private IMethod[] fSuperConstructors;
+		private IDialogSettings fGenConstructorSettings;
 
 		protected CheckboxTreeViewer fTreeViewer;
 		private GenerateConstructorUsingFieldsTreeViewerAdapter fTreeViewerAdapter;
 
 		private static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
 		private static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;
+		
+		private final String SETTINGS_SECTION= "GenerateConstructorUsingFieldsSelectionDialog"; //$NON-NLS-1$
+		private final String OMIT_SUPER="OmitCallToSuper"; //$NON-NLS-1$
 
 		public GenerateConstructorUsingFieldsSelectionDialog(Shell parent, ILabelProvider labelProvider, GenerateConstructorUsingFieldsContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
 			super(parent, labelProvider, contentProvider, editor, type);
@@ -507,8 +523,17 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			try {
 				fSuperConstructors= StubUtility.getOverridableConstructors(fType);
 			} catch (CoreException e) {
-				ExceptionHandler.handle(e, getShell(), fDialogTitle, ActionMessages.getString("CreateNewConstructorSelectionDialog.error.create.failed")); //$NON-NLS-1$
+				ExceptionHandler.handle(e, getShell(), fDialogTitle, ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.error.create.failed")); //$NON-NLS-1$
 			}
+			
+			IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
+			fGenConstructorSettings= dialogSettings.getSection(SETTINGS_SECTION);
+			if (fGenConstructorSettings == null) {
+				fGenConstructorSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
+				fGenConstructorSettings.put(OMIT_SUPER, false); //$NON-NLS-1$
+			}				
+			
+			fOmitSuper= fGenConstructorSettings.getBoolean(OMIT_SUPER);			
 		}
 
 		protected Control createDialogArea(Composite parent) {
@@ -565,7 +590,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			Composite commentComposite= createCommentSelection(composite);
 			commentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-			Composite overrideSuperComposite= createOverrideSuper(composite);
+			Composite overrideSuperComposite= createOmitSuper(composite);
 			overrideSuperComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 			gd= new GridData(GridData.FILL_BOTH);
@@ -574,34 +599,34 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return composite;
 		}
 
-		protected Composite createOverrideSuper(Composite composite) {
-			Composite overrideComposite= new Composite(composite, SWT.NONE);
+		protected Composite createOmitSuper(Composite composite) {
+			Composite omitSuperComposite= new Composite(composite, SWT.NONE);
 			GridLayout layout= new GridLayout();
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
-			overrideComposite.setLayout(layout);
-			overrideComposite.setFont(composite.getFont());
+			omitSuperComposite.setLayout(layout);
+			omitSuperComposite.setFont(composite.getFont());
 
-			Button commentButton= new Button(overrideComposite, SWT.CHECK);
-			commentButton.setText(ActionMessages.getString("CreateNewConstructorSelectionDialog.override.super")); //$NON-NLS-1$
-			commentButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+			Button omitSuperButton= new Button(omitSuperComposite, SWT.CHECK);
+			omitSuperButton.setText(ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.omit.super")); //$NON-NLS-1$
+			omitSuperButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
-			commentButton.addSelectionListener(new SelectionListener() {
+			omitSuperButton.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					boolean isSelected= (((Button) e.widget).getSelection());
-					setOverrideSuper(isSelected);
+					setOmitSuper(isSelected);
 				}
 
 				public void widgetDefaultSelected(SelectionEvent e) {
 					widgetSelected(e);
 				}
 			});
-			commentButton.setSelection(getGenerateComment());
+			omitSuperButton.setSelection(isOmitSuper());
 			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 			gd.horizontalSpan= 2;
-			commentButton.setLayoutData(gd);
+			omitSuperButton.setLayoutData(gd);
 
-			return overrideComposite;
+			return omitSuperComposite;
 		}
 
 		protected Composite createSelectionButtons(Composite composite) {
@@ -623,8 +648,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			int numButtons= 2; // up, down
 			fButtonControls= new Button[numButtons];
 			fButtonsEnabled= new boolean[numButtons];
-			fButtonControls[UP_INDEX]= createButton(buttonComposite, UP_BUTTON, ActionMessages.getString("CreateNewConstructorSelectionDialog.up_button"), false); //$NON-NLS-1$	
-			fButtonControls[DOWN_INDEX]= createButton(buttonComposite, DOWN_BUTTON, ActionMessages.getString("CreateNewConstructorSelectionDialog.down_button"), false); //$NON-NLS-1$			
+			fButtonControls[UP_INDEX]= createButton(buttonComposite, UP_BUTTON, ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.up_button"), false); //$NON-NLS-1$	
+			fButtonControls[DOWN_INDEX]= createButton(buttonComposite, DOWN_BUTTON, ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.down_button"), false); //$NON-NLS-1$			
 			boolean defaultState= false;
 			fButtonControls[UP_INDEX].setEnabled(defaultState);
 			fButtonControls[DOWN_INDEX].setEnabled(defaultState);
@@ -668,7 +693,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 		private Composite addSuperClassConstructorChoices(Composite composite) {
 			Label label= new Label(composite, SWT.NONE);
-			label.setText(ActionMessages.getString("CreateNewConstructorSelectionDialog.sort_constructor_choices.label")); //$NON-NLS-1$
+			label.setText(ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.sort_constructor_choices.label")); //$NON-NLS-1$
 			GridData gd= new GridData(GridData.FILL_BOTH);
 			label.setLayoutData(gd);
 
@@ -722,12 +747,15 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return fSuperConstructors;
 		}
 
-		public void setOverrideSuper(boolean overrideSuper) {
-			fOverrideSuper= overrideSuper;
+		public void setOmitSuper(boolean omitSuper) {
+			if (fOmitSuper != omitSuper)  {
+				fOmitSuper= omitSuper;
+				fGenConstructorSettings.put(OMIT_SUPER, omitSuper);
+			}	
 		}
 
-		public boolean isOverrideSuper() {
-			return fOverrideSuper;
+		public boolean isOmitSuper() {
+			return fOmitSuper;
 		}
 
 	}

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -22,6 +23,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
@@ -39,6 +41,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
@@ -46,6 +49,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
@@ -62,9 +67,15 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private int fWidth = 60;
 	private int fHeight = 18;
 	private String fCommentString;
+	private int fVisibilityModifier;
+	private boolean fFinal;
+	private boolean fSynchronized;
 	
 	private final String SETTINGS_SECTION= "SourceActionDialog"; //$NON-NLS-1$
 	public final String SETTINGS_INSERTPOSITION= "InsertPosition"; //$NON-NLS-1$
+	private final String VISIBILITY_MODIFIER= "VisibilityModifier"; //$NON-NLS-1$
+	private final String FINAL_MODIFIER= "FinalModifier"; //$NON-NLS-1$
+	private final String SYNCHRONIZED_MODIFIER= "SynchronizedModifier"; //$NON-NLS-1$
 
 	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
 		super(parent, labelProvider, contentProvider);
@@ -82,10 +93,24 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fSettings= dialogSettings.getSection(SETTINGS_SECTION);		
 		if (fSettings == null)  {
 			fSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
+			fSettings.put(VISIBILITY_MODIFIER, Modifier.PUBLIC); //$NON-NLS-1$
+			fSettings.put(FINAL_MODIFIER, false); //$NON-NLS-1$
+			fSettings.put(SYNCHRONIZED_MODIFIER, false); //$NON-NLS-1$
 			fSettings.put(SETTINGS_INSERTPOSITION, 1); //$NON-NLS-1$
 		}
 
-		fInsertPosition= fSettings.getInt(SETTINGS_INSERTPOSITION);
+		try {
+			fVisibilityModifier= fSettings.getInt(VISIBILITY_MODIFIER);
+			fFinal= fSettings.getBoolean(FINAL_MODIFIER);
+			fSynchronized= fSettings.getBoolean(SYNCHRONIZED_MODIFIER);
+			fInsertPosition= fSettings.getInt(SETTINGS_INSERTPOSITION);
+		} catch (NumberFormatException e) {
+			fSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
+			fSettings.put(VISIBILITY_MODIFIER, Modifier.PUBLIC); //$NON-NLS-1$
+			fSettings.put(FINAL_MODIFIER, false); //$NON-NLS-1$
+			fSettings.put(SYNCHRONIZED_MODIFIER, false); //$NON-NLS-1$
+			fSettings.put(SETTINGS_INSERTPOSITION, 1); //$NON-NLS-1$			
+		}
 	}
 
 	/***
@@ -117,6 +142,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return fGenerateComment;
 	}
 	
+	public int getVisibilityModifier() {
+		return fVisibilityModifier;
+	}
+	
 	private void setGenerateComment(boolean comment) {
 		fGenerateComment= comment;
 	}
@@ -130,6 +159,27 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fWidth = width;
 		fHeight = height;
 	}		
+	
+	public void setVisibility(int visibility) {
+		if (fVisibilityModifier != visibility) {
+			fVisibilityModifier= visibility;
+			fSettings.put(VISIBILITY_MODIFIER, visibility);
+		}
+	}
+	
+	public void setFinal(boolean value) {
+		if (fFinal != value)  {
+			fFinal= value;
+			fSettings.put(FINAL_MODIFIER, value);
+		}
+	}
+		
+	public void setSynchronized(boolean value)  {
+		if (fSynchronized != value)  {
+			fSynchronized= value;
+			fSettings.put(SYNCHRONIZED_MODIFIER, value);
+		}
+	}	
 	
 	protected Composite createSelectionButtons(Composite composite) {
 		Composite buttonComposite= super.createSelectionButtons(composite);
@@ -177,8 +227,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
 			
-		Composite composite = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout();
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
 		GridData gd= null;
 		
 		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
@@ -257,7 +307,126 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		
 		return commentComposite;
 	}
+
+	protected Composite addVisibilityAndModifiersChoices(Composite buttonComposite) {
+		// Add visibility and modifiers buttons: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
+		// Add persistence of options: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
+		IVisibilityChangeListener visibilityChangeListener= new IVisibilityChangeListener(){
+			public void visibilityChanged(int newVisibility) {
+				setVisibility(newVisibility);
+			}
+			public void modifierChanged(int modifier, boolean isChecked) {	
+				switch (modifier) {
+					case Modifier.FINAL:  {
+						setFinal(isChecked);
+						return; 
+					}
+					case Modifier.SYNCHRONIZED:  {
+						setSynchronized(isChecked);
+						return;
+					}
+					default: return;
+				}
+			}
+		};
+			
+		int initialVisibility= getVisibilityModifier();
+		int[] availableVisibilities= new int[]{Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.NONE};
+			
+		Composite visibilityComposite= createVisibilityControlAndModifiers(buttonComposite, visibilityChangeListener, availableVisibilities, initialVisibility);
+		return visibilityComposite;				
+	}
+	
+	private List convertToIntegerList(int[] array) {
+		List result= new ArrayList(array.length);
+		for (int i= 0; i < array.length; i++) {
+			result.add(new Integer(array[i]));
+		}
+		return result;
+	}	
+	
+	protected Composite createVisibilityControl(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
+		List allowedVisibilities= convertToIntegerList(availableVisibilities);
+		if (allowedVisibilities.size() == 1)
+			return null;
 		
+		Group group= new Group(parent, SWT.NONE);
+		group.setText(RefactoringMessages.getString("VisibilityControlUtil.Access_modifier")); //$NON-NLS-1$
+		GridData gd= new GridData(GridData.FILL_BOTH);
+		group.setLayoutData(gd);
+		GridLayout layout= new GridLayout();
+		layout.makeColumnsEqualWidth= true;
+		layout.numColumns= 4; 
+		group.setLayout(layout);
+		
+		String[] labels= new String[] {
+			"&public", //$NON-NLS-1$
+			"pro&tected", //$NON-NLS-1$
+			RefactoringMessages.getString("VisibilityControlUtil.defa&ult_4"), //$NON-NLS-1$
+			"pri&vate" //$NON-NLS-1$
+		};
+		Integer[] data= new Integer[] {
+					new Integer(Modifier.PUBLIC),
+					new Integer(Modifier.PROTECTED),
+					new Integer(Modifier.NONE),
+					new Integer(Modifier.PRIVATE)};
+		Integer initialVisibility= new Integer(correctVisibility);
+		for (int i= 0; i < labels.length; i++) {
+			Button radio= new Button(group, SWT.RADIO);
+			Integer visibilityCode= data[i];
+			radio.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+			radio.setText(labels[i]);
+			radio.setData(visibilityCode);
+			radio.setSelection(visibilityCode.equals(initialVisibility));
+			radio.setEnabled(allowedVisibilities.contains(visibilityCode));
+			radio.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent event) {
+					visibilityChangeListener.visibilityChanged(((Integer)event.widget.getData()).intValue());
+				}
+			});
+		}
+		return group;
+	}
+	
+	protected Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
+		Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);
+
+		Button finalCheckboxButton= new Button(visibilityComposite, SWT.CHECK);
+		finalCheckboxButton.setText(RefactoringMessages.getString("VisibilityControlUtil.final")); //$NON-NLS-1$
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		finalCheckboxButton.setLayoutData(gd);
+		finalCheckboxButton.setData(new Integer(Modifier.FINAL));
+		finalCheckboxButton.setEnabled(true);
+		finalCheckboxButton.setSelection(isFinal());
+		finalCheckboxButton.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				visibilityChangeListener.modifierChanged(((Integer)event.widget.getData()).intValue(), ((Button) event.widget).getSelection());
+			}
+
+			public void widgetDefaultSelected(SelectionEvent event) {
+				widgetSelected(event);
+			}
+		});	
+			
+		Button syncCheckboxButton= new Button(visibilityComposite, SWT.CHECK);
+		syncCheckboxButton.setText(RefactoringMessages.getString("VisibilityControlUtil.synchronized")); //$NON-NLS-1$
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		syncCheckboxButton.setLayoutData(gd);
+		syncCheckboxButton.setData(new Integer(Modifier.SYNCHRONIZED));
+		syncCheckboxButton.setEnabled(true);
+		syncCheckboxButton.setSelection(isSynchronized());
+		syncCheckboxButton.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				visibilityChangeListener.modifierChanged(((Integer)event.widget.getData()).intValue(), ((Button) event.widget).getSelection());
+			}
+
+			public void widgetDefaultSelected(SelectionEvent event) {
+				widgetSelected(event);
+			}
+		});	
+		return visibilityComposite;			
+	}	
+			
 	protected Composite createEntryPtCombo(Composite composite) {
 		Composite selectionComposite = new Composite(composite, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -347,6 +516,22 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		} catch (JavaModelException e) {
 		}	
 	}
+	
+	public boolean getFinal() {
+		return fFinal;
+	}		
+	
+	public boolean getSynchronized() {
+		return fSynchronized;
+	}	
+	
+	public boolean isFinal() {
+		return fFinal;
+	}
+
+	public boolean isSynchronized() {
+		return fSynchronized;
+	}	
 	
 	/*
 	 * Determine where in the file to enter the newly created methods.

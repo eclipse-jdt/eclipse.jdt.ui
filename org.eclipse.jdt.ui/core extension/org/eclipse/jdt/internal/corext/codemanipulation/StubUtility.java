@@ -215,7 +215,7 @@ public class StubUtility {
 		}
 	}
 	
-	private static String getDefaultMethodBodyStatement(String methodName, String[] paramNames, String retTypeSig, boolean callSuper) {
+	public static String getDefaultMethodBodyStatement(String methodName, String[] paramNames, String retTypeSig, boolean callSuper) {
 		StringBuffer buf= new StringBuffer();
 		if (callSuper) {
 			if (retTypeSig != null) {
