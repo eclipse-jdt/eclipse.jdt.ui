@@ -25,6 +25,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventSetListener;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.Launch;
+import org.eclipse.debug.core.model.IProcess;
+
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -41,15 +51,6 @@ import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbench;
 
-import org.eclipse.debug.core.DebugEvent;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IDebugEventSetListener;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.Launch;
-import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -59,11 +60,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
-
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.jarpackager.ConfirmSaveModifiedResourcesDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -86,6 +87,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private final int YES_TO_ALL= 1;
 	private final int NO= 2;
 	private final int NO_TO_ALL= 3;
+	private final String JAVADOC_ANT_INFORMATION_DIALOG= "javadocAntInformationDialog";//$NON-NLS-1$
+
 
 	private JavadocOptionsManager fStore;
 	private IWorkspaceRoot fRoot;
@@ -163,9 +166,9 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 
 		if (fJSWPage.generateAnt()) {
+			//@Improve: make a better message
+			OptionalMessageDialog.open(JAVADOC_ANT_INFORMATION_DIALOG, getShell(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.title"), MessageDialog.getDefaultImage(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.message"), MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0); //$NON-NLS-1$ //$NON-NLS-2$
 			fStore.createXML();
-			//@change
-			//refresh(new Path(fStore.getAntpath(fStore.getJavaProjects())));
 		}
 
 		//If the wizard was not launched from an ant file store the setttings 
