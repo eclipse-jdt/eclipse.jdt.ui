@@ -543,6 +543,7 @@
 		 sizeHint="460,160"
 		 extensions="java:90, jav:90"
 		 showScopeSection="true"
+		 canSearchEnclosingProjects="true"
 		 class="org.eclipse.jdt.internal.ui.search.JavaSearchPage">
    </page>
 </extension>
