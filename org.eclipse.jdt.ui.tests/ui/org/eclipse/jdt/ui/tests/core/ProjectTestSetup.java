@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.ui.tests.core;
 
+import java.util.Map;
+
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
@@ -39,7 +41,7 @@ public class ProjectTestSetup extends TestSetup {
 	}
 	
 	public static IClasspathEntry[] getDefaultClasspath() {
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar();
+		IPath[] rtJarPath= JavaProjectHelper.find15RtJar();
 		assertTrue("rt not found", rtJarPath != null);		
 		return new IClasspathEntry[] {  JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
 	}
@@ -68,6 +70,10 @@ public class ProjectTestSetup extends TestSetup {
 		
 		fJProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		fJProject.setRawClasspath(getDefaultClasspath(), null);
+		Map options= fJProject.getOptions(false);
+		JavaProjectHelper.set15CompilerOptions(options);
+		fJProject.setOptions(options);
+		
 		JavaCore.setOptions(TestOptions.getFormatterOptions());
 		TestOptions.initializeCodeGenerationOptions();
 		JavaPlugin.getDefault().getCodeTemplateStore().load();		

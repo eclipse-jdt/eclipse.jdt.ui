@@ -87,7 +87,8 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
-		fProject= ProjectTestSetup.getProject();
+		fProject= JavaProjectHelper.createJavaProject("serialIdProject", "bin");
+		JavaProjectHelper.addRTJar(fProject);
 
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(""); //$NON-NLS-1$
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.TYPECOMMENT).setPattern(""); //$NON-NLS-1$
@@ -96,7 +97,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	}
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.delete(fProject);
 	}
 
 	/**
