@@ -8,6 +8,7 @@ package org.eclipse.jdt.ui.text;
 
 import org.eclipse.swt.graphics.RGB;
 
+import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
@@ -121,9 +122,15 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		RuleBasedScanner scanner= new RuleBasedScanner();
 		scanner.setDefaultReturnToken(new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT))));
 		dr= new RuleBasedDamagerRepairer(scanner);		
-		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_MULTILINE_COMMENT);
-		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_MULTILINE_COMMENT);
+		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
+		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
 
+		scanner= new RuleBasedScanner();
+		scanner.setDefaultReturnToken(new Token(new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT))));
+		dr= new RuleBasedDamagerRepairer(scanner);		
+		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
+		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
+		
 		return reconciler;
 	}
 
@@ -164,17 +171,20 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getAutoIndentStrategy(ISourceViewer, String)
 	 */
 	public IAutoIndentStrategy getAutoIndentStrategy(ISourceViewer sourceViewer, String contentType) {
-		if (JavaPartitionScanner.JAVA_DOC.equals(contentType)) {
+		if (JavaPartitionScanner.JAVA_DOC.equals(contentType) ||
+				JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT.equals(contentType))
 			return new JavaDocAutoIndentStrategy();
-		} else {
-			return new JavaAutoIndentStrategy();
-		}
+		return new JavaAutoIndentStrategy();
 	}
 
 	/*
 	 * @see SourceViewerConfiguration#getDoubleClickStrategy(ISourceViewer, String)
 	 */
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
+		if (JavaPartitionScanner.JAVA_DOC.equals(contentType) ||
+				JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT.equals(contentType) ||
+				JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT.equals(contentType))
+			return new DefaultTextDoubleClickStrategy();
 		return new JavaDoubleClickSelector();
 	}
 
@@ -217,7 +227,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getConfiguredContentTypes(ISourceViewer)
 	 */
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-		return new String[] { IDocument.DEFAULT_CONTENT_TYPE, JavaPartitionScanner.JAVA_DOC, JavaPartitionScanner.JAVA_MULTILINE_COMMENT };
+		return new String[] { IDocument.DEFAULT_CONTENT_TYPE, JavaPartitionScanner.JAVA_DOC, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT };
 	}
 	
 	/**

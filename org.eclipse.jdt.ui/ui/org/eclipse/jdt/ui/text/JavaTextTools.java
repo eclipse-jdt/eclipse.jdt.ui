@@ -137,7 +137,8 @@ public class JavaTextTools {
 		
 		String[] types= new String[] {
 			JavaPartitionScanner.JAVA_DOC,
-			JavaPartitionScanner.JAVA_MULTILINE_COMMENT
+			JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT,
+			JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT
 		};
 		
 		return new RuleBasedPartitioner(getPartitionScanner(), types);

@@ -25,8 +25,9 @@ import org.eclipse.jface.text.rules.WordRule;
 public class JavaPartitionScanner extends BufferedRuleBasedScanner {
 
 	private final static String SKIP= "__skip"; //$NON-NLS-1$
-
-	public final static String JAVA_MULTILINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
+	
+	public final static String JAVA_SINGLE_LINE_COMMENT= "__java_singleline_comment";
+	public final static String JAVA_MULTI_LINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
 	public final static String JAVA_DOC= "__java_javadoc"; //$NON-NLS-1$
 
 	/**
@@ -57,12 +58,13 @@ public class JavaPartitionScanner extends BufferedRuleBasedScanner {
 		
 		IToken skip= new Token(SKIP);
 		IToken javaDoc= new Token(JAVA_DOC);
-		IToken comment= new Token(JAVA_MULTILINE_COMMENT);
+		IToken multiLineComment= new Token(JAVA_MULTI_LINE_COMMENT);
+		IToken singleLineComment= new Token(JAVA_SINGLE_LINE_COMMENT);
 
 		List rules= new ArrayList();
 
 		// Add rule for single line comments.
-		rules.add(new EndOfLineRule("//", skip)); //$NON-NLS-1$
+		rules.add(new EndOfLineRule("//", singleLineComment)); //$NON-NLS-1$
 
 		// Add rule for strings and character constants.
 		rules.add(new SingleLineRule("\"", "\"", skip, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
@@ -70,12 +72,12 @@ public class JavaPartitionScanner extends BufferedRuleBasedScanner {
 
 		// Add special case word rule.
 		WordRule wordRule= new WordRule(new EmptyCommentDetector());
-		wordRule.addWord("/**/", comment); //$NON-NLS-1$
+		wordRule.addWord("/**/", multiLineComment); //$NON-NLS-1$
 		rules.add(wordRule);
 
 		// Add rules for multi-line comments and javadoc.
 		rules.add(new MultiLineRule("/**", "*/", javaDoc)); //$NON-NLS-1$ //$NON-NLS-2$
-		rules.add(new MultiLineRule("/*", "*/", comment)); //$NON-NLS-1$ //$NON-NLS-2$
+		rules.add(new MultiLineRule("/*", "*/", multiLineComment)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		IRule[] result= new IRule[rules.size()];
 		rules.toArray(result);

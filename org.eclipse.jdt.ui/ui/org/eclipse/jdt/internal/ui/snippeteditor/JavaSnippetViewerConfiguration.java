@@ -84,8 +84,8 @@ public class JavaSnippetViewerConfiguration extends SourceViewerConfiguration {
 			null,
 			new TextAttribute(manager.getColor(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT))
 		);		
-		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_MULTILINE_COMMENT);
-		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_MULTILINE_COMMENT);
+		reconciler.setDamager(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
+		reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
 
 		return reconciler;
 	}
@@ -95,7 +95,7 @@ public class JavaSnippetViewerConfiguration extends SourceViewerConfiguration {
 	 * @see ISourceViewerConfiguration#getConfiguredContentTypes
 	 */
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-		return new String[] { IDocument.DEFAULT_CONTENT_TYPE, JavaPartitionScanner.JAVA_DOC, JavaPartitionScanner.JAVA_MULTILINE_COMMENT };
+		return new String[] { IDocument.DEFAULT_CONTENT_TYPE, JavaPartitionScanner.JAVA_DOC, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT };
 	}
 
 	/**
