@@ -39,14 +39,20 @@ public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 	}
 	
 	public void testThumbScrollTextEditor1() throws CoreException {
-		ResourceTestHelper.copy(THUMB_SCROLLING_ORIG_FILE, THUMB_SCROLLING_FILE);
-		measureScrolling(N_OF_RUNS, new ThumbScrollPoster(), ResourceTestHelper.findFile(THUMB_SCROLLING_FILE));
-		ResourceTestHelper.delete(THUMB_SCROLLING_FILE);
+		try {
+			ResourceTestHelper.copy(THUMB_SCROLLING_ORIG_FILE, THUMB_SCROLLING_FILE);
+			measureScrolling(N_OF_RUNS, new ThumbScrollPoster(), ResourceTestHelper.findFile(THUMB_SCROLLING_FILE));
+		} finally {
+			ResourceTestHelper.delete(THUMB_SCROLLING_FILE);
+		}
 	}
 	
 	public void testAutoScrollTextEditor1() throws CoreException {
-		ResourceTestHelper.copy(AUTO_SCROLLING_ORIG_FILE, AUTO_SCROLLING_FILE);
-		measureScrolling(N_OF_RUNS, new AutoScrollPoster(), ResourceTestHelper.findFile(AUTO_SCROLLING_FILE));
-		ResourceTestHelper.delete(AUTO_SCROLLING_FILE);
+		try {
+			ResourceTestHelper.copy(AUTO_SCROLLING_ORIG_FILE, AUTO_SCROLLING_FILE);
+			measureScrolling(N_OF_RUNS, new AutoScrollPoster(), ResourceTestHelper.findFile(AUTO_SCROLLING_FILE));
+		} finally {
+			ResourceTestHelper.delete(AUTO_SCROLLING_FILE);
+		}
 	}
 }
