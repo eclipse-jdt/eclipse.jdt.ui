@@ -100,8 +100,6 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
-			if (fResource.isReadOnly())
-				return RefactoringStatus.createErrorStatus("Resource " + fResource.getName() + " is marked as read-only.");
 			return new RefactoringStatus();
 		} finally{
 			pm.done();
