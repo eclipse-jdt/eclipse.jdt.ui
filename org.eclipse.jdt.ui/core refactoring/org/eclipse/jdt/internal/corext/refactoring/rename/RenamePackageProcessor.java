@@ -345,6 +345,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		// (from fOccurrences (without namesakes): may have shared star import)
 		// (from fPackage: may have unimported references to types of namesake packages)
 		IType[] typesToSearch= getTypesInPackages(namesakePackages);
+		if (typesToSearch.length == 0) {
+			pm.done();
+			return new ArrayList(0);
+		}
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= getPackageAndOccurrencesWithoutNamesakesScope();
 		SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1));
@@ -431,6 +435,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(namesakePackages);
 		IType[] typesToSearch= getTypesInPackage(fPackage);
+		if (typesToSearch.length == 0) {
+			pm.done();
+			return new ArrayList(0);
+		}
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
 		SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1));
 		pm.done();
