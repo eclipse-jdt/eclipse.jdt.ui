@@ -46,6 +46,17 @@ public class MethodsViewerFilter extends ViewerFilter {
 		return (fFilterProperties & filter) != 0;
 	}
 	
+	/**
+	 * Sets a property to filter for to the specified value
+	 */
+	public final void setFilter(int filter, boolean set) {
+		if (set) {
+			addFilter(filter);
+		} else {
+			removeFilter(filter);
+		}
+	}	
+	
 
 	/**
 	 * @see ViewerFilter@isFilterProperty

@@ -41,6 +41,11 @@ public class MethodsViewerFilterAction extends JavaUIAction {
 		valueChanged(isChecked());
 	}
 	
+	public void updateState() {
+		setChecked(fFilter.hasFilter(fFilterProperty));
+	}		
+	
+	
 	private void valueChanged(boolean on) {
 		if (on) {
 			fFilter.addFilter(fFilterProperty);

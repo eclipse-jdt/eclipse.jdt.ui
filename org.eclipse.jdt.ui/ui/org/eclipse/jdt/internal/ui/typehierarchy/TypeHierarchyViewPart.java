@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.ArrayList;import java.util.List;import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.custom.SashForm;import org.eclipse.swt.custom.ViewForm;import org.eclipse.swt.events.KeyAdapter;import org.eclipse.swt.events.KeyEvent;import org.eclipse.swt.events.KeyListener;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.ToolBar;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.action.ToolBarManager;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IInputSelectionProvider;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.PartInitException;import org.eclipse.ui.actions.OpenWithMenu;import org.eclipse.ui.part.PageBook;import org.eclipse.ui.part.ViewPart;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.ITypeHierarchyViewPart;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import java.util.ArrayList;import java.util.List;import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.CLabel;import org.eclipse.swt.custom.SashForm;import org.eclipse.swt.custom.ViewForm;import org.eclipse.swt.events.KeyAdapter;import org.eclipse.swt.events.KeyEvent;import org.eclipse.swt.events.KeyListener;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.ToolBar;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.action.ToolBarManager;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IInputSelectionProvider;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IMemento;import org.eclipse.ui.IViewSite;import org.eclipse.ui.PartInitException;import org.eclipse.ui.actions.OpenWithMenu;import org.eclipse.ui.part.PageBook;import org.eclipse.ui.part.ViewPart;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.ITypeHierarchyViewPart;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 /**
  * view showing the supertypes/subtypes of its input.
@@ -28,7 +28,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	
 	private static final String DIALOGSTORE_HIERARCHYVIEW= PART_NAME + ".hierarchyview";	
 
+	private static final String TAG_INPUT= "input";
+	private static final String TAG_VIEW= "view";
+
 	private IType fInput;
+	
+	private IMemento fMemento;
 	
 	private ArrayList fInputHistory;
 	private int fCurrHistoryIndex;
@@ -425,9 +430,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		getSite().setSelectionProvider(selProvider);
 		
 		IType input= determineInputElement();
-		if (input != null)
+		if (fMemento != null) {
+			restoreState(fMemento, input);
+		} else if (input != null) {
 			setInput(input);
-	
+		}
 	}
 	
 	/**
@@ -663,6 +670,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	}
 	
 	/**
+	 * Sets the current view (superhierarchy (0), subhierarchy (1), typehierarcy(2))
 	 * called from ToggleViewAction
 	 */	
 	public void setView(int viewerIndex) {
@@ -681,7 +689,20 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 			updateTitle();
 			fDialogSettings.put(DIALOGSTORE_HIERARCHYVIEW, viewerIndex);
 		}
-	}	
+	}
+
+	/**
+	 * Gets the curret active view index
+	 */		
+	public int getViewIndex() {
+		for (int i= 0; i < fAllViewers.length; i++) {
+			if (fCurrentViewer == fAllViewers[i]) {
+				return i;
+			}
+		}
+		return 0;
+	}
+	
 
 	/**
 	 * called from EnableMemberFilterAction
@@ -717,4 +738,52 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		} 
 		return null;	
 	}
+	
+	/* (non-Javadoc)
+	 * @see IViewPart#init
+	 */
+	public void init(IViewSite site, IMemento memento) throws PartInitException {
+		super.init(site, memento);
+		fMemento= memento;
+	}	
+	
+	/**
+	 * @see ViewPart#saveState(IMemento)
+	 */
+	public void saveState(IMemento memento) {
+		if (fPagebook == null) {
+			// part has not been created
+			if (fMemento != null) { //Keep the old state;
+				memento.putMemento(fMemento);
+			}
+			return;
+		}
+		if (fInput != null) {
+			memento.putString(TAG_INPUT, fInput.getHandleIdentifier());
+		}
+		memento.putString(TAG_VIEW, Integer.toString(getViewIndex()));
+				
+		fMethodsViewer.saveState(memento);
+	}
+	
+	/*
+	 * Restores the type hierarchy settings from a memento
+	 */
+	private void restoreState(IMemento memento, IType defaultInput) {
+		IType input= defaultInput;
+		String elementId= memento.getString(TAG_INPUT);
+		if (elementId != null) {
+			input= (IType) JavaCore.create(elementId);
+		}
+		setInput(input);
+
+		String viewerIndex= memento.getString(TAG_VIEW);
+		try {
+			setView(Integer.parseInt(viewerIndex));
+		} catch (NumberFormatException e) {
+		}
+		
+		fMethodsViewer.restoreState(memento);
+	}	
+
 }

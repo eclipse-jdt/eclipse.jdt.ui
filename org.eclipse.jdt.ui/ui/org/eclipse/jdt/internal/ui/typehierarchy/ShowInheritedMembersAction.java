@@ -39,6 +39,11 @@ public class ShowInheritedMembersAction extends JavaUIAction {
 		valueChanged(isChecked());
 	}
 	
+	public void updateState() {
+		setChecked(fMethodsViewer.isShowInheritedMethods());
+	}
+	
+	
 	private void valueChanged(boolean on) {
 		fMethodsViewer.showInheritedMethods(on);
 		if (on) {

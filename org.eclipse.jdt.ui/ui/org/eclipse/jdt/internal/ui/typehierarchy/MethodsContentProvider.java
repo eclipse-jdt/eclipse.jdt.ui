@@ -70,6 +70,13 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 	}
 	
 	/**
+	 * Returns true if inherited methods are shown
+	 */
+	public boolean isShowInheritedMethods() {
+		return fShowInheritedMethods;
+	}
+	
+	/**
 	 * Returns the current input type
 	 */
 	public IType getInputType() {

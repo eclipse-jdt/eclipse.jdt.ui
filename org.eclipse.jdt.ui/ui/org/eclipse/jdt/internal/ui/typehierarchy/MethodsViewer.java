@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.events.ControlAdapter;import org.eclipse.swt.events.ControlEvent;import org.eclipse.swt.events.DisposeEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.action.IAction;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.action.ToolBarManager;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GenerateGroup;import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.events.ControlAdapter;import org.eclipse.swt.events.ControlEvent;import org.eclipse.swt.events.DisposeEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.action.ToolBarManager;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.ui.IMemento;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GenerateGroup;import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
@@ -19,13 +19,20 @@ public class MethodsViewer extends TableViewer {
 	private static final String PREFIX_FILTER_STATIC= "MethodsViewer.hide_static.";
 	private static final String PREFIX_VISIBILITY_MENU= "MethodsViewer.visibilitymenu.";	
 	
+	private static final String TAG_HIDEFIELDS= "hidefields";
+	private static final String TAG_HIDESTATIC= "hidestatic";
+	private static final String TAG_HIDENONPUBLIC= "hidenonpublic";
+	private static final String TAG_SHOWINHERITED= "showinherited";		
+	
 	private MethodsViewerFilterAction fHideNonPublic;
 	private MethodsViewerFilterAction fHideFields;
 	private MethodsViewerFilterAction fHideStatic;
+	
+	private MethodsViewerFilter fFilter;
 		
 	private OpenSourceReferenceAction fOpen;
 
-	private IAction fShowInheritedMembersAction;
+	private ShowInheritedMembersAction fShowInheritedMembersAction;
 
 	private ContextMenuGroup[] fStandardGroups;	
 	
@@ -57,22 +64,22 @@ public class MethodsViewer extends TableViewer {
 			}
 		});
 				
-		MethodsViewerFilter filter= new MethodsViewerFilter();
+		fFilter= new MethodsViewerFilter();
 		
 		// fields	
-		fHideFields= new MethodsViewerFilterAction(this, filter,  bundle, PREFIX_FILTER_FIELDS, MethodsViewerFilter.FILTER_FIELDS, false);
+		fHideFields= new MethodsViewerFilterAction(this, fFilter,  bundle, PREFIX_FILTER_FIELDS, MethodsViewerFilter.FILTER_FIELDS, false);
 		fHideFields.setImageDescriptors("lcl16", "fields_co.gif");
 		
 		// static
-		fHideStatic= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_STATIC, MethodsViewerFilter.FILTER_STATIC, false);
+		fHideStatic= new MethodsViewerFilterAction(this, fFilter, bundle, PREFIX_FILTER_STATIC, MethodsViewerFilter.FILTER_STATIC, false);
 		fHideStatic.setImageDescriptors("lcl16", "static_co.gif");
 		
-		// public
-		fHideNonPublic= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_NONPUBLIC, MethodsViewerFilter.FILTER_NONPUBLIC, false);
+		// non-public
+		fHideNonPublic= new MethodsViewerFilterAction(this, fFilter, bundle, PREFIX_FILTER_NONPUBLIC, MethodsViewerFilter.FILTER_NONPUBLIC, false);
 		fHideNonPublic.setImageDescriptors("lcl16", "public_co.gif");
 		
 		
-		addFilter(filter);
+		addFilter(fFilter);
 		
 		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);		
 		
@@ -121,6 +128,44 @@ public class MethodsViewer extends TableViewer {
 			ExceptionHandler.handle(e, getControl().getShell(), "Error", "");
 		}
 	}
+	
+	public boolean isShowInheritedMethods() {
+		return ((MethodsContentProvider) getContentProvider()).isShowInheritedMethods();
+	}
+	
+	
+	/**
+	 * Saves the state of the filter actions
+	 */
+	public void saveState(IMemento memento) {
+		memento.putString(TAG_HIDEFIELDS, String.valueOf(fFilter.hasFilter(MethodsViewerFilter.FILTER_FIELDS)));
+		memento.putString(TAG_HIDESTATIC, String.valueOf(fFilter.hasFilter(MethodsViewerFilter.FILTER_STATIC)));
+		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(fFilter.hasFilter(MethodsViewerFilter.FILTER_NONPUBLIC)));
+		memento.putString(TAG_SHOWINHERITED, String.valueOf(isShowInheritedMethods()));
+	}
+
+	/**
+	 * Restores the state of the filter actions
+	 */	
+	public void restoreState(IMemento memento) {
+		boolean set= Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue();
+		fFilter.setFilter(MethodsViewerFilter.FILTER_FIELDS, set);
+		set= Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue();
+		fFilter.setFilter(MethodsViewerFilter.FILTER_STATIC, set);
+		set= Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue();
+		fFilter.setFilter(MethodsViewerFilter.FILTER_NONPUBLIC, set);		
+		
+		fHideFields.updateState();
+		fHideStatic.updateState();
+		fHideNonPublic.updateState();
+		
+		set= Boolean.valueOf(memento.getString(TAG_SHOWINHERITED)).booleanValue();
+		showInheritedMethods(set);
+		
+		fShowInheritedMembersAction.updateState();
+	}
+		
+	
 		
 	/**
 	 * Attaches a contextmenu listener to the table
