@@ -71,7 +71,8 @@ public class CompositeChange extends Change implements ICompositeChange {
 	}
 	
 	public void addChange(IChange change){
-		fChanges.add(change);
+		if (change != null)
+			fChanges.add(change);
 	}
 	
 	public IChange[] getChildren() {
@@ -143,7 +144,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 	public IJavaElement getCorrespondingJavaElement(){
 		return null;
 	}
-	
+
 	/**
 	 * @see IChange#setActive
 	 * Apart setting the active/non-active status on itself 
@@ -156,4 +157,17 @@ public class CompositeChange extends Change implements ICompositeChange {
 			((IChange)iter.next()).setActive(active);
 		}
 	}	
+	
+	/**
+	 * @see IChange#isUndoable()
+	 * Composite can be undone iff all its sub-changes can be undone.
+	 */
+	public boolean isUndoable(){
+		for (Iterator iter= fChanges.iterator(); iter.hasNext(); ){
+			IChange each= (IChange)iter.next();
+			if (! each.isUndoable())
+				return false;
+		}
+		return true;
+	}
 }
