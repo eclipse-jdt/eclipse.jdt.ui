@@ -20,7 +20,6 @@ import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 public abstract class AbstractOpenRefactoringWizardAction extends AbstractOpenWizardAction {
 
 	private Refactoring fRefactoring;
-	private static final IProgressMonitor fgNullProgressMonitor= new NullProgressMonitor();
 	
 	public AbstractOpenRefactoringWizardAction(String label, Class activatedOnType) {
 		super(label, new Class[] {activatedOnType}, false);
@@ -38,7 +37,7 @@ public abstract class AbstractOpenRefactoringWizardAction extends AbstractOpenWi
 			if (fRefactoring instanceof IPreactivatedRefactoring)
 				return ((IPreactivatedRefactoring)fRefactoring).checkPreactivation().isOK();
 			else	
-				return fRefactoring.checkActivation(fgNullProgressMonitor).isOK();
+				return fRefactoring.checkActivation(new NullProgressMonitor()).isOK();
 		} catch (JavaModelException e){
 			return false;
 		}
