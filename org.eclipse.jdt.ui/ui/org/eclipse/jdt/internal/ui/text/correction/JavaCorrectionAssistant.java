@@ -43,7 +43,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 
 public class JavaCorrectionAssistant extends ContentAssistant {
@@ -65,11 +64,6 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		JavaCorrectionProcessor processor= new JavaCorrectionProcessor(this); 
 		
 		setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-		setContentAssistProcessor(processor, IJavaPartitions.JAVA_STRING);
-		setContentAssistProcessor(processor, IJavaPartitions.JAVA_CHARACTER);
-		setContentAssistProcessor(processor, IJavaPartitions.JAVA_DOC);
-		setContentAssistProcessor(processor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-		setContentAssistProcessor(processor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 	
 		enableAutoActivation(false);
 		enableAutoInsert(false);
