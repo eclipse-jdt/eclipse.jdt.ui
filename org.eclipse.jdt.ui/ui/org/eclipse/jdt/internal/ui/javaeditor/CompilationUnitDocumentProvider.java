@@ -430,8 +430,11 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				if (fIncludesProblemAnnotationChanges) {
 					try {
 						ICompilationUnit workingCopy= getWorkingCopy(fInput);
-						if (workingCopy != null)
-							workingCopy.reconcile(true, null);
+						if (workingCopy != null) {
+							synchronized (workingCopy) {
+								workingCopy.reconcile(true, null);
+							}
+						}
 					} catch (JavaModelException ex) {
 						if (!ex.isDoesNotExist())
 							handleCoreException(ex, ex.getMessage());

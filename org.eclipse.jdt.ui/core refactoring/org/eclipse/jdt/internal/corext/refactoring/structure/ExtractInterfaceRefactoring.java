@@ -350,7 +350,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private static void setContent(ICompilationUnit cu, String newContent) throws JavaModelException {
 		cu.getBuffer().setContents(newContent);
-		cu.reconcile();
+		synchronized (cu) {
+			cu.reconcile();
+		}
 	}
 
 	private GroupDescription trackReferenceNodes(CompilationUnit typeCuNode, ASTRewrite typeCuRewrite, TypeDeclaration td) {
