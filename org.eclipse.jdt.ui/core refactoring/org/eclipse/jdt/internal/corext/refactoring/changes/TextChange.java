@@ -5,10 +5,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -63,7 +61,7 @@ public abstract class TextChange extends AbstractTextChange {
 	private List fTextEditChanges;
 	private TextEditCopier fCopier;
 	private TextEdit fEdit;
-	private boolean fTrackPositions;
+	private boolean fKeepExecutedTextEdits;
 	private boolean fAutoMode;
 
 	/**
@@ -213,14 +211,25 @@ public abstract class TextChange extends AbstractTextChange {
 	}
 
 	/**
-	 * Controls whether the text change should track position changes. If a change has been
-	 * executed a call to <code>getNewTextRange(TextEdit)</code> will return the text edit's
-	 * text range in the modified document.
+	 * Controls whether the text change should keep executed edits. If set to <code>true</code>
+	 * a call to <code>getExecutedTextEdit(TextEdit original)</code> will return the executed edit
+	 * associated with the original edit.
 	 * 
-	 * @param track if <code>true</code> track text position changes.
+	 * @param keep if <code>true</code> executed edits are kept
 	 */
-	public void setTrackPositionChanges(boolean track) {
-		fTrackPositions= track;
+	public void setKeepExecutedTextEdits(boolean keep) {
+		fKeepExecutedTextEdits= keep;
+	}
+	
+	/**
+	 * Returns the edit that got copied and executed instead of the orignial.
+	 * 
+	 * @return the executed edit
+	 */
+	public TextEdit getExecutedTextEdit(TextEdit original) {
+		if (!fKeepExecutedTextEdits || fCopier == null)
+			return null;
+		return fCopier.getCopy(original);
 	}
 	
 	/**
@@ -233,9 +242,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * </P>
 	 */
 	public TextRange getNewTextRange(TextEdit edit) {
-		if (!fTrackPositions || fCopier == null)
-			return null;
-		TextEdit result= fCopier.getCopy(edit);
+		TextEdit result= getExecutedTextEdit(edit);
 		if (result == null)
 			return null;
 		return result.getTextRange().copy();
@@ -245,7 +252,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * Note: API is under construction
 	 */
 	public TextRange getNewTextRange(EditChange editChange) {
-		if (!fTrackPositions || fCopier == null)
+		if (!fKeepExecutedTextEdits || fCopier == null)
 			return null;
 		TextEdit[] edits= editChange.getGroupDescription().getTextEdits();
 		List copies= new ArrayList(edits.length);
@@ -284,7 +291,7 @@ public abstract class TextChange extends AbstractTextChange {
 			}
 		}
 		editor.add(copiedEdit);		
-		if (!fTrackPositions)
+		if (!fKeepExecutedTextEdits)
 			fCopier= null;
 	}
 	
