@@ -45,6 +45,8 @@ public class WorkingSetFindAction extends FindAction {
 		super(site, workingSetName, null);
 		Assert.isNotNull(action);
 		fAction= action;
+		setImageDescriptor(action.getImageDescriptor());
+		setToolTipText(action.getToolTipText());
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
 	}
 
@@ -55,6 +57,7 @@ public class WorkingSetFindAction extends FindAction {
 		super(editor, workingSetName, null);
 		Assert.isNotNull(action);
 		fAction= action;
+		setImageDescriptor(action.getImageDescriptor());
 		setToolTipText(action.getToolTipText());
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.WORKING_SET_FIND_ACTION);
 	}
