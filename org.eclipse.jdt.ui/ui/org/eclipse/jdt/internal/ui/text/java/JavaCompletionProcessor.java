@@ -33,7 +33,6 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.text.templates.ContextType;
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
 
 import org.eclipse.ui.IEditorPart;
 
