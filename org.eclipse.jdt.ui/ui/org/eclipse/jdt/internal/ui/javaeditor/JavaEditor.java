@@ -1932,7 +1932,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		
 		ITextSelection s= (ITextSelection) provider.getSelection();
 		Position annotationPosition= new Position(0, 0);
-		IJavaAnnotation nextAnnotation= getNextAnnotation(s.getOffset(), forward, annotationPosition);
+		IJavaAnnotation nextAnnotation= getNextAnnotation(s.getOffset(), s.getLength(),forward, annotationPosition);
 		
 		setStatusLineErrorMessage(null);
 
@@ -2087,10 +2087,12 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 
 
-	private IJavaAnnotation getNextAnnotation(int offset, boolean forward, Position annotationPosition) {
-		
+	private IJavaAnnotation getNextAnnotation(int offset, int length, boolean forward, Position annotationPosition) {
 		IJavaAnnotation nextAnnotation= null;
 		Position nextAnnotationPosition= null;
+		IJavaAnnotation containingAnnotation= null;
+		Position containingAnnotationPosition= null;
+		boolean currentAnnotation= false;
 		
 		IDocument document= getDocumentProvider().getDocument(getEditorInput());
 		int endOfDocument= document.getLength(); 
@@ -2141,14 +2143,24 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					nextAnnotation= a;
 					nextAnnotationPosition= p;
 				}
+			} else {
+				if (containingAnnotationPosition == null || containingAnnotationPosition.length > p.length) {
+					containingAnnotation= a;
+					containingAnnotationPosition= p;
+					if (length == p.length)
+						currentAnnotation= true;
+				}
 			}
 		}
-		
+		if (containingAnnotationPosition != null && (!currentAnnotation || nextAnnotation == null)) {
+			annotationPosition.setOffset(containingAnnotationPosition.getOffset());
+			annotationPosition.setLength(containingAnnotationPosition.getLength());
+			return containingAnnotation;
+		}
 		if (nextAnnotationPosition != null) {
 			annotationPosition.setOffset(nextAnnotationPosition.getOffset());
 			annotationPosition.setLength(nextAnnotationPosition.getLength());
 		}
-		
 		return nextAnnotation;
 	}
 	
