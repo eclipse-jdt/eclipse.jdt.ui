@@ -342,8 +342,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			
 			IPreferenceStore preferenceStore= getPreferenceStore();
 			preferenceStore.addPropertyChangeListener(this);
-			
-			fMarkOccurrenceAnnotations= preferenceStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);			
 		}
 		
 		private void updateKeyModifierMask() {
@@ -1759,8 +1757,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this, IJavaPartitions.JAVA_PARTITIONING));
 		setRangeIndicator(new DefaultRangeIndicator());
-		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		setPreferenceStore(store);
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
+		fMarkOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 	}
 	
 	/*
@@ -2165,7 +2165,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	public void dispose() {
 		// cancel possiblle running computation
-		fOccurrenceAnnotations= null;
+		fMarkOccurrenceAnnotations= false;
 		fComputeCount++;
 		
 		if (isBrowserLikeLinks())
