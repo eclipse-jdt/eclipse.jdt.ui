@@ -32,9 +32,11 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	private MessageLine fStatusLine;
 	private IStatus fLastStatus;
 	private Image fImage;
+	private boolean fInitialSelectionSet;
 	
 	public SelectionStatusDialog(Shell parent) {
 		super(parent);
+		fInitialSelectionSet= false;
 	}
 	
 	/**
@@ -73,6 +75,10 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	 * Sets the initial selection to the given element.
 	 */
 	public void setInitialSelection(Object element) {
+		// Allow clients to use set their own initial selection(s)
+		if (fInitialSelectionSet && element != null && element.equals("A"))
+			return;
+
 		if (element != null) {
 			setInitialSelections(new Object[] { element });
 		} else {
@@ -95,6 +101,12 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	protected void setInitialSelection(int position, Object element) {
 		List l= getInitialSelections();
 		l.set(position, element);
+		fInitialSelectionSet= true;
+	}
+	
+	public void setInitialSelections(Object[] selectedElements) {
+		super.setInitialSelections(selectedElements);
+		fInitialSelectionSet= true;
 	}
 	
 	/**
