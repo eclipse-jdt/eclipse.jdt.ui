@@ -2,7 +2,7 @@ package p;
 
 class A {
 	/**
-	 * This is {@link #m(String[])}.
+	 * This is {@link #m(String...)}.
 	 * @param args TODO
 	 */
 	public void m(String... args) {

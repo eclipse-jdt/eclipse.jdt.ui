@@ -44,8 +44,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 	
 	private static final boolean BUG_79976_CORE_GENERIC_RippleMethodFinder= true;
 	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
-	private static final boolean BUG_83319_CORE_REFS_IN_STATIC_IMPORT= true;
-	private static final boolean BUG_83393_CORE_VARARG_JAVADOC_REFERENCE= true;
 	
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
 
@@ -1734,10 +1732,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	public void testStaticImport01() throws Exception {
-		if (BUG_83319_CORE_REFS_IN_STATIC_IMPORT) {
-			printTestDisabledMessage("BUG_83319_CORE_REFS_IN_STATIC_IMPORT");
-			return;
-		}
 		helperRenameMethod(new String[0], "abc");
 	}
 	
@@ -1786,10 +1780,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	public void testVararg03() throws Exception {
-		if (BUG_83393_CORE_VARARG_JAVADOC_REFERENCE) {
-			printTestDisabledMessage("BUG_83393_CORE_VARARG_JAVADOC_REFERENCE");
-			return;
-		}
 		String[] signature= {"[QString;"};
 		String[] newNames= {};
 		String[] newTypes= {};

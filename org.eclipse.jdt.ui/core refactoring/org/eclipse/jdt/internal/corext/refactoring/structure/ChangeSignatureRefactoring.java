@@ -2015,6 +2015,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					newP.setName(getASTRewrite().getAST().newSimpleName(info.getNewName()));
 			
 			newP.setType(createNewDocRefType(info));
+			newP.setVarargs(info.isNewVarargs());
 			return newP;
 		}
 
@@ -2023,10 +2024,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			ITypeBinding newTypeBinding= info.getNewTypeBinding();
 			if (newTypeBinding != null)
 				newTypeBinding= newTypeBinding.getErasure(); //see bug 83127: Javadoc references are raw (erasures)
-			Type typeNode= createNewTypeNode(newTypeName, newTypeBinding);
-			if (info.isNewVarargs())
-				typeNode= getASTRewrite().getAST().newArrayType(typeNode); // see bug 83393: Javadoc refs to varargs
-			return typeNode;
+			return createNewTypeNode(newTypeName, newTypeBinding);
 		}
 
 		protected SimpleName getMethodNameNode() {
@@ -2061,6 +2059,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			MethodRefParameter oldParam= (MethodRefParameter) ((MethodRef) fNode).parameters().get(info.getOldIndex());
 			Type oldTypeNode= oldParam.getType();
 			Type newTypeNode= createNewDocRefType(info);
+			if (info.isNewVarargs()) {
+				if (info.isOldVarargs() && ! oldParam.isVarargs()) {
+					// leave as array reference of old reference was not vararg
+					newTypeNode= getASTRewrite().getAST().newArrayType(newTypeNode);
+				} else {
+					getASTRewrite().set(oldParam, MethodRefParameter.VARARGS_PROPERTY, Boolean.TRUE, fDescription);
+				}
+			} else {
+				if (oldParam.isVarargs()) {
+					getASTRewrite().set(oldParam, MethodRefParameter.VARARGS_PROPERTY, Boolean.FALSE, fDescription);
+				}
+			}
+			
 			getASTRewrite().replace(oldTypeNode, newTypeNode, fDescription);
 			getImportRemover().registerRemovedNode(oldTypeNode);
 		}
