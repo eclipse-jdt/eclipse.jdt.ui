@@ -18,6 +18,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
 
@@ -58,15 +59,18 @@ public class SelectWorkingSetAction extends Action {
 	public void run() {
 		if (fShell == null)
 			fShell= JavaPlugin.getActiveWorkbenchShell();
-		IWorkingSetSelectionDialog dialog= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSetSelectionDialog(fShell, false);
+		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+		IWorkingSetSelectionDialog dialog= manager.createWorkingSetSelectionDialog(fShell, false);
 		IWorkingSet workingSet= fActionGroup.getWorkingSet();
 		if (workingSet != null)
 			dialog.setSelection(new IWorkingSet[]{workingSet});
 
 		if (dialog.open() == Window.OK) {
 			IWorkingSet[] result= dialog.getSelection();
-			if (result != null && result.length > 0)
+			if (result != null && result.length > 0) {
 				fActionGroup.setWorkingSet(result[0]);
+				manager.addRecentWorkingSet(result[0]);
+			}
 			else
 				fActionGroup.setWorkingSet(null);
 		}
