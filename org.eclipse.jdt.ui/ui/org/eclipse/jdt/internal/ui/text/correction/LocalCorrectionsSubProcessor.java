@@ -276,7 +276,7 @@ public class LocalCorrectionsSubProcessor {
 			String label;
 			switch (problemPos.getId()) {
 			case IProblem.StaticMethodRequested:
-				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changeaccesstostatic.description", name);
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changemodifiertostatic.description", name);
 				includedModifiers= Modifier.STATIC;
 				break;
 			case IProblem.NotVisibleMethod:
