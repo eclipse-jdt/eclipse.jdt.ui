@@ -769,6 +769,15 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		return settings;
 	}
 	
+	/**
+	 * Returns the hierarchy presenter which will determine and shown type hierarchy
+	 * information requested for the current cursor position.
+	 *
+	 * @param sourceViewer the source viewer to be configured by this configuration
+	 * @param doCodeResolve a boolean which specifies whether code resolve should be used to compute the Java element 
+	 * @return an information presenter
+	 * @since 3.0
+	 */
 	public IInformationPresenter getHierarchyPresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
 		InformationPresenter presenter= new InformationPresenter(getHierarchyPresenterControlCreator(sourceViewer));
 		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));

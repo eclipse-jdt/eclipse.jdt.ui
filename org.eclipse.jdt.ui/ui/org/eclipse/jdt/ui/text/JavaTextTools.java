@@ -360,29 +360,6 @@ public class JavaTextTools {
 		}
 		partitioner.connect(document);
 	}
-	
-	/**
-	 * Sets up the given document for the default partitioning.
-	 * 
-	 * @param document the document to be set up
-	 * @since 3.0
-	 * @deprecated As of 3.0, replaced by {@link #setupJavaDocumentPartitioner(IDocument)}
-	 */
-	public void setupDocument(IDocument document) {
-		setupJavaDocumentPartitioner(document, IDocumentExtension3.DEFAULT_PARTITIONING);
-	}
-	
-	/**
-	 * Sets up the given document for the given partitioning.
-	 * 
-	 * @param document the document to be set up
-	 * @param partitioning the document partitioning
-	 * @since 3.0
-	 * @deprecated As of 3.0, replaced by {@link #setupJavaDocumentPartitioner(IDocument, String)}
-	 */
-	public void setupDocument(IDocument document, String partitioning) {
-		setupJavaDocumentPartitioner(document, partitioning);
-	}
 
 	/**
 	 * Returns this text tool's preference store.
