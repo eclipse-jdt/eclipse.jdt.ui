@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -693,6 +694,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		StringBuffer buff= new StringBuffer();
 		
 		buff.append(getPreviewOfVisibityString());
+		if (Flags.isStatic(getMethod().getFlags()))
+			buff.append("static "); //$NON-NLS-1$
 		if (! getMethod().isConstructor())
 			buff.append(getReturnTypeString())
 				.append(' ');
@@ -1099,10 +1102,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		TextEdit resultingEdits= new MultiTextEdit();
 		rewrite.rewriteNode(textBuffer, resultingEdits);
 
-		TextChange textChange= manager.get(cu);
 		if (fImportManager.hasImportEditFor(cu))
 			resultingEdits.addChild(fImportManager.getImportRewrite(cu).createEdit(textBuffer));
-		textChange.addTextEdit(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
+		if (resultingEdits.hasChildren() || manager.containsChangesIn(cu)) {
+		    TextChange textChange= manager.get(cu);
+		    textChange.addTextEdit(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
+		}
 		rewrite.removeModifications();
 	}
 	
@@ -1143,8 +1148,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		rewrite.markAsReplaced(typeNode, newParamType);
 	}
 
-	private void changeReturnType(MethodDeclaration methodDeclaration, ASTRewrite rewrite) {
-		replaceTypeNode(methodDeclaration.getReturnType(), fReturnTypeName, rewrite);
+	private void changeReturnType(MethodDeclaration methodDeclaration, ASTRewrite rewrite) throws JavaModelException {
+	    if (! isReturnTypeSameAsInitial())
+	        replaceTypeNode(methodDeclaration.getReturnType(), fReturnTypeName, rewrite);
 	}
 
 	private void changeVisibility(MethodDeclaration methodDeclaration, ASTRewrite rewrite) {
