@@ -498,7 +498,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 */
 	protected boolean validateDestinationGroup() {
 		if (fDestinationNamesCombo.getText().length() == 0) {
-			setErrorMessage("Invalid JAR location.");
+//			setErrorMessage("Invalid JAR location.");
 			return false;
 		}
 		if (fJarPackage.getJarLocation().toString().endsWith("/")) {
@@ -524,7 +524,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			return false;
 		}
 		if (getSelectedResources().size() == 0) {
-			setErrorMessage("No resources selected for export");
 			return false;
 		}
 		return true;

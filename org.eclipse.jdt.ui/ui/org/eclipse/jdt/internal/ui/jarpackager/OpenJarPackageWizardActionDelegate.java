@@ -38,6 +38,10 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 			ExceptionHandler.handle(ex, parent, "Open JAR Packager Error", "Reading JAR package description from file failed");
 			return;
 		}
+		org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("show dialog");
+		if (jarPackage == null)
+			return;
+			
 		JarPackageWizard wizard= new JarPackageWizard();
 		wizard.init(getWorkbench(), jarPackage);
 		WizardDialog dialog= new WizardDialog(parent, wizard);

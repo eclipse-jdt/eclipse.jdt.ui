@@ -22,9 +22,9 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 * @param	message		the message
 	 * @param	exception	the throwable that caused the warning, or <code>null</code>
 	 */
-	protected void addWarning(String message, Throwable error) {		if (fJarPackage.logWarnings())
+	protected void addWarning(String message, Throwable error) {		if (fJarPackage == null || fJarPackage.logWarnings())
 			fErrors.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, message, error));
-	}	/**	 * Adds a new error to the list with the passed information.	 * Normally an error terminates the export operation.	 * @param	message		the message	 * @param	exception	the throwable that caused the error, or <code>null</code>	 */	protected void addError(String message, Throwable error) {		if (fJarPackage.logErrors())			fErrors.add(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, error));	}	/**
+	}	/**	 * Adds a new error to the list with the passed information.	 * Normally an error terminates the export operation.	 * @param	message		the message	 * @param	exception	the throwable that caused the error, or <code>null</code>	 */	protected void addError(String message, Throwable error) {		if (fJarPackage == null || fJarPackage.logErrors())			fErrors.add(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, error));	}	/**
 	 * Answers the number of file resources specified by the JAR package.
 	 *
 	 * @return int
@@ -249,7 +249,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 * @param	progressMonitor	the progress monitor that displays the progress
 	 * @see		#getStatus()
 	 */
-	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {		if (fJarPackage != null)			singleRun(progressMonitor);		else {			int jarCount= fDescriptionFiles.length;			for (int i= 0; i < jarCount; i++) {				fJarPackage= readJarPackage(fDescriptionFiles[i]);				singleRun(progressMonitor);			}		}	}	public void singleRun(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {		int totalWork= countSelectedElements();
+	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {		if (fJarPackage != null)			singleRun(progressMonitor);		else {			int jarCount= fDescriptionFiles.length;			for (int i= 0; i < jarCount; i++) {				fJarPackage= readJarPackage(fDescriptionFiles[i]);				if (fJarPackage == null)					addError("Skipped JAR description due to bad format: " + fDescriptionFiles[i].getFullPath(), null);				else					singleRun(progressMonitor);			}		}	}	public void singleRun(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {		int totalWork= countSelectedElements();
 		progressMonitor.beginTask("Exporting:", totalWork);
 		try {			if (!preconditionsOK())				throw new InvocationTargetException(null, "JAR creation failed. Details follow");			fJarWriter= new JarWriter(fJarPackage, fParentShell);
 			exportSelectedElements(progressMonitor);			if (getStatus().getSeverity() != IStatus.ERROR) {				progressMonitor.subTask("Saving files...");				saveFiles();			}		} catch (IOException ex) {
