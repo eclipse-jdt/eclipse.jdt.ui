@@ -109,7 +109,9 @@ public class ErrorTickManager implements IResourceChangeListener {
 	private IJavaProject getJavaProject(IProject proj) {
 		try {
 			if (proj.hasNature(JavaCore.NATURE_ID)) {
-				return JavaCore.create(proj);
+				IJavaProject jp= JavaCore.create(proj);
+				if (jp.isOpen()) 
+					return jp;
 			}
 		} catch (CoreException e) {
 		}
