@@ -187,7 +187,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		editor.performEdits(null);
 		CompositeCodeBlock codeBlock= new CompositeCodeBlock();
 		codeBlock.add(newLocals);
-		codeBlock.add(new TryCatchBlock(exceptions, new CodeBlock(editor.getTextBuffer())));
+		codeBlock.add(new TryCatchBlock(exceptions, fCUnit.getJavaProject(), new CodeBlock(editor.getTextBuffer())));
 		change.addTextEdit(NN, CodeBlockEdit.createReplace(selectionStart, fSelection.getLength(), codeBlock));
 	}
 	

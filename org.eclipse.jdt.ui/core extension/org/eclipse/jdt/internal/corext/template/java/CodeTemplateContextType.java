@@ -1,6 +1,5 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -15,6 +14,10 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String CATCHBLOCK_CONTEXTTYPE= "catchblock_context";
 	public static final String METHODBODY_CONTEXTTYPE= "methodbody_context";
 	public static final String NEWTYPE_CONTEXTTYPE= "newtype_context";
+	
+	public static final String CATCHBLOCK_NAME= "catchblock"; //$NON-NLS-1$
+	public static final String EXCEPTION_TYPE= "exception_type"; //$NON-NLS-1$
+	public static final String EXCEPTION_VAR= "exception_var"; //$NON-NLS-1$
 	
 	public static class CodeTemplateVariable extends TemplateVariable {
 		public CodeTemplateVariable(String name, String description) {
@@ -36,12 +39,9 @@ public class CodeTemplateContextType extends ContextType {
 		}
 		
 		public String evaluate(TemplateContext context) {
-			JavaContext javaContext= (JavaContext) context;
-			ICompilationUnit compilationUnit= javaContext.getCompilationUnit();
-			if (compilationUnit == null)
-				return "XXX"; //$NON-NLS-1$
+			CodeTemplateContext cc= (CodeTemplateContext)context;
 			
-			IJavaProject javaProject= compilationUnit.getJavaProject();
+			IJavaProject javaProject= cc.getJavaProject();
 			String todoTaskTag= StubUtility.getTodoTaskTag(javaProject);
 			if (todoTaskTag == null)
 				return "XXX"; //$NON-NLS-1$
@@ -63,6 +63,8 @@ public class CodeTemplateContextType extends ContextType {
 		addVariable(new Todo());	
 		
 		if (CATCHBLOCK_CONTEXTTYPE.equals(contextName)) {
+			addVariable(new CodeTemplateVariable(EXCEPTION_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.exceptionType")));
+			addVariable(new CodeTemplateVariable(EXCEPTION_VAR,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.exceptionVar")));
 		} else if (METHODBODY_CONTEXTTYPE.equals(contextName)) {
 		} else if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable("package_statement",  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.packstatement")));
