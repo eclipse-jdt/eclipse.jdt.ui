@@ -117,7 +117,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptClass(char[], char[], char[], int, int, int)
+	 * @see ICompletionRequestor#acceptClass(char[], char[], char[], int, int, int)
 	 */
 	public void acceptClass(
 		char[] packageName,
@@ -129,14 +129,14 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptError(IMarker)
+	 * @see ICompletionRequestor#acceptError(IMarker)
 	 */
 	public void acceptError(IMarker marker) {
 		fError= true;
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptField(char[], char[], char[], char[], char[], char[], int, int, int)
+	 * @see ICompletionRequestor#acceptField(char[], char[], char[], char[], char[], char[], int, int, int)
 	 */
 	public void acceptField(
 		char[] declaringTypePackageName,
@@ -151,7 +151,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptInterface(char[], char[], char[], int, int, int)
+	 * @see ICompletionRequestor#acceptInterface(char[], char[], char[], int, int, int)
 	 */
 	public void acceptInterface(
 		char[] packageName,
@@ -163,7 +163,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptKeyword(char[], int, int)
+	 * @see ICompletionRequestor#acceptKeyword(char[], int, int)
 	 */
 	public void acceptKeyword(
 		char[] keywordName,
@@ -172,7 +172,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptLabel(char[], int, int)
+	 * @see ICompletionRequestor#acceptLabel(char[], int, int)
 	 */
 	public void acceptLabel(
 		char[] labelName,
@@ -181,7 +181,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptLocalVariable(char[], char[], char[], int, int, int)
+	 * @see ICompletionRequestor#acceptLocalVariable(char[], char[], char[], int, int, int)
 	 */
 	public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName,
 		int modifiers, int completionStart,	int completionEnd)
@@ -191,7 +191,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
+	 * @see ICompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
 	 */
 	public void acceptMethod(
 		char[] declaringTypePackageName,
@@ -209,7 +209,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptMethodDeclaration(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
+	 * @see ICompletionRequestor#acceptMethodDeclaration(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
 	 */
 	public void acceptMethodDeclaration(
 		char[] declaringTypePackageName,
@@ -227,7 +227,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptModifier(char[], int, int)
+	 * @see ICompletionRequestor#acceptModifier(char[], int, int)
 	 */
 	public void acceptModifier(
 		char[] modifierName,
@@ -236,7 +236,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptPackage(char[], char[], int, int)
+	 * @see ICompletionRequestor#acceptPackage(char[], char[], int, int)
 	 */
 	public void acceptPackage(
 		char[] packageName,
@@ -246,7 +246,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptType(char[], char[], char[], int, int)
+	 * @see ICompletionRequestor#acceptType(char[], char[], char[], int, int)
 	 */
 	public void acceptType(
 		char[] packageName,
@@ -257,7 +257,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptVariableName(char[], char[], char[], char[], int, int)
+	 * @see ICompletionRequestor#acceptVariableName(char[], char[], char[], char[], int, int)
 	 */
 	public void acceptVariableName(
 		char[] typePackageName,
@@ -267,6 +267,12 @@ public class TemplateCollector implements ICompletionRequestor {
 		int completionStart,
 		int completionEnd) {
 	}
+	
+	/*
+	 * @see ICompletionRequestor#acceptAnonymousType(char[], char[], char[][], char[][], char[][], char[], int, int, int)
+	 */
+	public void acceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int modifiers, int completionStart, int completionEnd) {
+	}	
 
 	// ---
 
@@ -515,5 +521,7 @@ public class TemplateCollector implements ICompletionRequestor {
 	public static String[][] getVariables() {
 		return fgVariables;
 	}
+
+
 }
 

@@ -136,6 +136,17 @@ public class ResultCollector implements ICompletionRequestor {
 	}
 	
 	/*
+	 * @see ICompletionRequestor#acceptAnonymousType(char[], char[], char[][], char[][], char[][], char[], int, int, int)
+	 */
+	public void acceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
+		char[] completionName, int modifiers, int completionStart, int completionEnd) {
+
+		JavaCompletionProposal	proposal= createAnonymousTypeCompletion(superTypePackageName, superTypeName, parameterTypeNames, parameterNames, completionName, completionStart, completionEnd);
+		proposal.setProposalInfo(new ProposalInfo(fJavaProject, superTypePackageName, superTypeName));
+		fTypes.add(proposal);
+	}	
+	
+	/*
 	 * @see ICompletionRequestor#acceptKeyword
 	 */	
 	public void acceptKeyword(char[] keyword, int start, int end) {
@@ -185,7 +196,7 @@ public class ResultCollector implements ICompletionRequestor {
 	}
 	
 	/*
-	 * @see ICodeCompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
+	 * @see ICompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
 	 */
 	public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
 		char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
@@ -214,13 +225,7 @@ public class ResultCollector implements ICompletionRequestor {
 			proposal.setCursorPosition(completionName.length - 1);
 		}
 		
-		fMethods.add(proposal);
-		
-		if (returnTypeName.length == 0 && fCompilationUnit != null) {
-			proposal= createAnonymousTypeCompletion(declaringTypePackageName, declaringTypeName, name, parameterTypeNames, parameterNames, completionName, start, end);
-			proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName));
-			fTypes.add(proposal);
-		}		
+		fMethods.add(proposal);	
 	}
 
 	
@@ -320,7 +325,7 @@ public class ResultCollector implements ICompletionRequestor {
 		return createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString());
 	}
 
-	private JavaCompletionProposal createAnonymousTypeCompletion(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int start, int end) {
+	protected JavaCompletionProposal createAnonymousTypeCompletion(char[] declaringTypePackageName, char[] declaringTypeName, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int start, int end) {
 		StringBuffer declTypeBuf= new StringBuffer();
 		if (declaringTypePackageName.length > 0) {
 			declTypeBuf.append(declaringTypePackageName);
@@ -329,7 +334,7 @@ public class ResultCollector implements ICompletionRequestor {
 		declTypeBuf.append(declaringTypeName);
 		
 		StringBuffer nameBuffer= new StringBuffer();
-		nameBuffer.append(name);
+		nameBuffer.append(declaringTypeName);
 		nameBuffer.append('(');
 		if (parameterTypeNames.length > 0) {
 			nameBuffer.append(getParameterSignature(parameterTypeNames, parameterNames));
@@ -441,5 +446,7 @@ public class ResultCollector implements ICompletionRequestor {
 	public void setPreventEating(boolean preventEating) {
 		fPreventEating= preventEating;
 	}
+
+
 
 }
