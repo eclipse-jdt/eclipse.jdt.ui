@@ -49,13 +49,13 @@ public class ReferenceFinderUtil {
 	}
 	
 	private static SearchResult[] getTypeReferencesIn(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
-		List referencedFields= new ArrayList();
+		List referencedTypes= new ArrayList();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
-			referencedFields.addAll(getTypeReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
+			referencedTypes.addAll(getTypeReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
 		}
 		pm.done();
-		return (SearchResult[]) referencedFields.toArray(new SearchResult[referencedFields.size()]);
+		return (SearchResult[]) referencedTypes.toArray(new SearchResult[referencedTypes.size()]);
 	}
 	
 	private static List getTypeReferencesIn(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
