@@ -234,9 +234,10 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		return super.visit(node);
 	}
+	
 	public boolean visit(Assignment node) {
 		Expression lhs= node.getLeftHandSide();
-		Name name= getName(lhs);
+		SimpleName name= getSimpleName(lhs);
 		if (name != null) 
 			match(name, fWriteUsages, name.resolveBinding());	
 		lhs.accept(this);
@@ -260,7 +261,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		PrefixExpression.Operator operator= node.getOperator();	
 		if (operator == Operator.INCREMENT || operator == Operator.DECREMENT) {
 			Expression operand= node.getOperand();
-			Name name= getName(operand);
+			SimpleName name= getSimpleName(operand);
 			if (name != null) 
 				match(name, fWriteUsages, name.resolveBinding());				
 		}
@@ -269,7 +270,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 
 	public boolean visit(PostfixExpression node) {
 		Expression operand= node.getOperand();
-		Name name= getName(operand);
+		SimpleName name= getSimpleName(operand);
 		if (name != null) 
 			match(name, fWriteUsages, name.resolveBinding());
 		return super.visit(node);
@@ -283,11 +284,11 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		return false;
 	}
 
-	private Name getName(Expression expression) {
+	private SimpleName getSimpleName(Expression expression) {
 		if (expression instanceof SimpleName)
 			return ((SimpleName)expression);
 		else if (expression instanceof QualifiedName)
-			return ((QualifiedName)expression);
+			return (((QualifiedName) expression).getName());
 		else if (expression instanceof FieldAccess)
 			return ((FieldAccess)expression).getName();
 		return null;
