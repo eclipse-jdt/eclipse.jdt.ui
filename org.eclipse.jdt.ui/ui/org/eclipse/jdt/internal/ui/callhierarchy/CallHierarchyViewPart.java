@@ -63,6 +63,10 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.actions.CCPActionGroup;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
@@ -84,6 +88,8 @@ import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
  */
 public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListener,
     ISelectionChangedListener {
+    private CallHierarchyViewSiteAdapter fViewSiteAdapter;
+    private CallHierarchyViewAdapter fViewAdapter;
     public static final String CALLERS_VIEW_ID = "org.eclipse.jdt.callhierarchy.view"; //$NON-NLS-1$
     private static final String DIALOGSTORE_VIEWORIENTATION = "CallHierarchyViewPart.orientation"; //$NON-NLS-1$
     private static final String DIALOGSTORE_CALL_MODE = "CallHierarchyViewPart.call_mode"; //$NON-NLS-1$
@@ -122,7 +128,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     private List fMethodHistory;
     private TableViewer fLocationViewer;
     private Menu fLocationContextMenu;
-    private Menu fTreeContextMenu;
     private SashForm fHierarchyLocationSplitter;
     private SearchScopeActionGroup fSearchScopeActions;
     private ToggleOrientationAction[] fToggleOrientationActions;
@@ -131,7 +136,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     private CallHierarchyFiltersActionGroup fFiltersActionGroup;
     private HistoryDropDownAction fHistoryDropDownAction;
     private RefreshAction fRefreshAction;
-    private OpenDeclarationAction fOpenDeclarationAction;
     private OpenLocationAction fOpenLocationAction;
     private FocusOnSelectionAction fFocusOnSelectionAction;
     private CompositeActionGroup fActionGroups;
@@ -453,8 +457,10 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
      *
      */
     public void dispose() {
-        disposeMenu(fTreeContextMenu);
         disposeMenu(fLocationContextMenu);
+
+        if (fActionGroups != null)
+            fActionGroups.dispose();
 
         super.dispose();
     }
@@ -644,10 +650,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     protected void fillContextMenu(IMenuManager menu) {
         JavaPlugin.createStandardGroups(menu);
 
-        if (fOpenDeclarationAction.canActionBeAdded()) {
-            menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fOpenDeclarationAction);
-        }
-
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshAction);
     }
 
@@ -775,10 +777,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     protected void fillCallHierarchyViewerContextMenu(IMenuManager menu) {
         JavaPlugin.createStandardGroups(menu);
 
-        if (fOpenDeclarationAction.canActionBeAdded()) {
-            menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fOpenDeclarationAction);
-        }
-
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRefreshAction);
         menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, new Separator(GROUP_FOCUS));
 
@@ -825,7 +823,6 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
      */
     private void makeActions() {
         fRefreshAction = new RefreshAction(this);
-        fOpenDeclarationAction = new OpenDeclarationAction(this.getSite());
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
         fSearchScopeActions = new SearchScopeActionGroup(this);
         fFiltersActionGroup = new CallHierarchyFiltersActionGroup(this,
@@ -848,9 +845,28 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
             };
 
         fActionGroups = new CompositeActionGroup(new ActionGroup[] {
-                    new OpenViewActionGroup(this), new RefactorActionGroup(this),
+                    new OpenEditorActionGroup(getViewAdapter()), 
+                    new OpenViewActionGroup(getViewAdapter()),
+                    new CCPActionGroup(getViewAdapter()),
+                    new GenerateActionGroup(getViewAdapter()), 
+                    new RefactorActionGroup(getViewAdapter()),
+                    new JavaSearchActionGroup(getViewAdapter()),
                     fSearchScopeActions, fFiltersActionGroup
                 });
+    }
+
+    private CallHierarchyViewAdapter getViewAdapter() {
+        if (fViewAdapter == null) {
+            fViewAdapter= new CallHierarchyViewAdapter(getViewSiteAdapter());
+        }
+        return fViewAdapter; 
+    }
+
+    private CallHierarchyViewSiteAdapter getViewSiteAdapter() {
+        if (fViewSiteAdapter == null) {
+            fViewSiteAdapter= new CallHierarchyViewSiteAdapter(this.getViewSite());
+        }
+        return fViewSiteAdapter;
     }
 
     private void showOrHideCallDetailsView() {

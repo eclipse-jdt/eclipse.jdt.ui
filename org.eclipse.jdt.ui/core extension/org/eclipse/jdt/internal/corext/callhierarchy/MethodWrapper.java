@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
+
 import org.eclipse.jdt.internal.corext.Assert;
 
 /**
@@ -61,16 +61,8 @@ public abstract class MethodWrapper implements IAdaptable {
     }
 
     public Object getAdapter(Class adapter) {
-        if (adapter == IMethod.class) {
-            if (getMember().getElementType() == IJavaElement.METHOD) {
-                return getMember();
-            } else {
-                return null;
-            }
-        } else {
-            if (IJavaElement.class.isAssignableFrom(adapter)) {
-                return getMember();
-            }
+        if (adapter == IJavaElement.class) {
+            return getMember();
         }
 
         return null;
