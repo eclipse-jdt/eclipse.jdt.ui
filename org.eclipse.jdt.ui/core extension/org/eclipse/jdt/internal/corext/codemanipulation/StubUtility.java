@@ -104,7 +104,7 @@ public class StubUtility {
 		}
 		// add method declaration
 		String bodyStatement= getDefaultMethodBodyStatement(methName, paramNames, returnType, settings.callSuper);
-		String bodyContent= getMethodBodyContent(returnType == null, cu.getJavaProject(), destTypeName, methName, bodyStatement);
+		String bodyContent= getMethodBodyContent(returnType == null, method.getJavaProject(), destTypeName, methName, bodyStatement);
 		genMethodDeclaration(destTypeName, method, bodyContent, imports, buf);
 		return buf.toString();
 	}
