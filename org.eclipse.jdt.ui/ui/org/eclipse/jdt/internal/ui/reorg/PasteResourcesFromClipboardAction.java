@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 
-public class PasteResourcesFromClipboardAction extends Action implements IRefactoringAction {
+class PasteResourcesFromClipboardAction extends Action implements IRefactoringAction {
 	
 	private final StructuredSelectionProvider fProvider;
 
@@ -33,7 +33,7 @@ public class PasteResourcesFromClipboardAction extends Action implements IRefact
 	}
 
 	public void update() {
-		setEnabled(canEnableOn(getStructuredSelection()));
+		setEnabled(canOperateOn(getStructuredSelection()));
 	}
 
 	private IStructuredSelection getStructuredSelection() {
@@ -69,7 +69,7 @@ public class PasteResourcesFromClipboardAction extends Action implements IRefact
 	}
 
 	//- enablement ---
-	private static boolean canEnableOn(IStructuredSelection selection){
+	public static boolean canOperateOn(IStructuredSelection selection){
 		IResource[] resourceData= getClipboardResources();
 		if (resourceData == null || resourceData.length == 0)
 			return false;
