@@ -4,15 +4,14 @@
  */
 package org.eclipse.jdt.ui.examples;
 
-import java.util.Random;
-
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
+
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-
-import org.eclipse.jdt.internal.ui.dialogs.TwoPaneElementSelector;
+
+import org.eclipse.ui.dialogs.TwoPaneElementSelector;
+
+
 
 public class TwoPaneElementSelectorExample {
 

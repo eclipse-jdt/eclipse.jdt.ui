@@ -45,9 +45,7 @@ public class ImportOrganizeTest extends TestCase {
 
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite();
-		suite.addTest(new ImportOrganizeTest("test5"));
-		return suite;
+		return new TestSuite(THIS);
 	}
 
 
@@ -222,7 +220,7 @@ public class ImportOrganizeTest extends TestCase {
 		buf.append("public class ImportTest extends A implements IA, IB {\n");
 		buf.append("  private B fB;\n");
 		buf.append("  private Object fObj= new C();\n");
-		buf.append("  public IB foo(IC c, ID d) {\n");
+		buf.append("  public IB foo(IC c, ID d) throws IOException {\n");
 		buf.append("   Object local= (D) fObj;\n");
 		buf.append("   if (local instanceof E) {};\n");
 		buf.append("   return null;\n");
@@ -240,6 +238,7 @@ public class ImportOrganizeTest extends TestCase {
 		op.run(null);
 		
 		assertImports(cu, new String[] {
+			"java.io.IOException",
 			"test.A",
 			"test.B",
 			"test.C",
@@ -248,7 +247,7 @@ public class ImportOrganizeTest extends TestCase {
 			"test.IA",
 			"test.IB",
 			"test.IC",
-			"test.ID"
+			"test.ID",
 		});		
 	}
 }

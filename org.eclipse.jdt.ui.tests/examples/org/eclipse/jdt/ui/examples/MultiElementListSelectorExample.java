@@ -6,15 +6,15 @@ package org.eclipse.jdt.ui.examples;
 
 import java.util.Random;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -22,7 +22,7 @@ public class MultiElementListSelectorExample {
 
 	public static void main(String[] args) {
 
-		ISelectionValidator validator= new ISelectionValidator() {
+		ISelectionStatusValidator validator= new ISelectionStatusValidator() {
 			public IStatus validate(Object[] selection) {
 				if (selection != null && selection.length == 1) {
 					return new StatusInfo();

@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -24,7 +25,6 @@ import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
-import org.eclipse.jdt.internal.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class DialogsTest2 extends TestCase {

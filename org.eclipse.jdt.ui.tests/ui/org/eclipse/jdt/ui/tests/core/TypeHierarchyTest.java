@@ -70,7 +70,7 @@ public class TypeHierarchyTest extends TestCase {
 		
 		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 		
-		IType type= JavaModelUtil.findType(fJavaProject2, "pack1.A");
+		IType type= fJavaProject2.findType("pack1.A");
 		assertTrue("Type not found", type != null);
 
 	}	
