@@ -18,19 +18,19 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 
 /**
  * Creates a custom constructor with fields initialized.
@@ -43,8 +43,9 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	private IMethod fConstructorCreated;
 	private boolean fDoSave;
 	private CodeGenerationSettings fSettings;
+	private IMethod[] fSuperMethod;
 	
-	public AddCustomConstructorOperation(IType type, CodeGenerationSettings settings, IField[] selected, boolean save, IJavaElement insertPosition) {
+	public AddCustomConstructorOperation(IType type, CodeGenerationSettings settings, IField[] selected, boolean save, IJavaElement insertPosition, int superIndex) {
 		super();
 		fType= type;
 		fDoSave= save;
@@ -52,6 +53,11 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 		fSettings= settings;
 		fSelected= selected;
 		fInsertPosition= insertPosition;
+		try {
+			fSuperMethod= new IMethod[1];
+			fSuperMethod[0]= StubUtility.getOverridableConstructors(type)[superIndex];
+		} catch (CoreException e) {
+		}					
 	}
 
 	/**
@@ -66,16 +72,24 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			monitor.setTaskName(CodeGenerationMessages.getString("AddCustomConstructorOperation.description")); //$NON-NLS-1$
 			monitor.beginTask("", 3); //$NON-NLS-1$
 			
-			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			monitor.worked(1);
 			
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
-			String defaultConstructor= getDefaultConstructor(fType, hierarchy, imports);
-			int firstParenIndex= defaultConstructor.indexOf("(") + 1; //$NON-NLS-1$
-			int closingBraceIndex= defaultConstructor.indexOf("}"); //$NON-NLS-1$
-			StringBuffer buf= new StringBuffer(defaultConstructor.substring(0, firstParenIndex));
+			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
+			monitor.worked(1);
+			
+			String defaultConstructor= StubUtility.genOverrideStubs(fSuperMethod, fType, hierarchy, fSettings, imports)[0];					
+			int closingBraceIndex= defaultConstructor.lastIndexOf('}'); //$NON-NLS-1$
+
+			IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+			scanner.setSource(defaultConstructor.toCharArray());
+			TokenScanner tokenScanner= new TokenScanner(scanner);
+			int closingParenIndex= tokenScanner.getTokenStartOffset(ITerminalSymbols.TokenNameRPAREN, 0);
+
+			StringBuffer buf= new StringBuffer(defaultConstructor.substring(0, closingParenIndex));
 			String[] params= new String[fSelected.length];
 			for (int i= 0; i < fSelected.length; i++) {
+				buf.append(", "); //$NON-NLS-1$
 				buf.append(Signature.toString(fSelected[i].getTypeSignature()));				
 				buf.append(" "); //$NON-NLS-1$
 				IJavaProject project= fSelected[i].getJavaProject();
@@ -89,11 +103,11 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 				String paramName= StubUtility.guessArgumentName(project, accessName, new String[0]);
 				
-				buf.append(params[i]= paramName);
-				if (i != fSelected.length - 1)
-					buf.append(","); //$NON-NLS-1$					
+				buf.append(params[i]= paramName);				
 			}
-			buf.append(defaultConstructor.substring(firstParenIndex, closingBraceIndex));
+			
+			buf.append(defaultConstructor.substring(closingParenIndex, closingBraceIndex));
+			
 			for (int i= 0; i < fSelected.length; i++) {
 				String fieldName= fSelected[i].getElementName();
 				boolean isStatic= Flags.isStatic(fSelected[i].getFlags());
@@ -123,24 +137,6 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			monitor.done();
 		}
 	}
-		
-	private String getDefaultConstructor(IType type, ITypeHierarchy hierarchy, ImportsStructure imports)  {
-		try {
-			ICompilationUnit cu= type.getCompilationUnit();
-			GenStubSettings genStubSettings= new GenStubSettings(fSettings);	
-				
-			IType objectType= type.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$
-			IMethod curr= objectType.getMethod("Object", new String[0]);  //$NON-NLS-1$
-			IMethod defaultConstructor= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-			IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-			String str= StubUtility.genStub(cu, type.getElementName(), defaultConstructor, desc.getDeclaringType(), genStubSettings, imports);				
-			return str;	
-
-		} catch (JavaModelException e) {
-		} catch (CoreException e) {
-		}
-		return null;
-	}	
 	
 	/**
 	 * Returns the created constructor. To be called after a sucessful run.

@@ -17,8 +17,14 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -49,6 +55,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddCustomConstructorOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -64,6 +71,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 
 public class CreateNewConstructorAction extends SelectionDispatchAction {
@@ -134,7 +142,11 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 		try {
 			IField[] selectedFields= getSelectedFields(selection);
 			// open an editor and work on a working copy
-			IEditorPart editor= EditorUtility.openInEditor(getSelectedType(selection));	
+			IEditorPart editor= null;
+			if (selectedFields != null)
+				editor= EditorUtility.openInEditor(selectedFields[0]);			
+			else
+				editor= EditorUtility.openInEditor(getSelectedType(selection).getCompilationUnit());	
 			
 			if (canRunOn(selectedFields)){
 				run((IType)EditorUtility.getWorkingCopy(selectedFields[0].getDeclaringType()), selectedFields, editor, false);
@@ -318,8 +330,9 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 			settings.createComments= dialog.getGenerateComment();
 	
 			IJavaElement elementPosition= dialog.getElementPosition();
-			AddCustomConstructorOperation op= new AddCustomConstructorOperation(type, settings, selected, false, elementPosition);
-			
+			int superIndex= dialog.getSuperIndex();
+			AddCustomConstructorOperation op= new AddCustomConstructorOperation(type, settings, selected, false, elementPosition, superIndex);
+
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null) {
 				target.beginCompoundChange();		
@@ -488,12 +501,16 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 	
 	private static class CreateNewConstructorSelectionDialog extends SourceActionDialog {
 		private CreateNewConstructorContentProvider fContentProvider;
+		private IType fType;
+		private int fSuperIndex;
+		
 		private static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
 		private static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;		
 		
 		public CreateNewConstructorSelectionDialog(Shell parent, ILabelProvider labelProvider, CreateNewConstructorContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
 			super(parent, labelProvider, contentProvider, editor, type);
 			fContentProvider= contentProvider;
+			fType= type;
 		}	
 		
 		protected Composite createSelectionButtons(Composite composite) {
@@ -533,13 +550,54 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 		}
 		
 		private List getElementList() {
-			Object elements[]= getTreeViewer().getCheckedElements();
+			IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
+			List elements= selection.toList();						
 			ArrayList elementList= new ArrayList();
-			for(int i = 0; i < elements.length; i++)
-				elementList.add(elements[i]);			
+
+			for (int i= 0; i < elements.size(); i++) {
+				elementList.add(elements.get(i));		
+			}
 			return elementList;
 		}		
+
+		protected Composite createEntryPtCombo(Composite composite) {
+			Composite entryComposite= super.createEntryPtCombo(composite);			
+			addSuperClassConstructorChoices(entryComposite);
+			
+			return entryComposite;						
+		}
+		
+		private Composite addSuperClassConstructorChoices(Composite composite) {
+			try {
+				Label label= new Label(composite, SWT.NONE);
+				label.setText(ActionMessages.getString("CreateNewConstructorSelectionDialog.sort_constructor_choices.label")); //$NON-NLS-1$
+				GridData gd= new GridData(GridData.FILL_BOTH);
+				label.setLayoutData(gd);
 				
+				final Combo combo= new Combo(composite, SWT.READ_ONLY);
+				IMethod[] constructorMethods= StubUtility.getOverridableConstructors(fType);					
+				
+				for (int i= 0; i < constructorMethods.length; i++) {
+					combo.add(JavaElementLabels.getElementLabel(constructorMethods[i], JavaElementLabels.M_PARAMETER_TYPES));
+				}
+				// TODO: Can we be a little more intelligent about guessing the super() ?
+				combo.setText(combo.getItem(0));
+				combo.setLayoutData(new GridData(GridData.FILL_BOTH));
+				combo.addSelectionListener(new SelectionAdapter(){
+					public void widgetSelected(SelectionEvent e) {
+						fSuperIndex= combo.getSelectionIndex();
+					}
+				});	
+
+			} catch (CoreException e) {
+			}
+			return composite;
+		}		
+				
+		public int getSuperIndex() {
+			return fSuperIndex;
+		}
+
 	}
 	
 }
