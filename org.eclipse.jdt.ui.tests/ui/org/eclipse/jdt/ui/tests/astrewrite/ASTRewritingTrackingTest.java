@@ -134,8 +134,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		
-		assertEqualString(cu.getSource(), buf.toString());
+		String expected= buf.toString();
+		assertEqualString(cu.getSource(), expected);
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
@@ -143,7 +143,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			String string= buf.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -207,7 +207,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
+		String expected= buf.toString();
+		assertEqualString(cu.getSource(), expected);
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
@@ -215,7 +216,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			String string= buf.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -286,7 +287,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
+		String expected= buf.toString();
+		assertEqualString(cu.getSource(), expected);
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
@@ -294,7 +296,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			String string= buf.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -360,7 +362,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("\n");
 		buf.append("    public int x1;\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
+		String expected= buf.toString();
+		assertEqualString(cu.getSource(), expected);
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
@@ -368,8 +371,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			assertTrue("undefined range for " + name, range.getOffset() > -1);
-			String string= buf.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -432,7 +434,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
+		String expected= buf.toString();
+		assertEqualString(cu.getSource(), expected);
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
@@ -440,8 +443,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			assertTrue("undefined range for " + name, range.getOffset() > -1);
-			String string= buf.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -492,7 +494,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		buf.append("\n");
 		buf.append("    public int x1;\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
+		String expected= buf.toString();
+		assertEqualString(cu.getSource(), expected);
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
@@ -500,8 +503,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			assertTrue("undefined range for " + name, range.getOffset() > -1);
-			String string= buf.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
