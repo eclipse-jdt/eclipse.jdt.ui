@@ -364,10 +364,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		addTextMatches(manager, new SubProgressMonitor(pm, 1));
 		
 		//putting it together
-		IChange[] changes= manager.getAllChanges();
-		for (int i= 0; i < changes.length; i++){
-			builder.addChange(changes[i]);
-		}
+		builder.addAll(manager.getAllChanges());
 	}
 	
 	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException{
