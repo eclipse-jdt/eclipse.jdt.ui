@@ -3,6 +3,8 @@ package org.eclipse.jdt.internal.ui.compare;
 import java.io.InputStream;
 import java.util.*;
 
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -12,20 +14,33 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.compare.structuremergeviewer.*;
 
 /**
- * Object of this class are used to find source code changes of JavaElements
- * that occured after a given point in time.
+ * A <code>CompilationUnitDelta</code> represents the source code changes between
+ * a CU in the workspace and the same CU at some point in the past
+ * (from the local history).
+ * <p>
+ * This functionality is used in the context of Hot Code Replace
+ * to determine which stack frames are affected (and need to be dropped)
+ * by a class reload in the Java VM.
+ * <p>
+ * Typically a <code>CompilationUnitDelta</code> object is generated for a CU
+ * when the associated class is replaced in the VM.
+ * The <code>CompilationUnitDelta</code> calculates
+ * the differences between the current version of the CU and the version in the
+ * local history that was effective at the given <bold>last</bold> build time.
+ * The differences are stored as a tree which allows for an efficient implementation
+ * of a <code>hasChanged(IMember)</code> method.
  */
 public class CompilationUnitDelta {
 	
-	static class SimpleJavaElement {
+	private static class SimpleJavaElement {
 		
 		private String fName;
 		private HashMap fChildren;
-		private int fChangeType;
+//		private int fChangeType;
 		
 		SimpleJavaElement(SimpleJavaElement parent, int changeType, String name) {
 			fName= name;
-			fChangeType= changeType;
+//			fChangeType= changeType;
 			if (parent != null) {
 				if (parent.fChildren == null)
 					parent.fChildren= new HashMap();
@@ -60,43 +75,36 @@ public class CompilationUnitDelta {
 		}
 	}
 	
+	private ICompilationUnit fCompilationUnit;
 	private SimpleJavaElement fRoot;
+	private boolean fHasHistory= false;
 	
 	/**
-	 * Creates a new CompilationUnitDelta object that contains
-	 * all changed JavaElements of the given CU.
+	 * Creates a new <code>CompilationUnitDelta object that calculates and stores
+	 * the changes of the given CU since some point in time.
 	 */
-	public CompilationUnitDelta(ICompilationUnit cu, long timestamp) {
+	public CompilationUnitDelta(ICompilationUnit cu, long timestamp) throws CoreException {
+		
+		if (cu.isWorkingCopy())
+			cu= (ICompilationUnit) cu.getOriginalElement();
+
+		fCompilationUnit= cu;
 		
 		// find underlying file
-		IFile file= null;
-		try {
-			file= (IFile) cu.getUnderlyingResource();
-		} catch (JavaModelException ex) {
-			JavaPlugin.log(ex);
-		}
-		if (file == null) {
-			System.out.println("can't find underlying resource for " + cu);
-			return;
-		}
+		IFile file= (IFile) cu.getUnderlyingResource();
 
 		// get available editions
-		IFileState[] states= null;
-		try {
-			states= file.getHistory(null);
-		} catch (CoreException ex) {
-			JavaPlugin.log(ex);
-		}	
-		if (states == null || states.length <= 0) {
-			System.out.println("can't get history for " + cu);
+		IFileState[] states= file.getHistory(null);
+		if (states == null || states.length <= 0)
 			return;
-		}
+		fHasHistory= true;
 		
 		IFileState found= null;
 		// find edition just before the given time stamp
 		for (int i= 0; i < states.length; i++) {
 			IFileState state= states[i];
-			if (state.getModificationTime() < timestamp) {
+			long d= state.getModificationTime();
+			if (d < timestamp) {
 				found= state;
 				break;
 			}
@@ -111,12 +119,14 @@ public class CompilationUnitDelta {
 			oldContents= found.getContents();
 			newContents= file.getContents();
 		} catch (CoreException ex) {
-			System.out.println("can't get contents for " + cu);
+			return;
 		}
 		
 		JavaStructureCreator jsc= new JavaStructureCreator();
 		IStructureComparator oldStructure= jsc.getStructure(oldContents);
 		IStructureComparator newStructure= jsc.getStructure(newContents);
+		
+		final boolean[] memberDeleted= new boolean[1];	// visitor returns result here
 		
 		Differencer differencer= new Differencer() {
 			protected Object visit(Object data, int result, Object ancestor, Object left, Object right) {
@@ -130,6 +140,7 @@ public class CompilationUnitDelta {
 					break;
 				case Differencer.DELETION:
 					name= ((JavaNode)left).getId();
+					memberDeleted[0]= true;
 					break;
 				default:
 					break;
@@ -141,25 +152,39 @@ public class CompilationUnitDelta {
 		};
 		
 		fRoot= (SimpleJavaElement) differencer.findDifferences(false, null, null, null, oldStructure, newStructure);
-		if (fRoot != null)
-			fRoot.dump(0);
+//		if (fRoot != null)
+//			fRoot.dump(0);
+			
+		if (memberDeleted[0])	// shape change because of deleted members
+			fRoot= null;	// throw diffs away since hasChanged(..) must always return true
 	}
 	
 	/**
 	 * Returns <code>true</code>
 	 * <ul>
-	 * <li>if the source of the given element has been changed, or
+	 * <li>if the source of the given member has been changed, or
 	 * <li>if the element has been deleted, or
 	 * <li>if the element has been newly created
 	 * </ul>
 	 * after the initial timestamp.
+	 * 
+	 * @exception AssertionFailedException if member is null or member is not a member of this CU.
 	 */
-	public boolean hasChanged(IJavaElement element) {
+	public boolean hasChanged(IMember member) {
 		
-		if (fRoot != null) {
-			String[] path= JavaStructureCreator.createPath(element);
-			return fRoot.find(path, 0);
+		Assert.isNotNull(member);
+		ICompilationUnit cu= member.getCompilationUnit();
+		if (cu.isWorkingCopy())
+			cu= (ICompilationUnit) cu.getOriginalElement();
+		Assert.isTrue(cu.equals(fCompilationUnit));
+		
+		if (fRoot == null) {
+			if (fHasHistory)
+				return true;	// pessimistic: we have a history but we couldn't use it for some reason
+			return false;	// optimistic: we have no history, so assume that member hasn't changed
 		}
-		return true;
+		
+		String[] path= JavaStructureCreator.createPath(member);
+		return fRoot.find(path, 0);
 	}
 }
