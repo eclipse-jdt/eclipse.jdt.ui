@@ -46,7 +46,7 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 	/*
 	 * @see TextSelectionBasedRefactoringAction#createRefactoring
 	 */	
-	Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return new ExtractMethodRefactoring(
 			cunit, 
 			selection.getOffset(), selection.getLength(),
@@ -58,7 +58,7 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 	/*
 	 * @see TextSelectionBasedRefactoringAction#createWizard(Refactoring)
 	 */
-	RefactoringWizard createWizard(Refactoring refactoring) {
+	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		return new ExtractMethodWizard((ExtractMethodRefactoring)refactoring);
 	}
 
