@@ -13,6 +13,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
@@ -278,7 +279,12 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				if (!getInputType().getJavaProject().equals(element)) {
 					return false;
 				}
-				break;	
+				break;
+			case IJavaElement.COMPILATION_UNIT:
+				if (((ICompilationUnit)element).isWorkingCopy()) {
+					return false;
+				}
+				break;
 			case IJavaElement.TYPE:
 				if (getHierarchy().contains((IType)element)) {
 					return processChangeOnType(delta);

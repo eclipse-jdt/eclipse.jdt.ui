@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
@@ -501,9 +502,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		methodViewerViewForm.setTopCenter(methodViewerToolBar);
 		
 		// page 2 of pagebook (no hierarchy label)
-
-		fNoHierarchyShownLabel= new Label(fPagebook, SWT.LEFT + SWT.WRAP);
-		fNoHierarchyShownLabel.setText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.empty")); //$NON-NLS-1$
+		fNoHierarchyShownLabel= new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
+		fNoHierarchyShownLabel.setText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.empty")); //$NON-NLS-1$	
+		
 		MenuManager menu= new MenuManager();
 		menu.add(fFocusOnTypeAction);
 		fNoHierarchyShownLabel.setMenu(menu.createContextMenu(fNoHierarchyShownLabel));
@@ -579,6 +580,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fFocusOnSelectionAction);
 			
 		addRefactoring(menu, viewer);
+		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup() }, viewer);
 	}
 
 	/**
@@ -597,6 +599,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fMethodsViewer));	
 		addOpenWithMenu(menu, (IStructuredSelection)fMethodsViewer.getSelection());
 		addRefactoring(menu, fMethodsViewer);
+		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup() }, fMethodsViewer);
 	}
 	
 	private void addRefactoring(IMenuManager menu, IInputSelectionProvider viewer){
@@ -951,6 +954,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		String elementId= memento.getString(TAG_INPUT);
 		if (elementId != null) {
 			input= (IType) JavaCore.create(elementId);
+			if (!input.exists()) {
+				input= null;
+			}
 		}
 		setInput(input);
 
