@@ -247,8 +247,11 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		createInheritedMethods(type, doConstr, doInherited, imports, new SubProgressMonitor(monitor, 1));
 
 		if (doMain) {
-			String main= "public static void main(String[] args) {}"; //$NON-NLS-1$
-			type.createMethod(main, null, false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("public static void main(");
+			buf.append(imports.addImport("java.lang.String"));
+			buf.append("[] args) {}");
+			type.createMethod(buf.toString(), null, false, null);
 		}
 		
 		IDialogSettings section= getDialogSettings().getSection(PAGE_NAME);
