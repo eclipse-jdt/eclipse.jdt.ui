@@ -11,7 +11,9 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -30,6 +32,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class JavaIndenterTest extends TestCase {
 	
+	private static final Class THIS= JavaIndenterTest.class;
+
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 
 	private static final int N_OF_RUNS= 2;
@@ -40,6 +44,10 @@ public class JavaIndenterTest extends TestCase {
 
 	private ITextEditor fEditor;
 
+	public static Test suite() {
+		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
+	
 	protected void setUp() throws Exception {
 		EditorTestHelper.runEventQueue();
 		Performance performance= Performance.getDefault();

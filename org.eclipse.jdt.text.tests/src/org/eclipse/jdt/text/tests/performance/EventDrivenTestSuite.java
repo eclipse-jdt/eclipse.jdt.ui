@@ -30,7 +30,7 @@ public class EventDrivenTestSuite extends TestSuite {
 	public EventDrivenTestSuite() {
 		addTestSuite(ScrollJavaEditorTest.class);
 		addTestSuite(ScrollTextEditorTest.class);
-		addTestSuite(JavaIndenterTest.class);
+		addTest(JavaIndenterTest.suite());
 		addTestSuite(NonInitialTypingTest.class);
 		addTestSuite(OpenPreferencePageTest.class);
 		addTestSuite(ScrollAnnotatedJavaEditorTest.class);
