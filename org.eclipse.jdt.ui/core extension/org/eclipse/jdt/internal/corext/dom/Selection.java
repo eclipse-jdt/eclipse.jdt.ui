@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.corext.dom;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public class Selection {
 	
@@ -70,7 +71,11 @@ public class Selection {
 	}
 	
 	public int getInclusiveEnd() {
-		return fStart + fLength - 1;
+		return fExclusiveEnd - 1;
+	}
+	
+	public int getExclusiveEnd() {
+		return fExclusiveEnd;
 	}
 	
 	/**
@@ -137,6 +142,11 @@ public class Selection {
 	public boolean coveredBy(ASTNode node) {
 		int nodeStart= node.getStartPosition();
 		return nodeStart <= fStart && fExclusiveEnd <= nodeStart + node.getLength();
+	}
+	
+	public boolean coveredBy(TextRange range) {
+		int rangeStart= range.getOffset();
+		return rangeStart <= fStart && fExclusiveEnd <= rangeStart + range.getLength();
 	}
 	
 //	public boolean coveredBy(int sourceStart, int sourceEnd) {
