@@ -93,14 +93,29 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		subComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout subGrid= new GridLayout();
 		subGrid.numColumns= 2;
+		subGrid.marginWidth= 0;
+		subGrid.marginHeight= 0;
 		subComposite.setLayout(subGrid);
+	
+		Label tableLabel= new Label(subComposite, SWT.NONE);
+		GridData labelGd= new GridData();
+		labelGd.horizontalSpan= 2;
+		tableLabel.setLayoutData(labelGd);
+		tableLabel.setText("&Parameters");
 		
 		createParameterList(subComposite);
 		createButtonComposite(subComposite);
 	}
 
 	private void createParameterList(Composite parent){
-		fTableViewer= new TableViewer(parent, SWT.SINGLE | SWT.BORDER | SWT.HIDE_SELECTION |SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL);
+		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout gl= new GridLayout();
+		gl.marginHeight= 0;
+		gl.marginWidth= 0;
+		composite.setLayout(gl);
+		
+		fTableViewer= new TableViewer(composite, SWT.SINGLE | SWT.BORDER | SWT.HIDE_SELECTION |SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL);
 		fTableViewer.setUseHashlookup(true);
 		fTableViewer.getTable().setHeaderVisible(true);
 		fTableViewer.getTable().setLinesVisible(true);
