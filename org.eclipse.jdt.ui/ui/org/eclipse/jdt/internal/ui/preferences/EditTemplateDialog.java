@@ -44,6 +44,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextListener;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
@@ -77,6 +78,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 public class EditTemplateDialog extends StatusDialog {
 
 	private static class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfiguration {
+
 		SimpleJavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor) {
 			super(tools, editor);
 		}
@@ -233,7 +235,6 @@ public class EditTemplateDialog extends StatusDialog {
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 
-		// initialize fields
 		fNameText.setText(fTemplate.getName());
 		fDescriptionText.setText(fTemplate.getDescription());
 		fContextCombo.select(getIndex(fTemplate.getContext()));
@@ -308,8 +309,19 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private void handleKeyPressed(KeyEvent event) {
-		if ((event.character == ' ') && ((event.stateMask & SWT.CTRL) != 0))
-			fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
+		if (event.stateMask != SWT.CTRL)
+			return;
+			
+		switch (event.character) {
+			case ' ':
+				fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
+				break;
+
+			// XXX CTRL-Z
+			case (int) 'z' - (int) 'a' + 1:
+				fPatternEditor.doOperation(ITextOperationTarget.UNDO);
+				break;				
+		}
 	}
 
 	private void initializeActions() {
