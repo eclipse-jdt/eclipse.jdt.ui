@@ -45,7 +45,7 @@ public class JavaPluginImages {
 	private final static ImageRegistry IMAGE_REGISTRY= new ImageRegistry();
 
 
-	/**
+	/*
 	 * Available cached Images in the Java plugin image registry.
 	 */	
 	public static final String IMG_MISC_PUBLIC= NAME_PREFIX + "methpub_obj.gif"; //$NON-NLS-1$
@@ -136,7 +136,7 @@ public class JavaPluginImages {
 	// public static final String IMG_TOOL_CLASSPATH_ORDER= NAME_PREFIX + "cp_order.gif";
 
 
-	/**
+	/*
 	 * Set of predefined Image Descriptors.
 	 */
 	private static final String T_OBJ= "obj16"; //$NON-NLS-1$
