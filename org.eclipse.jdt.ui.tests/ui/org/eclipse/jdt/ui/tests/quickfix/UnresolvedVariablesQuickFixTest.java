@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
@@ -66,6 +67,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	protected void setUp() throws Exception {
 		Hashtable options= JavaCore.getDefaultOptions();
 		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.IGNORE);		
 		JavaCore.setOptions(options);			
