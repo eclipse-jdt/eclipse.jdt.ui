@@ -977,16 +977,22 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				}
 			}
 			if (ei instanceof IFileEditorInput) {
-				IContainer container= ((IFileEditorInput)ei).getFile().getParent();
-				IJavaElement je= null;
-				if (container != null)
-					je= (IJavaElement)container.getAdapter(IJavaElement.class);
+				IFile file= ((IFileEditorInput)ei).getFile();
+				IJavaElement je= (IJavaElement)file.getAdapter(IJavaElement.class);
+				if (je == null) {
+					IContainer container= ((IFileEditorInput)ei).getFile().getParent();
+					if (container != null)
+						je= (IJavaElement)container.getAdapter(IJavaElement.class);
+				}
+				if (je == null) {					
+					setSelection(null, false);
+					return;
+				}
 				adjustInputAndSetSelection(je);
 			} else if (ei instanceof IClassFileEditorInput) {
 				IClassFile cf= ((IClassFileEditorInput)ei).getClassFile();
 				adjustInputAndSetSelection(cf);
 			}
-			return;
 		}
 	}
 
