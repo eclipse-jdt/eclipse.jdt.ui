@@ -1,4 +1,5 @@
 package p;
+
 class A {
     void m() {
         //implementation
@@ -6,10 +7,11 @@ class A {
 }
 
 class C extends A {
-    void m() {
+	protected void m() {
         super.m();
         //further implementation
     }
+
 }
 
 class B extends C {
