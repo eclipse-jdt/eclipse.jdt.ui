@@ -23,7 +23,6 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -64,17 +63,7 @@ public class PropertiesFileEditor extends TextEditor {
 			if (sourceViewer == null)
 				return;
 				
-			String property= event.getProperty();	
-			
-			if (PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE.equals(property)) {
-				if (event.getNewValue() instanceof Boolean) {
-					Boolean disable= (Boolean) event.getNewValue();
-					enableOverwriteMode(!disable.booleanValue());
-				}
-				return;
-			}
-			
-			((PropertiesFileSourceViewerConfiguration)getSourceViewerConfiguration()).handlePropertyChangeEvent(event);
+			((PropertiesFileSourceViewerConfiguration) getSourceViewerConfiguration()).handlePropertyChangeEvent(event);
 			
 		} finally {
 			super.handlePreferenceStoreChanged(event);

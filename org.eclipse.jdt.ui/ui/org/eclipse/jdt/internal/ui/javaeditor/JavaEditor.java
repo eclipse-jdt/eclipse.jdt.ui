@@ -2308,14 +2308,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return;
 			}
 			
-			if (PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE.equals(property)) {
-				if (event.getNewValue() instanceof Boolean) {
-					Boolean disable= (Boolean) event.getNewValue();
-					enableOverwriteMode(!disable.booleanValue());
-				}
-				return;
-			}
-			
 			if (PreferenceConstants.EDITOR_MARK_OCCURRENCES.equals(property)) {
 				if (event.getNewValue() instanceof Boolean) {
 					boolean markOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
@@ -2623,9 +2615,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fEditorSelectionChangedListener= new EditorSelectionChangedListener();
 		fEditorSelectionChangedListener.install(getSelectionProvider());
 		
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE))
-			enableOverwriteMode(false);
-
 		if (fMarkOccurrenceAnnotations)
 			installOccurrencesFinder();
 		
