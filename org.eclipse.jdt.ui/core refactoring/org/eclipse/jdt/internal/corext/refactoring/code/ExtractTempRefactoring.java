@@ -74,8 +74,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		fIsCompactingAssignments= compactAssignments;
 		fAlreadyUsedNameMap= new HashMap(0);
 		
-		fReplaceAllOccurrences= false;
-		fDeclareFinal= false;
+		fReplaceAllOccurrences= true; //default
+		fDeclareFinal= false; //default
 	}
 
 	public String getName() {
