@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -43,7 +41,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 	
 /*
  * The page for setting general java plugin preferences.
@@ -133,20 +130,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.JAVA_BASE_PREFERENCE_PAGE);
 	}	
 
-	private Button addCheckBox(Composite parent, String label, String key) {
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		
-		Button checkBox= new Button(parent, SWT.CHECK);
-		checkBox.setText(label);
-		checkBox.setData(key);
-		checkBox.setLayoutData(gd);
-		
-		checkBox.setSelection(getPreferenceStore().getBoolean(key));
-		
-		fCheckBoxes.add(checkBox);
-		return checkBox;
-	}
-	
 	private Button addRadioButton(Composite parent, String label, String key, String value) { 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		
@@ -160,25 +143,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		fRadioButtons.add(button);
 		return button;
 	}
-	
-	private Text addTextControl(Composite parent, String label, String key) {
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		Label labelControl= new Label(parent, SWT.NONE);
-		labelControl.setText(label);
-		labelControl.setLayoutData(gd);
-		
-		gd= new GridData();
-		gd.widthHint= convertWidthInCharsToPixels(40);
-		
-		Text text= new Text(parent, SWT.SINGLE | SWT.BORDER);
-		text.setText(getPreferenceStore().getString(key));
-		text.setData(key);
-		text.setLayoutData(gd);
-		
-		fTextControls.add(text);
-		return text;
-	}	
-	
 	
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
@@ -238,11 +202,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	}
 	
 		
-	private void updateStatus(IStatus status) {
-		setValid(!status.matches(IStatus.ERROR));
-		StatusUtil.applyToStatusLine(this, status);
-	}		
-	
 	private void controlChanged(Widget widget) {
 	}
 	
