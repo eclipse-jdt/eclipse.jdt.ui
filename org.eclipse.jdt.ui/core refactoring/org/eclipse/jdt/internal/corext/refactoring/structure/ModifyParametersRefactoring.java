@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.codemanipulation.ChangeVisibilityEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -81,6 +82,8 @@ public class ModifyParametersRefactoring extends Refactoring {
 	private IMethod fMethod;
 	private IMethod[] fRippleMethods;
 	private ASTNodeMappingManager fAstManager;
+	private ASTNode[] fOccurrenceNodes;
+	private int fVisibility;
 	private static final String CONST_CLASS_DECL = "class A{";//$NON-NLS-1$
 	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
 	private static final String CONST_CLOSE = ";}";			//$NON-NLS-1$
@@ -93,14 +96,23 @@ public class ModifyParametersRefactoring extends Refactoring {
 															"int", 		//$NON-NLS-1$
 															"long", 	//$NON-NLS-1$
 															"short"});	//$NON-NLS-1$
-	private ASTNode[] fOccurrenceNodes;
 
 	public ModifyParametersRefactoring(IMethod method){
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
 		fAstManager= new ASTNodeMappingManager();
+		try {
+			fVisibility= getInitialMethodVisibility();
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			fVisibility= JdtFlags.VISIBILITY_CODE_INVALID;
+		}
 	}
-
+	
+	private int getInitialMethodVisibility() throws JavaModelException{
+		return JdtFlags.getVisibilityCode(fMethod);
+	}
+	
 	private static List createParameterInfoList(IMethod method) {
 		try {
 			String[] typeNames= method.getParameterTypes();
@@ -127,16 +139,47 @@ public class ModifyParametersRefactoring extends Refactoring {
 		return fMethod;
 	}
 	
+	/*
+	 * @see JdtFlags
+	 */
+	public int getVisibility(){
+		return fVisibility;
+	}
+
+	/*
+	 * @see JdtFlags
+	 */	
+	public void setVisibility(int visibility){
+		Assert.isTrue(	visibility == JdtFlags.VISIBILITY_CODE_PUBLIC ||
+		            	visibility == JdtFlags.VISIBILITY_CODE_PROTECTED ||
+		            	visibility == JdtFlags.VISIBILITY_CODE_PACKAGE ||
+		            	visibility == JdtFlags.VISIBILITY_CODE_PRIVATE);  
+		fVisibility= visibility;            	
+	}
+	
+	/*
+	 * @see JdtFlags
+	 */	
+	public int[] getAvailableVisibilities() throws JavaModelException{
+		if (fMethod.getDeclaringType().isInterface())
+			return new int[]{JdtFlags.VISIBILITY_CODE_PUBLIC};
+		else 	
+			return new int[]{	JdtFlags.VISIBILITY_CODE_PUBLIC,
+								JdtFlags.VISIBILITY_CODE_PROTECTED,
+								JdtFlags.VISIBILITY_CODE_PACKAGE,
+								JdtFlags.VISIBILITY_CODE_PRIVATE};
+	}
+	
 	/**
 	 * 	 * @return List of <code>ParameterInfo</code> objects.	 */
 	public List getParameterInfos(){
 		return fParameterInfos;
 	}
 	
-	public RefactoringStatus checkParameters(){
-		if (fMethod.getNumberOfParameters() == 0 && fParameterInfos.isEmpty())
-			return RefactoringStatus.createFatalErrorStatus("No parameters were added");
-		if (areNamesSameAsInitial() && isOrderSameAsInitial())
+	public RefactoringStatus checkParameters() throws JavaModelException{
+		if (fMethod.getNumberOfParameters() == 0 && fParameterInfos.isEmpty() && isVisibilitySameAsInitial())
+			return RefactoringStatus.createFatalErrorStatus("No parameters were added and visibility is unchanged");
+		if (areNamesSameAsInitial() && isOrderSameAsInitial() && isVisibilitySameAsInitial())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.no_changes")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		checkForDuplicateNames(result);
@@ -259,7 +302,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.checking_preconditions"), 2); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.checking_preconditions"), 5); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkParameters());
 			if (result.hasFatalError())
@@ -270,8 +313,15 @@ public class ModifyParametersRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 
+			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1), null);
+			fOccurrenceNodes= getOccurrenceNodes(new SubProgressMonitor(pm, 1));
+			
+			result.merge(checkVisibilityChanges());
+					
 			if (! isOrderSameAsInitial())	
 				result.merge(checkReorderings(new SubProgressMonitor(pm, 1)));	
+			else pm.worked(1);
+			
 			if (result.hasFatalError())
 				return result;
 
@@ -284,10 +334,22 @@ public class ModifyParametersRefactoring extends Refactoring {
 			pm.done();
 		}
 	}
+
+	private RefactoringStatus checkVisibilityChanges() throws JavaModelException {
+		if (isVisibilitySameAsInitial())
+			return null;
+	    if (fRippleMethods.length == 1)
+	    	return null;
+	    Assert.isTrue(getInitialMethodVisibility() != JdtFlags.VISIBILITY_CODE_PRIVATE);
+	    if (fVisibility == JdtFlags.VISIBILITY_CODE_PRIVATE)
+	    	return RefactoringStatus.createWarningStatus("Changing visibility to 'private' will make this method non-virtual, which may affect the program's behavior");
+		return null;
+	}
 	
 	public String getMethodSignaturePreview() throws JavaModelException{
 		StringBuffer buff= new StringBuffer();
-
+		
+		buff.append(getPreviewOfVisibityString());
 		if (! getMethod().isConstructor())
 			buff.append(getReturnTypeString());
 
@@ -296,6 +358,13 @@ public class ModifyParametersRefactoring extends Refactoring {
 			.append(getMethodParameters())
 			.append(Signature.C_PARAM_END);
 		return buff.toString();
+	}
+
+	public String getPreviewOfVisibityString() {
+		String visibilityString= JdtFlags.getVisibilityString(fVisibility);
+		if ("".equals(visibilityString))
+			return visibilityString;
+		return visibilityString + ' ';
 	}
 
 	private void checkForDuplicateNames(RefactoringStatus result){
@@ -422,11 +491,6 @@ public class ModifyParametersRefactoring extends Refactoring {
 			pm.beginTask(RefactoringCoreMessages.getString("ReorderParametersRefactoring.checking_preconditions"), 2); //$NON-NLS-1$
 
 			RefactoringStatus result= new RefactoringStatus();
-			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1), null);
-			fOccurrenceNodes= getOccurrenceNodes(new SubProgressMonitor(pm, 1));
-			if (result.hasFatalError())
-				return result;
-				
 			result.merge(checkNativeMethods());
 			result.merge(checkParameterNamesInRippleMethods());
 			return result;
@@ -493,9 +557,11 @@ public class ModifyParametersRefactoring extends Refactoring {
 	}
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.preparing_preview"), 3); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.preparing_preview"), 4); //$NON-NLS-1$
 		TextChangeManager manager= new TextChangeManager();
 
+		if (! isVisibilitySameAsInitial())
+			addVisibilityChanges(new SubProgressMonitor(pm, 1), manager);
 		//the sequence here is critical 
 		addReorderings(new SubProgressMonitor(pm, 1), manager);
 		addNewParameters(new SubProgressMonitor(pm, 1), manager);
@@ -506,6 +572,37 @@ public class ModifyParametersRefactoring extends Refactoring {
 			pm.worked(1);	
 
 		return manager;
+	}
+
+	private void addVisibilityChanges(IProgressMonitor pm,TextChangeManager manager) throws CoreException {
+		pm.beginTask("", fRippleMethods.length);
+		for (int i= 0; i < fRippleMethods.length; i++) {
+			IMethod method= fRippleMethods[i];
+			if (needsVisibilityUpdate(method)){
+				TextEdit edit= new ChangeVisibilityEdit(method, fVisibility);
+				ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(method.getCompilationUnit());
+				manager.get(cu).addTextEdit("Change method visibility", edit);
+			}	
+			pm.worked(1);
+		}
+		pm.done();
+	}
+	
+	private boolean needsVisibilityUpdate(IMethod method) throws JavaModelException {
+		if (isVisibilitySameAsInitial())
+			return false;
+		if (isIncreasingVisibility())
+			return JdtFlags.isHigherVisibility(fVisibility, JdtFlags.getVisibilityCode(method));
+		else
+			return JdtFlags.isHigherVisibility(JdtFlags.getVisibilityCode(method), fVisibility);
+	}
+
+	private boolean isIncreasingVisibility() throws JavaModelException{
+		return JdtFlags.isHigherVisibility(fVisibility, JdtFlags.getVisibilityCode(fMethod));
+	}
+	
+	private boolean isVisibilitySameAsInitial() throws JavaModelException {
+		return fVisibility == JdtFlags.getVisibilityCode(fMethod);
 	}
 
 	//ParameterInfo -> TextEdit[]
@@ -796,9 +893,10 @@ public class ModifyParametersRefactoring extends Refactoring {
 			edits.add(source);
 			edits.add(target);
 		}
-		change.addTextEdit(
-			RefactoringCoreMessages.getString("ReorderParametersRefactoring.editName"),  //$NON-NLS-1$
-			(TextEdit[]) edits.toArray(new TextEdit[edits.size()]));
+		if (! edits.isEmpty())
+			change.addTextEdit(
+				RefactoringCoreMessages.getString("ReorderParametersRefactoring.editName"),  //$NON-NLS-1$
+				(TextEdit[]) edits.toArray(new TextEdit[edits.size()]));
 	}
 
 	private int[] createPermutation() {
