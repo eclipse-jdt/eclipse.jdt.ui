@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -28,6 +29,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 /**
  * This action reveals the currently selected Java element in the packages
  * view. The Java element can be represeented by either
@@ -117,23 +119,49 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	private void run(IJavaElement element) {
 		if (element == null)
 			return;
-		try {
-			element= OpenActionUtil.getElementToShow(element);
-			if (element == null)
-				return;
-			PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
-			if (view != null) {
+		boolean showMembers= JavaPlugin.getDefault().getPreferenceStore().getBoolean(JavaBasePreferencePage.SHOW_CU_CHILDREN);
+		PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
+		if (view != null) {
+			Object selectedElement= element;
+			if (showMembers) {
 				view.selectReveal(new StructuredSelection(element));
-				return;
+				selectedElement= ((IStructuredSelection)view.getSite().getSelectionProvider().getSelection()).getFirstElement();
 			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			String message= ActionMessages.getString("ShowInPackageViewAction.error.message"); //$NON-NLS-1$
-			ErrorDialog.openError(getShell(), getDialogTitle(), message, e.getStatus());
+			if (selectedElement != element) {
+				element= getVisibleParent(element);
+				if (element != null) {
+					view.selectReveal(new StructuredSelection(element));
+				}
+			}
+			return;
 		}
+	}
+	
+	private IJavaElement getVisibleParent(IJavaElement element) {
+		switch (element.getElementType()) {
+			case IJavaElement.IMPORT_DECLARATION:
+			case IJavaElement.PACKAGE_DECLARATION:
+			case IJavaElement.IMPORT_CONTAINER:
+			case IJavaElement.TYPE:
+			case IJavaElement.METHOD:
+			case IJavaElement.FIELD:
+			case IJavaElement.INITIALIZER:
+				// select parent cu/classfile
+				element= (IJavaElement)element.getOpenable();
+				break;
+			case IJavaElement.JAVA_MODEL:
+				element= null;
+				break;
+		}
+		if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
+			ICompilationUnit unit= (ICompilationUnit)element;
+			if (unit.isWorkingCopy())
+				element= unit.getOriginalElement();
+		}
+		return element;
 	}
 	
 	private static String getDialogTitle() {
 		return ActionMessages.getString("ShowInPackageViewAction.dialog.title"); //$NON-NLS-1$
-	}		
+	}
 }

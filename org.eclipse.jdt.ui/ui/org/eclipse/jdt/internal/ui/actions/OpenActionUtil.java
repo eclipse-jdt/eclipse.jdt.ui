@@ -98,20 +98,6 @@ public class OpenActionUtil {
 		return null;
 	}
 	
-	public static IJavaElement getElementToShow(IJavaElement element) throws JavaModelException {
-		if (element == null)
-			return null;
-		switch (element.getElementType()) {
-			case IJavaElement.PACKAGE_DECLARATION:
-				// select package fragment
-				element= element.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
-				break;
-			default:
-				element= getElementToOpen(element);
-		}
-		return element;
-	}
-	
 	public static IJavaElement getElementToOpen(IJavaElement element) throws JavaModelException {
 		if (element == null)
 			return null;

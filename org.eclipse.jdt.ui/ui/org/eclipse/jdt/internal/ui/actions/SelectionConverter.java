@@ -202,14 +202,16 @@ public class SelectionConverter {
 				}
 			}
 			IJavaElement ref= cunit.getElementAt(selection.getOffset());
-			if (ref != null) {
+			if (ref == null)
+				return input;
+			else
 				return ref;
-			}
 		} else if (input instanceof IClassFile) {
 			IJavaElement ref= ((IClassFile)input).getElementAt(selection.getOffset());
-			if (ref != null) {
+			if (ref == null)
+				return input;
+			else
 				return ref;
-			}
 		}
 		return null;
 	}
