@@ -141,24 +141,31 @@ public final class SuperTypeConstraintsSolver {
 	private void computeTypeOccurrences(final Collection variables) {
 		Assert.isNotNull(variables);
 		fTypeOccurrences= new HashMap();
+		TType type= null;
+		ITypeSet estimate= null;
+		ICompilationUnit unit= null;
 		ConstraintVariable2 variable= null;
+		IDeclaredConstraintVariable declaration= null;
 		for (final Iterator iterator= variables.iterator(); iterator.hasNext();) {
 			variable= (ConstraintVariable2) iterator.next();
 			if (variable instanceof IDeclaredConstraintVariable) {
-				final ITypeSet estimate= variable.getTypeEstimate();
+				estimate= variable.getTypeEstimate();
 				if (estimate != null) {
-					variable.setData(DATA_TYPE_ESTIMATE, estimate.chooseSingleType());
-					if (variable instanceof IDeclaredConstraintVariable) {
-						final IDeclaredConstraintVariable declaration= (IDeclaredConstraintVariable) variable;
-						final ICompilationUnit unit= declaration.getCompilationUnit();
-						if (unit != null) {
-							Collection matches= (Collection) fTypeOccurrences.get(unit);
-							if (matches != null)
-								matches.add(variable);
-							else {
-								matches= new ArrayList(1);
-								matches.add(variable);
-								fTypeOccurrences.put(unit, matches);
+					type= estimate.chooseSingleType();
+					if (type == fModel.getSuperType()) {
+						variable.setData(DATA_TYPE_ESTIMATE, type);
+						if (variable instanceof IDeclaredConstraintVariable) {
+							declaration= (IDeclaredConstraintVariable) variable;
+							unit= declaration.getCompilationUnit();
+							if (unit != null) {
+								Collection matches= (Collection) fTypeOccurrences.get(unit);
+								if (matches != null)
+									matches.add(variable);
+								else {
+									matches= new ArrayList(1);
+									matches.add(variable);
+									fTypeOccurrences.put(unit, matches);
+								}
 							}
 						}
 					}
