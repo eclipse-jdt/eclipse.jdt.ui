@@ -90,7 +90,7 @@ public class ExtractConstantTests extends RefactoringTest {
 			assertTrue("The selected expression has been erroneously reported to contain references to non-static or non-final fields.", ref.selectionAllStaticFinal());
 		
 		assertEquals("precondition was supposed to pass", null, result);
-		assertEquals("temp name incorrectly guessed", guessedConstantName, ref.guessConstantName());
+		assertEquals("constant name incorrectly guessed", guessedConstantName, ref.guessConstantName());
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
@@ -183,6 +183,21 @@ public class ExtractConstantTests extends RefactoringTest {
 		
 	public void test14() throws Exception{
 		helper1(10, 28, 10, 44, true, true, "CONSTANT");
+	}	
+
+	public void test15() throws Exception{
+		printTestDisabledMessage("name guessing is to be implemented");
+//		helper1(5, 16, 5, 25, true, false, "CONSTANT", "FRED");
+	}	
+
+	public void test16() throws Exception{
+		printTestDisabledMessage("name guessing is to be implemented");
+//		helper1(5, 20, 5, 27, true, false, "CONSTANT", "RED");
+	}	
+
+	public void test17() throws Exception{
+		printTestDisabledMessage("name guessing is to be implemented");
+//		helper1(5, 16, 5, 35, true, false, "CONSTANT", "YET_ANOTHER_FRED");
 	}	
 	
 	// -- testing failing preconditions
