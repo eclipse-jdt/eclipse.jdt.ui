@@ -5,7 +5,7 @@ import java.util.ResourceBundle;
 
 public class CorextMessages {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.corext.util.corext"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME= CorextMessages.class.getName();
 
 	private static final ResourceBundle RESOURCE_BUNDLE =
 		ResourceBundle.getBundle(BUNDLE_NAME);
