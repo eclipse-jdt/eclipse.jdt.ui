@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/** @deprecated */
 class NLSGroupByKeyComputer implements IGroupByKeyComputer {
 
 	IJavaElement fLastJavaElement= null;

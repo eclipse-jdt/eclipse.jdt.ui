@@ -28,6 +28,7 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 
+/** @deprecated */
 class NLSSearchOperation extends WorkspaceModifyOperation {
 	
 	private IWorkspace fWorkspace;

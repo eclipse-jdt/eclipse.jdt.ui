@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchResultLabelProvider;
 
+/** @deprecated */
 class NLSSearchResultLabelProvider extends JavaSearchResultLabelProvider {
 
 	public String getText(Object o) {

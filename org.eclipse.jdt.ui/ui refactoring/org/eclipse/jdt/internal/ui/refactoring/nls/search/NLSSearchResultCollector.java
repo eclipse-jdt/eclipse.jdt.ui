@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+/** @deprecated */
 class NLSSearchResultCollector implements IJavaSearchResultCollector {
 
 	private static final String MATCH= NLSSearchMessages.getString("SearchResultCollector.match"); //$NON-NLS-1$
