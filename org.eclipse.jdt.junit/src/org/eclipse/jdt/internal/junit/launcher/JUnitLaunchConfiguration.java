@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
+import org.eclipse.jface.util.Assert;
 
 /**
  * Launch configuration delegate for a plain JUnit test.
@@ -127,19 +128,24 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 				
 				try {
 					junitEntries.add(Platform.asLocalURL(new URL(url, "bin")).getFile()); //$NON-NLS-1$
-					junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "bin")).getFile()); //$NON-NLS-1$
 				} catch (IOException e3) {
-					// fall through
-				}
-				// we didn't find the bin folders then try to find the JARs
-				if (junitEntries.size() < 2) {
 					try {
 						junitEntries.add(Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile()); //$NON-NLS-1$
-						junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile()); //$NON-NLS-1$
-					} catch (IOException e1) {
+					} catch (IOException e4) {
 						// fall through
-					}	
+					}
 				}
+				try {
+					junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "bin")).getFile()); //$NON-NLS-1$
+				} catch (IOException e1) {
+					try {
+						junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile()); //$NON-NLS-1$
+					} catch (IOException e4) {
+						// fall through
+					}
+				}
+				Assert.isTrue(junitEntries.size() == 2, "Required JARs available"); //$NON-NLS-1$
+				
 				classPath= new String[cp.length + junitEntries.size()];
 				Object[] jea= junitEntries.toArray();
 				System.arraycopy(cp, 0, classPath, 0, cp.length);
