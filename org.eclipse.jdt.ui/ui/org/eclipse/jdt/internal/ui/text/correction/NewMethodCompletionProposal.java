@@ -20,8 +20,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -81,16 +83,20 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		ImportEdit importEdit= new ImportEdit(changedCU, settings);
 
-		String content= generateStub(importEdit, settings);
+		IMethod currMethod= null;
+		IJavaElement elem= problemPos.getCompilationUnit().getElementAt(problemPos.getOffset());
+		if (elem != null && elem.getElementType() == IJavaElement.METHOD) {
+			currMethod= (IMethod) elem;
+		}
+		boolean isStatic= false;
+		
+		String content= generateStub(isStatic, importEdit, settings);
 		
 		int insertPos= MemberEdit.ADD_AT_END;
 		IJavaElement anchor= fParentType;
-		if (isLocalChange()) {
-			IJavaElement elem= problemPos.getCompilationUnit().getElementAt(problemPos.getOffset());
-			if (elem.getElementType() == IJavaElement.METHOD) {
-				anchor= elem;
-				insertPos= MemberEdit.INSERT_AFTER;
-			}
+		if (isLocalChange() && currMethod != null) {
+			anchor= elem;
+			insertPos= MemberEdit.INSERT_AFTER;			
 		}
 		
 		fMemberEdit= new MemberEdit(anchor, insertPos, new String[] { content }, settings.tabWidth);
@@ -103,7 +109,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	}
 	
 	
-	private String generateStub(ImportEdit importEdit, CodeGenerationSettings settings) throws CoreException {
+	private String generateStub(boolean isStatic, ImportEdit importEdit, CodeGenerationSettings settings) throws CoreException {
 		StringBuffer buf= new StringBuffer();
 		
 		boolean isInterface= fParentType.isInterface();
@@ -120,6 +126,10 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 			buf.append("private "); //$NON-NLS-1$
 		} else if (!isInterface) {
 			buf.append("public "); //$NON-NLS-1$
+		}
+		
+		if (isStatic) {
+			buf.append("static "); //$NON-NLS-1$
 		}
 		
 		buf.append(returnTypeName);
