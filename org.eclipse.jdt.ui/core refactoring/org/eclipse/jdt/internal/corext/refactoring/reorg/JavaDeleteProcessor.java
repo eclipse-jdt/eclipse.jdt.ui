@@ -561,7 +561,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 
 			//both getter and setter already included
 			if (! hasGetter(getterSetterMapping, field) && ! hasSetter(getterSetterMapping, field))
-				getterSetterMapping.remove(field);
+				iter.remove();
 		}
 	}
 

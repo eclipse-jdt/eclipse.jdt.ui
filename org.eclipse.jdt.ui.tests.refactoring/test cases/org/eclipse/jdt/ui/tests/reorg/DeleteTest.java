@@ -606,6 +606,20 @@ public class DeleteTest extends RefactoringTest{
 		ParticipantTesting.testDelete(handles);
 	}
 	
+	public void testDeleteWithinCu23() throws Exception{
+		ParticipantTesting.reset();
+		loadFileSetup();
+		IType typeA= fCuA.getType("A");
+		IJavaElement[] elems= new IJavaElement[]{
+				typeA.getField("nestingDepth"), typeA.getField("openOnRun"),
+				typeA.getMethod("getNestingDepth", new String[0]), typeA.getMethod("getOpenOnRun", new String[0])
+		};
+		String[] handles= ParticipantTesting.createHandles(elems);
+		
+		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
+	}
+	
 	public void testDeleteFile() throws Exception{
 		ParticipantTesting.reset();
 		IFolder folder= (IFolder)getPackageP().getResource();
