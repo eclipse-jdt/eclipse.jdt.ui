@@ -657,13 +657,16 @@ public class ExtractMethodRefactoring extends Refactoring {
 			}
 		}
 
-		// Rewrite local names		
+		// Rewrite local names
+		ASTNode[] selected= fAnalyzer.getSelectedNodes();
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 			ParameterInfo parameter= (ParameterInfo)iter.next();
 			if (parameter.isRenamed()) {
-				SimpleName[] oldNames= LinkedNodeFinder.perform(selection, (IBinding) parameter.getData());
-				for (int i= 0; i < oldNames.length; i++) {
-					fRewriter.markAsReplaced(oldNames[i], fAST.newSimpleName(parameter.getNewName()));
+				for (int n= 0; n < selected.length; n++) {
+					SimpleName[] oldNames= LinkedNodeFinder.perform(selected[n], (IBinding) parameter.getData());
+					for (int i= 0; i < oldNames.length; i++) {
+						fRewriter.markAsReplaced(oldNames[i], fAST.newSimpleName(parameter.getNewName()));
+					}
 				}
 			}
 		}
