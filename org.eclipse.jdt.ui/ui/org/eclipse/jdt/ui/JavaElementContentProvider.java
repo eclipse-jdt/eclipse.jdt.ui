@@ -179,7 +179,8 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 			// we are filtering out empty subpackages, so we
 			// a package becomes empty we remove it from the viewer. 
 			if (isPackageFragmentEmpty(element.getParent())) {
-				postRefresh(internalGetParent(parent));
+				if (fViewer.testFindItem(parent) != null)
+					postRefresh(internalGetParent(parent));
 			}  
 			return;
 		}
@@ -195,7 +196,12 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 				if (parent.equals(fInput)) {
 					postRefresh(parent);
 				} else {
-					postRefresh(grandparent);
+					// refresh from grandparent if parent isn't visible yet
+					if (fViewer.testFindItem(parent) == null)
+						postRefresh(grandparent);
+					else {
+						postRefresh(parent);
+					}	
 				}
 			} else {  
 				postAdd(parent, element);
