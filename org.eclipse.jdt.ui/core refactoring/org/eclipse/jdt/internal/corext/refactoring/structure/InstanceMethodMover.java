@@ -859,8 +859,7 @@ class InstanceMethodMover {
 				
 				MultiTextEdit dummy= getEdits(cuBuffer);
 				
-				TextRange methodRange= fMethod.createTextRange();
-				RangeMarker rangeMarker= new RangeMarker(methodRange);
+				RangeMarker rangeMarker= new RangeMarker(fMethod.createTextRange());
 				TextEdit[] edits= dummy.removeAll();
 				for (int i= 0; i < edits.length; i++)
 					rangeMarker.add(edits[i]);
@@ -872,7 +871,7 @@ class InstanceMethodMover {
 				editor.add(allEdits);
 				editor.performEdits(null);
 				
-				return new TextBufferPortion(cuBuffer, methodRange);
+				return new TextBufferPortion(cuBuffer, rangeMarker);
 			}
 			
 			public MultiTextEdit getEdits() throws JavaModelException {
@@ -1731,23 +1730,25 @@ class InstanceMethodMover {
 	
 	private static class TextBufferPortion {
 		private final TextBuffer fBuffer;
-		private final TextRange fRange;
+		private final RangeMarker fMarker;
 		
-		TextBufferPortion(TextBuffer buffer, TextRange range) {
+		TextBufferPortion(TextBuffer buffer, RangeMarker marker) {
 			Assert.isNotNull(buffer);
-			Assert.isNotNull(range);
+			Assert.isNotNull(marker);
 			fBuffer= buffer;
-			fRange= range;
+			fMarker= marker;
 		}
 		
 		public String getContent() {
-			return fBuffer.getContent(fRange.getOffset(), fRange.getLength());	
+			TextRange range= fMarker.getTextRange();
+			return fBuffer.getContent(range.getOffset(), range.getLength());	
 		}
 		
 		public String getUnindentedContentIgnoreFirstLine() {
+			TextRange range= fMarker.getTextRange();
 			return Strings.changeIndent(
-				fBuffer.getContent(fRange.getOffset(), fRange.getLength()),
-				fBuffer.getLineIndent(fBuffer.getLineOfOffset(fRange.getOffset()), CodeFormatterUtil.getTabWidth()),
+				fBuffer.getContent(range.getOffset(), range.getLength()),
+				fBuffer.getLineIndent(fBuffer.getLineOfOffset(range.getOffset()), CodeFormatterUtil.getTabWidth()),
 				CodeFormatterUtil.getTabWidth(),
 				"", //$NON-NLS-1$
 				fBuffer.getLineDelimiter()

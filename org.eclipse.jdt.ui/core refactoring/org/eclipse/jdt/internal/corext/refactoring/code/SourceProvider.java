@@ -236,7 +236,7 @@ public class SourceProvider {
 		TextBufferEditor editor= new TextBufferEditor(fBuffer);
 		editor.add(root);
 		UndoMemento undo= editor.performEdits(null);
-		String[] result= getBlocks(ranges);
+		String[] result= getBlocks(markers);
 		// It is faster to undo the changes than coping the buffer over and over again.
 		TextBufferEditor undoEditor= new TextBufferEditor(fBuffer);
 		undoEditor.add(undo);
@@ -386,16 +386,15 @@ public class SourceProvider {
 		return range;
 	}
 	
-	private String[] getBlocks(List ranges) {
-		int size= ranges.size();
-		List result= new ArrayList(size);
-		for (int i= 0; i < size; i++) {
-			TextRange range= (TextRange)ranges.get(i);
+	private String[] getBlocks(RangeMarker[] markers) {
+		String[] result= new String[markers.length];
+		for (int i= 0; i < markers.length; i++) {
+			TextRange range= markers[i].getTextRange();
 			String content= fBuffer.getContent(range.getOffset(), range.getLength());
 			String lines[]= Strings.convertIntoLines(content);
 			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
-			result.add(Strings.concatenate(lines, fBuffer.getLineDelimiter()));
+			result[i]= Strings.concatenate(lines, fBuffer.getLineDelimiter());
 		}
-		return (String[]) result.toArray(new String[result.size()]);
+		return result;
 	}
 }
