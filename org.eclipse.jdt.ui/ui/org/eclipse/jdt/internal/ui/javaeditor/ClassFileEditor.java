@@ -653,4 +653,15 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			}
 		};	
 	}
+	
+	/*
+	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
+	 */
+	public void dispose() {
+		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18510
+		IDocumentProvider documentProvider= getDocumentProvider();
+		if (documentProvider instanceof ClassFileDocumentProvider)
+			((ClassFileDocumentProvider) documentProvider).removeInputChangeListener(this);
+		super.dispose();
+	}
 }
