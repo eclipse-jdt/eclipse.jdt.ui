@@ -265,7 +265,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer= new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		
 		boolean showCUChildren= JavaBasePreferencePage.showCompilationUnitChildren();
-		fViewer.setContentProvider(new JavaElementContentProvider(showCUChildren, true));
+		fViewer.setContentProvider(new JavaElementContentProvider(showCUChildren, false));
 		
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fViewer);		
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
