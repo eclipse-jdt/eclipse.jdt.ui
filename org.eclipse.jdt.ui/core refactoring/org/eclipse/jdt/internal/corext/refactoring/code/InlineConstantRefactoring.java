@@ -351,7 +351,23 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 		
 		}
+		
+		private static class SourceRangeComputer extends TargetSourceRangeComputer {
+			private HashSet/*<ASTNode>*/ fTightSourceRangeNodes= new HashSet();
+			
+			public void addTightSourceNode(Expression reference) {
+				fTightSourceRangeNodes.add(reference);
+			}
 
+			public SourceRange computeSourceRange(ASTNode node) {
+				if (fTightSourceRangeNodes.contains(node)) {
+					return new TargetSourceRangeComputer.SourceRange(node.getStartPosition(), node.getLength());
+				} else {
+					return super.computeSourceRange(node); // see bug 85850
+				}
+			}
+		}
+		
 		private final Expression fInitializer;
 		private final ICompilationUnit fInitializerUnit;
 
@@ -359,6 +375,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		private final Expression[] fReferences;
 		private final VariableDeclarationFragment fDeclarationToRemove;
 		private final CompilationUnitRewrite fCuRewrite;
+		private final SourceRangeComputer fSourceRangeComputer;
 		private final HashSet fStaticImportsInInitializer;
 		private final boolean fIs15;
 		
@@ -367,6 +384,8 @@ public class InlineConstantRefactoring extends Refactoring {
 			fInitializerUnit= refactoring.getDeclaringCompilationUnit();
 			
 			fCuRewrite= cuRewrite;
+			fSourceRangeComputer= new SourceRangeComputer();
+			fCuRewrite.getASTRewrite().setTargetSourceRangeComputer(fSourceRangeComputer);
 			if (refactoring.getRemoveDeclaration() && cuRewrite.getCu().equals(fInitializerUnit))
 				fDeclarationToRemove= refactoring.getDeclaration();
 			else
@@ -409,11 +428,6 @@ public class InlineConstantRefactoring extends Refactoring {
 			
 			removeConstantDeclarationIfNecessary();
 			
-			fCuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
-				public SourceRange computeSourceRange(ASTNode node) {
-					return new TargetSourceRangeComputer.SourceRange(node.getStartPosition(), node.getLength());
-				}
-			});
 			return fCuRewrite.createChange();
 		}
 
@@ -434,6 +448,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				newReference= parenthesized;
 			}
 			fCuRewrite.getASTRewrite().replace(reference, newReference, msg);
+			fSourceRangeComputer.addTightSourceNode(reference);
 			fCuRewrite.getImportRemover().registerRemovedNode(reference);
 		}
 
@@ -761,11 +776,6 @@ public class InlineConstantRefactoring extends Refactoring {
 	private CompilationUnitRewrite createCuRewrite(ICompilationUnit cu) {
 		CompilationUnitRewrite cuRewrite;
 		cuRewrite= new CompilationUnitRewrite(cu);
-		cuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
-			public SourceRange computeSourceRange(ASTNode node) {
-				return new SourceRange(node.getStartPosition(), node.getLength());
-			}
-		});
 		return cuRewrite;
 	}
 

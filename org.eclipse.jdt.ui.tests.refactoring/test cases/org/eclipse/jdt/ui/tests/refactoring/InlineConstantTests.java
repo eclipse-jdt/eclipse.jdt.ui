@@ -27,7 +27,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InlineConstantTests extends RefactoringTest {
 	private static final boolean BUG_84659_CORE_ANNOT_REF= true;
-	private static final boolean BUG_85850= true;
 
 	private static final Class clazz = InlineConstantTests.class;
 	private static final String REFACTORING_PATH = "InlineConstant/";
@@ -266,10 +265,6 @@ public class InlineConstantTests extends RefactoringTest {
 	}
 		
 	public void test25() throws Exception {
-		if (BUG_85850) {
-			printTestDisabledMessage("BUG_85850");
-			return;
-		}
 		helper1("p.A", 5, 32, 5, 32, true, true);
 	}
 		

@@ -8,6 +8,6 @@ class A {
 	 * (non-Javadoc) comment
 	 */
 	public void foo() {
-		final int lineNumber2= CONST;
+		final int lineNumber2= /*preserve*/CONST/*this*/;
 	}
 }

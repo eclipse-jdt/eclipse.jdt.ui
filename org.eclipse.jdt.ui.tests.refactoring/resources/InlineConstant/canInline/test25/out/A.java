@@ -2,11 +2,10 @@
 package p;
 
 class A {
-
 	/*
 	 * (non-Javadoc) comment
 	 */
 	public void foo() {
-		final int lineNumber2= 9;
+		final int lineNumber2= /*preserve*/9/*this*/;
 	}
 }
