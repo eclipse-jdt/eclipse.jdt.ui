@@ -687,9 +687,6 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 */
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 		
-		if (true)
-			return;
-
 		if (fMustLeave) {
 			leave(true);
 			return;
