@@ -499,7 +499,7 @@ class ReorgPolicyFactory {
 		protected static TextChange addTextEditFromRewrite(ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 			TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 			TextEdit resultingEdits= new MultiTextEdit();
-			rewrite.rewriteNode(textBuffer, resultingEdits, null);
+			rewrite.rewriteNode(textBuffer, resultingEdits);
 				
 			TextChange textChange= new CompilationUnitChange(cu.getElementName(), cu);
 			if (textChange instanceof TextFileChange){
