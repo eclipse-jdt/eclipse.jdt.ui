@@ -137,4 +137,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	public void testFail0() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
 	}
+
+	public void testFail1() throws Exception{
+		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
+	}
 }
