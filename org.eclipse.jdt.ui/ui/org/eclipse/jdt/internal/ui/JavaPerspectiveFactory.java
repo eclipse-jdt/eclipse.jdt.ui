@@ -53,8 +53,10 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
 		layout.addShowViewShortcut(JavaUI.ID_TYPE_HIERARCHY);
+		layout.addShowViewShortcut("org.eclipse.jdt.ui.SourceView"); //$NON-NLS-1$
+		layout.addShowViewShortcut("org.eclipse.jdt.ui.JavadocView"); //$NON-NLS-1$
 
-
+		// views - search
 		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
 		
 		// views - debugging

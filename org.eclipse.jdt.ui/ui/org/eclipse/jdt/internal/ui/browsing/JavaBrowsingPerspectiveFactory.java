@@ -59,6 +59,8 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES_VIEW);
 		layout.addShowViewShortcut(JavaUI.ID_TYPES_VIEW);
 		layout.addShowViewShortcut(JavaUI.ID_MEMBERS_VIEW);
+		layout.addShowViewShortcut("org.eclipse.jdt.ui.SourceView"); //$NON-NLS-1$
+		layout.addShowViewShortcut("org.eclipse.jdt.ui.JavadocView"); //$NON-NLS-1$
 
 		// views - search		
 		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
