@@ -130,7 +130,7 @@ public class JavadocTagsSubProcessor {
 				
 				List typeParams= methodDeclaration.typeParameters();
 				for (int i= 0; i < typeParams.size(); i++) {
-					String curr= ((TypeParameter) typeParams.get(i)).getName().getIdentifier();
+					String curr= '<' + ((TypeParameter) typeParams.get(i)).getName().getIdentifier() + '>';
 					sameKindLeadingNames.add(curr);
 				}
 				insertTag(tagsRewriter, newTag, sameKindLeadingNames);
@@ -138,11 +138,11 @@ public class JavadocTagsSubProcessor {
 		 		// type parameter
 		 		TypeParameter typeParam= (TypeParameter) missingNode.getParent();
 		 		
-				String name= ((SimpleName) missingNode).getIdentifier();
+				String name= '<' + ((SimpleName) missingNode).getIdentifier() + '>';
 				newTag= ast.newTagElement();
 				newTag.setTagName(TagElement.TAG_PARAM);
 				TextElement text= ast.newTextElement();
-				text.setText('<' + name + '>');
+				text.setText(name);
 				newTag.fragments().add(text);
 				List params;
 				if (bodyDecl instanceof TypeDeclaration) {
@@ -200,12 +200,12 @@ public class JavadocTagsSubProcessor {
 		 	List typeParamNames= new ArrayList();
 		 	for (int i= typeParams.size() - 1; i >= 0 ; i--) {
 		 		TypeParameter decl= (TypeParameter) typeParams.get(i);
-		 		String name= decl.getName().getIdentifier();
+		 		String name= '<' + decl.getName().getIdentifier() + '>';
 		 		if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
 		 			TagElement newTag= ast.newTagElement();
 		 			newTag.setTagName(TagElement.TAG_PARAM);
 		 			TextElement text= ast.newTextElement();
-		 			text.setText('<' + name + '>');
+		 			text.setText(name);
 		 			newTag.fragments().add(text);
 					insertTabStop(rewriter, newTag.fragments(), "typeParam" + i); //$NON-NLS-1$
 		 			insertTag(tagsRewriter, newTag, getPreviousTypeParamNames(typeParams, decl));
@@ -262,12 +262,12 @@ public class JavadocTagsSubProcessor {
 			List typeParams= typeDecl.typeParameters();
 			for (int i= typeParams.size() - 1; i >= 0; i--) {
 				TypeParameter decl= (TypeParameter) typeParams.get(i);
-				String name= decl.getName().getIdentifier();
+				String name= '<' + decl.getName().getIdentifier() + '>';
 				if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
 					TagElement newTag= ast.newTagElement();
 					newTag.setTagName(TagElement.TAG_PARAM);
 					TextElement text= ast.newTextElement();
-					text.setText('<' + name + '>');
+					text.setText(name);
 					newTag.fragments().add(text);
 					insertTabStop(rewriter, newTag.fragments(), "typeParam" + i); //$NON-NLS-1$
 					insertTag(tagsRewriter, newTag, getPreviousTypeParamNames(typeParams, decl));
@@ -401,7 +401,7 @@ public class JavadocTagsSubProcessor {
 			if (curr == missingNode) {
 				return previousNames;
 			}
-			previousNames.add(curr.getName().getIdentifier());
+			previousNames.add('<' + curr.getName().getIdentifier() + '>');
 		}
 		return previousNames;
 	}
@@ -539,8 +539,14 @@ public class JavadocTagsSubProcessor {
 				return ASTNodes.getSimpleNameIdentifier((Name) first);
 			} else if (first instanceof TextElement && TagElement.TAG_PARAM.equals(curr.getTagName())) {
 				String text= ((TextElement) first).getText();
-				if (text.startsWith(String.valueOf('<')) && text.endsWith(String.valueOf('>'))) {
-					return text.substring(1, text.length() - 1).trim();
+				if ("<".equals(text) && fragments.size() >= 3) { //$NON-NLS-1$
+					Object second= fragments.get(1);
+					Object third= fragments.get(2);
+					if (second instanceof Name && third instanceof TextElement && ">".equals(((TextElement) third).getText())) { //$NON-NLS-1$
+						return '<' + ASTNodes.getSimpleNameIdentifier((Name) second) + '>';
+					}
+				} else if (text.startsWith(String.valueOf('<')) && text.endsWith(String.valueOf('>')) && text.length() > 2) {
+					return text.substring(1, text.length() - 1);
 				}
 			}
 		}
