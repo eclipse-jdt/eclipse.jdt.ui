@@ -88,7 +88,16 @@ WorkInProgressPreferencePage
 		ArrayList listModelItems= new ArrayList();
 		for (Iterator it= providers.iterator(); it.hasNext();) {
 			ReferenceProviderDescriptor provider= (ReferenceProviderDescriptor) it.next();
-			listModelItems.add(new String[] { provider.getId(), provider.getLabel() });
+			String label= provider.getLabel();
+			int i= label.indexOf('&');
+			while (i >= 0) {
+				if (i < label.length())
+					label= label.substring(0, i) + label.substring(i+1);
+				else
+					label.substring(0, i);
+				i= label.indexOf('&');
+			}
+			listModelItems.add(new String[] { provider.getId(), label });
 		}
 		String[][] items= new String[listModelItems.size()][];
 		listModelItems.toArray(items);
