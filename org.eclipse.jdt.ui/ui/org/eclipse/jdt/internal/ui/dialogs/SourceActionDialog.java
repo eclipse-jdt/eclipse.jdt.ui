@@ -59,17 +59,23 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private IType fType;
 	private int fWidth = 60;
 	private int fHeight = 18;
+	private String fCommentString;
 
 	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
 		super(parent, labelProvider, contentProvider);
 		fEditor= editor;
 		fContentProvider= contentProvider;		
 		fType= type;
+		fCommentString= ActionMessages.getString("SourceActionDialog.createMethodComment"); //$NON-NLS-1$
 		
 		// Take the default from the default for generating comments from the code gen prefs
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		GenStubSettings genStubSettings= new GenStubSettings(settings);
 		fGenerateComment= genStubSettings.createComments;		
+	}
+
+	public void setCommentString(String string) {
+		fCommentString= string;
 	}
 		
 	protected ITreeContentProvider getContentProvider() {
@@ -208,7 +214,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		commentComposite.setFont(composite.getFont());	
 		
 		Button commentButton= new Button(commentComposite, SWT.CHECK);
-		commentButton.setText(ActionMessages.getString("SourceActionDialog.createComment")); //$NON-NLS-1$
+		commentButton.setText(fCommentString); //$NON-NLS-1$
 		commentButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		commentButton.addSelectionListener(new SelectionListener() {
@@ -227,9 +233,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		commentButton.setLayoutData(gd);
 		
 		return commentComposite;
-		
 	}
-	
+		
 	protected Composite createEntryPtCombo(Composite composite) {
 		Composite selectionComposite = new Composite(composite, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -347,6 +352,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			}
 		}
 		return null;
-	}	
+	}
+
+
 
 }

@@ -199,7 +199,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		AddUnimplementedConstructorsContentProvider contentProvider = new AddUnimplementedConstructorsContentProvider(constructorMethods);			
 
 		SourceActionDialog dialog= new SourceActionDialog(shell, labelProvider, contentProvider, fEditor, type);
-
+		dialog.setCommentString(ActionMessages.getString("SourceActionDialog.createConstructorComment")); //$NON-NLS-1$
 		dialog.setTitle(getDialogTitle());
 		dialog.setInitialSelections(constructorMethods);
 		dialog.setContainerMode(true);
