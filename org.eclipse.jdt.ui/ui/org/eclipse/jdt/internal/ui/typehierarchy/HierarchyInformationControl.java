@@ -85,6 +85,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
 					KeySequence[] sequences= getInvokingCommandKeySequences();
+					if (sequences == null)
+						return;
 					
 					for (int i= 0; i < sequences.length; i++) {
 						if (sequences[i].equals(keySequence)) {
