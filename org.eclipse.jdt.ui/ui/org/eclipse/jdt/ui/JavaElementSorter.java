@@ -52,11 +52,12 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int JAVAPROJECTS= 1;
 	private static final int PACKAGEFRAGMENTROOTS= 2;
 	private static final int PACKAGEFRAGMENT= 3;
-	private static final int RESOURCEPACKAGES= 6;
+
 	private static final int COMPILATIONUNITS= 4;
 	private static final int CLASSFILES= 5;
 	
 	private static final int RESOURCEFOLDERS= 7;
+//	private static final int RESOURCEPACKAGES= 6;
 	private static final int RESOURCES= 8;
 	private static final int STORAGE= 9;	
 	
@@ -119,9 +120,6 @@ public class JavaElementSorter extends ViewerSorter {
 						IPackageFragment pack= (IPackageFragment) je;
 						if (pack.getParent().getUnderlyingResource() instanceof IProject) {
 							return PACKAGEFRAGMENTROOTS;
-						}
-						if (!pack.hasChildren() && pack.getNonJavaResources().length > 0) {
-							return RESOURCEPACKAGES;
 						}
 						return PACKAGEFRAGMENT;
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
