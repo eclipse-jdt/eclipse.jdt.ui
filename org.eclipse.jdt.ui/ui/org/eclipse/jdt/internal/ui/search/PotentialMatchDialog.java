@@ -96,6 +96,6 @@ class PotentialMatchDialog extends MessageDialog {
 		if (potentialMatchCount == 1)
 			return new String(SearchMessages.getString("Search.potentialMatchDialog.title.foundPotentialMatch")); //$NON-NLS-1$
 		else
-			return new String(SearchMessages.getFormattedString("Search.potentialMatchDialog.title.foundPotentialMatches", "" + potentialMatchCount)); //$NON-NLS-1$
+			return new String(SearchMessages.getFormattedString("Search.potentialMatchDialog.title.foundPotentialMatches", "" + potentialMatchCount)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
