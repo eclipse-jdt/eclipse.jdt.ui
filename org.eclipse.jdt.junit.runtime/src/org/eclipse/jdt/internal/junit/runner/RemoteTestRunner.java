@@ -27,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.Socket;
-import java.util.IdentityHashMap;
 import java.util.Vector;
 import junit.extensions.TestDecorator;
 import junit.framework.AssertionFailedError;
@@ -128,7 +127,7 @@ public class RemoteTestRunner implements TestListener {
 	/**
 	 * Map to map tests to unique IDs
 	 */
-	private IdentityHashMap fIdMap;
+	private CustomHashtable fIdMap;
 	private int	fNextId= 1;
 
 	private String[] fFailureNames;
@@ -443,9 +442,16 @@ public class RemoteTestRunner implements TestListener {
 			prioritizer.prioritize(suites[i]);
 		}
 		
-		// count all testMethods and inform ITestRunListeners		
+		// count all testMethods and inform ITestRunListeners	
 		int count= countTests(suites);
-		fIdMap= new IdentityHashMap(count);
+		fIdMap= new CustomHashtable(count, new IElementComparer() {
+			public boolean equals(Object a, Object b) {
+				return a == b;
+			}
+			public int hashCode(Object element) {
+				return System.identityHashCode(element);
+			}
+		});
 		
 		notifyTestRunStarted(count);
 		
