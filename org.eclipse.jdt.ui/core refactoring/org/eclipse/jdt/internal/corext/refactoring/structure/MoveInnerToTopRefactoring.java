@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -336,10 +337,15 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private void modifyAccessToFieldsFromEnclosingInstance(TextChangeManager manager, FieldAccess[] fieldAccesses) throws CoreException {
 		for (int i= 0; i < fieldAccesses.length; i++) {
-			FieldAccess field= fieldAccesses[i];
-			if (field.getExpression() != null)
-				continue;
-			IVariableBinding vb= resolveFieldBinding(field);
+			int length= 0;
+			FieldAccess fieldAccess= fieldAccesses[i];
+			if (fieldAccess.getExpression() != null){
+				if ((fieldAccess.getExpression() instanceof ThisExpression) && ((ThisExpression)fieldAccess.getExpression()).getQualifier() != null)
+					length= fieldAccess.getName().getStartPosition() - fieldAccess.getStartPosition();
+				else
+					continue;
+			}	
+			IVariableBinding vb= resolveFieldBinding(fieldAccess);
 			if (vb == null)
 				continue;
 			String text;
@@ -347,17 +353,22 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				text= JavaModelUtil.getTypeQualifiedName(getEnclosingType()) + '.';
 			else
 				text= createReadAccessForEnclosingInstance() + '.';
-			int offset= field.getStartPosition();
-			manager.get(getInputTypeCu()).addTextEdit("Update field access", SimpleTextEdit.createInsert(offset, text));
+			int offset= fieldAccess.getStartPosition();
+			manager.get(getInputTypeCu()).addTextEdit("Update field access", SimpleTextEdit.createReplace(offset, length, text));
 		}
 	}
 	
 	private void modifyAccessToMethodsFromEnclosingInstance(TextChangeManager manager, MethodInvocation[] methodInvocations) throws CoreException {
 		for (int i= 0; i < methodInvocations.length; i++) {
-			MethodInvocation method= methodInvocations[i];
-			if (method.getExpression() != null)
-				continue;
-			IMethodBinding mb= resolveMethodBinding(method);
+			int length= 0;
+			MethodInvocation methodInvocation= methodInvocations[i];
+			if (methodInvocation.getExpression() != null){
+				if ((methodInvocation.getExpression() instanceof ThisExpression) && ((ThisExpression)methodInvocation.getExpression()).getQualifier() != null)
+					length= methodInvocation.getName().getStartPosition() - methodInvocation.getStartPosition();
+				else
+					continue;
+			}	
+			IMethodBinding mb= resolveMethodBinding(methodInvocation);
 			if (mb == null)
 				continue;
 			String text;
@@ -365,8 +376,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				text= JavaModelUtil.getTypeQualifiedName(getEnclosingType()) + '.';
 			else
 				text= createReadAccessForEnclosingInstance() + '.';
-			int offset= method.getStartPosition();
-			manager.get(getInputTypeCu()).addTextEdit("Update method invocation", SimpleTextEdit.createInsert(offset, text));
+			int offset= methodInvocation.getStartPosition();
+			manager.get(getInputTypeCu()).addTextEdit("Update method invocation", SimpleTextEdit.createReplace(offset, length, text));
 		}
 	}
 
