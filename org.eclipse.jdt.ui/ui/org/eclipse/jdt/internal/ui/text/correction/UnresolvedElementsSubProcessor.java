@@ -124,15 +124,15 @@ public class UnresolvedElementsSubProcessor {
 			IPackageFragment pack= (IPackageFragment) cu.getParent();
 			final ICompilationUnit addedCU= pack.getCompilationUnit(addedCUName);
 			if (!addedCU.exists()) {
-				boolean isClass= (kind & SimilarElementsRequestor.CLASSES) != 0;
-				String[] superTypes= (problemPos.getId() != IProblem.ExceptionTypeNotFound) ? null : new String[] { "java.lang.Exception" }; //$NON-NLS-1$
-				String label;
-				if (isClass) {
-					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclass.description", typeName); //$NON-NLS-1$
-				} else {
-					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterface.description", typeName); //$NON-NLS-1$
+				if ((kind & SimilarElementsRequestor.CLASSES) != 0) {
+					String[] superTypes= (problemPos.getId() != IProblem.ExceptionTypeNotFound) ? null : new String[] { "java.lang.Exception" }; //$NON-NLS-1$
+					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclass.description", typeName); //$NON-NLS-1$
+					proposals.add(new NewCUCompletionProposal(label, addedCU, true, superTypes, 0));
 				}
-				proposals.add(new NewCUCompletionProposal(label, addedCU, isClass, superTypes, 0));
+				if ((kind & SimilarElementsRequestor.INTERFACES) != 0) {
+					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterface.description", typeName); //$NON-NLS-1$
+					proposals.add(new NewCUCompletionProposal(label, addedCU, false, null, 0));
+				}				
 			}
 		}
 	}

@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -71,9 +72,6 @@ public class ASTResolving {
 		}
 		return binding; 
 	}
-			
-			
-		
 		
 	private static ITypeBinding getPossibleTypeBinding(ASTNode node) {	
 		ASTNode parent= node.getParent();
@@ -88,23 +86,20 @@ public class ASTResolving {
 			return assignment.getLeftHandSide().resolveTypeBinding();
 		case ASTNode.INFIX_EXPRESSION:
 			InfixExpression infix= (InfixExpression) parent;
-			InfixExpression.Operator op= infix.getOperator();
 			if (node.equals(infix.getLeftOperand())) {
 				// xx == expression
-				if (op == InfixExpression.Operator.INSTANCEOF) {
-					ASTNode left= infix.getRightOperand();
-					if (left instanceof SimpleName) {
-						return ASTNodes.getTypeBinding(((SimpleName) left));
-					}
-				}
 				return infix.getRightOperand().resolveTypeBinding();
 			}
 			// expression == xx
+			InfixExpression.Operator op= infix.getOperator();
 			if (op == InfixExpression.Operator.LEFT_SHIFT || op == InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED		
 					|| op == InfixExpression.Operator.RIGHT_SHIFT_SIGNED) {
 				return infix.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
 			return infix.getLeftOperand().resolveTypeBinding();
+		case ASTNode.INSTANCEOF_EXPRESSION:
+			InstanceofExpression instanceofExpression= (InstanceofExpression) parent;
+			return instanceofExpression.getRightOperand().resolveBinding();
 		case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) parent;
 			if (frag.getInitializer().equals(node)) {
