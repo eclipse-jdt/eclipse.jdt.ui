@@ -117,13 +117,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		 */
 		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation {
 			
-			private static Image fgImage;
-			private static boolean fgImageInitialized= false;
+			private static Image fgQuickFixImage;
+			private static Image fgQuickFixErrorImage;
+			private static boolean fgQuickFixImagesInitialized= false;
 			
 			private List fOverlaids;
 			private IProblem fProblem;
 			private Image fImage;
-			private boolean fImageInitialized= false;
+			private boolean fQuickFixImagesInitialized= false;
 			private AnnotationType fType;
 			
 			
@@ -140,17 +141,21 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					fType= AnnotationType.ERROR;			
 			}
 			
-			private void initializeImage() {
+			private void initializeImages() {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
-				if (!fImageInitialized) {
+				if (!fQuickFixImagesInitialized) {
 					if (indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID())) {
-						if (!fgImageInitialized) {
-							fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
-							fgImageInitialized= true;
+						if (!fgQuickFixImagesInitialized) {
+							fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+							fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
+							fgQuickFixImagesInitialized= true;
 						}
-						fImage= fgImage;
+						if (fType == AnnotationType.ERROR)
+							fImage= fgQuickFixErrorImage;
+						else
+							fImage= fgQuickFixImage;
 					}
-					fImageInitialized= true;
+					fQuickFixImagesInitialized= true;
 				}
 			}
 
@@ -162,7 +167,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see Annotation#paint
 			 */
 			public void paint(GC gc, Canvas canvas, Rectangle r) {
-				initializeImage();
+				initializeImages();
 				if (fImage != null)
 					drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.TOP);
 			}
@@ -171,7 +176,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IJavaAnnotation#getImage(Display)
 			 */
 			public Image getImage(Display display) {
-				initializeImage();
+				initializeImages();
 				return fImage;
 			}
 			

@@ -51,11 +51,13 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	private static final int NO_IMAGE= 0;
 	private static final int ORIGINAL_MARKER_IMAGE= 1;
 	private static final int QUICKFIX_IMAGE= 2;
-	private static final int OVERLAY_IMAGE= 3;
-	private static final int GRAY_IMAGE= 4;
-	private static final int BREAKPOINT_IMAGE= 5;
+	private static final int QUICKFIX_ERROR_IMAGE= 3;
+	private static final int OVERLAY_IMAGE= 4;
+	private static final int GRAY_IMAGE= 5;
+	private static final int BREAKPOINT_IMAGE= 6;
 
 	private static Image fgQuickFixImage;
+	private static Image fgQuickFixErrorImage;
 	private static ImageRegistry fgGrayMarkersImageRegistry;
 	
 	private IDebugModelPresentation fPresentation;
@@ -131,9 +133,15 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	}
 	
 	private Image getQuickFixImage() {
-		if (fgQuickFixImage != null)
+		if (fgQuickFixImage == null)
 			fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
 		return fgQuickFixImage;
+	}
+
+	private Image getQuickFixErrorImage() {
+		if (fgQuickFixErrorImage == null)
+			fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
+		return fgQuickFixErrorImage;
 	}
 
 	/*
@@ -221,14 +229,18 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		if (hasOverlay())
 			newImageType= OVERLAY_IMAGE;
 		else if (isRelevant()) {
-			if (mustShowQuickFixIcon())
-				newImageType= QUICKFIX_IMAGE; 
-			else
+			if (mustShowQuickFixIcon()) {
+				if (fType == AnnotationType.ERROR)
+					newImageType= QUICKFIX_ERROR_IMAGE;
+				else
+					newImageType= QUICKFIX_IMAGE; 
+			} else
 				newImageType= ORIGINAL_MARKER_IMAGE; 
 		} else
 			newImageType= GRAY_IMAGE;
 
-		if (fImageType == newImageType)
+		if (fImageType == newImageType && newImageType != OVERLAY_IMAGE)
+			// Nothing changed - simply return the current image
 			return super.getImage(display);
 
 		Image newImage= null;
@@ -241,6 +253,9 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 				break;
 			case QUICKFIX_IMAGE:
 				newImage= getQuickFixImage();
+				break;
+			case QUICKFIX_ERROR_IMAGE:
+				newImage= getQuickFixErrorImage();
 				break;
 			case GRAY_IMAGE:
 				if (fImageType != ORIGINAL_MARKER_IMAGE)
@@ -265,7 +280,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 
 		fImageType= newImageType;
 		setImage(newImage);
-		return newImage;
+		return super.getImage(display);
 	}
 	
 	private ImageRegistry getGrayMarkerImageRegistry(Display display) {
