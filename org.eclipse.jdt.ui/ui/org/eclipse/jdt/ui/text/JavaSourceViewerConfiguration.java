@@ -22,6 +22,7 @@ import org.eclipse.jface.text.formatter.IFormattingStrategy;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.RuleBasedDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.rules.Token;
@@ -33,7 +34,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
-import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
@@ -158,9 +158,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 
 		if (getEditor() != null && getEditor().isEditable()) {
-			JavaReconciler reconciler= new JavaReconciler();
+			MonoReconciler reconciler= new MonoReconciler(new JavaReconcilingStrategy(getEditor()), false);
 			reconciler.setDelay(500);
-			reconciler.setReconcilingStrategy(new JavaReconcilingStrategy(getEditor()));
 			return reconciler;
 		}
 		

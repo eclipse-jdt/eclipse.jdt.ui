@@ -21,6 +21,7 @@ import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
@@ -114,7 +115,7 @@ public class JavaDocScanner extends BufferedRuleBasedScanner {
 		
 		fColorManager= manager;
 		
-		fKeyword= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_KEYWORD)));
+		fKeyword= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_KEYWORD), null, SWT.BOLD));
 		fTag= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_TAG)));
 		fLink= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVADOC_LINK)));
 		

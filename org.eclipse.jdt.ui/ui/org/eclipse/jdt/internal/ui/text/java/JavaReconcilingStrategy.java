@@ -18,6 +18,8 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+
+
 public class JavaReconcilingStrategy implements IReconcilingStrategy {
 	
 	private ICompilationUnit fUnit;

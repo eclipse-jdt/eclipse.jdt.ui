@@ -18,6 +18,7 @@ import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
@@ -71,8 +72,8 @@ public class JavaCodeScanner extends RuleBasedScanner {
 		
 		fColorManager= manager;
 		
-		fKeyword= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_KEYWORD)));
-		fType= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_TYPE)));
+		fKeyword= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_KEYWORD), null, SWT.BOLD));
+		fType= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_TYPE), null, SWT.BOLD));
 		fString= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_STRING)));
 		fComment= new Token(new TextAttribute(fColorManager.getColor(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT)));
 		
