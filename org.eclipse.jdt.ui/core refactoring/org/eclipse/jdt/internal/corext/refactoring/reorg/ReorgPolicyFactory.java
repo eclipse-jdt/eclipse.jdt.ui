@@ -345,7 +345,7 @@ class ReorgPolicyFactory {
 				ICompilationUnit cu= ReorgUtils.getCompilationUnit(javaElement);
 				if (cu != null)
 					return verifyDestination(cu);
-				return "The selected element is not located in a compilation unit and cannot be the destination of this operation.";
+				return RefactoringStatus.createFatalErrorStatus("The selected element is not located in a compilation unit and cannot be the destination of this operation.");
 			}
 	
 			if (containsLinkedResources() && !ReorgUtils.canBeDestinationForLinkedResources(javaElement))
