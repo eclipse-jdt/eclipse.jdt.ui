@@ -199,8 +199,8 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		if (!fJobPresenter.isCanceled())
 			reconcilePositions(subtrees);
 		
-		TextPresentation textPresentation;
-		if (!fJobPresenter.isCanceled());
+		TextPresentation textPresentation= null;
+		if (!fJobPresenter.isCanceled())
 			textPresentation= fJobPresenter.createPresentation(fAddedPositions, fRemovedPositions);
 		
 		if (!fJobPresenter.isCanceled())
