@@ -56,7 +56,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testIndirectStaticAccess_bug40880"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testIndirectStaticAccess_bug32022"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -2337,6 +2337,69 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	
+	public void testIndirectStaticAccess_bug32022() throws Exception {
+		
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class StaticField {\n");
+		buf.append("    public boolean flag;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("StaticField.java", buf.toString(), false, null);		
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ConstClass {\n");
+		buf.append("     public static StaticField staticField = new StaticField();\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("ConstClass.java", buf.toString(), false, null);		
+
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(ConstClass constclass) {\n");
+		buf.append("        constclass.staticField.flag= true;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(ConstClass constclass) {\n");
+		buf.append("        ConstClass.staticField.flag= true;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ConstClass {\n");
+		buf.append("     public StaticField staticField = new StaticField();\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+	
 	
 	public void testUnnecessaryInstanceof1() throws Exception {
 		Hashtable hashtable= JavaCore.getOptions();

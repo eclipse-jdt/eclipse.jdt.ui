@@ -424,12 +424,25 @@ public class LocalCorrectionsSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
+		// fix for 32022
+		String[] args= problem.getProblemArguments();
+		if (selectedNode instanceof QualifiedName && args.length == 2) {
+			String field= args[1];
+			QualifiedName qualified= (QualifiedName) selectedNode;
+			while (!field.equals(qualified.getName().getIdentifier()) && qualified.getQualifier() instanceof QualifiedName) {
+				qualified= (QualifiedName) qualified.getQualifier();
+			}
+			selectedNode= qualified;
+			problem= new ProblemLocation(qualified.getStartPosition(), qualified.getLength(), problem.getProblemId(), args);
+		}
+		
+		
 		Expression qualifier= null;
 		IBinding accessBinding= null;
 		
         if (selectedNode instanceof QualifiedName) {
-        	QualifiedName name= (QualifiedName) selectedNode; 
-            qualifier= name.getQualifier();
+        	QualifiedName name= (QualifiedName) selectedNode;
+        	qualifier= name.getQualifier(); 	
         	accessBinding= name.resolveBinding();
         } else if (selectedNode instanceof SimpleName) {
         	ASTNode parent= selectedNode.getParent();
