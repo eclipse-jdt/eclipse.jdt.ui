@@ -171,10 +171,14 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					return;
 				case UNDO:
 					fIgnoreTextConverters= true;
-					break;
+					super.doOperation(operation);
+					fIgnoreTextConverters= false;
+					return;
 				case REDO:
 					fIgnoreTextConverters= true;
-					break;
+					super.doOperation(operation);
+					fIgnoreTextConverters= false;
+					return;
 				case CONTENTASSIST_COMPLETE_PREFIX:
 					if (fContentAssistant instanceof IContentAssistantExtension) {
 						msg= ((IContentAssistantExtension) fContentAssistant).completePrefix();
@@ -240,7 +244,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				for (Iterator e = fTextConverters.iterator(); e.hasNext();)
 					((ITextConverter) e.next()).customizeDocumentCommand(getDocument(), command);
 			}
-			fIgnoreTextConverters= false;
 		}
 				
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=19270
