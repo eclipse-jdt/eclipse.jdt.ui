@@ -15,7 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.util.*;
+import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 /**
@@ -77,7 +78,7 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 					display.asyncExec(new Runnable() {
 						public void run() {
 							try {
-								activePage.openEditor((IFile)resource);
+								IDE.openEditor(activePage, (IFile)resource, true);
 							} catch (PartInitException e) {
 								JUnitPlugin.log(e);
 							}

@@ -14,7 +14,6 @@ package org.eclipse.jdt.internal.junit.launcher;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.CommonTab;
-import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaArgumentsTab;
@@ -41,6 +40,5 @@ public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		super.setDefaults(config); 
-		config.setAttribute(IDebugUIConstants.ATTR_TARGET_RUN_PERSPECTIVE, IDebugUIConstants.PERSPECTIVE_NONE);
 	}
 }

@@ -67,11 +67,11 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
@@ -865,7 +865,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 		IActionBars actionBars= getViewSite().getActionBars();
 		actionBars.setGlobalActionHandler(
-			IWorkbenchActionConstants.COPY,
+			ActionFactory.COPY.getId(),
 			new CopyTraceAction(fFailureView, fClipboard));
 		
 		JUnitPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
@@ -903,8 +903,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fPreviousAction= new ShowPreviousFailureAction(this);
 		fNextAction.setEnabled(false);
 		fPreviousAction.setEnabled(false);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.NEXT, fNextAction);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PREVIOUS, fPreviousAction);
+		actionBars.setGlobalActionHandler(ActionFactory.NEXT.getId(), fNextAction);
+		actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPreviousAction);
 		
 		toolBar.add(fNextAction);
 		toolBar.add(fPreviousAction);
