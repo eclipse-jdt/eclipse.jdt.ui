@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.debug.internal.ui.DebugUIUtils;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -219,7 +219,7 @@ public class OpenOnConsoleTypeAction extends Action implements IViewActionDelega
 			if (textSelection.getLength() > 0) {
 				parseSelection(textSelection.getText());
 			} else {
-				IDocument consoleDocument = DebugUIUtils.getCurrentConsoleDocument();
+				IDocument consoleDocument = DebugUIPlugin.getCurrentConsoleDocument();
 				if (consoleDocument == null) {
 					return;
 				}
