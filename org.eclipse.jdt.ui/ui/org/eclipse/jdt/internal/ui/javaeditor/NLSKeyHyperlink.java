@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.resources.IStorage;
+
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
@@ -24,6 +24,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
@@ -36,7 +37,6 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector;
 
@@ -114,7 +114,8 @@ public class NLSKeyHyperlink implements IHyperlink {
 			boolean found= false;
 			
 			// Find key in document
-			IDocument document= JavaPlugin.getDefault().getPropertiesFileDocumentProvider().getDocument(editor.getEditorInput());
+			IEditorInput editorInput= editor.getEditorInput();
+			IDocument document= ((ITextEditor)editor).getDocumentProvider().getDocument(editorInput);
 			if (document != null) {
 				FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
 				PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector((ITextEditor)editor);
@@ -134,11 +135,11 @@ public class NLSKeyHyperlink implements IHyperlink {
 									found= keyName.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
 								}
 							} else if (document instanceof IDocumentExtension3) {
-								// Fall back: test partition
+								// Fall back: test using properties file partitioning
 								ITypedRegion partition= null;
 								partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), false);
 								found= IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
-										&& keyName.equals(document.get(partition.getOffset(), partition.getLength()).trim()); 
+										&& keyName.equals(document.get(partition.getOffset(), partition.getLength()).trim());
 							}
 							// Prevent endless loop (panic code, shouldn't be needed)
 							if (offset == region.getOffset())
