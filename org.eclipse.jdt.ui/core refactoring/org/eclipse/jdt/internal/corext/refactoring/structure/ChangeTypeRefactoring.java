@@ -150,6 +150,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private int fParamIndex;
 	
 	/**
+	 * The name of the selected parameter, or <code>null</code>.
+	 */
+	private String fParamName;
+	
+	/**
 	 * If the selection corresponds to a field, this field stores a reference to its IVariableBinding,
 	 * otherwise this field remains null. Used during search for references in other CUs.
 	 */
@@ -732,17 +737,19 @@ public class ChangeTypeRefactoring extends Refactoring {
 				fFieldBinding= fragment.resolveBinding();
 				setSelectionRanges(fragment.getName());
 			}					
-		} else if (parent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION || parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+		} else if (parent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION) {
 			if ((grandParent.getNodeType() == ASTNode.METHOD_DECLARATION)) {
 				fMethodBinding= ((MethodDeclaration)grandParent).resolveBinding();
 				fSelectionTypeBinding= simpleName.resolveTypeBinding();
 				fParamIndex= ((MethodDeclaration)grandParent).parameters().indexOf(parent);
+				fParamName= ((SingleVariableDeclaration) parent).getName().getIdentifier();
 			}
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && (grandParent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION)) {
 			ASTNode greatGrandParent= grandParent.getParent();
 			if (greatGrandParent != null && greatGrandParent.getNodeType() == ASTNode.METHOD_DECLARATION) {
 				fMethodBinding= ((MethodDeclaration)greatGrandParent).resolveBinding();
 				fParamIndex= ((MethodDeclaration)greatGrandParent).parameters().indexOf(grandParent);
+				fParamName= ((SingleVariableDeclaration) grandParent).getName().getIdentifier();
 			}
 			setSelectionRanges(simpleName);
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && grandParent.getNodeType() == ASTNode.METHOD_DECLARATION) {
@@ -1122,6 +1129,23 @@ public class ChangeTypeRefactoring extends Refactoring {
 	
 	public IType getOriginalType(){
 		return fOriginalTypeOfSelection;
+	}
+	
+	public String getTarget() {
+		String typeName= fSelectionTypeBinding == null ? "" : fSelectionTypeBinding.getName() + " "; //$NON-NLS-2$
+		if (fFieldBinding != null) {
+			return typeName + fFieldBinding.getName();
+		} else if (fMethodBinding != null) {
+			if (fParamIndex == -1) {
+				return typeName + fMethodBinding.getName() + "(..)"; //$NON-NLS-1$
+			} else {
+				return typeName + fParamName;
+			}
+		} else if (fSelectionBinding != null) {
+			return typeName + fSelectionBinding.getName();
+		} else {
+			return typeName;
+		}
 	}
 	
 	public ITypeHierarchy getTypeHierarchy(){

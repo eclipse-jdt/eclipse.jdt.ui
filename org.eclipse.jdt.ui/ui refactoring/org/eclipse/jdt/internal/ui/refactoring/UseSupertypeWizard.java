@@ -32,6 +32,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -91,7 +93,9 @@ public class UseSupertypeWizard extends RefactoringWizard{
 //			});
 		
 			Label label= new Label(composite, SWT.NONE);
-			label.setText(RefactoringMessages.getString("UseSupertypeInputPage.Select_supertype_to_use")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.getFormattedString(
+					"UseSupertypeInputPage.Select_supertype_to_use", //$NON-NLS-1$
+					JavaElementLabels.getElementLabel(getUseSupertypeRefactoring().getInputType(), JavaElementLabels.T_FULLY_QUALIFIED)));
 			label.setLayoutData(new GridData());
 		
 			addTableComponent(composite);

@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -24,12 +25,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -92,40 +93,77 @@ public class ChangeTypeWizard extends RefactoringWizard {
 	private class ChangeTypeLabelProvider extends JavaElementLabelProvider 
 										  implements IColorProvider {
 		
+		private Color fGrayColor;
+		private HashMap/*<Object, Image>*/ fGrayImages;
+		
 		public ChangeTypeLabelProvider(){
 			fGrayColor= Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
+			fGrayImages= new HashMap();
 		}
 		
 		private Collection/*<IType>*/ fInvalidTypes;
 		
 		public void grayOut(Collection/*<IType>*/ invalidTypes){
 			fInvalidTypes= invalidTypes; 
-			fireLabelProviderChanged(new LabelProviderChangedEvent(this, fInvalidTypes.toArray()));
+			/*
+			 * Invalidate all labels. Invalidating only invalid types doesn't
+			 * work since there can be multiple nodes in the tree that
+			 * correspond to the same invalid IType. The TreeViewer only updates
+			 * the label of one of these ITypes and leaves the others in their
+			 * old state.
+			 */
+			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 		 */
 		public Color getForeground(Object element) {
-			if (fInvalidTypes == null){ // initially, everything is enabled
+			if (isInvalid(element))
+				return fGrayColor;
+			else
 				return null;
-			} else {
-				if (fInvalidTypes.contains(element))
-					return fGrayColor;
-				else
-					return null;
-			}
 		}
-
+		
+		private boolean isInvalid(Object element) {
+			if (fInvalidTypes == null)
+				return false; // initially, everything is enabled
+			else
+				return fInvalidTypes.contains(element);
+		}
+		
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
 		 */
 		public Color getBackground(Object element) {
-			return fCurrentBackgroundColor;
+			return null;
 		}
 		
-		private Color fGrayColor;
-		private Color fCurrentBackgroundColor;
+		/*
+		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
+		 */
+		public Image getImage(Object element) {
+			Image image= super.getImage(element);
+			if (isInvalid(element)) {
+				Image grayImage= (Image) fGrayImages.get(element);
+				if (grayImage == null && image != null) {
+					grayImage= new Image(Display.getCurrent(), image, SWT.IMAGE_GRAY);
+					fGrayImages.put(element, grayImage);
+				}
+				return grayImage;
+			} else {
+				return image;
+			}
+		}
+		
+		public void dispose() {
+			for (Iterator iter= fGrayImages.values().iterator(); iter.hasNext();) {
+				Image image= (Image) iter.next();
+				image.dispose();
+			}
+			fGrayImages.clear();
+			super.dispose();
+		}
 	}
 	
 	private class ChangeTypeInputPage extends UserInputWizardPage{
@@ -167,15 +205,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 	
 				}
 													
-// BUG: The following call does not gray out all appropriate nodes if there
-// are multiple nodes in the tree that correspond to the same IType that needs
-// to be grayed out
-//				fLabelProvider.grayOut(fInvalidTypes);
-				
-				// WORKAROUND: traverse the tree explicitly
-				Tree tree= fTreeViewer.getTree();
-				fTreeViewer.expandToLevel(10);
-				grayOutInvalidTypes(tree.getItems());
+				fLabelProvider.grayOut(fInvalidTypes);
 				
 				if (fValidTypes == null || fValidTypes.size() == 0){
 					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.getString("ChangeTypeWizard.declCannotBeChanged")); //$NON-NLS-1$
@@ -223,7 +253,9 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			composite.setLayoutData(new GridData());
 			
 			Label label= new Label(composite, SWT.NONE);
-			label.setText(RefactoringMessages.getString("ChangeTypeWizard.pleaseChooseType")); //$NON-NLS-1$
+			label.setText(RefactoringMessages.getFormattedString(
+					"ChangeTypeWizard.pleaseChooseType", //$NON-NLS-1$
+					((ChangeTypeRefactoring) getRefactoring()).getTarget()));
 			label.setLayoutData(new GridData());
 			
 			addTreeComponent(composite);			
@@ -280,21 +312,6 @@ public class ChangeTypeWizard extends RefactoringWizard {
 						"ChangeTypeWizard.grayed_types",  //$NON-NLS-1$
 						new Object[] {type.getElementName(), getGeneralizeTypeRefactoring().getOriginalType().getElementName()}));
 				}
-			}
-		}
-		
-		// NEEDED for WORKAROUND
-		private void grayOutInvalidTypes(TreeItem[] items) {
-			for (int i=0; i < items.length; i++){
-				TreeItem item= items[i];
-				String itemName= ((IType)item.getData()).getFullyQualifiedName();
-				ChangeTypeRefactoring ct= (ChangeTypeRefactoring) getRefactoring();
-				Collection validTypeNames= ct.getValidTypeNames();
-				if (!validTypeNames.contains(itemName)){
-					//item.setGrayed(true); --- useless here; only works for CheckboxTrees
-					item.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
-				}
-				grayOutInvalidTypes(items[i].getItems());
 			}
 		}
 		
