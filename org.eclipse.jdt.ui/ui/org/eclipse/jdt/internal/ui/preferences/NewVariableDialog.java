@@ -126,13 +126,16 @@ public class NewVariableDialog extends StatusDialog {
 		IStatus val= JavaConventions.validateIdentifier(name);
 		if (val.matches(IStatus.ERROR)) {
 			status.setError(JavaPlugin.getFormattedString(ERR_INVALIDNAME, val.getMessage()));
-		} else if (nameExists(name)) {
+		} else if (nameConflict(name)) {
 			status.setError(JavaPlugin.getResourceString(ERR_NAMEEXISTS));
 		}
 		return status;
 	}
 	
-	private boolean nameExists(String name) {
+	private boolean nameConflict(String name) {
+		if (fElement != null && fElement.getName().equals(name)) {
+			return false;
+		}
 		for (int i= 0; i < fExistingNames.size(); i++) {
 			CPVariableElement elem= (CPVariableElement)fExistingNames.get(i);
 			if (name.equals(elem.getName())){

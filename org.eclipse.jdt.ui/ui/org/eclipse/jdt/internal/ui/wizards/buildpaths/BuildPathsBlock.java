@@ -300,12 +300,17 @@ public class BuildPathsBlock {
 		}
 		
 		if (fAddJDKToDefault || fClassPathDefault == null) {
-			CPListElement elem= new CPListElement(JavaCore.newVariableEntry(ClasspathVariablesPreferencePage.JDKLIB_VARIABLE), null);
-			IPath[] attach= JavaBasePreferencePage.getJDKSourceAttachment();
-			if (attach != null) {
-				elem.setSourceAttachment(attach[0], attach[1]);
+			IPath jdkPath= JavaBasePreferencePage.getJDKPath();
+			if (jdkPath != null) {
+				IResource res= fWorkspaceRoot.findMember(jdkPath);
+				CPListElement elem= new CPListElement(JavaCore.newLibraryEntry(jdkPath), res);
+				//CPListElement elem= new CPListElement(JavaCore.newVariableEntry(ClasspathVariablesPreferencePage.JDKLIB_VARIABLE), null);
+				IPath[] attach= JavaBasePreferencePage.getJDKSourceAttachment();
+				if (attach != null) {
+					elem.setSourceAttachment(attach[0], attach[1]);
+				}
+				vec.add(elem);
 			}
-			vec.add(elem);
 		}
 		return vec;
 	}
