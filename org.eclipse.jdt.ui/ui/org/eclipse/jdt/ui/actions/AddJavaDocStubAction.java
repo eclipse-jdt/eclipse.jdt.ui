@@ -108,6 +108,10 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			if (cu.isWorkingCopy()) {
 				workingCopyCU= cu;
 				workingCopyMembers= members;
+				synchronized (workingCopyCU) {
+					workingCopyCU.reconcile();
+				}
+			
 			} else {
 				// get the corresponding elements from the working copy
 				workingCopyCU= EditorUtility.getWorkingCopy(cu);
@@ -128,6 +132,9 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			}
 			
 			run(workingCopyMembers);
+			synchronized (workingCopyCU) {
+				workingCopyCU.reconcile();
+			}					
 			EditorUtility.revealInEditor(editor, members[0]);
 			
 		} catch (CoreException e) {
@@ -168,7 +175,6 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		 		}
 			}
 			run(new IMember[] { (IMember)element });
-			EditorUtility.revealInEditor(fEditor, element);
 		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
 			showError(ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
