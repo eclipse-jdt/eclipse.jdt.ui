@@ -138,9 +138,10 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		Iterator e= fPartListeners.iterator();
 		while (e.hasNext()) 
 			getPage().removePartListener((RetargetAction) e.next());
-			
+		fPartListeners.clear();
+		
 		setActiveEditor(null);
-	
+		
 		super.dispose();
 	}
 }

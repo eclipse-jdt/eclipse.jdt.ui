@@ -58,30 +58,30 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	private void reconcile() {
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());		
 		if (unit != null) {
-			synchronized (unit) {
-				try {
-					
-					// reconcile
-					
-					/* fix for missing cancel flag communication */
-					IProblemRequestorExtension extension= getProblemRequestorExtension();
-					if (extension != null)
-						extension.setProgressMonitor(fProgressMonitor);
-					
+			try {
+								
+				/* fix for missing cancel flag communication */
+				IProblemRequestorExtension extension= getProblemRequestorExtension();
+				if (extension != null)
+					extension.setProgressMonitor(fProgressMonitor);
+				
+				// reconcile
+				synchronized (unit) {
 					unit.reconcile(true, fProgressMonitor);
-					
-					/* fix for missing cancel flag communication */
-					if (extension != null)
-						extension.setProgressMonitor(null);
-					
-					if (fEditor instanceof IReconcilingParticipant && !fProgressMonitor.isCanceled()) {
-						IReconcilingParticipant p= (IReconcilingParticipant) fEditor;
-						p.reconciled();
-					}
-					
-				} catch (JavaModelException x) {
-					// ignored
 				}
+				
+				/* fix for missing cancel flag communication */
+				if (extension != null)
+					extension.setProgressMonitor(null);
+				
+				// update participants
+				if (fEditor instanceof IReconcilingParticipant && !fProgressMonitor.isCanceled()) {
+					IReconcilingParticipant p= (IReconcilingParticipant) fEditor;
+					p.reconciled();
+				}
+				
+			} catch (JavaModelException x) {
+				// ignored
 			}
 		}
 	}

@@ -90,7 +90,11 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 		if (resolve != null) {
 			try {
 				
-				IJavaElement[] result= resolve.codeSelect(hoverRegion.getOffset(), hoverRegion.getLength());
+				IJavaElement[] result= null;
+				
+				synchronized (resolve) {
+					result= resolve.codeSelect(hoverRegion.getOffset(), hoverRegion.getLength());
+				}
 				
 				if (result == null)
 					return null;
