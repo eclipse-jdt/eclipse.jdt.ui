@@ -84,12 +84,11 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 		fInstantiatedTextHovers= new ArrayList(2);
 
 		// populate list
-		Iterator iter= JavaEditorTextHoverDescriptor.getContributedHovers().iterator();
-		while (iter.hasNext()) {
-			JavaEditorTextHoverDescriptor descriptor= (JavaEditorTextHoverDescriptor)iter.next();
+		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
+		for (int i= 0; i < hoverDescs.length; i++) {
 			// ensure that we don't add ourselves to the list
-			if (!JavaPlugin.ID_BESTMATCH_HOVER.equals(descriptor.getId()))
-				fTextHoverSpecifications.add(descriptor);
+			if (!JavaPlugin.ID_BESTMATCH_HOVER.equals(hoverDescs[i].getId()))
+				fTextHoverSpecifications.add(hoverDescs[i]);
 		}
 		Collections.sort(fTextHoverSpecifications, new JavaEditorTextHoverDescriptorComparator());
 	}	

@@ -77,7 +77,8 @@
    <hover
          class="org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover"
          id="org.eclipse.jdt.ui.JavadocHover"
-         label="%javadocHover">
+         label="%javadocHover"
+         description="%javadocHoverDescription">
    </hover>
 </extension>
 
@@ -86,7 +87,8 @@
    <hover
          class="org.eclipse.jdt.internal.ui.text.java.hover.BestMatchHover"
          id="org.eclipse.jdt.ui.BestMatchHover"
-         label="%sequentialHover">
+         label="%sequentialHover"
+         description="%sequentialHoverDescription">
    </hover>
 </extension>
 
@@ -95,7 +97,8 @@
    <hover
          class="org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover"
          id="org.eclipse.jdt.ui.JavaSourceHover"
-         label="%sourceHover">
+         label="%sourceHover"
+         description="%sourceHoverDescription">
    </hover>
 </extension>
 
@@ -104,7 +107,8 @@
    <hover
          class="org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"
          id="org.eclipse.jdt.ui.ProblemHover"
-         label="%problemHover">
+         label="%problemHover"
+         description="%problemHoverDescription">
    </hover>
 </extension>
 

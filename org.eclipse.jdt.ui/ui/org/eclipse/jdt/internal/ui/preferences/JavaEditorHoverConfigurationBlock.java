@@ -11,40 +11,40 @@ Contributors:
 
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.FontMetrics;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Item;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ComboBoxCellEditor;
-import org.eclipse.jface.viewers.ICellModifier;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 
 /**
@@ -54,116 +54,37 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor
  */
 class JavaEditorHoverConfigurationBlock {
 
-	private final static int NO_HOVER_CONFIGURED_INDEX= -1;
-	private final static int DEFAULT_HOVER_CONFIGURED_INDEX= -2;
-	private final static String MODIFIER= "modifier"; //$NON-NLS-1$	
-	private final static String HOVER= "hover"; //$NON-NLS-1$	
-	
 
+	// Data structure to hold the values which are edited by the user
 	private static class HoverConfig {
 		
-		private String fModifier;
+		private String fModifierString;
+		private boolean fIsEnabled;
 		private int fStateMask;
-		private int fHoverIndex;
-		private String fHoverId;
 
-		private HoverConfig(String modifier, int stateMask, String hoverId) {
-			fModifier= modifier;
+		private HoverConfig(String modifier, int stateMask, boolean enabled) {
+			fModifierString= modifier;
+			fIsEnabled= enabled;
 			fStateMask= stateMask;
-
-			if (PreferenceConstants.EDITOR_NO_HOVER_CONFIGURED_ID.equals(hoverId))
-				setHoverIndex(NO_HOVER_CONFIGURED_INDEX);
-			else if (PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID.equals(hoverId))
-				setHoverIndex(DEFAULT_HOVER_CONFIGURED_INDEX);
-			else {
-				// Find index
-				int i= 0;
-				Iterator iter= getContributedHovers().iterator();
-				while (iter.hasNext()) {
-					if (hoverId.equals(((JavaEditorTextHoverDescriptor)iter.next()).getId()))
-						break;
-					i++;
-				}
-				if (i < getContributedHovers().size())
-					setHoverIndex(i);
-				else
-					setHoverIndex(NO_HOVER_CONFIGURED_INDEX);
-			}
-		}
-		
-		private void setHoverIndex(int hoverIndex) {
-			fHoverIndex= hoverIndex;
-			if (hoverIndex == NO_HOVER_CONFIGURED_INDEX)
-				fHoverId= PreferenceConstants.EDITOR_NO_HOVER_CONFIGURED_ID;
-			else if (hoverIndex == DEFAULT_HOVER_CONFIGURED_INDEX)
-				fHoverId= PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID;
-			else if (hoverIndex >= 0 && hoverIndex < getContributedHovers().size())
-				fHoverId= ((JavaEditorTextHoverDescriptor)getContributedHovers().get(hoverIndex)).getId();
-			else
-				Assert.isLegal(false);
 		}
 	}
-
-	private static class HoverConfigLabelProvider extends LabelProvider implements ITableLabelProvider {
-		/*
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-		 */
-		public String getColumnText(Object element, int columnIndex) {
-			HoverConfig config= (HoverConfig)element;
-			switch (columnIndex) {
-				case 0:
-					return config.fModifier;
-				case 1:
-					if (config.fHoverIndex == NO_HOVER_CONFIGURED_INDEX)
-						return PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.noHoverConfigured"); //$NON-NLS-1$
-					else if (config.fHoverIndex == DEFAULT_HOVER_CONFIGURED_INDEX)
-						return PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
-					else
-						return ((JavaEditorTextHoverDescriptor)getContributedHovers().get(config.fHoverIndex)).getLabel();
-				default :
-					Assert.isLegal(false);
-				return null;
-			}
-		}
-		/* 
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-		 */
-		public Image getColumnImage(Object element, int columnIndex) {
-			return null;
-		}
-	}
-
-	private static class HoverConfigContentProvider implements IStructuredContentProvider {
-		/* 
-		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
-		 */
-		public Object[] getElements(Object inputElement) {
-			return (Object[])inputElement;
-		}
-		/* 
-		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-		 */
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		}
-		/*
-		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-		 */
-		public void dispose() {
-		}
-	}
-
 
 	private IPreferenceStore fStore;
 	private HoverConfig[] fHoverConfigs;
-	private TableViewer fTableViewer;
+	private Text fModifierEditor;
+	private Button fEnableField;
+	private List fHoverList;
+	private Text fDescription;
+	
+	private JavaEditorPreferencePage fMainPreferencePage;
 
-	public JavaEditorHoverConfigurationBlock(IPreferenceStore store) {
+	private StatusInfo fStatus;
+
+	public JavaEditorHoverConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, IPreferenceStore store) {
+		Assert.isNotNull(mainPreferencePage);
 		Assert.isNotNull(store);
+		fMainPreferencePage= mainPreferencePage;
 		fStore= store;
-	}
-
-	private static List getContributedHovers() {
-		return JavaEditorTextHoverDescriptor.getContributedHovers();
 	}
 
 	/**
@@ -172,178 +93,270 @@ class JavaEditorHoverConfigurationBlock {
 	public Control createControl(Composite parent) {
 
 		Composite hoverComposite= new Composite(parent, SWT.NULL);
-		GridLayout layout= new GridLayout(); layout.numColumns= 1;
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
 		hoverComposite.setLayout(layout);
+		GridData gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL);
+		hoverComposite.setLayoutData(gd);
 
-		final Table table= new Table(hoverComposite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		
-		GridData data= new GridData(GridData.FILL_BOTH);
-		table.setLayoutData(data);
-				
-		table.setHeaderVisible(true);
-		table.setLinesVisible(true);		
+		Label label= new Label(hoverComposite, SWT.NONE);
+		label.setText("&Hover key modifier preferences:");
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		gd.horizontalSpan= 2;
+		label.setLayoutData(gd);
+		gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL);
 
-		TableLayout tableLayout= new TableLayout();
-		table.setLayout(tableLayout);
-
-		TableColumn column1= new TableColumn(table, SWT.NONE);		
-		column1.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.tableColumn.stateMask")); //$NON-NLS-1$
-
-		TableColumn column2= new TableColumn(table, SWT.NONE);
-		column2.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.tableColumn.hover")); //$NON-NLS-1$
-
-		fTableViewer= new TableViewer(table);
-
-		fTableViewer.setLabelProvider(new HoverConfigLabelProvider());
-		fTableViewer.setContentProvider(new HoverConfigContentProvider());
-
-		// Setup cell editing support
-		final ComboBoxCellEditor comboBoxCellEditor= new ComboBoxCellEditor();
-		comboBoxCellEditor.setStyle(SWT.READ_ONLY);
-		fTableViewer.setCellEditors(new CellEditor [] {null, comboBoxCellEditor});
-		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (comboBoxCellEditor.getControl() == null & !table.isDisposed())
-					comboBoxCellEditor.create(table);
-				comboBoxCellEditor.setItems(getLabelsForHoverCombo());
+		// Hover list
+		fHoverList= new List(hoverComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
+		gd.heightHint= convertHeightInCharsToPixels(parent, 10);
+		fHoverList.setLayoutData(gd);
+		fHoverList.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				handleHoverListSelection();
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
-		
-		ICellModifier cellModifier = new ICellModifier() {
-			public Object getValue(Object element, String property) {
-				if (HOVER.equals(property)) {
-					if (isDefaultRowSelected())
-						return new Integer(((HoverConfig)element).fHoverIndex + 1);
-					else
-						return new Integer(((HoverConfig)element).fHoverIndex + 2);
-				}
-				return null;
-			}
-	
-			public boolean canModify(Object element, String property) {
-				return HOVER.equals(property);
-			}
-	
-			public void modify(Object element, String property, Object value) {
-				if (HOVER.equals(property)) {
-					HoverConfig hoverConfig= (HoverConfig)((Item)element).getData();
-					if (isDefaultRowSelected())
-						hoverConfig.setHoverIndex(((Integer)value).intValue() - 1);
-					else
-						hoverConfig.setHoverIndex(((Integer)value).intValue() - 2);
-					fTableViewer.refresh(hoverConfig);
-				}
-			}
-		};
-		fTableViewer.setCellModifier(cellModifier);
-		fTableViewer.setColumnProperties(new String[] {MODIFIER, HOVER});
-		
-		setTableInput();
 
-        configureTableResizing(hoverComposite, table, column1, column2);
+
+		Composite stylesComposite= new Composite(hoverComposite, SWT.NONE);
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.numColumns= 2;
+		stylesComposite.setLayout(layout);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.heightHint= convertHeightInCharsToPixels(parent, 10) + (2 * fHoverList.getBorderWidth());
+		stylesComposite.setLayoutData(gd);
+
+		// Enabled checkbox		
+		fEnableField= new Button(stylesComposite, SWT.CHECK);
+		fEnableField.setText("&Enabled");
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		gd.horizontalSpan= 2;
+		fEnableField.setLayoutData(gd);
+		fEnableField.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				int i= fHoverList.getSelectionIndex();
+				boolean state= fEnableField.getSelection();
+				fModifierEditor.setEnabled(state);
+				fHoverConfigs[i].fIsEnabled= state;
+				handleModifierModified();
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+
+		// Text field for modifier string
+		label= new Label(stylesComposite, SWT.LEFT);
+		label.setText("Key &Modifier:");
+		fModifierEditor= new Text(stylesComposite, SWT.BORDER);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		fModifierEditor.setLayoutData(gd);
+
+fModifierEditor.addKeyListener(new KeyListener() {
+	int time;
+	public void keyPressed(KeyEvent e) {
+		System.out.println(Action.findModifierString(e.stateMask));
+		System.out.println("pressed:"+ "key: " + e.keyCode + ", mask: " + e.stateMask + ", char: " + e.character + "time: "+e.time);
+
+		if (e.keyCode > 0 && e.character == 0 && e.stateMask == 0)
+			time= e.time;
+		else
+			time= -1;
+	}
+
+	public void keyReleased(KeyEvent e) {
+		System.out.println(Action.findModifierString(e.stateMask));
+		System.out.println("released:"+ "key: " + e.keyCode + ", mask: " + e.stateMask + ", char: " + e.character + ", time: " + e.time);
+
+		if (time != -1 && e.stateMask > 0 && e.stateMask == e.stateMask && e.character == 0) {// && e.time -time < 1000) {
+			String text= fModifierEditor.getText();
+			if (text.length() > 0)
+				text= text + " + ";
+			text= text + Action.findModifierString(e.stateMask);
+			fModifierEditor.setText(text);
+			fModifierEditor.setSelection(text.length(), text.length());
+		}
+	}
+});
+
+		fModifierEditor.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				handleModifierModified();
+			}
+		});
+
+		// Description
+		Label descriptionLabel= new Label(stylesComposite, SWT.LEFT);
+		descriptionLabel.setText("Description:");
+		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
+		gd.horizontalSpan= 2;
+		descriptionLabel.setLayoutData(gd);
+		fDescription= new Text(stylesComposite, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER);
+		gd= new GridData(GridData.FILL_BOTH);
+		gd.horizontalSpan= 2;
+		fDescription.setLayoutData(gd);
+
+		initialize();
 
 		return hoverComposite;
 	}
 
-	private void setTableInput() {
-		fHoverConfigs= new HoverConfig[8];
-		
-		String label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
-		fHoverConfigs[0]= new HoverConfig(label, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK, fStore.getString(PreferenceConstants.EDITOR_DEFAULT_HOVER));
+	private JavaEditorTextHoverDescriptor[] getContributedHovers() {
+		return JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();		
+	}
 
-		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.none"); //$NON-NLS-1$
-		fHoverConfigs[1]= new HoverConfig(label, SWT.NONE, fStore.getString(PreferenceConstants.EDITOR_NONE_HOVER));
-
-		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrl"); //$NON-NLS-1$		
-		fHoverConfigs[2]= new HoverConfig(label, SWT.CTRL, fStore.getString(PreferenceConstants.EDITOR_CTRL_HOVER));
-
-		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.shift"); //$NON-NLS-1$		
-		fHoverConfigs[3]= new HoverConfig(label, SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_SHIFT_HOVER));
-
-		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlShift"); //$NON-NLS-1$		
-		fHoverConfigs[4]= new HoverConfig(label, SWT.CTRL | SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER));
-
-		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlAlt"); //$NON-NLS-1$		
-		fHoverConfigs[5]= new HoverConfig(label, SWT.CTRL | SWT.ALT, fStore.getString(PreferenceConstants.EDITOR_CTRL_ALT_HOVER));
-
-		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.altShift"); //$NON-NLS-1$		
-		fHoverConfigs[6]= new HoverConfig(label, SWT.ALT | SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_ALT_SHIFT_HOVER));
-
-		label= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlAltShift"); //$NON-NLS-1$		
-		fHoverConfigs[7]= new HoverConfig(label, SWT.CTRL | SWT.ALT | SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER));
-
-		fTableViewer.setInput(fHoverConfigs);
+	void initialize() {
+		JavaEditorTextHoverDescriptor[] hoverDescs= getContributedHovers();
+		fHoverConfigs= new HoverConfig[hoverDescs.length];
+		for (int i= 0; i < hoverDescs.length; i++) {
+			fHoverConfigs[i]= new HoverConfig(hoverDescs[i].getModifierString(), hoverDescs[i].getStateMask(), hoverDescs[i].isEnabled());
+			fHoverList.add(hoverDescs[i].getLabel());
+		}
+		initializeFields();
 	}
 
 	void initializeFields() {
-		setTableInput();
+		fHoverList.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				if (fHoverList != null && !fHoverList.isDisposed()) {
+					fHoverList.select(0);
+					handleHoverListSelection();
+				}
+			}
+		});
 	}
 
 	void performOk() {
-		fStore.setValue(PreferenceConstants.EDITOR_DEFAULT_HOVER, fHoverConfigs[0].fHoverId);
-		fStore.setValue(PreferenceConstants.EDITOR_NONE_HOVER, fHoverConfigs[1].fHoverId);
-		fStore.setValue(PreferenceConstants.EDITOR_CTRL_HOVER, fHoverConfigs[2].fHoverId);
-		fStore.setValue(PreferenceConstants.EDITOR_SHIFT_HOVER, fHoverConfigs[3].fHoverId);
-		fStore.setValue(PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER, fHoverConfigs[4].fHoverId);
-		fStore.setValue(PreferenceConstants.EDITOR_CTRL_ALT_HOVER, fHoverConfigs[5].fHoverId);
-		fStore.setValue(PreferenceConstants.EDITOR_ALT_SHIFT_HOVER, fHoverConfigs[6].fHoverId);
-		fStore.setValue(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER, fHoverConfigs[7].fHoverId);
+		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < fHoverConfigs.length; i++) {
+			buf.append(getContributedHovers()[i].getId());
+			buf.append(JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
+			if (!fHoverConfigs[i].fIsEnabled)
+				buf.append(JavaEditorTextHoverDescriptor.DISABLED_TAG);
+			String modifier= fHoverConfigs[i].fModifierString;
+			if (modifier == null || modifier.length() == 0)
+				modifier= JavaEditorTextHoverDescriptor.NO_MODIFIER;
+			buf.append(modifier);
+			buf.append(JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
+		}
+		fStore.setValue(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, buf.toString());
+		JavaPlugin.getDefault().resetJavaEditorTextHoverDescriptors();
 	}
 
-	/**
-	 * Correctly resizes the table so no phantom columns appear.
-	 */
-    private void configureTableResizing(final Composite parent, final Table table, final TableColumn column1, final TableColumn column2) {
-        parent.addControlListener(new ControlAdapter() {
-            public void controlResized(ControlEvent e) {
-                Rectangle area= parent.getClientArea();
-                Point preferredSize= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-                int width= area.width - 2 * table.getBorderWidth();
-                if (preferredSize.y > area.height) {
-                    // Subtract the scrollbar width from the total column width
-                    // if a vertical scrollbar will be required
-                    Point vBarSize = table.getVerticalBar().getSize();
-                    width -= vBarSize.x;
-                }
-                Point oldSize= table.getSize();
-                if (oldSize.x > width) {
-                    // table is getting smaller so make the columns
-                    // smaller first and then resize the table to
-                    // match the client area width
-                    column1.setWidth(width/2);
-                    column2.setWidth(width - column1.getWidth());
-                    table.setSize(width, area.height);
-                } else {
-                    // table is getting bigger so make the table
-                    // bigger first and then make the columns wider
-                    // to match the client area width
-                    table.setSize(width, area.height);
-                    column1.setWidth(width / 2);
-                    column2.setWidth(width - column1.getWidth());
-                 }
-            }
-        });
-    }
-
-	private boolean isDefaultRowSelected() {
-		return fTableViewer.getTable().getSelectionIndex() == 0;
+	void performDefaults() {
+		restoreFromPreferences();
+		initializeFields();
 	}
 
-	private String[] getLabelsForHoverCombo() {
-		int additionalItemCount= 1;
-		if (!isDefaultRowSelected())
-			additionalItemCount++;
-
-		String[] labels= new String[getContributedHovers().size() + additionalItemCount];
+	private void restoreFromPreferences() {
+		String compiledTextHoverModifiers= fStore.getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS);
 		
-		if (!isDefaultRowSelected())
-			labels[0]= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
+		StringTokenizer tokenizer= new StringTokenizer(compiledTextHoverModifiers, JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
+		HashMap idToModifier= new HashMap(tokenizer.countTokens() / 2);
 
-		labels[additionalItemCount - 1]= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.noHoverConfigured"); //$NON-NLS-1$
+		while (tokenizer.hasMoreTokens()) {
+			String id= tokenizer.nextToken();
+			if (tokenizer.hasMoreTokens())
+				idToModifier.put(id, tokenizer.nextToken());
+		}
 
-		for (int i= additionalItemCount; i < labels.length; i++)
-			labels[i]= ((JavaEditorTextHoverDescriptor)getContributedHovers().get(i - additionalItemCount)).getLabel();
-		
-		return labels;
+		for (int i= 0; i < fHoverConfigs.length; i++) {
+			String modifierString= (String)idToModifier.get(getContributedHovers()[i].getId());
+			boolean enabled= true;
+			if (modifierString == null)
+				modifierString= JavaEditorTextHoverDescriptor.DISABLED_TAG;
+			
+			if (modifierString.startsWith(JavaEditorTextHoverDescriptor.DISABLED_TAG)) {
+				enabled= false;
+				modifierString= modifierString.substring(1);
+			}
+
+			if (modifierString.equals(JavaEditorTextHoverDescriptor.NO_MODIFIER))
+				modifierString= ""; //$NON-NLS-1$
+
+			fHoverConfigs[i].fModifierString= modifierString;
+			fHoverConfigs[i].fIsEnabled= enabled;
+			fHoverConfigs[i].fStateMask= JavaEditorTextHoverDescriptor.computeStateMask(modifierString);
+		}
+	}
+
+	private void handleModifierModified() {
+		int i= fHoverList.getSelectionIndex();
+		String modifiers= fModifierEditor.getText();
+		fHoverConfigs[i].fModifierString= modifiers;
+		fHoverConfigs[i].fStateMask= JavaEditorTextHoverDescriptor.computeStateMask(modifiers);
+		if (fHoverConfigs[i].fIsEnabled && fHoverConfigs[i].fStateMask == -1)
+			fStatus= new StatusInfo(StatusInfo.ERROR, "Modifier '" + fHoverConfigs[i].fModifierString + "' is not valid.");
+		else
+			fStatus= new StatusInfo();
+		updateStatus();
+	}
+
+	private void handleHoverListSelection() {	
+		int i= fHoverList.getSelectionIndex();
+		boolean enabled= fHoverConfigs[i].fIsEnabled;
+		fEnableField.setSelection(enabled);
+		fModifierEditor.setEnabled(enabled);
+		fModifierEditor.setText(fHoverConfigs[i].fModifierString);
+		String description= getContributedHovers()[i].getDescription();
+		if (description == null)
+			description= ""; //$NON-NLS-1$
+		fDescription.setText(description);
+	}
+
+	private int convertWidthInCharsToPixels(Control control, int chars) {
+		GC gc = new GC(control);
+		gc.setFont(control.getFont());
+		FontMetrics fontMetrics = gc.getFontMetrics();
+		gc.dispose();
+		if (fontMetrics == null)
+			return 0;
+		return Dialog.convertWidthInCharsToPixels(fontMetrics, chars);
+	}
+
+	private int convertHeightInCharsToPixels(Control control, int chars) {
+		GC gc = new GC(control);
+		gc.setFont(control.getFont());
+		FontMetrics fontMetrics = gc.getFontMetrics();
+		gc.dispose();
+		if (fontMetrics == null)
+			return 0;
+		return Dialog.convertHeightInCharsToPixels(fontMetrics, chars);
+	}
+
+	IStatus getStatus() {
+		if (fStatus == null)
+			fStatus= new StatusInfo();
+		return fStatus;
+	}
+
+	private void updateStatus() {
+		int i= 0;
+		HashMap stateMasks= new HashMap(fHoverConfigs.length);
+		while (fStatus.isOK() && i < fHoverConfigs.length) {
+			if (fHoverConfigs[i].fIsEnabled) {
+				String label= getContributedHovers()[i].getLabel();
+				Integer stateMask= new Integer(fHoverConfigs[i].fStateMask);
+				if (fHoverConfigs[i].fStateMask == -1)
+					fStatus= new StatusInfo(StatusInfo.ERROR, "Modifier '" + fHoverConfigs[i].fModifierString + "' for '" + label + "' hover is not valid.");
+				else if (stateMasks.containsKey(stateMask))
+					fStatus= new StatusInfo(StatusInfo.ERROR, "'" + label + "' hover uses the same modifier as '" +  stateMasks.get(stateMask) + "' hover.");
+				else
+					stateMasks.put(stateMask, label);
+			}
+			i++;
+		}
+
+		if (fStatus.isOK())
+			fMainPreferencePage.updateStatus(fStatus);
+		else {
+			fMainPreferencePage.setValid(false);
+			StatusUtil.applyToStatusLine(fMainPreferencePage, fStatus);
+		}
 	}
 }

@@ -124,7 +124,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
@@ -138,7 +137,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
 import org.eclipse.jdt.internal.ui.search.SearchUsagesInFileAction;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
@@ -942,26 +940,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	/** Preference key for the link color */
 	private final static String LINK_COLOR= PreferenceConstants.EDITOR_LINK_COLOR;
 	
-//	/** Preference key for the default hover */
-//	private static final String DEFAULT_HOVER= PreferenceConstants.EDITOR_DEFAULT_HOVER;
-//	/** Preference key for hover while no modifier is pressed */
-//	private static final String NONE_HOVER= PreferenceConstants.EDITOR_NONE_HOVER;
-//	/** Preference key for hover while Ctrl modifier is pressed */
-//	private static final String CTRL_HOVER= PreferenceConstants.EDITOR_CTRL_HOVER;
-//	/** Preference key for hover while Shift modifier is pressed */
-//	private static final String SHIFT_HOVER= PreferenceConstants.EDITOR_SHIFT_HOVER;
-//	/** Preference key for hover while Ctrl+Alt modifiers are pressed */
-//	private static final String CTRL_ALT_HOVER= PreferenceConstants.EDITOR_CTRL_ALT_HOVER;
-//	/** Preference key for hover while Ctrl+Alt+Shift modifiers are pressed */
-//	private static final String CTRL_ALT_SHIFT_HOVER= PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER;
-//	/** Preference key for hover while Ctrl+Shift modifiers are pressed */
-//	private static final String CTRL_SHIFT_HOVER= PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER;
-//	/** Preference key for hover while Alt+Shift modifiers are pressed */
-//	private static final String ALT_SHIFT_HOVER= PreferenceConstants.EDITOR_ALT_SHIFT_HOVER;
-//	/** Id indicating no hover is configured */
-//	private static final String NO_HOVER_CONFIGURED_ID= PreferenceConstants.EDITOR_NO_HOVER_CONFIGURED_ID;
-//	/** Hover id indicating the default hover */
-//	private static final String DEFAULT_HOVER_CONFIGURED_ID= PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID;
 
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
@@ -984,6 +962,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	
 	protected CompositeActionGroup fActionGroups;
 	private CompositeActionGroup fContextMenuGroup;
+
 		
 	/**
 	 * Returns the most narrow java element including the given offset
@@ -1501,14 +1480,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	}
 	
 	private boolean isJavaEditorHoverProperty(String property) {
-		return	PreferenceConstants.EDITOR_DEFAULT_HOVER.equals(property)
-			|| PreferenceConstants.EDITOR_NONE_HOVER.equals(property)
-			|| PreferenceConstants.EDITOR_CTRL_HOVER.equals(property)
-			|| PreferenceConstants.EDITOR_SHIFT_HOVER.equals(property)
-			|| PreferenceConstants.EDITOR_CTRL_ALT_HOVER.equals(property)
-			|| PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER.equals(property)
-			|| PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER.equals(property)
-			|| PreferenceConstants.EDITOR_ALT_SHIFT_HOVER.equals(property);
+		return	PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS.equals(property);
 	}
 	
 	/**
@@ -1715,11 +1687,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		for (int i= 0; i < types.length; i++) {
 			
 			String t= types[i];
-				
-			int[] stateMasks= configuration.getConfiguredTextHoverStateMasks(getSourceViewer(), t);
 
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer instanceof ITextViewerExtension2) {
+				// Remove existing hovers			
+				((ITextViewerExtension2)sourceViewer).removeTextHover(t);
+				
+				int[] stateMasks= configuration.getConfiguredTextHoverStateMasks(getSourceViewer(), t);
+
 				if (stateMasks != null) {
 					for (int j= 0; j < stateMasks.length; j++)	{
 						int stateMask= stateMasks[j];
@@ -1768,6 +1743,5 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		fInformationPresenter= new InformationPresenter(informationControlCreator);
 		fInformationPresenter.setSizeConstraints(60, 10, true, true);		
 		fInformationPresenter.install(getSourceViewer());
- 	}
-
+	}
 }

@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
- 
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
@@ -53,7 +53,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
@@ -352,22 +351,43 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 
 	public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
-		return new int[] { ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK, SWT.NONE, SWT.CTRL, SWT.SHIFT, SWT.CTRL | SWT.SHIFT, SWT.CTRL | SWT.ALT, SWT.ALT | SWT.SHIFT | SWT.CTRL | SWT.ALT | SWT.SHIFT };
+		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
+		int stateMasks[]= new int[hoverDescs.length];
+		int stateMasksLength= 0;		
+		for (int i= 0; i < hoverDescs.length; i++) {
+			if (hoverDescs[i].isEnabled()) {
+				int j= 0;
+				int stateMask= hoverDescs[i].getStateMask();
+				while (j < stateMasksLength) {
+					if (stateMasks[j] == stateMask)
+						break;
+					j++;
+				}
+				if (j == stateMasksLength)
+					stateMasks[stateMasksLength++]= stateMask;
+			}
+		}
+		if (stateMasksLength == hoverDescs.length)
+			return stateMasks;
+		
+		int[] shortenedStateMasks= new int[stateMasksLength];
+		System.arraycopy(stateMasks, 0, shortenedStateMasks, 0, stateMasksLength);
+		return shortenedStateMasks;
 	}
 	
 	/*
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
 	 */
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		JavaEditorTextHoverDescriptor descriptor= JavaEditorTextHoverDescriptor.getTextHoverDescriptor(stateMask);
-
-		if (stateMask != ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK) {
-			// Ensure that no additional instance is created for default hover
-			if ((descriptor == null && JavaEditorTextHoverDescriptor.getDefaultHoverId().equals(PreferenceConstants.EDITOR_NO_HOVER_CONFIGURED_ID)) ||(descriptor != null && descriptor.isDefaultTextHoverDescriptor()))
-				return null;	// use default hover instance
+		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
+		int i= 0;
+		while (i < hoverDescs.length) {
+			if (hoverDescs[i].isEnabled() &&  hoverDescs[i].getStateMask() == stateMask)
+				return new JavaEditorTextHoverProxy(hoverDescs[i], getEditor());
+			i++;
 		}
 
-		return new JavaEditorTextHoverProxy(descriptor, getEditor());
+		return null;
 	}
 
 	/*

@@ -15,6 +15,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 
@@ -114,7 +115,7 @@ public class PreferenceConstants {
 	 * A named preference that controls if prefix removal during setter/getter generation is turned on or off. 
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
-     * </p>
+	 * </p>
 	 */	
 	public static final String CODEGEN_USE_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.enable";//$NON-NLS-1$
 
@@ -146,7 +147,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated Use setting from JavaCore preference store (key JavaCore.
 	 * CODEASSIST_FIELD_SUFFIXES and CODEASSIST_STATIC_FIELD_SUFFIXES)
-     */
+	 */	
 	public static final String CODEGEN_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.list"; //$NON-NLS-1$
 
 	/**
@@ -386,6 +387,15 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public static final String JAVADOC_COMMAND= "command"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that defines the hover shown when no control key is
+	 * pressed.
+	 *
+	 * @see JavaUI
+	 * @since 2.1
+	 */
+	public static final String EDITOR_TEXT_HOVER_MODIFIERS= "hoverModifiers"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether bracket matching highlighting is turned on or off.
@@ -1094,6 +1104,7 @@ public class PreferenceConstants {
 	 */
 	public static final String EDITOR_SHOW_HOVER= "org.eclipse.jdt.ui.editor.showHover"; //$NON-NLS-1$
 
+
 	/**
 	 * A named preference that defines the hover shown when no control key is
 	 * pressed.
@@ -1106,6 +1117,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI
 	 * @since 2.1
+	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_NONE_HOVER= "noneHover"; //$NON-NLS-1$
 
@@ -1121,6 +1133,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI
 	 * @since 2.1
+	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_CTRL_HOVER= "ctrlHover"; //$NON-NLS-1$
 	
@@ -1136,6 +1149,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI ID_*_HOVER
 	 * @since 2.1
+	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_SHIFT_HOVER= "shiftHover"; //$NON-NLS-1$
 
@@ -1181,6 +1195,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI ID_*_HOVER
 	 * @since 2.1
+	 * @deprecated Will be removed in one of the next builds.
 	 */
 	public static final String EDITOR_CTRL_SHIFT_HOVER= "ctrlShiftHover"; //$NON-NLS-1$
 
@@ -1195,6 +1210,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_NO_HOVER_CONFIGURED_ID
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI ID_*_HOVER
+	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_HOVER_MODIFIERS}
 	 * @since 2.1
 	 */
 	public static final String EDITOR_ALT_SHIFT_HOVER= "altShiftHover"; //$NON-NLS-1$
@@ -1202,6 +1218,7 @@ public class PreferenceConstants {
 	/**
 	 * A string value used by the named preferences for hover configuration to
 	 * descibe that no hover should be shown for the given key modifiers.
+	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_HOVER_MODIFIERS}
 	 * @since 2.1
 	 */
 	public static final String EDITOR_NO_HOVER_CONFIGURED_ID= "noHoverConfiguredId"; //$NON-NLS-1$
@@ -1212,6 +1229,7 @@ public class PreferenceConstants {
 	 * modifiers. The default hover is described by the
 	 * <code>EDITOR_DEFAULT_HOVER</code> property.
 	 * @since 2.1
+	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_DEFAULT_HOVER_CONFIGURED_ID= "defaultHoverConfiguredId"; //$NON-NLS-1$
 
@@ -1221,7 +1239,8 @@ public class PreferenceConstants {
 	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or <code> the hover id of a hover
 	 * contributed as <code>javaEditorTextHovers</code>.
 	 * </p>
-	 *@since 2.1
+	 * @since 2.1
+	 * @deprecated Will soon be removed - replaced by {@link #EDITOR_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_DEFAULT_HOVER= "defaultHover"; //$NON-NLS-1$
 
@@ -1546,7 +1565,7 @@ public class PreferenceConstants {
 		// RefactoringPreferencePage
 		store.setDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, PreferenceConstants.REFACTOR_ERROR_SEVERITY);
 		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);		
-		store.setDefault("RefactoringUI", "dialog");		
+		store.setDefault("RefactoringUI", "dialog");
 
 		// TemplatePreferencePage
 		store.setDefault(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER, true);
@@ -1712,14 +1731,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, true);
 
-		store.setDefault(PreferenceConstants.EDITOR_DEFAULT_HOVER, JavaPlugin.ID_BESTMATCH_HOVER);
-		store.setDefault(PreferenceConstants.EDITOR_NONE_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
-		store.setDefault(PreferenceConstants.EDITOR_CTRL_HOVER, JavaPlugin.ID_SOURCE_HOVER);
-		store.setDefault(PreferenceConstants.EDITOR_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
-		store.setDefault(PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
-		store.setDefault(PreferenceConstants.EDITOR_CTRL_ALT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
-		store.setDefault(PreferenceConstants.EDITOR_ALT_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
-		store.setDefault(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
+		String ctrl= Action.findModifierString(SWT.CTRL);
+		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + ctrl); //$NON-NLS-1$
 
 		// do more complicated stuff
 		NewJavaProjectPreferencePage.initDefaults(store);	

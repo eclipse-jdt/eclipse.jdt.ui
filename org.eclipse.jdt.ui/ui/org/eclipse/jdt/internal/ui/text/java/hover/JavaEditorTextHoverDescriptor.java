@@ -14,8 +14,9 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -28,8 +29,8 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.Assert;
-import org.eclipse.jface.text.ITextViewerExtension2;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
@@ -48,74 +49,55 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 	private static final String ID_ATTRIBUTE= "id"; //$NON-NLS-1$
 	private static final String CLASS_ATTRIBUTE= "class"; //$NON-NLS-1$
 	private static final String LABEL_ATTRIBUTE= "label"; //$NON-NLS-1$
-	private static final String ACTIVATE_PLUG_IN_ATTRIBUTE= "label"; //$NON-NLS-1$
-	
+	private static final String ACTIVATE_PLUG_IN_ATTRIBUTE= "activate"; //$NON-NLS-1$
+	private static final String DESCRIPTION_ATTRIBUTE= "description"; //$NON-NLS-1$
+
 	private static List fgContributedHovers;
-	
+
+	public static final String NO_MODIFIER= "0"; //$NON-NLS-1$
+	public static final String DISABLED_TAG= "!"; //$NON-NLS-1$
+	public static final String VALUE_SEPARATOR= ";"; //$NON-NLS-1$
+
+	private int fStateMask;
+	private String fModifierString;
+	private boolean fIsEnabled;
 
 	private IConfigurationElement fElement;
-
+	
+	
 	/**
 	 * Returns all Java editor text hovers contributed to the workbench.
 	 */
-	public static List getContributedHovers() {
-		if (fgContributedHovers == null) {
-			IPluginRegistry registry= Platform.getPluginRegistry();
-			IConfigurationElement[] elements= registry.getConfigurationElementsFor(JAVA_EDITOR_TEXT_HOVER_EXTENSION_POINT);
-			fgContributedHovers= createDescriptors(elements);
-		}
-		return fgContributedHovers;
+	public static JavaEditorTextHoverDescriptor[] getContributedHovers() {
+		IPluginRegistry registry= Platform.getPluginRegistry();
+		IConfigurationElement[] elements= registry.getConfigurationElementsFor(JAVA_EDITOR_TEXT_HOVER_EXTENSION_POINT);
+		JavaEditorTextHoverDescriptor[] hoverDescs= createDescriptors(elements);
+		initializeFromPreferences(hoverDescs);
+		return hoverDescs;
 	} 
 
 	/**
-	 * Returns the id of the configured default hover.	 */
-	public static String getDefaultHoverId() {
-		return JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_DEFAULT_HOVER);
-	}
+	 * Computes the state mask for the given modifier string.
+	 * 
+	 * @param modifiers	the string with the modifiers, separated by '+', '-', ';', ',' or '.'
+	 * @return the state mask or -1 if the input is invalid
+	 */
+	public static int computeStateMask(String modifiers) {
+		if (modifiers == null)
+			return -1;
+		
+		if (modifiers.length() == 0)
+			return SWT.NONE;
 
-	public static JavaEditorTextHoverDescriptor getTextHoverDescriptor(int stateMask) {
-		String key= null;
-		switch (stateMask) {
-			case ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK:
-				key= PreferenceConstants.EDITOR_DEFAULT_HOVER;
-				break;
-			case SWT.NONE:
-				key= PreferenceConstants.EDITOR_NONE_HOVER;
-				break;
-			case SWT.CTRL:
-				key= PreferenceConstants.EDITOR_CTRL_HOVER;
-				break;
-			case SWT.SHIFT:
-				key= PreferenceConstants.EDITOR_SHIFT_HOVER;
-				break;
-			case SWT.CTRL | SWT.ALT:
-				key= PreferenceConstants.EDITOR_CTRL_ALT_HOVER;
-				break;
-			case SWT.CTRL | SWT.SHIFT:
-				key= PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER;
-				break;
-			case SWT.CTRL | SWT.ALT | SWT.SHIFT:
-				key= PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER;
-				break;
-			case SWT.ALT | SWT.SHIFT:
-				key= PreferenceConstants.EDITOR_ALT_SHIFT_HOVER;
-				break;
-			default :
-				return null;
+		int stateMask= 0;
+		StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
+		while (modifierTokenizer.hasMoreTokens()) {
+			int modifier= Action.findModifier(modifierTokenizer.nextToken());
+			if (modifier == 0)
+				return -1;
+			stateMask= stateMask | modifier;
 		}
-		String id= JavaPlugin.getDefault().getPreferenceStore().getString(key);
-		if (PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID.equals(id))
-			id= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_DEFAULT_HOVER);
-		if (id == null)
-			return null;
-
-		Iterator iter= getContributedHovers().iterator();
-		while (iter.hasNext()) {
-			JavaEditorTextHoverDescriptor hoverDescriptor= (JavaEditorTextHoverDescriptor)iter.next();
-			if (id.equals(hoverDescriptor.getId()))
-				return hoverDescriptor;
-		}
-		return null;
+		return stateMask;
 	}
 
 	/**
@@ -175,12 +157,18 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 			return label;
 	}
 
-	public boolean canActivatePlugIn() {
-		return Boolean.valueOf(fElement.getAttribute(ACTIVATE_PLUG_IN_ATTRIBUTE)).booleanValue();
+	/**
+	 * Returns the hover's description.
+	 * 
+	 * @return the hover's description or <code>null</code> if not provided
+	 */
+	public String getDescription() {
+		return fElement.getAttribute(DESCRIPTION_ATTRIBUTE);
 	}
 
-	public boolean isDefaultTextHoverDescriptor() {
-		return getId().equals(getDefaultHoverId());
+
+	public boolean canActivatePlugIn() {
+		return Boolean.valueOf(fElement.getAttribute(ACTIVATE_PLUG_IN_ATTRIBUTE)).booleanValue();
 	}
 
 	public boolean equals(Object obj) {
@@ -230,8 +218,8 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 		return false;
 	}
 
-	private static List createDescriptors(IConfigurationElement[] elements) {
-		List result= new ArrayList(5);
+	private static JavaEditorTextHoverDescriptor[] createDescriptors(IConfigurationElement[] elements) {
+		List result= new ArrayList(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			IConfigurationElement element= elements[i];
 			if (HOVER_TAG.equals(element.getName())) {
@@ -240,6 +228,65 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 			}
 		}
 		Collections.sort(result);
-		return result;
+		return (JavaEditorTextHoverDescriptor[])result.toArray(new JavaEditorTextHoverDescriptor[result.size()]);
+	}
+
+	private static void initializeFromPreferences(JavaEditorTextHoverDescriptor[] hovers) {
+		String compiledTextHoverModifiers= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS);
+		
+		StringTokenizer tokenizer= new StringTokenizer(compiledTextHoverModifiers, VALUE_SEPARATOR);
+		HashMap idToModifier= new HashMap(tokenizer.countTokens() / 2);
+
+		while (tokenizer.hasMoreTokens()) {
+			String id= tokenizer.nextToken();
+			if (tokenizer.hasMoreTokens())
+				idToModifier.put(id, tokenizer.nextToken());
+		}
+
+		for (int i= 0; i < hovers.length; i++) {
+			String modifierString= (String)idToModifier.get(hovers[i].getId());
+			boolean enabled= true;
+			if (modifierString == null)
+				modifierString= DISABLED_TAG;
+			
+			if (modifierString.startsWith(DISABLED_TAG)) {
+				enabled= false;
+				modifierString= modifierString.substring(1);
+			}
+
+			if (modifierString.equals(NO_MODIFIER))
+				modifierString= ""; //$NON-NLS-1$
+
+			hovers[i].fModifierString= modifierString;
+			hovers[i].fIsEnabled= enabled;
+			hovers[i].fStateMask= computeStateMask(modifierString);
+		}
+	}
+
+	/**
+	 * Returns the configured modifier getStateMask for this hover.
+	 * 
+	 * @return the hover modifier stateMask or -1 if no hover is configured
+	 */
+	public int getStateMask() {
+		return fStateMask;
+	}
+
+	/**
+	 * Returns the modifier String as set in the preference store.
+	 * 
+	 * @return the modifier string
+	 */
+	public String getModifierString() {
+		return fModifierString;
+	}
+
+	/**
+	 * Returns whether this hover is enabled or not.
+	 * 
+	 * @return <code>true</code> if enabled
+	 */
+	public boolean isEnabled() {
+		return fIsEnabled;
 	}
 }

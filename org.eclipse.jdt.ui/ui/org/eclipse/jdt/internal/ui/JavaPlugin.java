@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
@@ -114,6 +115,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private ResourceAdapterFactory fResourceAdapterFactory;
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
 	private IPropertyChangeListener fFontPropertyChangeListener;
+	
+	private JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
 	
 	
 	public static JavaPlugin getDefault() {
@@ -322,7 +325,33 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
 		return fMembersOrderPreferenceCache;
 	}	
-		
+
+	/**
+	 * Returns all Java editor text hovers contributed to the workbench.
+	 * 
+	 * @return an array of JavaEditorTextHoverDescriptor
+	 * @since 2.1
+	 */
+	public JavaEditorTextHoverDescriptor[] getJavaEditorTextHoverDescriptors() {
+		if (fJavaEditorTextHoverDescriptors == null)
+			fJavaEditorTextHoverDescriptors= JavaEditorTextHoverDescriptor.getContributedHovers();
+		return fJavaEditorTextHoverDescriptors;
+	} 
+
+	/**
+	 * Resets the Java editor text hovers contributed to the workbench.
+	 * <p>
+	 * This will force a rebuild of the descriptors the next time
+	 * a client asks for them.
+	 * </p>
+	 * 
+	 * @return an array of JavaEditorTextHoverDescriptor
+	 * @since 2.1
+	 */
+	public void resetJavaEditorTextHoverDescriptors() {
+		fJavaEditorTextHoverDescriptors= null;
+	}
+
 	/**
 	 * Creates the Java plugin standard groups in a context menu.
 	 */

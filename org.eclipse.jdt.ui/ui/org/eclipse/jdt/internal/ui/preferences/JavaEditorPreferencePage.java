@@ -196,16 +196,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FORMAT_JAVADOCS),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END),
-		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_DEFAULT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_NONE_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CTRL_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CTRL_ALT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_ALT_SHIFT_HOVER),
+	
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS)
 	};
 	
 	private final String[][] fSyntaxColorListModel= new String[][] {
@@ -1024,7 +1016,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.hoverTab.title")); //$NON-NLS-1$
-		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(fOverlayStore);
+		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(this, fOverlayStore);
 		item.setControl(fJavaEditorHoverConfigurationBlock.createControl(folder));
 		
 		initialize();
@@ -1120,8 +1112,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fGuessMethodArgumentsButton.setEnabled(fillMethodArguments);
 		
         updateAutoactivationControls();
-        
-		fJavaEditorHoverConfigurationBlock.initializeFields();
 	}
 	
     private void updateAutoactivationControls() {
@@ -1147,14 +1137,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	protected void performDefaults() {
 		
 		fOverlayStore.loadDefaults();
+
 		initializeFields();
 
 		handleSyntaxColorListSelection();
 		handleAppearanceColorListSelection();
 		handleAnnotationListSelection();
 		handleContentAssistColorListSelection();
+
+		fJavaEditorHoverConfigurationBlock.performDefaults();		
+
 		super.performDefaults();
-		
+
 		fPreviewViewer.invalidateTextPresentation();
 	}
 	
@@ -1293,7 +1287,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return status;
 	}
 	
-	private void updateStatus(IStatus status) {
+	void updateStatus(IStatus status) {
 		if (!status.matches(IStatus.ERROR)) {
 			for (int i= 0; i < fNumberFields.size(); i++) {
 				Text text= (Text) fNumberFields.get(i);
@@ -1301,6 +1295,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				status= StatusUtil.getMoreSevere(s, status);
 			}
 		}	
+		status= StatusUtil.getMoreSevere(status, fJavaEditorHoverConfigurationBlock.getStatus());
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}
