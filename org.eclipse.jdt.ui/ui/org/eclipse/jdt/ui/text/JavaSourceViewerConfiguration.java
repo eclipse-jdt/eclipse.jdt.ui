@@ -55,6 +55,8 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
@@ -160,6 +162,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 3.0
 	 */
 	private IColorManager fColorManager;
+	/**
+	 * The double click strategy.
+	 * @since 3.1
+	 */
+	private JavaDoubleClickSelector fJavaDoubleClickSelector;
 	
 	/**
 	 * Creates a new Java source viewer configuration for viewers in the given editor 
@@ -446,7 +453,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		else if (IJavaPartitions.JAVA_STRING.equals(contentType) ||
 				IJavaPartitions.JAVA_CHARACTER.equals(contentType))
 			return new JavaStringDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer));
-		return new JavaDoubleClickSelector();
+		if (fJavaDoubleClickSelector == null) {
+			fJavaDoubleClickSelector= new JavaDoubleClickSelector();
+			fJavaDoubleClickSelector.setVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));
+		}
+		return fJavaDoubleClickSelector;
 	}
 
 	/*
@@ -797,5 +808,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 			fStringScanner.adaptToPreferenceChange(event);
 		if (fJavaDocScanner.affectsBehavior(event))
 			fJavaDocScanner.adaptToPreferenceChange(event);
+		if (JavaCore.COMPILER_SOURCE.equals(event.getProperty()))
+			if (event.getNewValue() instanceof String)
+				fJavaDoubleClickSelector.setVersion((String) event.getNewValue());
 	}
 }

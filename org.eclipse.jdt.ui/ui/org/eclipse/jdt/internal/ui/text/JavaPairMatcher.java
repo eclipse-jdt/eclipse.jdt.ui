@@ -18,6 +18,8 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 
+import org.eclipse.jdt.core.JavaCore;
+
 /**
  * JavaPairMatcher.java
  */
@@ -35,6 +37,11 @@ public class JavaPairMatcher implements ICharacterPairMatcher {
 	protected int fAnchor;
 	
 	protected JavaCodeReader fReader= new JavaCodeReader();
+	/**
+	 * Stores the source version state.
+	 * @since 3.1
+	 */
+	private boolean fHighlightAngularBrackets= false;
 	
 	
 	public JavaPairMatcher(char[] pairs) {
@@ -152,6 +159,8 @@ public class JavaPairMatcher implements ICharacterPairMatcher {
 	}
 	
 	protected int searchForClosingPeer(int offset, int openingPeer, int closingPeer, IDocument document) throws IOException {
+		if (openingPeer == '<' && !(fHighlightAngularBrackets && isTypeParameterBracket(offset, document)))
+			return -1;
 		
 		fReader.configureForwardReader(document, offset + 1, document.getLength(), true, true);
 		
@@ -172,7 +181,10 @@ public class JavaPairMatcher implements ICharacterPairMatcher {
 		return  -1;
 	}
 	
+	
 	protected int searchForOpeningPeer(int offset, int openingPeer, int closingPeer, IDocument document) throws IOException {
+		if (openingPeer == '<' && !fHighlightAngularBrackets)
+			return -1;
 		
 		fReader.configureBackwardReader(document, offset, true, true);
 		
@@ -184,12 +196,93 @@ public class JavaPairMatcher implements ICharacterPairMatcher {
 			else if (c == openingPeer)
 				stack--;
 				
-			if (stack == 0)
+			if (stack == 0) {
+				if (closingPeer == '>' && !isTypeParameterBracket(fReader.getOffset(), document))
+					return -1;
 				return fReader.getOffset();
+			}
 				
 			c= fReader.read();
 		}
 		
 		return -1;
+	}
+	
+	/**
+	 * Checks if the angular bracket at <code>offset</code> is a type
+	 * parameter bracket.
+	 * 
+	 * @param offset the offset of the opening bracket
+	 * @param document the document
+	 * @return <code>true</code> if the bracket is part of a type parameter,
+	 *         <code>false</code> otherwise
+	 * @since 3.1
+	 */
+	private boolean isTypeParameterBracket(int offset, IDocument document) {
+		/* 
+		 * type parameter come after braces (closing or opening), semicolons, or after
+		 * a Type name (heuristic: starts with capital character, or after a modifier
+		 * keyword in a method declaration (visibility, static, synchronized, final) 
+		 */
+		
+		try {
+			IRegion line= document.getLineInformationOfOffset(offset);
+			
+			JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+			int prevToken= scanner.previousToken(offset - 1, line.getOffset());
+			int prevTokenOffset= scanner.getPosition() + 1;
+			String previous= prevToken == Symbols.TokenEOF ? null : document.get(prevTokenOffset, offset - prevTokenOffset).trim();
+			
+			if (	   prevToken == Symbols.TokenLBRACE	
+					|| prevToken == Symbols.TokenRBRACE 
+					|| prevToken == Symbols.TokenSEMICOLON
+					|| prevToken == Symbols.TokenSYNCHRONIZED
+					|| prevToken == Symbols.TokenSTATIC
+					|| (prevToken == Symbols.TokenIDENT && isTypeParameterIntroducer(previous))
+					|| prevToken == Symbols.TokenEOF)
+				return true;
+		} catch (BadLocationException e) {
+			return false;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if <code>identifier</code> is an identifier
+	 * that could come right before a type parameter list. It uses a heuristic:
+	 * if the identifier starts with an upper case, it is assumed a type name.
+	 * Also, if <code>identifier</code> is a method modifier, it is assumed
+	 * that the angular bracket is part of the generic type parameter of a
+	 * method.
+	 * 
+	 * @param identifier the identifier to check
+	 * @return <code>true</code> if the identifier could introduce a type
+	 *         parameter list
+	 * @since 3.1
+	 */
+	private boolean isTypeParameterIntroducer(String identifier) {
+		return identifier.length() > 0
+				&& (Character.isUpperCase(identifier.charAt(0)) 
+						|| identifier.startsWith("final") //$NON-NLS-1$
+						|| identifier.startsWith("public") //$NON-NLS-1$
+						|| identifier.startsWith("public") //$NON-NLS-1$
+						|| identifier.startsWith("protected") //$NON-NLS-1$
+						|| identifier.startsWith("private")); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Sets the source version to one of the <code>JavaCore.VERSION_</code>
+	 * identifiers. Versions greater than {@link JavaCore#VERSION_1_4} have
+	 * angular bracket highlighting.
+	 * 
+	 * @param version the new version
+	 * @since 3.1
+	 */
+	public void setVersion(String version) {
+		if (JavaCore.VERSION_1_5.compareTo(version) <= 0)
+			fHighlightAngularBrackets= true;
+		else
+			fHighlightAngularBrackets= false;
 	}
 }

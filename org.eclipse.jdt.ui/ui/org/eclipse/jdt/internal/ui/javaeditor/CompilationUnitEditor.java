@@ -122,7 +122,9 @@ import org.eclipse.jdt.internal.ui.actions.RemoveBlockCommentAction;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
+import org.eclipse.jdt.internal.ui.text.Symbols;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -548,57 +550,14 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fCloseAngularBrackets= enabled;
 		}
 
-		private boolean hasIdentifierToTheRight(IDocument document, int offset) {
-			try {
-				int end= offset;
-				IRegion endLine= document.getLineInformationOfOffset(end);
-				int maxEnd= endLine.getOffset() + endLine.getLength();
-				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
-					++end;
-
-				return end != maxEnd && Character.isJavaIdentifierPart(document.getChar(end));
-
-			} catch (BadLocationException e) {
-				// be conservative
-				return true;
-			}
-		}
-
-		private boolean hasIdentifierToTheLeft(IDocument document, int offset, boolean onlyUpperCase) {
-			try {
-				int start= offset;
-				IRegion startLine= document.getLineInformationOfOffset(start);
-				int minStart= startLine.getOffset();
-				while (start != minStart && Character.isWhitespace(document.getChar(start - 1)))
-					--start;
-				
-				while (start != minStart && Character.isJavaIdentifierPart(document.getChar(start - 1)))
-					--start;
-				
-				return start != minStart 
-						&& Character.isJavaIdentifierPart(document.getChar(start))
-						&& (!onlyUpperCase || Character.isUpperCase(document.getChar(start)));
-
-			} catch (BadLocationException e) {
-				return true;
-			}			
-		}
-
-		private boolean hasCharacterToTheRight(IDocument document, int offset, char character) {
-			try {
-				int end= offset;
-				IRegion endLine= document.getLineInformationOfOffset(end);
-				int maxEnd= endLine.getOffset() + endLine.getLength();
-				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
-					++end;
-				
-				return end != maxEnd && document.getChar(end) == character;
-
-
-			} catch (BadLocationException e) {
-				// be conservative
-				return true;
-			}			
+		private boolean isAngularIntroducer(String identifier) {
+			return identifier.length() > 0
+					&& (Character.isUpperCase(identifier.charAt(0)) 
+							|| identifier.startsWith("final") //$NON-NLS-1$
+							|| identifier.startsWith("public") //$NON-NLS-1$
+							|| identifier.startsWith("public") //$NON-NLS-1$
+							|| identifier.startsWith("protected") //$NON-NLS-1$
+							|| identifier.startsWith("private")); //$NON-NLS-1$
 		}
 		
 		/*
@@ -606,8 +565,19 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 */
 		public void verifyKey(VerifyEvent event) {			
 
+			// early pruning to slow down normal typing as little as possible
 			if (!event.doit || getInsertMode() != SMART_INSERT)
 				return;
+			switch (event.character) {
+				case '(':
+				case '<':
+				case '[':
+				case '\'':
+				case '\"':
+					break;
+				default:
+					return;
+			}
 				
 			final ISourceViewer sourceViewer= getSourceViewer();
 			IDocument document= sourceViewer.getDocument();
@@ -615,52 +585,61 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			final Point selection= sourceViewer.getSelectedRange();
 			final int offset= selection.x;
 			final int length= selection.y;
-
-			switch (event.character) {
-			case '(':
-				if (hasCharacterToTheRight(document, offset + length, '('))
-					return;
-				if (hasIdentifierToTheRight(document, offset + length))
-					return;
-				break;
-
-			case '<':
-				if (!fCloseAngularBrackets)
-					return;
-				if (hasCharacterToTheRight(document, offset + length, '<'))
-					return;
-				if (hasIdentifierToTheRight(document, offset + length))
-					return;
-				if (!hasIdentifierToTheLeft(document, offset, true))
-					return;
-				break;
-
-			case '[':
-				if (!fCloseBrackets)
-					return;
-				if (hasIdentifierToTheRight(document, offset + length))
-					return;
-				break;
 			
-			case '\'':
-				if (!fCloseStrings)
-					return;
-				if (hasIdentifierToTheLeft(document, offset, false) || hasIdentifierToTheRight(document, offset + length))
-					return;
-				break;
-
-			case '"':
-				if (!fCloseStrings)
-					return;
-				if (hasIdentifierToTheLeft(document, offset, false) || hasIdentifierToTheRight(document, offset + length))
-					return;
-				break;
-			
-			default:
-				return;
-			}
-			
-			try {		
+			try {
+				IRegion startLine= document.getLineInformationOfOffset(offset);
+				IRegion endLine= document.getLineInformationOfOffset(offset + length);
+				
+				JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+				int nextToken= scanner.nextToken(offset + length, endLine.getOffset() + endLine.getLength());
+				String next= nextToken == Symbols.TokenEOF ? null : document.get(offset, scanner.getPosition() - offset).trim();
+				int prevToken= scanner.previousToken(offset - 1, startLine.getOffset());
+				int prevTokenOffset= scanner.getPosition() + 1;
+				String previous= prevToken == Symbols.TokenEOF ? null : document.get(prevTokenOffset, offset - prevTokenOffset).trim();
+				
+				switch (event.character) {
+					case '(':
+						if (nextToken == Symbols.TokenLPAREN
+								|| nextToken == Symbols.TokenIDENT 
+								|| next != null && next.length() > 1)
+							return;
+						break;
+						
+					case '<':
+						if (!fCloseAngularBrackets
+								|| nextToken == Symbols.TokenLESSTHAN 
+								|| nextToken == Symbols.TokenIDENT
+								|| 		   prevToken != Symbols.TokenLBRACE	
+										&& prevToken != Symbols.TokenRBRACE 
+										&& prevToken != Symbols.TokenSEMICOLON
+										&& prevToken != Symbols.TokenSYNCHRONIZED
+										&& prevToken != Symbols.TokenSTATIC
+										&& (prevToken != Symbols.TokenIDENT || !isAngularIntroducer(previous))
+										&& prevToken != Symbols.TokenEOF)
+							return;
+						break;
+						
+					case '[':
+						if (!fCloseBrackets
+								|| nextToken == Symbols.TokenIDENT 
+								|| next != null && next.length() > 1)
+							return;
+						break;
+						
+					case '\'':
+					case '"':
+						if (!fCloseStrings
+								|| nextToken == Symbols.TokenIDENT 
+								|| prevToken == Symbols.TokenIDENT
+								|| next != null && next.length() > 1
+								|| previous != null && previous.length() > 1)
+							return;
+						break;
+						
+					default:
+						return;
+				}
+				
 				ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 				if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()))
 					return;
@@ -1192,13 +1171,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.QUICK_FIX_ACTION);
 
 		action= new ContentAssistAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);		
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);		
 		setAction("ContentAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.CONTENT_ASSIST_ACTION);
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);	//$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
 		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.PARAMETER_HINTS_ACTION);
@@ -1619,7 +1598,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		IPreferenceStore preferenceStore= getPreferenceStore();
 		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
 		boolean closeStrings= preferenceStore.getBoolean(CLOSE_STRINGS);
-		boolean closeAngularBrackets= JavaCore.VERSION_1_5.equals(preferenceStore.getString(JavaCore.COMPILER_SOURCE));
+		boolean closeAngularBrackets= JavaCore.VERSION_1_5.compareTo(preferenceStore.getString(JavaCore.COMPILER_SOURCE)) <= 0;
 		
 		fBracketInserter.setCloseBracketsEnabled(closeBrackets);
 		fBracketInserter.setCloseStringsEnabled(closeStrings);
@@ -1695,7 +1674,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				}
 				
 				if (JavaCore.COMPILER_SOURCE.equals(p)) {
-					boolean closeAngularBrackets= JavaCore.VERSION_1_5.equals(getPreferenceStore().getString(p));
+					boolean closeAngularBrackets= JavaCore.VERSION_1_5.compareTo(getPreferenceStore().getString(p)) <= 0;
 					fBracketInserter.setCloseAngularBracketsEnabled(closeAngularBrackets);
 				}
 								

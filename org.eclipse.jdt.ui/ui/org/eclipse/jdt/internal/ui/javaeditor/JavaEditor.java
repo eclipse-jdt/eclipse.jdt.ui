@@ -119,6 +119,7 @@ import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
+import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension2;
@@ -2184,7 +2185,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private final static String BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK;
 	
-	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
+	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']', '<', '>' };
 
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
@@ -3171,6 +3172,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return;
 			}
 			
+			if (JavaCore.COMPILER_SOURCE.equals(property)) {
+				if (event.getNewValue() instanceof String)
+					fBracketMatcher.setVersion((String) event.getNewValue());
+				// fall through as others are interested in source change as well.
+			}
+			
 			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).handlePropertyChangeEvent(event);
 			
 			if (affectsOverrideIndicatorAnnotations(event)) {
@@ -3453,6 +3460,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	
 	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
 		
+		fBracketMatcher.setVersion(getPreferenceStore().getString(JavaCore.COMPILER_SOURCE));
 		support.setCharacterPairMatcher(fBracketMatcher);
 		support.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);
 		
@@ -4017,7 +4025,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			
 		int anchor= fBracketMatcher.getAnchor();
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
-		int targetOffset= (JavaPairMatcher.RIGHT == anchor) ? offset + 1: offset + length;
+		int targetOffset= (ICharacterPairMatcher.RIGHT == anchor) ? offset + 1: offset + length;
 		
 		boolean visible= false;
 		if (sourceViewer instanceof ITextViewerExtension5) {

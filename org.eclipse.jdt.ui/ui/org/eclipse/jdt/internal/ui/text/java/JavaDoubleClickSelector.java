@@ -11,12 +11,15 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextViewer;
+
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
 /**
  * Double click strategy aware of Java identifier syntax rules.
@@ -24,7 +27,7 @@ import org.eclipse.jface.text.ITextViewer;
 public class JavaDoubleClickSelector implements ITextDoubleClickStrategy {
 	
 	
-	protected static final char[] BRACKETS= {'{', '}', '(', ')', '[', ']' };
+	protected static final char[] BRACKETS= {'{', '}', '(', ')', '[', ']', '<', '>' };
 	
 	protected JavaPairMatcher fPairMatcher= new JavaPairMatcher(BRACKETS);
 		
@@ -87,5 +90,18 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy {
 			
 		} catch (BadLocationException x) {
 		}
+	}
+	
+	/**
+	 * Sets the source version to one of the <code>JavaCore.VERSION_</code>
+	 * identifiers. Versions greater than {@link JavaCore#VERSION_1_4} have
+	 * angular bracket highlighting.
+	 * 
+	 * @param version the new version
+	 * @since 3.1
+	 * @see JavaPairMatcher#setVersion(String)
+	 */
+	public void setVersion(String version) {
+		fPairMatcher.setVersion(version);
 	}
 }
