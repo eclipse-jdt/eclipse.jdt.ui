@@ -440,6 +440,53 @@ public class TextBufferTest extends TestCase {
 		doUndoRedo(undo, "0561472389");		
 	}
 	
+	public void testMoveWithRangeMarker() throws Exception {
+		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
+		MoveTargetEdit t1= new MoveTargetEdit(5, s1);
+		
+		RangeMarker marker= new RangeMarker(2, 2);
+		s1.add(marker);		
+		
+		fEditor.add(s1);
+		fEditor.add(t1);
+		
+		assertTrue(fEditor.canPerformEdits());
+		UndoMemento undo= fEditor.performEdits(null);
+		assertEquals("Buffer content", "0142356789", fBuffer.getContent());
+		assertEquals(s1.getTextRange(), 2, 0);
+		assertEquals(t1.getTextRange(), 3, 2);
+		assertEquals(marker.getTextRange(), 3, 2);
+		doUndoRedo(undo, "0142356789");
+	}
+	
+	private static final boolean bug_39324= true;
+	
+	public void testMoveWithRangeMarker2() throws Exception {
+		if (bug_39324) {
+			return;
+		}
+		
+		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
+		MoveTargetEdit t1= new MoveTargetEdit(5, s1);
+		
+		SimpleTextEdit e2= SimpleTextEdit.createDelete(2, 2);
+		e2.add(s1);
+		
+		RangeMarker marker= new RangeMarker(2, 2);
+		s1.add(marker);		
+		
+		fEditor.add(e2);
+		fEditor.add(t1);
+		
+		assertTrue(fEditor.canPerformEdits());
+		UndoMemento undo= fEditor.performEdits(null);
+		assertEquals("Buffer content", "0142356789", fBuffer.getContent());
+		assertTrue(s1.getTextRange().isDeleted());
+		assertEquals(t1.getTextRange(), 3, 2);
+		assertEquals(marker.getTextRange(), 3, 2);
+		doUndoRedo(undo, "0142356789");
+	}		
+	
 	
 	
 	public void testMoveWithTargetDelete() throws Exception {
