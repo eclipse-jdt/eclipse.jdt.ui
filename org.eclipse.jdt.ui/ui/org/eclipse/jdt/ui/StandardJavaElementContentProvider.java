@@ -55,6 +55,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 
 	protected static final Object[] NO_CHILDREN= new Object[0];
 	protected boolean fProvideMembers;
+	protected boolean fProvideWorkingCopy;
 	
 	/**
 	 * Creates a new content provider. The content provider does not
@@ -82,6 +83,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 */
 	public StandardJavaElementContentProvider(boolean provideMembers) {
 		fProvideMembers= provideMembers;
+		fProvideWorkingCopy= provideMembers;
 	}
 	
 	/**
@@ -114,7 +116,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * to the result of {@link #getProvideMembers()}.
 	 */
 	public boolean getProvideWorkingCopy() {
-		return fProvideMembers;
+		return fProvideWorkingCopy;
 	}
 
 	/**
@@ -122,6 +124,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * offers a unified world and does not support the 'original' mode anymore. 
 	 */
 	public void setProvideWorkingCopy(boolean b) {
+		fProvideWorkingCopy= b;
 	}
 
 	/* (non-Javadoc)
@@ -283,7 +286,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			List nonJavaResources= new ArrayList();
 			for (int i= 0; i < members.length; i++) {
 				Object o= members[i];
-				// A folder can also be a package fragement root in the following case
+				// A folder can also be a package fragment root in the following case
 				// Project
 				//  + src <- source folder
 				//    + excluded <- excluded from class path
