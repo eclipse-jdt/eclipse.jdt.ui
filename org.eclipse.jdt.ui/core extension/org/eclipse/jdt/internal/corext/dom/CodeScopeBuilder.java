@@ -144,6 +144,13 @@ public class CodeScopeBuilder extends ASTVisitor {
 		fIgnoreRange= ignore;
 	}
 	
+	public boolean visit(CatchClause node) {
+		// open a new scope for the exception declaration.
+		fScopes.add(fScope);
+		fScope= new Scope(fScope, node.getStartPosition(), node.getLength());
+		return true;
+	}
+	
 	public boolean visit(SimpleName node) {
 		if (fIgnoreBinding != null && Bindings.equals(fIgnoreBinding, node.resolveBinding()))
 			return false;
