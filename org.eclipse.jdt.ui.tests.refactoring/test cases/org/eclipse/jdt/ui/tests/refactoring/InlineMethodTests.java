@@ -99,6 +99,30 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		return null;
 	}
 
+	private void performTestInlineFirstConstructor(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
+		ICompilationUnit unit= createCU(packageFragment, id);
+		IType type= unit.getTypes()[0];
+		IMethod method= getFirstConstructor(type);
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, 
+			method.getNameRange().getOffset(), method.getNameRange().getLength());
+		String out= null;
+		switch (mode) {
+			case COMPARE_WITH_OUTPUT:
+				out= getProofedContent(outputFolder, id);
+				break;		
+		}
+		performTest(unit, refactoring, mode, out, true);
+	}
+	
+	private IMethod getFirstConstructor(IType type) throws CoreException {
+		IMethod[] methods= type.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (methods[i].isConstructor())
+				return methods[i];
+		}
+		return null;
+	}
+
 	/* *********************** Invalid Tests ******************************* */
 		
 	protected void performInvalidTest() throws Exception {
@@ -163,6 +187,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineMethod(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, "simple_out");
 	}
 	
+	private void performSimpleTestInlineConstrcutor() throws Exception {
+		performTestInlineFirstConstructor(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, "simple_out");
+	}
+	
 	public void testBasic1() throws Exception {
 		performSimpleTest();
 	}	
@@ -205,6 +233,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 
 	public void testConstructor1() throws Exception {
 		performSimpleTest();
+	}	
+
+	public void testConstructor2() throws Exception {
+		performSimpleTestInlineConstrcutor();
 	}	
 
 	public void testCatchClause() throws Exception {

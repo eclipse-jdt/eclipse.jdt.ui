@@ -730,7 +730,10 @@ public class CallInliner {
 	private void initializeInsertionPoint(int nos) {
 		fInsertionIndex= -1;
 		fNeedsStatement= false;
-		ASTNode parentStatement= ASTNodes.getParent(fInvocation, Statement.class);
+		// if we have a constructor invocation the invocation itself is already a statement
+		ASTNode parentStatement= fInvocation instanceof Statement 
+			? fInvocation 
+			: ASTNodes.getParent(fInvocation, Statement.class);
 		ASTNode container= parentStatement.getParent();
 		int type= container.getNodeType();
 		if (type == ASTNode.BLOCK) { 
