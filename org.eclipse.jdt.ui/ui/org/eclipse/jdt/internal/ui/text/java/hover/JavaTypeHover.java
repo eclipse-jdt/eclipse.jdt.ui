@@ -71,10 +71,9 @@ public class JavaTypeHover implements ITextHover {
 							IMember member= (IMember)curr;
 							String infoText= getInfoText(member);
 							buffer.append(infoText);							
-							buffer.append(lineDelim);
-							
 							String jdocText= getJavaDocText(member, lineDelim);
 							if (jdocText != null) {
+								buffer.append(lineDelim);
 								buffer.append(jdocText);
 							}							
 						}
