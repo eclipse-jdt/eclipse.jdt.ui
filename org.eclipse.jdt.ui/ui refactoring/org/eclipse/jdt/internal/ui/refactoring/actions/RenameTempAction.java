@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.rename.RenameTempRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
@@ -56,7 +57,8 @@ public class RenameTempAction extends TextSelectionBasedRefactoringAction{
 	 */
 	RefactoringWizard createWizard(Refactoring refactoring) {
 		String message= "Choose a new name for the local variable.";
-		//FIXME wrong help
+		String wizardPageHelp= IJavaHelpContextIds.RENAME_TEMP_WIZARD_PAGE; 
+		String errorPageHelp= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
 		return new RenameRefactoringWizard((RenameTempRefactoring)refactoring, getDialogTitle(), message, "HELPID", "ERRORHELPID");
 	}
 }
