@@ -3721,10 +3721,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected boolean isShowingOverrideIndicators() {
 		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreference(OverrideIndicatorManager.ANNOTATION_TYPE);
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(preference.getHighlightPreferenceKey())
-			|| store.getBoolean(preference.getVerticalRulerPreferenceKey())
-			|| store.getBoolean(preference.getOverviewRulerPreferenceKey())
-			|| store.getBoolean(preference.getTextPreferenceKey());
+		return getBoolean(store, preference.getHighlightPreferenceKey())
+			|| getBoolean(store, preference.getVerticalRulerPreferenceKey())
+			|| getBoolean(store, preference.getOverviewRulerPreferenceKey())
+			|| getBoolean(store, preference.getTextPreferenceKey());
+	}
+	
+	/**
+	 * Returns the boolean preference for the given key.
+	 * 
+	 * @param store the preference store
+	 * @param key the preference key
+	 * @return <code>true</code> if the key exists in the store and its value is <code>true</code>
+	 * @since 3.0
+	 */
+	private boolean getBoolean(IPreferenceStore store, String key) {
+		return key != null && store.getBoolean(key);
 	}
 	
 	/**
