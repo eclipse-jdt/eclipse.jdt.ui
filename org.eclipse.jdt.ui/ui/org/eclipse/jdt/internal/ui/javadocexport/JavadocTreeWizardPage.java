@@ -6,7 +6,9 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -466,30 +468,57 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	
 	//Returns the path were the doclet file will be created
-	private IJavaElement[] getSourceElements() {
+	private IJavaElement[] getSourceElements(IJavaProject currProject) {
 		ArrayList res= new ArrayList();
-		Iterator checkedElements= fInputGroup.getAllCheckedListItems();
-		while (checkedElements.hasNext()) {
-			Object element= checkedElements.next();
-			if (element instanceof ICompilationUnit) {
-				ICompilationUnit unit= (ICompilationUnit) element;
-				IPackageFragment pack= (IPackageFragment) unit.getParent();
-				if (fInputGroup.isTreeItemGreyChecked(pack) || pack.isDefaultPackage()) {
-					res.add(unit);
-				}
+		try {
+			Set allChecked= fInputGroup.getAllCheckedTreeItems();
+			
+			Set incompletePackages= new HashSet();
+			IPackageFragmentRoot[] roots= currProject.getPackageFragmentRoots();
+			for (int i= 0; i < roots.length; i++) {
+				IPackageFragmentRoot root= roots[i];
+				if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+					IJavaElement[] packs= root.getChildren();
+					for (int k= 0; k < packs.length; k++) {
+						IJavaElement curr= packs[k];
+						if (curr.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+							// default packages are always incomplete
+							if (curr.getElementName().length() == 0 || !allChecked.contains(curr) || fInputGroup.isTreeItemGreyChecked(curr)) {
+								incompletePackages.add(curr.getElementName());
+							}
+						}
+					}		
+				}		
 			}
-		}
-		Iterator checkedTreeElements= fInputGroup.getAllCheckedTreeItems().iterator();
-		while (checkedTreeElements.hasNext()) {
-			Object element= checkedTreeElements.next();
-			if (element instanceof IPackageFragment) {
-				IPackageFragment pack= (IPackageFragment) element;
-				if (!fInputGroup.isTreeItemGreyChecked(pack) && !pack.isDefaultPackage()) {
-					res.add(pack);
+			
+			Iterator checkedElements= fInputGroup.getAllCheckedListItems();
+			while (checkedElements.hasNext()) {
+				Object element= checkedElements.next();
+				if (element instanceof ICompilationUnit) {
+					ICompilationUnit unit= (ICompilationUnit) element;
+					if (incompletePackages.contains(unit.getParent().getElementName())) {
+						res.add(unit);
+					}
 				}
-			}
-		}
+			}	
 
+			Set addedPackages= new HashSet();
+	
+			checkedElements= allChecked.iterator();
+			while (checkedElements.hasNext()) {
+				Object element= checkedElements.next();
+				if (element instanceof IPackageFragment) {
+					String name= ((IPackageFragment) element).getElementName();
+					if (!incompletePackages.contains(name) && !addedPackages.contains(name)) {
+						res.add(element);
+						addedPackages.add(name);
+					}
+				}
+			}
+			
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
 		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
 	}
 
@@ -512,7 +541,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fStore.setSourcepath(getSourcePath(project));
 		fStore.setClasspath(getClassPath(project));	
 		fStore.setAccess(fVisibilitySelection);
-		fStore.setSourceElements(getSourceElements());
+		fStore.setSourceElements(getSourceElements(project));
 	}
 
 	private void doValidation(int validate) {
@@ -566,12 +595,12 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			case TREESTATUS :
 
 				fTreeStatus = new StatusInfo();
-				boolean empty = fInputGroup.getAllCheckedTreeItems().isEmpty();
-				if (empty)
+				Object[] items = fInputGroup.getAllCheckedTreeItems().toArray();
+
+				if (items.length == 0)
 					fTreeStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.invalidtreeselection.error")); //$NON-NLS-1$
 				else {
 					int projCount = 0;
-					Object[] items = fInputGroup.getAllCheckedTreeItems().toArray();
 					for (int i = 0; i < items.length; i++) {
 						IJavaElement element = (IJavaElement) items[i];
 						if (element instanceof IJavaProject) {
