@@ -57,7 +57,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -152,7 +151,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			if (firstElement instanceof IType)
 				run((IType)firstElement, new IField[0], false);
 			else if (firstElement instanceof ICompilationUnit)	
-				run(JavaElementUtil.getMainType((ICompilationUnit)firstElement), new IField[0], false);
+				run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
@@ -167,7 +166,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			return canEnableOn((IType)selection.getFirstElement());
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
-			return canEnableOn(JavaElementUtil.getMainType((ICompilationUnit)selection.getFirstElement()));
+			return canEnableOn(((ICompilationUnit)selection.getFirstElement()).findPrimaryType());
 
 		return false;	
 	}
@@ -203,7 +202,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setTitle(dialogTitle);
-		String message= ActionMessages.getFormattedString("AddGetterSetterAction.dialog.title", JavaElementUtil.createSignature(type));//$NON-NLS-1$
+		String message= ActionMessages.getString("AddGetterSetterAction.dialog.title");//$NON-NLS-1$
 		dialog.setMessage(message);
 		dialog.setValidator(createValidator());
 		dialog.setContainerMode(true);
