@@ -1,10 +1,12 @@
 package p;
 class A{
-	A(int i){
+	A(){
 	}
 }
 class B extends A{
 	B(){
-		super(1);
+		this(3);
+	}
+	B(int y){
 	}
 }

@@ -4,7 +4,7 @@ class A{
 	}
 }
 class B extends A{
-	B(int i){
+	B(){
 		super(1);
 	}
 }
