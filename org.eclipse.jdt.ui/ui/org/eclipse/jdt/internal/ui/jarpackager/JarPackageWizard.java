@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -301,13 +302,21 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 				Object selectedElement=  iter.next();
 				if (selectedElement instanceof IProject) {
 					try {
-						selectedElements.addAll(Arrays.asList(((IProject)selectedElement).members()));
+						IProject project= (IProject)selectedElement;
+						if (project.hasNature(JavaCore.NATURE_ID))
+							selectedElements.add(JavaCore.create(project));
 					} catch (CoreException ex) {
-						// // ignore selected element
+						// ignore selected element
+						continue;
 					}
 				}
-				else if (selectedElement instanceof IResource)
-					selectedElements.add(selectedElement);
+				else if (selectedElement instanceof IResource) {
+					IJavaElement je= JavaCore.create((IResource)selectedElement);
+					if (je != null && je.exists() && je.getElementType() == IJavaElement.COMPILATION_UNIT)
+						selectedElements.add(je);
+					else
+						selectedElements.add(selectedElement);
+				}
 				else if (selectedElement instanceof IJavaElement) {
 					IJavaElement je= (IJavaElement)selectedElement;
 					if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
@@ -320,6 +329,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 								selectedElements.add(je);
 						} catch (JavaModelException ex) {
 							// ignore selected element
+							continue;
 						}
 					}
 					else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {

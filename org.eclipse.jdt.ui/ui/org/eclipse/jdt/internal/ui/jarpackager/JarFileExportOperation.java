@@ -77,18 +77,18 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	protected void exportElement(Object element, IProgressMonitor progressMonitor) throws InterruptedException {		int leadSegmentsToRemove= 1;		IPackageFragmentRoot pkgRoot= null;		boolean isJavaElement= false;		IResource resource= null;		IJavaProject jProject= null;		if (element instanceof IJavaElement) {			isJavaElement= true;			IJavaElement je= (IJavaElement)element;			try {				resource= je.getUnderlyingResource();			} catch (JavaModelException ex) {				addWarning("Underlying resource not found for compilation unit: " + je.getElementName(), ex);				return;			}			jProject= je.getJavaProject();			pkgRoot= JavaModelUtility.getPackageFragmentRoot(je);			if (pkgRoot != null)				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();		}		else			resource= (IResource)element;		if (!resource.isAccessible()) {			addWarning("Resource not found or not  accessible: " + resource.getFullPath(), null);			return;		}
 		if (resource.getType() == IResource.FILE) {			if (!resource.isLocal(IResource.DEPTH_ZERO))
 				try {					resource.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);				} catch (CoreException ex) {
-					addWarning("Resource could not be retrieved locally: " + resource.getFullPath(), ex);					return;				}			/*			try {				isJavaProject= resource.getProject().hasNature(JavaCore.NATURE_ID);			} catch (CoreException ex) {				addWarning("Project nature could not be determined for: " + resource.getFullPath(), ex);				return;			}			if (isJavaProject) {
-				jProject= JavaCore.create(resource.getProject());
-				try {
-					IPackageFragment pkgFragment= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
-					if (pkgFragment != null) {
-						pkgRoot= JavaModelUtility.getPackageFragmentRoot(pkgFragment);
-						if (pkgRoot != null)
-							leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
-					}
-				} catch (JavaModelException ex) {
-					addWarning("Java package could not be found for: " + resource.getFullPath(), ex);					return;				}
-			}			*/
+					addWarning("Resource could not be retrieved locally: " + resource.getFullPath(), ex);					return;				}			if (!isJavaElement) {				// check if it's a Java resource				try {					isJavaElement= resource.getProject().hasNature(JavaCore.NATURE_ID);				} catch (CoreException ex) {					addWarning("Project nature could not be determined for: " + resource.getFullPath(), ex);					return;				}				if (isJavaElement) {
+					jProject= JavaCore.create(resource.getProject());
+					try {
+						IPackageFragment pkgFragment= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
+						if (pkgFragment != null) {
+							pkgRoot= JavaModelUtility.getPackageFragmentRoot(pkgFragment);
+							if (pkgRoot != null)
+								leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
+						}
+					} catch (JavaModelException ex) {
+						addWarning("Java package could not be found for: " + resource.getFullPath(), ex);						return;					}
+				}			}
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
 			progressMonitor.subTask(destinationPath.toString());
 			

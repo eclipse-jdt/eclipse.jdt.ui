@@ -430,7 +430,16 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 	
 	private Object[] getResources(IFolder folder) {
 		try {
-			return folder.members();
+			// filter out folders that are package fragment roots
+			Object[] members= folder.members();
+			List nonJavaResources= new ArrayList();
+			for (int i= 0; i < members.length; i++) {
+				Object o= members[i];
+				if (!(o instanceof IFolder && JavaCore.create((IFolder)o) != null)) {
+					nonJavaResources.add(o);
+				}	
+			}
+			return nonJavaResources.toArray();
 		} catch(CoreException e) {
 			return ArrayUtility.getEmptyArray();
 		}
