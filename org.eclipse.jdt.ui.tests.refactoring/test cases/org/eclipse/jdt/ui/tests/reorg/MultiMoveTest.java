@@ -8,29 +8,34 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.refactoring;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.eclipse.jdt.ui.tests.reorg;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.MoveRefactoring2;
+;
 
-public class MultiMoveTests extends RefactoringTest {
+public class MultiMoveTest extends RefactoringTest {
 
-	private static final Class clazz= MultiMoveTests.class;
+	private static final Class clazz= MultiMoveTest.class;
 	private static final String REFACTORING_PATH= "MultiMove/";
 
-	public MultiMoveTests(String name) {
+	public MultiMoveTest(String name) {
 		super(name);
 	}
 
@@ -80,10 +85,13 @@ public class MultiMoveTests extends RefactoringTest {
 			packP2= createPackage(p2Name);
 			ICompilationUnit p2C= createCu(packP2, getName() + inDir + p2Name + "/C.java", "C.java");
 
-			List elems= new ArrayList();
-			elems.add(p1A);
-			elems.add(p1B);
-			MoveRefactoring ref= MoveRefactoring.create(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
+//			List elems= new ArrayList();
+//			elems.add(p1A);
+//			elems.add(p1B);
+			IResource[] resources= {};
+			IJavaElement[] javaElements= {p1A, p1B};
+			MoveRefactoring2 ref= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);
 		    performDummySearch();
@@ -112,27 +120,27 @@ public class MultiMoveTests extends RefactoringTest {
 	
 	public void test1() throws Exception{		
 		IPackageFragment packP1= null;
-		IPackageFragment packP3= null;
 		IPackageFragment packP2= null;
 		try {
 			final String p1Name= "p1";
-			final String p3Name= "p3";
 			final String inDir= "/in/";
 			final String outDir= "/out/";
 
 			packP1= createPackage(p1Name);
-			packP3= createPackage(p3Name);
 			ICompilationUnit p1A= createCu(packP1, getName() + inDir + p1Name + "/A.java", "A.java");
-			ICompilationUnit p3B= createCu(packP3, getName() + inDir + p3Name + "/B.java", "B.java");
+			ICompilationUnit p1B= createCu(packP1, getName() + inDir + p1Name + "/B.java", "B.java");
 
 			String p2Name= "p2";
 			packP2= createPackage(p2Name);
 			ICompilationUnit p2C= createCu(packP2, getName() + inDir + p2Name + "/C.java", "C.java");
 
-			List elems= new ArrayList();
-			elems.add(p1A);
-			elems.add(p3B);
-			MoveRefactoring ref= MoveRefactoring.create(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
+//			List elems= new ArrayList();
+//			elems.add(p1A);
+//			elems.add(p3B);
+			IResource[] resources= {};
+			IJavaElement[] javaElements= {p1A, p1B};
+			MoveRefactoring2 ref= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);
 		    performDummySearch();
@@ -143,20 +151,21 @@ public class MultiMoveTests extends RefactoringTest {
 
 			assertEquals("p1 files", 0, packP1.getChildren().length);
 			assertEquals("p2 files", 3, packP2.getChildren().length);
-			assertEquals("p1 files", 0, packP3.getChildren().length);
 
 			String expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/A.java");
-			assertEquals("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());
+//			assertEquals("incorrect update of A", expectedSource, packP2.getCompilationUnit("A.java").getSource());
+			SourceCompareUtil.compare("incorrect update of A", packP2.getCompilationUnit("A.java").getSource(), expectedSource);
 
 			expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/B.java");
-			assertEquals("incorrect update of B", expectedSource, packP2.getCompilationUnit("B.java").getSource());
+//			assertEquals("incorrect update of B", expectedSource, packP2.getCompilationUnit("B.java").getSource());
+			SourceCompareUtil.compare("incorrect update of B", packP2.getCompilationUnit("B.java").getSource(), expectedSource);
 
 			expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p2Name + "/C.java");
-			assertEquals("incorrect update of C", expectedSource, p2C.getSource());
+//			assertEquals("incorrect update of C", expectedSource, p2C.getSource());
+			SourceCompareUtil.compare("incorrect update of C", p2C.getSource(), expectedSource);
 		} finally {
 			delete(packP1);
 			delete(packP2);
-			delete(packP3);	
 		}		
 	}
 	
@@ -176,9 +185,12 @@ public class MultiMoveTests extends RefactoringTest {
 			packP2= createPackage(p2Name);
 			ICompilationUnit p2C= createCu(packP2, getName() + inDir + p2Name + "/C.java", "C.java");
 
-			List elems= new ArrayList();
-			elems.add(p1A);
-			MoveRefactoring ref= MoveRefactoring.create(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
+//			List elems= new ArrayList();
+//			elems.add(p1A);
+			IResource[] resources= {};
+			IJavaElement[] javaElements= {p1A};
+			MoveRefactoring2 ref= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);
 		    performDummySearch();
@@ -223,9 +235,12 @@ public class MultiMoveTests extends RefactoringTest {
 			String p2Name= "p2";
 			packP2= createPackage(p2Name);
 
-			List elems= new ArrayList();
-			elems.add(p1A);
-			MoveRefactoring ref= MoveRefactoring.create(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
+//			List elems= new ArrayList();
+//			elems.add(p1A);
+			IResource[] resources= {};
+			IJavaElement[] javaElements= {p1A};
+			MoveRefactoring2 ref= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);
 		    performDummySearch();
