@@ -25,11 +25,11 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -69,7 +69,7 @@ public class AddUnimplementedMethodsAction extends Action {
 			}
 			
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(type, settings, false);
+			AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, false);
 			try {
 				ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 				dialog.run(false, true, new WorkbenchRunnableWrapper(op));
