@@ -384,7 +384,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				updateHierarchyViewer();
 			}
 			IType root= getSelectableType(fInputElement);
-			internalSelectType(root);
+			internalSelectType(root, true);
 			updateMethodViewer(root);
 			updateToolbarButtons();
 			updateTitle();
@@ -803,6 +803,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		updateHierarchyViewer();
 		updateTitle();
+		internalSelectType(fSelectedType, true);
 	}	
 	
 	private IType getSelectableType(IJavaElement elem) {
@@ -814,10 +815,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 	}
 	
-	private void internalSelectType(IMember elem) {	
+	private void internalSelectType(IMember elem, boolean reveal) {	
 		TypeHierarchyViewer viewer= getCurrentViewer();
 		viewer.removeSelectionChangedListener(fSelectionChangedListener);
-		viewer.setSelection(elem != null ? new StructuredSelection(elem) : StructuredSelection.EMPTY);
+		viewer.setSelection(elem != null ? new StructuredSelection(elem) : StructuredSelection.EMPTY, reveal);
 		viewer.addSelectionChangedListener(fSelectionChangedListener);
 	}
 	
@@ -1004,7 +1005,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (fInputElement != null) {
 				ISelection currSelection= getCurrentViewer().getSelection();
 				if (currSelection == null || currSelection.isEmpty()) {
-					internalSelectType(getSelectableType(fInputElement));
+					internalSelectType(getSelectableType(fInputElement), false);
 				}
 				if (!fIsEnableMemberFilter) {
 					typeSelectionChanged(currSelection);
@@ -1052,10 +1053,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			
 				if (methodViewerInput != null && getCurrentViewer().isElementShown(methodViewerInput)) {
 					// avoid that the method view changes content by selecting the previous input
-					internalSelectType(methodViewerInput);
+					internalSelectType(methodViewerInput, true);
 				} else if (fSelectedType != null) {
 					// choose a input that exists
-					internalSelectType(fSelectedType);
+					internalSelectType(fSelectedType, true);
 					updateMethodViewer(fSelectedType);
 				}
 			} else {
@@ -1200,7 +1201,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (selectionId != null) {
 			IJavaElement elem= JavaCore.create(selectionId);
 			if (getCurrentViewer().isElementShown(elem) && elem instanceof IMember) {
-				internalSelectType((IMember)elem);
+				internalSelectType((IMember)elem, false);
 			}
 		}
 		fMethodsViewer.restoreState(memento);
@@ -1224,14 +1225,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (elem instanceof IClassFile) {
 				IType type= ((IClassFile)elem).getType();
 				if (currentViewer.isElementShown(type)) {
-					internalSelectType(type);
+					internalSelectType(type, true);
 					updateMethodViewer(type);
 				}
 			} else if (elem instanceof ICompilationUnit) {
 				IType[] allTypes= ((ICompilationUnit)elem).getAllTypes();
 				for (int i= 0; i < allTypes.length; i++) {
 					if (currentViewer.isElementShown(allTypes[i])) {
-						internalSelectType(allTypes[i]);
+						internalSelectType(allTypes[i], true);
 						updateMethodViewer(allTypes[i]);
 						return;
 					}
