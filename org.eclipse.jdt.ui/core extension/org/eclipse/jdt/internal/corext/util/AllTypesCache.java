@@ -191,12 +191,12 @@ public class AllTypesCache {
 	 * The lock for synchronizing all activity in the AllTypesCache.
 	 */
 	private static Object fgLock= new Object();
-		private static boolean fgIsLocked;
+		private volatile static boolean fgIsLocked;
 		private volatile static TypeCacher fgTypeCacherThread;
 		private static TypeInfo[] fgTypeCache;
 		private static int fgSizeHint= INITIAL_SIZE;
-		private static boolean fgTerminated;	
-		private static boolean fgAsyncMode;		// if true cache updates are run via a background thread
+		private volatile static boolean fgTerminated;	
+		private volatile static boolean fgAsyncMode;		// if true cache updates are run via a background thread
 	
 	
 	private static int fgNumberOfCacheFlushes;
