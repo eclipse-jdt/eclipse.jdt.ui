@@ -1,6 +1,6 @@
 --------------------------------
-Refactoring:
-    0.   delete all projects from your workspace except for JUnit
+	Refactoring:
+ 	   0.   delete all projects from your workspace except for JUnit
 
     RenameType
         1. open junit.framework.Test in the editor
@@ -13,7 +13,7 @@ Refactoring:
          7. select the second element: verify that the compare viewer is fed with the 'junit.textui.TestRunner.java' file contents
               there should be exactly 12 differences
         8. press 'finish>' - verify progress notification
-        9. verify that there are no compiler errors (if you have the autobuild off, then build before verifying)
+        9. verify that there are no compiler errors (if you have the autobuild off, then it on before verifying)
     
     Undo
         10. rightclick in the outliner
@@ -35,7 +35,7 @@ Refactoring:
         6. a page with errors should come up - 1 error saying that the method exists in types related to Test
         6a. verify that only '<back' and cancel buttons are enabled
        7. press <back
-        8. enter fun as the new name
+        8. enter 'bogus' as the new name
         9. press next>
         10. you should see a page with proposed changes: there should be exactly 13 entries (top level nodes)
         11. press finish    - verify that there are no compiler errors
@@ -44,23 +44,28 @@ Refactoring:
         11. rightclick in the outliner and select "Refactoring>>Undo"
         12. verify that there are no compiler errors
         
- RenamePackage:
-	1. select junit.framework in the package viewer
-	2. choose 'refactoring/rename' from the popup menu
-	3. enter new name 
-		- verify that empty string is not a valid name
-		- verify that you cannot rename to 'junit'
-	4. 'finish'
-	5. verify that no compiler errors are introduced
-	6. undo and verify that there are no compiler errors
-	7. create a default package and verify that the rename refactoring is not activated for it
+	 RenamePackage:
+		1. select junit.framework in the package viewer
+		2. choose 'refactoring/rename' from the popup menu
+		3. enter new name 
+			- verify that empty string is not a valid name
+		4. 'finish'
+		5. verify that no compiler errors are introduced
+		6. undo and verify that there are no compiler errors
+		7. create a default package and verify that the rename refactoring is not activated for it
 
-Move a CompilationUnit
-	1. select junit.framework.Test in the package view
-	2. choose 'refactoring/move'
-	3. enter junit.ui as a new package name
-	4. 'finish' and verify that there are no compiler errors
-	5. undo and verify that there are no compiler errors
-	
-	6. in a similar manner - verify that it is not possible to move "junit.ui.TestRunner.java" to junit.textui
-        
+	Move a CompilationUnit
+		1. select junit.framework.Test in the package view
+		2. choose 'refactoring/move'
+		3. enter junit.ui as a new package name
+		4. 'finish' and verify that there are no compiler errors
+		5. undo and verify that there are no compiler errors
+		
+		6. in a similar manner - verify that it is not possible to move "junit.ui.TestRunner.java" to junit.textui
+    
+   	Rename Parameters
+   		1. open junit.ui.TestRunner
+   		2. select appendFailure(String, Test, Throwable)
+   		3. verify that you're not allowed to rename the  first parameter to fExceptions
+   		4.rename it to x and 'finish'     
+   		5. verify that there're no compiler errors

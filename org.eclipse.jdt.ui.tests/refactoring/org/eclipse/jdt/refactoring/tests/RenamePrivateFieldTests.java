@@ -5,7 +5,7 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.IRefactoring;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.fields.RenamePrivateFieldRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.refactoring.ChangeContext;import org.eclipse.jdt.core.refactoring.IRefactoring;import org.eclipse.jdt.core.refactoring.Refactoring;import org.eclipse.jdt.core.refactoring.RefactoringStatus;import org.eclipse.jdt.core.refactoring.fields.RenameFieldRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
 
 public class RenamePrivateFieldTests extends RefactoringTest {
 
@@ -35,7 +35,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 
 	private void helper1_0(String fieldName, String newFieldName) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		IRefactoring ref= new RenamePrivateFieldRefactoring(fgChangeCreator, getScope(), classA.getField(fieldName), newFieldName);
+		IRefactoring ref= new RenameFieldRefactoring(fgChangeCreator, getScope(), classA.getField(fieldName), newFieldName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
 	}
@@ -47,7 +47,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private void helper2(String fieldName, String newFieldName) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		IRefactoring ref= new RenamePrivateFieldRefactoring(fgChangeCreator, getScope(), classA.getField(fieldName), newFieldName);
+		IRefactoring ref= new RenameFieldRefactoring(fgChangeCreator, getScope(), classA.getField(fieldName), newFieldName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("was supposed to pass", null, result);
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());

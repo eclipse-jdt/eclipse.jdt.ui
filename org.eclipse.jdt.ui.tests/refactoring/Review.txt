@@ -1,9 +1,0 @@
-To do:
-
-- comment the code
-    
-- NLS 
-  
-- Lazy building of Refactoring menu
-
-  

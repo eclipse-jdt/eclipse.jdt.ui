@@ -27,7 +27,7 @@ public class ExtractMethodTests extends RefactoringTest {
 	
 	public ExtractMethodTests(String name) {
 		super(name);
-		// fgIsVerbose= true;
+		//fIsVerbose= true;
 	}
 	
 	public static void main(String[] args) {

@@ -61,7 +61,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IRefactoring ref= createRefactoring(getScope(), classA, newName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
-		if (fgIsVerbose)
+		if (fIsVerbose)
 			DebugUtils.dump("result: " + result);
 	}
 	

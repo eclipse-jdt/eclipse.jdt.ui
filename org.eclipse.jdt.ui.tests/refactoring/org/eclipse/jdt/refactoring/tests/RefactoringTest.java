@@ -13,7 +13,7 @@ public abstract class RefactoringTest extends TestCase {
 	private IPackageFragment fPackageP;
 	private IJavaSearchScope fScope;
 	
-	public static boolean fgIsVerbose= false;
+	public boolean fIsVerbose= false;
 
 	public static final String TEST_PATH_PREFIX= "Refactoring Tests Resources/";
 
@@ -35,7 +35,7 @@ public abstract class RefactoringTest extends TestCase {
 		fPackageP= fRoot.createPackageFragment("p", true, null);
 
 		fScope= SearchEngine.createWorkspaceScope();
-		if (fgIsVerbose){
+		if (fIsVerbose){
 			System.out.println("---------------------------------------------");
 			System.out.println("Test:" + getClass() + "." + name());
 		}	
@@ -93,7 +93,7 @@ public abstract class RefactoringTest extends TestCase {
 	 * BOGUS: this might be already implemented somewhere else (JDK? Core?)
 	 */
 	protected String getFileContents(String fileName) throws IOException {
-		if (fgIsVerbose)
+		if (fIsVerbose)
 			System.out.println("loading:" + fileName);
 			
 		InputStream in= getFileInputStream(fileName);

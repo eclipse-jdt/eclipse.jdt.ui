@@ -6,7 +6,6 @@ import junit.framework.Test;import junit.framework.TestSuite;import org.eclip
 	
 	public RenameParametersTests(String name){
 		super(name);
-		fgIsVerbose= true;
 	}
 	
 	protected String getRefactoringPath() {

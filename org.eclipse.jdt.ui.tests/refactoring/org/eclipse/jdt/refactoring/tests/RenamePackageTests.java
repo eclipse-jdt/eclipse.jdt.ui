@@ -67,7 +67,7 @@ public class RenamePackageTests extends RefactoringTest {
 		IRefactoring ref= createRefactoring(thisPackage, newPackageName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
-		if (fgIsVerbose)
+		if (fIsVerbose)
 			DebugUtils.dump("" + result);
 	}
 	
@@ -83,7 +83,7 @@ public class RenamePackageTests extends RefactoringTest {
 		IRefactoring ref= createRefactoring(thisPackage, newPackageName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
-		if (fgIsVerbose)
+		if (fIsVerbose)
 			DebugUtils.dump("" + result);
 	}
 	
