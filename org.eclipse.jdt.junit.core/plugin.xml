@@ -177,6 +177,9 @@
                label="%DebugJUnitTestAction.label"
                menubarPath="org.eclipse.ui.run/jdtDebugLaunchGroup"
                tooltip="%DebugJUnitTestAction.tooltip"
+               hoverIcon="icons/full/ctool16/debugjunit.gif"
+               disabledIcon="icons/full/dtool16/debugjunit.gif"
+               icon="icons/full/etool16/debugjunit.gif"
                mode= "debug">
          </action>
          <action
@@ -185,6 +188,9 @@
                label="%RunJUnitTestAction.label"
                menubarPath="org.eclipse.ui.run/jdtDebugLaunchGroup"
                tooltip="%RunJUnitTestAction.tooltip"
+               hoverIcon="icons/full/ctool16/runjunit.gif"
+               disabledIcon="icons/full/dtool16/runjunit.gif"
+               icon="icons/full/etool16/runjunit.gif"
                mode= "run">
          </action>
       </actionSet>
