@@ -1445,11 +1445,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (template == null) {
 			return getDefaultCUContent(packStatement, typeContent, lineDelimiter);
 		}
+		String typeComment= StubUtility.getTypeComment(cu, getTypeName());
 		IJavaProject project= cu.getJavaProject();
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.PACKAGE_STATEMENT, packStatement);
-		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, getTypeComment(cu));
+		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment != null ? typeComment : ""); //$NON-NLS-1$
 		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, getTypeName());
 		String content= context.evaluate(template).getString();
