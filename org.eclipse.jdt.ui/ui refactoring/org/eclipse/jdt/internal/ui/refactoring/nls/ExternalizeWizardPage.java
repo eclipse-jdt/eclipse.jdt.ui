@@ -201,7 +201,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return null;	
 		}
 	}
-
+	
 	private class KeyValuePair {
 		private String fKey;
 		private String fValue;
@@ -502,9 +502,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fSourceViewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 
 		try {
+			
 			String contents= getCu().getBuffer().getContents();
 			IDocument document= new Document(contents);
-			tools.setupDocument(document);
+			tools.setupJavaDocumentPartitioner(document);
 			
 			fSourceViewer.setDocument(document);
 			fSourceViewer.setEditable(false);
@@ -693,6 +694,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
         });
 	}
 	
+	
 	private void openEditButton(ISelection selection){
 		try{
 			Set selected= getSelectedTableEntries();
@@ -714,7 +716,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fViewer.setSelection(selection);
 		}
 	}
-
+	
 	private Set getSelectedTableEntries() {
 		ISelection sel= fViewer.getSelection();
 		if (sel instanceof IStructuredSelection)
