@@ -262,15 +262,8 @@ class RefactoringStatusViewer extends SashForm {
 	//---- UI creation ----------------------------------------------------------------------
 	
 	public Point computeSize (int wHint, int hHint, boolean changed) {
-		Point result= super.computeSize(wHint, hHint, changed);
 		PixelConverter converter= new PixelConverter(this);
-		int maxWidth= converter.convertWidthInCharsToPixels(60);
-		int maxHeight= converter.convertHeightInCharsToPixels(30);
-		if (result.x > maxWidth)
-			result.x= maxWidth;
-		if (result.y > maxHeight)
-			result.y= maxHeight;
-		return result;
+		return new Point(converter.convertWidthInCharsToPixels(90), converter.convertHeightInCharsToPixels(25));
 	}
 	
 	private void createContents() {
