@@ -39,6 +39,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
@@ -96,7 +97,7 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 		//XXX must exclude it here - nasty
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object each= iter.next();
-			if (each instanceof IPackageFragment && ((IPackageFragment)each).isDefaultPackage())
+			if (JavaElementUtil.isDefaultPackage(each))
 				return false;
 		}
 		
