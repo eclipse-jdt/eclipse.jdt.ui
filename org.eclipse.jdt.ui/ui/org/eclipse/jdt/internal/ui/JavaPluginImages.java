@@ -14,7 +14,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.action.IAction;
 
 /**
- * Bundle of most images used by the Java plugin. 
+ * Bundle of most images used by the Java plugin.
  */
 public class JavaPluginImages {
 
@@ -92,7 +92,7 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_EXCEPTION= NAME_PREFIX + "jexception_obj.gif";
 	public static final String IMG_OBJS_ERROR= NAME_PREFIX + "jrtexception_obj.gif";
 	
-	public static final String IMG_OBJS_BREAKPOINT_INSTALLED= NAME_PREFIX + "jbreakpoint_installed_obj.gif";
+	public static final String IMG_OBJS_BREAKPOINT_INSTALLED= NAME_PREFIX + "brkpi_obj.gif";
 
 	public static final String IMG_OBJS_STACK_FRAME_SYNCH= NAME_PREFIX + "jstackframe_synch_obj.gif";
 
