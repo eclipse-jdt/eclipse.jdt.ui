@@ -638,6 +638,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		List cus= new ArrayList(searchResultGroups.length);
 		for (int i= 0; i < searchResultGroups.length; i++) {
 			ICompilationUnit cu= searchResultGroups[i].getCompilationUnit();
+			cu= WorkingCopyUtil.getWorkingCopyIfExists(cu);
 			if (cu != null)
 				cus.add(cu);
 		}
