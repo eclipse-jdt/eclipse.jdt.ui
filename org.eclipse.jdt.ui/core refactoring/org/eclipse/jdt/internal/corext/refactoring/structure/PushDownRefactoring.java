@@ -75,7 +75,6 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -398,39 +397,6 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		monitor.done();
 	}
 
-	protected boolean canBeAccessedFrom(IMember member, IType target, ITypeHierarchy hierarchy) throws JavaModelException {
-		if (super.canBeAccessedFrom(member, target, hierarchy)) {
-			if (target.equals(member.getDeclaringType()))
-				return true;
-			if (target.equals(member))
-				return true;
-			if (member instanceof IMethod) {
-				final IMethod method= (IMethod) member;
-				final IMethod stub= target.getMethod(method.getElementName(), method.getParameterTypes());
-				if (stub.exists())
-					return true;
-			}
-			if (member.getDeclaringType() == null) {
-				if (!(member instanceof IType))
-					return false;
-				if (JdtFlags.isPublic(member))
-					return true;
-				if (!JdtFlags.isPackageVisible(member))
-					return false;
-				if (JavaModelUtil.isSamePackage(((IType) member).getPackageFragment(), target.getPackageFragment()))
-					return true;
-				return hierarchy.contains(member.getDeclaringType());
-			}
-			final IType declaringType= member.getDeclaringType();
-			if (!canBeAccessedFrom(declaringType, target, hierarchy))
-				return false;
-			if (declaringType.equals(getDeclaringType()))
-				return false;
-			return true;
-		}
-		return false;
-	}
-
 	private RefactoringStatus checkAbstractMembersInDestinationClasses(IMember[] membersToPushDown, IType[] destinationClassesForAbstract) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		IMember[] abstractMembersToPushDown= getAbstractMembers(membersToPushDown);
@@ -685,6 +651,8 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 					for (int offset= infos.length - 1; offset >= 0; offset--) {
 						member= infos[offset].getMember();
 						adjustor= new MemberVisibilityAdjustor(type, member);
+						if (infos[offset].isNewMethodToBeDeclaredAbstract())
+							adjustor.setIncoming(false);
 						adjustor.setRewrite(sourceRewriter.getASTRewrite(), sourceRewriter.getRoot());
 						adjustor.setRewrites(rewrites);
 
@@ -695,8 +663,6 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 						adjustor.setAdjustments(adjustments);
 						adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
 						adjustors.add(adjustor);
-						// if (needsVisibilityAdjustment(member, false, new SubProgressMonitor(monitor, 1), status))
-						// adjustments.put(member, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(member, Modifier.ModifierKeyword.PROTECTED_KEYWORD, RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.change_visibility_method_warning", new String[] { MemberVisibilityAdjustor.getLabel(member), RefactoringCoreMessages.getString("MemberVisibilityAdjustor.change_visibility_protected")}), JavaStatusContext.create(member)))); //$NON-NLS-1$ //$NON-NLS-2$
 						if (infos[offset].isFieldInfo()) {
 							FieldDeclaration newField= createNewFieldDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite());
 							unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
