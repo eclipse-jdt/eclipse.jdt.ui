@@ -27,7 +27,7 @@ public class JdtTextTestSuite {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("JDT Text Test Suite"); //$NON-NLS-1$
 		//$JUnit-BEGIN$
-		suite.addTestSuite(ComilationUnitDocumentProviderTest.class);
+		suite.addTestSuite(CompilationUnitDocumentProviderTest.class);
 		suite.addTest(JavaHeuristicScannerTest.suite());
 		suite.addTest(JavaParameterListValidatorTest.suite());
 		suite.addTest(JavaDoc2HTMLTextReaderTester.suite());

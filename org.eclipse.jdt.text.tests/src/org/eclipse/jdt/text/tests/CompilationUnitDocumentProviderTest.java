@@ -38,12 +38,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 
 
-public class ComilationUnitDocumentProviderTest extends TestCase {
+public class CompilationUnitDocumentProviderTest extends TestCase {
 	
 	private IJavaProject fJavaProject;
 	private IProject fLinkedProject;
 
-	public ComilationUnitDocumentProviderTest(String name) {
+	public CompilationUnitDocumentProviderTest(String name) {
 		super(name);
 	}
 			
