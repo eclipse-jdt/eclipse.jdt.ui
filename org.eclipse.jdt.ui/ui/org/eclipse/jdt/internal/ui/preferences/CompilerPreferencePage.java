@@ -184,7 +184,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	
 	private ArrayList fComplianceControls;
 
-	IStatus fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus, fTaskTagsStatus;
+	private IStatus fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus, fTaskTagsStatus;
 
 	public CompilerPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
@@ -636,29 +636,28 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 				if (checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT)) {
 					updateComplianceDefaultSettings();
 				}
+				fComplianceStatus= validateCompliance();
 			} else if (PREF_SOURCE_COMPATIBILITY.equals(changedKey) ||
 					PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey) ||
 					PREF_PB_ASSERT_AS_IDENTIFIER.equals(changedKey)) {
 				fComplianceStatus= validateCompliance();
-			} else if (!PREF_PB_MAX_PER_UNIT.equals(changedKey)) {
+			} else if (PREF_PB_MAX_PER_UNIT.equals(changedKey)) {
 				fMaxNumberProblemsStatus= validateMaxNumberProblems();
-			} else if (!PREF_RESOURCE_FILTER.equals(changedKey)) {
+			} else if (PREF_RESOURCE_FILTER.equals(changedKey)) {
 				fResourceFilterStatus= validateResourceFilters();
-			} else if (!PREF_COMPILER_TASK_TAGS.equals(changedKey)) {
+			} else if (PREF_COMPILER_TASK_TAGS.equals(changedKey)) {
 				fTaskTagsStatus= validateTaskTags();
 			} else {
 				return;
 			}
 		} else {
 			updateComplianceEnableState();
-		}
-		
-		IStatus fComplianceStatus= validateCompliance();
-		IStatus fMaxNumberProblemsStatus= validateMaxNumberProblems();
-		IStatus fResourceFilterStatus= validateResourceFilters();
-		IStatus fTaskTagsStatus= validateTaskTags();
-		
-		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fComplianceStatus, validateMaxNumberProblems(), validateResourceFilters(), validateTaskTags() });
+			fComplianceStatus= validateCompliance();
+			fMaxNumberProblemsStatus= validateMaxNumberProblems();
+			fResourceFilterStatus= validateResourceFilters();
+			fTaskTagsStatus= validateTaskTags();
+		}		
+		IStatus status= StatusUtil.getMostSevere(new IStatus[] { fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus, fTaskTagsStatus });
 		updateStatus(status);
 	}
 	
