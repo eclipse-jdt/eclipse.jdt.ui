@@ -413,6 +413,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			modifyAccessToEnclosingInstance(targetRewrite, declaration, status);
 			final ITypeBinding binding= declaration.resolveBinding();
 			if (binding != null) {
+				modifyInterfaceMemberModifiers(binding);
 				modifyEnclosingClassModifiers(status, binding, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.change_visibility"))); //$NON-NLS-1$
 				final ITypeBinding declaring= binding.getDeclaringClass();
 				if (declaring != null)
@@ -434,6 +435,21 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			updateConstructorReference(references[index], targetRewrite, targetUnit);
 	}
 
+	private void modifyInterfaceMemberModifiers(final ITypeBinding binding) {
+		Assert.isNotNull(binding);
+		ITypeBinding declaring= binding.getDeclaringClass();
+		while (declaring != null && !declaring.isInterface()) {
+			declaring= declaring.getDeclaringClass();
+		}
+		if (declaring != null) {
+			final ASTNode node= ASTNodes.findDeclaration(binding, fSourceRewrite.getRoot());
+			if (node instanceof TypeDeclaration) {
+				final TypeDeclaration declaration= (TypeDeclaration) node;
+				ModifierRewrite.create(fSourceRewrite.getASTRewrite(), declaration).setVisibility(Modifier.PUBLIC, null);
+			}
+		}
+	}
+
 	private void modifyAccessToEnclosingInstance(final CompilationUnitRewrite targetRewrite, final TypeDeclaration declaration, final RefactoringStatus status) {
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(declaration);
@@ -447,17 +463,17 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private void modifyEnclosingClassModifiers(final RefactoringStatus status, final ITypeBinding binding, final TextEditGroup group) {
-		if (Modifier.isStatic(binding.getModifiers())) {
+		final ITypeBinding declaring= binding.getDeclaringClass();
+		if (declaring != null && !declaring.isInterface() && Modifier.isStatic(binding.getModifiers())) {
 			final ASTNode node= ASTNodes.findDeclaration(binding, fSourceRewrite.getRoot());
 			if (node instanceof TypeDeclaration) {
 				final TypeDeclaration declaration= (TypeDeclaration) node;
 				ModifierRewrite.create(fSourceRewrite.getASTRewrite(), declaration).setModifiers(0, Modifier.PRIVATE, group);
-				final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_type_warning", new String[] {Bindings.asString(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
+				final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.change_visibility_type_warning", new String[] { Bindings.asString(binding)}), JavaStatusContext.create(fSourceRewrite.getCu(), node)); //$NON-NLS-1$
 				if (!containsStatusEntry(status, entry))
 					status.addEntry(entry);
 			}
 		}
-		final ITypeBinding declaring= binding.getDeclaringClass();
 		if (declaring != null)
 			modifyEnclosingClassModifiers(status, declaring, group);
 	}
@@ -470,7 +486,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			}
 		}, other).length > 0;
 	}
-
 
 	private void addInheritedTypeQualifications(final TypeDeclaration declaration, final CompilationUnitRewrite targetRewrite, final TextEditGroup group) {
 		Assert.isNotNull(declaration);

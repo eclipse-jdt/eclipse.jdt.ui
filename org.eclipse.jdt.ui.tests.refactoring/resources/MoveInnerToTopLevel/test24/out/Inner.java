@@ -1,3 +1,3 @@
 package p;
-class Inner{
+public class Inner{
 }
