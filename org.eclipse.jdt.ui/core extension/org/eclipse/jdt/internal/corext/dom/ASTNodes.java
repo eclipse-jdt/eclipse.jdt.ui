@@ -45,6 +45,8 @@ public class ASTNodes {
 	private static final Message[] EMPTY_MESSAGES= new Message[0];
 	private static final IProblem[] EMPTY_PROBLEMS= new IProblem[0];
 	
+	private static final int CLEAR_VISIBILITY= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE);
+	
 	private static class ChildrenCollector extends GenericVisitor {
 		public List result;
 
@@ -664,5 +666,9 @@ public class ASTNodes {
 		};
 		name.accept(visitor);
 		return result[0];
-	}	
+	}
+	
+	public static int changeVisibility(int modifiers, int visibility) {
+		return (modifiers & CLEAR_VISIBILITY) | visibility;
+	}
 }

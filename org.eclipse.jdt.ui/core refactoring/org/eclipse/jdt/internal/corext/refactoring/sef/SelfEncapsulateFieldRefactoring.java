@@ -262,7 +262,6 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				new SubProgressMonitor(pm, 5), RefactoringScopeFactory.create(fField),
 				SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
 			
-			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(affectedCUs)));
 			checkInHierarchy(result);
 			if (result.hasFatalError())
 				return result;
@@ -400,7 +399,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (!JdtFlags.isPrivate(fField)) {
 			FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 			FieldDeclaration modified= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-			modified.setModifiers(Modifier.PRIVATE);
+			modified.setModifiers(ASTNodes.changeVisibility(decl.getModifiers(), Modifier.PRIVATE));
 			GroupDescription description= new GroupDescription(
 				RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
 			result.add(description);

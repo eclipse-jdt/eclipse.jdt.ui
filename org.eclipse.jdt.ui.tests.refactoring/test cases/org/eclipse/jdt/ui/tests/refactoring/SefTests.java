@@ -173,6 +173,10 @@ public class SefTests extends AbstractSelectionTestCase {
 		baseTest("field");
 	}
 	
+	public void testFinal() throws Exception {
+		baseTest("field");
+	}
+	
 	//=====================================================================================
 	// Basic Object Test
 	//=====================================================================================
