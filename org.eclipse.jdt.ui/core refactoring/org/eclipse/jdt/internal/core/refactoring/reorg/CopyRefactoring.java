@@ -138,6 +138,8 @@ public class CopyRefactoring extends ReorgRefactoring {
 		IJavaProject javaProject= JavaCore.create(project);
 		CompositeChange result= new CompositeChange("copy source folder", 2);
 		String newName= createNewName(res, project);
+		if (newName == null )
+			newName= res.getName();
 		result.addChange(new CopyResourceChange(res, project, newName));
 		if (javaProject != null)
 			result.addChange(new AddToClasspathChange(javaProject, newName));
