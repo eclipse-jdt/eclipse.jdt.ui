@@ -17,8 +17,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	private JarPackage fJarPackage;
 
 	// widgets
-	private Button		fShowErrorsCheckbox;
-	private Button		fShowWarningsCheckbox;
 	private Button		fExportErrorsCheckbox;
 	private Button		fExportWarningsCheckbox;
 	private Composite	fDescriptionFileGroup;
@@ -30,8 +28,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	// dialog store id constants
 	private final static String PAGE_NAME= "jarOptionsWizardPage"; //$NON-NLS-1$
 	
-	private final static String STORE_SHOW_WARNINGS= PAGE_NAME + ".SHOW_WARNINGS"; //$NON-NLS-1$
-	private final static String STORE_SHOW_ERRORS= PAGE_NAME + ".SHOW_ERRORS"; //$NON-NLS-1$
 	private final static String STORE_EXPORT_WARNINGS= PAGE_NAME + ".EXPORT_WARNINGS"; //$NON-NLS-1$
 	private final static String STORE_EXPORT_ERRORS= PAGE_NAME + ".EXPORT_ERRORS"; //$NON-NLS-1$
 	private final static String STORE_SAVE_DESCRIPTION= PAGE_NAME + ".SAVE_DESCRIPTION"; //$NON-NLS-1$
@@ -82,16 +78,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		layout.marginHeight= 0;
 		optionsGroup.setLayout(layout);
 
-		createLabel(optionsGroup, JarPackagerMessages.getString("JarOptionsPage.howReportProblems.label"), false); //$NON-NLS-1$
-		fShowWarningsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fShowWarningsCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.showWarnings.text")); //$NON-NLS-1$
-		fShowWarningsCheckbox.addListener(SWT.Selection, this);
-
-		fShowErrorsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fShowErrorsCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.showErrors.text")); //$NON-NLS-1$
-		fShowErrorsCheckbox.addListener(SWT.Selection, this);
-
-		createSpacer(optionsGroup);
 		createLabel(optionsGroup, JarPackagerMessages.getString("JarOptionsPage.howTreatProblems.label"), false); //$NON-NLS-1$
 
 		fExportErrorsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
@@ -103,7 +89,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		fExportWarningsCheckbox.addListener(SWT.Selection, this);
 
 		createSpacer(optionsGroup);
-//		createLabel(optionsGroup, "What do you want to export?", false);
 
 		fSaveDescriptionCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fSaveDescriptionCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.saveDescription.text")); //$NON-NLS-1$
@@ -123,8 +108,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		if (settings != null) {
 			settings.put(STORE_EXPORT_WARNINGS, fJarPackage.exportWarnings());
 			settings.put(STORE_EXPORT_ERRORS, fJarPackage.exportErrors());
-			settings.put(STORE_SHOW_WARNINGS, fJarPackage.logWarnings());
-			settings.put(STORE_SHOW_ERRORS, fJarPackage.logErrors());
 			settings.put(STORE_SAVE_DESCRIPTION, fJarPackage.isDescriptionSaved());
 			settings.put(STORE_DESCRIPTION_LOCATION, fJarPackage.getDescriptionLocation().toString());
 		}
@@ -144,8 +127,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		if (!fJarPackage.isUsedToInitialize())
 			initializeJarPackage();
 
-		fShowWarningsCheckbox.setSelection(fJarPackage.logWarnings());
-		fShowErrorsCheckbox.setSelection(fJarPackage.logErrors());
 		fExportWarningsCheckbox.setSelection(fJarPackage.exportWarnings());
 		fExportErrorsCheckbox.setSelection(fJarPackage.exportErrors());
 		fSaveDescriptionCheckbox.setSelection(fJarPackage.isDescriptionSaved());
@@ -157,8 +138,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	protected void initializeJarPackage() {
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
-			fJarPackage.setLogErrors(settings.getBoolean(STORE_SHOW_WARNINGS));
-			fJarPackage.setLogWarnings(settings.getBoolean(STORE_SHOW_ERRORS));
 			fJarPackage.setExportWarnings(settings.getBoolean(STORE_EXPORT_WARNINGS));
 			fJarPackage.setExportErrors(settings.getBoolean(STORE_EXPORT_ERRORS));
 			fJarPackage.setSaveDescription(settings.getBoolean(STORE_SAVE_DESCRIPTION));
@@ -176,8 +155,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 			return;
 		fJarPackage.setExportWarnings(fExportWarningsCheckbox.getSelection());
 		fJarPackage.setExportErrors(fExportErrorsCheckbox.getSelection());
-		fJarPackage.setLogErrors(fShowErrorsCheckbox.getSelection());
-		fJarPackage.setLogWarnings(fShowWarningsCheckbox.getSelection());
 		fJarPackage.setSaveDescription(fSaveDescriptionCheckbox.getSelection());
 		fJarPackage.setDescriptionLocation(new Path(fDescriptionFileText.getText()));
 	}
@@ -280,8 +257,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 				handleDescriptionFileBrowseButtonPressed();
 			}
 		});
-
-//		new Label(parent, SWT.NONE); // vertical spacer
 	}
 	/**
 	 * Creates a file resource handle for the file with the given workspace path.
