@@ -1553,6 +1553,9 @@ public class PreferenceConstants {
 
 		// MembersOrderPreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SI,SF,SM,I,F,C,M"); //$NON-NLS-1$
+		// must add here to guarantee that it is the first in the listener list
+		store.addPropertyChangeListener(JavaPlugin.getDefault().getMemberOrderPreferenceCache());
+
 
 		// JavaEditorPreferencePage
 		/*
