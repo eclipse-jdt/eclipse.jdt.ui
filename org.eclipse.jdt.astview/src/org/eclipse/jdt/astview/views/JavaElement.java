@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 
 
