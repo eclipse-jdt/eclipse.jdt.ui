@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -50,8 +51,16 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 
 	public void run() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(parent, PlatformUI.getWorkbench().getProgressService(), 
-			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
+		// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66436
+		OpenTypeSelectionDialog dialog;
+		try {
+			dialog= new OpenTypeSelectionDialog(parent, PlatformUI.getWorkbench().getProgressService(), 
+				IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
+		} catch (OperationCanceledException e) {
+			// action got canceled
+			return;
+		}
+		// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66436
 		
 		dialog.setMatchEmptyString(true);	
 		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
