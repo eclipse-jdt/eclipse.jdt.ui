@@ -80,7 +80,6 @@ public class MainMethodFinder {
 			element= ((ILaunch)element).getElement();
 
 		if (element instanceof IAdaptable) {
-			IResource resource= null;
 			IJavaElement jelem= (IJavaElement) ((IAdaptable) element).getAdapter(IJavaElement.class);
 			if (jelem != null) {
 				IType parentType= (IType) JavaModelUtil.findElementOfKind(jelem, IJavaElement.TYPE);
@@ -107,25 +106,17 @@ public class MainMethodFinder {
 						monitor.done();
 						return;	
 					}
-					resource= openable.getUnderlyingResource();
 				}
-			}
-			if (resource == null) {
-				resource= (IResource) ((IAdaptable) element).getAdapter(IResource.class);
-			}
-			if (resource != null) {
-				IType[] types= searchMainMethods(resource, monitor);
+				IType[] types= searchMainMethods(jelem, monitor);
 				for (int i= 0; i < types.length; i++) {
 					result.add(types[i]);
-				}
-			} else {
-				monitor.done();
+				}				
 			}
 		}
 	}
 	
-	private static IType[] searchMainMethods(IResource res, IProgressMonitor monitor) throws JavaModelException {
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IResource[] { res });
+	private static IType[] searchMainMethods(IJavaElement elem, IProgressMonitor monitor) throws JavaModelException {
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { elem });
 		MainMethodSearchEngine searchEngine= new MainMethodSearchEngine();
 		return searchEngine.searchMainMethods(monitor, scope, IJavaElementSearchConstants.CONSIDER_BINARIES);
 	}

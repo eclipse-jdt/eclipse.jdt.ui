@@ -12,7 +12,6 @@ import java.util.List;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
@@ -25,6 +24,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -340,7 +340,7 @@ public final class JavaUI {
 	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
 	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IProject project, int style, boolean multipleSelection) throws JavaModelException {
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IResource[] { project });
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[] { JavaCore.create(project) });
 		return createTypeDialog(parent, context, scope, style, multipleSelection);
 	}
 	

@@ -336,14 +336,14 @@ public class AddVMDialog extends StatusDialog {
 		String libJar= "";
 		String srcJar= "";
 		
-		File systemLibrary= location.getSystemLibrary();
-		if (systemLibrary.isFile()) {
-			libJar= systemLibrary.getPath();
+		IPath systemLibraryPath= location.getSystemLibraryPath();
+		if (systemLibraryPath.toFile().isFile()) {
+			libJar= systemLibraryPath.toOSString();
 		}
 
-		File librarySource= location.getSystemLibrarySource();
-		if (librarySource.isFile()) {
-			srcJar= librarySource.getPath();
+		IPath librarySourcePath= location.getSystemLibrarySourcePath();
+		if (librarySourcePath.toFile().isFile()) {
+			srcJar= librarySourcePath.toOSString();
 		}
 
 		fSystemLibrary.setText(libJar);
@@ -390,7 +390,7 @@ public class AddVMDialog extends StatusDialog {
 		StatusInfo status= new StatusInfo();
 		
 		String locationName= fSystemLibrarySource.getText();
-		if (locationName == null || "".equals(locationName)) { //$NON-NLS-1$
+		if (locationName.length() == 0) {
 			return status;
 		}
 			
@@ -398,7 +398,7 @@ public class AddVMDialog extends StatusDialog {
 		if (!f.isFile()) {
 			status.setError(LauncherMessages.getString("addVMDialog.missingJRESource"));
 		} else {
-			if (determinePackagePrefix(f) == null) {
+			if (determinePackagePrefix(new Path(locationName)) == null) {
 				status.setError(LauncherMessages.getString("addVMDialog.noObjectSource"));
 			}
 		}
@@ -408,13 +408,13 @@ public class AddVMDialog extends StatusDialog {
 	/**
 	 * try finding the package prefix
 	 */
-	private String determinePackagePrefix(File f) {
-		if (!f.isFile()) {
+	private IPath determinePackagePrefix(IPath sourceJar) {
+		if (sourceJar.isEmpty() || !sourceJar.toFile().isFile()) {
 			return null;
 		}
 		ZipFile zip= null;
 		try {
-			zip= new ZipFile(f);
+			zip= new ZipFile(sourceJar.toFile());
 			Enumeration zipEntries= zip.entries();
 			while (zipEntries.hasMoreElements()) {
 				ZipEntry entry= (ZipEntry) zipEntries.nextElement();
@@ -423,7 +423,7 @@ public class AddVMDialog extends StatusDialog {
 					String prefix= name.substring(0, name.length() - JAVA_LANG_OBJECT.length());
 					if (prefix.endsWith("/")) //$NON-NLS-1$
 						prefix= prefix.substring(0, prefix.length() - 1);
-					return prefix;
+					return new Path(prefix);
 				}
 			}
 		} catch (IOException e) {
@@ -507,8 +507,8 @@ public class AddVMDialog extends StatusDialog {
 		fSystemLibrary.setEnabled(true);
 		fSystemLibrarySource.setEnabled(true);
 		if (newValues != null) {
-			fSystemLibrary.setText(newValues.getSystemLibrary().getPath());
-			fSystemLibrarySource.setText(newValues.getSystemLibrarySource().getPath());
+			fSystemLibrary.setText(newValues.getSystemLibraryPath().toOSString());
+			fSystemLibrarySource.setText(newValues.getSystemLibrarySourcePath().toOSString());
 		}
 	}
 
@@ -542,13 +542,13 @@ public class AddVMDialog extends StatusDialog {
 		vm.setName(fVMName.getText());
 		vm.setDebuggerTimeout(getTimeout());
 		if (isCustomLibraryUsed()) {
-			File systemLibrary= getAbsoluteFileOrEmpty(fSystemLibrary.getText());
-			File source= getAbsoluteFileOrEmpty(fSystemLibrarySource.getText());
-			String pathString= determinePackagePrefix(source);
-			if (pathString == null)
-				pathString= ""; //$NON-NLS-1$
-			IPath packageRoot= new Path(pathString);
-			vm.setLibraryLocation(new LibraryLocation(systemLibrary, source, packageRoot));
+			IPath systemLibrary= new Path(fSystemLibrary.getText());
+			IPath source= new Path(fSystemLibrarySource.getText());
+			IPath sourceRoot= determinePackagePrefix(source);
+			if (sourceRoot == null) {
+				sourceRoot= Path.EMPTY;
+			}
+			vm.setLibraryLocation(new LibraryLocation(systemLibrary, source, sourceRoot));
 		} else {
 			vm.setLibraryLocation(null);
 		}
