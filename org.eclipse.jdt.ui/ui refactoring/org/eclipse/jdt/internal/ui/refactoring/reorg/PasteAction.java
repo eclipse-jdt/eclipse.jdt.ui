@@ -55,9 +55,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -581,41 +581,45 @@ public class PasteAction extends SelectionDispatchAction{
 					return null;
 				} else if (destinationNode.getNodeType() == ASTNode.COMPILATION_UNIT) {
 					ASTNode nodeToInsert= createNewNodeToInsertToCu(source, rewrite);
-					insertToCu(nodeToInsert, (CompilationUnit)destinationNode);
+					insertToCu(rewrite, nodeToInsert, (CompilationUnit)destinationNode);
 					return nodeToInsert;
 				} else if (destinationNode.getNodeType() == ASTNode.TYPE_DECLARATION){
 					ASTNode nodeToInsert= createNewNodeToInsertToType(source, rewrite);
-					insertToType(nodeToInsert, (TypeDeclaration)destinationNode);
+					insertToType(rewrite, nodeToInsert, (TypeDeclaration)destinationNode);
 					return nodeToInsert;
 				} else
 					return null;
 			}
 
-			private static void insertToType(ASTNode node, TypeDeclaration typeDeclaration) {
+			private static void insertToType(ASTRewrite rewrite, ASTNode node, AbstractTypeDeclaration typeDeclaration) {
 				switch(node.getNodeType()){
+					case ASTNode.ANNOTATION_TYPE_DECLARATION:
+					case ASTNode.ENUM_DECLARATION:
 					case ASTNode.TYPE_DECLARATION: 
 					case ASTNode.METHOD_DECLARATION: 
 					case ASTNode.FIELD_DECLARATION: 
 					case ASTNode.INITIALIZER: 
-						typeDeclaration.bodyDeclarations().add(ASTNodes.getInsertionIndex((BodyDeclaration)node, typeDeclaration.bodyDeclarations()), node);
+						rewrite.getListRewrite(typeDeclaration, typeDeclaration.getBodyDeclarationsProperty()).insertAt(node, ASTNodes.getInsertionIndex((BodyDeclaration)node, typeDeclaration.bodyDeclarations()), null);
 						break;
 					default:
 						Assert.isTrue(false, String.valueOf(node.getNodeType()));
 				}
 			}
 
-			private static void insertToCu(ASTNode node, CompilationUnit cuNode) {
+			private static void insertToCu(ASTRewrite rewrite, ASTNode node, CompilationUnit cuNode) {
 				switch(node.getNodeType()){
 					case ASTNode.TYPE_DECLARATION: 
-						cuNode.types().add(ASTNodes.getInsertionIndex((TypeDeclaration)node, cuNode.types()), node);
+					case ASTNode.ENUM_DECLARATION:
+					case ASTNode.ANNOTATION_TYPE_DECLARATION:
+						rewrite.getListRewrite(cuNode, CompilationUnit.TYPES_PROPERTY).insertAt(node, ASTNodes.getInsertionIndex((AbstractTypeDeclaration)node, cuNode.types()), null);
 						break;
 					case ASTNode.IMPORT_DECLARATION:
-						cuNode.imports().add(node);
+						rewrite.getListRewrite(cuNode, CompilationUnit.IMPORTS_PROPERTY).insertLast(node, null);
 						break;
 					case ASTNode.PACKAGE_DECLARATION:
 						// only insert if none exists
 						if (cuNode.getPackage() == null)
-							cuNode.setPackage((PackageDeclaration) node);
+							rewrite.set(cuNode, CompilationUnit.PACKAGE_PROPERTY, node, null);
 						break;
 					default:
 						Assert.isTrue(false, String.valueOf(node.getNodeType()));
