@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.C
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder2;
-import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder2;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
 public class InlineTempRefactoring extends Refactoring {
@@ -195,7 +195,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private Integer[] getOccurrenceOffsets() throws JavaModelException{
-		return TempOccurrenceFinder2.findTempOccurrenceOffsets(fCompilationUnitNode, fTempDeclaration, true, false);
+		return TempOccurrenceFinder.findTempOccurrenceOffsets(fCompilationUnitNode, fTempDeclaration, true, false);
 	}	
 	
 	private static boolean needsBracketsAroundReferences(Expression expression){
