@@ -66,9 +66,6 @@ public class JavaPluginImages {
 	public static final String IMG_ELCL_VIEW_MENU= NAME_PREFIX + T_ELCL + "view_menu.gif"; //$NON-NLS-1$
 	public static final String IMG_DLCL_VIEW_MENU= NAME_PREFIX + T_DLCL + "view_menu.gif"; //$NON-NLS-1$
 	
-	public static final String IMG_REMOVE= NAME_PREFIX + "remove_exc.gif"; 	//$NON-NLS-1$
-    public static final String IMG_UNDO= NAME_PREFIX + "undo_edit.gif"; //$NON-NLS-1$
-	
 	public static final String IMG_OBJS_GHOST= NAME_PREFIX + "ghost.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_SEARCH_TSK= NAME_PREFIX + "search_tsk.gif"; 		//$NON-NLS-1$
 	public static final String IMG_OBJS_PACKDECL= NAME_PREFIX + "packd_obj.gif"; 			//$NON-NLS-1$
@@ -151,9 +148,6 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_SEARCH_OCCURRENCE= NAME_PREFIX + "occ_match.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_OBJS_HELP= NAME_PREFIX + "help.gif"; //$NON-NLS-1$
-	
-	public static final String IMG_OBJS_ADD_TO_CP= NAME_PREFIX + "add_to_classpath.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_REMOVE_FROM_CP= NAME_PREFIX + "remove_from_classpath.gif"; //$NON-NLS-1$
 
 	/*
 	 * Set of predefined Image Descriptors.
@@ -171,7 +165,6 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_ELCL_VIEW_MENU= createManaged(T_ELCL, NAME_PREFIX + "view_menu.gif", IMG_ELCL_VIEW_MENU); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_DLCL_VIEW_MENU= createManaged(T_DLCL, NAME_PREFIX + "view_menu.gif", IMG_DLCL_VIEW_MENU); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_REMOVE= createManaged(T_ELCL, IMG_REMOVE); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_MISC_PUBLIC= createManaged(T_OBJ, IMG_MISC_PUBLIC);
 	public static final ImageDescriptor DESC_MISC_PROTECTED= createManaged(T_OBJ, IMG_MISC_PROTECTED);
@@ -185,7 +178,6 @@ public class JavaPluginImages {
 	
 	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= create(T_ETOOL, "shift_r_edit.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= create(T_ETOOL, "shift_l_edit.gif"); 	//$NON-NLS-1$
-    public static final ImageDescriptor DESC_UNDO= createManaged(T_ETOOL, IMG_UNDO); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_GHOST= createManaged(T_OBJ, IMG_OBJS_GHOST);
 	public static final ImageDescriptor DESC_OBJS_PACKDECL= createManaged(T_OBJ, IMG_OBJS_PACKDECL);
@@ -199,6 +191,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_CFILE= createManaged(T_OBJ, IMG_OBJS_CFILE); 
 	public static final ImageDescriptor DESC_OBJS_CFILECLASS= createManaged(T_OBJ, IMG_OBJS_CFILECLASS);
 	public static final ImageDescriptor DESC_OBJS_CLEAR= createManaged(T_ELCL, IMG_OBJS_CLEAR);
+    public static final ImageDescriptor DESC_DLCL_CLEAR= createManaged(T_DLCL, IMG_OBJS_CLEAR);
 	public static final ImageDescriptor DESC_OBJS_CFILEINT= createManaged(T_OBJ, IMG_OBJS_CFILEINT); 
 	public static final ImageDescriptor DESC_OBJS_PACKAGE= createManaged(T_OBJ, IMG_OBJS_PACKAGE);
 	public static final ImageDescriptor DESC_OBJS_EMPTY_LOGICAL_PACKAGE= createManaged(T_OBJ, IMG_OBJS_EMPTY_LOGICAL_PACKAGE);
@@ -260,11 +253,12 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_COMPOSITE_CHANGE= create(T_OBJ, "composite_change.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_CU_CHANGE= create(T_OBJ, "cu_change.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_FILE_CHANGE= create(T_OBJ, "file_change.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_OBJS_TEXT_EDIT= create(T_OBJ, "text_edit.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_TEXT_EDIT= createManaged(T_OBJ, NAME_PREFIX + "text_edit.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_DLCL_TEXT_EDIT= createManaged(T_DLCL, NAME_PREFIX + "text_edit.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_EXCLUSION_FILTER_ATTRIB= create(T_OBJ, "exclusion_filter_attrib.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_INCLUSION_FILTER_ATTRIB= create(T_OBJ, "inclusion_filter_attrib.gif"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_OBJS_OUTPUT_FOLDER_ATTRIB= create(T_OBJ, "output_folder_attrib.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_OBJS_OUTPUT_FOLDER_ATTRIB= createManaged(T_OBJ, NAME_PREFIX + "output_folder_attrib.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_SOURCE_ATTACH_ATTRIB= create(T_OBJ, "source_attach_attrib.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_JAVADOC_LOCATION_ATTRIB= create(T_OBJ, "javadoc_location_attrib.gif"); //$NON-NLS-1$
 
@@ -287,9 +281,19 @@ public class JavaPluginImages {
 	
 	public static final ImageDescriptor DESC_OBJS_HELP= createManaged(T_ELCL, IMG_OBJS_HELP);
 	
-	public static final ImageDescriptor DESC_ADD_TO_CP= createManaged(T_OBJ, IMG_OBJS_ADD_TO_CP);
-	public static final ImageDescriptor DESC_REMOVE_FROM_CP= createManaged(T_OBJ, IMG_OBJS_REMOVE_FROM_CP);
+    public static final ImageDescriptor DESC_ELCL_ADD_TO_BP= createManaged(T_ELCL, NAME_PREFIX + "add_to_buildpath.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_REMOVE_FROM_BP= createManaged(T_ELCL, NAME_PREFIX + "remove_from_buildpath.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_INCLUSION= createManaged(T_ELCL, NAME_PREFIX + "inclusion_filter_attrib.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_EXCLUSION= createManaged(T_ELCL, NAME_PREFIX + "exclusion_filter_attrib.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_INCLUSION_UNDO= createManaged(T_ELCL, NAME_PREFIX + "inclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_EXCLUSION_UNDO= createManaged(T_ELCL, NAME_PREFIX + "exclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
 
+    public static final ImageDescriptor DESC_DLCL_ADD_TO_BP= createManaged(T_DLCL, NAME_PREFIX + "add_to_buildpath.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_DLCL_REMOVE_FROM_BP= createManaged(T_DLCL, NAME_PREFIX + "remove_from_buildpath.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_DLCL_INCLUSION= createManaged(T_DLCL, NAME_PREFIX + "inclusion_filter_attrib.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_DLCL_EXCLUSION= createManaged(T_DLCL, NAME_PREFIX + "exclusion_filter_attrib.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_DLCL_INCLUSION_UNDO= createManaged(T_DLCL, NAME_PREFIX + "inclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_DLCL_EXCLUSION_UNDO= createManaged(T_DLCL, NAME_PREFIX + "exclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_OBJ_OVERRIDES= create(T_OBJ, "over_co.gif");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJ_IMPLEMENTS= create(T_OBJ, "implm_co.gif");  				//$NON-NLS-1$
@@ -348,7 +352,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_TOOL_NEWCLASS= create(T_ETOOL, "newclass_wiz.gif"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_NEWINTERFACE= create(T_ETOOL, "newint_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_NEWSNIPPET= create(T_ETOOL, "newsbook_wiz.gif"); 			//$NON-NLS-1$
-	public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= create(T_ETOOL, "newpackfolder_wiz.gif"); 		//$NON-NLS-1$
+    public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= createManaged(T_ETOOL, NAME_PREFIX + "newpackfolder_wiz.gif");         //$NON-NLS-1$
+    public static final ImageDescriptor DESC_DLCLL_NEWPACKROOT= createManaged(T_DLCL, NAME_PREFIX + "newpackfolder_wiz.gif");        //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= create(T_OBJ, "cp_order_obj.gif"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_COLLAPSEALL= create(T_ELCL, "collapseall.gif"); //$NON-NLS-1$

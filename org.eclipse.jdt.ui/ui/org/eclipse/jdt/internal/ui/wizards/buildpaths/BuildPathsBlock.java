@@ -14,13 +14,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +23,14 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -59,10 +60,12 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+
 import org.eclipse.ui.views.navigator.ResourceSorter;
+
+import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelStatus;
@@ -79,7 +82,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
@@ -88,6 +90,7 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.NewSourceContainerWorkbookPage;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -141,7 +144,7 @@ public class BuildPathsBlock {
     
     private IRunnableContext fRunnableContext= null;
 		
-	public BuildPathsBlock(IStatusChangeListener context, int pageToShow) {
+	public BuildPathsBlock(IRunnableContext runnableContext, IStatusChangeListener context, int pageToShow) {
 		fWorkspaceRoot= JavaPlugin.getWorkspace().getRoot();
 		fContext= context;
 		
@@ -152,7 +155,7 @@ public class BuildPathsBlock {
 		fLibrariesPage= null;
 		fProjectsPage= null;
 		fCurrPage= null;
-        fRunnableContext= new BusyIndicatorRunnableContext();
+        fRunnableContext= runnableContext;
 				
 		BuildPathAdapter adapter= new BuildPathAdapter();			
 	
@@ -184,11 +187,6 @@ public class BuildPathsBlock {
 		
 		fCurrJProject= null;
 	}
-    
-    public BuildPathsBlock(IRunnableContext runnableContext, IStatusChangeListener context, int pageToShow) {
-        this(context, pageToShow);
-        fRunnableContext= runnableContext;
-    }
 	
 	// -------- UI creation ---------
 	
@@ -345,15 +343,17 @@ public class BuildPathsBlock {
 		fClassPathList.setElements(newClassPath);
 		fClassPathList.setCheckedElements(exportedEntries);
 		
-		if (Display.getCurrent() != null) {
-			updateUI();
-		} else {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					updateUI();
-				}
-			});
-		}
+        if (!newPageEnabled()) {
+    		if (Display.getCurrent() != null) {
+    			updateUI();
+    		} else {
+    			Display.getDefault().asyncExec(new Runnable() {
+    				public void run() {
+    					updateUI();
+    				}
+    			});
+    		}
+        }
 		initializeTimeStamps();
 	}
 	
@@ -447,8 +447,6 @@ public class BuildPathsBlock {
 		}
 		return entries;
 	}
-    
-    // TODO add method to undo changes --> forward call to NewSourceContainerWorkbookPage
 	
 	public int getPageIndex() {
 		return fPageIndex;
@@ -682,6 +680,11 @@ public class BuildPathsBlock {
 		}
 	}
     
+    /**
+     * Undo all changes (e.g. creation of folders).
+     *
+     *@see NewSourceContainerWorkbookPage#undoAll()
+     */
     public void undoAll() {
         if (newPageEnabled() && fNewSourceContainerPage != null) {
             fNewSourceContainerPage.undoAll();
@@ -755,6 +758,17 @@ public class BuildPathsBlock {
 		monitor.worked(1);
 				
 		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));
+        if (newPageEnabled() && !fBuildPathDialogField.getLabelControl(null).isDisposed()) {
+            if (Display.getCurrent() != null) {
+                updateUI();
+            } else {
+                Display.getDefault().asyncExec(new Runnable() {
+                    public void run() {
+                        updateUI();
+                    }
+                });
+            }
+        }
 		initializeTimeStamps();
 	}
 	
@@ -794,7 +808,7 @@ public class BuildPathsBlock {
 						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
 						String title= NewWizardMessages.getString("BuildPathsBlock.RemoveBinariesDialog.title"); //$NON-NLS-1$
 						String message= NewWizardMessages.getFormattedString("BuildPathsBlock.RemoveBinariesDialog.description", oldOutputLocation.toString()); //$NON-NLS-1$
-						MessageDialog dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+						MessageDialog dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
 						res[0]= dialog.open();
 					}
 				});

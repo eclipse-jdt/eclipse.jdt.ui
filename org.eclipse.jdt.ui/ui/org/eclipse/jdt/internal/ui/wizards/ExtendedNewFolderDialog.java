@@ -1,14 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v10.html
- * 
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.io.File;
@@ -20,6 +9,15 @@ import java.text.MessageFormat;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -28,19 +26,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -48,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -58,10 +46,12 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.NewSourceContainerWorkbookPage;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.HintTextGroup;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
@@ -71,7 +61,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class ExtendedNewFolderDialog extends SelectionStatusDialog {
-    private final class FolderNameField {
+    private final class FolderNameField extends Observable implements IDialogFieldListener {
         private StringDialogField fNameDialogField;
         
         public FolderNameField(Composite parent) {
@@ -86,10 +76,11 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
             
             fNameDialogField= new StringDialogField();
-    		fNameDialogField.setLabelText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.nameLabel")); //$NON-NLS-1$
+    		fNameDialogField.setLabelText(NewWizardMessages.getString("NewFolderDialog.folderNameGroup.label")); //$NON-NLS-1$
     		fNameDialogField.doFillIntoGrid(folderGroup, layout.numColumns);
     		LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
     		folderGroup.setLayoutData(gridData);
+            fNameDialogField.setDialogFieldListener(this);
         }
         
         public StringDialogField getNameDialogField() {
@@ -100,14 +91,18 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             return fNameDialogField.getText();
         }
         
-        public void setDialogFieldListener(IDialogFieldListener listener){
-            fNameDialogField.setDialogFieldListener(listener);
+        protected void fireEvent() {
+            setChanged();
+            notifyObservers();
+        }
+
+        public void dialogFieldChanged(DialogField field) {
+            fireEvent();
         }
     }
     
     private final class FolderTypeGroup {
         protected Button fSourceFolderRadio;
-        protected Button fNormalFolderRadio;
 //        protected Button fPackageFolderRadio;
     	
         public FolderTypeGroup(Composite parent) {
@@ -120,22 +115,11 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             layout.numColumns = 1;
     		group.setLayout(layout);
     		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    		group.setText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.TypeGroup.title")); //$NON-NLS-1$
+    		group.setText(NewWizardMessages.getString("NewFolderDialog.TypeGroup.title")); //$NON-NLS-1$
             
 //    		if (fType != NewSourceContainerWorkbookPage.HintTextGroup.FOLDER) {
-	            fSourceFolderRadio= new Button(group, SWT.RADIO);
-	            fSourceFolderRadio.addSelectionListener(new SelectionListener() {
-	                
-	                public void widgetSelected(SelectionEvent event) {
-	                    // TODO fill in the event reaction
-	                }
-	                
-	                public void widgetDefaultSelected(SelectionEvent event) {
-	                    //TODO fill in the event reaction
-	                }
-	            });
-	            
-	    		fSourceFolderRadio.setText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.folderTypeGroup.source.desc")); //$NON-NLS-1$
+	            fSourceFolderRadio= new Button(group, SWT.RADIO);	            
+	    		fSourceFolderRadio.setText(NewWizardMessages.getString("NewFolderDialog.folderTypeGroup.source.desc")); //$NON-NLS-1$
 	    		fSourceFolderRadio.setSelection(true);
 //    		}
     		
@@ -152,41 +136,33 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
 	                }
 	            });
 	            
-    		    fPackageFolderRadio.setText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.folderTypeGroup.pack.desc")); //$NON-NLS-1$
+    		    fPackageFolderRadio.setText(NewWizardMessages.getString("NewFolderDialog.folderTypeGroup.pack.desc")); //$NON-NLS-1$
     		}*/
     		
-    		fNormalFolderRadio= new Button(group, SWT.RADIO);
-    		fNormalFolderRadio.setText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.folderTypeGroup.normal.desc")); //$NON-NLS-1$
-    		fNormalFolderRadio.addSelectionListener(new SelectionListener() {                
-                public void widgetSelected(SelectionEvent event) {
-//                  TODO fill in the event reaction
-                }
-                
-                public void widgetDefaultSelected(SelectionEvent event) {
-                    //TODO fill in the event reaction
-                }
-            });
-    		fNormalFolderRadio.setSelection(fSourceFolderRadio == null);
+            Button normalFolderRadio= new Button(group, SWT.RADIO);
+    		normalFolderRadio.setText(NewWizardMessages.getString("NewFolderDialog.folderTypeGroup.normal.desc")); //$NON-NLS-1$
+    		normalFolderRadio.setSelection(fSourceFolderRadio == null);
         }
         
         public boolean isSourceFolderType() {
             return fSourceFolderRadio != null && fSourceFolderRadio.getSelection();
         }
         
+        //public void setSelectionListener(SelectionListener listener){
+         //   fSourceFolderRadio.addSelectionListener(listener);
+          //  fNormalFolderRadio.addSelectionListener(listener);
+        //}
+        
         /*public boolean isPackageFolderType() {
             return fPackageFolderRadio != null && fPackageFolderRadio.getSelection();
         }*/
     }
     
-    private final class DependenciesGroup implements Observer, IStringButtonAdapter, IDialogFieldListener{
-        protected SelectionButtonDialogField fNoneButton;
+    private final class DependenciesGroup extends Observable implements IStringButtonAdapter, IDialogFieldListener{
         protected SelectionButtonDialogField fCopyFromButton;
         protected SelectionButtonDialogField fLinkToButton;
-        protected SelectionButtonDialogField fVariables;
         protected StringButtonDialogField fCopyLocation;
         protected StringButtonDialogField fLinkLocation;
-        
-        private String fPreviousExternalLocation;
         
         private static final String DIALOGSTORE_LAST_EXTERNAL_LOC= JavaUI.ID_PLUGIN + ".last.external.project"; //$NON-NLS-1$
         
@@ -204,60 +180,52 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
     		GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
     		gridData.minimumWidth= 430;
     		group.setLayoutData(gridData);
-    		group.setText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.DependencyGroup.title")); //$NON-NLS-1$
+    		group.setText(NewWizardMessages.getString("NewFolderDialog.DependencyGroup.title")); //$NON-NLS-1$
     		
-    		fNoneButton= new SelectionButtonDialogField(SWT.RADIO);
-            fNoneButton.setDialogFieldListener(this);
+            SelectionButtonDialogField noneButton= new SelectionButtonDialogField(SWT.RADIO);
+            noneButton.setDialogFieldListener(this);
             
-            fNoneButton.setLabelText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.none.desc")); //$NON-NLS-1$
-            fNoneButton.setSelection(true);
+            noneButton.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.none.desc")); //$NON-NLS-1$
+            noneButton.setSelection(true);
     		
             fCopyFromButton= new SelectionButtonDialogField(SWT.RADIO);
-            fCopyFromButton.setLabelText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.copy.desc")); //$NON-NLS-1$
+            fCopyFromButton.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.copy.desc")); //$NON-NLS-1$
             
             fCopyLocation= new StringButtonDialogField(this);
-			fCopyLocation.setDialogFieldListener(this);
-			fCopyLocation.setLabelText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
-			fCopyLocation.setButtonLabel(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.browseButton.desc")); //$NON-NLS-1$
+			fCopyLocation.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
+			fCopyLocation.setButtonLabel(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.browseButton.desc")); //$NON-NLS-1$
 			fCopyFromButton.attachDialogField(fCopyLocation);
+            fCopyFromButton.setDialogFieldListener(this);
+            fCopyLocation.setDialogFieldListener(this);
     		
             fLinkToButton= new SelectionButtonDialogField(SWT.RADIO);
-            fLinkToButton.setLabelText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.link.desc")); //$NON-NLS-1$
+            fLinkToButton.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.link.desc")); //$NON-NLS-1$
+            
             
             fLinkLocation= new StringButtonDialogField(this);
+            fLinkLocation.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
+            fLinkLocation.setButtonLabel(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.browseButton.desc")); //$NON-NLS-1$
             fLinkLocation.setDialogFieldListener(this);
-            fLinkLocation.setLabelText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
-            fLinkLocation.setButtonLabel(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.browseButton.desc")); //$NON-NLS-1$
             
-            fVariables= new SelectionButtonDialogField(SWT.PUSH);
-            fVariables.setLabelText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.variables.desc")); //$NON-NLS-1$
-            fLinkToButton.attachDialogFields(new DialogField[] {fLinkLocation, fVariables});
+            SelectionButtonDialogField variables= new SelectionButtonDialogField(SWT.PUSH);
+            variables.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.variables.desc")); //$NON-NLS-1$
+            fLinkToButton.attachDialogFields(new DialogField[] {fLinkLocation, variables});
+            fLinkToButton.setDialogFieldListener(this);
 			
-            fNoneButton.doFillIntoGrid(group, numColumns);
-            createCopyControls(group, numColumns);
+            noneButton.doFillIntoGrid(group, numColumns);
+            fCopyFromButton.doFillIntoGrid(group, numColumns);
 			fCopyLocation.doFillIntoGrid(group, numColumns - 1);
-			if (fType == NewSourceContainerWorkbookPage.HintTextGroup.JAVA_PROJECT) {
+			if (fType != DialogPackageExplorerActionGroup.JAVA_PROJECT) {
+			    fLinkToButton.setLabelText(NewWizardMessages.getString("NewFolderDialog.dependenciesGroup.link.descDisabled")); //$NON-NLS-1$
+                fLinkToButton.setEnabled(false);
+            }
 			    fLinkToButton.doFillIntoGrid(group, numColumns);
 			    fLinkLocation.doFillIntoGrid(group, numColumns - 1);
 			    LayoutUtil.setHorizontalGrabbing(fLinkLocation.getTextControl(null));
-			}			
+//			}			
 			
-			fVariables.doFillIntoGrid(group, 1);
+			variables.doFillIntoGrid(group, 1);
 			LayoutUtil.setHorizontalGrabbing(fCopyLocation.getTextControl(null));
-			
-			fPreviousExternalLocation= ""; //$NON-NLS-1$
-        }
-        
-        private void createCopyControls(Composite parent, int numColumns) {
-            fCopyFromButton= new SelectionButtonDialogField(SWT.RADIO);
-            fCopyFromButton.setLabelText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.copy.desc")); //$NON-NLS-1$
-            
-            fCopyLocation= new StringButtonDialogField(this);
-			fCopyLocation.setDialogFieldListener(this);
-			fCopyLocation.setLabelText(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
-			fCopyLocation.setButtonLabel(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.dependenciesGroup.browseButton.desc")); //$NON-NLS-1$
-			fCopyFromButton.attachDialogField(fCopyLocation);
-			fCopyFromButton.doFillIntoGrid(parent, numColumns);
         }
         
         public String getLinkTarget() {
@@ -274,14 +242,6 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         
         public boolean copyTargetSelected() {
             return fCopyFromButton.isSelected();
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-         */
-        public void update(Observable o, Object arg) {
-            // TODO Auto-generated method stub
-            
         }
 
         /* (non-Javadoc)
@@ -311,125 +271,39 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
 			}
 		}
         
-        /* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-		 */
-		public void dialogFieldChanged(DialogField field) {
-			if (field == fLinkToButton) {
-				final boolean checked= fLinkToButton.isSelected();
-				if (checked) {
-					fPreviousExternalLocation= getLinkTarget();
-					fLinkLocation.setText(getDefaultPath(fFolderNameField.getText()));
-				} else {
-				    fLinkLocation.setText(fPreviousExternalLocation);
-				}
-			}
-			setDetect();
-//			fireEvent();
-		}
-		
-		public void setDialogFieldListener(IDialogFieldListener listener){
-            fCopyLocation.setDialogFieldListener(listener);
-            fLinkLocation.setDialogFieldListener(listener);
+        public void dialogFieldChanged(DialogField field) {
+            fireEvent();
         }
 		
-		protected String getDefaultPath(String name) {
-			final IPath path= Platform.getLocation().append(name);
-			return path.toOSString();
-		}
-		
-		private void setDetect() {
-		    /*if (isInWorkspace()) {
-				String name= getProjectName();
-				if (name.length() == 0 || JavaPlugin.getWorkspace().getRoot().findMember(name) != null) {
-					fDetect= false;
-				} else {
-					final File directory= fLocationGroup.getLocation().append(getProjectName()).toFile();
-					fDetect= directory.isDirectory() && directory.exists();
-				}
-			} else {
-				final File directory= fLocationGroup.getLocation().toFile();
-				fDetect= directory.isDirectory();
-			}*/
-		}
- 
+        protected void fireEvent() {
+            setChanged();
+            notifyObservers();
+        }
     }
     
     /**
 	 * Validate this page and show appropriate warnings and error NewWizardMessages.
 	 */
-	private final class Validator implements Observer, IDialogFieldListener {
+	private final class Validator implements Observer {
 
 		public void update(Observable o, Object arg) {
 
-/*			final IWorkspace workspace= JavaPlugin.getWorkspace();
-
 			final String name= fFolderNameField.getText();
-
-			// check wether the project name field is empty
-			if (name.length() == 0) { //$NON-NLS-1$
-				setErrorMessage(null);
-				setMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.enterProjectName")); //$NON-NLS-1$
-				setPageComplete(false);
-				return;
-			}
-
-			// check whether the project name is valid
-			final IStatus nameStatus= workspace.validateName(name, IResource.PROJECT);
-			if (!nameStatus.isOK()) {
-				setErrorMessage(nameStatus.getMessage());
-				setPageComplete(false);
-				return;
-			}
-
-			// check whether project already exists
-			final IProject handle= getProjectHandle();
-			if (handle.exists()) {
-				setErrorMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.projectAlreadyExists")); //$NON-NLS-1$
-				setPageComplete(false);
-				return;
-			}
-
-			final String location= fDependenciesGroup.getLinkTarget();
-
-			// check whether location is empty
-			if (location.length() == 0) {
-				setErrorMessage(null);
-				setMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.enterLocation")); //$NON-NLS-1$
-				setPageComplete(false);
-				return;
-			}
-
-			// check whether the location is a syntactically correct path
-			if (!Path.EMPTY.isValidPath(location)) { //$NON-NLS-1$
-				setErrorMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.invalidDirectory")); //$NON-NLS-1$
-				setPageComplete(false);
-				return;
-			}
-
-			// check whether the location has the workspace as prefix
-			IPath projectPath= new Path(location);
-			if (!fLocationGroup.isInWorkspace() && Platform.getLocation().isPrefixOf(projectPath)) {
-				setErrorMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.cannotCreateInWorkspace")); //$NON-NLS-1$
-				setPageComplete(false);
-				return;
-			}
-
-			// If we do not place the contents in the workspace validate the
-			// location.
-			if (!fLocationGroup.isInWorkspace()) {
-				final IStatus locationStatus= workspace.validateProjectLocation(handle, projectPath);
-				if (!locationStatus.isOK()) {
-					setErrorMessage(locationStatus.getMessage());
-					setPageComplete(false);
-					return;
-				}
-			}
 			
-			setPageComplete(true);
-
-			setErrorMessage(null);
-			setMessage(null);*/
+            if (!validateFolderName(name))
+                return;
+            
+            if (fDependenciesGroup.linkTargetSelected()) {
+                validateLinkedResource(fDependenciesGroup.getLinkTarget());
+                return;
+            }
+            
+            if (fDependenciesGroup.copyTargetSelected()) {
+                validateLocation(fDependenciesGroup.getCopyTarget());
+                return;
+            }
+			
+			updateStatus(IStatus.OK, ""); //$NON-NLS-1$
 		}
 		
 		/**
@@ -438,12 +312,12 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
          * @return IStatus indicating the validation result. IStatus.OK if the 
          * 	specified link target is valid given the linkHandle.
          */
-        public IStatus validateLinkLocation(IResource linkHandle) {
+        private IStatus validateLinkLocation(IResource linkHandle) {
             IWorkspace workspace = JavaPlugin.getWorkspace();
             IPath path = new Path(fDependenciesGroup.getLinkTarget());
 
             IStatus locationStatus = workspace.validateLinkLocation(linkHandle, path);
-            if (locationStatus.getMessage().equals(NewWizardMessages.getFormattedString("JavaProjectWizardFoldersPage.newFolderDialog.links.parentNotProject", linkHandle.getName())) && //$NON-NLS-1$
+            if (locationStatus.getMessage().equals(NewWizardMessages.getFormattedString("NewFolderDialog.links.parentNotProject", linkHandle.getName())) && //$NON-NLS-1$
                     container.getType() == IResource.PROJECT)
                 locationStatus= Status.OK_STATUS;
             else if (locationStatus.getSeverity() == IStatus.ERROR)
@@ -462,7 +336,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
                 return createStatus(
                         IStatus.WARNING,
                         NewWizardMessages
-                                .getString("JavaProjectWizardFoldersPage.newFolderDialog.linkTargetNonExistent")); //$NON-NLS-1$	
+                                .getString("NewFolderDialog.linkTargetNonExistent")); //$NON-NLS-1$	
             }
             return locationStatus;
         }
@@ -478,7 +352,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         private IStatus validateFileType(File linkTargetFile) {
             if (linkTargetFile.isDirectory() == false)
                 return createStatus(IStatus.ERROR, NewWizardMessages
-                        .getString("JavaProjectWizardFoldersPage.newFolderDialog.linkTargetNotFolder")); //$NON-NLS-1$
+                        .getString("NewFolderDialog.linkTargetNotFolder")); //$NON-NLS-1$
             return createStatus(IStatus.OK, ""); //$NON-NLS-1$
         }
         
@@ -531,7 +405,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             IPath path = new Path(text);
             if (!path.toFile().exists()) {
                 updateStatus(IStatus.ERROR, NewWizardMessages.getFormattedString(
-                        "JavaProjectWizardFoldersPage.newFolderDialog.notExists", new Object[] { text })); //$NON-NLS-1$
+                        "NewFolderDialog.notExists", new Object[] { text })); //$NON-NLS-1$
                 return false;
             }
             updateStatus(IStatus.OK, "");  //$NON-NLS-1$
@@ -541,81 +415,60 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         /**
          * Checks if the folder name is valid.
          *
-         * @return null if the new folder name is valid.
-         * 	a message that indicates the problem otherwise.
+         * @return <code>true</code> if validation was
+         * correct, <code>false</code> otherwise
          */
         private boolean validateFolderName(String name) {
             IWorkspace workspace = container.getWorkspace();
             IStatus nameStatus = workspace.validateName(name, IResource.FOLDER);
 
-            if ("".equals(name)) { //$NON-NLS-1$
+            if (name.length() == 0) { //$NON-NLS-1$
                 updateStatus(IStatus.ERROR, NewWizardMessages
-                        .getString("JavaProjectWizardFoldersPage.newFolderDialog.folderNameEmpty")); //$NON-NLS-1$
+                        .getString("NewFolderDialog.folderNameEmpty")); //$NON-NLS-1$
                 return false;
             }
+            
             if (nameStatus.isOK() == false) {
                 updateStatus(nameStatus);
                 return false;
             }
+            
             IPath path = new Path(name);
             if (container.getFolder(path).exists()
                     || container.getFile(path).exists()) {
                 updateStatus(IStatus.ERROR, NewWizardMessages.getFormattedString(
-                        "JavaProjectWizardFoldersPage.newFolderDialog.folderNameEmpty.alreadyExists", new Object[] { name })); //$NON-NLS-1$
+                        "NewFolderDialog.folderNameEmpty.alreadyExists", new Object[] { name })); //$NON-NLS-1$
                 return false;
             }
             updateStatus(IStatus.OK, ""); //$NON-NLS-1$
             return true;
         }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-         */
-        public void dialogFieldChanged(DialogField field) {
-            boolean valid= validateFolderName(fFolderNameField.getText());
-                if (!valid)
-                    return;
-            if (fDependenciesGroup.fLinkLocation == field || fDependenciesGroup.linkTargetSelected()) {
-                // verify that the folder is valid
-                validateLinkedResource(fDependenciesGroup.getLinkTarget());
-                return;
-            }
-            if (fDependenciesGroup.fCopyLocation == field || fDependenciesGroup.copyTargetSelected()) {
-                validateLocation(fDependenciesGroup.getCopyTarget());
-                return;
-            }
-        }
 	}
 	
 	private final class CopyFolder {
-	    private File source, dest;
-	    private IWorkspaceRoot workspaceRoot;
-	    private String folderName;
 
-	    public void copy(String sourceDir, String destDir, IWorkspaceRoot root, String name) throws IOException, StringIndexOutOfBoundsException {
-	        this.folderName= name;
-	        workspaceRoot= root;
-	        source = new File(sourceDir);
-	        dest = new File(destDir);
+	    public void copy(String sourceDir, String destDir, IWorkspaceRoot workspaceRoot, String name) throws IOException, StringIndexOutOfBoundsException {
+	        File source = new File(sourceDir);
+	        File dest = new File(destDir);
 	        if (!(source.isDirectory() && source.exists()))
 	          throw new IOException();
 	        if( !dest.exists() )
 	          dest.mkdir();
-	        copy(source.getPath());
-	        }
+	        copy(source.getPath(), name, source, workspaceRoot);
+        }
 
-	    private void copy(String from) {
+	    private void copy(String from, String folderName, File source, IWorkspaceRoot workspaceRoot) {
 	        File dir[] = new File(from).listFiles();
 	        for (int i = 0; i < dir.length; i++) {
 	            if (dir[i].isDirectory()) {
-	               createFolder(new Path(dir[i].getPath().substring(source.getPath().length())).makeRelative().toString());
-	               copy(dir[i].getPath());
+	               createFolder(new Path(dir[i].getPath().substring(source.getPath().length())).makeRelative().toString(), folderName, workspaceRoot);
+	               copy(dir[i].getPath(), folderName, source, workspaceRoot);
 	            }
 	            else {              
 	                File fileFrom = new File(dir[i].getPath());
 	                try {
 	                   FileInputStream in = new FileInputStream(fileFrom);
-	                   createFile(new Path(dir[i].getPath().substring(source.getPath().length())).makeRelative().toString(), in);
+	                   createFile(new Path(dir[i].getPath().substring(source.getPath().length())).makeRelative().toString(), in, folderName, workspaceRoot);
 	                }
 	                catch(FileNotFoundException e) {
 	                      e.printStackTrace();
@@ -624,7 +477,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
 	        }
 	    }
 	    
-	    private void createFolder(String name) {
+	    private void createFolder(String name, String folderName, IWorkspaceRoot workspaceRoot) {
 	        IPath path= container.getFullPath().append(folderName+name);
 	        IFolder folderHandle = workspaceRoot.getFolder(path);
 	        try {
@@ -634,7 +487,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
 	        }
 	    }
 	    
-	    private void createFile(String name, FileInputStream stream) {
+	    private void createFile(String name, FileInputStream stream, String folderName, IWorkspaceRoot workspaceRoot) {
 	        IPath path= container.getFullPath().append(folderName+name);
 	        IFile fileHandle= workspaceRoot.getFile(path);
 	        try { 
@@ -648,9 +501,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
     private FolderNameField fFolderNameField;
     protected FolderTypeGroup fFolderTypeGroup;
     protected DependenciesGroup fDependenciesGroup;
-    private Validator fValidator;
     private int fType;
-
     private IContainer container;
 
     /**
@@ -658,16 +509,16 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
      * 
      * @param parentShell parent of the new dialog
      * @param container parent of the new folder
-     * @param type specifies the type of the caller. Must be one of the constants of
-     * NewSourceContainerWorkbookPage.HintTextGroup
+     * @param type specifies the type of the parent folder. Must be one of the constants of
+     * <code>NewSourceContainerWorkbookPage.HintTextGroup</code>
      * 
-     * @see NewSourceContainerWorkbookPage.HintTextGroup
+     * @see HintTextGroup
      */
     public ExtendedNewFolderDialog(Shell parentShell, IContainer container, int type) {
         super(parentShell);
         this.container = container;
         this.fType= type;
-        setTitle(NewWizardMessages.getString("JavaProjectWizardFoldersPage.newFolderDialog.title")); //$NON-NLS-1$
+        setTitle(NewWizardMessages.getString("NewFolderDialog.title")); //$NON-NLS-1$
         setShellStyle(getShellStyle() | SWT.RESIZE);
         setStatusLineAboveButtons(true);      
     }
@@ -706,14 +557,18 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         Composite composite = (Composite) super.createDialogArea(parent);
         composite.setLayout(new GridLayout());
         composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-
+        
+        Label label= new Label(composite, SWT.NONE);
+        label.setText(NewWizardMessages.getFormattedString("NewFolderDialog.createIn", container.getFullPath().toString())); //$NON-NLS-1$
+        
         fFolderNameField= new FolderNameField(composite);
+        
         fFolderTypeGroup= new FolderTypeGroup(composite); //$NON-NLS-1$
         fDependenciesGroup= new DependenciesGroup(composite);
         
-		fValidator= new Validator();
-		fFolderNameField.setDialogFieldListener(fValidator);
-		fDependenciesGroup.setDialogFieldListener(fValidator);
+		Validator validator= new Validator();
+        fDependenciesGroup.addObserver(validator);
+        fFolderNameField.addObserver(validator);
 
         return composite;
     }
@@ -744,6 +599,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
      */
     private IFolder createNewFolder(final String folderName, final String linkTargetName) {
         final IFolder folderHandle = createFolderHandle(folderName);
+//        final boolean isSourceFolder= fFolderTypeGroup.isSourceFolderType();
 //        final boolean isPackageFolder= fFolderTypeGroup.isPackageFolderType();
         final boolean copyFromFolder= fDependenciesGroup.copyTargetSelected();
         final boolean linkToFolder= fDependenciesGroup.linkTargetSelected();
@@ -753,7 +609,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             public void execute(IProgressMonitor monitor) throws CoreException {
                 try {
                     monitor.beginTask(NewWizardMessages
-                            .getString("JavaProjectWizardFoldersPage.newFolderDialog.progress"), 2000); //$NON-NLS-1$
+                            .getString("NewFolderDialog.progress"), 2000); //$NON-NLS-1$
                     if (monitor.isCanceled())
                         throw new OperationCanceledException();
                     
@@ -793,7 +649,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         } catch (InvocationTargetException exception) {
             if (exception.getTargetException() instanceof CoreException) {
                 ErrorDialog.openError(getShell(), NewWizardMessages
-                        .getString("JavaProjectWizardFoldersPage.newFolderDialog.errorTitle"), //$NON-NLS-1$
+                        .getString("NewFolderDialog.errorTitle"), //$NON-NLS-1$
                         null, // no special message
                         ((CoreException) exception.getTargetException())
                                 .getStatus());
@@ -806,28 +662,12 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
                 MessageDialog.openError(getShell(), NewWizardMessages
                         .getString("NewFolderDialog.errorTitle"), //$NON-NLS-1$
                         NewWizardMessages.getFormattedString(
-                                "JavaProjectWizardFoldersPage.newFolderDialog.internalError", //$NON-NLS-1$
+                                "NewFolderDialog.internalError", //$NON-NLS-1$
                                 new Object[] { exception.getTargetException()
                                         .getMessage() }));
             }
             return null;
         }
-        
-        
-        /*IPath path= folderHandle.getFullPath();
-        try {
-            if (isSourceFolder) {            
-                fModifier.addToClasspath(folderHandle, fProject, fModifier.getDefaultFolderQuery(null), null);
-            }
-            else {
-                fModifier.exclude(path, fProject, null);
-            }
-        } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("NewSourceContainerWorkbookPage.PackageExplorer.PackageContentProvider.Error.Title"), e.getMessage()); //$NON-NLS-1$
-        }*/
-        /*else if (!isPackageFolder && (fType == FRAGMENT_ROOT || fType == FRAGMENT)) {
-            fModifier.exclude(folderHandle.getFullPath(), fProject);
-        }*/
         
         return folderHandle;
     }

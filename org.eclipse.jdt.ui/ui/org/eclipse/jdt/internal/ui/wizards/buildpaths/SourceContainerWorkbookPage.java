@@ -345,7 +345,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		String key= elem.getKey();
 		if (key.equals(CPListElement.OUTPUT)) {
 			CPListElement selElement=  elem.getParent();
-			OutputLocationDialog dialog= new OutputLocationDialog(getShell(), selElement);
+			OutputLocationDialog dialog= new OutputLocationDialog(getShell(), selElement, fClassPathList.getElements());
 			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.OUTPUT, dialog.getOutputLocation());
 				fFoldersList.refresh();

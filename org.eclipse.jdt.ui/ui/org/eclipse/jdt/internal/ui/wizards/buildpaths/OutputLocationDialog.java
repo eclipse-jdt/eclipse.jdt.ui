@@ -11,6 +11,12 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -18,8 +24,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -39,9 +43,11 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -63,8 +69,9 @@ public class OutputLocationDialog extends StatusDialog {
 	
 	private IProject fCurrProject;
 	private IPath fOutputLocation;
+    private List fClassPathList;
 		
-	public OutputLocationDialog(Shell parent, CPListElement entryToEdit) {
+	public OutputLocationDialog(Shell parent, CPListElement entryToEdit, List classPathList) {
 		super(parent);
 		setTitle(NewWizardMessages.getString("OutputLocationDialog.title")); //$NON-NLS-1$
 		fContainerFieldStatus= new StatusInfo();
@@ -87,6 +94,7 @@ public class OutputLocationDialog extends StatusDialog {
 		fUseSpecific.attachDialogField(fContainerDialogField);
 		
 		fCurrProject= entryToEdit.getJavaProject().getProject();
+        fClassPathList= classPathList;
 		
 		IPath outputLocation= (IPath) entryToEdit.getAttribute(CPListElement.OUTPUT);
 		if (outputLocation == null) {
@@ -191,9 +199,34 @@ public class OutputLocationDialog extends StatusDialog {
 				fContainerFieldStatus.setError(NewWizardMessages.getString("OutputLocationDialog.error.existingisfile")); //$NON-NLS-1$
 				return;
 			}
+            
+            if (!checkIfFolderValid(path)) {
+                fContainerFieldStatus.setError(NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidFolder", path)); //$NON-NLS-1$
+                return;
+            }            
 		}
 		fOutputLocation= path;
 	}
+    
+    /**
+     * Iterate over the list of class path entries and check 
+     * wheter the new path points to a location where a 
+     * source folder has already been established.
+     * 
+     * @param path the new path
+     * @return <code>false</code> if the path belongs to 
+     * a folder which is already taken as source folder, 
+     * <code>true</code> otherwise
+     */
+    private boolean checkIfFolderValid(IPath path) {
+        Iterator iterator= fClassPathList.iterator();
+        while (iterator.hasNext()) {
+            CPListElement element= (CPListElement)iterator.next();
+            if (element.getPath().equals(path))
+                return false;
+        }
+        return true;
+    }
 	
 		
 	public IPath getOutputLocation() {
@@ -212,8 +245,7 @@ public class OutputLocationDialog extends StatusDialog {
 
 	private IContainer chooseOutputLocation() {
 		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
-		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
-		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
+		final Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		IProject[] allProjects= root.getProjects();
 		ArrayList rejectedElements= new ArrayList(allProjects.length);
 		for (int i= 0; i < allProjects.length; i++) {
@@ -233,7 +265,24 @@ public class OutputLocationDialog extends StatusDialog {
 
 		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
 		dialog.setTitle(NewWizardMessages.getString("OutputLocationDialog.ChooseOutputFolder.title")); //$NON-NLS-1$
-		dialog.setValidator(validator);
+        
+        dialog.setValidator(new ISelectionStatusValidator() {
+            ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
+            public IStatus validate(Object[] selection) {
+                IStatus typedStatus= validator.validate(selection);
+                if (!typedStatus.isOK())
+                    return typedStatus;           
+                if ((selection[0] instanceof IFolder)) {
+                    IFolder folder= (IFolder)selection[0];
+                    boolean valid= checkIfFolderValid(folder.getFullPath());
+                    if (!valid) {
+                        return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, 
+                                NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidFolder", folder.getFullPath()), null); //$NON-NLS-1$
+                    }
+                }
+                return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+            }
+        });
 		dialog.setMessage(NewWizardMessages.getString("OutputLocationDialog.ChooseOutputFolder.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);
 		dialog.setInput(root);

@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.core.resources.IContainer;

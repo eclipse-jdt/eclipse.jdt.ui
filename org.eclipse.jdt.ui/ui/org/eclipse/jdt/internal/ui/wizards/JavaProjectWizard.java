@@ -12,13 +12,14 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -38,13 +39,13 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
     private JavaProjectWizardSecondPage fSecondPage;
     
     private IConfigurationElement fConfigElement;
-    protected boolean fIsAutoBuilding;
+    private boolean fAutobuildEnabled;
     
     public JavaProjectWizard() {
         setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
         setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
         setWindowTitle(NewWizardMessages.getString("JavaProjectWizard.title")); //$NON-NLS-1$
-        fIsAutoBuilding= enableAutoBuild(false);
+        fAutobuildEnabled= enableAutoBuild(false);
     }
 
     /*
@@ -93,7 +94,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			checkCompliance();
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 	 		selectAndReveal(fSecondPage.getJavaProject().getProject());
-            enableAutoBuild(fIsAutoBuilding);
+            enableAutoBuild(fAutobuildEnabled);
 		}
 		return res;
 	}
@@ -117,7 +118,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
      */
     public boolean performCancel() {
         fSecondPage.performCancel();
-        enableAutoBuild(fIsAutoBuilding);
+        enableAutoBuild(fAutobuildEnabled);
         return super.performCancel();
     }
     

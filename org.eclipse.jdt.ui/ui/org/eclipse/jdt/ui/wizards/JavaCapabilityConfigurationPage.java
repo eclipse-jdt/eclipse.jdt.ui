@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,6 +19,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -77,7 +79,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
                     updateStatus(status);
                 }
             };
-            fBuildPathsBlock= new BuildPathsBlock(listener, 0);
+            fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0);
         }
         return fBuildPathsBlock;
     }
@@ -217,8 +219,12 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		}			
 	}
     
-    public void undoChanges() {
+    /**
+     * Cancel the operation.
+     *
+     *@see BuildPathsBlock#undoAll()
+     */
+    public void performCancel() {
         getBuildPathsBlock().undoAll();
     }
-	
 }

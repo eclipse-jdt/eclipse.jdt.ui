@@ -36,6 +36,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -64,7 +65,7 @@ public class BuildPathDialog extends StatusDialog {
 			}
 		};
 		Composite result= (Composite)super.createDialogArea(parent);
-		fBlock= new BuildPathsBlock(listener, 0);
+		fBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0);
 		fBlock.init(fProject, null, null);
 		fBlock.createControl(result).setLayoutData(new GridData(GridData.FILL_BOTH));
 		applyDialogFont(result);		

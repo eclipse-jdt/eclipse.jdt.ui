@@ -257,7 +257,13 @@ public class CPListElement {
             return own == other;
         IPath[] ownPaths= (IPath[]) own;
         IPath[] otherPaths= (IPath[]) other;
-        return ownPaths.equals(otherPaths);
+        if (ownPaths.length != otherPaths.length)
+            return false;
+        for(int i= 0; i < ownPaths.length; i++) {
+            if (!ownPaths[i].equals(otherPaths[i]))
+                return false;
+        }
+        return true;
     }
     
     private boolean sameOutputAttribute(Object own, Object other) {

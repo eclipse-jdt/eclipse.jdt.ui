@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -86,7 +87,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 			}
 		};
 
-		fBuildPathsBlock= new BuildPathsBlock(listener, 0);
+		fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0);
 		
 		fProjectModified= true;
 		fOutputLocation= null;

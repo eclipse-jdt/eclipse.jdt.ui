@@ -12,14 +12,16 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -35,6 +37,10 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -196,7 +202,48 @@ public class ExclusionInclusionDialog extends StatusDialog {
 	protected void doSelectionChanged(ListDialogField field) {
 		List selected= field.getSelectedElements();
 		field.enableButton(IDX_EDIT, canEdit(selected));
+        field.enableButton(IDX_REMOVE, canRemove(selected));
 	}
+    
+    protected boolean canRemove(List selected) {
+        IJavaProject project= fCurrElement.getJavaProject();
+        IClasspathEntry entry= fCurrElement.getClasspathEntry();
+        IPath rootPath= fCurrElement.getPath();
+        
+        try {
+            IClasspathEntry[] cpEntries= project.getRawClasspath();
+            for(int i= 0; i < cpEntries.length; i++) {
+                if (cpEntries[i].getEntryKind() != IClasspathEntry.CPE_SOURCE)
+                    continue;
+                Iterator iterator= selected.iterator();
+                while(iterator.hasNext()) {
+                    IPath path= rootPath.append((String)iterator.next()).removeTrailingSeparator();
+                    if (cpEntries[i].getPath().equals(path))
+                        return false;
+                }
+            }
+        } catch(JavaModelException e) {
+            JavaPlugin.log(e);
+        }
+        
+        Iterator iterator= selected.iterator();
+        if (entry.getOutputLocation() != null) {
+            while(iterator.hasNext()) {
+                if (completeName(entry.getOutputLocation().lastSegment()).equals(iterator.next()))
+                    return false;
+            }
+        }
+        return true;
+    }
+    
+    private String completeName(String name) {
+        if (!name.endsWith(".java")) { //$NON-NLS-1$
+            name= name + "/"; //$NON-NLS-1$
+            name= name.replace('.', '/');
+            return name;
+        }
+        return name;
+    }
 	
 	private boolean canEdit(List selected) {
 		return selected.size() == 1;

@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,6 +25,10 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -56,6 +59,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	protected IProject fCurrProject;
 	
 	protected boolean fKeepContent;
+    private List fRemoveList;
 
 	/**
 	 * Constructor for NewProjectCreationWizardPage.
@@ -66,6 +70,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		fCurrProjectLocation= null;
 		fCurrProject= null;
 		fKeepContent= false;
+        fRemoveList= new ArrayList();
 	}
 	
 	/* (non-Javadoc)
@@ -75,6 +80,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		if (visible) {
 			changeToNewProject();
 		} else {
+            deleteCreatedResources(); // delete new folders
 			removeProject();
 		}
 		super.setVisible(visible);
@@ -93,6 +99,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				try {
                     if (newPageEnabled()) {
                         monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.create"), 3); //$NON-NLS-1$
+                        JavaCore.create(fFirstPage.getProjectHandle());
                         updateProject(true, new SubProgressMonitor(monitor, 1));
                         configureJavaProject(new SubProgressMonitor(monitor, 2));
                     }
@@ -123,6 +130,9 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		
 		fCurrProject= fFirstPage.getProjectHandle();
 		fCurrProjectLocation= fFirstPage.getLocationPath();
+        boolean removeProjectFile= false;
+        boolean removeOutputFolder= false;
+        boolean removeClasspathFile= false;
 		
 		final boolean noProgressMonitor= !initialize && !fFirstPage.getDetect();
 		
@@ -135,6 +145,12 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				throw new OperationCanceledException();
 			}
 			
+            File file= new File(fCurrProjectLocation.append(".classpath").toString()); //$NON-NLS-1$
+            if (!file.exists())
+                removeClasspathFile= true;
+            file= new File(fCurrProjectLocation.append(".project").toString()); //$NON-NLS-1$
+            if (!file.exists()) //$NON-NLS-1$
+                removeProjectFile= true;
 			createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 1));
 			if (initialize) {
 				
@@ -145,6 +161,9 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 					if (!fCurrProject.getFile(".classpath").exists()) { //$NON-NLS-1$
 						final ClassPathDetector detector= new ClassPathDetector(fCurrProject);
 						entries= detector.getClasspath();
+                        outputLocation= detector.getOutputLocation();
+                        if (!fCurrProject.getFolder(outputLocation.removeFirstSegments(fCurrProject.getFullPath().segmentCount())).exists())
+                            removeOutputFolder= true;
                         outputLocation= detector.getOutputLocation();
 					}
 				} else if (fFirstPage.isSrcBin()) {
@@ -185,7 +204,14 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 					throw new OperationCanceledException();
 				}
 				
-				init(JavaCore.create(fCurrProject), outputLocation, entries, false);
+                init(JavaCore.create(fCurrProject), outputLocation, entries, false);
+                fRemoveList= new ArrayList();
+                if (removeClasspathFile)
+                    fRemoveList.add(fCurrProject.getFile(".classpath")); //$NON-NLS-1$
+                if (removeProjectFile)
+                    fRemoveList.add(fCurrProject.getFile(".project")); //$NON-NLS-1$
+                if (removeOutputFolder)
+                    fRemoveList.add(fCurrProject.getFolder(outputLocation.removeFirstSegments(fCurrProject.getFullPath().segmentCount())));
 			}
 			monitor.worked(1);
 		} finally {
@@ -228,7 +254,6 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				try {
                     if (newPageEnabled() && fKeepContent) {
                         try {
-                            undoChanges();
                             fCurrProject.delete(false, true, null);
                         } catch (CoreException e) {
                             JavaPlugin.log(e);
@@ -263,8 +288,22 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	 * Called from the wizard on cancel.
 	 */
 	public void performCancel() {
+        deleteCreatedResources(); // delete new folders
 		removeProject();
 	}
+    
+    private void deleteCreatedResources() {
+        Iterator iterator= fRemoveList.iterator();
+        while(iterator.hasNext()) {
+            IResource resource= (IResource)iterator.next();
+            try {
+                resource.delete(true, null);
+            } catch (CoreException e) {
+                // do nothing
+            }
+        }
+        super.performCancel(); // undo changes
+    }
     
     private boolean newPageEnabled() {
         return PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.NEW_SOURCE_PAGE);
