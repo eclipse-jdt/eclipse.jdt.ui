@@ -15,12 +15,13 @@ import java.util.HashMap;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeHandle;
 
 public class ContainerMethods {
 
@@ -45,12 +46,12 @@ public class ContainerMethods {
 
 	private boolean isTargetOf(SpecialMethod specialMethod, IMethodBinding methodBinding) {
 		//TODO: check parameter types (resolve type variables)
-		TypeHandle declaringType= fTCFactory.getTypeHandleFactory().getTypeHandle(methodBinding.getDeclaringClass());
-		return declaringType.canAssignTo(specialMethod.fTypeHandle);
+		ITypeBinding declaringType= methodBinding.getDeclaringClass();
+		return TypeBindings.isSuperType(specialMethod.fTypeBinding, declaringType);
 	}
 
 	private void initialize() {
-		addSpecialMethod(new SpecialMethod(fTCFactory.getCollectionTypeHandle(), "add", new TypeHandle[] {fTCFactory.getObjectTypeHandle()}) {
+		addSpecialMethod(new SpecialMethod(fTCFactory.getCollectionType(), "add", new ITypeBinding[] {fTCFactory.getObjectType()}) {
 			public void generateConstraintsFor(MethodInvocation invocation, AugmentRawContClConstraintCreator constraintCreator) {
 				AugmentRawContainerClientsTCModel tcFactory= constraintCreator.getTCFactory();
 				

@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 /**
  * A ReturnTypeVariable is a ConstraintVariable which stands for
@@ -24,8 +25,8 @@ public class ReturnTypeVariable2 extends TypeConstraintVariable2 implements IDec
 	private String fMethodBindingKey;
 	private ICompilationUnit fCompilationUnit;
 
-	protected ReturnTypeVariable2(TypeHandle returnTypeHandle, IMethodBinding methodBinding) {
-		super(returnTypeHandle);
+	protected ReturnTypeVariable2(ITypeBinding returnTypeBinding, IMethodBinding methodBinding) {
+		super(returnTypeBinding);
 		fMethodBindingKey= methodBinding.getKey();
 	}
 

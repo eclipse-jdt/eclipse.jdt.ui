@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawCo
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -90,7 +91,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 			return;
 		
 		setConstraintVariable(node, typeVariable);
-		if (typeVariable.getTypeHandle().canAssignTo(fTCFactory.getCollectionTypeHandle()))
+		if (TypeBindings.isSuperType(fTCFactory.getCollectionType(), typeVariable.getTypeBinding()))
 			fTCFactory.makeElementVariable(typeVariable);
 	}
 	

@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
 /**
@@ -24,8 +25,8 @@ public class VariableVariable2 extends TypeConstraintVariable2 implements IDecla
 	private String fVariableBindingKey;
 	private ICompilationUnit fCompilationUnit;
 	
-	public VariableVariable2(TypeHandle typeHandle, IVariableBinding variableBinding) {
-		super(typeHandle);
+	public VariableVariable2(ITypeBinding typeBinding, IVariableBinding variableBinding) {
+		super(typeBinding);
 		fVariableBindingKey= variableBinding.getKey();
 	}
 

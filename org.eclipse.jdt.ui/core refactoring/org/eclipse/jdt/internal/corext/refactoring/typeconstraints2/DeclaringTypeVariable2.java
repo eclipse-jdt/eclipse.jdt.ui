@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 /**
  * A DeclaringTypeVariable is a ConstraintVariable which stands for
@@ -21,8 +22,8 @@ public class DeclaringTypeVariable2 extends TypeConstraintVariable2 {
 
 	private String fBindingKey;
 
-	protected DeclaringTypeVariable2(TypeHandle declaringTypeHandle, IBinding memberBinding) {
-		super(declaringTypeHandle);
+	protected DeclaringTypeVariable2(ITypeBinding declaringTypeBinding, IBinding memberBinding) {
+		super(declaringTypeBinding);
 		fBindingKey= memberBinding.getKey();
 	}
 

@@ -74,8 +74,6 @@ public class AugmentRawContainerClientsTCModel {
 	
 	protected static boolean fStoreToString= DEBUG;
 	
-	protected TypeHandleFactory fTypeHandleFactory;
-	
 	/**
 	 * Map from {@link ConstraintVariable2} to
 	 * <ul>
@@ -92,8 +90,8 @@ public class AugmentRawContainerClientsTCModel {
 	private Collection fNewTypeConstraints;
 	private Collection fNewConstraintVariables; //TODO: remove?
 	
-	protected final TypeHandle fCollection;
-	protected final TypeHandle fObject;
+	protected final ITypeBinding fCollection;
+	protected final ITypeBinding fObject;
 
 //	private ITypeBinding fCollectionBinding;
 
@@ -101,7 +99,6 @@ public class AugmentRawContainerClientsTCModel {
 		fTypeConstraints= new CustomHashtable(new TypeConstraintComparer());
 		fConstraintVariables= new CustomHashtable(new ConstraintVariableComparer());
 		fEquivalenceRepresentatives= new HashSet();
-		fTypeHandleFactory= new TypeHandleFactory();
 		
 		fCuScopedConstraintVariables= new HashSet();
 		fNewTypeConstraints= new ArrayList();
@@ -119,8 +116,9 @@ public class AugmentRawContainerClientsTCModel {
 		
 		FieldDeclaration field= (FieldDeclaration) type.bodyDeclarations().get(0);
 		ITypeBinding collectionBinding= field.getType().resolveBinding();
-		fCollection= getTypeHandleFactory().getTypeHandle(collectionBinding);
-		fObject= getTypeHandleFactory().getTypeHandle(unit.getAST().resolveWellKnownType("java.lang.Object"));
+		//TODO: make sure this is in the compiler loop!
+		fCollection= collectionBinding;
+		fObject= unit.getAST().resolveWellKnownType("java.lang.Object");
 	}
 	
 	/**
@@ -157,21 +155,21 @@ public class AugmentRawContainerClientsTCModel {
 		
 		//TODO: who needs these?
 		if (cv1 instanceof TypeConstraintVariable2)
-			if (((TypeConstraintVariable2) cv1).getTypeHandle().canAssignTo(fCollection))
+			if (TypeBindings.isSuperType(fCollection, ((TypeConstraintVariable2) cv1).getTypeBinding()))
 				return true;
 				
 		if (cv2 instanceof TypeConstraintVariable2)
-			if (((TypeConstraintVariable2) cv2).getTypeHandle().canAssignTo(fCollection))
+			if (TypeBindings.isSuperType(fCollection, ((TypeConstraintVariable2) cv2).getTypeBinding()))
 				return true;
 		
 		return false;
 	}
 	
-	public TypeHandle getCollectionTypeHandle() {
+	public ITypeBinding getCollectionType() {
 		return fCollection;
 	}
 	
-	public TypeHandle getObjectTypeHandle() {
+	public ITypeBinding getObjectType() {
 		return fObject;
 	}
 	
@@ -252,9 +250,6 @@ public class AugmentRawContainerClientsTCModel {
 //		return createSimpleTypeConstraint(v1, v2, ConstraintOperator2.createStrictSubtypeOperator());
 //	}
 //	
-	public TypeHandleFactory getTypeHandleFactory() {
-		return fTypeHandleFactory;
-	}
 	
 	protected void createSimpleTypeConstraint(ConstraintVariable2 cv1, ConstraintVariable2 cv2, ConstraintOperator2 operator) {
 		if (! keep(cv1, cv2, operator))
@@ -365,8 +360,7 @@ public class AugmentRawContainerClientsTCModel {
 		ITypeBinding typeBinding= variableBinding.getType();
 		if (filterConstraintVariableType(typeBinding))
 			return null;
-		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
-		VariableVariable2 cv= new VariableVariable2(typeHandle, variableBinding);
+		VariableVariable2 cv= new VariableVariable2(typeBinding, variableBinding);
 		cv= (VariableVariable2) storedCv(cv);
 		CollectionElementVariable2 elementVariable= makeElementVariable(cv);
 		if (fStoreToString)
@@ -386,10 +380,9 @@ public class AugmentRawContainerClientsTCModel {
 		ITypeBinding typeBinding= type.resolveBinding();
 		if (filterConstraintVariableType(typeBinding))
 			return null;
-		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(type);
 		CompilationUnitRange range= new CompilationUnitRange(cu, type);
-		TypeVariable2 typeVariable= new TypeVariable2(typeHandle, range);
+		TypeVariable2 typeVariable= new TypeVariable2(typeBinding, range);
 		typeVariable= (TypeVariable2) storedCv(typeVariable); //TODO: Should not use storedCv(..) here!
 		fCuScopedConstraintVariables.add(typeVariable);
 		if (fStoreToString)
@@ -407,10 +400,9 @@ public class AugmentRawContainerClientsTCModel {
 	public TypeVariable2 makeTypeVariable(Expression expression, ITypeBinding typeBinding) {
 		if (filterConstraintVariableType(typeBinding))
 			return null;
-		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(expression);
 		CompilationUnitRange range= new CompilationUnitRange(cu, expression);
-		TypeVariable2 typeVariable= new TypeVariable2(typeHandle, range);
+		TypeVariable2 typeVariable= new TypeVariable2(typeBinding, range);
 		fCuScopedConstraintVariables.add(typeVariable);
 		if (fStoreToString)
 			typeVariable.setData(ConstraintVariable2.TO_STRING, expression.toString());
@@ -421,8 +413,7 @@ public class AugmentRawContainerClientsTCModel {
 		ITypeBinding typeBinding= methodBinding.getParameterTypes() [parameterIndex];
 		if (filterConstraintVariableType(typeBinding))
 			return null;
-		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
-		ParameterTypeVariable2 cv= new ParameterTypeVariable2(typeHandle, parameterIndex, methodBinding);
+		ParameterTypeVariable2 cv= new ParameterTypeVariable2(typeBinding, parameterIndex, methodBinding);
 		if (fStoreToString)
 			cv.setData(ConstraintVariable2.TO_STRING, "[Parameter(" + parameterIndex + "," + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return cv;
@@ -460,11 +451,10 @@ public class AugmentRawContainerClientsTCModel {
 	}
 
 	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding) {
-		ITypeBinding typeBinding= methodBinding.getReturnType();
-		if (filterConstraintVariableType(typeBinding))
+		ITypeBinding returnTypeBinding= methodBinding.getReturnType();
+		if (filterConstraintVariableType(returnTypeBinding))
 			return null;
-		TypeHandle returnTypeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
-		ReturnTypeVariable2 cv= new ReturnTypeVariable2(returnTypeHandle, methodBinding);
+		ReturnTypeVariable2 cv= new ReturnTypeVariable2(returnTypeBinding, methodBinding);
 		if (fStoreToString)
 			cv.setData(ConstraintVariable2.TO_STRING, "[ReturnType(" + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$
 		return cv;
@@ -497,8 +487,7 @@ public class AugmentRawContainerClientsTCModel {
 	public PlainTypeVariable2 makePlainTypeVariable(ITypeBinding typeBinding) {
 		if (filterConstraintVariableType(typeBinding))
 			return null;
-		TypeHandle typeHandle= fTypeHandleFactory.getTypeHandle(typeBinding);
-		PlainTypeVariable2 cv= new PlainTypeVariable2(typeHandle);
+		PlainTypeVariable2 cv= new PlainTypeVariable2(typeBinding);
 		cv= (PlainTypeVariable2) storedCv(cv);
 		return cv;
 	}
@@ -509,7 +498,7 @@ public class AugmentRawContainerClientsTCModel {
 		if (storedElementVariable != null)
 			return storedElementVariable;
 		
-		if (expressionCv.getTypeHandle().canAssignTo(getCollectionTypeHandle())) {
+		if (TypeBindings.isSuperType(getCollectionType(), expressionCv.getTypeBinding())) {
 			CollectionElementVariable2 cv= new CollectionElementVariable2(expressionCv);
 			cv= (CollectionElementVariable2) storedCv(cv); //TODO: Should not use storedCv(..) here!
 			setElementVariable(expressionCv, cv);

@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
@@ -31,7 +32,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstra
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeHandle;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 
@@ -78,7 +78,7 @@ public class AugmentRawContClConstraintsSolver {
 			if (cv instanceof TypeConstraintVariable2) {
 				TypeConstraintVariable2 typeConstraintCv= (TypeConstraintVariable2) cv;
 				//TODO: not necessary for types that are not used in a TypeConstraint but only as type in CollectionElementVariable
-				setTypeEstimate(cv, TypeSet.create(typeConstraintCv.getTypeHandle()));
+				setTypeEstimate(cv, TypeSet.create(typeConstraintCv.getTypeBinding()));
 			} else if (cv instanceof CollectionElementVariable2) {
 				setTypeEstimate(cv, TypeSet.getUniverse());
 			}
@@ -172,8 +172,8 @@ public class AugmentRawContClConstraintsSolver {
 			if (cv instanceof CollectionElementVariable2) {
 				CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
 				//TODO: should calculate only once per EquivalenceRepresentative
-				TypeHandle typeHandle= elementCv.getRepresentative().getTypeEstimate().chooseSingleType();
-				setChosenType(elementCv, typeHandle);
+				ITypeBinding typeBinding= elementCv.getRepresentative().getTypeEstimate().chooseSingleType();
+				setChosenType(elementCv, typeBinding);
 				ICompilationUnit cu= elementCv.getCompilationUnit();
 				ArrayList cvs= (ArrayList) fDeclarationsToUpdate.get(cu);
 				if (cvs != null) {
@@ -193,13 +193,13 @@ public class AugmentRawContClConstraintsSolver {
 		return fDeclarationsToUpdate;
 	}
 
-	public static TypeHandle getChosenType(ConstraintVariable2 cv) {
+	public static ITypeBinding getChosenType(ConstraintVariable2 cv) {
 		if (cv instanceof CollectionElementVariable2)
 			return ((CollectionElementVariable2) cv).getRepresentative().getTypeEstimate().chooseSingleType();
-		return (TypeHandle) cv.getData(TYPE_ESTIMATE);
+		return (ITypeBinding) cv.getData(TYPE_ESTIMATE);
 	}
 
-	private static void setChosenType(ConstraintVariable2 cv, TypeHandle type) {
+	private static void setChosenType(ConstraintVariable2 cv, ITypeBinding type) {
 		cv.setData(TYPE_ESTIMATE, type);
 	}
 }

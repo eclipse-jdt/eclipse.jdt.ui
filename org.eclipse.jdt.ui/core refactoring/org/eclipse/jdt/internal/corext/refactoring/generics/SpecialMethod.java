@@ -11,19 +11,18 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.generics;
 
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeHandle;
 
 
 public abstract class SpecialMethod {
 
-	protected final TypeHandle fTypeHandle;
+	protected final ITypeBinding fTypeBinding;
 	protected final String fName;
-	protected final TypeHandle[] fParameterTypes;
+	protected final ITypeBinding[] fParameterTypes;
 
-	public SpecialMethod(TypeHandle typeHandle, String name, TypeHandle[] argumentTypes) {
-		fTypeHandle= typeHandle;
+	public SpecialMethod(ITypeBinding typeBinding, String name, ITypeBinding[] argumentTypes) {
+		fTypeBinding= typeBinding;
 		fName= name;
 		fParameterTypes= argumentTypes;
 	}

@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
@@ -43,7 +44,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeHandle;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -217,8 +217,8 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 					//TODO: C&P'd
 					Type movingType= (Type) rewrite.createMoveTarget(originalType);
 					ParameterizedType newType= ast.newParameterizedType(movingType);
-					TypeHandle chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
-					String typeName= chosenType.getSimpleName(); // TODO: use ImportRewrite
+					ITypeBinding chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
+					String typeName= chosenType.getName(); // TODO: use ImportRewrite
 					newType.typeArguments().add(rewrite.createStringPlaceholder(typeName, ASTNode.SIMPLE_TYPE));
 					rewrite.replace(originalType, newType, null); // TODO: description
 				}

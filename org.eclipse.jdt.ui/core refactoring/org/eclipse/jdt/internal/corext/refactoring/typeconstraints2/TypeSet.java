@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
 public abstract class TypeSet {
 	
 	protected static class Universe extends TypeSet {
@@ -19,35 +21,62 @@ public abstract class TypeSet {
 			return restrictionSet;
 		}
 		
-		public TypeHandle chooseSingleType() {
+		public ITypeBinding chooseSingleType() {
 			return null;
+		}
+
+		public String toString() {
+			return "UNIVERSE"; //$NON-NLS-1$
 		}
 	}
 	
 	private static class SingleTypeSet extends TypeSet {
 
-		private final TypeHandle fTypeHandle;
+		private final ITypeBinding fTypeBinding;
 
-		public SingleTypeSet(TypeHandle typeHandle) {
-			fTypeHandle= typeHandle;
+		public SingleTypeSet(ITypeBinding typeHandle) {
+			fTypeBinding= typeHandle;
 		}
 
 		public TypeSet restrictedTo(TypeSet restrictionSet) {
 			if (restrictionSet instanceof Universe) {
 				return this;
 			} else if (restrictionSet instanceof SingleTypeSet) {
-				SingleTypeSet singleTypeSet= (SingleTypeSet) restrictionSet;
-				if (fTypeHandle == singleTypeSet.fTypeHandle)
+				SingleTypeSet restrictionSingleTypeSet= (SingleTypeSet) restrictionSet;
+				if (fTypeBinding == restrictionSingleTypeSet.fTypeBinding)
 					return this;
-				else //TODO
-					throw new IllegalStateException(fTypeHandle + " != " + singleTypeSet.fTypeHandle); //$NON-NLS-1$
+				else if (TypeBindings.canAssign(fTypeBinding, restrictionSingleTypeSet.fTypeBinding))
+					return restrictionSingleTypeSet;
+				else if (TypeBindings.canAssign(restrictionSingleTypeSet.fTypeBinding, fTypeBinding))
+					return this;
+				else
+					return commonLowerBound(restrictionSingleTypeSet);
 			} else { //TODO
-				throw new IllegalStateException(fTypeHandle + " ^ " + restrictionSet); //$NON-NLS-1$
+				throw new IllegalStateException(fTypeBinding.getQualifiedName() + " ^ " + restrictionSet); //$NON-NLS-1$
 			}
 		}
 		
-		public TypeHandle chooseSingleType() {
-			return fTypeHandle;
+		private TypeSet commonLowerBound(SingleTypeSet other) {
+			//see also org.eclipse.jdt.internal.compiler.lookup.Scope.lowerUpperBound(types);
+			//and org.eclipse.jdt.internal.compiler.lookup.Scope.mostSpecificCommonType(types)
+			
+			throw new IllegalStateException(this + " != " + other); //$NON-NLS-1$
+//			// first try superclasses:
+//			ArrayList superclasses= new ArrayList();
+//			ITypeBinding superclass= fTypeBinding.getSuperclass();
+//			while (superclass != null) {
+//				superclasses.add(superclass);
+//				superclass= superclass.getSuperclass();
+//			}
+//			return null;
+		}
+
+		public ITypeBinding chooseSingleType() {
+			return fTypeBinding;
+		}
+
+		public String toString() {
+			return fTypeBinding.getQualifiedName();
 		}
 	}
 	
@@ -57,7 +86,7 @@ public abstract class TypeSet {
 		return fgUniverse;
 	}
 
-	public static TypeSet create(TypeHandle typeHandle) {
+	public static TypeSet create(ITypeBinding typeHandle) {
 		if (typeHandle == null)
 			return new Universe();
 		else
@@ -66,5 +95,8 @@ public abstract class TypeSet {
 
 	public abstract TypeSet restrictedTo(TypeSet restrictionSet);
 	
-	public abstract TypeHandle chooseSingleType();
+	public abstract ITypeBinding chooseSingleType();
+	
+	
+	public abstract String toString();
 }
