@@ -56,20 +56,6 @@ public class NewGroup extends ContextMenuGroup {
 	
 	public static final String GROUP_NAME= IContextMenuConstants.GROUP_NEW;
 	
-	public static class OpenPackageWizardAction extends AbstractOpenWizardAction {
-		public OpenPackageWizardAction() {
-		}
-		public OpenPackageWizardAction(IWorkbench workbench, String label, Class[] acceptedTypes) {
-			super(workbench, label, acceptedTypes, false);
-		}
-		protected Wizard createWizard() { 
-			return new NewPackageCreationWizard();
-		}
-		protected boolean shouldAcceptElement(Object obj) { 
-			return isOnBuildPath(obj) && !isInArchive(obj);
-		}
-	}
-
 	public NewGroup() {
 	}
 	
@@ -78,11 +64,9 @@ public class NewGroup extends ContextMenuGroup {
 		if (fActionsCreated)
 			return;
 	
-		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();	
-	
 		String label= JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGE + ".label");
 		Class[] acceptedTypes= new Class[] { IJavaProject.class, IPackageFragmentRoot.class };			
-		fNewPackageAction= new OpenPackageWizardAction(workbench, label, acceptedTypes);
+		fNewPackageAction= new OpenPackageWizardAction(label, acceptedTypes);
 		fNewPackageAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKAGE);
 		fNewPackageAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGE + ".tooltip"));
 		fNewPackageAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGE + ".description"));			
@@ -91,29 +75,28 @@ public class NewGroup extends ContextMenuGroup {
 		acceptedTypes= new Class[] { IJavaProject.class, IPackageFragmentRoot.class,
 			IPackageFragment.class, ICompilationUnit.class, IClassFile.class };		
 		
-		fNewClassAction= new OpenClassWizardAction(workbench, label, acceptedTypes);
+		fNewClassAction= new OpenClassWizardAction(label, acceptedTypes);
 		fNewClassAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWCLASS);
 		fNewClassAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_CLASS + ".tooltip"));
 		fNewClassAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_CLASS + ".description"));			
 			
 		label= JavaPlugin.getResourceString(WIZARDS_ADD_INTERFACE + ".label");
-		fNewInterfaceAction= new OpenInterfaceWizardAction(workbench, label, acceptedTypes);
+		fNewInterfaceAction= new OpenInterfaceWizardAction(label, acceptedTypes);
 		fNewInterfaceAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWINTERFACE);	
 		fNewInterfaceAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_INTERFACE + ".tooltip"));
 		fNewInterfaceAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_INTERFACE + ".description"));
 
+		acceptedTypes= new Class[] { IJavaProject.class };
 		label= JavaPlugin.getResourceString(WIZARDS_ADD_SNIPPET + ".label");
-		fNewSnippetAction= new OpenInterfaceWizardAction(workbench, label, acceptedTypes);
-		fNewSnippetAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_PACKSNIPPET);	
+		fNewSnippetAction= new OpenSnippetWizardAction(label, acceptedTypes);
+		fNewSnippetAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWSNIPPET);	
 		fNewSnippetAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_SNIPPET + ".tooltip"));
 		fNewSnippetAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_SNIPPET + ".description"));
-
-
 
 		label= JavaPlugin.getResourceString(WIZARDS_ADD_PACKAGEROOT + ".label");
 		acceptedTypes= new Class[] { IJavaProject.class };
 		fNewPackageRootAction= 
-			new AbstractOpenWizardAction(workbench, label, acceptedTypes, false) {
+			new AbstractOpenWizardAction(label, acceptedTypes, false) {
 				protected Wizard createWizard() { return new NewPackageRootCreationWizard(); }
 				protected boolean shouldAcceptElement(Object obj) { return !isOnBuildPath(obj); }
 			};
@@ -126,7 +109,7 @@ public class NewGroup extends ContextMenuGroup {
 		if (isNewProjectWizardRegistered()) {
 			label= JavaPlugin.getResourceString(WIZARDS_ADD_PROJECT + ".label");
 			acceptedTypes= new Class[] { IJavaModel.class };
-			fNewProjectAction= new OpenProjectWizardAction(workbench, label, acceptedTypes);
+			fNewProjectAction= new OpenProjectWizardAction(label, acceptedTypes);
 			fNewProjectAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPROJECT);
 			fNewProjectAction.setToolTipText(JavaPlugin.getResourceString(WIZARDS_ADD_PROJECT + ".tooltip"));
 			fNewProjectAction.setDescription(JavaPlugin.getResourceString(WIZARDS_ADD_PROJECT + ".description"));
@@ -202,6 +185,10 @@ public class NewGroup extends ContextMenuGroup {
 			manager.add(fNewInterfaceAction);
 			i++;
 		}
+		if (fNewSnippetAction.canActionBeAdded()) {
+			manager.add(fNewSnippetAction);
+			i++;
+		}		
 
 		boolean added= i != 0;
 		if (added) {

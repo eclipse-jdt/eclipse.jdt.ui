@@ -23,7 +23,7 @@ public abstract class AbstractOpenRefactoringWizardAction extends AbstractOpenWi
 	private static final IProgressMonitor fgNullProgressMonitor= new NullProgressMonitor();
 	
 	public AbstractOpenRefactoringWizardAction(ISelectionProvider viewer, String label, Class activatedOnType) {
-		super(JavaPlugin.getDefault().getWorkbench(), label, new Class[] {activatedOnType}, false);
+		super(label, new Class[] {activatedOnType}, false);
 	}
 	
 	/**

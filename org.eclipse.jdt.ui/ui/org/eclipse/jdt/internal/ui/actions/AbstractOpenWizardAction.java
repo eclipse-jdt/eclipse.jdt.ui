@@ -4,38 +4,33 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.util.Iterator;import org.eclipse.jface.action.Action;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.Wizard;import org.eclipse.jface.wizard.WizardDialog;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWizard;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.util.Iterator;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IAction;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.Wizard;import org.eclipse.jface.wizard.WizardDialog;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWindowActionDelegate;import org.eclipse.ui.IWorkbenchWizard;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public abstract class AbstractOpenWizardAction extends Action {
+public abstract class AbstractOpenWizardAction extends Action implements IWorkbenchWindowActionDelegate {
 
 	public static final String WIZARD_TITLE= "AbstractOpenWizardAction.title";
 
-	private IWorkbench fWorkbench;
-	
 	private Class[] fActivatedOnTypes;
 	private boolean fAcceptEmptySelection;
 	
-	public AbstractOpenWizardAction(IWorkbench workbench, String label, boolean acceptEmptySelection) {
-		this(workbench, label, null, acceptEmptySelection);
+	public AbstractOpenWizardAction(String label, boolean acceptEmptySelection) {
+		this(label, null, acceptEmptySelection);
 	}
 	
-	public AbstractOpenWizardAction(IWorkbench workbench, String label, Class[] activatedOnTypes, boolean acceptEmptySelection) {
+	public AbstractOpenWizardAction(String label, Class[] activatedOnTypes, boolean acceptEmptySelection) {
 		super(label);
-		fWorkbench= workbench;
 		fActivatedOnTypes= activatedOnTypes;
 		fAcceptEmptySelection= acceptEmptySelection;
 	}
 	
 	protected AbstractOpenWizardAction() {
+		fActivatedOnTypes= null;
+		fAcceptEmptySelection= false;
 	}
 	
 	protected IWorkbench getWorkbench() {
-		return fWorkbench;
+		return JavaPlugin.getDefault().getWorkbench();
 	}
-	
-	protected void setWorkbench(IWorkbench workbench) {
-		fWorkbench= workbench;
-	}	
 	
 	private boolean isOfAcceptedType(Object obj) {
 		for (int i= 0; i < fActivatedOnTypes.length; i++) {
@@ -73,7 +68,7 @@ public abstract class AbstractOpenWizardAction extends Action {
 
 
 	protected IStructuredSelection getCurrentSelection() {
-		IWorkbenchWindow window= fWorkbench.getActiveWorkbenchWindow();
+		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 		if (window != null) {
 			ISelection selection= window.getSelectionService().getSelection();
 			if (selection instanceof IStructuredSelection) {
@@ -90,9 +85,9 @@ public abstract class AbstractOpenWizardAction extends Action {
 	public void run() {
 		Wizard wizard= createWizard();
 		if (wizard instanceof IWorkbenchWizard) {
-			((IWorkbenchWizard)wizard).init(fWorkbench, getCurrentSelection());
+			((IWorkbenchWizard)wizard).init(getWorkbench(), getCurrentSelection());
 		}
-		WizardDialog dialog= new WizardDialog(fWorkbench.getActiveWorkbenchWindow().getShell(), wizard);
+		WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
 		dialog.create();
 		dialog.getShell().setText(JavaPlugin.getResourceString(WIZARD_TITLE));
 		dialog.open();
@@ -108,5 +103,31 @@ public abstract class AbstractOpenWizardAction extends Action {
 		}
 		return true;
 	}
-	
+
+	/**
+	 * @see IActionDelegate#run(IAction)
+	 */
+	public void run(IAction action) {
+		run();
+	}
+
+	/**
+	 * @see IWorkbenchWindowActionDelegate#dispose()
+	 */
+	public void dispose() {
+	}
+
+	/**
+	 * @see IWorkbenchWindowActionDelegate#init(IWorkbenchWindow)
+	 */
+	public void init(IWorkbenchWindow window) {
+	}
+
+	/**
+	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
+	 */
+	public void selectionChanged(IAction action, ISelection selection) {
+		// selection taken from selectionprovider
+	}
+
 }

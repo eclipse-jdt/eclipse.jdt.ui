@@ -232,6 +232,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_TOOL_NEWPACKAGE= create(T_CTOOL, "newpack_wiz.gif");
 	public static final ImageDescriptor DESC_TOOL_NEWCLASS= create(T_CTOOL, "newclass_wiz.gif");
 	public static final ImageDescriptor DESC_TOOL_NEWINTERFACE= create(T_CTOOL, "newint_wiz.gif");
+	public static final ImageDescriptor DESC_TOOL_NEWSNIPPET= create(T_CTOOL, "newsbook_wiz.gif");
 
 	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= create(T_OBJ, "cp_order_obj.gif");
 		

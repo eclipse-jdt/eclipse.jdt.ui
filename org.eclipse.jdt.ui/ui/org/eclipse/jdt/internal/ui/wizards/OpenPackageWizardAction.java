@@ -4,19 +4,16 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.jface.wizard.Wizard;
-
-import org.eclipse.ui.IWorkbench;
-
-import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardWorkbenchAction;
+import org.eclipse.jface.wizard.Wizard;import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 
 
-public class OpenPackageWizardAction extends AbstractOpenWizardWorkbenchAction {
+public class OpenPackageWizardAction extends AbstractOpenWizardAction {
+	
 	public OpenPackageWizardAction() {
 	}
 	
-	public OpenPackageWizardAction(IWorkbench workbench, String label, Class[] acceptedTypes) {
-		super(workbench, label, acceptedTypes, false);
+	public OpenPackageWizardAction(String label, Class[] acceptedTypes) {
+		super(label, acceptedTypes, false);
 	}
 	
 	protected Wizard createWizard() { 

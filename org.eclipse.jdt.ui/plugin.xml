@@ -302,6 +302,12 @@
 			tooltip="%OpenTypeAction.tooltip"
 			icon="icons/full/ctool16/opentype.gif"
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"/>
+		<action id="org.eclipse.jdt.ui.actions.OpenSnippetWizard"	
+			toolbarPath="Normal/JavaWizards"			
+			label="%OpenSnippetWizardAction.label"
+			tooltip="%OpenSnippetWizardAction.tooltip"
+			icon="icons/full/ctool16/newsbook_wiz.gif"
+			class="org.eclipse.jdt.internal.ui.wizards.OpenSnippetWizardAction"/>			
 		<action id="org.eclipse.jdt.ui.actions.OpenInterfaceWizard"	
 			toolbarPath="Normal/JavaWizards"			
 			label="%OpenInterfaceWizardAction.label"

@@ -4,14 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.wizard.Wizard;
-
-import org.eclipse.ui.INewWizard;
-import org.eclipse.ui.IWorkbench;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jface.resource.ImageDescriptor;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.wizard.Wizard;import org.eclipse.ui.INewWizard;import org.eclipse.ui.IWorkbench;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * Creates a new snippet page
@@ -34,7 +27,12 @@ public class NewSnippetCreationWizard extends Wizard implements INewWizard {
 	public void addPages() {
 		super.addPages();
 		if (fSelection == null) {
-			fSelection= new StructuredSelection(EditorUtility.getActiveEditorJavaInput());
+			IJavaElement elem= EditorUtility.getActiveEditorJavaInput();
+			if (elem != null) {
+				fSelection= new StructuredSelection(elem);
+			} else {
+				fSelection= StructuredSelection.EMPTY;
+			}
 		}
 		fPage= new NewSnippetFileCreationPage(fWorkbench, fSelection);
 		addPage(fPage);
