@@ -1407,7 +1407,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
 		 */
 		public void documentAboutToBeChanged(DocumentEvent event) {
-			fOccurrencesFinderJob.doCancel();
+			if (fOccurrencesFinderJob != null)
+				fOccurrencesFinderJob.doCancel();
 		}
 
 		/*
