@@ -149,20 +149,20 @@ public class JavadocTagsSubProcessor {
 		JavaDocTag[] existingTags= proposal.getTags();
 		
 		switch (problem.getProblemId()) {
-			case IProblem.AnnotationMissingParamTag: {
+			case IProblem.JavadocMissingParamTag: {
 				String name= ASTNodes.asString(node);
 				proposal.setDisplayName(CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.paramtag.description")); //$NON-NLS-1$
 				int insertPosition= findParamInsertPosition(existingTags, methodDecl, node.getParent());
 				proposal.insertNewTag(insertPosition, new JavaDocTag(JavaDocTag.PARAM, name));
 				break;
 			}
-			case IProblem.AnnotationMissingReturnTag: {
+			case IProblem.JavadocMissingReturnTag: {
 				proposal.setDisplayName(CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.returntag.description")); //$NON-NLS-1$
 				int insertPosition= findReturnInsertPosition(existingTags);
 				proposal.insertNewTag(insertPosition, new JavaDocTag(JavaDocTag.RETURN, "")); //$NON-NLS-1$
 				break;
 			}
-			case IProblem.AnnotationMissingThrowsTag: {
+			case IProblem.JavadocMissingThrowsTag: {
 				String name= ASTNodes.asString(node);
 				proposal.setDisplayName(CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.throwstag.description")); //$NON-NLS-1$
 				int insertPosition= findThrowsInsertPosition(existingTags, methodDecl, node);

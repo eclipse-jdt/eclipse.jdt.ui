@@ -112,10 +112,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnusedMethodDeclaredThrownException:
 			case IProblem.UnusedConstructorDeclaredThrownException:
 			case IProblem.UnqualifiedFieldAccess:
-			case IProblem.AnnotationMissing:
-			case IProblem.AnnotationMissingParamTag:
-			case IProblem.AnnotationMissingReturnTag:
-			case IProblem.AnnotationMissingThrowsTag:
+			case IProblem.JavadocMissing:
+			case IProblem.JavadocMissingParamTag:
+			case IProblem.JavadocMissingReturnTag:
+			case IProblem.JavadocMissingThrowsTag:
 				return true;
 			default:
 				return false;
@@ -320,12 +320,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.Task:
 				proposals.add(new TaskMarkerProposal(context.getCompilationUnit(), problem, 10));
 				break;
-			case IProblem.AnnotationMissing:
+			case IProblem.JavadocMissing:
 				JavadocTagsSubProcessor.getMissingJavadocCommentProposals(context, problem, proposals);
 				break;
-			case IProblem.AnnotationMissingParamTag:
-			case IProblem.AnnotationMissingReturnTag:
-			case IProblem.AnnotationMissingThrowsTag:
+			case IProblem.JavadocMissingParamTag:
+			case IProblem.JavadocMissingReturnTag:
+			case IProblem.JavadocMissingThrowsTag:
 				JavadocTagsSubProcessor.getMissingJavadocTagProposals(context, problem, proposals);
 				break;
 			default:
