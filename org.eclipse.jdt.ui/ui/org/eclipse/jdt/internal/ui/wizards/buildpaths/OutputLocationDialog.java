@@ -69,7 +69,7 @@ public class OutputLocationDialog extends StatusDialog {
 		fUseDefault.setLabelText(NewWizardMessages.getString("OutputLocationDialog.usedefault.label"));
 		fUseDefault.setDialogFieldListener(adapter);		
 
-		String label= NewWizardMessages.getFormattedString("OutputLocationDialog.usespecific.label", entryToEdit.getPath().makeRelative().toString());
+		String label= NewWizardMessages.getFormattedString("OutputLocationDialog.usespecific.label", entryToEdit.getPath().segment(0));
 		fUseSpecific= new SelectionButtonDialogField(SWT.RADIO);
 		fUseSpecific.setLabelText(label);
 		fUseSpecific.setDialogFieldListener(adapter);		
