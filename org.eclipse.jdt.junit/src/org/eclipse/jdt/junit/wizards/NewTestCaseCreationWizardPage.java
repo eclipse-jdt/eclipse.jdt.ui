@@ -599,9 +599,13 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 							methodName.append("Array"); //$NON-NLS-1$
 					}
 				}
-				
-				if (newMethodsNames.contains(methodName.toString()))
-					methodName.append("1"); //$NON-NLS-1$
+
+				if (newMethodsNames.contains(methodName.toString())) {
+					int suffix= 1;
+					while (newMethodsNames.contains(methodName.toString() + Integer.toString(suffix)))
+						suffix++;
+					methodName.append(Integer.toString(suffix));
+				}
 				newMethodsNames.add(new String(methodName));
 				newMethod.append("public void "+methodName.toString()+"() {}\n\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				type.createMethod(newMethod.toString(), null, false, null);	
