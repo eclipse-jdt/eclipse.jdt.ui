@@ -41,6 +41,9 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ISelectionProvider;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IAutoEditStrategy;
@@ -59,8 +62,6 @@ import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -94,7 +95,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
@@ -242,7 +242,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			fCorrectionAssistant.install(this);
 			IAutoEditStrategy smartSemi= new SmartSemicolonAutoEditStrategy();
 			prependAutoEditStrategy(smartSemi, IDocument.DEFAULT_CONTENT_TYPE);
-			prependAutoEditStrategy(smartSemi, IJavaPartitions.JAVA_STRING);			
 		}
 	};
 	
