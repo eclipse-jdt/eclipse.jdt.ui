@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
 
-public class LocalCorrectionsQuickFixTest extends QuickFixTest {
+public class LocalCorrectionsLocalCorrectionsQuickFixTestQuickFixTest extends QuickFixTest {
 	
 	private static final Class THIS= LocalCorrectionsQuickFixTest.class;
 	
@@ -44,7 +44,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testInvisibleFieldRequestedInSamePackage"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testInvisibleFieldRequestedInSamePackage2"));
 			return suite;
 		}
 	}
@@ -774,7 +774,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}	
 	
-	public void testInvisibleFieldRequestedInSamePackage() throws Exception {
+	public void testInvisibleFieldRequestedInSamePackage1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -814,6 +814,48 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	
+	public void testInvisibleFieldRequestedInSamePackage2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    private int fXoo;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public class E extends C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("         fXoo= 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(problemPos.getId()));
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    int fXoo;\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}	
+	
 	
 	public void testNonStaticMethodRequestedInConstructor() throws Exception {
 		if (true) {
@@ -911,7 +953,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 	
-	public void testInvisibleTypeRequestedInDifferenetPackage() throws Exception {
+	public void testInvisibleTypeRequestedInDifferentPackage() throws Exception {
 		if (true) {
 			System.out.println("testInvisibleTypeRequestedInDifferenetPackage: Waiting for release fo bug fix 24406");	
 			return;
