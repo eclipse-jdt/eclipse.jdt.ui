@@ -102,7 +102,7 @@ public class ProblemTableViewer extends TableViewer {
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
 		if (event instanceof ProblemsLabelChangedEvent) {
 			ProblemsLabelChangedEvent e= (ProblemsLabelChangedEvent) event;
-			if (!e.isMarkerChange() && !isShowingWorkingCopies()) {
+			if (!e.isMarkerChange() && canIgnoreChangesFromAnnotionModel()) {
 				return;
 			}
 		}
@@ -127,12 +127,11 @@ public class ProblemTableViewer extends TableViewer {
 	}
 	
 	/**
-	 * Answers whether this viewer shows working copies or not.
-	 * 
-	 * @return <code>true</code> if this viewer shows working copies
+	 * Answers whether this viewer can ignore label provider changes resulting from
+	 * marker changes in annotation models
 	 */
-	private boolean isShowingWorkingCopies() {
+	private boolean canIgnoreChangesFromAnnotionModel() {
 		Object contentProvider= getContentProvider();
-		return contentProvider instanceof IWorkingCopyProvider && ((IWorkingCopyProvider)contentProvider).providesWorkingCopies();
+		return contentProvider instanceof IWorkingCopyProvider && !((IWorkingCopyProvider)contentProvider).providesWorkingCopies();
 	}
 }
