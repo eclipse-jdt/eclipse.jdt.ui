@@ -21,6 +21,7 @@ public class AllRefactoringTests {
 		suite.addTest(InlineTempTests.suite());
 		suite.addTest(ExtractTempTests.suite());
 		suite.addTest(RenameTempTests.suite());
+		suite.addTest(ExtractConstantTests.suite());
 		
 		//-- structure
 		suite.addTest(ReorderParametersTests.suite());
