@@ -31,16 +31,18 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  * Abstract class for actions that run on IJavaElement.
  */
 public abstract class JavaElementAction extends Action {
-
+	public static final String PREFIX= "ShowTypeHierarchyAction.";
+	
+	// A dummy which can't be selected in the UI
+	private static final IJavaElement RETURN_WITHOUT_BEEP= JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot());
+	
 	private Class[] fValidTypes;
-
+
 	public JavaElementAction(String label, Class[] validTypes) {
 		super(label);
 		fValidTypes= validTypes;
 	}
-
-
-	public boolean canOperateOn(ISelection sel) {
+	public boolean canOperateOn(ISelection sel) {
 		boolean result= !sel.isEmpty();
 		if (!result || fValidTypes == null)
 			return result;
@@ -48,7 +50,7 @@ public abstract class JavaElementAction extends Action {
 		if (fValidTypes.length == 0)
 			return false;
 
-		IJavaElement element= getJavaElement(sel);
+		IJavaElement element= getJavaElement(sel, true);
 		if (element != null) {
 			for (int i= 0; i < fValidTypes.length; i++) {
 				if (fValidTypes[i].isInstance(element))
@@ -57,81 +59,76 @@ public abstract class JavaElementAction extends Action {
 		}
 		return false;
 	}
-
-	public void run() {
-		IJavaElement element= getJavaElement(getSelection());
+	public void run() {
+		IJavaElement element= getJavaElement(getSelection(), false);
 		if (element == null) {
 			beep();
 			return;
-		}
+		} 
+		else if (element == RETURN_WITHOUT_BEEP)
+			return;
+
 		run(element);
 	}
-
-	protected abstract void run(IJavaElement element);
-
-	private IJavaElement getJavaElement(IJavaElement o) {
+	protected abstract void run(IJavaElement element);
+
+	private IJavaElement getJavaElement(IJavaElement o, boolean silent) {
 		if (o == null)
 			return null;
-
 		switch (o.getElementType()) {
 			case IJavaElement.COMPILATION_UNIT:
-				return findType((ICompilationUnit)o);
+				return findType((ICompilationUnit)o, silent);
 			case IJavaElement.CLASS_FILE:
-				return findType((IClassFile)o);			
+				return findType((IClassFile)o, silent);			
 		}
 		return o;
 	}
-
-	private IJavaElement getJavaElement(IMarker o) {
+	private IJavaElement getJavaElement(IMarker o, boolean silent) {
 		try {
-			return getJavaElement(JavaCore.create((String) ((IMarker) o).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID)));
+			return getJavaElement(JavaCore.create((String) ((IMarker) o).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID)), silent);
 		} catch (CoreException ex) {
 			ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.createJavaElement.");
 			return null;
 		}
 	}
-
-	protected IJavaElement getJavaElement(ISelection selection) {
+	protected IJavaElement getJavaElement(ISelection selection, boolean silent) {
 		if (selection instanceof ITextSelection)
-			return getJavaElement((ITextSelection) selection);
+			return getJavaElement((ITextSelection) selection, silent);
 		else
 			if (selection instanceof IStructuredSelection)
-				return getJavaElement((IStructuredSelection) selection);
+				return getJavaElement((IStructuredSelection) selection, silent);
 		return null;
 	}
-
-	private IJavaElement getJavaElement(Object o) {
+	private IJavaElement getJavaElement(Object o, boolean silent) {
 		if (o instanceof IJavaElement)
-			return getJavaElement((IJavaElement)o);
+			return getJavaElement((IJavaElement)o, silent);
 		else if (o instanceof IMarker)
-			return getJavaElement((IMarker)o);
+			return getJavaElement((IMarker)o, silent);
 		else if (o instanceof ISelection)
-			return getJavaElement((ISelection)o);
+			return getJavaElement((ISelection)o, silent);
 		else if (o instanceof ISearchResultViewEntry)
-			return getJavaElement((ISearchResultViewEntry)o);
+			return getJavaElement((ISearchResultViewEntry)o, silent);
 		return null;
 	}
-
-	private IJavaElement getJavaElement(ISearchResultViewEntry entry) {
+
+	private IJavaElement getJavaElement(ISearchResultViewEntry entry, boolean silent) {
 		if (entry != null)
-			return getJavaElement(entry.getSelectedMarker());
+			return getJavaElement(entry.getSelectedMarker(), silent);
 		return null;
 	}
-
-	private IJavaElement getJavaElement(IStructuredSelection selection) {
+
+	private IJavaElement getJavaElement(IStructuredSelection selection, boolean silent) {
 		if (selection.size() == 1)
 			// Selection only enabled if one element selected.
-			return getJavaElement(selection.getFirstElement());
+			return getJavaElement(selection.getFirstElement(), silent);
 		return null;
 	}
-
-	private IJavaElement getJavaElement(ITextSelection selection) {
+	private IJavaElement getJavaElement(ITextSelection selection, boolean silent) {
 		IEditorPart editorPart= JavaPlugin.getActivePage().getActiveEditor();
-
+
 		if (editorPart == null)
 			return null;
-
-		ICodeAssist assist= getCodeAssist(editorPart);
+		ICodeAssist assist= getCodeAssist(editorPart);
 		ITextSelection ts= (ITextSelection) selection;
 		if (assist != null) {
 			IJavaElement[] elements;
@@ -150,24 +147,21 @@ public abstract class JavaElementAction extends Action {
 		}
 		return null;
 	}
-
-	public ISelection getSelection() {
+	public ISelection getSelection() {
 		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 		if (window != null)
 			return window.getSelectionService().getSelection();
 		else
 			return TextSelection.emptySelection();
 	}
-
-	protected ICodeAssist getCodeAssist(IEditorPart editorPart) {
+	protected ICodeAssist getCodeAssist(IEditorPart editorPart) {
 		IEditorInput input= editorPart.getEditorInput();
 		if (input instanceof ClassFileEditorInput)
 			return ((ClassFileEditorInput)input).getClassFile();
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
 		return manager.getWorkingCopy(input);
 	}
-
-	private IJavaElement chooseFromList(List openChoices) {
+	private IJavaElement chooseFromList(List openChoices) {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(
 			  JavaElementLabelProvider.SHOW_DEFAULT 
 			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
@@ -178,7 +172,6 @@ public abstract class JavaElementAction extends Action {
 			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
 		return null;
 	}
-
 	/**
 	 * Answers if a dialog should prompt the user for a unique Java element
 	 */	
@@ -191,28 +184,56 @@ public abstract class JavaElementAction extends Action {
 		if (shell != null && shell.getDisplay() != null)
 			shell.getDisplay().beep();
 	}	
-
-	protected IType findType(ICompilationUnit cu) {
-		String mainTypeName= cu.getElementName().substring(0, cu.getElementName().length() - 5);
-		IType mainType= cu.getType(mainTypeName);
-		mainTypeName= JavaModelUtility.getTypeQualifiedName((IType)mainType);
-		try {					
-			mainType= JavaModelUtility.findTypeInCompilationUnit(cu, mainTypeName);
-			if (mainType == null) {
-				// fetch type which is declared first in the file
-				IType[] types= cu.getTypes();
-				if (types.length > 0)
-					mainType= types[0];
-				else
-					return null;
+	protected IJavaElement findType(ICompilationUnit cu, boolean silent) {
+		if (silent) {
+			String mainTypeName= cu.getElementName().substring(0, cu.getElementName().length() - 5);
+			IType mainType= cu.getType(mainTypeName);
+			mainTypeName= JavaModelUtility.getTypeQualifiedName((IType)mainType);
+			try {					
+				mainType= JavaModelUtility.findTypeInCompilationUnit(cu, mainTypeName);
+				if (mainType == null) {
+					// fetch type which is declared first in the file
+					IType[] types= cu.getTypes();
+					if (types.length > 0)
+						mainType= types[0];
+					else
+						return null;
+				}
+			} catch (JavaModelException ex) {
+				// silent mode
+				ExceptionHandler.log(ex, JavaPlugin.getResourceBundle(), "OpenTypeAction.error.open.");
+				return RETURN_WITHOUT_BEEP;
 			}
-		} catch (JavaModelException ex) {
-			return null;
+			return mainType;
+		} 
+		else {
+			IType[] types= null;
+			try {
+				types= cu.getAllTypes();
+			} catch (JavaModelException ex) {
+				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "OpenTypeAction.error.open.");
+				return RETURN_WITHOUT_BEEP;
+			}
+			if (types.length == 1)
+				return types[0];
+			String title= JavaPlugin.getResourceString(PREFIX + "selectionDialog.title");
+			String message = JavaPlugin.getResourceString(PREFIX + "selectionDialog.message");
+			Shell parent= JavaPlugin.getActiveWorkbenchShell();
+			int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
+			ElementListSelectionDialog d= new ElementListSelectionDialog(parent, title, null, new JavaElementLabelProvider(flags), true, false);
+			d.setMessage(message);
+			if (d.open(types, null) == d.OK) {
+				Object[] elements= d.getResult();
+				if (elements != null && elements.length == 1) {
+					return ((IType)elements[0]);
+				}
+			}
+			else
+				return RETURN_WITHOUT_BEEP;
 		}
-		return mainType;
+		return null;
 	}
-
-	protected IType findType(IClassFile cf) {
+	protected IJavaElement findType(IClassFile cf, boolean silent) {
 		IType mainType;
 		try {					
 			mainType= cf.getType();

@@ -29,7 +29,7 @@ public class FindImplementorsAction extends ElementSearchAction {
 		if (!super.canOperateOn(sel))
 			return false;
 
-		IJavaElement element= getJavaElement(sel);
+		IJavaElement element= getJavaElement(sel, true);
 		if (element.getElementType() == IJavaElement.TYPE)
 			try {
 				return ((IType) element).isInterface();
