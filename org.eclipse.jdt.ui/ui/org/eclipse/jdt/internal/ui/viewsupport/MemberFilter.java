@@ -9,6 +9,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -20,28 +21,28 @@ import org.eclipse.jdt.core.JavaModelException;
 public class MemberFilter extends ViewerFilter {
 
 	public static final int FILTER_NONPUBLIC= 1;
-	public static final int FILTER_STATIC= 2;
-	public static final int FILTER_FIELDS= 4;
+	public static final int SHOW_STATIC= 2;
+	public static final int SHOW_FIELDS= 4;
 	
 	private int fFilterProperties;
 
 	/**
-	 * Modifies filter and add a property to filter for
+	 * Modifies filter and add a property
 	 */
-	public final void addFilter(int filter) {
-		fFilterProperties |= filter;
+	public final void addProperty(int property) {
+		fFilterProperties |= property;
 	}
 	/**
-	 * Modifies filter and remove a property to filter for
+	 * Modifies filter and remove a property
 	 */	
-	public final void removeFilter(int filter) {
-		fFilterProperties &= (-1 ^ filter);
+	public final void removeProperty(int property) {
+		fFilterProperties &= (-1 ^ property);
 	}
 	/**
 	 * Tests if a property is filtered
 	 */		
-	public final boolean hasFilter(int filter) {
-		return (fFilterProperties & filter) != 0;
+	public final boolean hasProperty(int property) {
+		return (fFilterProperties & property) != 0;
 	}
 	
 	/*
@@ -50,25 +51,29 @@ public class MemberFilter extends ViewerFilter {
 	public boolean isFilterProperty(Object element, Object property) {
 		return false;
 	}
+	
 	/*
 	 * @see ViewerFilter@select
 	 */		
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		try {
-			if (hasFilter(FILTER_FIELDS) && element instanceof IField) {
-				return false;
-			}
 			if (element instanceof IMember) {
+				
 				IMember member= (IMember)element;
 				if (member.getElementName().startsWith("<")) { // filter out <clinit> //$NON-NLS-1$
 					return false;
 				}
 				int flags= member.getFlags();
-				if (hasFilter(FILTER_STATIC) && Flags.isStatic(flags)) {
-					return false;
+				if (!Flags.isPublic(flags) && !isMemberInInterface(member) && !isTopLevelType(member)) {
+					if (hasProperty(FILTER_NONPUBLIC)) {
+						return false;
+					}
 				}
-				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterface(member) && !isTopLevelType(member)) {
-					return false;
+				boolean isField= member.getElementType() == IJavaElement.FIELD;
+				boolean isStatic= Flags.isStatic(flags) || isFieldInInterface(member);
+				
+				if (isField || isStatic) {
+					return (isField && hasProperty(SHOW_FIELDS)) || (isStatic && hasProperty(SHOW_STATIC));
 				}
 			}			
 		} catch (JavaModelException e) {
@@ -81,6 +86,10 @@ public class MemberFilter extends ViewerFilter {
 		IType parent= member.getDeclaringType();
 		return parent != null && parent.isInterface();
 	}
+	
+	private boolean isFieldInInterface(IMember member) throws JavaModelException {
+		return (member.getElementType() == IJavaElement.FIELD) && member.getDeclaringType().isInterface();
+	}	
 	
 	private boolean isTopLevelType(IMember member) throws JavaModelException {
 		IType parent= member.getDeclaringType();

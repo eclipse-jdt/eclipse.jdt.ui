@@ -278,7 +278,7 @@ public class JavaElementImageProvider {
 					flags |= JavaElementImageDescriptor.FINAL;
 				if (Flags.isSynchronized(modifiers) && confirmSynchronized(member))
 					flags |= JavaElementImageDescriptor.SYNCHRONIZED;
-				if (Flags.isStatic(modifiers))
+				if (Flags.isStatic(modifiers) || isInterfaceField(member))
 					flags |= JavaElementImageDescriptor.STATIC;
 				
 				if (member.getElementType() == IJavaElement.TYPE) {
@@ -302,7 +302,7 @@ public class JavaElementImageProvider {
 	}
 	
 	private boolean isInterfaceField(IMember element) throws JavaModelException {
-		// always show the final symbol on interface fields
+		// always show the final && static symbol on interface fields
 		if (element.getElementType() == IJavaElement.FIELD) {
 			return element.getDeclaringType().isInterface();
 		}

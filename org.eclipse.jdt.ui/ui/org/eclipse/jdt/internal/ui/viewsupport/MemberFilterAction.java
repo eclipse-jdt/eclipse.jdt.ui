@@ -17,18 +17,15 @@ public class MemberFilterAction extends Action {
 
 	private int fFilterProperty;
 	private MemberFilterActionGroup fFilterActionGroup;
-
-	private boolean fCheckedIsFiltering;
 	
-	public MemberFilterAction(MemberFilterActionGroup actionGroup, String title, int property, String contextHelpId, boolean initValue, boolean checkedIsFiltering) {
+	public MemberFilterAction(MemberFilterActionGroup actionGroup, String title, int property, String contextHelpId, boolean initValue) {
 		super(title);
 		fFilterActionGroup= actionGroup;
 		fFilterProperty= property;
-		fCheckedIsFiltering= checkedIsFiltering;
 		
 		WorkbenchHelp.setHelp(this, contextHelpId);
 
-		setFilter(initValue);
+		setChecked(initValue);
 	}
 	
 	/**
@@ -42,23 +39,7 @@ public class MemberFilterAction extends Action {
 	 * @see Action#actionPerformed
 	 */
 	public void run() {	
-		fFilterActionGroup.setMemberFilter(fFilterProperty, isFilterSet());
+		fFilterActionGroup.setMemberFilter(fFilterProperty, isChecked());
 	}
-	
-	public void setFilter(boolean doFilter) {
-		if (fCheckedIsFiltering) {
-			setChecked(doFilter);
-		} else {
-			setChecked(!doFilter);
-		}
-	}
-	
-	public boolean isFilterSet() {
-		if (fCheckedIsFiltering) {
-			return isChecked();
-		} else {
-			return !isChecked();
-		}
-	}
-	
+		
 }

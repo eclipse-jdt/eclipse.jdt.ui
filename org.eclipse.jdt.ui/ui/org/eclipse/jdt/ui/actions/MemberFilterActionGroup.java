@@ -30,11 +30,16 @@ import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterAction;
 public class MemberFilterActionGroup extends ActionGroup {
 
 	public static final int FILTER_NONPUBLIC= MemberFilter.FILTER_NONPUBLIC;
-	public static final int FILTER_STATIC= MemberFilter.FILTER_STATIC;
-	public static final int FILTER_FIELDS= MemberFilter.FILTER_FIELDS;
+	public static final int SHOW_STATIC= MemberFilter.SHOW_STATIC;
+	public static final int SHOW_FIELDS= MemberFilter.SHOW_FIELDS;
 	
-	private static final String TAG_HIDEFIELDS= "hidefields"; //$NON-NLS-1$
-	private static final String TAG_HIDESTATIC= "hidestatic"; //$NON-NLS-1$
+	/** deprecated */
+	public static final int HIDE_STATIC= 8;
+	/** deprecated */
+	public static final int HIDE_FIELDS= 8;
+	
+	private static final String TAG_SHOWFIELDS= "showfields"; //$NON-NLS-1$
+	private static final String TAG_SHOWSTATIC= "showstatic"; //$NON-NLS-1$
 	private static final String TAG_HIDENONPUBLIC= "hidenonpublic"; //$NON-NLS-1$
 	
 	private MemberFilterAction[] fFilterActions;
@@ -57,38 +62,38 @@ public class MemberFilterActionGroup extends ActionGroup {
 		
 		// get initial values
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		boolean doHideFields= store.getBoolean(getPreferenceKey(FILTER_FIELDS));
-		boolean doHideStatic= store.getBoolean(getPreferenceKey(FILTER_STATIC));
+		boolean doShowFields= store.getBoolean(getPreferenceKey(SHOW_FIELDS));
+		boolean doShowStatic= store.getBoolean(getPreferenceKey(SHOW_STATIC));
 		boolean doHidePublic= store.getBoolean(getPreferenceKey(FILTER_NONPUBLIC));
 
 		fFilter= new MemberFilter();
-		if (doHideFields)
-			fFilter.addFilter(FILTER_FIELDS);
-		if (doHideStatic)
-			fFilter.addFilter(FILTER_STATIC);			
+		if (doShowFields)
+			fFilter.addProperty(SHOW_FIELDS);
+		if (doShowStatic)
+			fFilter.addProperty(SHOW_STATIC);			
 		if (doHidePublic)
-			fFilter.addFilter(FILTER_NONPUBLIC);		
+			fFilter.addProperty(FILTER_NONPUBLIC);		
 	
 		// fields
-		String title= ActionMessages.getString("MemberFilterActionGroup.hide_fields.label"); //$NON-NLS-1$
+		String title= ActionMessages.getString("MemberFilterActionGroup.show_fields.label"); //$NON-NLS-1$
 		String helpContext= IJavaHelpContextIds.FILTER_FIELDS_ACTION;
-		MemberFilterAction hideFields= new MemberFilterAction(this, title, FILTER_FIELDS, helpContext, doHideFields, false);
-		hideFields.setDescription(ActionMessages.getString("MemberFilterActionGroup.hide_fields.description")); //$NON-NLS-1$
-		hideFields.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.hide_fields.tooltip")); //$NON-NLS-1$
+		MemberFilterAction hideFields= new MemberFilterAction(this, title, SHOW_FIELDS, helpContext, doShowFields);
+		hideFields.setDescription(ActionMessages.getString("MemberFilterActionGroup.show_fields.description")); //$NON-NLS-1$
+		hideFields.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.show_fields.tooltip")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(hideFields, "fields_co.gif"); //$NON-NLS-1$
 		
 		// static
-		title= ActionMessages.getString("MemberFilterActionGroup.hide_static.label"); //$NON-NLS-1$
+		title= ActionMessages.getString("MemberFilterActionGroup.show_static.label"); //$NON-NLS-1$
 		helpContext= IJavaHelpContextIds.FILTER_STATIC_ACTION;
-		MemberFilterAction hideStatic= new MemberFilterAction(this, title, FILTER_STATIC, helpContext, doHideStatic, false);
-		hideStatic.setDescription(ActionMessages.getString("MemberFilterActionGroup.hide_static.description")); //$NON-NLS-1$
-		hideStatic.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.hide_static.tooltip")); //$NON-NLS-1$
+		MemberFilterAction hideStatic= new MemberFilterAction(this, title, SHOW_STATIC, helpContext, doShowStatic);
+		hideStatic.setDescription(ActionMessages.getString("MemberFilterActionGroup.show_static.description")); //$NON-NLS-1$
+		hideStatic.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.show_static.tooltip")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(hideStatic, "static_co.gif"); //$NON-NLS-1$
 		
 		// non-public
 		title= ActionMessages.getString("MemberFilterActionGroup.hide_nonpublic.label"); //$NON-NLS-1$
 		helpContext= IJavaHelpContextIds.FILTER_PUBLIC_ACTION;
-		MemberFilterAction hideNonPublic= new MemberFilterAction(this, title, FILTER_NONPUBLIC, helpContext, doHidePublic, true);
+		MemberFilterAction hideNonPublic= new MemberFilterAction(this, title, FILTER_NONPUBLIC, helpContext, doHidePublic);
 		hideNonPublic.setDescription(ActionMessages.getString("MemberFilterActionGroup.hide_nonpublic.description")); //$NON-NLS-1$
 		hideNonPublic.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.hide_nonpublic.tooltip")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(hideNonPublic, "public_co.gif"); //$NON-NLS-1$
@@ -105,22 +110,22 @@ public class MemberFilterActionGroup extends ActionGroup {
 	
 	/**
 	 * Set the current filter.
-	 * @param filterProperty Constants FILTER_FIELDS, FILTER_PUBLIC & FILTER_PRIVATE as defined by this
+	 * @param filterProperty Constants SHOW_FIELDS, FILTER_NONPUBLIC & SHOW_STATIC as defined by this
 	 * action group
 	 * @param set The new value. If true, the elements of the given types are filtered.
 	 */	
 	public void setMemberFilter(int filterProperty, boolean set) {
 		if (set) {
-			fFilter.addFilter(filterProperty);
+			fFilter.addProperty(filterProperty);
 		} else {
-			fFilter.removeFilter(filterProperty);
+			fFilter.removeProperty(filterProperty);
 		}
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		
 		for (int i= 0; i < fFilterActions.length; i++) {
 			int currProperty= fFilterActions[i].getFilterProperty();
 			if (currProperty == filterProperty) {
-				fFilterActions[i].setFilter(set);
+				fFilterActions[i].setChecked(set);
 			}
 			store.setValue(getPreferenceKey(currProperty), hasMemberFilter(currProperty));
 		}
@@ -129,19 +134,19 @@ public class MemberFilterActionGroup extends ActionGroup {
 
 	/**
 	 * Returns <code>true</code> if the given filter is set.
-	 * @param filterProperty Constants FILTER_FIELDS, FILTER_PUBLIC & FILTER_PRIVATE as defined by this
+	 * @param filterProperty Constants SHOW_FIELDS, FILTER_NONPUBLIC & SHOW_STATIC as defined by this
 	 * action group
 	 */	
 	public boolean hasMemberFilter(int filterProperty) {
-		return fFilter.hasFilter(filterProperty);
+		return fFilter.hasProperty(filterProperty);
 	}
 	
 	/**
 	 * Saves the state of the filter actions in a memento.
 	 */
 	public void saveState(IMemento memento) {
-		memento.putString(TAG_HIDEFIELDS, String.valueOf(hasMemberFilter(FILTER_FIELDS)));
-		memento.putString(TAG_HIDESTATIC, String.valueOf(hasMemberFilter(FILTER_STATIC)));
+		memento.putString(TAG_SHOWFIELDS, String.valueOf(hasMemberFilter(SHOW_FIELDS)));
+		memento.putString(TAG_SHOWSTATIC, String.valueOf(hasMemberFilter(SHOW_STATIC)));
 		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(hasMemberFilter(FILTER_NONPUBLIC)));
 	}
 	
@@ -149,10 +154,10 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 * Restores the state of the filter actions from a memento.
 	 */	
 	public void restoreState(IMemento memento) {
-		boolean set= Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue();
-		setMemberFilter(FILTER_FIELDS, set);
-		set= Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue();
-		setMemberFilter(FILTER_STATIC, set);
+		boolean set= Boolean.valueOf(memento.getString(TAG_SHOWFIELDS)).booleanValue();
+		setMemberFilter(SHOW_FIELDS, set);
+		set= Boolean.valueOf(memento.getString(TAG_SHOWSTATIC)).booleanValue();
+		setMemberFilter(SHOW_STATIC, set);
 		set= Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue();
 		setMemberFilter(FILTER_NONPUBLIC, set);		
 	}

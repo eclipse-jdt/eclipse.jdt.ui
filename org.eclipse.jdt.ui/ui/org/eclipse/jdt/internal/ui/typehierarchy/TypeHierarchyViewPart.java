@@ -1117,7 +1117,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (display != null) {
 			display.asyncExec(new Runnable() {
 				public void run() {
-					doTypeHierarchyChangedOnViewers(changedTypes);
+					if (fPagebook != null && !fPagebook.isDisposed()) {
+						doTypeHierarchyChangedOnViewers(changedTypes);
+					}
 				}
 			});
 		}
