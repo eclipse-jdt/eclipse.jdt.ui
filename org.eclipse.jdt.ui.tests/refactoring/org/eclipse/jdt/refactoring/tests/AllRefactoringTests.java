@@ -33,6 +33,7 @@ public class AllRefactoringTests {
 		suite.addTest(RenamePrivateMethodTests.noSetupSuite());	
 		suite.addTest(RenameStaticMethodTests.noSetupSuite());
 		suite.addTest(RenameParametersTests.noSetupSuite());
+		suite.addTest(RenameTempTests.noSetupSuite());
 		//suite.addTest(ReorderParametersTests.noSetupSuite());
 		
 		//--types

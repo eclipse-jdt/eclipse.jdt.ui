@@ -4,9 +4,12 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
+import java.util.HashMap;
+import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
@@ -63,12 +66,23 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;public class RenameParame
 		return createCU(pack, getSimpleTestFileName(canRename, input), getFileContents(getTestFileName(canRename, input)));
 	}
 	
+	private static Map createRenamings(IMethod method, String[] newNames) throws Exception{
+		Map result= new HashMap();
+		String[] oldNames= method.getParameterNames();
+		for (int i = 0; i < oldNames.length; i++) {
+			result.put(oldNames[i], newNames[i]);
+		}
+		return result;
+	}
+	
 	private void helper1(String[] newNames, String[] signature, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
-		RenameParametersRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, classA.getMethod("m", signature));
+		IMethod method= classA.getMethod("m", signature);
+		RenameParametersRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, method);
 		ref.setUpdateReferences(updateReferences);
-		ref.setNewParameterNames(newNames);
+		//ref.setNewParameterNames(newNames);
+		ref.setNewNames(createRenamings(method, newNames));
 		
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -88,9 +102,11 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;public class RenameParame
 	private void helper2(String[] newNames, String[] signature) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		//DebugUtils.dump("classA" + classA);
-		RenameParametersRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, classA.getMethod("m", signature));
+		IMethod method= classA.getMethod("m", signature);
+		RenameParametersRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, method);
 		if (newNames.length > 0)
-			ref.setNewParameterNames(newNames);
+			ref.setNewNames(createRenamings(method, newNames));
+			//ref.setNewParameterNames(newNames);
 		
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		

@@ -34,10 +34,10 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 public class ExtractMethodTests extends AbstractCUTestCase {
 
-	private static final String SQUARE_BRACKET_OPEN= "/*[*/";
-	private static final int    SQUARE_BRACKET_OPEN_LENGTH= SQUARE_BRACKET_OPEN.length();
-	private static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
-	private static final int    SQUARE_BRACKET_CLOSE_LENGTH= SQUARE_BRACKET_CLOSE.length();
+	public static final String SQUARE_BRACKET_OPEN= "/*[*/";
+	public static final int    SQUARE_BRACKET_OPEN_LENGTH= SQUARE_BRACKET_OPEN.length();
+	public static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
+	public static final int    SQUARE_BRACKET_CLOSE_LENGTH= SQUARE_BRACKET_CLOSE.length();
 
 	private static ExtractMethodTestSetup fgTestSetup;
 	
@@ -95,7 +95,7 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 		return id + "_" + name() + ".java";
 	}
 
-	protected int[] getSelection(String source) {
+	protected static int[] getSelection(String source) {
 		int start= -1;
 		int end= -1;
 		int includingStart= source.indexOf(SQUARE_BRACKET_OPEN);

@@ -911,9 +911,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void test57() throws Exception {
-		fIsVerbose= true;
 		helper2_0("A", "A", "B", "B", true, true, true, true);
-		fIsVerbose= false;
 	}
 		
 	public void test5() throws Exception { 
