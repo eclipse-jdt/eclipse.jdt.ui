@@ -268,5 +268,10 @@ public class InlineTempTests extends RefactoringTest {
 		//test for 19851
 		helper2(10, 16, 10, 19);
 	}
+
+	public void testFail13() throws Exception{
+//		printTestDisabledMessage("12106");
+		helper2(4, 18, 4, 19);
+	}
 	
 }
