@@ -1428,6 +1428,24 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			fCloseStrings= enabled;
 		}
 		
+		private boolean isResfOfLineEmpty(IDocument document, int offset) {
+
+			if (offset == document.getLength())
+				return true;
+				
+			try {
+				IRegion line= document.getLineInformationOfOffset(offset);
+				String string= document.get(offset, line.getOffset() + line.getLength() - offset);
+				for (int i= 0; i < string.length(); i++)
+					if (!Character.isWhitespace(string.charAt(i)))
+						return false;
+				return true;
+				
+			} catch (BadLocationException e) {
+				return true;
+			}
+		}
+		
 		/*
 		 * @see org.eclipse.swt.custom.VerifyKeyListener#verifyKey(org.eclipse.swt.events.VerifyEvent)
 		 */
@@ -1446,7 +1464,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			switch (event.character) {
 			case '(':
 			case '[':
-				if (!fCloseBrackets)
+				if (!fCloseBrackets || !isResfOfLineEmpty(document, offset + length))
 					return;
 			
 			case '"':
