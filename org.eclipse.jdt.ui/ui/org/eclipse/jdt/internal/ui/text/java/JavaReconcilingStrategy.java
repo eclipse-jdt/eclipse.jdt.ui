@@ -28,6 +28,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -84,10 +86,10 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 						// reconcile
 						synchronized (unit) {
 							if (fIsJavaReconcilingListener) {
-								ast= unit.reconcile(true, true, null, fProgressMonitor);
+								ast= unit.reconcile(AST.LEVEL_2_0, true, null, fProgressMonitor);
 								markAsUnmodifiable(ast);
 							} else
-								unit.reconcile(false, true, null, fProgressMonitor);
+								unit.reconcile(0, true, null, fProgressMonitor);
 						}
 					} catch (OperationCanceledException ex) {
 						Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());

@@ -1003,7 +1003,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				try {
 					
 					synchronized (unit) {
-						unit.reconcile(false, false, null, null);
+						unit.reconcile(0, false, null, null);
 					}
 					IJavaElement[] findings= unit.findElements(element);
 					if (findings != null && findings.length > 0)
@@ -1192,7 +1192,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			try {
 				if (reconcile) {
 					synchronized (unit) {
-						unit.reconcile(false, false, null, null);
+						unit.reconcile(0, false, null, null);
 					}
 					return unit.getElementAt(offset);
 				} else if (unit.isConsistent())

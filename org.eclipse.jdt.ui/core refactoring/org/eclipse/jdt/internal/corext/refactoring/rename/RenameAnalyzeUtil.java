@@ -82,7 +82,7 @@ class RenameAnalyzeUtil {
 			newWorkingCopies[i]= WorkingCopyUtil.getNewWorkingCopy(cu);
 			String previewContent= manager.get(cu).getPreviewContent();
 			newWorkingCopies[i].getBuffer().setContents(previewContent);
-			newWorkingCopies[i].reconcile(false, false, null, new SubProgressMonitor(pm, 1));
+			newWorkingCopies[i].reconcile(0, false, null, new SubProgressMonitor(pm, 1));
 		}
 		return newWorkingCopies;
 	}
@@ -96,7 +96,7 @@ class RenameAnalyzeUtil {
 			newWorkingCopies[i]= cu.getWorkingCopy(owner, null, null);
 			String previewContent= manager.get(cu).getPreviewContent();
 			newWorkingCopies[i].getBuffer().setContents(previewContent);
-			newWorkingCopies[i].reconcile(false, false, owner, new SubProgressMonitor(pm, 1));
+			newWorkingCopies[i].reconcile(0, false, owner, new SubProgressMonitor(pm, 1));
 		}
 		pm.done();
 		return newWorkingCopies;
