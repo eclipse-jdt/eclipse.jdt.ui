@@ -31,9 +31,9 @@ import org.eclipse.test.performance.PerformanceMeter;
  * 
  * @since 3.1
  */
-public class ConvertLineDelimiterTest extends TextPerformanceTestCase {
+public class ConvertLineDelimitersTest extends TextPerformanceTestCase {
 	
-	private static final Class THIS= ConvertLineDelimiterTest.class;
+	private static final Class THIS= ConvertLineDelimitersTest.class;
 	
 	private static final int WARM_UP_RUNS= 5;
 
