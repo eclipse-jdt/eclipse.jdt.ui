@@ -204,7 +204,6 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 * @param node The node to be marked as inserted.
 	 * @param description Description of the change.
-	 * @deprecated Use markAsInsertBeforeNew, markAsInsertBeforeOriginal or markAsInsert  
 	 */
 	public final void markAsInserted(ASTNode node, GroupDescription description) {
 		Assert.isTrue(!isCollapsed(node), "Tries to insert a collapsed node"); //$NON-NLS-1$
@@ -220,7 +219,6 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
 	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 * @param node The node to be marked as inserted.
-	 * @deprecated Use markAsInsertBeforeNew, markAsInsertBeforeOriginal or markAsInsert  
 	 */
 	public final void markAsInserted(ASTNode node) {
 		markAsInserted(node, (GroupDescription) null);
