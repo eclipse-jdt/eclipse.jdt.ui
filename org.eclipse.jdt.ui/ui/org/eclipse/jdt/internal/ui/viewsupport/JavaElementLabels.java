@@ -502,17 +502,17 @@ public class JavaElementLabels {
 			}
 		}
 		
-		try {
-			if (!type.isAnonymous()) {
-				buf.append(type.getElementName());
-			} else {
+		String typeName= type.getElementName();
+		if (typeName.length() == 0) { // anonymous
+			try {
 				String superclassName= Signature.getSimpleName(type.getSuperclassName());
-				buf.append(JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type" , superclassName)); //$NON-NLS-1$
+				typeName= JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type" , superclassName); //$NON-NLS-1$
+			} catch (JavaModelException e) {
+				//ignore
+				typeName= JavaUIMessages.getString("JavaElementLabels.anonym"); //$NON-NLS-1$
 			}
-		} catch (JavaModelException e) {
-			//ignore
-			buf.append(type.getElementName());
 		}
+		buf.append(typeName);
 		
 		// post qualification
 		if (getFlag(flags, T_POST_QUALIFIED)) {
