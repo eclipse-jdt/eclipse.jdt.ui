@@ -599,7 +599,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				
 				switch (event.character) {
 					case '(':
-						if (nextToken == Symbols.TokenLPAREN
+						if (!fCloseBrackets
+								|| nextToken == Symbols.TokenLPAREN
 								|| nextToken == Symbols.TokenIDENT 
 								|| next != null && next.length() > 1)
 							return;
