@@ -71,12 +71,13 @@ class CPListLabelProvider extends LabelProvider {
 					}
 				}
 				case IClasspathEntry.CPE_VARIABLE: {
-					String name= cpentry.getPath().makeRelative().toString();
+					IPath path= cpentry.getPath();
+					String name= path.makeRelative().toString();
 					StringBuffer buf= new StringBuffer(name);
-					IClasspathEntry entry= JavaCore.getResolvedClasspathVariable(cpentry.getPath());
-					if (entry != null) {
+					IPath entryPath= JavaCore.getClasspathVariable(path.segment(0));
+					if (entryPath != null) {
 						buf.append(" - ");
-						IPath pathExtension= entry.getPath();
+						buf.append(entryPath.append(path.removeFirstSegments(1).toString()));
 					}
 					return buf.toString();
 				}

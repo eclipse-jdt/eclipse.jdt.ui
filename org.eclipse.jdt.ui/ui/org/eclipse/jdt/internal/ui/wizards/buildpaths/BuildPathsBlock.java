@@ -376,25 +376,30 @@ public class BuildPathsBlock {
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 		
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
-			CPListElement currelement= (CPListElement)elements.get(i);
-			int entryKind= currelement.getEntryKind();
-			IPath curr= currelement.getPath();
-			for (int j= 0; j < i; j++) {
-				CPListElement cpelement= (CPListElement)elements.get(j);
-				IPath p= cpelement.getPath();
-				if (curr.equals(p)) {
-					// duplicate entry
-					fClassPathStatus.setError(getFormattedString(CP_DUPLICATE_ERROR, p.toString()));
-					return;
-				} else {
-					// nested entry (applies only if they are of the same kind)
-					if (cpelement.getEntryKind() == entryKind && JavaConventions.isOverlappingRoots(curr, p)) {
-						fClassPathStatus.setError(getFormattedString(CP_RECURSIVE_ERROR, new String[] { curr.toString(), p.toString()}));
-						return;
+			CPListElement currElement= (CPListElement)elements.get(i);
+			int currKind= currElement.getEntryKind();
+			if (currKind == IClasspathEntry.CPE_SOURCE || currKind == IClasspathEntry.CPE_LIBRARY) {
+				IPath currPath= currElement.getPath();
+				for (int j= 0; j < i; j++) {
+					CPListElement cpelement= (CPListElement)elements.get(j);
+					int cpelementKind= cpelement.getEntryKind();
+					if (cpelementKind == IClasspathEntry.CPE_SOURCE || cpelementKind == IClasspathEntry.CPE_LIBRARY) {
+						IPath cpelementPath= cpelement.getPath();
+						if (currPath.equals(cpelementPath)) {
+							// duplicate entry
+							fClassPathStatus.setError(getFormattedString(CP_DUPLICATE_ERROR, cpelementPath.toString()));
+							return;
+						} else {
+							// nested entry (applies only if they are of the same kind)
+							if (cpelementKind == currKind && JavaConventions.isOverlappingRoots(currPath, cpelementPath)) {
+								fClassPathStatus.setError(getFormattedString(CP_RECURSIVE_ERROR, new String[] { currPath.toString(), cpelementPath.toString()}));
+								return;
+							}
+						}
 					}
 				}
 			}
-			entries[i]= currelement.getClasspathEntry();
+			entries[i]= currElement.getClasspathEntry();
 		}
 		if (fCurrJProject.hasClasspathCycle(entries)) {
 			fClassPathStatus.setError(getResourceString(CP_CYCLES_ERROR));

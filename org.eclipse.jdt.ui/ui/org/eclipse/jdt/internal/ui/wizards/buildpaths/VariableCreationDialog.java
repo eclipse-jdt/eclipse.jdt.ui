@@ -170,7 +170,12 @@ public class VariableCreationDialog extends StatusDialog {
 				initPath= "";
 			}
 		} else {
-			initPath= new Path(initPath).removeLastSegments(1).toOSString();
+			IPath entryPath= new Path(initPath);
+			String fileExt= entryPath.getFileExtension();
+			if ("zip".equals(fileExt) || "jar".equals(fileExt)) {
+				entryPath.removeLastSegments(1);
+			}
+			initPath= entryPath.toOSString();
 		}
 		
 		FileDialog dialog= new FileDialog(getShell());

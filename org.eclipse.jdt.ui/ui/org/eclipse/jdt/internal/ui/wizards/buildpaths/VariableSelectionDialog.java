@@ -225,13 +225,25 @@ public class VariableSelectionDialog extends StatusDialog {
 			}
 		}
 		return status;
-	}	
+	}
+	
+	private IPath getResolvedPath() {
+		if (fVariable != null) {
+			IPath entryPath= JavaCore.getClasspathVariable(fVariable);
+			if (entryPath != null) {
+				return entryPath.append(fExtensionField.getText());
+			}
+		}
+		return null;
+	}		
+	
+		
 
 	private void updateFullTextField() {
 		if (fFullPath != null && !fFullPath.isDisposed()) {
-			if (fVariable != null) {
-				IPath entryPath= JavaCore.getClasspathVariable(fVariable);
-				fFullPath.setText(entryPath.append(fExtensionField.getText()).toString());
+			IPath resolvedPath= getResolvedPath();
+			if (resolvedPath != null) {
+				fFullPath.setText(resolvedPath.toString());
 			} else {
 				fFullPath.setText("");
 			}
@@ -239,12 +251,15 @@ public class VariableSelectionDialog extends StatusDialog {
 	}
 	
 	private IPath chooseExtJar() {
-		String varName= fVariableField.getText();
-		IPath entryPath= JavaCore.getClasspathVariable(varName);
-		if (entryPath == null) {
-			return null;
+		String lastUsedPath= "";
+		IPath entryPath= getResolvedPath();
+		if (entryPath != null) {
+			String fileExt= entryPath.getFileExtension();
+			if ("zip".equals(fileExt) || "jar".equals(fileExt)) {
+				entryPath.removeLastSegments(1);
+			}
+			lastUsedPath= entryPath.toOSString();
 		}
-		String lastUsedPath= entryPath.append(fExtensionField.getText()).removeLastSegments(1).toOSString();
 		
 		FileDialog dialog= new FileDialog(getShell(), SWT.SINGLE);
 		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"});
@@ -257,7 +272,7 @@ public class VariableSelectionDialog extends StatusDialog {
 		if (!entryPath.isPrefixOf(resPath)) {
 			return new Path(resPath.lastSegment());
 		} else {
-			return resPath.removeLastSegments(entryPath.segmentCount());
+			return resPath.removeFirstSegments(entryPath.segmentCount()).setDevice(null);
 		}
 	}
 
