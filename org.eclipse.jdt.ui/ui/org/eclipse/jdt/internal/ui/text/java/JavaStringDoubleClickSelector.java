@@ -58,7 +58,7 @@ public class JavaStringDoubleClickSelector extends JavaDoubleClickSelector {
 			if ((document.getChar(offset) == '"') || (document.getChar(offset) == '\'') ||
 				(document.getChar(offset - 1) == '"') || (document.getChar(offset - 1) == '\''))		
 			{
-				return TextUtilities.getPartition(document, fPartitioning, offset);
+				return TextUtilities.getPartition(document, fPartitioning, offset, true);
 			}
 		} catch (BadLocationException e) {
 		}

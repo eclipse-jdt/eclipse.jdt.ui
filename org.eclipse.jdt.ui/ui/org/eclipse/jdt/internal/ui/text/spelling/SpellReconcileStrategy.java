@@ -330,7 +330,7 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 				fRequestor.beginReporting();
 
 				ITypedRegion partition= null;
-				final ITypedRegion[] partitions= TextUtilities.computePartitioning(fDocument, fPartitioning, 0, fDocument.getLength());
+				final ITypedRegion[] partitions= TextUtilities.computePartitioning(fDocument, fPartitioning, 0, fDocument.getLength(), false);
 
 				final Locale locale= getLocale();
 				final ISpellCheckEngine engine= SpellCheckEngine.getInstance();

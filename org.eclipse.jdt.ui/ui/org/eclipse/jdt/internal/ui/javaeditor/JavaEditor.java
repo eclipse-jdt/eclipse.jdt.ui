@@ -1453,7 +1453,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 			try {
 				// get the text hover content
-				String contentType= TextUtilities.getContentType(sourceViewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, offset);
+				String contentType= TextUtilities.getContentType(sourceViewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, offset, true);
 
 				IRegion hoverRegion= textHover.getHoverRegion(sourceViewer, offset);						
 				if (hoverRegion == null)
@@ -1531,7 +1531,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 			String type= IDocument.DEFAULT_CONTENT_TYPE;
 			try {
-				type= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset).getType();
+				type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 			} catch (BadLocationException exception) {
 				// Should not happen
 			}
@@ -1544,7 +1544,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					} while (index < length && Character.isWhitespace(line.charAt(index)));
 				}
 			} else {
-				if (index < length - 1 && line.charAt(index) == '/' && line.charAt(++index) == '/') {
+				if (index < length - 1 && line.charAt(index) == '/' && line.charAt(index + 1) == '/') {
+					index++;
 					do {
 						++index;
 					} while (index < length && Character.isWhitespace(line.charAt(index)));
@@ -1589,7 +1590,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			
 				// Check whether we are in a java code partition and the preference is enabled
 				final IPreferenceStore store= getNewPreferenceStore();
-				final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
+				final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position, false);
 				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
 					super.run();
 					return;				
@@ -1789,7 +1790,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					short next= Short.MAX_VALUE;
 
 					// Acquire collator for partition around caret
-					final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
+					final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position, false);
 					final String buffer= document.get(region.getOffset(), position - region.getOffset() + 1);
 					final CollationElementIterator iterator= fCollator.getCollationElementIterator(buffer);
 
@@ -1958,7 +1959,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				try {
 					viewer.setRedraw(false);
 
-					final String type= TextUtilities.getContentType(viewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, selection.x);
+					final String type= TextUtilities.getContentType(viewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, selection.x, true);
 					if (type.equals(IDocument.DEFAULT_CONTENT_TYPE) && selection.y == 0) {
 
 						try {
@@ -2934,7 +2935,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			return null;
 			
 		IRegion line= document.getLineInformationOfOffset(lineOffset);
-		ITypedRegion[] linePartitioning= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, lineOffset, line.getLength());
+		ITypedRegion[] linePartitioning= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, lineOffset, line.getLength(), false);
 		
 		List segmentation= new ArrayList();
 		for (int i= 0; i < linePartitioning.length; i++) {

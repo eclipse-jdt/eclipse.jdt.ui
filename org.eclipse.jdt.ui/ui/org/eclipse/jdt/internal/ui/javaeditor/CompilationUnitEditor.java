@@ -104,6 +104,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -552,8 +553,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				}
 				
 				try {		
-					ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset);
-					if (! IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()) && partition.getOffset() != offset)
+					ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
+//					if (! IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()) && partition.getOffset() != offset)
+					if (! IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()))
 						return;
 						
 					if (!validateEditorInputState())
@@ -1019,7 +1021,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 	
 	/** Preference key for code formatter tab size */
-	private final static String CODE_FORMATTER_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
+	private final static String CODE_FORMATTER_TAB_SIZE= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
 	/** Preference key for inserting spaces rather than tabs */
 	private final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
 	/** Preference key for automatically closing strings */

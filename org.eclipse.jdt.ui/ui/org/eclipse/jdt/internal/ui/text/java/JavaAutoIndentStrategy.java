@@ -280,7 +280,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			c.length=  Math.max(contentStart - c.offset, 0);
 		
 			int start= reg.getOffset();
-			ITypedRegion region= TextUtilities.getPartition(d, fPartitioning, start);
+			ITypedRegion region= TextUtilities.getPartition(d, fPartitioning, start, true);
 			if (IJavaPartitions.JAVA_DOC.equals(region.getType()))
 				start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
 				
@@ -453,7 +453,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		Assert.isTrue(position <= document.getLength());
 		
 		try {
-			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position);
+			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position, false);
 			return region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
 			
 		} catch (BadLocationException e) {
@@ -700,7 +700,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		
 		// don't count the space before javadoc like, asterix-style comment lines
 		if (to > from && to < endOffset - 1 && document.get(to - 1, 2).equals(" *")) { //$NON-NLS-1$
-			String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, to);
+			String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, to, true);
 			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
 				to--;
 		}

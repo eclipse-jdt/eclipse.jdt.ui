@@ -42,6 +42,7 @@ import org.eclipse.ui.texteditor.ITextEditorExtension3;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -216,10 +217,9 @@ public class IndentAction extends TextEditorAction {
 		
 		String indent= null;
 		if (offset < document.getLength()) {
-			ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset);
+			ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 			String type= partition.getType();
-			if (partition.getOffset() < offset // only get partitions that start on a previous line
-					&& (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))) {
+			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
 				
 				// TODO this is a hack
 				// what I want to do
@@ -343,7 +343,7 @@ public class IndentAction extends TextEditorAction {
 	private String getTabEquivalent() {
 		String tab;
 		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SPACES_FOR_TABS)) {
-			int size= JavaCore.getPlugin().getPluginPreferences().getInt(JavaCore.FORMATTER_TAB_SIZE);
+			int size= JavaCore.getPlugin().getPluginPreferences().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
 			StringBuffer buf= new StringBuffer();
 			for (int i= 0; i< size; i++)
 				buf.append(' ');

@@ -127,7 +127,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 		try {
 			
 			IRegion block= getTextBlockFromSelection(textSelection, document);
-			ITypedRegion[] regions= TextUtilities.computePartitioning(document, fDocumentPartitioning, block.getOffset(), block.getLength());
+			ITypedRegion[] regions= TextUtilities.computePartitioning(document, fDocumentPartitioning, block.getOffset(), block.getLength(), false);
 
 			int lineCount= 0;			
 			int[] lines= new int[regions.length * 2]; // [startline, endline, startline, endline, ...]

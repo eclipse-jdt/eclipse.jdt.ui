@@ -648,7 +648,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		Assert.isTrue(position <= document.getLength());
 		
 		try {
-			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position);
+			// don't use getPartition2 since we're interested in the scanned character's partition
+			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position, false);
 			return region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
 			
 		} catch (BadLocationException e) {
@@ -723,7 +724,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Checks whether code>document</code> contains the <code>String</code> <code>like</code> such 
 	 * that its last character is at <code>position</code>. If <code>like</code> starts with a
-	 * identifier part (as determined by {@link Character.isJavaIdentifier(char)}), it is also made
+	 * identifier part (as determined by {@link Character#isJavaIdentifier(char)}), it is also made
 	 * sure that <code>like</code> is preceded by some non-identifier character or stands at the
 	 * document start.
 	 * 
@@ -867,7 +868,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		int validPosition= docOffset;
 
 		try {
-			ITypedRegion partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos);
+			ITypedRegion partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos, true);
 			validPosition= getValidPositionForPartition(document, partition, eol);
 			while (validPosition == -1) {
 				nextPartitionPos= partition.getOffset() - 1;
@@ -875,7 +876,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 					validPosition= docOffset;
 					break;
 				}
-				partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos);
+				partition= TextUtilities.getPartition(document, partitioning, nextPartitionPos, false);
 				validPosition= getValidPositionForPartition(document, partition, eol);
 			}
 		} catch (BadLocationException e) {

@@ -143,22 +143,16 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return document.get(start, end - start);
 	}
 
-	private String getModifiedText(String string, String indentation, String delimiter) throws BadLocationException {		
+	private String getModifiedText(String string, String indentation, String delimiter) {		
 		return displayString(string, indentation, delimiter);
 	}
 
 	private void javaStringIndentAfterNewLine(IDocument document, DocumentCommand command) throws BadLocationException {
 
-		ITypedRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset);
+		ITypedRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset, true);
 		int offset= partition.getOffset();
 		int length= partition.getLength();
 
-		if (command.offset == offset) {
-			// we are really just before the string partition -> feet the event through the java indenter
-			new JavaAutoIndentStrategy(fPartitioning).customizeDocumentCommand(document, command);
-			return;
-		}
-		
 		if (command.offset == offset + length && document.getChar(offset + length - 1) == '\"')
 			return;
 

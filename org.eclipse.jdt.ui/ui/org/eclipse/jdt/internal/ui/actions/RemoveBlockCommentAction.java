@@ -54,7 +54,7 @@ public class RemoveBlockCommentAction extends BlockCommentAction {
 		int offset= selection.getOffset();
 		int endOffset= offset + selection.getLength();
 
-		ITypedRegion partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, offset);
+		ITypedRegion partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, offset, false);
 		int partOffset= partition.getOffset();
 		int partEndOffset= partOffset + partition.getLength();
 		
@@ -65,7 +65,7 @@ public class RemoveBlockCommentAction extends BlockCommentAction {
 				edits.add(factory.createEdit(partEndOffset - tokenLength, tokenLength, "")); //$NON-NLS-1$
 			}
 			
-			partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, partEndOffset);
+			partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, partEndOffset, false);
 			partOffset= partition.getOffset();
 			partEndOffset= partOffset + partition.getLength();
 		}

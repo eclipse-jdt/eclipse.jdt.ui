@@ -54,7 +54,7 @@ public class AddBlockCommentAction extends BlockCommentAction {
 		int selectionOffset= selection.getOffset();
 		int selectionEndOffset= selectionOffset + selection.getLength();
 		List edits= new LinkedList();
-		ITypedRegion partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, selectionOffset);
+		ITypedRegion partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, selectionOffset, false);
 
 		handleFirstPartition(partition, edits, factory, selectionOffset);
 
@@ -125,7 +125,7 @@ public class AddBlockCommentAction extends BlockCommentAction {
 		}
 
 		// advance to next partition
-		partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, partEndOffset);
+		partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, partEndOffset, false);
 		partType= partition.getType();
 
 		// start of next partition

@@ -751,7 +751,7 @@ public class JavaHeuristicScanner implements Symbols {
 		Assert.isTrue(position <= fDocument.getLength());
 		
 		try {
-			ITypedRegion region= TextUtilities.getPartition(fDocument, fPartitioning, position);
+			ITypedRegion region= TextUtilities.getPartition(fDocument, fPartitioning, position, false);
 			return region.getType().equals(fPartition);
 			
 		} catch (BadLocationException e) {
