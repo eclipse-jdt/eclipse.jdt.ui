@@ -4,33 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Tree;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.PortingFinder;
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.Tree;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	
@@ -57,18 +31,6 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		
 	private boolean fIsEmpty;
 	
-	/**
-	 * Creates a ElementTreeSelectionDialog for IElements supporting the P_CHILDREN property
-	 */
-	 // Can't be implemented since we don't have a generic way to access the label and image
-	 // of an element
-	static {
-		PortingFinder.toBeDone("1G5XYUD: ITPUI:WIN2000 - DCR - Need a generic way to access the label and image of an element");
-	} 
-//	public ElementTreeSelectionDialog() {
-//		this(new ElementLabelProvider(IBasicPropertyConstants.P_LABEL, IBasicPropertyConstants.P_IMAGE), ElementViewerAdapter.createTree(IBasicPropertyConstants.P_CHILDREN), true, true);
-//	}
-
 	/**
 	 * Constructor for the ElementTreeSelectionDialog.
 	 * @param labelProvider The label provider to render the entries

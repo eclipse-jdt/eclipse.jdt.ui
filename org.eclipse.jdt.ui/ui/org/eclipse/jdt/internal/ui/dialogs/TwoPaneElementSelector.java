@@ -284,7 +284,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 				ti= new TableItem(fUpperList, i);
 			}
 			ti.setText(fRenderedStrings[indices[i]]);
-			PortingFinder.toBeDone("1G65LDG: JFUIF:WIN2000 - ILabelProvider used outside a viewer");
+			// XXX: 1G65LDG: JFUIF:WIN2000 - ILabelProvider used outside a viewer
 			Image img= fElementRenderer.getImage(fElements[indices[i]]);
 			if (img != null)
 				ti.setImage(img);
@@ -386,7 +386,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 		fQualifierMap= new Integer[to-from];
 		String[] qualifiers= new String[to-from];
 		for (int i= from; i < to; i++) {
-			PortingFinder.toBeDone("1G65LDG: JFUIF:WIN2000 - ILabelProvider used outside a viewer");
+			// XXX: 1G65LDG: JFUIF:WIN2000 - ILabelProvider used outside a viewer
 			qualifiers[i-from]= fQualifierRenderer.getText(fElements[i]);
 			fQualifierMap[i-from]= new Integer(i);
 		}
@@ -395,7 +395,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 		for (int i= 0; i < to-from; i++) {
 			TableItem ti= new TableItem(fLowerList, i);
 			ti.setText(qualifiers[i]);
-			PortingFinder.toBeDone("1G65LDG: JFUIF:WIN2000 - ILabelProvider used outside a viewer");
+			// XXX: 1G65LDG: JFUIF:WIN2000 - ILabelProvider used outside a viewer
 			Image img= fQualifierRenderer.getImage(fElements[from+i]);
 			if (img != null)
 				ti.setImage(img);

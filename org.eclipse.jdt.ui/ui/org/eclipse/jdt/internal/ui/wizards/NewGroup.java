@@ -143,7 +143,7 @@ public class NewGroup extends ContextMenuGroup {
 	
 	
 	private boolean isNewProjectWizardRegistered() {
-		org.eclipse.jdt.internal.ui.util.PortingFinder.toBeDone("check if still required");
+		// XXX: check if still required
 		/*IPluginRegistry registry= JavaPlugin.getDefault().getPluginRegistry();
 		IExtensionPoint extPoint= registry.getExtensionPoint("org.eclipse.itp.desktop.new");
 		if (extPoint != null) {
