@@ -22,7 +22,6 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -34,6 +33,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 public class LinkedNamesAssistProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
 
 	private SimpleName fNode;
-	private IRegion fSelectedRegion; // initialized by apply()
+	private Point fSelectedRegion; // initialized by apply()
 	private ICompilationUnit fCompilationUnit;
 	private String fLabel;
 	private String fValueSuggestion;
@@ -77,6 +77,8 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
+			fSelectedRegion= viewer.getSelectedRange();
+			
 			// get full ast
 			CompilationUnit root= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, null);
 
@@ -134,15 +136,15 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			ui.setExitPosition(viewer, offset, 0, LinkedPositionGroup.NO_STOP);
 			ui.enter();
 			
-			int endPos;
-			fSelectedRegion= ui.getSelectedRegion();
-			if (fValueSuggestion != null && fSelectedRegion != null) {
-				document.replace(fSelectedRegion.getOffset(), fSelectedRegion.getLength(), fValueSuggestion);
-				endPos= fSelectedRegion.getOffset() + fValueSuggestion.length();
-			} else {
-				endPos= fSelectedRegion.getOffset() + fSelectedRegion.getLength();
+
+			if (fValueSuggestion != null) {
+				IRegion selectedRegion= ui.getSelectedRegion();
+				if (selectedRegion != null) {
+					document.replace(selectedRegion.getOffset(), selectedRegion.getLength(), fValueSuggestion);
+					selectedRegion= ui.getSelectedRegion();
+					fSelectedRegion= new Point(selectedRegion.getOffset(), fValueSuggestion.length());
+				}
 			}
-			fSelectedRegion= new Region(endPos, 0);
 			
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
@@ -174,10 +176,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {
-		if (fSelectedRegion == null) {
-			return null;
-		}
-		return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
+		return fSelectedRegion;
 	}
 
 	/*
