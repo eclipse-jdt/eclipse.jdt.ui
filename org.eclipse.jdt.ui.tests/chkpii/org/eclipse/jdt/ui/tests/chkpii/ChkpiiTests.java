@@ -30,38 +30,55 @@ public class ChkpiiTests extends TestCase {
 	
 	private String fLogDirectoryName;
 	
-	private static final int HTML= 0;
-	private static final int PROPERTIES= 1;
-	private static final int XML= 2;
-	
-	public void testChkpii() {
-			
-		StringBuffer message= new StringBuffer();
-		StringBuffer buf= new StringBuffer();
-		boolean testExecuted= testChkpii(HTML);
-		assertTrue("Could not run chkpii test on HTML files. See console for details.", testExecuted); //$NON-NLS-1$
-		boolean result1= checkValidLogFile(getOutputFile(HTML), buf);
-		if (!result1)
-			message.append("\n- HTML: \n" + buf);
-
-		buf= new StringBuffer();
-		testExecuted= testChkpii(XML);
-		assertTrue("Could not run chkpii test on XML files. See console for details.", testExecuted); //$NON-NLS-1$
-		boolean result2= checkValidLogFile(getOutputFile(XML), buf);
-		if (!result2)
-			message.append("\n- XML: \n" + buf);
+	private class FileCategory {
+		private final String fName;
+		protected FileCategory(String name) {
+			fName= name;
+		}
+		public String getOutputFile() {
+			return fLogDirectoryName + fName.toLowerCase() + ".txt";
+		}
+		public String getFilesToTest() {
+			return getPluginDirectory() + getExtension();
+		}
+		protected String getExtension() {
+			return "*." + fName.toLowerCase();
+		}
 		
-		buf= new StringBuffer();
-		testExecuted= testChkpii(PROPERTIES);
-		assertTrue("Could not run chkpii test on PROPERTIES files. See console for details.", testExecuted); //$NON-NLS-1$
-		boolean result3= checkValidLogFile(getOutputFile(PROPERTIES), buf);
-		if (!result3)
-			message.append("\n- PROPERTIES: \n" + buf);
-
-		assertTrue(message + "\nSee " + fLogDirectoryName + " for details.", (result1 && result2 && result3)); //$NON-NLS-1$ //$NON-NLS-2$
+		public String toString() {
+			return fName.toUpperCase();
+		}
 	}
-		
-	private boolean testChkpii(int type) {
+	
+	private final FileCategory HTML= new FileCategory("HTML") {
+		protected String getExtension() {
+			return "*.htm*";
+		}
+	};
+	private final FileCategory PROPERTIES= new FileCategory("PROPERTIES");
+	private final FileCategory XML= new FileCategory("XML");
+	
+	public void testHTMLFiles() {
+		assertChkpii(HTML);
+	}
+	
+	public void testXMLFiles() {
+		assertChkpii(XML);
+	}
+	
+	public void testPropertiesFiles() {
+		assertChkpii(PROPERTIES);
+	}
+	
+	private void assertChkpii(FileCategory type) {
+		boolean isExecuted= executeChkpiiProcess(type);
+		assertTrue("Could not run chkpii test on " + type + " files. See console for details.", isExecuted); //$NON-NLS-1$
+		StringBuffer buf= new StringBuffer();
+		boolean isValid= checkLogFile(type.getOutputFile(), buf);
+		assertTrue(buf + "See " + type.getOutputFile() + " for details.", isValid); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	private boolean executeChkpiiProcess(FileCategory type) {
 		Runtime aRuntime= Runtime.getRuntime();
 		String chkpiiString= getChkpiiString(type);
 		BufferedReader aBufferedReader= null;
@@ -88,7 +105,7 @@ public class ChkpiiTests extends TestCase {
 				} catch (IOException ex) {
 				}
 		}
-		if (!new File(getOutputFile(type)).exists()) {
+		if (!new File(type.getOutputFile()).exists()) {
 			System.out.println(consoleLog.toString());
 			System.out.flush();
 			return false;
@@ -96,10 +113,9 @@ public class ChkpiiTests extends TestCase {
 		return true;
 	}
 	
-	private String getChkpiiString(int type) {
-		return getExec() + " " + getFilesToTest(type) + " -E -O " + getOutputFile(type) + " -XM @" + getExcludeErrors() + " -X " + getExcludeFile () + " -S"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+	private String getChkpiiString(FileCategory type) {
+		return getExec() + " " + type.getFilesToTest() + " -E -O " + type.getOutputFile() + " -XM @" + getExcludeErrors() + " -X " + getExcludeFile () + " -S"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
-
 
 	private String getPluginDirectory() {
 		
@@ -122,24 +138,6 @@ public class ChkpiiTests extends TestCase {
 		return path + File.separator;
 	}
 
-	private String getFilesToTest(int type) {
-			
-		String aString= getPluginDirectory();
-			
-		switch (type) {
-			case HTML :
-				return aString + "*.htm*"; //$NON-NLS-1$
-			case PROPERTIES :
-				return aString + "*.properties"; //$NON-NLS-1$
-							
-			case XML : 
-				return aString + "*.xml"; //$NON-NLS-1$
-			
-			default :
-				return aString + "*.*"; //$NON-NLS-1$
-		}
-	}
-	
 	private String toLocation(URL platformURL) {
 		File localFile;
 		try {
@@ -163,30 +161,6 @@ public class ChkpiiTests extends TestCase {
 	 */
 	private String getExcludeFile() {
 		return toLocation(getClass().getResource("ignoreFiles.txt"));
-	}
-	
-	/**
-	 * Returns the output file path.
-	 * 
-	 * @param type the file type
-	 * @return the string with the output file path
-	 */
-	private String getOutputFile(int type) {
-
-		switch (type) {
-
-			case HTML :
-				return fLogDirectoryName + "html.txt"; //$NON-NLS-1$
-
-			case PROPERTIES :
-				return fLogDirectoryName + "properties.txt"; //$NON-NLS-1$
-		
-			case XML : 
-				return fLogDirectoryName + "xml.txt"; //$NON-NLS-1$
-
-			default :
-				return fLogDirectoryName + "other.txt"; //$NON-NLS-1$
-		}
 	}
 	
 	/**
@@ -217,7 +191,7 @@ public class ChkpiiTests extends TestCase {
 	 * @param message a stringbuffer to append error messages to
 	 * @return <code>true</code> if there are errors in the log file
 	 */
-	private boolean checkValidLogFile(String logFilePath, StringBuffer message) {
+	private boolean checkLogFile(String logFilePath, StringBuffer message) {
 		BufferedReader aReader= null;
 		int errors= -1, notProcessed= -1, endOfSummary= -1;
 		boolean hasErrors= false;
@@ -322,9 +296,9 @@ public class ChkpiiTests extends TestCase {
 
 		new File(fLogDirectoryName).mkdirs();
 
-		new File(getOutputFile(PROPERTIES)).delete();
-		new File(getOutputFile(HTML)).delete();
-		new File(getOutputFile(XML)).delete();
+		new File(PROPERTIES.getOutputFile()).delete();
+		new File(HTML.getOutputFile()).delete();
+		new File(XML.getOutputFile()).delete();
 		
 	}
 
