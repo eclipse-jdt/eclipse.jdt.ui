@@ -11,9 +11,11 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
-import junit.framework.TestCase;
 
 import org.eclipse.jface.action.IAction;
 
@@ -23,15 +25,23 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 public class ToggleCommentTest extends TestCase {
 	
+	private static final Class THIS= ToggleCommentTest.class;
+	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
-	private static final int N_OF_RUNS= 5;
+	private static final int N_OF_RUNS= 6;
+
+	private static final int N_OF_COLD_RUNS= 3;
 
 	private PerformanceMeter fCommentMeter;
 
 	private PerformanceMeter fUncommentMeter;
 
 	private ITextEditor fEditor;
+	
+	public static Test suite() {
+		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
 
 	protected void setUp() throws Exception {
 		Performance performance= Performance.getDefault();
@@ -47,11 +57,6 @@ public class ToggleCommentTest extends TestCase {
 		fUncommentMeter.dispose();
 	}
 
-	public void testToggleComment1() throws PartInitException {
-		// cold run
-		measureToggleComment();
-	}
-
 	public void testToggleComment2() throws PartInitException {
 		// warm run
 		measureToggleComment();
@@ -60,14 +65,18 @@ public class ToggleCommentTest extends TestCase {
 	private void measureToggleComment() throws PartInitException {
 		IAction toggleComment= fEditor.getAction("ToggleComment");
 		for (int i= 0; i < N_OF_RUNS; i++) {
-			fCommentMeter.start();
+			if (i >= N_OF_COLD_RUNS)
+				fCommentMeter.start();
 			runAction(toggleComment);
-			fCommentMeter.stop();
-			sleep(5000);
-			fUncommentMeter.start();
+			if (i >= N_OF_COLD_RUNS)
+				fCommentMeter.stop();
+			EditorTestHelper.runEventQueue(5000);
+			if (i >= N_OF_COLD_RUNS)
+				fUncommentMeter.start();
 			runAction(toggleComment);
-			fUncommentMeter.stop();
-			sleep(5000);
+			if (i >= N_OF_COLD_RUNS)
+				fUncommentMeter.stop();
+			EditorTestHelper.runEventQueue(5000);
 		}
 		fCommentMeter.commit();
 		fUncommentMeter.commit();
@@ -78,12 +87,5 @@ public class ToggleCommentTest extends TestCase {
 	private void runAction(IAction action) {
 		action.run();
 		EditorTestHelper.runEventQueue();
-	}
-
-	private synchronized void sleep(int time) {
-		try {
-			wait(time);
-		} catch (InterruptedException e) {
-		}
 	}
 }
