@@ -560,6 +560,94 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	public void test84() throws Exception{
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+	
+	public void test85() throws Exception{
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test86() throws Exception{
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test87() throws Exception{
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test88() throws Exception{
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test89() throws Exception{
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test90() throws Exception{
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test91() throws Exception{
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test92() throws Exception{
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test93() throws Exception{
+//		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+		String[] names= {};
+		String[][] signatures= {{}};
+		String[] fieldNames= {};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void test94() throws Exception{
+		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
+//		String[] names= {};
+//		String[][] signatures= {{}};
+//		String[] fieldNames= {};
+//		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
 	public void testPaperExample0() throws Exception{
 		String[] names= new String[]{"add", "addAll", "iterator"};
 		String[][] signatures= new String[][]{new String[]{"QComparable;"}, new String[]{"QA;"}, new String[0]};
