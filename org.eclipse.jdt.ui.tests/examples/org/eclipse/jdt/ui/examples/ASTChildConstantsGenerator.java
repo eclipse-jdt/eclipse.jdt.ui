@@ -26,17 +26,16 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
-
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 /**
  *
@@ -130,8 +129,6 @@ public class ASTChildConstantsGenerator extends TestCase {
 	
 	private static final Class THIS= ASTChildConstantsGenerator.class;
 
-	private IJavaProject fJProject1;
-
 	private static HashSet fgPropertyIgnoreList;
 	
 	static {
@@ -165,13 +162,10 @@ public class ASTChildConstantsGenerator extends TestCase {
 	}
 
 	protected void setUp() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 	}
 
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
 	}
 	
 	
@@ -201,9 +195,10 @@ public class ASTChildConstantsGenerator extends TestCase {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.FORMATTER_LINE_SPLIT, "999");
 		
-		TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, code, 0, String.valueOf('\n'), options);
-		String res= CodeFormatterUtil.evaluateFormatterEdit(code, edit, null);
-		System.out.print(res);
+		TextEdit edit= ToolFactory.createCodeFormatter(options).format(CodeFormatter.K_COMPILATION_UNIT, code, 0, code.length(), 0, String.valueOf('\n'));
+		Document doc= new Document(code);
+		edit.apply(doc, 0);
+		System.out.print(doc.get());
 	}
 	
 
