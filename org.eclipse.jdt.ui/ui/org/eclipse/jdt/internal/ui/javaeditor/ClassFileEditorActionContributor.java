@@ -88,4 +88,12 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 			classFileEditor.fActionGroups.fillActionBars(bars);
 		}
 	}
+	
+	/*
+	 * @see IEditorActionBarContributor#dispose()
+	 */
+	public void dispose() {
+		setActiveEditor(null);
+		super.dispose();
+	}
 }

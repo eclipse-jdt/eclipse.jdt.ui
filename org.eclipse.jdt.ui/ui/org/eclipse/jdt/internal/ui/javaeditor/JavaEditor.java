@@ -33,7 +33,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.source.AnnotationColumn;
+import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -75,11 +75,8 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenExternalJavadocAction;
-import org.eclipse.jdt.ui.actions.OpenSuperImplementationAction;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
-import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -87,7 +84,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 
@@ -193,7 +190,7 @@ public abstract class JavaEditor extends StatusTextEditor {
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		
-		if (WorkInProgressPreferencePage.synchronizeOutlineOnCursorMove())
+		if (JavaEditorPreferencePage.synchronizeOutlineOnCursorMove())
 			fUpdater= new OutlinePageSelectionUpdater();
 	}
 	
@@ -245,10 +242,10 @@ public abstract class JavaEditor extends StatusTextEditor {
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
-		menu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
-		menu.add(new GroupMarker(IContextMenuConstants.GROUP_SHOW));	
 			
 		super.editorContextMenuAboutToShow(menu);
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, new Separator(IContextMenuConstants.GROUP_OPEN));	
+		menu.insertAfter(IContextMenuConstants.GROUP_OPEN, new GroupMarker(IContextMenuConstants.GROUP_SHOW));	
 		
 		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
 		fContextMenuGroup.setContext(context);
@@ -802,8 +799,7 @@ public abstract class JavaEditor extends StatusTextEditor {
 	 */
 	protected IVerticalRuler createVerticalRuler() {
 		CompositeRuler ruler= new CompositeRuler();
-//		ruler.addDecorator(0, new AnnotationRulerColumn(VERTICAL_RULER_WIDTH));
-		ruler.addDecorator(0, new AnnotationColumn(VERTICAL_RULER_WIDTH));
+		ruler.addDecorator(0, new AnnotationRulerColumn(VERTICAL_RULER_WIDTH));
 		if (isLineNumberRulerVisible())
 			ruler.addDecorator(1, createLineNumberRulerColumn());
 		return ruler;

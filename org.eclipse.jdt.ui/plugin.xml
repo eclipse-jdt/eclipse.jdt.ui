@@ -375,11 +375,6 @@
 		class="org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
-	<page name="%workInProgressPageName"
-		id = "org.eclipse.jdt.ui.preferences.WorkInProgressPreferencePage"
-		class="org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage"
-		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
-	</page>
 	<page name="%codeGenerationPreferencePageName"
 		id = "org.eclipse.jdt.ui.preferences.CodeGenerationPreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage"

@@ -36,23 +36,13 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 	 */
 	public TogglePresentationAction() {
 		super(JavaEditorMessages.getResourceBundle(), "TogglePresentation.", null); //$NON-NLS-1$
-		
 		JavaPluginImages.setToolImageDescriptors(this, "segment_edit.gif"); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("TogglePresentation.tooltip")); //$NON-NLS-1$
-		
+		WorkbenchHelp.setHelp(this,	IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);		
 		update();
-		WorkbenchHelp.setHelp(this,	IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);
-		
-		getStore().addPropertyChangeListener(this);
-	}
-
-	private IPreferenceStore getStore() {
-		if (fStore == null)
-			fStore= JavaPlugin.getDefault().getPreferenceStore();
-		return fStore;
 	}
 	
-	/**
+	/*
 	 * @see IAction#actionPerformed
 	 */
 	public void run() {
@@ -71,20 +61,22 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 		if (remembered != null)
 			editor.setHighlightRange(remembered.getOffset(), remembered.getLength(), true);
 		
-		getStore().setValue(PreferenceConstants.EDITOR_SHOW_SEGMENTS, showAll);
+		fStore.removePropertyChangeListener(this);
+		fStore.setValue(PreferenceConstants.EDITOR_SHOW_SEGMENTS, showAll);
+		fStore.addPropertyChangeListener(this);
 	}
 	
-	/**
+	/*
 	 * @see TextEditorAction#update
 	 */
 	public void update() {
 		ITextEditor editor= getTextEditor();
 		boolean checked= (editor != null && editor.showsHighlightRangeOnly());
 		setChecked(checked);
-		setEnabled(true);
+		setEnabled(editor != null);
 	}
 	
-	/**
+	/*
 	 * @see TextEditorAction#setEditor(ITextEditor)
 	 */
 	public void setEditor(ITextEditor editor) {
@@ -93,25 +85,45 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 		
 		if (editor != null) {
 			
-			boolean showSegments= getStore().getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS);			
-			setChecked(showSegments);
-			
-			if (editor.showsHighlightRangeOnly() != showSegments) {
-				IRegion remembered= editor.getHighlightRange();
-				editor.resetHighlightRange();
-				editor.showHighlightRangeOnly(showSegments);
-				if (remembered != null)
-					editor.setHighlightRange(remembered.getOffset(), remembered.getLength(), true);
+			if (fStore == null) {
+				fStore= JavaPlugin.getDefault().getPreferenceStore();
+				fStore.addPropertyChangeListener(this);
 			}
+			synchronizeWithPreference(editor);
+			
+		} else if (fStore != null) {
+			fStore.removePropertyChangeListener(this);
+			fStore= null;
+		}
+		
+		update();
+	}
+	
+	/**
+	 * Synchronizes the appearance of the editor with what the preference store tells him.
+	 */
+	private void synchronizeWithPreference(ITextEditor editor) {
+		
+		if (editor == null)
+			return;
+		
+		boolean showSegments= fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS);			
+		setChecked(showSegments);
+		
+		if (editor.showsHighlightRangeOnly() != showSegments) {
+			IRegion remembered= editor.getHighlightRange();
+			editor.resetHighlightRange();
+			editor.showHighlightRangeOnly(showSegments);
+			if (remembered != null)
+				editor.setHighlightRange(remembered.getOffset(), remembered.getLength(), true);
 		}
 	}
 
-	/**
+	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty().equals(PreferenceConstants.EDITOR_SHOW_SEGMENTS))
-			update();
+			synchronizeWithPreference(getTextEditor());
 	}
-
 }

@@ -645,8 +645,10 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		fTogglePresentation= new TogglePresentationAction();
 		fToggleTextHover= new ToggleTextHoverAction();
-		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$		
+		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
+		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
+		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		fShowJavadoc= (TextOperationAction) fEditor.getAction("ShowJavaDoc"); //$NON-NLS-1$
 		
 		fTogglePresentation.setEditor(editor);
@@ -810,6 +812,11 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		if (fActionGroups != null)
 			fActionGroups.dispose();
 			
+		fTogglePresentation.setEditor(null);
+		fToggleTextHover.setEditor(null);
+		fPreviousError.setEditor(null);
+		fNextError.setEditor(null);	
+		
 		fOutlineViewer= null;
 		
 		super.dispose();

@@ -18,6 +18,8 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -31,6 +33,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -47,6 +51,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.util.IClassFileDisassembler;
+import org.eclipse.jdt.core.util.IClassFileReader;
 
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -69,6 +76,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			private Color fSeparatorColor;
 			private List fBannerLabels= new ArrayList();
 			private List fHeaderLabels= new ArrayList();
+			private Font fFont;
 			
 			/**
 			 * Creates a source attachment form for a class file. 
@@ -113,6 +121,10 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						fSeparatorColor= null;				
 						fBannerLabels.clear();
 						fHeaderLabels.clear();
+						if (fFont != null) {
+							fFont.dispose();
+							fFont= null;
+						}
 					}
 				});
 		
@@ -181,7 +193,17 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						}
 					}
 				}
-		
+				
+				separator= createCompositeSeparator(composite);
+				data= new GridData(GridData.FILL_HORIZONTAL);
+				data.heightHint= 2;
+				separator.setLayoutData(data);
+
+				StyledText styledText= createCodeView(composite);
+				data= new GridData(GridData.FILL_BOTH);
+				styledText.setLayoutData(data);
+				updateCodeView(styledText, fFile);
+				
 				fScrolledComposite.setContent(composite);
 				fScrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 				
@@ -229,7 +251,37 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				composite.setBackground(fSeparatorColor);
 				return composite;
 			}
-				
+			
+			private StyledText createCodeView(Composite parent) {
+				int styles= SWT.MULTI | SWT.FULL_SELECTION;
+				StyledText styledText= new StyledText(parent, styles);
+				styledText.setBackground(fBackgroundColor);
+				styledText.setForeground(fForegroundColor);
+				styledText.setEditable(false);
+				setFont(styledText);
+				return styledText;
+			}
+			
+			private void setFont(StyledText styledText) {
+				IPreferenceStore store= getPreferenceStore();
+				if (store != null) {
+					
+					FontData data= null;
+					if (store.contains(PREFERENCE_FONT) && !store.isDefault(PREFERENCE_FONT))
+						data= PreferenceConverter.getFontData(store, PREFERENCE_FONT);
+					else
+						data= PreferenceConverter.getDefaultFontData(store, PREFERENCE_FONT);
+					
+					if (data != null) {
+						Font font= new Font(styledText.getDisplay(), data);
+						styledText.setFont(font);
+						if (fFont != null)
+							fFont.dispose();
+						fFont= font;
+					}
+				}
+			}
+			
 			private Label createLabel(Composite parent, String text) {
 				Label label = new Label(parent, SWT.NONE);
 				if (text != null)
@@ -269,6 +321,17 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					button.setText(text);
 		//		button.addFocusListener(visibilityHandler);
 				return button;
+			}
+			
+			private void updateCodeView(StyledText styledText, IClassFile classFile) {
+				String content= null;
+				int flags= IClassFileReader.FIELD_INFOS | IClassFileReader.METHOD_INFOS;
+				IClassFileReader classFileReader= ToolFactory.createDefaultClassFileReader(classFile, flags);					
+				if (classFileReader != null) {
+					IClassFileDisassembler disassembler= ToolFactory.createDefaultClassFileDisassembler();
+					content= disassembler.disassemble(classFileReader, "\n"); //$NON-NLS-1$
+				}
+				styledText.setText(content == null ? "" : content); //$NON-NLS-1$
 			}	
 		};
 	

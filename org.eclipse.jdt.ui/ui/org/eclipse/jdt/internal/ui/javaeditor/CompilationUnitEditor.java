@@ -36,7 +36,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -77,7 +76,6 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
-import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.tasklist.TaskList;
 
@@ -96,15 +94,15 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.SelectionHistory;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectEnclosingAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectHistoryAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectNextAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
@@ -469,27 +467,27 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, JavaCorrectionSourceViewer.CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);		
-		setAction("CorrectionAssistProposal", action);
+		setAction("CorrectionAssistProposal", action); //$NON-NLS-1$
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);		
-		setAction("ContentAssistProposal", action);
+		setAction("ContentAssistProposal", action); //$NON-NLS-1$
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION, true);	//$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
-		setAction("ContentAssistContextInformation", action);
+		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.COMMENT);		
-		setAction("Comment", action);
+		setAction("Comment", action); //$NON-NLS-1$
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.UNCOMMENT);		
-		setAction("Uncomment", action);
+		setAction("Uncomment", action); //$NON-NLS-1$
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);		
-		setAction("Format", action);
+		setAction("Format", action); //$NON-NLS-1$
 
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
@@ -566,14 +564,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);		
+		
 		addActionIfEnabled(menu, ITextEditorActionConstants.GROUP_EDIT,  ITextEditorActionConstants.REVERT_TO_SAVED);
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
-		
-		MenuManager submenu= new MenuManager("&Add", ITextEditorActionConstants.GROUP_ADD);
-		addAction(submenu, ITextEditorActionConstants.BOOKMARK);
-		addAction(submenu, ITextEditorActionConstants.ADD_TASK);
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_ADD, submenu);
-		
+				
 		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
@@ -1317,7 +1311,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @see IReconcilingParticipant#reconciled()
 	 */
 	public void reconciled() {
-		if (!WorkInProgressPreferencePage.synchronizeOutlineOnCursorMove()) {
+		if (!JavaEditorPreferencePage.synchronizeOutlineOnCursorMove()) {
 			Shell shell= getSite().getShell();
 			if (shell != null && !shell.isDisposed()) {
 				shell.getDisplay().asyncExec(new Runnable() {

@@ -43,7 +43,9 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 		if (fIsActive) {
 			fIsActive= false;
 						/* on turning off the feature one has to paint the currently 			 * highlighted line with the standard background color 			 */			if (redraw)
-				drawHighlightLine(fCurrentLine, fViewer.getVisibleRegion().getOffset());							fViewer.getTextWidget().removeLineBackgroundListener(this);						if (fPositionManager != null)				fPositionManager.removeManagedPosition(fCurrentLine);		}
+				drawHighlightLine(fCurrentLine, fViewer.getVisibleRegion().getOffset());							fViewer.getTextWidget().removeLineBackgroundListener(this);						if (fPositionManager != null)				fPositionManager.removeManagedPosition(fCurrentLine);
+				
+			fLastLineNumber= -1;		}
 	}
 	/*
 	 * @see IPainter#dispose()
@@ -54,9 +56,18 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 	 * @see IPainter#paint(int)
 	 */
 	public void paint(int reason) {
+		
+		// check selection
+		Point selection= fViewer.getTextWidget().getSelectionRange();
+		if (selection.y > 0) {
+			deactivate(true);
+			return;
+		}
+		
 		// initialization		if (!fIsActive) {
 			fViewer.getTextWidget().addLineBackgroundListener(this);			fPositionManager.addManagedPosition(fCurrentLine);			fIsActive= true;
 		}
+		
 		//redraw line highlight only if it hasn't been drawn yet on the respective line		if (updateHighlightLine()) {			// used to handle segmented view of source files			int visibleRegionOffset= fViewer.getVisibleRegion().getOffset();			// clear last line			drawHighlightLine(fLastLine, visibleRegionOffset);			// draw new line			drawHighlightLine(fCurrentLine, visibleRegionOffset);		}	}
 	/*
 	 * @see IPainter#setPositionManager(IPositionManager)

@@ -37,6 +37,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
 
@@ -185,7 +186,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 */
 	public String getErrorMessage() {
 		if (fNumberOfComputedResults == 0)
-			return "No completions available.";
+			return JavaUIMessages.getString("JavaEditor.codeassist.noCompletions"); //$NON-NLS-1$
 		return fCollector.getErrorMessage();
 	}
 

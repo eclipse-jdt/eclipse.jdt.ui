@@ -10,6 +10,11 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
@@ -24,25 +29,22 @@ import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+
 public class BasicEditorActionContributor extends BasicTextEditorActionContributor {
 	
-	private boolean fListenersRegistered;
-	
 	protected RetargetAction fRetargetShowJavaDoc;
-	
 	protected RetargetTextEditorAction fContentAssist;
 	protected RetargetTextEditorAction fContextInformation;
 	protected RetargetTextEditorAction fCorrectionAssist;
 	protected RetargetTextEditorAction fShowJavaDoc;
-	
-	/** Encoding action group */
 	private EncodingActionGroup fEncodingActionGroup;
+	
+	private List fPartListeners= new ArrayList();
 
 
 
@@ -56,22 +58,18 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc."); //$NON-NLS-1$
 		
 		fRetargetShowJavaDoc= new RetargetAction(JdtActionConstants.SHOW_JAVA_DOC, JavaEditorMessages.getString("ShowJavaDoc.label")); //$NON-NLS-1$
-	
+		
 		// character encoding
 		fEncodingActionGroup= new EncodingActionGroup();
+		
+		markAsPartListener(fRetargetShowJavaDoc);
 	}
 	
-	public void init(IActionBars bars) {
-		super.init(bars);
-		
-		// register actions that have a dynamic editor. 
-		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavaDoc);
-		
-		// character encoding
-		fEncodingActionGroup.fillActionBars(bars);
+	protected final void markAsPartListener(RetargetAction action) {
+		fPartListeners.add(action);
 	}
-
-	/**
+	
+	/*
 	 * @see EditorActionBarContributor#contributeToMenu(IMenuManager)
 	 */
 	public void contributeToMenu(IMenuManager menu) {
@@ -89,15 +87,13 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 		}		
 	}
-
-	/**
+	
+	/*
 	 * @see IEditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */
 	public void setActiveEditor(IEditorPart part) {
 		super.setActiveEditor(part);
-		
-		registerListeners(part);
-		
+				
 		IActionBars actionBars= getActionBars();
 		IStatusLineManager manager= actionBars.getStatusLineManager();
 		manager.setMessage(null);
@@ -119,11 +115,32 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		fEncodingActionGroup.retarget(textEditor);
 	}
 	
-	private void registerListeners(IEditorPart part) {
-		if (fListenersRegistered)
-			return;
-		IWorkbenchPage page = part.getSite().getPage();	
-		page.addPartListener(fRetargetShowJavaDoc);
-		fListenersRegistered= true;
-	}	
+	/*
+	 * @see IEditorActionBarContributor#init(IActionBars, IWorkbenchPage)
+	 */
+	public void init(IActionBars bars, IWorkbenchPage page) {
+		Iterator e= fPartListeners.iterator();
+		while (e.hasNext()) 
+			page.addPartListener((RetargetAction) e.next());
+			
+		super.init(bars, page);
+		
+		// register actions that have a dynamic editor. 
+		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavaDoc);
+		// character encoding
+		fEncodingActionGroup.fillActionBars(bars);
+	}
+	
+	/*
+	 * @see IEditorActionBarContributor#dispose()
+	 */
+	public void dispose() {
+		Iterator e= fPartListeners.iterator();
+		while (e.hasNext()) 
+			getPage().removePartListener((RetargetAction) e.next());
+			
+		setActiveEditor(null);
+	
+		super.dispose();
+	}
 }

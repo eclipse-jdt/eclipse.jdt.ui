@@ -28,7 +28,6 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.core.WorkingCopy;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
 
 

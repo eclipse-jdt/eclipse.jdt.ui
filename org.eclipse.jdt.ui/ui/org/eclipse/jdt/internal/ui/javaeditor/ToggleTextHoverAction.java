@@ -35,56 +35,59 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	 */
 	public ToggleTextHoverAction() {
 		super(JavaEditorMessages.getResourceBundle(), "ToggleTextHover.", null); //$NON-NLS-1$
-		
 		JavaPluginImages.setToolImageDescriptors(this, "jdoc_hover_edit.gif"); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("ToggleTextHover.tooltip")); //$NON-NLS-1$
-	
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION);	
-
-		boolean showHover= getStore().getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
-		setChecked(showHover);
-		
-		getStore().addPropertyChangeListener(this);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION);
+		update();
 	}
 	
-	private IPreferenceStore getStore() {
-		if (fStore == null)
-			fStore= JavaPlugin.getDefault().getPreferenceStore();
-		return fStore;
-	}
-	
-	/**
+	/*
 	 * @see IAction#actionPerformed
 	 */
 	public void run() {
-		boolean showHover= !getStore().getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
-		getStore().setValue(PreferenceConstants.EDITOR_SHOW_HOVER, showHover);
+		ITextEditor editor= getTextEditor();
+		if (editor == null)
+			return;
+		
+		boolean showHover= !fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
 		setChecked(showHover);
+		
+		fStore.removePropertyChangeListener(this);
+		fStore.setValue(PreferenceConstants.EDITOR_SHOW_HOVER, showHover);
+		fStore.addPropertyChangeListener(this);
 	}
 	
-	/**
+	/*
 	 * @see TextEditorAction#update
 	 */
 	public void update() {
-		boolean showHover= getStore().getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
+		boolean showHover= fStore != null &&  fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
 		setChecked(showHover);
-		setEnabled(true);
+		setEnabled(getTextEditor() != null);
 	}
 	
-	/**
+	/*
 	 * @see TextEditorAction#setEditor(ITextEditor)
 	 */
 	public void setEditor(ITextEditor editor) {		
 		super.setEditor(editor);
+		if (editor != null) {
+			if (fStore == null) {
+				fStore= JavaPlugin.getDefault().getPreferenceStore();
+				fStore.addPropertyChangeListener(this);
+			}
+		} else if (fStore != null) {
+			fStore.removePropertyChangeListener(this);
+			fStore= null;
+		}
 		update();
 	}
 
-	/**
+	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty().equals(PreferenceConstants.EDITOR_SHOW_HOVER))
 			update();
 	}
-
 }
