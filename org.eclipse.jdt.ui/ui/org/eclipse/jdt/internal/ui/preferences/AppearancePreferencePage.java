@@ -61,7 +61,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 
 	public static String getPkgNamePatternForPackagesView() {
 		if (! isCompressingEnabled())
-			return "";
+			return ""; //$NON-NLS-1$
 		return JavaPlugin.getDefault().getPreferenceStore().getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW);
 	}
 
@@ -112,15 +112,15 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 
 		fShowMembersInPackageView= new SelectionButtonDialogField(SWT.CHECK);
 		fShowMembersInPackageView.setDialogFieldListener(listener);
-		fShowMembersInPackageView.setLabelText("S&how members in Packages view");
+		fShowMembersInPackageView.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.showMembersInPackagesView")); //$NON-NLS-1$
 
 		fStackBrowsingViewsVertically= new SelectionButtonDialogField(SWT.CHECK);
 		fStackBrowsingViewsVertically.setDialogFieldListener(listener);
-		fStackBrowsingViewsVertically.setLabelText("&Stack views vertically in the Java Browsing perspective");
+		fStackBrowsingViewsVertically.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.stackViewsVerticallyInTheJavaBrowsingPerspective")); //$NON-NLS-1$
 
 		fCompressPackageNames= new SelectionButtonDialogField(SWT.CHECK);
 		fCompressPackageNames.setDialogFieldListener(listener);
-		fCompressPackageNames.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.pkgNamePatternEnable.label"));
+		fCompressPackageNames.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.pkgNamePatternEnable.label")); //$NON-NLS-1$
 
 		fPackageNamePattern= new StringDialogField();
 		fPackageNamePattern.setDialogFieldListener(listener);
@@ -172,13 +172,12 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		LayoutUtil.setHorizontalGrabbing(fPackageNamePattern.getTextControl(null));
 		LayoutUtil.setWidthHint(fPackageNamePattern.getLabelControl(null), convertWidthInCharsToPixels(65));
 		
-		
 		new Separator().doFillIntoGrid(composite, nColumns);
 		fStackBrowsingViewsVertically.doFillIntoGrid(composite, nColumns);
 		
 		
 		DialogField field= new DialogField();
-		field.setLabelText("Note: This preference will only take effect on new perspectives");
+		field.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.preferenceOnlyEffectiveForNewPerspectives")); //$NON-NLS-1$
 		field.doFillIntoGrid(composite, 2);
 		
 		initFields();
@@ -194,8 +193,8 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	}
 	
 	private IStatus getValidationStatus(){
-		if (fCompressPackageNames.isSelected() && fPackageNamePattern.getText().equals(""))
-			return new StatusInfo(IStatus.ERROR, "Enter a package name compression pattern");
+		if (fCompressPackageNames.isSelected() && fPackageNamePattern.getText().equals("")) //$NON-NLS-1$
+			return new StatusInfo(IStatus.ERROR, JavaUIMessages.getString("AppearancePreferencePage.packageNameCompressionPattern.error.isEmpty")); //$NON-NLS-1$
 		else	
 			return new StatusInfo();
 	}

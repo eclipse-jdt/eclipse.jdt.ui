@@ -128,5 +128,5 @@ public interface IJavaHelpContextIds {
 	public static final String SOURCE_ATTACHMENT_BLOCK= PREFIX + "source_attachment_context"; //$NON-NLS-1$
 	
 	// Custom Filters
-	public static final String CUSTOM_FILTERS_DIALOG= PREFIX + "open_custom_filters_dialog_context";
+	public static final String CUSTOM_FILTERS_DIALOG= PREFIX + "open_custom_filters_dialog_context"; //$NON-NLS-1$
 }
