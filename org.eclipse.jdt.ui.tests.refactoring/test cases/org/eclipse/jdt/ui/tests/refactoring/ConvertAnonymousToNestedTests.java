@@ -77,7 +77,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		JavaCore.setOptions(options);	
 	}
 
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeStatic, boolean makeFinal, String className, int visibility) throws Exception{
+	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
@@ -89,7 +89,6 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 
 		ref.setClassName(className);
 		ref.setDeclareFinal(makeFinal);
-//		ref.setDeclareStatic(makeStatic);///XXX remove the parameter
 		ref.setVisibility(visibility);
 		
 		if (preconditionResult == null)
@@ -99,7 +98,6 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		if (preconditionResult.isOK())
 			preconditionResult= null;
 		assertEquals("precondition was supposed to pass", null, preconditionResult);
-
 		
 		performChange(ref.createChange(new NullProgressMonitor()));
 		
@@ -107,105 +105,127 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		//assertEquals("incorrect extraction", getFileContents(getTestFileName(true, false)), newcu.getSource());
 		SourceCompareUtil.compare(newcu.getSource(), getFileContents(getTestFileName(true, false)));
-
 	}
 	
-//	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, int expectedStatus) throws Exception{
-//		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
-//		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-//		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength(), 
-//																									JavaPreferencesSettings.getCodeGenerationSettings());
-//		
-//		ref.setReplaceAllOccurrences(replaceAll);
-//		ref.setDeclareFinal(makeFinal);
-//		ref.setTempName(tempName);
-//		RefactoringStatus result= performRefactoring(ref);
-//		assertNotNull("precondition was supposed to fail", result);
-//		assertEquals("status", expectedStatus, result.getSeverity());
-//	}	
+	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility, int expectedSeverity) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		ConvertAnonymousToNestedRefactoring ref= new ConvertAnonymousToNestedRefactoring(cu, selection.getOffset(), selection.getLength());
+
+		RefactoringStatus preconditionResult= ref.checkActivation(new NullProgressMonitor());	
+		if (preconditionResult.isOK())
+			preconditionResult= null;
+		assertEquals("activation was supposed to be successful", null, preconditionResult);
+
+		ref.setClassName(className);
+		ref.setDeclareFinal(makeFinal);
+		ref.setVisibility(visibility);
+		
+		if (preconditionResult == null)
+			preconditionResult= ref.checkInput(new NullProgressMonitor());
+		else	
+			preconditionResult.merge(ref.checkInput(new NullProgressMonitor()));
+		if (preconditionResult.isOK())
+			preconditionResult= null;
+		assertNotNull("precondition was supposed to fail",preconditionResult);
+
+		assertEquals("incorrect severity:", expectedSeverity, preconditionResult.getSeverity());
+	}	
 
 	//--- TESTS
+
+	public void testFail0() throws Exception{
+		printTestDisabledMessage("corner case - local types");
+//		failHelper1(6, 14, 6, 16, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
+	}
+
+	public void testFail1() throws Exception{
+		failHelper1(5, 17, 5, 17, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
+	}
+
+	public void testFail2() throws Exception{
+		failHelper1(5, 17, 5, 18, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
+	}
 	
 	public void test0() throws Exception{
-		helper1(5, 17, 5, 17, true, true, "Inner", Modifier.PRIVATE);
+		helper1(5, 17, 5, 17, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test1() throws Exception{
-		helper1(5, 17, 5, 17, true, true, "Inner", Modifier.PUBLIC);
+		helper1(5, 17, 5, 17, true, "Inner", Modifier.PUBLIC);
 	}
 
 	public void test2() throws Exception{
-		helper1(5, 17, 5, 17, false, true, "Inner", Modifier.PUBLIC);
+		helper1(5, 17, 5, 17, true, "Inner", Modifier.PUBLIC);
 	}
 
 	public void test3() throws Exception{
-		helper1(5, 17, 5, 17, false, false, "Inner", Modifier.PUBLIC);
+		helper1(5, 17, 5, 17, false, "Inner", Modifier.PUBLIC);
 	}
 
 	public void test4() throws Exception{
-		helper1(7, 17, 7, 17, true, true, "Inner", Modifier.PRIVATE);
+		helper1(7, 17, 7, 17, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test5() throws Exception{
-		helper1(7, 17, 7, 19, true, true, "Inner", Modifier.PRIVATE);
+		helper1(7, 17, 7, 19, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test6() throws Exception{
-		helper1(8, 13, 9, 14, true, true, "Inner", Modifier.PRIVATE);
+		helper1(8, 13, 9, 14, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test7() throws Exception{
-		helper1(7, 18, 7, 18, true, true, "Inner", Modifier.PRIVATE);
+		helper1(7, 18, 7, 18, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test8() throws Exception{
-		helper1(8, 14, 8, 15, false, true, "Inner", Modifier.PRIVATE);
+		helper1(8, 14, 8, 15, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test9() throws Exception{
-		helper1(8, 13, 8, 14, false, true, "Inner", Modifier.PRIVATE);
+		helper1(8, 13, 8, 14, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test10() throws Exception{
-		helper1(7, 15, 7, 16, true, true, "Inner", Modifier.PRIVATE);
+		helper1(7, 15, 7, 16, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test11() throws Exception{
-		helper1(5, 15, 5, 17, true, true, "Inner", Modifier.PRIVATE);
+		helper1(5, 15, 5, 17, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test12() throws Exception{
-		helper1(8, 9, 10, 10, true, true, "Inner", Modifier.PRIVATE);
+		helper1(8, 9, 10, 10, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test13() throws Exception{
-		helper1(6, 28, 6, 28, true, true, "Inner", Modifier.PRIVATE);
+		helper1(6, 28, 6, 28, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test14() throws Exception{
-		helper1(5, 13, 5, 23, true, true, "Inner", Modifier.PRIVATE);
+		helper1(5, 13, 5, 23, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test15() throws Exception{
-		helper1(7, 26, 7, 26, true, true, "Inner", Modifier.PRIVATE);
+		helper1(7, 26, 7, 26, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test16() throws Exception{
-		helper1(4, 10, 4, 26, true, true, "Inner", Modifier.PRIVATE);
+		helper1(4, 10, 4, 26, true, "Inner", Modifier.PRIVATE);
 	}
 	
 	public void test17() throws Exception{
-		helper1(6, 16, 6, 19, true, true, "Inner", Modifier.PRIVATE);
+		helper1(6, 16, 6, 19, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test18() throws Exception{
-		helper1(5, 15, 5, 17, true, true, "Inner", Modifier.PRIVATE);
+		helper1(5, 15, 5, 17, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test19() throws Exception{
-		helper1(5, 12, 6, 21, true, true, "Inner", Modifier.PRIVATE);
+		helper1(5, 12, 6, 21, true, "Inner", Modifier.PRIVATE);
 	}
 
 }
