@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
  */
 public class TodoTaskPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
 
-	public static final String ID= "org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage"; //$NON-NLS-1$
+	public static final String ID= "org.eclipse.jdt.ui.preferences.TodoTaskPreferencePage"; //$NON-NLS-1$
 
 	private TodoTaskConfigurationBlock fConfigurationBlock;
 
