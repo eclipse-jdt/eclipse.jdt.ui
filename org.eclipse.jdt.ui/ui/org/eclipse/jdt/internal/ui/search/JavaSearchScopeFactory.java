@@ -111,7 +111,7 @@ public class JavaSearchScopeFactory {
 	}
 	
 	public IJavaSearchScope createJavaProjectSearchScope(ISelection selection) {
-		IEditorInput input= getActiveEditorInput();;
+		IEditorInput input= getActiveEditorInput();
 		if (input != null)
 			return JavaSearchScopeFactory.getInstance().internalCreateProjectScope(input);
 		return internalCreateProjectScope(selection);
