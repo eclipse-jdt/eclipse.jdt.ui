@@ -91,8 +91,7 @@ public class CPListElement {
 					if (container != null) {
 						IClasspathEntry[] entries= container.getClasspathEntries();
 						for (int i= 0; i < entries.length; i++) {
-							CPListElement curr= createFromExisting(entries[i], fProject);
-							curr.setParentContainer(this);
+							CPListElement curr= createFromExisting(this, entries[i], fProject);
 							fChildren.add(curr);
 						}						
 					}
@@ -192,18 +191,41 @@ public class CPListElement {
 		fChildren.add(new CPListElementAttribute(this, key, value));
 	}	
 	
+	private static boolean isFiltered(Object entry, String[] filteredKeys) {
+		if (entry instanceof CPListElementAttribute) {
+			String key= ((CPListElementAttribute) entry).getKey();
+			for (int i= 0; i < filteredKeys.length; i++) {
+				if (key.equals(filteredKeys[i])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
+	private Object[] getFilteredChildren(String[] filteredKeys) {
+		int nChildren= fChildren.size();
+		ArrayList res= new ArrayList(nChildren - filteredKeys.length);
+		
+		for (int i= 0; i < nChildren; i++) {
+			Object curr= fChildren.get(i);
+			if (!isFiltered(curr, filteredKeys)) {
+				res.add(curr);
+			}
+		}
+		return res.toArray();
+	}
+		
 	public Object[] getChildren(boolean hideOutputFolder) {
 		if (hideOutputFolder && fEntryKind == IClasspathEntry.CPE_SOURCE) {
-			return new Object[] { findAttributeElement(INCLUSION), findAttributeElement(EXCLUSION) };
+			return getFilteredChildren(new String[] { OUTPUT });
+		}
+		if (fParentContainer != null && fEntryKind != IClasspathEntry.CPE_SOURCE) {
+			return getFilteredChildren(new String[] { INCLUSION, EXCLUSION });
 		}
 		return fChildren.toArray();
 	}
-	
-	private void setParentContainer(Object element) {
-		fParentContainer= element;
-	}
-	
+		
 	public Object getParentContainer() {
 		return fParentContainer;
 	}	
@@ -281,6 +303,11 @@ public class CPListElement {
 	}
 	
 	public static CPListElement createFromExisting(IClasspathEntry curr, IJavaProject project) {
+		return createFromExisting(null, curr, project);
+	}
+		
+	
+	public static CPListElement createFromExisting(Object parent, IClasspathEntry curr, IJavaProject project) {
 		IPath path= curr.getPath();
 		IWorkspaceRoot root= project.getProject().getWorkspace().getRoot();
 
@@ -332,7 +359,7 @@ public class CPListElement {
 				isMissing= (res == null);
 				break;
 		}
-		CPListElement elem= new CPListElement(project, curr.getEntryKind(), path, res);
+		CPListElement elem= new CPListElement(parent, project, curr.getEntryKind(), path, res);
 		elem.setExported(curr.isExported());
 		elem.setAttribute(SOURCEATTACHMENT, curr.getSourceAttachmentPath());
 		elem.setAttribute(JAVADOC, javaDocLocation);
