@@ -17,6 +17,8 @@ public class CompilationUnitEditor extends JavaEditor {
 		
 	/** The status line clearer */
 	protected ISelectionChangedListener fStatusLineClearer;
+	/** The editor's save policy */
+	protected ISavePolicy fSavePolicy;
 	
 	
 	
@@ -29,6 +31,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		setEditorContextMenuId("#CompilationUnitEditorContext"); //$NON-NLS-1$
 		setRulerContextMenuId("#CompilationUnitRulerContext"); //$NON-NLS-1$
 		setOutlinerContextMenuId("#CompilationUnitOutlinerContext"); //$NON-NLS-1$
+		fSavePolicy= new CUSavePolicy();
 	}
 	
 	/**
@@ -124,6 +127,26 @@ public class CompilationUnitEditor extends JavaEditor {
 		if (page != null) {
 			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 			page.setInput(manager.getWorkingCopy(input));
+		}
+	}
+	
+	/**
+	 * @see AbstractTextEditor#performSaveOperation(WorkspaceModifyOperation, IProgressMonitor)
+	 */
+	protected void performSaveOperation(WorkspaceModifyOperation operation, IProgressMonitor progressMonitor) {
+		IDocumentProvider p= getDocumentProvider();
+		if (p instanceof CompilationUnitDocumentProvider) {
+			CompilationUnitDocumentProvider cp= (CompilationUnitDocumentProvider) p;
+			cp.setSavePolicy(fSavePolicy);
+		}
+		
+		try {
+			super.performSaveOperation(operation, progressMonitor);
+		} finally {
+			if (p instanceof CompilationUnitDocumentProvider) {
+				CompilationUnitDocumentProvider cp= (CompilationUnitDocumentProvider) p;
+				cp.setSavePolicy(null);
+			}
 		}
 	}
 	

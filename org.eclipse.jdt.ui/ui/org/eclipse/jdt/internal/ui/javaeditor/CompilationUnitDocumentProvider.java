@@ -156,14 +156,21 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 		};
 		
-	
+		
 	/** The save policy used by this provider */
 	private ISavePolicy fSavePolicy;
-		
+	
+	
 	/**
 	 * Constructor
 	 */
-	public CompilationUnitDocumentProvider(ISavePolicy savePolicy) {
+	public CompilationUnitDocumentProvider() {
+	}
+	
+	/**
+	 * Sets the document provider's save policy.
+	 */
+	public void setSavePolicy(ISavePolicy savePolicy) {
 		fSavePolicy= savePolicy;
 	}
 	
