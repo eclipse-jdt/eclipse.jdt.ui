@@ -111,6 +111,8 @@ public class JavaElementUtil {
 	}
 
 	public static IMethod[] getAllConstructors(IType type) throws JavaModelException {
+		if (type.isInterface())
+			return new IMethod[0];
 		List result= new ArrayList();
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < methods.length; i++) {
