@@ -192,9 +192,6 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor) part;
 
-		CompilationUnitEditor cueditor= null;		
-		if (part instanceof CompilationUnitEditor)
-			cueditor= (CompilationUnitEditor)part;
 		
 
 		fTogglePresentation.setEditor(textEditor);
@@ -220,9 +217,10 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		
 		// Navigate menu
 	
-		if (cueditor != null) {
-			cueditor.fStandardActionGroups.fillActionBars(bars);
-		}										
+		if (part instanceof CompilationUnitEditor) {
+			CompilationUnitEditor cuEditor= (CompilationUnitEditor)part;
+			cuEditor.getStandardActionGroup().fillActionBars(bars);
+		}
 	}
 	
 	private void registerListeners(IEditorPart part) {

@@ -438,7 +438,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private SelectionHistory fSelectionHistory;
 	
 	/** The standard action groups added to the menu */
-	/* package */ CompositeActionGroup fStandardActionGroups;
+	private CompositeActionGroup fStandardActionGroups;
 	
 	/**
 	 * Creates a new compilation unit editor.
@@ -455,6 +455,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
+	/**
+	 *  Returns the standard action group of this editor.
+	 */
+	public ActionGroup getStandardActionGroup() {
+		return fStandardActionGroups;
+	} 
+	
 	/*
 	 * @see AbstractTextEditor#createActions()
 	 */
@@ -464,7 +471,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 		setAction("CorrectionAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, JavaCorrectionSourceViewer.CORRECTIONASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$		
 		setAction("ContentAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
-		setAction("ContentAssistContextInformation", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION));			 //$NON-NLS-1$ //$NON-NLS-2$
+		setAction("ContentAssistContextInformation", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION, true));			 //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("AddImportOnSelection", new AddImportOnSelectionAction(this));		 //$NON-NLS-1$
 		setAction("OrganizeImports", new OrganizeImportsAction(this)); //$NON-NLS-1$
 		setAction("Comment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
@@ -472,6 +479,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		setAction("Format", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT)); //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("SurroundWithTryCatch", new SurroundWithTryCatchAction(this)); //$NON-NLS-1$
 
+		markAsStateDependentAction("CorrectionAssistProposal", true);
 		markAsStateDependentAction("ContentAssistProposal", true);
 		markAsStateDependentAction("Comment", true);
 		markAsStateDependentAction("Uncomment", true);
@@ -490,7 +498,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			new OpenViewActionGroup(this), 
 			new ShowActionGroup(this), 
 			new GenerateActionGroup(this),
-			new RefactorActionGroup(this)});		
+			new RefactorActionGroup(this)
+		});		
 	}
 	
 	/*
@@ -531,34 +540,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
 		
-		/*
-		 * http://dev.eclipse.org/bugs/show_bug.cgi?id=8735
-		 * Removed duplicates of Edit menu entries to shorten context menu.
-		 * Will be reworked for overal context menu reorganization.
-		 */
-//		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "ContentAssistProposal"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "AddImportOnSelection"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "OrganizeImports"); //$NON-NLS-1$
-
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "CorrectionAssistProposal"); //$NON-NLS-1$
-
-		
 		addAction(menu, IContextMenuConstants.GROUP_GENERATE, "SurroundWithTryCatch"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Comment"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Uncomment"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
-	}
-	
-	/*
-	 * @see JavaEditor#createOutlinePage()
-	 */
-	protected JavaOutlinePage createOutlinePage() {
-		JavaOutlinePage page= super.createOutlinePage();
-
-		//page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page)); //$NON-NLS-1$
-		//page.setAction("AddEdition", new JavaAddElementFromHistory(this, page)); //$NON-NLS-1$
-		
-		return page;
 	}
 	
 	/*

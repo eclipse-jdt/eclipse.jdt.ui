@@ -99,7 +99,10 @@ public class EditorUtility {
 			return openInEditor((IFile) inputElement);
 		
 		IEditorInput input= getEditorInput(inputElement);
-		return openInEditor(input, getEditorID(input, inputElement), activate);
+		if (input != null)
+			return openInEditor(input, getEditorID(input, inputElement), activate);
+			
+		return null;
 	}
 	
 	/** 
@@ -204,11 +207,14 @@ public class EditorUtility {
 	 * @return the working copy of the compilation unit, or null if not found
 	 */	
 	public static ICompilationUnit getWorkingCopy(ICompilationUnit cu) throws JavaModelException {
-		if (cu.isWorkingCopy()) {
+		if (cu.isWorkingCopy())
 			return cu;
-		}
+			
 		IEditorInput editorInput= getEditorInput(cu);
-		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput);
+		if (editorInput != null)
+			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput);
+		
+		return null;
 	}
 	
 	/** 
