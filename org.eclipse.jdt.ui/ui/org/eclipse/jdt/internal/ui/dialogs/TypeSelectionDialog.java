@@ -133,13 +133,6 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		setLowerListLabel(JavaUIMessages.getString("TypeSelectionDialog.lowerLabel")); //$NON-NLS-1$
 	}
 
-	public void create() {
-//		if (getFilter() == null)
-//			setFilter("A"); //$NON-NLS-1$
-				
-		super.create();
-	}
-
 	/*
 	 * @see AbstractElementListSelectionDialog#createFilteredList(Composite)
 	 */

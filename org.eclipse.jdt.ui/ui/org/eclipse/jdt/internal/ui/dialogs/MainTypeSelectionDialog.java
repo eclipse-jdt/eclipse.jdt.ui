@@ -72,16 +72,6 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	}
 
 	/*
-	 * @see Window#create()
-	 */
-	public void create() {	
-		if (getFilter() == null)
-			setFilter("A"); //$NON-NLS-1$
-			
-		super.create();				
-	}
-
-	/*
 	 * @see Window#open()
 	 */
 	public int open() {
