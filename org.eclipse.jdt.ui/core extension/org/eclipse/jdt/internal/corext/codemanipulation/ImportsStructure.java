@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -604,11 +605,11 @@ public class ImportsStructure implements IImportsStructure {
 		int nCreated= 0;
 		PackageEntry lastPackage= null;
 		
+		Set onDemandConflicts= null;
+		if (fFindAmbiguousImports) {
+			onDemandConflicts= evaluateStarImportConflicts();
+		}
 		
-		HashSet starImportPackages= new HashSet();
-		HashSet onDemandConflicts= new HashSet();
-				
-		evaluateStarImportConflicts(starImportPackages, onDemandConflicts);
 		int nPackageEntries= fPackageEntries.size();
 		for (int i= 0; i < nPackageEntries; i++) {
 			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
@@ -627,7 +628,7 @@ public class ImportsStructure implements IImportsStructure {
 			}
 			lastPackage= pack;
 			
-			boolean doStarImport= starImportPackages.contains(pack.getName());
+			boolean doStarImport= pack.hasStarImport(fImportOnDemandThreshold, onDemandConflicts);
 			if (doStarImport && (!fRestoreExistingImports || pack.find("*") == null)) { //$NON-NLS-1$
 				String starImportString= pack.getName() + ".*"; //$NON-NLS-1$
 				appendImportToBuffer(buf, starImportString, lineDelim);
@@ -639,7 +640,7 @@ public class ImportsStructure implements IImportsStructure {
 				String content= currDecl.getContent();
 				
 				if (content == null) { // new entry
-					if (!doStarImport || currDecl.isOnDemand() || onDemandConflicts.contains(currDecl.getSimpleName())) {
+					if (!doStarImport || currDecl.isOnDemand() || (onDemandConflicts != null && onDemandConflicts.contains(currDecl.getSimpleName()))) {
 						appendImportToBuffer(buf, currDecl.getElementName(), lineDelim);
 						nCreated++;
 					}
@@ -669,48 +670,63 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		return null;
 	}
-
-	private void evaluateStarImportConflicts(HashSet starImportPackages, HashSet onDemandConflicts) throws JavaModelException {
+	
+	private Set evaluateStarImportConflicts() throws JavaModelException {
 		int nPackageEntries= fPackageEntries.size();
+		HashSet starImportPackages= new HashSet(nPackageEntries);
 		for (int i= 0; i < nPackageEntries; i++) {
 			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
-			if (pack.hasStarImport(fImportOnDemandThreshold)) {
+			if (pack.hasStarImport(fImportOnDemandThreshold, null)) {
 				starImportPackages.add(pack.getName());
 			}
 		}
-		if (!fFindAmbiguousImports || starImportPackages.size() == 0) {
-			return;
+		if (starImportPackages.isEmpty()) {
+			return null;
 		}
+		
 		starImportPackages.add(fCompilationUnit.getParent().getElementName());
 		starImportPackages.add(JAVA_LANG);
-
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
-		TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
 		
-		String lastName= null;
-		TypeInfo lastEntry= null;
-		for (int i= 0; i < allTypes.length; i++) {
-			TypeInfo curr= allTypes[i];
-			String name= curr.getTypeName();
-			if (!name.equals(lastName)) {
-				lastName= name;
-				lastEntry= curr;
-			} else { // same name as last
-				String containerName= curr.getTypeContainerName();
-				if (starImportPackages.contains(containerName) && !onDemandConflicts.contains(lastName)) {
-					String lastContainerName= lastEntry.getTypeContainerName();
-					if (!containerName.equals(lastContainerName) && starImportPackages.contains(lastContainerName)) {
-						if (curr.isEnclosed(scope)) {
-							if (lastEntry.isEnclosed(scope)) {
-								onDemandConflicts.add(lastName);
-							} else {
-								lastEntry= curr;
-							}
-						}
-					}
+		TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
+		if (allTypes.length < 2) {
+			return null;
+		}
+		
+		HashSet onDemandConflicts= new HashSet();
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
+		String curr= allTypes[0].getTypeName();
+		int offset= 0;
+		int i= 1;
+		while (i < allTypes.length) {
+			String name= allTypes[i].getTypeName();
+			if (!name.equals(curr)) {
+				if (i - offset > 1 && isConflictingTypeName(allTypes, offset, i, starImportPackages, scope)) {
+					onDemandConflicts.add(curr);
 				}
+				curr= name;
+				offset= i;
+			}
+			i++;
+		}
+		if (i - offset > 1 && isConflictingTypeName(allTypes, offset, i, starImportPackages, scope)) {
+			onDemandConflicts.add(curr);
+		}
+		return onDemandConflicts;
+	}
+	
+	private boolean isConflictingTypeName(TypeInfo[] allTypes, int start, int end, HashSet starImportPackages, IJavaSearchScope scope) {
+		String conflictingContainer= null; // set only when entry is validated to be conflicting
+		for (int i= start; i < end; i++) {
+			TypeInfo curr= allTypes[i];
+			String containerName= curr.getTypeContainerName();
+			if (!containerName.equals(conflictingContainer) && starImportPackages.contains(containerName) && curr.isEnclosed(scope)) {
+				if (conflictingContainer != null) {
+					return true;
+				}
+				conflictingContainer= containerName;
 			}
 		}
+		return false;
 	}
 	
 	private boolean hasChanged(TextBuffer textBuffer, int offset, int length, String content) {
@@ -898,14 +914,17 @@ public class ImportsStructure implements IImportsStructure {
 			return (ImportDeclEntry) fImportEntries.get(index);
 		}
 		
-		public boolean hasStarImport(int threshold) {
+		public boolean hasStarImport(int threshold, Set explicitImports) {
 			if (isComment() || isDefaultPackage()) { // can not star import default package
 				return false;
 			}
-
+			int nImports= getNumberOfImports();
+			if (nImports < threshold) {
+				return false;
+			}
+			
 			int count= 0;
 			boolean containsNew= false;
-			int nImports= getNumberOfImports();
 			for (int i= 0; i < nImports; i++) {
 				ImportDeclEntry curr= getImportAt(i);
 				if (curr.isOnDemand()) {
@@ -913,7 +932,8 @@ public class ImportsStructure implements IImportsStructure {
 				}
 				if (!curr.isComment()) {
 					count++;
-					containsNew |= curr.isNew();
+					boolean isExplicit= (explicitImports != null) && explicitImports.contains(curr.getSimpleName());
+					containsNew |= curr.isNew() && !isExplicit;
 				}
 			}
 			return (count >= threshold) && containsNew;
