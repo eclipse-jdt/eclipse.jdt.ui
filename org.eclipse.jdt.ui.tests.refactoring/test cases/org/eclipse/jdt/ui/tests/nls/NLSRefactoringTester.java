@@ -1,20 +1,24 @@
-package org.eclipse.jdt.ui.nls.tests;
-
+package org.eclipse.jdt.ui.tests.nls;
+
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
-
+
+
 public class NLSRefactoringTester extends TestCase {
-
+
+
 	/**
 	 * Constructor for NLSRefactoringTester
 	 */
 	public NLSRefactoringTester(String name) {
 		super(name);
 	}
-
+
+
 	public static void main (String[] args) {
 		junit.textui.TestRunner.run (suite());
 	}
@@ -33,5 +37,7 @@ public class NLSRefactoringTester extends TestCase {
 	
 	public void test1(){
 		testRemoveQuotes("\"\"", "");	}
-}
-
+
+}
+
+

@@ -1,9 +1,11 @@
-package org.eclipse.jdt.ui.nls.tests;
-
+package org.eclipse.jdt.ui.tests.nls;
+
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
-
+
+
 public class AllTests {
 	
 	public static void main (String[] args) {
@@ -19,4 +21,5 @@ public class AllTests {
 	    return suite;
 	}
 }
-
+
+

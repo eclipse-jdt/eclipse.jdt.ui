@@ -1,11 +1,13 @@
-package org.eclipse.jdt.ui.nls.tests;
-
+package org.eclipse.jdt.ui.tests.nls;
+
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
-
+
+
 public class NLSElementTester extends TestCase{
 	
 	public NLSElementTester(String name) {
@@ -56,7 +58,8 @@ public class NLSElementTester extends TestCase{
 		assertEquals("tagposition.length", 2, fEl.getTagPosition().getLength());
 		assertEquals("tagposition.offset", 1, fEl.getTagPosition().getOffset());
 	}
-
+
+
 	public void test4(){	
 		assertEquals("hastag", false, fEl.hasTag());
 	}
@@ -67,4 +70,5 @@ public class NLSElementTester extends TestCase{
 	}
 		
 }
-
+
+

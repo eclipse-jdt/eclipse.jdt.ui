@@ -1,11 +1,13 @@
-package org.eclipse.jdt.ui.nls.tests;
-
+package org.eclipse.jdt.ui.tests.nls;
+
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 import org.eclipse.jdt.internal.ui.refactoring.nls.MultiStateCellEditor;
-
+
+
 public class CellEditorTester extends TestCase {
 
 	/**
@@ -61,4 +63,5 @@ public class CellEditorTester extends TestCase {
 		assertTrue(ce.getValue().equals(new Integer(0)));	
 	}	
 }
-
+
+

@@ -1,5 +1,6 @@
-package org.eclipse.jdt.ui.nls.tests;
-
+package org.eclipse.jdt.ui.tests.nls;
+
+
 import java.util.List;
 
 import junit.framework.Test;
@@ -9,9 +10,11 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
-
+
+
 public class NLSScannerTester extends TestCase {
-
+
+
 	public NLSScannerTester(String name) {
 		super(name);
 	}
@@ -71,7 +74,8 @@ public class NLSScannerTester extends TestCase {
 //		assertEquals("2 lines", 2, l.size());
 		printDisabledMessage("Scanner does not handle strings in the first line");
 	}
-
+
+
 	public void test4() throws Exception{
 		String text= "fred\n \"xx\"";
 		List l= NLSScanner.scan(text);
@@ -102,7 +106,8 @@ public class NLSScannerTester extends TestCase {
 		line= ((NLSLine)l.get(1));
 		assertEquals("1 string B", 1, line.size());
 	}	
-
+
+
 	public void test8() throws Exception{
 		String text= "\n \"xx\" \n\"dff\" \"ccc\"";
 		List l= NLSScanner.scan(text);
@@ -120,7 +125,8 @@ public class NLSScannerTester extends TestCase {
 		NLSElement el= line.get(0);
 		assertEquals("has tag", true, el.hasTag());
 	}
-
+
+
 	public void test10() throws Exception{
 		String text= "fred\n \"xx\"\n";
 		List l= NLSScanner.scan(text);
@@ -196,4 +202,5 @@ public class NLSScannerTester extends TestCase {
 	}
 				
 }
-
+
+

@@ -1,4 +1,4 @@
-package org.eclipse.jdt.ui.nls.tests;
+package org.eclipse.jdt.ui.tests.nls;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
