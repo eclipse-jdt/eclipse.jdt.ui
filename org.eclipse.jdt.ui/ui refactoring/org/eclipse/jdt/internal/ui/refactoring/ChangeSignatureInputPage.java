@@ -47,7 +47,8 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
                 }
             };
             Composite visibilityComposite= VisibilityControlUtil.createVisibilityControl(composite, visibilityChangeListener, availableVisibilities, currectVisibility);
-       		visibilityComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+            if (visibilityComposite != null)
+	       		visibilityComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
             
             if ( getChangeMethodSignatureRefactoring().canChangeReturnType())
             	createReturnTypeControl(composite);
