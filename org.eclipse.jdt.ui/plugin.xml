@@ -74,8 +74,8 @@
 <extension
       point="org.eclipse.jdt.ui.javaEditorTextHovers">
    <hover
-         class="org.eclipse.jdt.internal.ui.text.java.hover.JavaTypeHover"
-         id="org.eclipse.jdt.internal.ui.text.java.hover.JavaTypeHover"
+         class="org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover"
+         id="org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover"
          label="%javadocHover">
    </hover>
 </extension>
@@ -98,6 +98,14 @@
    </hover>
 </extension>
 
+<extension
+      point="org.eclipse.jdt.ui.javaEditorTextHovers">
+   <hover
+         class="org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"
+         id="org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"
+         label="%problemHover">
+   </hover>
+</extension>
 
 <extension 
 	point="org.eclipse.ui.perspectives">
