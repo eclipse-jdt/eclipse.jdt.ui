@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -60,7 +59,6 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		super(JavaEditorMessages.getString("AddImportOnSelection.label"));		 //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("AddImportOnSelection.tooltip")); //$NON-NLS-1$
 		setDescription(JavaEditorMessages.getString("AddImportOnSelection.description")); //$NON-NLS-1$
-		Assert.isNotNull(fEditor);
 		fEditor= editor;
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION);
 		setEnabled(getCompilationUnit() != null);	
@@ -71,6 +69,10 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	}	
 			
 	private ICompilationUnit getCompilationUnit () {
+		if (fEditor == null) {
+			return null;
+		}
+		
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
 		return manager.getWorkingCopy(fEditor.getEditorInput());
 	}
@@ -80,7 +82,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	 */
 	public void run() {
 		final ICompilationUnit cu= getCompilationUnit();
-		if (cu == null)
+		if (cu == null || fEditor == null)
 			return;
 		if (!ElementValidator.checkValidateEdit(cu, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"))) //$NON-NLS-1$
 			return;
