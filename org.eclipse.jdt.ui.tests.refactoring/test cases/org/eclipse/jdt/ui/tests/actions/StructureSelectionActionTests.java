@@ -20,15 +20,16 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
-
 import org.eclipse.jdt.ui.tests.refactoring.AbstractSelectionTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
+
+import org.eclipse.jdt.internal.corext.SourceRange;
 
 public class StructureSelectionActionTests extends RefactoringTest{
 	
