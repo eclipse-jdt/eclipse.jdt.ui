@@ -89,7 +89,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NeedToEmulateConstructorAccess:			
 			case IProblem.SuperfluousSemicolon:
 			case IProblem.UnnecessaryCast:
-			case IProblem.UnnecessaryArgumentCast:
 			case IProblem.UnnecessaryInstanceof:
 			case IProblem.IndirectAccessToStaticField:
 			case IProblem.IndirectAccessToStaticMethod:
@@ -377,7 +376,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addSuperfluousSemicolonProposal(context, problem, proposals);
 				break;
 			case IProblem.UnnecessaryCast:
-			case IProblem.UnnecessaryArgumentCast:
 				LocalCorrectionsSubProcessor.addUnnecessaryCastProposal(context, problem, proposals);
 				break;
 			case IProblem.UnnecessaryInstanceof:	
