@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.content.IContentType;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.ui.editors.text.ForwardingDocumentProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
@@ -64,5 +66,16 @@ public class PropertiesFileDocumentProvider extends TextFileDocumentProvider {
 			return null;
 
 		return super.createFileInfo(element);
+	}
+	
+	/*
+	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createSaveOperation(java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
+	 * @since 3.1
+	 */
+	protected DocumentProviderOperation createSaveOperation(final Object element, final IDocument document, final boolean overwrite) throws CoreException {
+		if (getFileInfo(element) == null)
+			return null;
+		
+		return super.createSaveOperation(element, document, overwrite);
 	}
 }
