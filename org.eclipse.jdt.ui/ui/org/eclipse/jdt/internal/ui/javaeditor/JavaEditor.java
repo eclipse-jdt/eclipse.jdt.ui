@@ -2590,6 +2590,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			enableBrowserLikeLinks();
 		
 		super.doSetInput(input);
+		
 		if (fEncodingSupport != null)
 			fEncodingSupport.reset();
 		setOutlinePageInput(fOutlinePage, input);
