@@ -39,6 +39,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -419,29 +420,41 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					fEditor= (JavaEditor) editor;
 				}			
 			}
-
-			
 			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), true, createChooseImportQuery());
 		
-			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-			context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
-			IProblem parseError= op.getParseError();
-			if (parseError != null) {
-				String message= ActionMessages.getFormattedString("OrganizeImportsAction.single.error.parse", parseError.getMessage()); //$NON-NLS-1$
-				MessageDialog.openInformation(getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), message); //$NON-NLS-1$ 
-				if (fEditor != null && parseError.getSourceStart() != -1) {
-					fEditor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
+			IRewriteTarget target= null;
+			if (fEditor != null) {
+				target= (IRewriteTarget) fEditor.getAdapter(IRewriteTarget.class);
+				if (target != null) {
+					target.beginCompoundChange();
 				}
-			} else {
-				if (fEditor != null) {
-					setStatusBarMessage(getOrganizeInfo(op));
+			}
+			
+			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
+			try {
+				context.run(false, true, new WorkbenchRunnableAdapter(op, op.getScheduleRule()));
+				IProblem parseError= op.getParseError();
+				if (parseError != null) {
+					String message= ActionMessages.getFormattedString("OrganizeImportsAction.single.error.parse", parseError.getMessage()); //$NON-NLS-1$
+					MessageDialog.openInformation(getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), message); //$NON-NLS-1$ 
+					if (fEditor != null && parseError.getSourceStart() != -1) {
+						fEditor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
+					}
+				} else {
+					if (fEditor != null) {
+						setStatusBarMessage(getOrganizeInfo(op));
+					}
+				}
+			} catch (InvocationTargetException e) {
+				ExceptionHandler.handle(e, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), ActionMessages.getString("OrganizeImportsAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			} catch (InterruptedException e) {
+			} finally {
+				if (target != null) {
+					target.endCompoundChange();
 				}
 			}
 		} catch (CoreException e) {	
 			ExceptionHandler.handle(e, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), ActionMessages.getString("OrganizeImportsAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), ActionMessages.getString("OrganizeImportsAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (InterruptedException e) {
 		}
 	}
 	
