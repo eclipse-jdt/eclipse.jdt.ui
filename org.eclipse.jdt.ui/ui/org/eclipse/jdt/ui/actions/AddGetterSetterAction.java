@@ -22,6 +22,38 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -33,6 +65,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.Modifier;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -56,37 +93,6 @@ import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.IRewriteTarget;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Creates getter and setter methods for a type's fields. Opens a dialog
@@ -107,7 +113,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
  * @since 2.0
  */
 public class AddGetterSetterAction extends SelectionDispatchAction {
-	
 	private int fVisibility;
 	private boolean fSort;
 	private boolean fSynchronized;
@@ -257,10 +262,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		
 		generate(getterFields, setterFields, getterSetterFields, elementPosition);
 	}
-
-	private boolean isEditorAvailable() {
-		return fEditor != null;
-	}	
 	
 	private IMethod asFirstMethod(IField[][] allFields) {
 		try {
@@ -280,40 +281,23 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			for (int i=0; i < allFields.length; i++) {
 				if (allFields[i].length  > 0) {
 					IMethod methods[]= allFields[i][0].getDeclaringType().getMethods();
-					return methods[index-1];				
+					if (index < methods.length)
+						return methods[index];		// reserve position for "as first method" option			
 				}
 			}
 		} catch (JavaModelException e) {
 		}
 		return null;
 	}
+	
 	/*
-	 * Determine where in the file to enter the newly created methods. Result depends
-	 * on whether to enter at the current cursor position or to enter at a chosen
-	 * method.
+	 * Determine where in the file to enter the newly created methods.
 	 */
 	private IJavaElement calculateElementPosition(int comboBoxIndex, IField[][] allFields) {		
-		try {
-			if (isEditorAvailable()) {
-				if (comboBoxIndex == 0) {			// at cursor position
-					return setElementPosition(SelectionConverter.getElementAtOffset(fEditor));		
-				}
-				else if (comboBoxIndex == 1)	 	// as first method
-					return asFirstMethod(allFields);
-				else								// method position
-					return atMethodPosition(allFields, comboBoxIndex-1);
-			}
-			else {									// run from a view part
-				if (comboBoxIndex == 0)				// as first method
-					return asFirstMethod(allFields);
-				else {								// method position
-					return atMethodPosition(allFields, comboBoxIndex);			
-				}
-			}
-		}
-		catch (JavaModelException e) {
-		}
-		return null;
+		if (comboBoxIndex == 0)				// as first method
+			return asFirstMethod(allFields);
+		else								// method position
+			return atMethodPosition(allFields, comboBoxIndex);			
 	}
 	
 	private static ISelectionStatusValidator createValidator() {
@@ -816,6 +800,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		private int fInsertionIndex;
 		private CompilationUnitEditor fEditor;
 		private ITreeContentProvider fContentProvider;
+		private static final int SELECT_GETTERS_ID= IDialogConstants.CLIENT_ID + 1;
+		private static final int SELECT_SETTERS_ID= IDialogConstants.CLIENT_ID + 2;
 		
 		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor) {
 			super(parent, labelProvider, contentProvider);
@@ -846,10 +832,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		public boolean getSynchronized() {
 			return fSynchronized;
 		}	
-
-		private boolean isEditorAvailable() {
-			return fEditor != null;
-		}	
 						
 		/**
 		 * Adds the Select Getters and Select Setters buttons.
@@ -858,41 +840,106 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		 * @param composite the parent composite
 		 */
 		protected Composite createSelectionButtons(Composite composite) {
-			Composite buttonComposite = super.createSelectionButtons(composite); 
-					
-			addGetSetSelectButtons(buttonComposite);
-			addOrderEntryChoices(buttonComposite);	
-			addVisibilityAndModifiersChoices(buttonComposite);
-										
-			((GridLayout) buttonComposite.getLayout()).numColumns= 4;
-			return buttonComposite;
-		}
-		
-		private Composite addGetSetSelectButtons(Composite buttonComposite) {
-			// Add buttons for selecting getters or setters only: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
-			int id = IDialogConstants.CLIENT_ID + 1;
-			Button gettersButton = createButton(buttonComposite, id++, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_getters"), false); //$NON-NLS-1$	
+			Composite buttonComposite= super.createSelectionButtons(composite);
 
-			SelectionListener listener = new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					getTreeViewer().setCheckedElements(getGetterSetterElements(true));
-					updateOKStatus();
-				}
-			};
-			gettersButton.addSelectionListener(listener);
-		
-			Button settersButton = createButton(buttonComposite, id++, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_setters"), false); //$NON-NLS-1$	
-
-			listener = new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {					
-					getTreeViewer().setCheckedElements(getGetterSetterElements(false));
-					updateOKStatus();
-				}
-			};
-			settersButton.addSelectionListener(listener);
+			GridLayout layout = new GridLayout();
+			buttonComposite.setLayout(layout);						
 			
-			return buttonComposite;			
+			// Add buttons for selecting getters or setters only: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
+			createButton(buttonComposite, SELECT_GETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_getters"), false); //$NON-NLS-1$	
+			createButton(buttonComposite, SELECT_SETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_setters"), false); //$NON-NLS-1$	
+			
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;						
+			layout.numColumns= 1;
+			
+			return buttonComposite;
+		}	
+		
+		protected void buttonPressed(int buttonId) {
+			switch(buttonId) {
+				case SELECT_GETTERS_ID: {
+					getTreeViewer().setCheckedElements(getGetterSetterElements(true));
+					updateOKStatus();						
+					break;
+				}
+				case SELECT_SETTERS_ID: {
+					getTreeViewer().setCheckedElements(getGetterSetterElements(false));
+					updateOKStatus();									
+					break;
+				}
+				case IDialogConstants.OK_ID: {
+					okPressed();
+					break;
+				}
+				case IDialogConstants.CANCEL_ID: {
+					cancelPressed();
+					break;
+				}
+			}
+		}	
+		
+		protected Composite createSelectionCombos(Composite composite) {
+			Composite selectionComposite = new Composite(composite, SWT.NONE);
+			GridLayout layout = new GridLayout();
+			selectionComposite.setLayout(layout);
+			selectionComposite.setFont(composite.getFont());	
+						
+			addOrderEntryChoices(selectionComposite);	
+			addVisibilityAndModifiersChoices(selectionComposite);	
+											
+			return selectionComposite;
 		}
+		
+		/*
+		 * @see Dialog#createDialogArea(Composite)
+		 */
+		protected Control createDialogArea(Composite parent) {
+			initializeDialogUnits(parent);
+			
+			Composite composite = new Composite(parent, SWT.NONE);
+			GridLayout layout = new GridLayout();
+			layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+			layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+			layout.verticalSpacing=	convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+			layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);			
+			composite.setLayout(layout);
+			composite.setFont(parent.getFont());	
+						
+			Label messageLabel = createMessageArea(composite);			
+			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+			gd.horizontalSpan= 2;
+			messageLabel.setLayoutData(gd);			
+			
+			Composite inner= new Composite(composite, SWT.NONE);
+			GridLayout innerLayout = new GridLayout();
+			innerLayout.numColumns= 2;
+			innerLayout.marginHeight= 0;
+			innerLayout.marginWidth= 0;
+			inner.setLayout(innerLayout);
+			inner.setFont(parent.getFont());		
+			
+			CheckboxTreeViewer treeViewer= createTreeViewer(inner);
+			gd= new GridData(GridData.FILL_BOTH);
+			gd.heightHint = convertHeightInCharsToPixels(20);
+			treeViewer.getControl().setLayoutData(gd);			
+					
+			Composite buttonComposite= createSelectionButtons(inner);
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL);
+			buttonComposite.setLayoutData(gd);
+			
+			gd= new GridData(GridData.FILL_BOTH);
+			inner.setLayoutData(gd);
+			
+			Composite selectionComposite= createSelectionCombos(composite);	
+			gd= new GridData(GridData.FILL_BOTH);
+			selectionComposite.setLayoutData(gd);												
+			
+			gd= new GridData(GridData.FILL_BOTH);
+			composite.setLayoutData(gd);
+			
+			return composite;
+		}				
 		
 		private Composite addVisibilityAndModifiersChoices(Composite buttonComposite) {
 			// Add visibility and modifiers buttons: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
@@ -923,15 +970,15 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			// Add order entry choices: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
 			Label enterLabel= new Label(buttonComposite, SWT.NONE);
 			enterLabel.setText(ActionMessages.getString("GetterSetterTreeSelectionDialog.enterAt_label")); //$NON-NLS-1$
-			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-			gd.horizontalSpan= 1;
+			
+			GridData gd= new GridData(GridData.FILL_BOTH);
 			enterLabel.setLayoutData(gd);
 
 			final Combo enterCombo= new Combo(buttonComposite, SWT.READ_ONLY);
 			fillWithPossibleInsertPositions(enterCombo);
-			//enterCombo.setText(enterCombo.getItem(0));
-			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-			gd.horizontalSpan= 3;
+			
+			gd= new GridData(GridData.FILL_BOTH);
+			gd.grabExcessHorizontalSpace= true;
 			enterCombo.setLayoutData(gd);
 			enterCombo.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
@@ -941,8 +988,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 			Label label= new Label(buttonComposite, SWT.NONE);
 			label.setText(ActionMessages.getString("GetterSetterTreeSelectionDialog.sort_label")); //$NON-NLS-1$
-			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-			gd.horizontalSpan= 1;
+			gd= new GridData(GridData.FILL_BOTH);
 			label.setLayoutData(gd);
 
 			final Combo combo= new Combo(buttonComposite, SWT.READ_ONLY);
@@ -950,8 +996,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 										ActionMessages.getString("GetterSetterTreeSelectionDialog.alpha_method_sort")});  //$NON-NLS-1$  
 			final int methodIndex= 1;	// Hard-coded. Change this if the list gets more complicated.
 			combo.setText(combo.getItem(0));
-			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-			gd.horizontalSpan= 3;
+			gd= new GridData(GridData.FILL_BOTH);
+			gd.grabExcessHorizontalSpace= true;
 			combo.setLayoutData(gd);
 			combo.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
@@ -963,22 +1009,65 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 		
 		private void fillWithPossibleInsertPositions(Combo combo) {
-			Object allFields[]= fContentProvider.getElements(null);
-			IField field= (IField)allFields[0];
-
-			if (isEditorAvailable())
-				combo.add(ActionMessages.getString("GetterSetterTreeSelectionDialog.cursor_position")); //$NON-NLS-1$	
-
-			combo.add(ActionMessages.getString("GetterSetterTreeSelectionDialog.first_method")); //$NON-NLS-1$
 			try {
+				Object allFields[]= fContentProvider.getElements(null);
+				IField field= (IField)allFields[0];
+	
+				combo.add(ActionMessages.getString("GetterSetterTreeSelectionDialog.first_method")); //$NON-NLS-1$
 				IMethod[] methods= field.getDeclaringType().getMethods();
+				int[] offsets= new int[methods.length];
 				for (int i= 0; i < methods.length; i++) {
 					combo.add(JavaElementLabels.getElementLabel(methods[i], JavaElementLabels.M_PARAMETER_TYPES));
+					offsets[i]= methods[i].getSourceRange().getOffset();
 				}		
+				combo.select(preselectElementPosition(methods, offsets));
+				fInsertionIndex= combo.getSelectionIndex();	
+
 			} catch (JavaModelException e) {
 			}
-			combo.select(0);
-		}		
+		}	
+
+		/*
+		 * Returns pre-select index based on element selected or closest method to cursor.
+		 */ 
+		private int preselectElementPosition(IMethod[] methods, int[] offsets) throws JavaModelException {	
+			int position= 0;
+
+			if (fEditor != null) {
+				IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);	
+				int elementOffset= 0;				
+				int type = element.getElementType();
+				if (type == IJavaElement.METHOD)
+					elementOffset= ((IMethod)element).getSourceRange().getOffset();
+				else if (type == IJavaElement.FIELD)
+					elementOffset= ((IField)element).getSourceRange().getOffset();
+				else {
+					GoToNextPreviousMemberAction action= GoToNextPreviousMemberAction.newGoToNextMemberAction(fEditor);
+					ITextSelection textSelect= (ITextSelection)fEditor.getSelectionProvider().getSelection();	
+					ISourceRange sourceRange= action.getNewSelectionRange(createSourceRange(textSelect), null);
+					IJavaElement nextElement= SelectionConverter.getElementAtOffset(SelectionConverter.getInput(fEditor), createTextSelection(sourceRange));
+					type = nextElement.getElementType();
+					if (type == IJavaElement.METHOD)
+						elementOffset= ((IMethod)nextElement).getSourceRange().getOffset();
+					else if (type == IJavaElement.FIELD)
+						elementOffset= ((IField)nextElement).getSourceRange().getOffset();	
+					else 
+						return 0;				
+				}
+					
+				int delta= Math.abs(offsets[0] - elementOffset);
+				for (int i = 1; i < offsets.length; i++) {
+					int newDelta= Math.abs(offsets[i] - elementOffset);
+					if (newDelta < delta) {
+						delta= newDelta;
+						position= i;
+					}
+				}
+				return (position+1);
+			}
+
+			return position;		
+		}
 
 		private Object[] getGetterSetterElements(boolean isGetter){
 			Object[] allFields= fContentProvider.getElements(null);
@@ -1012,34 +1101,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 	}
 
-	/**
-	 * Sets the location where the new getter/setter methods will be entered. 
-	 */
-	private IJavaElement setElementPosition(IJavaElement element) {
-		try {
-			if (element == null) {
-				return null;
-			}
-			int type = element.getElementType();
-			if (type == IJavaElement.METHOD || type == IJavaElement.FIELD)
-				return element;
-			else {		
-				ITextSelection textSelect= (ITextSelection)fEditor.getSelectionProvider().getSelection();	
-				GoToNextPreviousMemberAction action= GoToNextPreviousMemberAction.newGoToNextMemberAction(fEditor);
-				ISourceRange sourceRange= action.getNewSelectionRange(createSourceRange(textSelect), null);
-				IJavaElement nextElement= SelectionConverter.getElementAtOffset(SelectionConverter.getInput(fEditor), createTextSelection(sourceRange));
-				type= nextElement.getElementType();
-				if (type == IJavaElement.METHOD || type == IJavaElement.FIELD)
-					return nextElement;
-				else		// end of file
-					return null;
-
-			}
-		} catch (JavaModelException e) {
-		}
-		return null;
-	}
-	
 	private static ISourceRange createSourceRange(ITextSelection textSelection){
 		return new SourceRange(textSelection.getOffset(), textSelection.getLength());
 	}

@@ -38,7 +38,7 @@ public class VisibilityControlUtil {
 		group.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
 		layout.makeColumnsEqualWidth= true;
-		layout.numColumns= 4; layout.marginWidth= 0;
+		layout.numColumns= 4; 
 		group.setLayout(layout);
 		
 		String[] labels= new String[] {
