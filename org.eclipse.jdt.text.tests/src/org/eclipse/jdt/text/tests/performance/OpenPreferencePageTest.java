@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -37,22 +39,29 @@ import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
  * @since 3.1
  */
 public class OpenPreferencePageTest extends TestCase {
+	
+	private static final Class THIS= OpenPreferencePageTest.class;
+	
 	private PerformanceMeter fMeter;
+	
+	public static Test suite() {
+		return new TestSuite(THIS);
+	}
 
 	public void testOpenPreferencePage() {
 		Display display= EditorTestHelper.getActiveDisplay();
 		
-        PreferenceManager pm = WorkbenchPlugin.getDefault().getPreferenceManager();
-        assertNotNull(pm);
-        
-       	PreferenceDialog d = new WorkbenchPreferenceDialog(display.getActiveShell(), pm);
-       	d.create();
-       	WorkbenchHelp.setHelp(d.getShell(), IWorkbenchHelpContextIds.PREFERENCE_DIALOG);
-       	// HACK to get control back instantly
-       	d.setBlockOnOpen(false);
-       	d.open();
-       	
-       	EditorTestHelper.runEventQueue();
+		PreferenceManager pm = WorkbenchPlugin.getDefault().getPreferenceManager();
+		assertNotNull(pm);
+		
+		PreferenceDialog d = new WorkbenchPreferenceDialog(display.getActiveShell(), pm);
+		d.create();
+		WorkbenchHelp.setHelp(d.getShell(), IWorkbenchHelpContextIds.PREFERENCE_DIALOG);
+		// HACK to get control back instantly
+		d.setBlockOnOpen(false);
+		d.open();
+		
+		EditorTestHelper.runEventQueue();
 		
 		Control control= display.getFocusControl();
 		assertTrue(control instanceof Tree);

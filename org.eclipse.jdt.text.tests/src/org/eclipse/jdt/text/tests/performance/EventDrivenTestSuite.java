@@ -33,11 +33,11 @@ public class EventDrivenTestSuite extends TestSuite {
 		addTest(JavaIndenterTest.suite());
 		addTest(JavaNonInitialTypingTest.suite());
 		addTest(TextNonInitialTypingTest.suite());
-		addTestSuite(OpenPreferencePageTest.class);
+		addTest(OpenPreferencePageTest.suite());
 		addTestSuite(ScrollAnnotatedJavaEditorTest.class);
 		// TODO: enable when Bug 72244: "Posting mouse events locks up event handling" is fixed
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=72244
-//		addTestSuite(MouseScrollJavaEditorTest.class);
-//		addTestSuite(MouseScrollTextEditorTest.class);
+//		addTest(MouseScrollJavaEditorTest.suite());
+//		addTest(MouseScrollTextEditorTest.suite());
 	}
 }
