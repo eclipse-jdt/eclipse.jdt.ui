@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -78,8 +78,8 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -709,13 +709,13 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		Assert.isTrue(rg == null || rg.getCompilationUnit() == unitHandle);
 		CompilationUnit		unit= getASTFor(unitHandle);
 		ASTRewrite			unitRewriter= ASTRewrite.create(unit.getAST());
-		TextBuffer			buffer= null;
+		ITextFileBuffer			buffer= null;
 		MultiTextEdit		root= new MultiTextEdit();
 		boolean				someChange= false;
 
 		try {
 			unitChange.setEdit(root);
-			buffer= TextBuffer.acquire((IFile) unitHandle.getResource());
+			buffer= RefactoringFileBuffers.acquire(unitHandle);
 			fImportRewriter= new ImportRewrite(unitHandle);
 
 			// First create the factory method
@@ -747,8 +747,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				root.addChild(fImportRewriter.createEdit(buffer.getDocument()));
 			}
 		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
+			RefactoringFileBuffers.release(unitHandle);
 		}
 		return someChange;
 	}

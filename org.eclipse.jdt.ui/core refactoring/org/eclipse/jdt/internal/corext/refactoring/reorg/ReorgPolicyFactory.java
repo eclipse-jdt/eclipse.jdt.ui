@@ -576,7 +576,7 @@ class ReorgPolicyFactory {
 
 		protected static TextChange addTextEditFromRewrite(ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 			try {
-				ITextFileBuffer buffer= RefactoringFileBuffers.connect(cu);
+				ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
 				TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), cu.getJavaProject().getOptions(true));
 				TextChange textChange= new CompilationUnitChange(cu.getElementName(), cu);
 				if (textChange instanceof TextFileChange) {
@@ -588,7 +588,7 @@ class ReorgPolicyFactory {
 				TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
 				return textChange;
 			} finally {
-				RefactoringFileBuffers.disconnect(cu);
+				RefactoringFileBuffers.release(cu);
 			}
 		}
 

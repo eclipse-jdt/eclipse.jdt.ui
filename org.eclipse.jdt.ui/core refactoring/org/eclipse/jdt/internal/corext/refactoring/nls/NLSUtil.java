@@ -164,11 +164,11 @@ public class NLSUtil {
 
 	private static int findLineEnd(ICompilationUnit cu, int position) throws CoreException, BadLocationException {
 		try {
-			ITextFileBuffer buffer= RefactoringFileBuffers.connect(cu);
+			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
 			IRegion lineInfo= buffer.getDocument().getLineInformationOfOffset(position);
 			return lineInfo.getOffset() + lineInfo.getLength();
 		} finally {
-			RefactoringFileBuffers.disconnect(cu);
+			RefactoringFileBuffers.release(cu);
 		}
 	}
 }

@@ -573,13 +573,13 @@ public class PasteAction extends SelectionDispatchAction{
 				}
 				final CompilationUnitChange result= new CompilationUnitChange(ReorgMessages.getString("PasteAction.change.name"), getDestinationCu()); //$NON-NLS-1$
 				try {
-					ITextFileBuffer buffer= RefactoringFileBuffers.connect(getDestinationCu());
+					ITextFileBuffer buffer= RefactoringFileBuffers.acquire(getDestinationCu());
 					TextEdit rootEdit= rewrite.rewriteAST(buffer.getDocument(), fDestination.getJavaProject().getOptions(true));
 					if (getDestinationCu().isWorkingCopy())
 						result.setSaveMode(TextFileChange.LEAVE_DIRTY);
 					TextChangeCompatibility.addTextEdit(result, ReorgMessages.getString("PasteAction.edit.name"), rootEdit); //$NON-NLS-1$
 				} finally {
-					RefactoringFileBuffers.disconnect(getDestinationCu());
+					RefactoringFileBuffers.release(getDestinationCu());
 				}
 				return result;
 			}

@@ -24,13 +24,19 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.RangeMarker;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditProcessor;
 import org.eclipse.text.edits.UndoEdit;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -57,16 +63,17 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class SourceProvider {
 
 	private ICompilationUnit fCUnit;
-	private TextBuffer fBuffer;
+	private IDocument fDocument;
 	private MethodDeclaration fDeclaration;
 	private ASTRewrite fRewriter;
 	private SourceAnalyzer fAnalyzer;
@@ -109,7 +116,7 @@ public class SourceProvider {
 	}
 	
 	public void initialize() throws JavaModelException {
-		fBuffer= TextBuffer.create(fCUnit.getBuffer().getContents());
+		fDocument= new Document(fCUnit.getBuffer().getContents());
 		fAnalyzer.analyzeParameters();
 		if (hasReturnValue()) {
 			ASTNode last= getLastStatement();
@@ -235,7 +242,7 @@ public class SourceProvider {
 	public TextEdit getDeleteEdit() {
 		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getParent().getAST());
 		rewriter.remove(fDeclaration, null);
-		return rewriter.rewriteAST(fBuffer.getDocument(), fCUnit.getJavaProject().getOptions(true));
+		return rewriter.rewriteAST(fDocument, fCUnit.getJavaProject().getOptions(true));
 	}
 	
 	public String[] getCodeBlocks(CallContext context) throws CoreException {
@@ -260,7 +267,7 @@ public class SourceProvider {
 			}
 		}
 
-		final TextEdit dummy= fRewriter.rewriteAST(fBuffer.getDocument(), fCUnit.getJavaProject().getOptions(true));
+		final TextEdit dummy= fRewriter.rewriteAST(fDocument, fCUnit.getJavaProject().getOptions(true));
 		int size= ranges.size();
 		RangeMarker[] markers= new RangeMarker[size];
 		for (int i= 0; i < markers.length; i++) {
@@ -280,17 +287,23 @@ public class SourceProvider {
 			int pos= edit.getOffset() >= split ? 1 : 0;
 			markers[pos].addChild(edit);
 		}
-		MultiTextEdit root= new MultiTextEdit();
+		MultiTextEdit root= new MultiTextEdit(0, fDocument.getLength());
 		root.addChildren(markers);
-		TextBufferEditor editor= new TextBufferEditor(fBuffer);
-		editor.add(root);
-		UndoEdit undo= editor.performEdits(null);
-		String[] result= getBlocks(markers);
-		// It is faster to undo the changes than coping the buffer over and over again.
-		TextBufferEditor undoEditor= new TextBufferEditor(fBuffer);
-		undoEditor.add(undo);
-		undoEditor.performEdits(null);
-		return result;
+		
+		try {
+			TextEditProcessor processor= new TextEditProcessor(fDocument, root, TextEdit.CREATE_UNDO | TextEdit.UPDATE_REGIONS);
+			UndoEdit undo= processor.performEdits();
+			String[] result= getBlocks(markers);
+			// It is faster to undo the changes than coping the buffer over and over again.
+			processor= new TextEditProcessor(fDocument, undo, TextEdit.UPDATE_REGIONS);
+			processor.performEdits();
+			return result;
+		} catch (MalformedTreeException exception) {
+			JavaPlugin.log(exception);
+		} catch (BadLocationException exception) {
+			JavaPlugin.log(exception);
+		}
+		return new String[] {};
 	}
 
 	private void replaceParameterWithExpression(String[] expressions) {
@@ -464,14 +477,14 @@ public class SourceProvider {
 		return range;
 	}
 	
-	private String[] getBlocks(RangeMarker[] markers) {
+	private String[] getBlocks(RangeMarker[] markers) throws BadLocationException {
 		String[] result= new String[markers.length];
 		for (int i= 0; i < markers.length; i++) {
 			RangeMarker marker= markers[i];
-			String content= fBuffer.getContent(marker.getOffset(), marker.getLength());
+			String content= fDocument.get(marker.getOffset(), marker.getLength());
 			String lines[]= Strings.convertIntoLines(content);
 			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
-			result[i]= Strings.concatenate(lines, fBuffer.getLineDelimiter());
+			result[i]= Strings.concatenate(lines, TextUtilities.getDefaultLineDelimiter(fDocument));
 		}
 		return result;
 	}

@@ -410,14 +410,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private static TextChange addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, OldASTRewrite rewrite) throws CoreException {
 		try {
-			ITextFileBuffer buffer= RefactoringFileBuffers.connect(cu);
+			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
 			TextEdit edit= rewrite.rewriteAST(buffer.getDocument(), cu.getJavaProject().getOptions(true));
 			TextChange textChange= manager.get(cu);
 			TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_type_declaration"), edit); //$NON-NLS-1$
 			rewrite.removeModifications();
 			return textChange;
 		} finally {
-			RefactoringFileBuffers.disconnect(cu);
+			RefactoringFileBuffers.release(cu);
 		}
 	}
     

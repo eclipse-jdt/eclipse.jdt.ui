@@ -19,8 +19,10 @@ import java.util.Map;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -159,6 +161,28 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 	}
 	
 	public void endVisit(TypeDeclaration node) {
+		--fTypes;
+		super.endVisit(node);
+	}
+
+	public boolean visit(EnumDeclaration node) {
+		if (++fTypes > 1)
+			return false;
+		return super.visit(node);
+	}
+	
+	public void endVisit(EnumDeclaration node) {
+		--fTypes;
+		super.endVisit(node);
+	}
+
+	public boolean visit(AnnotationTypeDeclaration node) {
+		if (++fTypes > 1)
+			return false;
+		return super.visit(node);
+	}
+	
+	public void endVisit(AnnotationTypeDeclaration node) {
 		--fTypes;
 		super.endVisit(node);
 	}

@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -22,9 +27,9 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 
 /**
  * Utility class used to get better source ranges for <code>ISourceReference</code>
@@ -47,8 +52,7 @@ public class SourceRangeComputer {
 	public static String computeSource(ISourceReference elem) throws JavaModelException{
 		String cuSource= getCuSource(elem);
 		ISourceRange range= SourceRangeComputer.computeSourceRange(elem, cuSource);
-		int endIndex= range.getOffset() + range.getLength();
-		return cuSource.substring(range.getOffset(), endIndex);
+		return cuSource.substring(range.getOffset(), range.getOffset() + range.getLength());
 	}
 
     private static String getCuSource(ISourceReference elem) throws JavaModelException {
@@ -72,34 +76,30 @@ public class SourceRangeComputer {
 				return element.getSourceRange();
 			if (cuSource == null)
 				return element.getSourceRange();
-			return computeSourceRange(element.getSourceRange(), cuSource);			
-//		 	SourceRangeComputer inst= new SourceRangeComputer(element, cuSource);
-//		 	int offset= inst.computeOffset();
-//		 	int end= inst.computeEnd();
-//		 	int length= end - offset;
-//		 	return new SourceRange(offset, length);
-//		}	catch(CoreException e){
-//			//fall back to the default
-//			return element.getSourceRange();
-//		}	
+			return computeSourceRange(element.getSourceRange(), cuSource);				
 	}
 	
 	public static ISourceRange computeSourceRange(ISourceRange sourceRange, String cuSource) {
 		SourceRangeComputer inst= new SourceRangeComputer(sourceRange, cuSource);
-		int offset= inst.computeOffset();
-		int end= inst.computeEnd();
-		int length= end - offset;
-		return new SourceRange(offset, length);
+		try {
+			int offset= inst.computeOffset();
+			int end= inst.computeEnd();
+			return new SourceRange(offset, (end - offset));
+		} catch (BadLocationException exception) {
+			// Should never happen
+			JavaPlugin.log(exception);
+		}
+		return null;
 	}
 
-	private int computeEnd() {
+	private int computeEnd() throws BadLocationException {
 		int end= fSourceRange.getOffset() + fSourceRange.getLength();
 		try{	
 			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 			scanner.setSource(fCuSource.toCharArray());
 			scanner.resetTo(end, fCuSource.length() - 1);
-			TextBuffer buff= TextBuffer.create(fCuSource);
-			int startLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
+			IDocument document= new Document(fCuSource);
+			int startLine= document.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
 			
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
@@ -109,17 +109,17 @@ public class SourceRangeComputer {
 					case ITerminalSymbols.TokenNameSEMICOLON:
 						break;	
 					case ITerminalSymbols.TokenNameCOMMENT_LINE :
-						if (startLine == getCurrentTokenStartLine(scanner, buff))
+						if (startLine == document.getLineOfOffset(scanner.getCurrentTokenStartPosition() + 1))
 							break;
 						else
-							return stopProcessing(end, scanner, buff, startLine);
+							return stopProcessing(end, scanner, document, startLine);
 					case ITerminalSymbols.TokenNameCOMMENT_BLOCK :
-						if (startLine == getCurrentTokenStartLine(scanner, buff))
+						if (startLine == document.getLineOfOffset(scanner.getCurrentTokenStartPosition() + 1))
 							break;
 						else	
-							return stopProcessing(end, scanner, buff, startLine);
+							return stopProcessing(end, scanner, document, startLine);
 					default:
-						return stopProcessing(end, scanner, buff, startLine);
+						return stopProcessing(end, scanner, document, startLine);
 				}
 				token= scanner.getNextToken();
 			}
@@ -129,20 +129,16 @@ public class SourceRangeComputer {
 		}
 	}
 
-	private int stopProcessing(int end, IScanner scanner, TextBuffer buff, int startLine) {
-		int currentTokenStartLine= getCurrentTokenStartLine(scanner, buff);
+	private int stopProcessing(int end, IScanner scanner, IDocument buff, int startLine) throws BadLocationException {
+		int currentTokenStartLine= buff.getLineOfOffset(scanner.getCurrentTokenStartPosition() + 1);
 		int currentTokenEndLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
 		if (endOnCurrentTokenStart(startLine, currentTokenStartLine, currentTokenEndLine))
 			return scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenSource().length + 1;
-		TextRegion tokenStartLine= buff.getLineInformation(currentTokenStartLine);
+		IRegion tokenStartLine= buff.getLineInformation(currentTokenStartLine);
 		if (tokenStartLine != null)
 			return tokenStartLine.getOffset();
 		else
 			return end; //fallback	
-	}
-
-	private int getCurrentTokenStartLine(IScanner scanner, TextBuffer buff) {
-		return buff.getLineOfOffset(scanner.getCurrentTokenStartPosition() + 1);
 	}
 
 	private boolean endOnCurrentTokenStart(int startLine, int currentTokenStartLine,int currentTokenEndLine) {
@@ -151,14 +147,14 @@ public class SourceRangeComputer {
 		return (startLine == currentTokenStartLine && currentTokenStartLine != currentTokenEndLine);
 	}
 	
-	private int computeOffset() {
+	private int computeOffset() throws BadLocationException {
 		int offset= fSourceRange.getOffset();
 		try{
-			TextBuffer buff= TextBuffer.create(fCuSource);
-			int lineOffset= buff.getLineInformationOfOffset(offset).getOffset();
+			IDocument document= new Document(fCuSource);
+			int lineOffset= document.getLineInformationOfOffset(offset).getOffset();
 			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
-			scanner.setSource(buff.getContent().toCharArray());
-			scanner.resetTo(lineOffset, buff.getLength() - 1);
+			scanner.setSource(document.get().toCharArray());
+			scanner.resetTo(lineOffset, document.getLength() - 1);
 			
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {

@@ -108,10 +108,10 @@ public class MoveCuUpdateCreator {
 			ImportRewrite importRewrite= (ImportRewrite) fImportRewrites.get(cu);
 			if (importRewrite != null && !importRewrite.isEmpty()) {
 				try {
-					ITextFileBuffer buffer= RefactoringFileBuffers.connect(cu);
+					ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
 					TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer.getDocument())); //$NON-NLS-1$
 				} finally {
-					RefactoringFileBuffers.disconnect(cu);
+					RefactoringFileBuffers.release(cu);
 				}
 			}
 		}

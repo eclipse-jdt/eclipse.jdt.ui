@@ -26,7 +26,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.text.edits.TextEditGroup;
+
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -79,11 +83,10 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
@@ -332,13 +335,12 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 		}
-		
-		TextBuffer buffer= TextBuffer.acquire(getFile(owner));
 		try {
-			ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter, buffer.getLineDelimiter()));
+			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(owner);
+			ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter, TextUtilities.getDefaultLineDelimiter(buffer.getDocument())));
 			createEdits(owner, fRewriter, ownerDescriptions, buffer);
 		} finally {
-			TextBuffer.release(buffer);
+			RefactoringFileBuffers.release(owner);
 		}
 		sub.done();
 		result.merge(validateModifiesFiles());
@@ -346,15 +348,15 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups) throws CoreException {
-		TextBuffer buffer= TextBuffer.acquire(getFile(unit));
 		try {
+		ITextFileBuffer buffer= RefactoringFileBuffers.acquire(unit);
 			createEdits(unit, rewriter, groups, buffer);
 		} finally {
-			TextBuffer.release(buffer);
+			RefactoringFileBuffers.release(unit);
 		}
 	}
 
-	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups, TextBuffer buffer) {
+	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups, ITextFileBuffer buffer) {
 		TextChange change= fChangeManager.get(unit);
 		change.setEdit(rewriter.rewriteAST(buffer.getDocument(), fField.getJavaProject().getOptions(true)));
 		for (Iterator iter= groups.iterator(); iter.hasNext();) {
@@ -594,10 +596,6 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 		if (isStatic && fArgName.equals(fieldName) && fieldName.equals(fField.getDeclaringType().getElementName()))
 			fArgName= "_" + fieldName; //$NON-NLS-1$
-	}
-	
-	private static IFile getFile(ICompilationUnit cu) {
-		return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
 	}
 	
 	private RefactoringStatus validateModifiesFiles(){

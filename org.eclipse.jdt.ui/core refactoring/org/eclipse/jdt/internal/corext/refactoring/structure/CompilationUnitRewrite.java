@@ -118,7 +118,7 @@ public class CompilationUnitRewrite {
 			return null;
 
 		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
-		ITextFileBuffer buffer= RefactoringFileBuffers.connect(fCu);
+		ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
 		try {
 			IDocument document= buffer.getDocument();
 			MultiTextEdit multiEdit= new MultiTextEdit();
@@ -149,7 +149,7 @@ public class CompilationUnitRewrite {
 				return null;
 			return cuChange;
 		} finally {
-			RefactoringFileBuffers.disconnect(fCu);
+			RefactoringFileBuffers.release(fCu);
 		}
 	}
 

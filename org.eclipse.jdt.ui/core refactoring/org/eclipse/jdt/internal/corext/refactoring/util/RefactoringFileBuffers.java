@@ -35,7 +35,7 @@ public final class RefactoringFileBuffers {
 	 * @return the text file buffer, or <code>if</code> no buffer could be acquired
 	 * @throws CoreException if no buffer could be acquired
 	 */
-	public static ITextFileBuffer connect(final ICompilationUnit unit) throws CoreException {
+	public static ITextFileBuffer acquire(final ICompilationUnit unit) throws CoreException {
 		Assert.isNotNull(unit);
 		final IResource resource= unit.getResource();
 		if (resource != null && resource.getType() == IResource.FILE) {
@@ -52,7 +52,7 @@ public final class RefactoringFileBuffers {
 	 * @param unit the compilation unit whose text file buffer has to be released
 	 * @throws CoreException if the buffer could not be successfully released
 	 */
-	public static void disconnect(final ICompilationUnit unit) throws CoreException {
+	public static void release(final ICompilationUnit unit) throws CoreException {
 		Assert.isNotNull(unit);
 		final IResource resource= unit.getResource();
 		if (resource != null && resource.getType() == IResource.FILE)

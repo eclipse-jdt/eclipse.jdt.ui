@@ -10,25 +10,33 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CodeRefactoringUtil {
-
-    private CodeRefactoringUtil() {}
 
     public static RefactoringStatus checkMethodSyntaxErrors(int selectionStart, int selectionLength, CompilationUnit cuNode, String invalidSelectionMessage){
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(selectionStart, selectionLength), true);
@@ -46,16 +54,20 @@ public class CodeRefactoringUtil {
 	}
 	
 	public static int getIndentationLevel(ASTNode node, IFile file) throws CoreException {
-		TextBuffer buffer= null;
 		try{
-			buffer= TextBuffer.acquire(file);
-			int startLine= buffer.getLineOfOffset(node.getStartPosition());
-			return buffer.getLineIndent(startLine, CodeFormatterUtil.getTabWidth());
+			FileBuffers.getTextFileBufferManager().connect(file.getFullPath(), new NullProgressMonitor());
+			ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath());
+			try {
+				IRegion region= buffer.getDocument().getLineInformationOfOffset(node.getStartPosition());
+				return Strings.computeIndent(buffer.getDocument().get(region.getOffset(), region.getLength()), CodeFormatterUtil.getTabWidth());
+			} catch (BadLocationException exception) {
+				JavaPlugin.log(exception);
+			}
+			return 0;
 		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
+			FileBuffers.getTextFileBufferManager().disconnect(file.getFullPath(), new NullProgressMonitor());
 		}
-	}
-	
-	
+	}	
+
+    private CodeRefactoringUtil() {}
 }

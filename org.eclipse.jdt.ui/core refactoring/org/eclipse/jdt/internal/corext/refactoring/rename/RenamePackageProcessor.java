@@ -716,12 +716,12 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		if (!importRewrite.isEmpty()) {
 			ICompilationUnit cu= importRewrite.getCompilationUnit();
 			try {
-				ITextFileBuffer buffer= RefactoringFileBuffers.connect(cu);
+				ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
 				TextEdit importEdit= importRewrite.createEdit(buffer.getDocument());
 				String name= RefactoringCoreMessages.getString("RenamePackageRefactoring.update_imports"); //$NON-NLS-1$
 				TextChangeCompatibility.addTextEdit(manager.get(cu), name, importEdit);
 			} finally {
-				RefactoringFileBuffers.disconnect(cu);
+				RefactoringFileBuffers.release(cu);
 			}
 		}
 	}

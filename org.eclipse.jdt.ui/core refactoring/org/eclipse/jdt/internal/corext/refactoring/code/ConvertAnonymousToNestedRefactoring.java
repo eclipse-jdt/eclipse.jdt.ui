@@ -427,11 +427,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	private Change createChange(ASTRewrite rewrite) throws CoreException {
 		TextChange change= new CompilationUnitChange("", fCu); //$NON-NLS-1$
 		try {
-			ITextFileBuffer buffer= RefactoringFileBuffers.connect(fCu);
+			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
 			TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
 			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.edit_name"), resultingEdits); //$NON-NLS-1$
 		} finally {
-			RefactoringFileBuffers.disconnect(fCu);
+			RefactoringFileBuffers.release(fCu);
 		}
 		return change;
 	}

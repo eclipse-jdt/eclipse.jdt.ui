@@ -518,12 +518,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 		MultiTextEdit root= new MultiTextEdit();
 		try {
 			unitChange.setEdit(root); // Adam sez don't need this, but then unitChange.addGroupDescription() fails an assertion!
-			ITextFileBuffer buffer= RefactoringFileBuffers.connect(icu);
+			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(icu);
 			String typeName= updateImports(icu, buffer, root);
 			updateCu(unit, vars, unitChange, unitRewriter, typeName);
 			root.addChild(unitRewriter.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true)));
 		} finally {
-			RefactoringFileBuffers.disconnect(icu);
+			RefactoringFileBuffers.release(icu);
 		}
 	}
 

@@ -215,7 +215,7 @@ public class CallInliner {
 	public CallInliner(ICompilationUnit unit, SourceProvider provider, CodeGenerationSettings settings) throws CoreException {
 		super();
 		fCUnit= unit;
-		fBuffer= RefactoringFileBuffers.connect(fCUnit);
+		fBuffer= RefactoringFileBuffers.acquire(fCUnit);
 		fSourceProvider= provider;
 		fImportEdit= new ImportRewrite(fCUnit);
 		fLocals= new ArrayList(3);
@@ -223,7 +223,7 @@ public class CallInliner {
 
 	public void dispose() {
 		try {
-			RefactoringFileBuffers.disconnect(fCUnit);
+			RefactoringFileBuffers.release(fCUnit);
 		} catch (CoreException exception) {
 			JavaPlugin.log(exception);
 		}

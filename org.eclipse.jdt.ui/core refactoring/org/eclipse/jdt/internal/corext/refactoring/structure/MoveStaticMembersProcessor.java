@@ -918,7 +918,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		// extract updated members
 		String[] updatedMemberSources= new String[members.length];
 		try {
-			ITextFileBuffer buffer= RefactoringFileBuffers.connect(fSource.getCu());
+			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fSource.getCu());
 			TextEdit edit= fSource.getASTRewrite().rewriteAST(buffer.getDocument(), fSource.getCu().getJavaProject().getOptions(true));
 			edit.apply(buffer.getDocument(), TextEdit.UPDATE_REGIONS);
 			for (int i= 0; i < members.length; i++) {
@@ -927,7 +927,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			fSource.clearASTRewrite();
 			return updatedMemberSources;
 		} finally {
-			RefactoringFileBuffers.disconnect(fSource.getCu());
+			RefactoringFileBuffers.release(fSource.getCu());
 		}
 	}
 

@@ -22,10 +22,13 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -72,11 +75,14 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -209,9 +215,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	private static String guessContantName(MethodInvocation selectedNode) {
 		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-			String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], selectedNode.getName().getIdentifier());
-			if (proposal != null)
-				return proposal;
+			return tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], selectedNode.getName().getIdentifier());
 		}
 		return null;	
 	}
@@ -420,17 +424,20 @@ public class ExtractConstantRefactoring extends Refactoring {
 		pm.done();
 		return result;
 	}
-	
-	private RefactoringStatus checkCompilation() throws JavaModelException {
-		TextBuffer buffer= null;
-		try{
-			RefactoringStatus result= new RefactoringStatus();
-			
-			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
-			TextEdit[] edits= getAllEdits(buffer);
-			TextChange change= new DocumentChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.rename"), new Document(fCu.getSource())); //$NON-NLS-1$
-			TextChangeCompatibility.addTextEdit(change, "", edits); //$NON-NLS-1$
 
+	private RefactoringStatus checkCompilation() throws JavaModelException {
+		ITextFileBuffer buffer= null;
+		final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
+		try {
+			RefactoringStatus result= new RefactoringStatus();
+			TextChange change= new DocumentChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.rename"), new Document(fCu.getSource())); //$NON-NLS-1$
+			try {
+				buffer= RefactoringFileBuffers.acquire(original);
+				TextEdit[] edits= getAllEdits(buffer);
+				TextChangeCompatibility.addTextEdit(change, "", edits); //$NON-NLS-1$
+			} catch (BadLocationException exception) {
+				JavaPlugin.log(exception);
+			}
 			String newCuSource= change.getPreviewContent(new NullProgressMonitor());
 			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource(newCuSource.toCharArray());
@@ -440,19 +447,22 @@ public class ExtractConstantRefactoring extends Refactoring {
 			CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
 			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
 			for (int i= 0; i < newProblems.length; i++) {
-                IProblem problem= newProblems[i];
-                if (problem.isError())
-                	result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
-            }
-	
+				IProblem problem= newProblems[i];
+				if (problem.isError())
+					result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
+			}
+
 			return result;
-		} catch (JavaModelException e){
+		} catch (JavaModelException e) {
 			throw e;
-		} catch (CoreException e){
-			throw new JavaModelException(e);	
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
 		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
+			try {
+				RefactoringFileBuffers.release(original);
+			} catch (CoreException e) {
+				throw new JavaModelException(e);
+			}
 		}
 	}
 
@@ -461,30 +471,36 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return getModifier() + " " + getConstantTypeName() + " " + fConstantName; //$NON-NLS-2$//$NON-NLS-1$
 	}
 
-	public Change createChange(IProgressMonitor pm) throws CoreException {
-		TextBuffer buffer= null;
+	public Change createChange(IProgressMonitor monitor) throws CoreException {
+		ITextFileBuffer buffer= null;
+		final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
 		try {
-			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
-			pm.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.preview"), 3); //$NON-NLS-1$
+			buffer= RefactoringFileBuffers.acquire(original);
+			monitor.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.preview"), 3); //$NON-NLS-1$
 			TextChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.extract_constant"), fCu); //$NON-NLS-1$
-			addConstantDeclaration(result);
-			pm.worked(1);
+			try {
+				addConstantDeclaration(result, buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart)));
+			} catch (CoreException exception) {
+				JavaPlugin.log(exception);
+			} catch (BadLocationException exception) {
+				JavaPlugin.log(exception);
+			}
+			monitor.worked(1);
 			addImportIfNeeded(result, buffer);
-			pm.worked(1);
+			monitor.worked(1);
 			addReplaceExpressionWithConstant(result);
-			pm.worked(1);
+			monitor.worked(1);
 
 			return result;
 		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
-			pm.done();
+			RefactoringFileBuffers.release(original);
+			monitor.done();
 		}
 	}
 
-	private TextEdit[] getAllEdits(TextBuffer buffer) throws CoreException {
+	private TextEdit[] getAllEdits(ITextFileBuffer buffer) throws CoreException, BadLocationException {
 		Collection edits= new ArrayList(3);
-		edits.add(createConstantDeclarationEdit());
+		edits.add(createConstantDeclarationEdit(buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart))));
 		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
 			edits.add(importEdit);
@@ -496,27 +512,27 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	// !!! analogue in ExtractTempRefactoring
-	private TextEdit createConstantDeclarationEdit() throws CoreException {
+	private TextEdit createConstantDeclarationEdit(String delimiter) throws CoreException {
 		if(insertFirst())
-			return createInsertDeclarationFirstEdit();
+			return createInsertDeclarationFirstEdit(delimiter);
 		else
-			return createInsertDeclarationAfterEdit(getNodeToInsertConstantDeclarationAfter());
+			return createInsertDeclarationAfterEdit(getNodeToInsertConstantDeclarationAfter(), delimiter);
 	}
 	
-	private TextEdit createInsertDeclarationFirstEdit() throws JavaModelException, CoreException {
+	private TextEdit createInsertDeclarationFirstEdit(String delimiter) throws JavaModelException, CoreException {
 		BodyDeclaration first = (BodyDeclaration) getBodyDeclarations().next();
 		int insertOffset = first.getStartPosition();
-		String text= createConstantDeclarationSource() + getLineDelimiter() + getIndent(first);
+		String text= createConstantDeclarationSource(delimiter) + delimiter + getIndent(first);
 		return new InsertEdit(insertOffset, text);		
 	}
 	
-	private TextEdit createInsertDeclarationAfterEdit(BodyDeclaration toInsertAfter) throws JavaModelException, CoreException {
+	private TextEdit createInsertDeclarationAfterEdit(BodyDeclaration toInsertAfter, String delimiter) throws JavaModelException, CoreException {
 		Assert.isNotNull(toInsertAfter);
 
 		if(isOtherDeclOrClassEndOnSameLine(toInsertAfter))
-			return createInsertDeclarationOnSameLineEdit(toInsertAfter);
+			return createInsertDeclarationOnSameLineEdit(toInsertAfter, delimiter);
 		else
-			return createInsertDeclarationOnNextLineEdit(toInsertAfter);			
+			return createInsertDeclarationOnNextLineEdit(toInsertAfter, delimiter);			
 	}
 		
 	private boolean isOtherDeclOrClassEndOnSameLine(BodyDeclaration toInsertAfter) throws JavaModelException {
@@ -553,11 +569,11 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return null;	
 	}
 	
-	private TextEdit createInsertDeclarationOnNextLineEdit(BodyDeclaration toInsertAfter) throws JavaModelException, CoreException {
+	private TextEdit createInsertDeclarationOnNextLineEdit(BodyDeclaration toInsertAfter, String delimiter) throws JavaModelException, CoreException {
 		Assert.isNotNull(toInsertAfter);
 			
 		int insertOffset= getStartOfFollowingLine(toInsertAfter);
-		String text= getIndent(toInsertAfter) + createConstantDeclarationSource() + getLineDelimiter();
+		String text= getIndent(toInsertAfter) + createConstantDeclarationSource(delimiter) + delimiter;
 		return new InsertEdit(insertOffset, text);		
 	}
 	
@@ -582,16 +598,16 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return node.getStartPosition() + node.getLength();	
 	}
 	
-	private TextEdit createInsertDeclarationOnSameLineEdit(BodyDeclaration toInsertAfter) throws JavaModelException, CoreException {
+	private TextEdit createInsertDeclarationOnSameLineEdit(BodyDeclaration toInsertAfter, String delimiter) throws JavaModelException, CoreException {
 		Assert.isNotNull(toInsertAfter);
 
 		int insertOffset= getNodeExclusiveEnd(toInsertAfter);
-		String text= " " + createConstantDeclarationSource(); //$NON-NLS-1$
+		String text= " " + createConstantDeclarationSource(delimiter); //$NON-NLS-1$
 		return new InsertEdit(insertOffset, text);
 	}
 		
 	// !! almost identical to version in ExtractTempRefactoring
-	private TextEdit createImportEditIfNeeded(TextBuffer buffer) throws CoreException {
+	private TextEdit createImportEditIfNeeded(ITextFileBuffer buffer) throws CoreException {
 		ITypeBinding type= getSelectedExpression().getAssociatedExpression().resolveTypeBinding();
 		if (type.isPrimitive())
 			return null;
@@ -636,12 +652,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	// !!!
-	private void addConstantDeclaration(TextChange change) throws CoreException {
-		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.declare_constant"), createConstantDeclarationEdit()); //$NON-NLS-1$
+	private void addConstantDeclaration(TextChange change, String delimiter) throws CoreException {
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.declare_constant"), createConstantDeclarationEdit(delimiter)); //$NON-NLS-1$
 	}
 
 	// !!! very similar to equivalent in ExtractTempRefactoring
-	private void addImportIfNeeded(TextChange change, TextBuffer buffer) throws CoreException {
+	private void addImportIfNeeded(TextChange change, ITextFileBuffer buffer) throws CoreException {
 		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
 			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.update_imports"), importEdit); //$NON-NLS-1$
@@ -664,7 +680,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		BodyDeclaration lastStaticDependency= null;
 		Iterator decls= getBodyDeclarations();
 		
-		Assert.isTrue(decls.hasNext()); /* Admissable selected expressions must occur
+		Assert.isTrue(decls.hasNext()); /* Admissible selected expressions must occur
 		                                   within a body declaration.  Thus, the 
 		                                   class/interface in which such an expression occurs
 		                                   must have at least one body declaration */
@@ -748,18 +764,18 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fBodyDeclarations.iterator();
 	}
 
-	private String createConstantDeclarationSource() throws JavaModelException, CoreException {
-		return createConstantDeclarationSource(getInitializerSource());		
+	private String createConstantDeclarationSource(String delimiter) throws JavaModelException, CoreException {
+		return createConstantDeclarationSource(getInitializerSource(), delimiter);		
 	}
 
 	// !!! similar to one in ExtractTempRefactoring
 	//*without the trailing indent*
-	private String createConstantDeclarationSource(String initializerSource) throws CoreException {
+	private String createConstantDeclarationSource(String initializerSource, String delimiter) throws CoreException {
 		String dummyInitializer= "0"; //$NON-NLS-1$
 		String semicolon= ";"; //$NON-NLS-1$
 		String dummyDeclaration= getModifier() + " " + getConstantTypeName() + " " + fConstantName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		int[] position= { dummyDeclaration.length() - dummyInitializer.length() - semicolon.length()};
-		String formattedDeclaration= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, dummyDeclaration, 0, position, getLineDelimiter(), fCu.getJavaProject());
+		String formattedDeclaration= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, dummyDeclaration, 0, position, delimiter, fCu.getJavaProject());
 		StringBuffer formattedDummyDeclaration= new StringBuffer(formattedDeclaration);
 		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), initializerSource).toString();
 	}
@@ -792,28 +808,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return removeTrailingSemicolons(arg.substring(0, arg.length() - 1));
 	}
 
-	// !!! same as method in ExtractTempRefactoring
-	private String getIndent(ASTNode insertAfter) throws CoreException {
-		TextBuffer buffer= null;
-		try {
-			buffer= TextBuffer.acquire(getFile());
-			int startLine= buffer.getLineOfOffset(insertAfter.getStartPosition());
-			return CodeFormatterUtil.createIndentString(buffer.getLineIndent(startLine, CodeFormatterUtil.getTabWidth()));
-		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
-		}
-	}
-
-	private String getLineDelimiter() throws CoreException {
-		TextBuffer buffer= null;
-		try {
-			buffer= TextBuffer.acquire(getFile());
-			return buffer.getLineDelimiter(buffer.getLineOfOffset(fSelectionStart));
-		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
-		}
+	private String getIndent(ASTNode insertBefore) throws CoreException {
+		return CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(insertBefore, getFile()));
 	}
 
 	private static boolean isStaticFieldOrStaticInitializer(BodyDeclaration node) {

@@ -19,16 +19,21 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
@@ -76,8 +81,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
-import org.eclipse.jface.text.Document;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -98,10 +101,12 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -416,9 +421,10 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		TextBuffer buffer= null;
+		ITextFileBuffer buffer= null;
+		final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
 		try {
-			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
+			buffer= RefactoringFileBuffers.acquire(original);
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			
@@ -426,7 +432,13 @@ public class ExtractTempRefactoring extends Refactoring {
 			checkExcludedNames(fTempName, result);
 			
 			TextChange change= new DocumentChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), new Document(fCu.getSource())); //$NON-NLS-1$
-			TextChangeCompatibility.addTextEdit(change, "", getAllEdits(buffer)); //$NON-NLS-1$
+			try {
+				TextChangeCompatibility.addTextEdit(change, "", getAllEdits(buffer)); //$NON-NLS-1$
+			} catch (CoreException exception) {
+				JavaPlugin.log(exception);
+			} catch (BadLocationException exception) {
+				JavaPlugin.log(exception);
+			}
 			String newCuSource= change.getPreviewContent(new NullProgressMonitor());
 			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource(newCuSource.toCharArray());
@@ -442,8 +454,7 @@ public class ExtractTempRefactoring extends Refactoring {
             }
 			return result;
 		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
+			RefactoringFileBuffers.release(original);
 		}	
 	}
 
@@ -541,12 +552,19 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		TextBuffer buffer= null;		
+		ITextFileBuffer buffer= null;
+		final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
 		try {
-			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
+			buffer= RefactoringFileBuffers.acquire(original);
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.preview"), 3);	 //$NON-NLS-1$
 			final TextChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractTempRefactoring.extract_temp"), fCu); //$NON-NLS-1$
-			addTempDeclaration(result);
+			try {
+				addTempDeclaration(result, buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart)));
+			} catch (CoreException exception) {
+				JavaPlugin.log(exception);
+			} catch (BadLocationException exception) {
+				JavaPlugin.log(exception);
+			}
 			pm.worked(1);
 			addImportIfNeeded(result, buffer);
 			pm.worked(1);
@@ -555,15 +573,14 @@ public class ExtractTempRefactoring extends Refactoring {
 			
 			return result;
 		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
+			RefactoringFileBuffers.release(original);
 			pm.done();
 		}	
 	}
-	
-	private TextEdit[] getAllEdits(TextBuffer buffer) throws CoreException{
+
+	private TextEdit[] getAllEdits(ITextFileBuffer buffer) throws CoreException, BadLocationException{
 		Collection edits= new ArrayList(3);
-		edits.add(createTempDeclarationEdit());
+		edits.add(createTempDeclarationEdit(buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart))));
 		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
 			edits.add(importEdit);
@@ -574,11 +591,11 @@ public class ExtractTempRefactoring extends Refactoring {
 		return (TextEdit[]) edits.toArray(new TextEdit[edits.size()]);
 	}
 
-	private TextEdit createTempDeclarationEdit() throws CoreException {
+	private TextEdit createTempDeclarationEdit(String delimiter) throws CoreException {
 		if (shouldReplaceSelectedExpressionWithTempDeclaration())
-			return replaceSelectedExpressionWithTempDeclaration();
+			return replaceSelectedExpressionWithTempDeclaration(delimiter);
 		else	
-			return createAndInsertTempDeclaration();
+			return createAndInsertTempDeclaration(delimiter);
 	}
 	
 	private boolean shouldReplaceSelectedExpressionWithTempDeclaration() throws JavaModelException {
@@ -587,14 +604,14 @@ public class ExtractTempRefactoring extends Refactoring {
 		        && selectedFragment.matches(ASTFragmentFactory.createFragmentForFullSubtree(selectedFragment.getAssociatedNode()));
 	}
 
-	private TextEdit createAndInsertTempDeclaration() throws CoreException {
+	private TextEdit createAndInsertTempDeclaration(String delimiter) throws CoreException {
 		ASTNode insertBefore= getNodeToInsertTempDeclarationBefore();		
 		int insertOffset= insertBefore.getStartPosition();
-		String text= createTempDeclarationSource(getInitializerSource(), true) + getIndent(insertBefore);
+		String text= createTempDeclarationSource(getInitializerSource(), true, delimiter) + getIndent(insertBefore);
 		return new InsertEdit(insertOffset, text); 
 	}
 
-	private TextEdit replaceSelectedExpressionWithTempDeclaration() throws CoreException {
+	private TextEdit replaceSelectedExpressionWithTempDeclaration(String delimiter) throws CoreException {
 		/* This is used in cases where the selected expression is the full expression part of an ExpressionStatement,
 		 * in which case the expression is not replaced by a variable reference,
 		 * but, rather, its parent ExpressionStatement is replaced by the new
@@ -602,14 +619,14 @@ public class ExtractTempRefactoring extends Refactoring {
 		 */
 		
 		String nodeSource= fCu.getBuffer().getText(getSelectedExpression().getStartPosition(), getSelectedExpression().getLength());
-		String text= createTempDeclarationSource(nodeSource, false);
+		String text= createTempDeclarationSource(nodeSource, false, delimiter);
 		ASTNode parent= getSelectedExpression().getAssociatedNode().getParent();
 		Assert.isTrue(parent instanceof ExpressionStatement);
 		
 		return new ReplaceEdit(parent.getStartPosition(), parent.getLength(), text);
 	}
 
-	private TextEdit createImportEditIfNeeded(TextBuffer buffer) throws CoreException {
+	private TextEdit createImportEditIfNeeded(ITextFileBuffer buffer) throws CoreException {
 		final Expression expression= getSelectedExpression().getAssociatedExpression();
 		if (expression instanceof ClassInstanceCreation) {
 			final ClassInstanceCreation creation= (ClassInstanceCreation) expression;
@@ -653,11 +670,11 @@ public class ExtractTempRefactoring extends Refactoring {
 		return result;
 	}
 
-	private void addTempDeclaration(TextChange change) throws CoreException {
-		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.declare_local_variable"), createTempDeclarationEdit()); //$NON-NLS-1$
+	private void addTempDeclaration(TextChange change, String delimiter) throws CoreException {
+		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.declare_local_variable"), createTempDeclarationEdit(delimiter)); //$NON-NLS-1$
 	}
 
-	private void addImportIfNeeded(TextChange change, TextBuffer buffer) throws CoreException {
+	private void addImportIfNeeded(TextChange change, ITextFileBuffer buffer) throws CoreException {
 		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
 			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractTempRefactoring.update_imports"), importEdit); //$NON-NLS-1$
@@ -765,15 +782,15 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	//without the trailing indent
-	private String createTempDeclarationSource(String initializerSource, boolean addTrailingLineDelimiter) throws CoreException {
+	private String createTempDeclarationSource(String initializerSource, boolean addTrailingLineDelimiter, String delimiter) throws CoreException {
 		String modifier= fDeclareFinal ? "final ": ""; //$NON-NLS-1$ //$NON-NLS-2$
 		String dummyInitializer= "0"; //$NON-NLS-1$
 		String semicolon= ";"; //$NON-NLS-1$
 		String dummyDeclaration= modifier + getTempTypeName() + " " + fTempName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$
 		int[] position= {dummyDeclaration.length() - dummyInitializer.length()  - semicolon.length()};
-		String formattedDeclaration= CodeFormatterUtil.format(CodeFormatter.K_STATEMENTS, dummyDeclaration, 0, position, getLineDelimiter(), fCu.getJavaProject());
+		String formattedDeclaration= CodeFormatterUtil.format(CodeFormatter.K_STATEMENTS, dummyDeclaration, 0, position, delimiter, fCu.getJavaProject());
 		StringBuffer formattedDummyDeclaration= new StringBuffer(formattedDeclaration);
-		String tail= addTrailingLineDelimiter ? getLineDelimiter(): ""; //$NON-NLS-1$
+		String tail= addTrailingLineDelimiter ? delimiter: ""; //$NON-NLS-1$
 		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), initializerSource)
 														.append(tail)
 														.toString();
@@ -816,17 +833,6 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private String getIndent(ASTNode insertBefore) throws CoreException {
 		return CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(insertBefore, getFile()));
-	}
-	
-	private String getLineDelimiter() throws CoreException {
-		TextBuffer buffer= null;
-		try{
-			buffer= TextBuffer.acquire(getFile());
-			return buffer.getLineDelimiter(buffer.getLineOfOffset(fSelectionStart));
-		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
-		}
 	}
 	
 	private Statement getInnermostStatementInBlock(IASTFragment fragment) {
