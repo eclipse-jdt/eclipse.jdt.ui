@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  * Utility methods for the Java Model.
  */
 public class JavaModelUtil {
-
+		
 	/** 
 	 * Finds a type by its qualified type name (dot separated).
 	 * @param jproject The java project to search in
@@ -123,6 +123,17 @@ public class JavaModelUtil {
 		return null;
 	}
 	
+	/** 
+	 * Finds a type by package and type name.
+	 * @param jproject the java project to search in
+	 * @param pack The package name
+	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
+	 * @return the type found, or null if not existing
+	 * @deprecated Use IJavaProject.findType(String, String) instead
+	 */	
+	public static IType findType(IJavaProject jproject, String pack, String typeQualifiedName) throws JavaModelException {
+		return jproject.findType(pack, typeQualifiedName);
+	}
 
 	/**
 	 * Finds a type container by container name.
@@ -453,6 +464,14 @@ public class JavaModelUtil {
 		return field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
 	}
 	
+	/**
+	 * Returns true if the element is on the build path of the given project
+	 * @deprecated Use jproject.isOnClasspath(element);
+	 */	
+	public static boolean isOnBuildPath(IJavaProject jproject, IJavaElement element) throws JavaModelException {
+		return jproject.isOnClasspath(element);
+	}
+
 	/**
 	 * Resolves a type name in the context of the declaring type.
 	 * @param refTypeSig the type name in signature notation (for example 'QVector')
