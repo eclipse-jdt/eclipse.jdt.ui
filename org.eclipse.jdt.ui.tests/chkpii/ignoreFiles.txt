@@ -35,3 +35,4 @@ org.eclipse.jdt.debug/*
 org.eclipse.jdt.debug.ui/*
 org.eclipse.debug.ui/*
 org.eclipse.releng.tools/*
+org.eclipse.ui.console/*
