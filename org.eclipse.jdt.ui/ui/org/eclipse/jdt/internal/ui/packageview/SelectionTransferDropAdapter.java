@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
@@ -47,7 +47,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private List fElements;
 	private JavaMoveProcessor fMoveProcessor;
 	private int fCanMoveElements;
-	private CopyRefactoring fCopyRefactoring2;
+	private JavaCopyProcessor fCopyProcessor;
 	private int fCanCopyElements;
 	private ISelection fSelection;
 	private AddMethodStubAction fAddMethodStubAction;
@@ -89,7 +89,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		fSelection= null;
 		fMoveProcessor= null;
 		fCanMoveElements= 0;
-		fCopyRefactoring2= null;
+		fCopyProcessor= null;
 		fCanCopyElements= 0;
 	}
 	
@@ -222,15 +222,15 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	private int handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
 
-		if (fCopyRefactoring2 == null)
-			fCopyRefactoring2= CopyRefactoring.create(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+		if (fCopyProcessor == null)
+			fCopyProcessor= JavaCopyProcessor.create(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
 
 		if (!canCopyElements())
 			return DND.DROP_NONE;	
 
-		if (target instanceof IResource && fCopyRefactoring2 != null && fCopyRefactoring2.setDestination((IResource)target).isOK())
+		if (target instanceof IResource && fCopyProcessor != null && fCopyProcessor.setDestination((IResource)target).isOK())
 			return DND.DROP_COPY;
-		else if (target instanceof IJavaElement && fCopyRefactoring2 != null && fCopyRefactoring2.setDestination((IJavaElement)target).isOK())
+		else if (target instanceof IJavaElement && fCopyProcessor != null && fCopyProcessor.setDestination((IJavaElement)target).isOK())
 			return DND.DROP_COPY;
 		else
 			return DND.DROP_NONE;					
@@ -239,7 +239,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private boolean canCopyElements() {
 		if (fCanCopyElements == 0) {
 			fCanCopyElements= 2;
-			if (fCopyRefactoring2 == null)
+			if (fCopyProcessor == null)
 				fCanCopyElements= 1;
 		}
 		return fCanCopyElements == 2;

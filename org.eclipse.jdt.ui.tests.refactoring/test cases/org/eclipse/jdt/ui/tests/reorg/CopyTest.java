@@ -16,12 +16,18 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
+import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
+import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -36,17 +42,17 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
-
-import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
 
 public class CopyTest extends RefactoringTest {
@@ -71,58 +77,61 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		assertTrue("copy should be disabled", ! CopyRefactoring.isAvailable(resources, javaElements));
-		CopyRefactoring refactoring2= CopyRefactoring.create(resources, javaElements);
-		assertTrue(refactoring2 == null);
+		assertTrue("copy should be disabled", ! JavaCopyProcessor.isAvailable(resources, javaElements));
+		assertTrue(JavaCopyProcessor.create(resources, javaElements) == null);
 	}
 
-	private CopyRefactoring verifyEnabled(IResource[] resources, IJavaElement[] javaElements, INewNameQueries newNameQueries, IReorgQueries reorgQueries) throws JavaModelException {
-		assertTrue("copy should be enabled", CopyRefactoring.isAvailable(resources, javaElements));
-		CopyRefactoring refactoring2= CopyRefactoring.create(resources, javaElements);
-		assertNotNull(refactoring2);
+	private JavaCopyProcessor verifyEnabled(IResource[] resources, IJavaElement[] javaElements, INewNameQueries newNameQueries, IReorgQueries reorgQueries) throws JavaModelException {
+		assertTrue("copy should be enabled", JavaCopyProcessor.isAvailable(resources, javaElements));
+		JavaCopyProcessor processor= JavaCopyProcessor.create(resources, javaElements);
+		assertNotNull(processor);
 		if (newNameQueries != null)
-			refactoring2.setNewNameQueries(newNameQueries);
+			processor.setNewNameQueries(newNameQueries);
 		if (reorgQueries != null)
-			refactoring2.setReorgQueries(reorgQueries);
-		return refactoring2;
+			processor.setReorgQueries(reorgQueries);
+		return processor;
 	}
 	
 	private IReorgQueries createReorgQueries(){
 		return new MockReorgQueries();
 	}
 	
-	private void verifyInvalidDestination(CopyRefactoring ref, Object destination) throws Exception {
+	private void verifyInvalidDestination(JavaCopyProcessor processor, Object destination) throws Exception {
 		RefactoringStatus status= null;
 		if (destination instanceof IResource)
-			status= ref.setDestination((IResource)destination);
+			status= processor.setDestination((IResource)destination);
 		else if (destination instanceof IJavaElement)
-			status= ref.setDestination((IJavaElement)destination);
+			status= processor.setDestination((IJavaElement)destination);
 		else assertTrue(false);
 		
 		assertEquals("destination was expected to be not valid",  RefactoringStatus.FATAL, status.getSeverity());
 	}
 	
-	private void verifyValidDestination(CopyRefactoring ref, Object destination) throws Exception {
+	private void verifyValidDestination(JavaCopyProcessor processor, Object destination) throws Exception {
 		RefactoringStatus status= null;
 		if (destination instanceof IResource)
-			status= ref.setDestination((IResource)destination);
+			status= processor.setDestination((IResource)destination);
 		else if (destination instanceof IJavaElement)
-			status= ref.setDestination((IJavaElement)destination);
+			status= processor.setDestination((IJavaElement)destination);
 		else assertTrue(false);
 		
 		assertEquals("destination was expected to be valid: " + status.getMessageMatchingSeverity(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
 	}
 
 	private void verifyCopyingOfSubCuElements(ICompilationUnit[] cus, Object destination, IJavaElement[] javaElements) throws JavaModelException, Exception, IOException {
-		CopyRefactoring ref= verifyEnabled(new IResource[0], javaElements, new MockNewNameQueries(), createReorgQueries());
-		verifyValidDestination(ref, destination);
-		RefactoringStatus status= performRefactoring(ref, false);
+		JavaCopyProcessor processor= verifyEnabled(new IResource[0], javaElements, new MockNewNameQueries(), createReorgQueries());
+		verifyValidDestination(processor, destination);
+		RefactoringStatus status= performRefactoring(new CopyRefactoring(processor), false);
 		assertNull("failed precondition", status);
 		for (int i= 0; i < cus.length; i++) {
 			assertEqualLines("different source in " + cus[i].getElementName(), getFileContents(getOutputTestFileName(removeExtension(cus[i].getElementName()))), cus[i].getSource());
 		}
 	}
 
+	private final RefactoringStatus performRefactoring(JavaCopyProcessor processor, boolean providesUndo) throws Exception {
+		return performRefactoring(new CopyRefactoring(processor), false);
+	}
+	
 	private static class MockNewNameQueries implements INewNameQueries{
 
 		private static final String NEW_PACKAGE_NAME= "unused.name";
@@ -162,6 +171,32 @@ public class CopyTest extends RefactoringTest {
 			return createStaticQuery(NEW_PACKAGE_FRAGMENT_ROOT_NAME);
 		}
 	}
+	
+	private static class MockCancelNameQueries implements INewNameQueries{
+		public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String s) {
+			return createNullQuery();
+		}
+		public INewNameQuery createNewResourceNameQuery(IResource res, String s) {
+			return createNullQuery();
+		}
+		public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String s) {
+			return createNullQuery();
+		}
+		public INewNameQuery createNullQuery() {
+			return new INewNameQuery() {
+				public String getNewName() {
+					throw new OperationCanceledException();
+				}
+			};
+		}
+		public INewNameQuery createStaticQuery(final String newName) {
+			return createNullQuery();
+		}
+		public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
+			return createNullQuery();
+		}
+	}
+	
 	//---------------
 	
 	public void test_field_declared_in_multi_yes_type() throws Exception{
@@ -449,7 +484,7 @@ public class CopyTest extends RefactoringTest {
 	public void testDestination_package_no_1() throws Exception{
 		IJavaElement[] javaElements= { getPackageP()};
 		IResource[] resources= {};
-		CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 		verifyInvalidDestination(ref, RefactoringTestSetup.getProject());
 	}
 
@@ -459,7 +494,7 @@ public class CopyTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= { getPackageP()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination=cu;
 			verifyInvalidDestination(ref, destination);
@@ -477,7 +512,7 @@ public class CopyTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= { getPackageP()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -495,7 +530,7 @@ public class CopyTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= { getPackageP()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -513,7 +548,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= closedProject;
 			verifyInvalidDestination(ref, destination);
@@ -531,7 +566,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= folder;//same folder
 			verifyInvalidDestination(ref, destination);	
@@ -551,7 +586,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= childFolder;
 			verifyInvalidDestination(ref, destination);			
@@ -572,7 +607,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= childFile;
 			verifyInvalidDestination(ref, destination);			
@@ -594,7 +629,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyInvalidDestination(ref, destination);						
@@ -609,7 +644,7 @@ public class CopyTest extends RefactoringTest {
 	public void testDestination_root_no_0() throws Exception{
 		IJavaElement[] javaElements= {getRoot()};
 		IResource[] resources= {};
-		CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 		Object destination= getPackageP();
 		verifyInvalidDestination(ref, destination);			
@@ -621,7 +656,7 @@ public class CopyTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= cu;
 			verifyInvalidDestination(ref, destination);
@@ -637,7 +672,7 @@ public class CopyTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			IType classB= cu.getType("B");
 			Object destination= classB;
@@ -656,7 +691,7 @@ public class CopyTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -673,7 +708,7 @@ public class CopyTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -686,7 +721,7 @@ public class CopyTest extends RefactoringTest {
 	public void testDestination_root_yes_2() throws Exception{
 		IJavaElement[] javaElements= { getRoot()};
 		IResource[] resources= {};
-		CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 		Object destination= getRoot();
 		verifyValidDestination(ref, destination);
@@ -697,7 +732,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 			Object destination= cu1;
 			verifyValidDestination(ref, destination);			
 		}finally{
@@ -711,7 +746,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= getPackageP();
 			verifyValidDestination(ref, destination);			
@@ -727,7 +762,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= otherPackage;
 			verifyValidDestination(ref, destination);			
@@ -743,7 +778,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);			
@@ -758,7 +793,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);			
@@ -776,7 +811,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyValidDestination(ref, destination);
@@ -795,7 +830,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= file;
 			verifyValidDestination(ref, destination);			
@@ -814,7 +849,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= folder;
 			verifyValidDestination(ref, destination);			
@@ -831,7 +866,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= cu2;
 			verifyValidDestination(ref, destination);			
@@ -850,7 +885,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= file;
 			verifyValidDestination(ref, destination);			
@@ -871,7 +906,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= otherFile;
 			verifyValidDestination(ref, destination);			
@@ -893,7 +928,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= folder;
 			verifyValidDestination(ref, destination);			
@@ -913,7 +948,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= cu1;
 			verifyValidDestination(ref, destination);			
@@ -932,7 +967,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= getPackageP();
 			verifyValidDestination(ref, destination);			
@@ -950,7 +985,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);			
@@ -968,7 +1003,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);			
@@ -986,7 +1021,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= parentFolder;
 			verifyValidDestination(ref, destination);			
@@ -1005,7 +1040,7 @@ public class CopyTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= cu2;
 			verifyValidDestination(ref, destination);
@@ -1027,7 +1062,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= otherFolder;
 			verifyValidDestination(ref, destination);						
@@ -1046,7 +1081,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);						
@@ -1064,7 +1099,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);						
@@ -1082,7 +1117,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= getPackageP();
 			verifyValidDestination(ref, destination);						
@@ -1105,7 +1140,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= fileInAnotherFolder;
 			verifyValidDestination(ref, destination);						
@@ -1125,7 +1160,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= cu;
 			verifyValidDestination(ref, destination);						
@@ -1147,7 +1182,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyValidDestination(ref, destination);						
@@ -1161,7 +1196,7 @@ public class CopyTest extends RefactoringTest {
 	public void testDestination_package_yes_0() throws Exception{
 		IJavaElement[] javaElements= {getPackageP()};
 		IResource[] resources= {};
-		CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 		Object destination= getRoot();
 		verifyValidDestination(ref, destination);						
@@ -1170,7 +1205,7 @@ public class CopyTest extends RefactoringTest {
 	public void testDestination_package_yes_1() throws Exception{
 		IJavaElement[] javaElements= { getPackageP()};
 		IResource[] resources= {};
-		CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 		verifyValidDestination(ref, getPackageP());
 	}
 
@@ -1179,7 +1214,7 @@ public class CopyTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= { getPackageP()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= otherPackage;
 			verifyValidDestination(ref, destination);
@@ -1192,7 +1227,7 @@ public class CopyTest extends RefactoringTest {
 	public void testDestination_root_yes_0() throws Exception{
 		IJavaElement[] javaElements= {getRoot()};
 		IResource[] resources= {};
-		CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 		Object destination= getRoot().getJavaProject();
 		verifyValidDestination(ref, destination);
@@ -1204,7 +1239,7 @@ public class CopyTest extends RefactoringTest {
 		try {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= otherJavaProject;
 			verifyValidDestination(ref, destination);
@@ -1222,7 +1257,7 @@ public class CopyTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= otherCu;
 			verifyInvalidDestination(ref, destination);
@@ -1240,7 +1275,7 @@ public class CopyTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= getPackageP();
 			verifyInvalidDestination(ref, destination);
@@ -1262,7 +1297,7 @@ public class CopyTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -1285,7 +1320,7 @@ public class CopyTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -1303,7 +1338,7 @@ public class CopyTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyInvalidDestination(ref, destination);
@@ -1320,7 +1355,7 @@ public class CopyTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= RefactoringTestSetup.getProject();
 			verifyInvalidDestination(ref, destination);
@@ -1340,7 +1375,7 @@ public class CopyTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyInvalidDestination(ref, destination);
@@ -1358,7 +1393,7 @@ public class CopyTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			IImportContainer importContainer= cu.getImportContainer();
 			Object destination= importContainer;
@@ -1376,7 +1411,7 @@ public class CopyTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			IImportDeclaration importDeclaration= cu.getImport("java.util.*");
 			Object destination= importDeclaration;
@@ -1394,7 +1429,7 @@ public class CopyTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= cu.getPackageDeclaration("p");
 			verifyInvalidDestination(ref, destination);
@@ -1532,12 +1567,14 @@ public class CopyTest extends RefactoringTest {
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{}", true, new NullProgressMonitor());
 		ICompilationUnit newCu= null;
 		try {
+			ParticipantTesting.reset();
 			IType type= cu.getType("A");
 			IJavaElement[] javaElements= { type };
 			IResource[] resources=  {};
-			Object destination= getPackageP();
+			String[] handles= ParticipantTesting.createHandles(type.getCompilationUnit(), type.getCompilationUnit().getResource());
+			IPackageFragment destination= getPackageP();
 			INewNameQueries queries= new MockNewNameQueries();
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 			verifyValidDestination(ref, destination);
 			assertTrue("source cu does not exist before copying", cu.exists());
 			RefactoringStatus status= performRefactoring(ref, false);
@@ -1545,6 +1582,47 @@ public class CopyTest extends RefactoringTest {
 			assertTrue("source cu does not exist after copying", cu.exists());
 			newCu= getPackageP().getCompilationUnit(MockNewNameQueries.NEW_CU_NAME + ".java");
 			assertTrue("new cu does not exist after copying", newCu.exists());
+			ReorgExecutionLog executionLog= new ReorgExecutionLog();
+			executionLog.setNewName(type.getCompilationUnit(), MockNewNameQueries.NEW_CU_NAME + ".java");
+			executionLog.setNewName(type.getCompilationUnit().getResource(), MockNewNameQueries.NEW_CU_NAME + ".java");
+			executionLog.markAsProcessed(type.getCompilationUnit());
+			executionLog.markAsProcessed(type.getCompilationUnit().getResource());
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, executionLog), 
+				new CopyArguments(destination.getResource(), executionLog)
+			});
+		} finally {
+			performDummySearch();
+			if (newCu != null && newCu.exists())
+				newCu.delete(true, new NullProgressMonitor());
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void test_type_canel_package() throws Exception{
+		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{}", true, new NullProgressMonitor());
+		ICompilationUnit newCu= null;
+		try {
+			ParticipantTesting.reset();
+			IType type= cu.getType("A");
+			IJavaElement[] javaElements= { type };
+			IResource[] resources=  {};
+			String[] handles= ParticipantTesting.createHandles(type.getCompilationUnit(), type.getCompilationUnit().getResource());
+			IPackageFragment destination= getPackageP();
+			INewNameQueries queries= new MockCancelNameQueries();
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			verifyValidDestination(ref, destination);
+			assertTrue("source cu does not exist before copying", cu.exists());
+			try {
+				performRefactoring(ref, false);
+			} catch (OperationCanceledException e) {
+			}
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsCanceled();
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log), 
+				new CopyArguments(destination.getResource(), log)
+			});
 		} finally {
 			performDummySearch();
 			if (newCu != null && newCu.exists())
@@ -1558,13 +1636,16 @@ public class CopyTest extends RefactoringTest {
 		IPackageFragment otherPackage= getRoot().createPackageFragment("other", true, new NullProgressMonitor());
 		ICompilationUnit newCu= null;
 		try {
+			ParticipantTesting.reset();
+			
 			IType type= cu.getType("A");
 			IJavaElement[] javaElements= { type };
 			IResource[] resources=  {};
-			Object destination= otherPackage;
+			IPackageFragment destination= otherPackage;
+			String[] handles= ParticipantTesting.createHandles(type.getCompilationUnit(), type.getCompilationUnit().getResource());
 			
 			INewNameQueries queries= new MockNewNameQueries();
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 			verifyValidDestination(ref, destination);
 			assertTrue("source cu does not exist before copying", cu.exists());
 			RefactoringStatus status= performRefactoring(ref, false);
@@ -1572,6 +1653,14 @@ public class CopyTest extends RefactoringTest {
 			assertTrue("source cu does not exist after copying", cu.exists());
 			newCu= otherPackage.getCompilationUnit(cu.getElementName());
 			assertTrue("new cu does not exist after copying", newCu.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsProcessed(type.getCompilationUnit());
+			log.markAsProcessed(type.getCompilationUnit().getResource());
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log), 
+				new CopyArguments(destination.getResource(), log)
+			});
+			
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -1588,7 +1677,7 @@ public class CopyTest extends RefactoringTest {
 			IInitializer initializer= cu.getType("A").getInitializer(1);
 			IJavaElement[] javaElements= { initializer };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= getPackageP();
 			verifyInvalidDestination(ref, destination);
@@ -1634,7 +1723,7 @@ public class CopyTest extends RefactoringTest {
 			IImportContainer container= cu.getImportContainer();
 			IJavaElement[] javaElements= { container };
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 	
 			Object destination= getPackageP();
 			verifyInvalidDestination(ref, destination);
@@ -1697,6 +1786,7 @@ public class CopyTest extends RefactoringTest {
 
 
 	public void testCopy_File_to_Folder() throws Exception {
+		ParticipantTesting.reset();
 		IFolder parentFolder= (IFolder) getPackageP().getResource();
 		String fileName= "a.txt";
 		IFile file= parentFolder.getFile(fileName);
@@ -1708,11 +1798,14 @@ public class CopyTest extends RefactoringTest {
 		
 		IFile newFile= null;
 		try {
+			
 			INewNameQueries queries= new MockNewNameQueries();
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(file);
+			
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= destinationFolder;
 			verifyValidDestination(ref, destination);
@@ -1726,6 +1819,11 @@ public class CopyTest extends RefactoringTest {
 			
 			newFile= destinationFolder.getFile(fileName);
 			assertTrue("new file does not exist after copying", newFile.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsProcessed(file);
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log)
+			});
 		} finally {
 			performDummySearch();
 			file.delete(true, false, null);
@@ -1736,6 +1834,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_File_to_Same_Folder() throws Exception {
+		ParticipantTesting.reset();
 		IFolder parentFolder= (IFolder) getPackageP().getResource();
 		String fileName= "a.txt";
 		IFile file= parentFolder.getFile(fileName);
@@ -1749,7 +1848,8 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(file);
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= destinationFolder;
 			verifyValidDestination(ref, destination);
@@ -1763,6 +1863,52 @@ public class CopyTest extends RefactoringTest {
 			
 			newFile= destinationFolder.getFile(MockNewNameQueries.NEW_FILE_NAME);
 			assertTrue("new file does not exist after copying", newFile.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.setNewName(file, MockNewNameQueries.NEW_FILE_NAME);
+			log.markAsProcessed(file);
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log)
+			});
+		} finally {
+			performDummySearch();
+			file.delete(true, false, null);
+			if (newFile != null)
+				newFile.delete(true, false, null);
+		}
+	}
+	
+	public void testCopy_File_to_Same_Folder_Cancel() throws Exception {
+		ParticipantTesting.reset();
+		IFolder parentFolder= (IFolder) getPackageP().getResource();
+		String fileName= "a.txt";
+		IFile file= parentFolder.getFile(fileName);
+		file.create(getStream("123"), true, null);
+		
+		IFolder destinationFolder= parentFolder;
+		
+		IFile newFile= null;
+		try {
+			INewNameQueries queries= new MockCancelNameQueries();
+
+			IJavaElement[] javaElements= {};
+			IResource[] resources= { file };
+			String[] handles= ParticipantTesting.createHandles(file);
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+
+			Object destination= destinationFolder;
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source file does not exist before copying", file.exists());
+			
+			try {
+				performRefactoring(ref, false);
+			} catch(OperationCanceledException e) {
+			}
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsCanceled();
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log)
+			});
 		} finally {
 			performDummySearch();
 			file.delete(true, false, null);
@@ -1783,7 +1929,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= file;
 			verifyValidDestination(ref, destination);
@@ -1820,7 +1966,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= otherFile;
 			verifyValidDestination(ref, destination);
@@ -1856,7 +2002,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= otherPackage;
 			verifyValidDestination(ref, destination);
@@ -1894,7 +2040,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= defaultPackage;
 			verifyValidDestination(ref, destination);
@@ -1928,7 +2074,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);
@@ -1962,7 +2108,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);
@@ -1997,7 +2143,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= cu;
 			verifyValidDestination(ref, destination);
@@ -2035,7 +2181,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {};
 			IResource[] resources= { file };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyValidDestination(ref, destination);
@@ -2072,7 +2218,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= { };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= destinationFolder;
 			verifyValidDestination(ref, destination);
@@ -2096,6 +2242,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_Cu_to_Same_Package() throws Exception {
+		ParticipantTesting.reset();
 		String fileName= "A.java";
 		ICompilationUnit cu= getPackageP().createCompilationUnit(fileName, "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
 
@@ -2105,9 +2252,10 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= { };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(cu, cu.getResource());
 			
-			Object destination= getPackageP();
+			IPackageFragment destination= getPackageP();
 			verifyValidDestination(ref, destination);
 			
 			assertTrue("source cu does not exist before copying", cu.exists());
@@ -2117,8 +2265,54 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source cu does not exist after copying", cu.exists());
 			
-			newCu= getPackageP().getCompilationUnit(MockNewNameQueries.NEW_CU_NAME + ".java");
+			String newName= MockNewNameQueries.NEW_CU_NAME + ".java";
+			newCu= getPackageP().getCompilationUnit(newName);
 			assertTrue("new cu does not exist after copying", newCu.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.setNewName(cu, newName);
+			log.setNewName(cu.getResource(), newName);
+			log.markAsProcessed(cu);
+			log.markAsProcessed(cu.getResource());
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log), new CopyArguments(destination.getResource(), log)
+			});
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			if (newCu != null && newCu.exists()){
+				newCu.delete(true, new NullProgressMonitor());
+			}
+		}
+	}
+
+	public void testCopy_Cu_to_Same_Package_Cancel() throws Exception {
+		ParticipantTesting.reset();
+		String fileName= "A.java";
+		ICompilationUnit cu= getPackageP().createCompilationUnit(fileName, "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+
+		ICompilationUnit newCu= null;
+		try {
+			INewNameQueries queries= new MockCancelNameQueries();
+
+			IJavaElement[] javaElements= {cu};
+			IResource[] resources= { };
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(cu, cu.getResource());
+			
+			IPackageFragment destination= getPackageP();
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source cu does not exist before copying", cu.exists());
+			
+			try {
+				performRefactoring(ref, false);
+			} catch (OperationCanceledException e) {
+			}
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsCanceled();
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log), new CopyArguments(destination.getResource(), log)
+			});
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -2138,7 +2332,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= { };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 			
 			Object destination= otherCu;
 			verifyValidDestination(ref, destination);
@@ -2174,7 +2368,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= { };
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= cu;
 			verifyValidDestination(ref, destination);
@@ -2198,6 +2392,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_Cu_to_OtherPackage() throws Exception {
+		ParticipantTesting.reset();
 		String fileName= "A.java";
 		ICompilationUnit cu= getPackageP().createCompilationUnit(fileName, "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
 
@@ -2207,9 +2402,10 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(cu, cu.getResource());
 
-			Object destination= otherPackage;
+			IPackageFragment destination= otherPackage;
 			verifyValidDestination(ref, destination);
 			
 			assertTrue("source file does not exist before copying", cu.exists());
@@ -2221,6 +2417,12 @@ public class CopyTest extends RefactoringTest {
 			
 			ICompilationUnit newCu= otherPackage.getCompilationUnit(fileName);
 			assertTrue("new file does not exist after copying", newCu.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsProcessed(cu);
+			log.markAsProcessed(cu.getResource());
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log), new CopyArguments(destination.getResource(), log)
+			});
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -2229,6 +2431,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_Cu_to_DefaultPackage() throws Exception {
+		ParticipantTesting.reset();
 		String fileName= "A.java";
 		ICompilationUnit cu= getPackageP().createCompilationUnit(fileName, "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
 
@@ -2240,9 +2443,10 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(cu, cu.getResource());
 
-			Object destination= defaultPackage;
+			IPackageFragment destination= defaultPackage;
 			verifyValidDestination(ref, destination);
 			
 			assertTrue("source file does not exist before copying", cu.exists());
@@ -2254,6 +2458,12 @@ public class CopyTest extends RefactoringTest {
 			
 			ICompilationUnit newCu= defaultPackage.getCompilationUnit(fileName);
 			assertTrue("new file does not exist after copying", newCu.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsProcessed(cu);
+			log.markAsProcessed(cu.getResource());
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log), new CopyArguments(destination.getResource(), log)
+			});
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -2270,7 +2480,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);
@@ -2300,7 +2510,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);
@@ -2337,7 +2547,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= file;
 			verifyValidDestination(ref, destination);
@@ -2378,7 +2588,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= file;
 			verifyValidDestination(ref, destination);
@@ -2414,7 +2624,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyValidDestination(ref, destination);
@@ -2437,13 +2647,15 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_Package_to_Its_Root() throws Exception {
+		ParticipantTesting.reset();
 		IPackageFragment newPackage= null;
 		try {
 			INewNameQueries queries= new MockNewNameQueries();
 
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(getPackageP());
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);
@@ -2457,22 +2669,59 @@ public class CopyTest extends RefactoringTest {
 			
 			newPackage= getRoot().getPackageFragment(MockNewNameQueries.NEW_PACKAGE_NAME);
 			assertTrue("new package does not exist after copying", newPackage.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.setNewName(getPackageP(), MockNewNameQueries.NEW_PACKAGE_NAME);
+			log.markAsProcessed(getPackageP());
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log)
+			});
 		} finally {
 			performDummySearch();
 			newPackage.delete(true, new NullProgressMonitor());
 		}
 	}
 
+	public void testCopy_Package_to_Its_Root_Cancel() throws Exception {
+		ParticipantTesting.reset();
+		try {
+			INewNameQueries queries= new MockCancelNameQueries();
+
+			IJavaElement[] javaElements= {getPackageP()};
+			IResource[] resources= {};
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(getPackageP());
+
+			Object destination= getRoot();
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source package does not exist before copying", getPackageP().exists());
+			
+			try {
+				performRefactoring(ref, false);
+			} catch(OperationCanceledException e) {
+			}
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsCanceled();
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log)
+			});
+		} finally {
+			performDummySearch();
+		}
+	}
+
 	public void testCopy_Package_to_Itself() throws Exception {
+		ParticipantTesting.reset();
 		IPackageFragment newPackage= null;
 		try {
 			INewNameQueries queries= new MockNewNameQueries();
 
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(getPackageP());
 
-			Object destination= getPackageP();
+			IPackageFragment destination= getPackageP();
 			verifyValidDestination(ref, destination);
 			
 			assertTrue("source package does not exist before copying", getPackageP().exists());
@@ -2484,6 +2733,12 @@ public class CopyTest extends RefactoringTest {
 			
 			newPackage= getRoot().getPackageFragment(MockNewNameQueries.NEW_PACKAGE_NAME);
 			assertTrue("new package does not exist after copying", newPackage.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsProcessed(getPackageP());
+			log.setNewName(getPackageP(), MockNewNameQueries.NEW_PACKAGE_NAME);
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination.getParent(), log)
+			});
 		} finally {
 			performDummySearch();
 			if (newPackage != null && newPackage.exists())
@@ -2500,7 +2755,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= otherRoot;
 			verifyValidDestination(ref, destination);
@@ -2529,7 +2784,7 @@ public class CopyTest extends RefactoringTest {
 
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
 			Object destination= otherProject;
 			verifyValidDestination(ref, destination);
@@ -2557,6 +2812,7 @@ public class CopyTest extends RefactoringTest {
 	}
 	
 	public void testCopy_folder_to_other_folder() throws Exception {
+		ParticipantTesting.reset();
 		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		String folderName= "folder";
 		IFolder folder= superFolder.getFolder(folderName);
@@ -2568,7 +2824,8 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(folder);
 
 			Object destination= otherFolder;
 			verifyValidDestination(ref, destination);	
@@ -2580,11 +2837,89 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source does not exist after copying", folder.exists());
 			assertTrue("copied folder does not exist after copying", otherFolder.getFolder(folderName).exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsProcessed(folder);
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log)
+			});
 			
 		} finally{
 			performDummySearch();
 			folder.delete(true, new NullProgressMonitor());			
 			otherFolder.delete(true, new NullProgressMonitor());			
+		}
+	}
+
+	public void testCopy_folder_to_same_container() throws Exception {
+		ParticipantTesting.reset();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
+		String folderName= "folder";
+		IFolder folder= superFolder.getFolder(folderName);
+		folder.create(true, true, null);
+		IFolder newFolder= null;
+		
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(folder);
+
+			Object destination= superFolder;
+			verifyValidDestination(ref, destination);	
+
+			assertTrue("source does not exist before copying", folder.exists());
+								
+			RefactoringStatus status= performRefactoring(ref, false);
+			assertEquals(null, status);
+			
+			assertTrue("source does not exist after copying", folder.exists());
+			newFolder= superFolder.getFolder(MockNewNameQueries.NEW_FOLDER_NAME);
+			assertTrue("copied folder does not exist after copying", newFolder.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsProcessed(folder);
+			log.setNewName(folder, MockNewNameQueries.NEW_FOLDER_NAME);
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log)
+			});
+			
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+			newFolder.delete(true, new NullProgressMonitor());			
+		}
+	}
+
+	public void testCopy_folder_to_same_container_cancel() throws Exception {
+		ParticipantTesting.reset();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
+		String folderName= "folder";
+		IFolder folder= superFolder.getFolder(folderName);
+		folder.create(true, true, null);
+		
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockCancelNameQueries(), createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(folder);
+
+			Object destination= superFolder;
+			verifyValidDestination(ref, destination);	
+
+			assertTrue("source does not exist before copying", folder.exists());
+								
+			try {
+				performRefactoring(ref, false);
+			} catch (OperationCanceledException e) {
+			}
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsCanceled();
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log)
+			});
+			
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
 		}
 	}
 
@@ -2597,7 +2932,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
 
 			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);						
@@ -2624,7 +2959,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);						
@@ -2651,7 +2986,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
 
 			IPackageFragment destination= getPackageP();
 			verifyValidDestination(ref, destination);						
@@ -2681,7 +3016,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
 
 			Object destination= fileInAnotherFolder;
 			verifyValidDestination(ref, destination);						
@@ -2708,9 +3043,9 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
 
-			Object destination= cu;
+			ICompilationUnit destination= cu;
 			verifyValidDestination(ref, destination);						
 			assertTrue("source does not exist before copying", folder.exists());
 			RefactoringStatus status= performRefactoring(ref, false);
@@ -2737,7 +3072,7 @@ public class CopyTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyValidDestination(ref, destination);						
@@ -2755,13 +3090,15 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_root_to_same_Java_project() throws Exception {
+		ParticipantTesting.reset();
 		IPackageFragmentRoot newRoot= null;
 		try {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {			};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(getRoot(), getRoot().getResource());
 
-			Object destination= getRoot().getJavaProject();
+			IJavaProject destination= getRoot().getJavaProject();
 			verifyValidDestination(ref, destination);
 			assertTrue("source does not exist before copying", getRoot().exists());
 			RefactoringStatus status= performRefactoring(ref, false);
@@ -2772,6 +3109,42 @@ public class CopyTest extends RefactoringTest {
 			newRoot= getSourceFolder(RefactoringTestSetup.getProject(), newName);
 			assertNotNull("copied folder does not exist after copying", newRoot);
 			assertTrue("copied folder does not exist after copying", newRoot.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.setNewName(getRoot(), newName);
+			log.setNewName(getRoot().getResource(), newName);
+			log.markAsProcessed(getRoot());
+			log.markAsProcessed(getRoot().getResource());
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log), new CopyArguments(destination.getResource(), log)
+			});
+		} finally {
+			performDummySearch();
+			if (newRoot != null && newRoot.exists())
+				newRoot.delete(0, 0, new NullProgressMonitor());
+		}
+	}
+	
+	public void testCopy_root_to_same_Java_project_cancel() throws Exception {
+		ParticipantTesting.reset();
+		IPackageFragmentRoot newRoot= null;
+		try {
+			IJavaElement[] javaElements= { getRoot()};
+			IResource[] resources= {};
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockCancelNameQueries(), createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(getRoot(), getRoot().getResource());
+
+			IJavaProject destination= getRoot().getJavaProject();
+			verifyValidDestination(ref, destination);
+			assertTrue("source does not exist before copying", getRoot().exists());
+			try {
+				performRefactoring(ref, false);
+			} catch (OperationCanceledException e) {
+			}
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsCanceled();
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log), new CopyArguments(destination.getResource(), log)
+			});
 		} finally {
 			performDummySearch();
 			if (newRoot != null && newRoot.exists())
@@ -2780,13 +3153,15 @@ public class CopyTest extends RefactoringTest {
 	}
 	
 	public void testCopy_root_to_other_Java_project() throws Exception {
+		ParticipantTesting.reset();
 		IJavaProject otherJavaProject= JavaProjectHelper.createJavaProject("other", "bin");
 		try {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {};
-			CopyRefactoring ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+			String[] handles= ParticipantTesting.createHandles(getRoot(), getRoot().getResource());
 
-			Object destination= otherJavaProject;
+			IJavaProject destination= otherJavaProject;
 			verifyValidDestination(ref, destination);
 			assertTrue("source does not exist before copying", getRoot().exists());
 			RefactoringStatus status= performRefactoring(ref, false);
@@ -2797,6 +3172,12 @@ public class CopyTest extends RefactoringTest {
 			IPackageFragmentRoot newRoot= getSourceFolder(otherJavaProject, newName);
 			assertNotNull("copied folder does not exist after copying", newRoot);
 			assertTrue("copied folder does not exist after copying", newRoot.exists());
+			ReorgExecutionLog log= new ReorgExecutionLog();
+			log.markAsProcessed(getRoot());
+			log.markAsProcessed(getRoot().getResource());
+			ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log), new CopyArguments(destination.getProject(), log)
+			});
 		} finally {
 			performDummySearch();
 			JavaProjectHelper.delete(otherJavaProject);

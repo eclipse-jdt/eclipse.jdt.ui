@@ -21,11 +21,13 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.ltk.core.refactoring.Change;
 
 abstract class ResourceReorgChange extends JDTChange {
 	
@@ -59,7 +61,9 @@ abstract class ResourceReorgChange extends JDTChange {
 			boolean performReorg= deleteIfAlreadyExists(new SubProgressMonitor(pm, 1), newName);
 			if (!performReorg)
 				return null;
-			return doPerformReorg(getDestinationPath(newName), new SubProgressMonitor(pm, 1));
+			final Change result= doPerformReorg(getDestinationPath(newName), new SubProgressMonitor(pm, 1));
+			markAsExecuted();
+			return result;
 		} finally {
 			pm.done();
 		}
@@ -138,6 +142,13 @@ abstract class ResourceReorgChange extends JDTChange {
 
 	protected int getReorgFlags() {
 		return IResource.KEEP_HISTORY | IResource.SHALLOW;
+	}
+	
+	private void markAsExecuted() {
+		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
+		if (log != null) {
+			log.markAsProcessed(getResource());
+		}
 	}
 }
 

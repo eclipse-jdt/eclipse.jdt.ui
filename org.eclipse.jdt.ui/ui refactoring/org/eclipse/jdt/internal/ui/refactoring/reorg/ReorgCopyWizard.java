@@ -12,14 +12,15 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 
 
 public class ReorgCopyWizard extends RefactoringWizard {
@@ -44,31 +45,31 @@ public class ReorgCopyWizard extends RefactoringWizard {
 			super(PAGE_NAME);
 		}
 
-		private CopyRefactoring getCopyRefactoring(){
-			return (CopyRefactoring) getRefactoring();
+		private JavaCopyProcessor getCopyProcessor(){
+			return (JavaCopyProcessor)((CopyRefactoring)getRefactoring()).getCopyProcessor();
 		}
 
 		protected Object getInitiallySelectedElement() {
-			return getCopyRefactoring().getCommonParentForInputElements();
+			return getCopyProcessor().getCommonParentForInputElements();
 		}
 
 		protected IJavaElement[] getJavaElements() {
-			return getCopyRefactoring().getJavaElements();
+			return getCopyProcessor().getJavaElements();
 		}
 
 		protected IResource[] getResources() {
-			return getCopyRefactoring().getResources();
+			return getCopyProcessor().getResources();
 		}
 
 		protected IReorgDestinationValidator getDestinationValidator() {
-			return getCopyRefactoring();
+			return getCopyProcessor();
 		}
 		
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
 			if (selected instanceof IJavaElement)
-				return getCopyRefactoring().setDestination((IJavaElement)selected);
+				return getCopyProcessor().setDestination((IJavaElement)selected);
 			if (selected instanceof IResource)
-				return getCopyRefactoring().setDestination((IResource)selected);
+				return getCopyProcessor().setDestination((IResource)selected);
 			return RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("ReorgCopyWizard.2")); //$NON-NLS-1$
 		}		
 	}

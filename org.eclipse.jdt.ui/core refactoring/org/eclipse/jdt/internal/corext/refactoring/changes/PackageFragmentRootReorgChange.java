@@ -18,6 +18,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -28,7 +31,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.ltk.core.refactoring.Change;
 
 abstract class PackageFragmentRootReorgChange extends JDTChange {
 
@@ -49,7 +51,9 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 		pm.beginTask(getName(), 2);
 		try {
 			String newName= getNewResourceName();
-			return doPerformReorg(getDestinationProjectPath().append(newName), new SubProgressMonitor(pm, 1));
+			final Change result= doPerformReorg(getDestinationProjectPath().append(newName), new SubProgressMonitor(pm, 1));
+			markAsExecuted();
+			return result;
 		} finally {
 			pm.done();
 		}
@@ -114,5 +118,15 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 	
 	protected int getResourceUpdateFlags(){
 		return IResource.KEEP_HISTORY | IResource.SHALLOW;
+	}
+	
+	private void markAsExecuted() {
+		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
+		if (log != null) {
+			IPackageFragmentRoot root= getRoot();
+			log.markAsProcessed(root);
+			if (root.getResource() != null)
+				log.markAsProcessed(root.getResource());
+		}
 	}
 }

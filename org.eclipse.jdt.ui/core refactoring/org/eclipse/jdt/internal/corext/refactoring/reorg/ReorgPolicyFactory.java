@@ -107,10 +107,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
@@ -851,6 +853,10 @@ class ReorgPolicyFactory {
 		public IResource[] getResources() {
 			return new IResource[0];
 		}
+		
+		public IPackageFragmentRoot[] getRoots() {
+			return fPackageFragmentRoots;
+		}
 
 		public PackageFragmentRootsReorgPolicy(IPackageFragmentRoot[] roots){
 			Assert.isNotNull(roots);
@@ -1047,13 +1053,24 @@ class ReorgPolicyFactory {
 		}
 	}
 
-	private static class CopySubCuElementsPolicy extends SubCuElementReorgPolicy implements ICopyPolicy{
+	private static class CopySubCuElementsPolicy extends SubCuElementReorgPolicy implements ICopyPolicy {
+		private ReorgExecutionLog fReorgExecutionLog;
 		CopySubCuElementsPolicy(IJavaElement[] javaElements){
 			super(javaElements);
 		}
-			
-		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
-			return new RefactoringParticipant[0];
+		public ReorgExecutionLog getReorgExecutionLog() {
+			return fReorgExecutionLog;
+		}	
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants sharedParticipants) throws CoreException {
+			List result= new ArrayList();
+			fReorgExecutionLog= new ReorgExecutionLog();
+			CopyArguments args= new CopyArguments(getDestinationCu(), fReorgExecutionLog);
+			IJavaElement[] javaElements= getJavaElements();
+			for (int i= 0; i < javaElements.length; i++) {
+				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
+					status, processor, javaElements[i], args, natures, sharedParticipants)));
+			}
+			return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 		}
 		
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException {
@@ -1104,14 +1121,44 @@ class ReorgPolicyFactory {
 	}
 	private static class CopyFilesFoldersAndCusPolicy extends FilesFoldersAndCusReorgPolicy implements ICopyPolicy{
 
+		private ReorgExecutionLog fReorgExecutionLog;
+		
 		CopyFilesFoldersAndCusPolicy(IFile[] files, IFolder[] folders, ICompilationUnit[] cus){
 			super(files, folders, cus);
 		}
-				
-		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
-			return new RefactoringParticipant[0];
+		public ReorgExecutionLog getReorgExecutionLog() {
+			return fReorgExecutionLog;
 		}
-		
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants sharedParticipants) throws CoreException {
+			List result= new ArrayList();
+			fReorgExecutionLog= new ReorgExecutionLog();
+			CopyArguments jArgs= new CopyArguments(getDestination(), fReorgExecutionLog);
+			CopyArguments rArgs= new CopyArguments(getDestinationAsContainer(), fReorgExecutionLog);
+			ICompilationUnit[] cus= getCus();
+			for (int i= 0; i < cus.length; i++) {
+				ICompilationUnit cu= cus[i];
+				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
+					status, processor, cu, jArgs, natures, sharedParticipants)));
+				if (cu.getResource() != null) {
+					result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
+						status, processor, cu.getResource(), rArgs, natures, sharedParticipants)));
+				}
+			}
+			IResource[] resources= ReorgUtils.union(getFiles(), getFolders());
+			for (int i= 0; i < resources.length; i++) {
+				IResource resource= resources[i];
+				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
+					status, processor, resource, rArgs, natures, sharedParticipants)));
+				
+			}
+			return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
+		}
+		private Object getDestination() {
+			Object result= getDestinationAsPackageFragment();
+			if (result != null)
+				return result;
+			return getDestinationAsContainer();
+		}
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			IFile[] file= getFiles();
 			IFolder[] folders= getFolders();
@@ -1193,12 +1240,29 @@ class ReorgPolicyFactory {
 		}
 	}
 	private static class CopyPackageFragmentRootsPolicy extends PackageFragmentRootsReorgPolicy implements ICopyPolicy{
+		private ReorgExecutionLog fReorgExecutionLog;
 		public CopyPackageFragmentRootsPolicy(IPackageFragmentRoot[] roots){
 			super(roots);
 		}
-		
-		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
-			return new RefactoringParticipant[0];
+		public ReorgExecutionLog getReorgExecutionLog() {
+			return fReorgExecutionLog;
+		}
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants sharedParticipants) throws CoreException {
+			List result= new ArrayList();
+			fReorgExecutionLog= new ReorgExecutionLog();
+			CopyArguments javaArgs= new CopyArguments(getDestinationJavaProject(), fReorgExecutionLog);
+			CopyArguments resourceArgs= new CopyArguments(getDestinationJavaProject().getProject(), fReorgExecutionLog);
+			IPackageFragmentRoot[] roots= getRoots();
+			for (int i= 0; i < roots.length; i++) {
+				IPackageFragmentRoot root= roots[i];
+				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
+					status, processor, root, javaArgs, natures, sharedParticipants)));
+				if (root.getResource() != null) {
+					result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
+						status, processor, root.getResource(), resourceArgs, natures, sharedParticipants)));
+				}
+			}
+			return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 		}
 		
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
@@ -1232,15 +1296,26 @@ class ReorgPolicyFactory {
 		}
 	}
 	private static class CopyPackagesPolicy extends PackagesReorgPolicy implements ICopyPolicy{
-
+		private ReorgExecutionLog fReorgExecutionLog;
+		
 		public CopyPackagesPolicy(IPackageFragment[] packageFragments){
 			super(packageFragments);
 		}
-
-		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
-			return new RefactoringParticipant[0];
+		public ReorgExecutionLog getReorgExecutionLog() {
+			return fReorgExecutionLog;
 		}
-		
+		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants sharedParticipants) throws CoreException {
+			List result= new ArrayList();
+			fReorgExecutionLog= new ReorgExecutionLog();
+			IPackageFragmentRoot destination= getDestinationAsPackageFragmentRoot();
+			CopyArguments javaArgs= new CopyArguments(destination, fReorgExecutionLog);
+			IPackageFragment[] packages= getPackages();
+			for (int i= 0; i < packages.length; i++) {
+				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
+					status, processor, packages[i], javaArgs, natures, sharedParticipants)));
+			}
+			return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
+		}
 		public Change createChange(IProgressMonitor pm, INewNameQueries newNameQueries) throws JavaModelException {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragment[] fragments= getPackages();
@@ -1255,7 +1330,6 @@ class ReorgPolicyFactory {
 			pm.done();
 			return composite;
 		}
-
 		private Change createChange(IPackageFragment pack, IPackageFragmentRoot destination, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			String newName= nameProposer.createNewName(pack, destination);
 			if (newName == null || JavaConventions.validatePackageName(newName).getSeverity() < IStatus.ERROR){
@@ -1279,6 +1353,9 @@ class ReorgPolicyFactory {
 	private static class NoCopyPolicy extends ReorgPolicy implements ICopyPolicy{
 		public boolean canEnable() throws JavaModelException {
 			return false;
+		}
+		public ReorgExecutionLog getReorgExecutionLog() {
+			return null;
 		}
 		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
 			return new RefactoringParticipant[0];

@@ -21,6 +21,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -43,7 +47,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 
@@ -55,6 +58,12 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		fOldCu= oldCu;
 		fNameQuery= nameQuery;
 		setEncoding(oldCu);
+	}
+	
+	public Change perform(IProgressMonitor pm) throws CoreException {
+		final Change result= super.perform(pm);
+		markAsExecuted();
+		return result;
 	}
 	
 	private void setEncoding(ICompilationUnit cunit) {
@@ -158,5 +167,13 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		SearchPattern constructorDeclarationPattern= RefactoringSearchEngine.createOrPattern(constructors, IJavaSearchConstants.DECLARATIONS);
 		return SearchPattern.createOrPattern(pattern, constructorDeclarationPattern);
 	}
-
+	
+	private void markAsExecuted() {
+		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
+		if (log != null) {
+			log.markAsProcessed(fOldCu);
+			if (fOldCu.getResource() != null)
+				log.markAsProcessed(fOldCu.getResource());
+		}
+	}
 }

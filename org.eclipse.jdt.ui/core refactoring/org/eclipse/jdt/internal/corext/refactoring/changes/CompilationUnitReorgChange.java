@@ -14,6 +14,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
@@ -22,7 +25,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
-import org.eclipse.ltk.core.refactoring.Change;
 
 abstract class CompilationUnitReorgChange extends JDTChange {
 
@@ -52,7 +54,9 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 1);
 		try{
-			return doPerformReorg(new SubProgressMonitor(pm, 1));
+			Change result= doPerformReorg(new SubProgressMonitor(pm, 1));
+			markAsExecuted();
+			return result;
 		} finally {
 			pm.done();
 		}
@@ -87,6 +91,16 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 			return RefactoringCoreMessages.getString("MoveCompilationUnitChange.default_package"); //$NON-NLS-1$
 		else
 			return pack.getElementName();	
+	}
+	
+	private void markAsExecuted() {
+		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
+		if (log != null) {
+			ICompilationUnit cu= getCu();
+			log.markAsProcessed(cu);
+			if (cu.getResource() != null)
+				log.markAsProcessed(cu.getResource());
+		}
 	}
 }
 

@@ -20,12 +20,13 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.CopyProjectAction;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -72,7 +73,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return CopyRefactoring.isAvailable(resources, javaElements);
+		return JavaCopyProcessor.isAvailable(resources, javaElements);
 	}
 
 	private CopyProjectAction createWorkbenchAction(IStructuredSelection selection) {
@@ -102,22 +103,19 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 
 	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		CopyRefactoring refactoring= createRefactoring(resources, javaElements);
+		JavaCopyProcessor processor= JavaCopyProcessor.create(resources, javaElements);
+		CopyRefactoring refactoring= new CopyRefactoring(processor);
 		RefactoringWizard wizard= createWizard(refactoring);
 		/*
 		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
 		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
 		 */
-		refactoring.setNewNameQueries(new NewNameQueries(wizard));
-		refactoring.setReorgQueries(new ReorgQueries(wizard));
+		processor.setNewNameQueries(new NewNameQueries(wizard));
+		processor.setReorgQueries(new ReorgQueries(wizard));
 		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
 	}
 
 	private RefactoringWizard createWizard(CopyRefactoring refactoring) {
 		return new ReorgCopyWizard(refactoring);
-	}
-
-	private CopyRefactoring createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return CopyRefactoring.create(resources, javaElements);
 	}
 }

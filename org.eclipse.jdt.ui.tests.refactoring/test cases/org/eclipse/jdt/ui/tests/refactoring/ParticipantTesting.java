@@ -17,10 +17,11 @@ import junit.framework.Assert;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IJavaElement;
-
+import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+
+import org.eclipse.jdt.core.IJavaElement;
 
 
 public class ParticipantTesting {
@@ -30,11 +31,13 @@ public class ParticipantTesting {
 		TestDeleteParticipantShared.reset();
 		TestMoveParticipantShared.reset();
 		TestRenameParticipantShared.reset();
+		TestCopyParticipantShared.reset();
 		
 		TestCreateParticipantSingle.reset();
 		TestDeleteParticipantSingle.reset();
 		TestMoveParticipantSingle.reset();
 		TestRenameParticipantSingle.reset();
+		TestCopyParticipantSingle.reset();
 	}
 	
 	public static String[] createHandles(Object object) {
@@ -117,6 +120,20 @@ public class ParticipantTesting {
 			
 			TestCreateParticipantSingle.testNumberOfInstances(handles.length);
 			TestCreateParticipantSingle.testElements(handles);
+		}
+	}
+	
+	public static void testCopy(String[] handles, CopyArguments[] arguments) {
+		if (handles.length == 0)  {
+			TestCopyParticipantShared.testNumberOfElements(0);
+			TestCopyParticipantSingle.testNumberOfInstances(0);
+		} else {
+			testElementsShared(handles, TestCopyParticipantShared.fgInstance.fHandles);
+			TestCopyParticipantShared.testArguments(arguments);
+			
+			TestCopyParticipantSingle.testNumberOfInstances(handles.length);
+			TestCopyParticipantSingle.testElements(handles);
+			TestCopyParticipantSingle.testArguments(arguments);
 		}
 	}
 	
