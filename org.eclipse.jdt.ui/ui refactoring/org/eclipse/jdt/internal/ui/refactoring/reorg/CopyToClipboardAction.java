@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IResource;
@@ -120,12 +121,12 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (elements.size() == resources.length + javaElements.length && canEnable(resources, javaElements)) 
 				doRun(resources, javaElements);
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), ReorgMessages.getString("CopyToClipboardAction.2"), ReorgMessages.getString("CopyToClipboardAction.3")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
-	private void doRun(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
+	private void doRun(IResource[] resources, IJavaElement[] javaElements) throws CoreException {
 		new ClipboardCopier(resources, javaElements, fClipboard, getShell(), fAutoRepeatOnFailure).copyToClipboard();
 
 		// update the enablement of the paste action
@@ -161,7 +162,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			fAutoRepeatOnFailure= autoRepeatOnFailure;
 		}
 
-		public void copyToClipboard() throws JavaModelException{
+		public void copyToClipboard() throws CoreException{
 			//Set<String> fileNames
 			Set fileNames= new HashSet(fResources.length + fJavaElements.length);
 			StringBuffer namesBuf = new StringBuffer();
@@ -179,7 +180,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			IResource[] resourcesForClipboard= ReorgUtils.union(fResources, ReorgUtils.union(cuResources, resourcesOfMainTypes));
 			IJavaElement[] javaElementsForClipboard= ReorgUtils.union(fJavaElements, cusOfMainTypes);
 			
-			TypedSource[] typedSources= TypedSource.createTypeSources(javaElementsForClipboard);
+			TypedSource[] typedSources= TypedSource.createTypedSources(javaElementsForClipboard);
 			String[] fileNameArray= (String[]) fileNames.toArray(new String[fileNames.size()]);
 			copyToClipboard(resourcesForClipboard, fileNameArray, namesBuf.toString(), javaElementsForClipboard, typedSources, 0);
 		}
@@ -203,7 +204,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		private void processJavaElements(Set fileNames, StringBuffer namesBuf) {
 			for (int i= 0; i < fJavaElements.length; i++) {
 				IJavaElement element= fJavaElements[i];
-				if (! ReorgUtils.isInsideCompilationUnit(element))
+				if (element instanceof ICompilationUnit)
 					addFileName(fileNames, ReorgUtils.getResource(element));
 
 				if (fResources.length > 0 || i > 0)
