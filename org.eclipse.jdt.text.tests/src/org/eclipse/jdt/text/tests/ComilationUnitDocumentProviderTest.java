@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 public class ComilationUnitDocumentProviderTest extends TestCase {
 	
 	private IJavaProject fJavaProject;
+	private IProject fLinkedProject;
 
 	public ComilationUnitDocumentProviderTest(String name) {
 		super(name);
@@ -50,6 +51,7 @@ public class ComilationUnitDocumentProviderTest extends TestCase {
 	 * Creates a new test Java project.
 	 */	
 	protected void setUp() throws Exception {
+		fJavaProject= JavaProjectHelper.createJavaProject("P", "bin");
 	}
 
 	private void setupProject() throws CoreException, JavaModelException {
@@ -70,6 +72,9 @@ public class ComilationUnitDocumentProviderTest extends TestCase {
 	protected void tearDown () throws Exception {
 		if (fJavaProject != null)
 			JavaProjectHelper.delete(fJavaProject);
+		
+		if (fLinkedProject != null)
+			TestHelper.delete(fLinkedProject, false);
 	}
 				
 	public void test1() throws Exception {
@@ -91,9 +96,9 @@ public class ComilationUnitDocumentProviderTest extends TestCase {
 	}
 	
 	public void test3() throws Exception {
-		IProject project= TestHelper.createLinkedProject("P2", JdtTextTestPlugin.getDefault(), new Path("testResources/folderLinkTarget1"));
-		assertNotNull(project);
-		assertTrue(project.exists());
+		fLinkedProject= TestHelper.createLinkedProject("P2", JdtTextTestPlugin.getDefault(), new Path("testResources/folderLinkTarget1"));
+		assertNotNull(fLinkedProject);
+		assertTrue(fLinkedProject.exists());
 		
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IFile file= root.getFile(new Path("/P2/test1/test2/C.java"));
