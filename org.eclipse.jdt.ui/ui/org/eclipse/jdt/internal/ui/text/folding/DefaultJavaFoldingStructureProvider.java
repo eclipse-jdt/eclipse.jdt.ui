@@ -610,9 +610,10 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 						JavaProjectionAnnotation a= (JavaProjectionAnnotation) annotationPosition[0];
 						Position p= (Position) annotationPosition[1];
 						if (annotation.isComment() == a.isComment()) {
-							if (p != null && !position.equals(p)) {
+							if (p != null && (!position.equals(p) || a.getCaptionOffset() != annotation.getCaptionOffset())) {
 								p.setOffset(position.getOffset());
 								p.setLength(position.getLength());
+								annotation.setCaptionOffset(a.getCaptionOffset());
 								updates.add(a);
 							}
 							x.remove();
