@@ -31,7 +31,6 @@ import org.eclipse.ui.IStartup;
 import org.eclipse.ui.editors.text.TextEditorPreferenceConstants;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import org.eclipse.jdt.internal.core.JavaModelManager;
 
 /**
  */
@@ -145,7 +144,7 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 	public void shutdown() {
 		System.out.println("JspCorePlugin: shutdown");
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		workspace.removeResourceChangeListener(JavaModelManager.getJavaModelManager().deltaProcessor);
+		workspace.removeResourceChangeListener(this);
 	}
 
 	public static void triggerLoad() {
