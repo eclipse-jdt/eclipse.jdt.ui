@@ -14,7 +14,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -26,6 +28,8 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.BuildAction;
 import org.eclipse.ui.actions.RefreshAction;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 
@@ -90,6 +94,10 @@ public class BuildActionGroup extends ActionGroup {
 	 * Method declared in ActionGroup
 	 */
 	public void fillContextMenu(IMenuManager menu) {
+		ISelection selection= getContext().getSelection();
+		if (!ResourcesPlugin.getWorkspace().isAutoBuilding() && isBuildTarget(selection)) {
+			appendToGroup(menu, fBuildAction);
+		}
 		super.fillContextMenu(menu);
 	}
 	
@@ -113,5 +121,14 @@ public class BuildActionGroup extends ActionGroup {
 	private void appendToGroup(IMenuManager menu, IAction action) {
 		if (action.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, action);
+	}
+	
+	private boolean isBuildTarget(ISelection s) {
+		if (!(s instanceof IStructuredSelection))
+			return false;
+		IStructuredSelection selection= (IStructuredSelection)s;
+		if (selection.size() != 1)
+			return false;
+		return selection.getFirstElement() instanceof IJavaProject;
 	}
 }

@@ -63,8 +63,7 @@ public class ImportActionGroup extends ActionGroup {
 			
 		if (checkSelection(selection)) {
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_IMPORT));
-			if (selection.size() == 1)
-				menu.appendToGroup(GROUP_IMPORT, fImportAction);
+			menu.appendToGroup(GROUP_IMPORT, fImportAction);
 			menu.appendToGroup(GROUP_IMPORT, fExportAction);
 		}
 		super.fillContextMenu(menu);

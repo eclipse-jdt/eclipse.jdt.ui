@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -24,6 +25,9 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -35,9 +39,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.actions.MoveResourceAction;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
 import org.eclipse.ui.actions.RefreshAction;
+import org.eclipse.ui.actions.RenameResourceAction;
 import org.eclipse.ui.views.framelist.BackAction;
 import org.eclipse.ui.views.framelist.ForwardAction;
 import org.eclipse.ui.views.framelist.FrameList;
@@ -70,7 +76,7 @@ import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
-public class PackageExplorerActionGroup extends CompositeActionGroup {
+public class PackageExplorerActionGroup extends CompositeActionGroup implements ISelectionChangedListener {
 
 	private PackageExplorerPart fPart;
 
@@ -81,6 +87,9 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 	private GotoTypeAction fGotoTypeAction;
 	private GotoPackageAction fGotoPackageAction;
 	
+	private RenameResourceAction fRenameResourceAction;
+	private MoveResourceAction fMoveResourceAction;
+	
 	private NavigateActionGroup fNavigateActionGroup;
 	private BuildActionGroup fBuildActionGroup;
 	private CCPActionGroup fCCPActionGroup;
@@ -90,11 +99,13 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 
  	private ShowLibrariesAction fShowLibrariesAction;
   	private FilterSelectionAction fFilterAction;
-	
+  	
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
 		fPart= part;
 		Shell shell= fPart.getSite().getShell();
+		ISelectionProvider provider= fPart.getSite().getSelectionProvider();
+		IStructuredSelection selection= (IStructuredSelection) provider.getSelection();
 		setGroups(new ActionGroup[] {
 			fNavigateActionGroup= new NavigateActionGroup(fPart), 
 			new ShowActionGroup(fPart), 
@@ -114,6 +125,9 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		fBackAction= new BackAction(frameList);
 		fForwardAction= new ForwardAction(frameList);
 		fUpAction= new UpAction(frameList);
+		
+		fRenameResourceAction= new RenameResourceAction(shell);		
+		fMoveResourceAction= new MoveResourceAction(shell);
 
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
@@ -122,6 +136,38 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		
 		fShowLibrariesAction = new ShowLibrariesAction(fPart, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$				
 		fFilterAction = new FilterSelectionAction(shell, fPart, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$		
+		
+		provider.addSelectionChangedListener(this);
+		update(selection);
+	}
+
+	public void dispose() {
+		ISelectionProvider provider= fPart.getSite().getSelectionProvider();
+		provider.removeSelectionChangedListener(this);
+		super.dispose();
+	}
+	
+	//---- Selection changed listener ---------------------------------------------------------
+	
+	public void selectionChanged(SelectionChangedEvent event) {
+		fRenameResourceAction.selectionChanged(event);
+		fMoveResourceAction.selectionChanged(event);
+		IStructuredSelection selection= (IStructuredSelection)event.getSelection();
+		update(selection);
+	}
+
+	private void update(IStructuredSelection selection) {
+		int size= selection.size();
+		Object element= selection.getFirstElement();
+		IActionBars actionBars= fPart.getViewSite().getActionBars();
+		if (size == 1 && element instanceof IResource) {
+			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.RENAME, fRenameResourceAction);
+			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.MOVE, fMoveResourceAction);
+		} else {
+			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.RENAME, null);
+			actionBars.setGlobalActionHandler(IWorkbenchActionConstants.MOVE, null);
+		}
+		actionBars.updateActionBars();
 	}
 
 	//---- Persistent state -----------------------------------------------------------------------
@@ -188,7 +234,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		Object element= selection.getFirstElement();
 		IJavaElement jElement= element instanceof IJavaElement ? (IJavaElement)element : null;
 		
-		if (size == 0 || (size == 1 &&isNewTarget(jElement))) {
+		if (size == 0 || (size == 1 && (isNewTarget(jElement) || element instanceof IContainer))) {
 			IMenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
 			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
 			new NewWizardMenu(newMenu, fPart.getSite().getWorkbenchWindow(), false);
@@ -203,7 +249,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 	
 	 private void addGotoMenu(IMenuManager menu, Object element, int size) {
 		
-		if (size == 1 && fPart.getViewer().isExpandable(element) && isGoIntoTarget(element)) 
+		if (size == 1 && fPart.getViewer().isExpandable(element) && (isGoIntoTarget(element) || element instanceof IContainer))
 			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
 	}
 	
@@ -213,7 +259,9 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		int type= element.getElementType();
 		return type == IJavaElement.JAVA_PROJECT ||
 			type == IJavaElement.PACKAGE_FRAGMENT_ROOT || 
-			type == IJavaElement.PACKAGE_FRAGMENT;
+			type == IJavaElement.PACKAGE_FRAGMENT ||
+			type == IJavaElement.COMPILATION_UNIT ||
+			type == IJavaElement.TYPE;
 	}
 	
 	private boolean isGoIntoTarget(Object element) {

@@ -384,7 +384,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		Object element= selection.getFirstElement();
 		IJavaElement jElement= element instanceof IJavaElement ? (IJavaElement)element : null;
 		
-		if (size == 0 || (size == 1 && isNewTarget(jElement))) {
+		if (size == 0 || (size == 1 && (isNewTarget(jElement) || element instanceof IContainer))) {
 			MenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
 			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
 			new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);
@@ -403,7 +403,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		int type= element.getElementType();
 		return type == IJavaElement.JAVA_PROJECT ||
 			type == IJavaElement.PACKAGE_FRAGMENT_ROOT || 
-			type == IJavaElement.PACKAGE_FRAGMENT;
+			type == IJavaElement.PACKAGE_FRAGMENT ||
+			type == IJavaElement.COMPILATION_UNIT ||
+			type == IJavaElement.TYPE;
 	}
 	
 	private void addOpenNewWindowAction(IMenuManager menu, Object element) {
