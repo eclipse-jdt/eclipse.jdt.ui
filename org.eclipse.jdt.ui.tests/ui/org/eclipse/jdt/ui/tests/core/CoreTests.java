@@ -30,6 +30,7 @@ public class CoreTests extends TestCase {
 		TestSuite suite= new TestSuite();
 		suite.addTest(AddImportTest.allTests());
 		suite.addTest(AddUnimplementedMethodsTest.allTests());
+		suite.addTest(AddUnimplementedConstructorsTest.allTests());
 		suite.addTest(AllTypesCacheTest.allTests());
 		suite.addTest(BindingsNameTest.allTests());
 		suite.addTest(ClassPathDetectorTest.allTests());
