@@ -1039,8 +1039,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			
 		fSyntaxColorList.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				fSyntaxColorList.select(0);
-				handleSyntaxColorListSelection();
+				if (fSyntaxColorList != null && !fSyntaxColorList.isDisposed()) {
+					fSyntaxColorList.select(0);
+					handleSyntaxColorListSelection();
+				}
 			}
 		});
 		
@@ -1049,8 +1051,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			
 		fAppearanceColorList.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				fAppearanceColorList.select(0);
-				handleAppearanceColorListSelection();
+				if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
+					fAppearanceColorList.select(0);
+					handleAppearanceColorListSelection();
+				}
 			}
 		});
 		
@@ -1059,8 +1063,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			
 		fProblemIndicationColorList.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				fProblemIndicationColorList.select(0);
-				handleProblemIndicationColorListSelection();
+				if (fProblemIndicationColorList != null && !fProblemIndicationColorList.isDisposed()) {
+					fProblemIndicationColorList.select(0);
+					handleProblemIndicationColorListSelection();
+				}
 			}
 		});
 	}
