@@ -973,7 +973,6 @@
       		menubarPath="navigate/open.ext"
       		label="%OpenAction.label"
 			tooltip="%OpenAction.tooltip"
-			description="%OpenAction.description"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.open.editor"
 			retarget="true" 
 			allowLabelUpdate="true"/>
@@ -1018,7 +1017,6 @@
       		menubarPath="navigate/open.ext"
       		label="%OpenSuperImplementationAction.label"
 			tooltip="%OpenSuperImplementationAction.tooltip"
-			description="%OpenSuperImplementationAction.description"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
 			retarget="true" />
 						
