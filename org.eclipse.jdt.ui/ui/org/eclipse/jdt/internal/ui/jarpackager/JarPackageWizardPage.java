@@ -330,9 +330,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		// destination
 		String comboText= fDestinationNamesCombo.getText();
 		IPath path= new Path(comboText);
-		if (!new File(comboText).isAbsolute())
-			// prepend workspace path
-			path= getWorkspaceLocation().append(path);
+
 		if (path.segmentCount() > 0 && ensureTargetFileIsValid(path.toFile()) && path.getFileExtension() == null) //$NON-NLS-1$
 			// append .jar
 			path= path.addFileExtension(JarPackagerUtil.JAR_EXTENSION);
@@ -563,14 +561,14 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 				setMessage(null);
 			return false;
 		}
-		if (fJarPackage.getJarLocation().toString().endsWith("/")) { //$NON-NLS-1$
+		if (fJarPackage.getAbsoluteJarLocation().toString().endsWith("/")) { //$NON-NLS-1$
 			setErrorMessage(JarPackagerMessages.getString("JarPackageWizardPage.error.exportDestinationMustNotBeDirectory")); //$NON-NLS-1$
 			fDestinationNamesCombo.setFocus();
 			return false;
 		}
-		if (getWorkspaceLocation() != null && getWorkspaceLocation().isPrefixOf(fJarPackage.getJarLocation())) {
-			int segments= getWorkspaceLocation().matchingFirstSegments(fJarPackage.getJarLocation());
-			IPath path= fJarPackage.getJarLocation().removeFirstSegments(segments);
+		if (getWorkspaceLocation() != null && getWorkspaceLocation().isPrefixOf(fJarPackage.getAbsoluteJarLocation())) {
+			int segments= getWorkspaceLocation().matchingFirstSegments(fJarPackage.getAbsoluteJarLocation());
+			IPath path= fJarPackage.getAbsoluteJarLocation().removeFirstSegments(segments);
 			IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(path);
 			if (resource != null && resource.getType() == IResource.FILE) {
 				// test if included
@@ -589,7 +587,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			if (currentMessage != null)
 				setMessage(null);
 		}
-		return ensureTargetFileIsValid(fJarPackage.getJarLocation().toFile());
+		return ensureTargetFileIsValid(fJarPackage.getAbsoluteJarLocation().toFile());
 	}
 
 	/*

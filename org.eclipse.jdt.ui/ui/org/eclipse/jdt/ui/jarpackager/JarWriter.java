@@ -71,9 +71,9 @@ public class JarWriter {
 		try {
 			if (fJarPackage.usesManifest() && fJarPackage.areClassFilesExported()) {
 				Manifest manifest=  fJarPackage.getManifestProvider().create(fJarPackage);
-				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()), manifest);
+				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toOSString()), manifest);
 			} else
-				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()));
+				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toOSString()));
 			String comment= jarPackage.getComment();
 			if (comment != null)
 				fJarOutputStream.setComment(comment);
@@ -205,13 +205,13 @@ public class JarWriter {
 	 * @return	<code>true</code> if it is OK to create the JAR
 	 */
 	protected boolean canCreateJar(Shell parent) {
-		File file= fJarPackage.getJarLocation().toFile();
+		File file= fJarPackage.getAbsoluteJarLocation().toFile();
 		if (file.exists()) {
 			if (!file.canWrite())
 				return false;
 			if (fJarPackage.allowOverwrite())
 				return true;
-			return parent != null && JarPackagerUtil.askForOverwritePermission(parent, fJarPackage.getJarLocation().toOSString());
+			return parent != null && JarPackagerUtil.askForOverwritePermission(parent, fJarPackage.getAbsoluteJarLocation().toOSString());
 		}
 					
 		// Test if directory exists
@@ -230,7 +230,7 @@ public class JarWriter {
 	}
 
 	private void registerInWorkspaceIfNeeded() {
-		IPath jarPath= fJarPackage.getJarLocation();
+		IPath jarPath= fJarPackage.getAbsoluteJarLocation();
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i= 0; i < projects.length; i++) {
 			IProject project= projects[i];

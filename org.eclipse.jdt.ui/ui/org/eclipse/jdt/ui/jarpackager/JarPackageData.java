@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -26,7 +27,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.jarpackager.JarFileExportOperation;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageReader;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWriter;
@@ -231,6 +231,21 @@ public class JarPackageData {
 		fUseSourceFolderHierarchy= state;
 	}
 	
+	/**
+	 * Gets the absolute location of the JAR file.
+	 * This path is normally external to the workspace.
+	 * 
+	 * @return the absolute path representing the location of the JAR file
+	 */
+	public IPath getAbsoluteJarLocation() {
+		IPath workspaceLocation= ResourcesPlugin.getWorkspace().getRoot().getLocation();
+		if (!fJarLocation.isAbsolute() && workspaceLocation != null)
+			// prepend workspace path
+			return workspaceLocation.append(fJarLocation);
+		else
+			return fJarLocation;
+	}
+
 	/**
 	 * Gets the location of the JAR file.
 	 * This path is normally external to the workspace.
@@ -839,7 +854,7 @@ public class JarPackageData {
 	public boolean isValid() {
 		return (areClassFilesExported() || areJavaFilesExported())
 			&& getElements() != null && getElements().length > 0
-			&& getJarLocation() != null
+			&& getAbsoluteJarLocation() != null
 			&& isManifestAccessible()
 			&& isMainClassValid(new BusyIndicatorRunnableContext());
 	}

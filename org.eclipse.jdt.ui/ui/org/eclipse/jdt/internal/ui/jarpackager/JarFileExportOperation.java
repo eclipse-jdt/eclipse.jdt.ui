@@ -770,11 +770,11 @@ public class JarFileExportOperation implements IJarExportRunnable {
 			addError(JarPackagerMessages.getString("JarFileExportOperation.noResourcesSelected"), null); //$NON-NLS-1$
 			return false;
 		}
-		if (fJarPackage.getJarLocation() == null) {
+		if (fJarPackage.getAbsoluteJarLocation() == null) {
 			addError(JarPackagerMessages.getString("JarFileExportOperation.invalidJarLocation"), null); //$NON-NLS-1$
 			return false;
 		}
-		File targetFile= fJarPackage.getJarLocation().toFile();
+		File targetFile= fJarPackage.getAbsoluteJarLocation().toFile();
 		if (targetFile.exists() && !targetFile.canWrite()) {
 			addError(JarPackagerMessages.getString("JarFileExportOperation.jarFileExistsAndNotWritable"), null); //$NON-NLS-1$
 			return false;
