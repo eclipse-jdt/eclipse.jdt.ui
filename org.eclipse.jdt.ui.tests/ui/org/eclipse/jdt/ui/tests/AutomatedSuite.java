@@ -26,8 +26,6 @@ import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
 import org.eclipse.jdt.ui.tests.text.HTML2TextReaderTester;
 import org.eclipse.jdt.ui.tests.text.JavaDoc2HTMLTextReaderTester;
-import org.eclipse.jdt.ui.tests.text.JavaHeuristicScannerTest;
-import org.eclipse.jdt.ui.tests.text.SmartSemicolonAutoEditStrategyTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
 
 
@@ -65,10 +63,6 @@ public class AutomatedSuite extends TestSuite {
 		addTest(PackagesViewDeltaTests.suite());
 		
 		addTest(CallHierarchyContentProviderTest.suite());
-		
-		addTest(JavaHeuristicScannerTest.suite());
-		addTest(SmartSemicolonAutoEditStrategyTest.suite());
-		
 		
 		System.out.println("! Java Search Tests disabled !");
 		if (false) addTest(SearchTest.suite()); //TODO: fix
