@@ -27,10 +27,12 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 	
 	private StyledText fTextWidget;
 	private Color fHighlightColor;
-	private int[] fLine= { -1, -1 };
 	private boolean fIsActive= false;
-	private int fLastLine = -2;
-	private int fCurrentLine = -2;
+	
+	private int fLastOffset = -1;
+	private int fCurrentOffset = -1;
+	private int fLineNumber= -1;
+	private int[] fLine= { -1, -1 };
 	
 	
 	public LinePainter(ISourceViewer sourceViewer) {
@@ -59,7 +61,7 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 		}
 	}
 	
-	private boolean sameLine() {
+	private boolean isSameLine() {
 		StyledTextContent content= fTextWidget.getContent();
 		
 		int offset= fTextWidget.getCaretOffset();
@@ -67,22 +69,21 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 		if (offset > length)
 			offset= length;
 		
-		int lineNumber= content.getLineAtOffset(offset);
-		fCurrentLine= content.getOffsetAtLine(lineNumber);
-		if (fLastLine != fCurrentLine) {
-			fLastLine= fCurrentLine;
-			return false; 
-			} else {
-				return true;
-		} 
-	
+		fLineNumber= content.getLineAtOffset(offset);
+		fCurrentOffset= content.getOffsetAtLine(fLineNumber);
+		if (fLastOffset != fCurrentOffset) {
+			fLastOffset= fCurrentOffset;
+			return false;
+		}
+		
+		return true;
 	}
-	
+		
 	private void updateHighlightLine() {
 		StyledTextContent content= fTextWidget.getContent();
-		fLine[0]= fCurrentLine;
+		fLine[0]= fCurrentOffset;
 		try {
-			fLine[1]= content.getOffsetAtLine(content.getLineAtOffset(fCurrentLine) + 1);
+			fLine[1]= content.getOffsetAtLine(fLineNumber + 1);
 		} catch (IllegalArgumentException x) {
 			fLine[1]= -1;
 		}
@@ -132,16 +133,19 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 	 * @see IPainter#paint(int)
 	 */
 	public void paint(int reason) {
+		
 		if (!fIsActive) {
 			fIsActive= true;
 			fTextWidget.addLineBackgroundListener(this);
-		} else if (!sameLine() ) {
-			if (fLine[0] != -1 ) {
+		}
+		
+		if (!isSameLine() ) {
+			
+			if (fLine[0] != -1 )
 				clearHighlightLine();
-			}
-
+			
 			updateHighlightLine();
-
+			
 			drawHighlightLine();
 		}
 	}
