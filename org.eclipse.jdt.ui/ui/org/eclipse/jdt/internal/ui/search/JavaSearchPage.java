@@ -322,36 +322,26 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		return -1;
 	}
 
-	private void setLimitTo(int searchFor) {
+	private void setLimitTo(int searchFor, int limitTo) {
+		if (!(searchFor == TYPE || searchFor == INTERFACE) && limitTo == IMPLEMENTORS) {
+			limitTo= REFERENCES;
+		}
+
+		if (!(searchFor == FIELD) && (limitTo == READ_ACCESSES || limitTo == WRITE_ACCESSES)) {
+			limitTo= REFERENCES;
+		}
+		
+		for (int i= 0; i < fLimitTo.length; i++) {
+			fLimitTo[i].setSelection(limitTo == i);
+		}
+		
 		fLimitTo[DECLARATIONS].setEnabled(true);
-		fLimitTo[IMPLEMENTORS].setEnabled(false);
+		fLimitTo[IMPLEMENTORS].setEnabled(searchFor == INTERFACE || searchFor == TYPE);
 		fLimitTo[REFERENCES].setEnabled(true);			
 		fLimitTo[ALL_OCCURRENCES].setEnabled(true);
-		fLimitTo[READ_ACCESSES].setEnabled(false);
-		fLimitTo[WRITE_ACCESSES].setEnabled(false);
+		fLimitTo[READ_ACCESSES].setEnabled(searchFor == FIELD);
+		fLimitTo[WRITE_ACCESSES].setEnabled(searchFor == FIELD);
 		
-		if (!(searchFor == TYPE || searchFor == INTERFACE) && fLimitTo[IMPLEMENTORS].getSelection()) {
-			fLimitTo[IMPLEMENTORS].setSelection(false);
-			fLimitTo[REFERENCES].setSelection(true);
-		}
-
-		if (!(searchFor == FIELD) && (getLimitTo() == READ_ACCESSES || getLimitTo() == WRITE_ACCESSES)) {
-			fLimitTo[getLimitTo()].setSelection(false);
-			fLimitTo[REFERENCES].setSelection(true);
-		}
-
-		switch (searchFor) {
-			case TYPE:
-			case INTERFACE:
-				fLimitTo[IMPLEMENTORS].setEnabled(true);
-				break;
-			case FIELD:
-				fLimitTo[READ_ACCESSES].setEnabled(true);
-				fLimitTo[WRITE_ACCESSES].setEnabled(true);
-				break;
-			default :
-				break;
-		}
 	}
 
 	private String[] getPreviousSearchPatterns() {
@@ -475,7 +465,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 					fJavaElement= fInitialData.getJavaElement();
 				else
 					fJavaElement= null;
-				setLimitTo(getSearchFor());
+				setLimitTo(getSearchFor(), getLimitTo());
 				doPatternModified();
 			}
 		};
@@ -628,13 +618,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			return;
 		
 		SearchPatternData initialData= (SearchPatternData) fPreviousSearchPatterns.get(selectionIndex);
-		for (int i= 0; i < fSearchFor.length; i++)
-			fSearchFor[i].setSelection(false);
-		for (int i= 0; i < fLimitTo.length; i++)
-			fLimitTo[i].setSelection(false);
-		fSearchFor[initialData.getSearchFor()].setSelection(true);
-		setLimitTo(initialData.getSearchFor());
-		fLimitTo[initialData.getLimitTo()].setSelection(true);
+
+		setSearchFor(initialData.getSearchFor());
+		setLimitTo(initialData.getSearchFor(), initialData.getLimitTo());
 
 		fPattern.setText(initialData.getPattern());
 		fIsCaseSensitive= initialData.isCaseSensitive();
@@ -650,6 +636,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		
 		fInitialData= initialData;
 	}
+	
+	private void setSearchFor(int searchFor) {
+		for (int i= 0; i < fSearchFor.length; i++) {
+			fSearchFor[i].setSelection(searchFor == i);
+		}
+	}
+	
 
 	private Control createSearchFor(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
@@ -662,9 +655,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		for (int i= 0; i < fSearchForText.length; i++) {
 			Button button= new Button(result, SWT.RADIO);
 			button.setText(fSearchForText[i]);
+			button.setSelection(i == TYPE);
 			fSearchFor[i]= button;
 		}
-		fSearchFor[0].setSelection(true);
 
 		// Fill with dummy radio buttons
 		Button filler= new Button(result, SWT.RADIO);
@@ -693,9 +686,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			Button button= new Button(result, SWT.RADIO);
 			button.setText(fLimitToText[i]);
 			fLimitTo[i]= button;
+			button.setSelection(i == REFERENCES);
 			button.addSelectionListener(listener);
 		}
-		fLimitTo[0].setSelection(true);
+		
 		createSearchJRE(result);
 		return result;		
 	}	
@@ -730,9 +724,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fJavaElement= initData.getJavaElement();
 		fCaseSensitive.setSelection(initData.isCaseSensitive());
 		fCaseSensitive.setEnabled(fJavaElement == null);
-		fSearchFor[initData.getSearchFor()].setSelection(true);
-		setLimitTo(initData.getSearchFor());
-		fLimitTo[initData.getLimitTo()].setSelection(true);		
+		
+		setSearchFor(initData.getSearchFor());
+		setLimitTo(initData.getSearchFor(), initData.getLimitTo());
+
 		fPattern.setText(initData.getPattern());
 		updateUseJRE();
 	}
