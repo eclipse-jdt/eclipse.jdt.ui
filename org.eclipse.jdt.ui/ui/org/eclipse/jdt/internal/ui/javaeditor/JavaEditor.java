@@ -2804,7 +2804,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			if (PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE.equals(property)) {
 				if (event.getNewValue() instanceof Boolean) {
 					Boolean disable= (Boolean) event.getNewValue();
-					configureInsertMode(OVERWRITE, !disable.booleanValue());
+					enableOverwriteMode(!disable.booleanValue());
 				}
 			}
 			
@@ -3053,7 +3053,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			enableBrowserLikeLinks();
 
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE))
-			configureInsertMode(OVERWRITE, false);
+			enableOverwriteMode(false);
 
 		if (fMarkOccurrenceAnnotations)
 			installOccurrencesFinder();
