@@ -125,15 +125,13 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 
 		public void copyToClipboard(){
-			IJavaElement[] javaElements= null;
-
 			//List<String>
 			List fileNameList= new ArrayList(fResources.length + fJavaElements.length);
 			StringBuffer namesBuf = new StringBuffer();
 			processResources(fileNameList, namesBuf);
 			processJavaElements(fileNameList, namesBuf);
 			String[] fileNames= (String[]) fileNameList.toArray(new String[fileNameList.size()]);
-			copyToClipboard(fResources, fileNames, namesBuf.toString(), javaElements);
+			copyToClipboard(fResources, fileNames, namesBuf.toString(), fJavaElements);
 		}
 		
 		private void processJavaElements(List fileNameList, StringBuffer namesBuf) {
@@ -170,26 +168,8 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		
 		private void copyToClipboard(IResource[] resources, String[] fileNames, String names, IJavaElement[] javaElements){
 			try{
-				//TODO add java element transfer
-				if (fileNames.length > 0) {
-					fClipboard.setContents(
-						new Object[]{
-							resources, 
-							fileNames, 
-							names}, 
-						new Transfer[]{
-							ResourceTransfer.getInstance(), 
-							FileTransfer.getInstance(), 
-							TextTransfer.getInstance()});
-				} else {
-					fClipboard.setContents(
-						new Object[]{
-							resources, 
-							names}, 
-						new Transfer[]{
-							ResourceTransfer.getInstance(), 
-							TextTransfer.getInstance()});
-				}
+				fClipboard.setContents( createDataArray(resources, javaElements, fileNames, names),
+										createDataTypeArray(resources, javaElements, fileNames, names));
 			} catch (SWTError e) {
 				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 					throw e;
@@ -197,6 +177,31 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 					copyToClipboard(resources, fileNames, names, javaElements);
 			}
 		}
+		
+		private static Transfer[] createDataTypeArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames, String names) {
+			List result= new ArrayList(4);
+			if (resources.length != 0)
+				result.add(ResourceTransfer.getInstance());
+			if (javaElements.length != 0)
+				result.add(JavaElementTransfer.getInstance());
+			if (fileNames.length != 0)
+				result.add(FileTransfer.getInstance());
+			result.add(TextTransfer.getInstance());			
+			return (Transfer[]) result.toArray(new Transfer[result.size()]);
+		}
+
+		private static Object[] createDataArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames, String names) {
+			List result= new ArrayList(4);
+			if (resources.length != 0)
+				result.add(resources);
+			if (javaElements.length != 0)
+				result.add(javaElements);
+			if (fileNames.length != 0)
+				result.add(fileNames);
+			result.add(names);
+			return result.toArray();
+		}
+
 		private static ILabelProvider createLabelProvider(){
 			return new JavaElementLabelProvider(
 				JavaElementLabelProvider.SHOW_VARIABLE
