@@ -30,7 +30,7 @@ public class ResourceLocator implements IResourceLocator {
 
 	public IResource getCorrespondingResource(Object element) throws JavaModelException {
 		if (element instanceof IJavaElement)
-			return ((IJavaElement) element).getUnderlyingResource();
+			return ((IJavaElement) element).getCorrespondingResource();
 		else
 			return null;
 	}
@@ -40,7 +40,7 @@ public class ResourceLocator implements IResourceLocator {
 		if (element instanceof IResource)
 			resource= (IResource) element;
 		if (element instanceof IJavaElement) {
-			resource= ((IJavaElement) element).getUnderlyingResource();
+			resource= ((IJavaElement) element).getResource();
 			if (resource == null)
 				resource= ((IJavaElement) element).getJavaProject().getProject();
 		}
