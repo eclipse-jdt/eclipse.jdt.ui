@@ -156,6 +156,6 @@ public class TodoTaskInputDialog extends StatusDialog {
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.IMPORT_ORGANIZE_INPUT_DIALOG);
+		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.TODO_TASK_INPUT_DIALOG);
 	}
 }
