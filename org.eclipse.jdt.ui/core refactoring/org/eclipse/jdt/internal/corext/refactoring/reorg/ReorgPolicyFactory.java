@@ -240,6 +240,19 @@ class ReorgPolicyFactory {
 		protected abstract RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException;
 		protected abstract RefactoringStatus verifyDestination(IResource destination) throws JavaModelException;
 
+		public boolean canChildrenBeDestinations(IJavaElement javaElement) {
+			return true;
+		}
+		public boolean canChildrenBeDestinations(IResource resource) {
+			return true;
+		}
+		public boolean canElementBeDestination(IJavaElement javaElement) {
+			return true;
+		}
+		public boolean canElementBeDestination(IResource resource) {
+			return true;
+		}
+		
 		private void resetDestinations() {
 			fJavaElementDestination= null;
 			fResourceDestination= null;
@@ -391,6 +404,31 @@ class ReorgPolicyFactory {
 			return false;
 		}
 	
+		public boolean canChildrenBeDestinations(IJavaElement javaElement) {
+			switch (javaElement.getElementType()) {
+				case IJavaElement.JAVA_MODEL :
+				case IJavaElement.JAVA_PROJECT :
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT :
+					return true;
+				default :
+					return false;
+			}
+		}
+		public boolean canChildrenBeDestinations(IResource resource) {
+			return resource instanceof IContainer;
+		}
+		public boolean canElementBeDestination(IJavaElement javaElement) {
+			switch (javaElement.getElementType()) {
+				case IJavaElement.PACKAGE_FRAGMENT :
+					return true;
+				default :
+					return false;
+			}
+		}
+		public boolean canElementBeDestination(IResource resource) {
+			return resource instanceof IContainer;
+		}
+		
 		private static IContainer getAsContainer(IResource resDest){
 			if (resDest instanceof IContainer)
 				return (IContainer)resDest;
@@ -745,6 +783,13 @@ class ReorgPolicyFactory {
 				
 			return new RefactoringStatus();
 		}
+		
+		public boolean canChildrenBeDestinations(IResource resource) {
+			return false;
+		}
+		public boolean canElementBeDestination(IResource resource) {
+			return false;
+		}
 	}
 
 	private static abstract class PackageFragmentRootsReorgPolicy extends ReorgPolicy {
@@ -776,6 +821,25 @@ class ReorgPolicyFactory {
 			return true;
 		}
 	
+		public boolean canChildrenBeDestinations(IJavaElement javaElement) {
+			switch (javaElement.getElementType()) {
+				case IJavaElement.JAVA_MODEL :
+				case IJavaElement.JAVA_PROJECT :
+					return true;
+				default :
+					return false;
+			}
+		}
+		public boolean canChildrenBeDestinations(IResource resource) {
+			return false;
+		}
+		public boolean canElementBeDestination(IJavaElement javaElement) {
+			return javaElement.getElementType() == IJavaElement.JAVA_PROJECT;
+		}
+		public boolean canElementBeDestination(IResource resource) {
+			return false;
+		}
+		
 		protected RefactoringStatus verifyDestination(IResource resource) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.src2proj")); //$NON-NLS-1$
 		}
@@ -855,6 +919,32 @@ class ReorgPolicyFactory {
 		
 		protected IPackageFragmentRoot getDestinationAsPackageFragmentRoot() throws JavaModelException {
 			return getDestinationAsPackageFragmentRoot(getJavaElementDestination());
+		}
+		
+		public boolean canChildrenBeDestinations(IJavaElement javaElement) {
+			switch (javaElement.getElementType()) {
+				case IJavaElement.JAVA_MODEL :
+				case IJavaElement.JAVA_PROJECT :
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT : //can be nested (with exclusion filters)
+					return true;
+				default :
+					return false;
+			}
+		}
+		public boolean canChildrenBeDestinations(IResource resource) {
+			return false;
+		}
+		public boolean canElementBeDestination(IJavaElement javaElement) {
+			switch (javaElement.getElementType()) {
+				case IJavaElement.JAVA_PROJECT :
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT :
+					return true;
+				default :
+					return false;
+			}
+		}
+		public boolean canElementBeDestination(IResource resource) {
+			return false;
 		}
 		
 		private IPackageFragmentRoot getDestinationAsPackageFragmentRoot(IJavaElement javaElement) throws JavaModelException {

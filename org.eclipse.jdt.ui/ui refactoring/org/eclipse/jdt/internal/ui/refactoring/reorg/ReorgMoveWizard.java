@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.Dialog;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -82,6 +83,10 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			return getJavaMoveProcessor().getResources();
 		}
 
+		protected IReorgDestinationValidator getDestinationValidator() {
+			return getJavaMoveProcessor();
+		}
+		
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
 		 */

@@ -13,11 +13,14 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -26,36 +29,50 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 public final class DestinationContentProvider extends StandardJavaElementContentProvider {
 	
-	private final int fStopExpandingAtType;
-
-	public DestinationContentProvider(){
-		this(IJavaElement.PACKAGE_FRAGMENT, false);//default
-	}
+	private IReorgDestinationValidator fValidator;
 	
-	public DestinationContentProvider(int stopExpandingAtType, boolean provideMembers){
-		super(provideMembers);
-		fStopExpandingAtType= stopExpandingAtType;
+	public DestinationContentProvider(IReorgDestinationValidator validator) {
+		super(true);
+		fValidator= validator;
 	}
 	
 	public boolean hasChildren(Object element) {
 		if (element instanceof IJavaElement){
-			IJavaElement javaElement= (IJavaElement)element;
-			if ((javaElement).getElementType() == fStopExpandingAtType)
+			IJavaElement javaElement= (IJavaElement) element;
+			if (! fValidator.canChildrenBeDestinations(javaElement))
 				return false;
 			if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT){
 				if (((IPackageFragmentRoot)javaElement).isArchive())
 					return false;
 			}
+		} else if (element instanceof IResource) {
+			IResource resource= (IResource) element;
+			if (! fValidator.canChildrenBeDestinations(resource))
+				return false;
 		}
 		return super.hasChildren(element);
 	}
 	
 	public Object[] getChildren(Object parentElement) {
 		try {
-			if (parentElement instanceof IJavaModel) 
+			if (parentElement instanceof IJavaModel) {
 				return concatenate(getJavaProjects((IJavaModel)parentElement), getOpenNonJavaProjects((IJavaModel)parentElement));
-			else
-				return super.getChildren(parentElement);
+			} else {
+				Object[] children= super.getChildren(parentElement);
+				ArrayList result= new ArrayList(children.length);
+				for (int i= 0; i < children.length; i++) {
+					if (children[i] instanceof IJavaElement) {
+						IJavaElement javaElement= (IJavaElement) children[i];
+						if (fValidator.canElementBeDestination(javaElement) || fValidator.canChildrenBeDestinations(javaElement))
+							result.add(javaElement);
+					} else if (children[i] instanceof IResource) {
+						IResource resource= (IResource) children[i];
+						if (fValidator.canElementBeDestination(resource) || fValidator.canChildrenBeDestinations(resource))
+							result.add(resource);
+					}
+				}
+				return result.toArray();
+			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return new Object[0];

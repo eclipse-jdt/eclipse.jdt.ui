@@ -31,6 +31,11 @@ interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdatingRef
 	public RefactoringStatus setDestination(IResource resource) throws JavaModelException;
 	public RefactoringStatus setDestination(IJavaElement javaElement) throws JavaModelException;
 	
+	public boolean canChildrenBeDestinations(IResource resource);
+	public boolean canChildrenBeDestinations(IJavaElement javaElement);
+	public boolean canElementBeDestination(IResource resource);
+	public boolean canElementBeDestination(IJavaElement javaElement);
+	
 	public IResource[] getResources();
 	public IJavaElement[] getJavaElements();
 	

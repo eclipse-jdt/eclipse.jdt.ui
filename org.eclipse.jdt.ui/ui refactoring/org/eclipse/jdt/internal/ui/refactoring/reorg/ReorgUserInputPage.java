@@ -31,6 +31,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
@@ -106,11 +108,14 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 	
 	protected abstract Object getInitiallySelectedElement();
 	
+	/** Set and verify destination */
 	protected abstract RefactoringStatus verifyDestination(Object selected) throws JavaModelException;
 	
 	protected abstract IResource[] getResources();
 	protected abstract IJavaElement[] getJavaElements();
 
+	protected abstract IReorgDestinationValidator getDestinationValidator();
+	
 	private final void verifyDestination(Object selected, boolean initialVerification) {
 		try {
 			RefactoringStatus status= verifyDestination(selected);
@@ -131,7 +136,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		gd.heightHint= convertHeightInCharsToPixels(15);
 		treeViewer.getTree().setLayoutData(gd);
 		treeViewer.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
-		treeViewer.setContentProvider(new DestinationContentProvider(0, true));
+		treeViewer.setContentProvider(new DestinationContentProvider(getDestinationValidator()));
 		treeViewer.setSorter(new JavaElementSorter());
 		treeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		return treeViewer;

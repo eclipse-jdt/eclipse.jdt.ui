@@ -16,6 +16,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -58,6 +60,10 @@ public class ReorgCopyWizard extends RefactoringWizard {
 			return getCopyRefactoring().getResources();
 		}
 
+		protected IReorgDestinationValidator getDestinationValidator() {
+			return getCopyRefactoring();
+		}
+		
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
 			if (selected instanceof IJavaElement)
 				return getCopyRefactoring().setDestination((IJavaElement)selected);

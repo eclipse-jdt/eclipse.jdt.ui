@@ -44,8 +44,10 @@ import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
-public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUpdating {
-
+public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUpdating, IReorgDestinationValidator {
+	//TODO: offer IMovePolicy getMovePolicy(); IReorgPolicy getReorgPolicy();
+	// and remove delegate methods (also for CopyRefactoring)?
+	
 	private IReorgQueries fReorgQueries;
 	private IMovePolicy fMovePolicy;
 	private boolean fWasCanceled;
@@ -153,7 +155,20 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 	public RefactoringStatus setDestination(IResource destination) throws JavaModelException{
 		return fMovePolicy.setDestination(destination);
 	}
-
+	
+	public boolean canChildrenBeDestinations(IJavaElement javaElement) {
+		return fMovePolicy.canChildrenBeDestinations(javaElement);
+	}
+	public boolean canChildrenBeDestinations(IResource resource) {
+		return fMovePolicy.canChildrenBeDestinations(resource);
+	}
+	public boolean canElementBeDestination(IJavaElement javaElement) {
+		return fMovePolicy.canElementBeDestination(javaElement);
+	}
+	public boolean canElementBeDestination(IResource resource) {
+		return fMovePolicy.canElementBeDestination(resource);
+	}
+	
 	public void setReorgQueries(IReorgQueries queries){
 		Assert.isNotNull(queries);
 		fReorgQueries= queries;
@@ -175,8 +190,8 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null);		
 		try {
 			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("Change.javaChanges")) { //$NON-NLS-1$
-				public Change perform(IProgressMonitor pm) throws CoreException {
-					super.perform(pm);
+				public Change perform(IProgressMonitor pm2) throws CoreException {
+					super.perform(pm2);
 					return null;
 				}
 			};

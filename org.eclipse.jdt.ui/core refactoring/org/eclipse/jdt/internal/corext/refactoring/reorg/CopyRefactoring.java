@@ -33,7 +33,9 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.IConditionChecker;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
-public final class CopyRefactoring extends Refactoring{
+public final class CopyRefactoring extends Refactoring implements IReorgDestinationValidator {
+	//TODO: offer ICopyPolicy getCopyPolicy(); IReorgPolicy getReorgPolicy();
+	// and remove delegate methods (also for JavaMoveProcessor)?
 
 	private INewNameQueries fNewNameQueries;
 	private IReorgQueries fReorgQueries;
@@ -95,7 +97,20 @@ public final class CopyRefactoring extends Refactoring{
 	public RefactoringStatus setDestination(IResource destination) throws JavaModelException{
 		return fCopyPolicy.setDestination(destination);
 	}
-
+	
+	public boolean canChildrenBeDestinations(IJavaElement javaElement) {
+		return fCopyPolicy.canChildrenBeDestinations(javaElement);
+	}
+	public boolean canChildrenBeDestinations(IResource resource) {
+		return fCopyPolicy.canChildrenBeDestinations(resource);
+	}
+	public boolean canElementBeDestination(IJavaElement javaElement) {
+		return fCopyPolicy.canElementBeDestination(javaElement);
+	}
+	public boolean canElementBeDestination(IResource resource) {
+		return fCopyPolicy.canElementBeDestination(resource);
+	}
+	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fNewNameQueries, "Missing new name queries"); //$NON-NLS-1$
 		Assert.isNotNull(fReorgQueries, "Missing reorg queries"); //$NON-NLS-1$
@@ -115,8 +130,8 @@ public final class CopyRefactoring extends Refactoring{
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() != null || fCopyPolicy.getResourceDestination() != null);		
 		try {
 			final DynamicValidationStateChange result= new DynamicValidationStateChange(getName()) {
-				public Change perform(IProgressMonitor pm) throws CoreException {
-					super.perform(pm);
+				public Change perform(IProgressMonitor pm2) throws CoreException {
+					super.perform(pm2);
 					return null;
 				}
 			};
