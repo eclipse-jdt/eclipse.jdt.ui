@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
@@ -224,7 +225,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 
 		if (getEditor() != null && getEditor().isEditable()) {
-			MonoReconciler reconciler= new MonoReconciler(new JavaReconcilingStrategy(getEditor()), false);
+			JavaReconciler reconciler= new JavaReconciler(getEditor(), new JavaReconcilingStrategy(getEditor()), false);
 			reconciler.setProgressMonitor(new NullProgressMonitor());
 			reconciler.setDelay(500);
 			return reconciler;

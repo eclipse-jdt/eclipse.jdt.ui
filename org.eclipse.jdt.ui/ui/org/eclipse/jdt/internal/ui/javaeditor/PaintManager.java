@@ -207,6 +207,10 @@ public final class PaintManager implements KeyListener, MouseListener, ISelectio
 	 * @see ITextListener#textChanged(TextEvent)
 	 */
 	public void textChanged(TextEvent event) {
+		
+		if (!event.getViewerRedrawState())
+			return;
+			
 		fTextChanged= true;
 		Control control= fSourceViewer.getTextWidget();
 		if (control != null) {

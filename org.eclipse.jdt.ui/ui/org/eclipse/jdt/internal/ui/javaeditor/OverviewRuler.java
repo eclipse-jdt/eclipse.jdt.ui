@@ -61,8 +61,8 @@ public class OverviewRuler {
 		/*
 		 * @see ITextListener#textChanged
 		 */
-		public void textChanged(TextEvent e) {
-			if (fTextViewer != null && e.getDocumentEvent() == null) {
+		public void textChanged(TextEvent e) {		
+			if (fTextViewer != null && e.getDocumentEvent() == null && e.getViewerRedrawState()) {
 				// handle only changes of visible document
 				redraw();
 			}

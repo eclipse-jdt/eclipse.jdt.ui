@@ -55,7 +55,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 		return null;
 	}
 	
-	private void reconcile(boolean forceProblemDetection) {
+	private void reconcile() {
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());		
 		if (unit != null) {
 			synchronized (unit) {
@@ -68,7 +68,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 					if (extension != null)
 						extension.setProgressMonitor(fProgressMonitor);
 					
-					unit.reconcile(forceProblemDetection, fProgressMonitor);
+					unit.reconcile(true, fProgressMonitor);
 					
 					/* fix for missing cancel flag communication */
 					if (extension != null)
@@ -90,14 +90,14 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	 * @see IReconcilingStrategy#reconcile(IRegion)
 	 */
 	public void reconcile(IRegion partition) {
-		reconcile(false);
+		reconcile();
 	}
 	
 	/*
 	 * @see IReconcilingStrategy#reconcile(DirtyRegion, IRegion)
 	 */
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
-		reconcile(false);
+		reconcile();
 	}
 	
 	/*
@@ -117,6 +117,6 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	 * @see IReconcilingStrategyExtension#initialReconcile()
 	 */
 	public void initialReconcile() {
-		reconcile(true);
+		reconcile();
 	}
 }

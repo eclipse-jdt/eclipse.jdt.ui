@@ -32,6 +32,8 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -617,7 +619,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 		};
 		
-		private static class GlobalAnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
+		protected static class GlobalAnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
 			
 			private ListenerList fListenerList;
 			
@@ -654,9 +656,66 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			
 			public void removeListener(IAnnotationModelListener listener) {
 				fListenerList.remove(listener);
-			}			
+			}
+		};
+		
+		
+		/**
+		 * Document that can also be used by a background reconciler.
+		 */
+		protected static class PartiallySynchronizedDocument extends Document {
 			
-		}
+			/*
+			 * @see IDocumentExtension#startSequentialRewrite()
+			 */
+			synchronized public void startSequentialRewrite() {
+				super.startSequentialRewrite();
+			}
+			
+			/*
+			 * @see IDocumentExtension#stopSequentialRewrite()
+			 */
+			synchronized public void stopSequentialRewrite() {
+				super.stopSequentialRewrite();
+			}
+			
+			/*
+			 * @see IDocument#get()
+			 */
+			synchronized public String get() {
+				return super.get();
+			}
+			
+			/*
+			 * @see IDocument#get(int, int)
+			 */
+			synchronized public String get(int offset, int length) throws BadLocationException {
+				return super.get(offset, length);
+			}
+			
+			/*
+			 * @see IDocument#getChar(int)
+			 */
+			synchronized public char getChar(int offset) throws BadLocationException {
+				return super.getChar(offset);
+			}
+			
+			/*
+			 * @see IDocument#replace(int, int, String)
+			 */
+			synchronized public void replace(int offset, int length, String text) throws BadLocationException {
+				super.replace(offset, length, text);
+			}
+			
+			/*
+			 * @see IDocument#set(String)
+			 */
+			synchronized public void set(String text) {
+				super.set(text);
+			}
+		};
+		
+		
 		
 	/* Preference key for temporary problems */
 	public final static String HANDLE_TEMPORARY_PROBLEMS= "handleTemporaryProblems"; //$NON-NLS-1$
@@ -879,9 +938,16 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 * @see AbstractDocumentProvider#createDocument(Object)
 	 */
 	protected IDocument createDocument(Object element) throws CoreException {
-		IDocument document= super.createDocument(element);
-		initializeDocument(document);
-		return document;
+		
+		if (element instanceof IEditorInput) {
+			Document document= new PartiallySynchronizedDocument();
+			if (setDocumentContent(document, (IEditorInput) element, getEncoding(element))) {
+				initializeDocument(document);
+				return document;
+			}
+		}
+		
+		return null;
 	}
 	
 	/*
