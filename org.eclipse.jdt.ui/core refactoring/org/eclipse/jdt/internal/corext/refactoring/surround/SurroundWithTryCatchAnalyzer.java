@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Message;
@@ -88,6 +89,13 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 	public void endVisit(SuperConstructorInvocation node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
 			invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.cannotHandleSuper"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
+		}
+		super.endVisit(node);
+	}
+	
+	public void endVisit(ConstructorInvocation node) {
+		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
+			invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.cannotHandleThis"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
 		}
 		super.endVisit(node);
 	}
