@@ -74,7 +74,10 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.SaveAsDialog;
@@ -1104,6 +1107,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * 
 	 * @param offset the offset included by the retrieved element
 	 * @param reconcile <code>true</code> if working copy should be reconciled
+	 * @return the most narrow element which includes the given offset
 	 */
 	protected IJavaElement getElementAt(int offset, boolean reconcile) {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
@@ -1246,6 +1250,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * The compilation unit editor implementation of this  <code>AbstractTextEditor</code>
 	 * method asks the user for the workspace path of a file resource and saves the document
 	 * there. See http://dev.eclipse.org/bugs/show_bug.cgi?id=6295
+	 * 
+	 * @param progressMonitor the progress monitor
 	 */
 	protected void performSaveAs(IProgressMonitor progressMonitor) {
 		
@@ -1507,7 +1513,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	public void aboutToBeReconciled() {
 
 		// Notify AST provider
-		if (isActivePart())
+		if (isActiveEditor())
 			JavaPlugin.getDefault().getASTProvider().aboutToBeReconciled(getInputJavaElement());
 		
 		// Notify listeners
@@ -1525,7 +1531,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	public void reconciled(CompilationUnit ast) {
 
 		// Notify AST provider
-		if (isActivePart())
+		if (isActiveEditor())
 			JavaPlugin.getDefault().getASTProvider().reconciled(ast, getInputJavaElement());
 		
 		// Notify listeners
@@ -1547,6 +1553,21 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				});
 			}
 		}
+	}
+	
+	/**
+	 * Tells whether this is the active editor in the active page.
+	 *
+	 * @return <code>true</code> if this is the active editor in the active page
+	 * @see IWorkbenchPage#getActiveEditor();
+	 */
+	protected final boolean isActiveEditor() {
+		IWorkbenchWindow window= getSite().getWorkbenchWindow();
+		IWorkbenchPage page= window.getActivePage();
+		if (page == null)
+			return false;
+		IEditorPart activeEditor= page.getActiveEditor();
+		return activeEditor != null && activeEditor.equals(this);
 	}
 	
 	/**
