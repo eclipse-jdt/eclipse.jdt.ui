@@ -500,7 +500,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					} else if (end > eventOffset + eventOldLength) {
 						// event extends from before position into it - adjust offset
 						// and length
-						// offset becomes end of event, length ajusted acordingly
+						// offset becomes end of event, length adjusted accordingly
 						int newOffset= eventOffset + eventNewLength;
 						position.setOffset(newOffset);
 						position.setLength(end - newOffset);
@@ -603,7 +603,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 						break;
 						
 					case '<':
-						if (!fCloseAngularBrackets
+						if (!(fCloseAngularBrackets && fCloseBrackets)
 								|| nextToken == Symbols.TokenLESSTHAN 
 								|| nextToken == Symbols.TokenIDENT
 								|| 		   prevToken != Symbols.TokenLBRACE	
@@ -773,7 +773,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 */
 		public void remember() {
 			/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=52257
-			 * This method may be called inside an async call posted
+			 * This method may be called inside an asynchronous call posted
 			 * to the UI thread, so protect against intermediate disposal
 			 * of the editor.
 			 */
@@ -793,7 +793,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 */
 		public void restore() {
 			/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=52257
-			 * This method may be called inside an async call posted
+			 * This method may be called inside an asynchronous call posted
 			 * to the UI thread, so protect against intermediate disposal
 			 * of the editor.
 			 */
@@ -1858,7 +1858,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#isPrefQuickDiffAlwaysOn()
 	 */
 	protected boolean isPrefQuickDiffAlwaysOn() {
-		// reestablishes the behaviour from AbstractDecoratedTextEditor which was hacked by JavaEditor
+		// reestablishes the behavior from AbstractDecoratedTextEditor which was hacked by JavaEditor
 		// to disable the change bar for the class file (attached source) java editor.
 		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
