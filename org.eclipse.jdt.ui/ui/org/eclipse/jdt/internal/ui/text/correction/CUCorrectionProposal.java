@@ -247,13 +247,14 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		
 		for (int i= 0; i < linked.length; i++) {
 			GroupDescription curr= linked[i];
+			String name= curr.getName(); // name used as key for link mode proposals & as kind for linked mode
 			TextRange range= change.getNewTextRange(curr.getTextEdits());
-			if (range != null && range.isValid()) {
-				ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(curr.getName());
+			if (range != null && range.isValid() && name != null) {
+				ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(name);
 				if (linkedModeProposals != null) {
-					manager.addPosition(range.getOffset(), range.getLength(), curr.getName(), linkedModeProposals);
+					manager.addPosition(range.getOffset(), range.getLength(), name, linkedModeProposals);
 				} else {
-					manager.addPosition(range.getOffset(), range.getLength(), curr.getName());
+					manager.addPosition(range.getOffset(), range.getLength(), name);
 				}
 				if (i == 0) {
 					editor.setInitialOffset(range.getOffset());

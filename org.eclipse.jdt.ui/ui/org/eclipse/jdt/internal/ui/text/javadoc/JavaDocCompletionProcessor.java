@@ -113,7 +113,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
-		return null;
+		return fErrorMessage;
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 		}
 		if (fTemplateEngine != null) {
 			try {
-				fTemplateEngine.reset();
+				fTemplateEngine.reset(); 
 				fTemplateEngine.complete(viewer, offset, cu);
 			} catch (JavaModelException x) {
 				errorMessage= x.getLocalizedMessage();
