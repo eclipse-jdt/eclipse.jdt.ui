@@ -241,6 +241,10 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	}
 	
 	private void updateLinkVisibility() {
+		if (fChangeWorkspaceSettings == null || fChangeWorkspaceSettings.isDisposed()) {
+			return;
+		}
+		
 		if (isProjectPreferencePage()) {
 			fChangeWorkspaceSettings.setVisible(offerLink() && !useProjectSettings());
 		} else {
