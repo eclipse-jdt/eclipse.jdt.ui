@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2003.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;
@@ -47,6 +47,7 @@ public class JavaSearchMarkerUpdater implements IMarkerUpdater {
 							IJavaElement element= ((ICompilationUnit) o).getElementAt(position.getOffset());
 							if (element != null) {
 								marker.setAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID, element.getHandleIdentifier());
+								marker.setAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID_CHANGED, new Boolean(true));
 								return true;
 							}
 							else

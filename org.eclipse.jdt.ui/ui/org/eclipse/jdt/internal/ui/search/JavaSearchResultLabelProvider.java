@@ -51,7 +51,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	}	
 
 	public String getText(Object o) {
-		fLastMarker= null;
+		fLastMarker= null; // reset cache
 		IJavaElement javaElement= getJavaElement(o); // sets fLastMarker as side effect
 		boolean isPotentialMatch= fLastMarker != null && fLastMarker.getAttribute(SearchUI.POTENTIAL_MATCH, false);
 		if (javaElement == null) {
@@ -117,20 +117,16 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		fLabelProvider.setTextFlags(flags);
 	}
 
+
 	private IJavaElement getJavaElement(Object o) {
 		if (o instanceof IJavaElement)
 			return (IJavaElement)o;
-		if (!(o instanceof ISearchResultViewEntry))
-			return null;
 
 		IMarker marker= getMarker(o);
-		if (marker == null || !marker.exists())
+		if (marker == null)
 			return null;
 
-		if (!marker.getAttribute(SearchUI.POTENTIAL_MATCH, false))
-			return (IJavaElement)((ISearchResultViewEntry)o).getGroupByKey();
-		
-		return getJavaElement(marker);
+		return getJavaElement(marker, (ISearchResultViewEntry)o);
 	}
 
 	protected IMarker getMarker(Object o) {
@@ -139,9 +135,16 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		return ((ISearchResultViewEntry)o).getSelectedMarker();
 	}
 	
-	private IJavaElement getJavaElement(IMarker marker) {
+	private IJavaElement getJavaElement(IMarker marker, ISearchResultViewEntry entry) {
 		if (fLastMarker != marker) {
-			fLastJavaElement= SearchUtil.getJavaElement(marker);
+			boolean canUseGroupByKey= !marker.getAttribute(SearchUI.POTENTIAL_MATCH, false)
+								&& !marker.getAttribute(IJavaSearchUIConstants.ATT_IS_WORKING_COPY, false)
+								&& !marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID_CHANGED, false);
+
+			if (canUseGroupByKey)
+				fLastJavaElement= (IJavaElement)entry.getGroupByKey();
+			else
+				fLastJavaElement= SearchUtil.getJavaElement(marker);
 			fLastMarker= marker;
 		}
 		return fLastJavaElement;
