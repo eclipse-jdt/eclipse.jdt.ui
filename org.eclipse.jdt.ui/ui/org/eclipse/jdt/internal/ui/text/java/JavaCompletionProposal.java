@@ -90,21 +90,6 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	 * If set to <code>null</code>, the replacement string will be taken as display string.
 	 */
 	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, String displayString, int relevance) {
-		this(replacementString, replacementOffset, replacementLength, image, displayString, relevance, null);
-	}
-
-	/**
-	 * Creates a new completion proposal. All fields are initialized based on the provided information.
-	 *
-	 * @param replacementString the actual string to be inserted into the document
-	 * @param replacementOffset the offset of the text to be replaced
-	 * @param replacementLength the length of the text to be replaced
-	 * @param image the image to display for this proposal
-	 * @param displayString the string to be displayed for the proposal
-	 * @param viewer the text viewer for which this proposal is computed, may be <code>null</code>
-	 * If set to <code>null</code>, the replacement string will be taken as display string.
-	 */
-	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, String displayString, int relevance, ITextViewer viewer) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
@@ -115,7 +100,6 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		fImage= image;
 		fDisplayString= displayString != null ? displayString : replacementString;
 		fRelevance= relevance;
-		fTextViewer= viewer;
 
 		fCursorPosition= replacementString.length();
 	
@@ -557,6 +541,8 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 
 		IDocument document= viewer.getDocument();
+		if (fTextViewer == null)
+			fTextViewer= viewer;
 
 		// don't eat if not in preferences, XOR with modifier key 1 (Ctrl)
 		// but: if there is a selection, replace it!

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.java;
+package org.eclipse.jdt.ui.text.java;
 
 import java.util.Comparator;
 
@@ -17,28 +17,35 @@ import org.eclipse.jface.text.templates.TemplateProposal;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
-public class JavaCompletionProposalComparator implements Comparator {
-	
-	private static JavaCompletionProposalComparator fgInstance= new JavaCompletionProposalComparator();
-
-	public static JavaCompletionProposalComparator getInstance() {
-		return fgInstance;
-	}
+/**
+ * Comparator for java completion proposals. Completion proposals can be sorted
+ * by relevance or alphabetically.
+ * 
+ * @since 3.1
+ */
+public final class JavaCompletionProposalComparator implements Comparator {
 	
 	private boolean fOrderAlphabetically;
 
 	/**
-	 * Constructor for CompletionProposalComparator.
+	 * Creates a comparator that sorts by relevance.
 	 */
 	public JavaCompletionProposalComparator() {
 		fOrderAlphabetically= false;
 	}
 	
+	/**
+	 * Sets the sort order. Default is <code>false</code>, i.e. order by
+	 * relevance.
+	 * 
+	 * @param orderAlphabetically <code>true</code> to order alphabetically,
+	 *        <code>false</code> to order by relevance
+	 */
 	public void setOrderAlphabetically(boolean orderAlphabetically) {
 		fOrderAlphabetically= orderAlphabetically;
 	}
 	
-	/* (non-Javadoc)
+	/*
 	 * @see Comparator#compare(Object, Object)
 	 */
 	public int compare(Object o1, Object o2) {
@@ -53,6 +60,10 @@ public class JavaCompletionProposalComparator implements Comparator {
 				return relevanceDif;
 			}
 		}
+		/*
+		 * TODO the correct (but possibly much slower) sorting would use a
+		 * collator.
+		 */
 		// fix for bug 67468 
 		return p1.getDisplayString().compareToIgnoreCase(p2.getDisplayString());
 	}

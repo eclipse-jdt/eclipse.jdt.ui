@@ -15,10 +15,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -44,11 +45,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 
 /**
   */
@@ -154,7 +155,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 						IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
 						ArrayList proposals= new ArrayList();
 						JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
-						Collections.sort(proposals, JavaCompletionProposalComparator.getInstance());
+						Collections.sort(proposals, new JavaCompletionProposalComparator());
 						
 						int nProposals= proposals.size();
 						IMarkerResolution[] resolutions= new IMarkerResolution[nProposals];

@@ -21,6 +21,8 @@ import org.eclipse.jface.text.contentassist.IContextInformationExtension;
 
 import org.eclipse.jdt.core.CompletionProposal;
 
+import org.eclipse.jdt.ui.text.java.ProposalLabelProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -36,7 +38,6 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	private String fContextDisplayString;
 	private String fInformationDisplayString;
 	private Image fImage;
-	private int fPosition;
 
 	/**
 	 * Creates a new context information.
@@ -64,7 +65,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 */
 	public String getInformationDisplayString() {
 		if (fInformationDisplayString == null) {
-			fInformationDisplayString= getLabelProvider().createUnboundedParameterList(fProposal);
+			fInformationDisplayString= getLabelProvider().createParameterList(fProposal);
 		}
 		return fInformationDisplayString;
 	}
@@ -86,7 +87,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 */
 	public String getContextDisplayString() {
 		if (fContextDisplayString == null) {
-			fContextDisplayString= getLabelProvider().createMethodProposalLabel(fProposal);
+			fContextDisplayString= getLabelProvider().createLabel(fProposal);
 		}
 		return fContextDisplayString;
 	}
@@ -95,11 +96,9 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 * @see IContextInformationExtension#getContextInformationPosition()
 	 */
 	public int getContextInformationPosition() {
-		return fPosition;
-	}
-	
-	public void setContextInformationPosition(int position) {
-		fPosition= position;
+		if (fProposal.getCompletion().length == 0)
+			return fProposal.getCompletionLocation() + 1;
+		return -1;
 	}
 	
 	private ProposalLabelProvider getLabelProvider() {

@@ -20,7 +20,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
@@ -45,8 +44,8 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 
 	private IRegion fSelectedRegion; // initialized by apply()
 		
-	public ExperimentalProposal(String name, char[] signature, char[][] parameterNames, int offset, int length, Image image, String displayName, ITextViewer viewer, int relevance) {
-		super(name, offset, length, image, displayName, relevance, viewer);
+	public ExperimentalProposal(String name, char[] signature, char[][] parameterNames, int offset, int length, Image image, String displayName, int relevance) {
+		super(name, offset, length, image, displayName, relevance);
 		fParameterNames= parameterNames;
 	}
 

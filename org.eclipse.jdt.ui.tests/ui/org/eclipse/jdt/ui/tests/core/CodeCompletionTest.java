@@ -37,14 +37,14 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.ResultCollector;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.ExperimentalResultCollector;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 import org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -80,7 +80,7 @@ public class CodeCompletionTest extends CoreTests {
 		super(name);
 	}
 
-	private void assertAppliedProposal(String contents, JavaCompletionProposal proposal, String completion) {
+	private void assertAppliedProposal(String contents, IJavaCompletionProposal proposal, String completion) {
 		IDocument doc= new Document(contents);
 		proposal.apply(doc);
 		int offset2= contents.indexOf("//here");
@@ -142,15 +142,12 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str) + str.length();
 
-		ResultCollector collector= new ResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
 		assertNumberOf("proposals", proposals.length, 1);
 
@@ -195,15 +192,12 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str) + str.length();
 
-		ResultCollector collector= new ResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
 		assertNumberOf("proposals", proposals.length, 1);
 
@@ -252,17 +246,14 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			ResultCollector collector= new ResultCollector();
-			collector.reset(offset, cu.getJavaProject(), cu);
-			collector.setViewer(null);
+			ResultCollector collector= new ResultCollector(cu);
 			collector.setReplacementLength(0);
-			collector.setPreventEating(true);
-
+	
 			codeComplete(cu, offset, collector);
 
-			JavaCompletionProposal[] proposals= collector.getResults();
+			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
-			JavaCompletionProposal proposal= null;
+			IJavaCompletionProposal proposal= null;
 
 			for (int i= 0; i < proposals.length; i++) {
 				if (proposals[i].getDisplayString().startsWith("MyClass")) {
@@ -319,17 +310,14 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ExperimentalResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ExperimentalResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
-		JavaCompletionProposal proposal= null;
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
+		IJavaCompletionProposal proposal= null;
 		for (int i= 0; i < proposals.length; i++) {
 			if (proposals[i].getDisplayString().startsWith("Natural")) {
 				proposal= proposals[i];
@@ -381,17 +369,14 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			ResultCollector collector= new ResultCollector();
-			collector.reset(offset, cu.getJavaProject(), cu);
-			collector.setViewer(null);
+			ResultCollector collector= new ResultCollector(cu);
 			collector.setReplacementLength(0);
-			collector.setPreventEating(true);
-
+	
 			codeComplete(cu, offset, collector);
 
-			JavaCompletionProposal[] proposals= collector.getResults();
+			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
-			JavaCompletionProposal proposal= null;
+			IJavaCompletionProposal proposal= null;
 
 			for (int i= 0; i < proposals.length; i++) {
 				if (proposals[i].getDisplayString().startsWith("getWriter")) {
@@ -446,17 +431,13 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			ResultCollector collector= new ResultCollector();
-			collector.reset(offset, cu.getJavaProject(), cu);
-			collector.setViewer(null);
+			ResultCollector collector= new ResultCollector(cu);
 			collector.setReplacementLength(0);
-			collector.setPreventEating(true);
-
+	
 			codeComplete(cu, offset, collector);
 
-			JavaCompletionProposal[] proposals= collector.getResults();
-
-			JavaCompletionProposal proposal= null;
+			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+			IJavaCompletionProposal proposal= null;
 
 			for (int i= 0; i < proposals.length; i++) {
 				if (proposals[i].getDisplayString().startsWith("foo")) {
@@ -508,15 +489,12 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
 		assertEquals(12, proposals.length);
 		JavaCompletionProposalComparator comparator= new JavaCompletionProposalComparator();
@@ -562,15 +540,12 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ExperimentalResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ExperimentalResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
 		JavaCompletionProposalComparator comparator= new JavaCompletionProposalComparator();
 		comparator.setOrderAlphabetically(true);
@@ -614,15 +589,12 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ExperimentalResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ExperimentalResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
 		JavaCompletionProposalComparator comparator= new JavaCompletionProposalComparator();
 		comparator.setOrderAlphabetically(true);
@@ -663,17 +635,13 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
-
-		JavaCompletionProposal proposal= null;
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		IJavaCompletionProposal proposal= null;
 
 		for (int i= 0; i < proposals.length; i++) {
 			if (proposals[i].getDisplayString().startsWith("foo")) {
@@ -719,17 +687,14 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
-		JavaCompletionProposal toStringProposal= null;
+		IJavaCompletionProposal toStringProposal= null;
 
 		for (int i= 0; i < proposals.length; i++) {
 			if (proposals[i].getDisplayString().startsWith("toString()")) {
@@ -784,17 +749,14 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
-		JavaCompletionProposal closeProposal= null;
+		IJavaCompletionProposal closeProposal= null;
 
 		for (int i= 0; i < proposals.length; i++) {
 			if (proposals[i].getDisplayString().startsWith("close()")) {
@@ -850,17 +812,14 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
-		JavaCompletionProposal closeProposal= null;
+		IJavaCompletionProposal closeProposal= null;
 
 		for (int i= 0; i < proposals.length; i++) {
 			if (proposals[i].getDisplayString().startsWith("close()")) {
@@ -929,17 +888,14 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 		JavaModelUtil.reconcile(cu);
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
-		JavaCompletionProposal closeProposal= null;
+		IJavaCompletionProposal closeProposal= null;
 
 		for (int i= 0; i < proposals.length; i++) {
 			if (proposals[i].getDisplayString().startsWith("foo()")) {
@@ -994,17 +950,14 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector();
-		collector.reset(offset, cu.getJavaProject(), cu);
-		collector.setViewer(null);
+		ResultCollector collector= new ResultCollector(cu);
 		collector.setReplacementLength(0);
-		collector.setPreventEating(true);
 
 		codeComplete(cu, offset, collector);
 
-		JavaCompletionProposal[] proposals= collector.getResults();
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
-		JavaCompletionProposal toStringProposal= null;
+		IJavaCompletionProposal toStringProposal= null;
 
 		for (int i= 0; i < proposals.length; i++) {
 			if (proposals[i].getDisplayString().startsWith("run()")) {
@@ -1060,17 +1013,14 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			ResultCollector collector= new ResultCollector();
-			collector.reset(offset, cu.getJavaProject(), cu);
-			collector.setViewer(null);
+			ResultCollector collector= new ResultCollector(cu);
 			collector.setReplacementLength(0);
-			collector.setPreventEating(true);
-
+	
 			codeComplete(cu, offset, collector);
 
-			JavaCompletionProposal[] proposals= collector.getResults();
+			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
-			JavaCompletionProposal proposal= null;
+			IJavaCompletionProposal proposal= null;
 
 			for (int i= 0; i < proposals.length; i++) {
 				if (proposals[i].getDisplayString().startsWith("setWriter")) {

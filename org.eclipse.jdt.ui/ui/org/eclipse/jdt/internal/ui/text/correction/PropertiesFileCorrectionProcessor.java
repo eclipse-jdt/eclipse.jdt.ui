@@ -18,10 +18,10 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IMarker;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
@@ -37,16 +37,17 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerHelpRegistry;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IStorageEditorInput;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
+
+import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 import org.eclipse.jdt.internal.ui.text.spelling.WordQuickFixProcessor;
 
 
@@ -138,7 +139,7 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 			}
 			
 			ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
-			Arrays.sort(res, JavaCompletionProposalComparator.getInstance());
+			Arrays.sort(res, new JavaCompletionProposalComparator());
 			return res;
 		} finally {
 			try {

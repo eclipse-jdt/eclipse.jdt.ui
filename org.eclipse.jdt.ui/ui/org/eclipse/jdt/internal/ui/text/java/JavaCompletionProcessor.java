@@ -44,6 +44,9 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.ResultCollector;
+import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -117,22 +120,19 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		
 	protected IWorkingCopyManager fManager;
 	private IEditorPart fEditor;
-	private ResultCollector fCollector;
 	private IContextInformationValidator fValidator;
 	
 	private char[] fProposalAutoActivationSet;
 	private JavaCompletionProposalComparator fComparator;
-	private boolean fAllowAddImports;
 	
 	private TemplateEngine fTemplateEngine;
-	private ExperimentalResultCollector fExperimentalCollector;
 	
 	private int fNumberOfComputedResults= 0;
+	private String fErrorMsg;
 	
 	
 	public JavaCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
-		fCollector= new ResultCollector();
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null) {
@@ -141,8 +141,6 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		}
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
-		fExperimentalCollector= new ExperimentalResultCollector();
-		fAllowAddImports= true;
 		
 		fComparator= new JavaCompletionProposalComparator();
 	}
@@ -195,31 +193,15 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	}
 	
 	/**
-	 * Tells this processor to add import statement for proposals that have
-	 * a fully qualified type name
-	 * 
-	 * @param allowAddingImports <code>true</code> if import can be added
-	 */
-	public void allowAddingImports(boolean allowAddingImports) {
-		fAllowAddImports= allowAddingImports;
-	}	
-		
-	/**
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
 		
 		if (fNumberOfComputedResults == 0) {
-			String errorMsg= fCollector.getErrorMessage();
-			if (errorMsg == null || errorMsg.trim().length() == 0)
-				errorMsg= JavaUIMessages.getString("JavaEditor.codeassist.noCompletions"); //$NON-NLS-1$
-			return errorMsg;
+			if (fErrorMsg == null || fErrorMsg.trim().length() == 0)
+				return JavaUIMessages.getString("JavaEditor.codeassist.noCompletions"); //$NON-NLS-1$
 		}
-		
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
-			return fExperimentalCollector.getErrorMessage();
-			
-		return fCollector.getErrorMessage();
+		return fErrorMsg;
 	}
 
 	/**
@@ -293,7 +275,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	}		
 	
 	private List addContextInformations(ITextViewer viewer, int offset) {
-		ICompletionProposal[] proposals= internalComputeCompletionProposals(viewer, offset, -1);
+		ICompletionProposal[] proposals= internalComputeCompletionProposals(viewer, offset);
 
 		List result= new ArrayList();
 		for (int i= 0; i < proposals.length; i++) {
@@ -328,32 +310,27 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
-		int contextInformationPosition= guessContextInformationPosition(viewer, offset);
-		return internalComputeCompletionProposals(viewer, offset, contextInformationPosition);
+		return internalComputeCompletionProposals(viewer, offset);
 	}
 	
-	private ICompletionProposal[] internalComputeCompletionProposals(ITextViewer viewer, int offset, int contextOffset) {
+	private ICompletionProposal[] internalComputeCompletionProposals(ITextViewer viewer, int offset) {
 		
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 		ICompletionProposal[] results;
 
 		ResultCollector collector;
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
-			collector= fExperimentalCollector;
+			collector= new ExperimentalResultCollector(unit);
 		} else {
-			collector= fCollector;
+			collector= new ResultCollector(unit);
 		}
 			
 		try {
 			if (unit != null) {
 
-				collector.setPreventEating(false);	
-				collector.reset(offset, contextOffset, unit.getJavaProject(), fAllowAddImports ? unit : null);
-				collector.setViewer(viewer);
-				
 				Point selection= viewer.getSelectedRange();
 				if (selection.y > 0)
-				collector.setReplacementLength(selection.y);
+					collector.setReplacementLength(selection.y);
 				
 				unit.codeComplete(offset, collector);
 			}
@@ -365,7 +342,8 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 				ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}				
 
-		results= collector.getResults();
+		results= collector.getJavaCompletionProposals();
+		fErrorMsg= collector.getErrorMessage();
 
 		if (fTemplateEngine != null) {
 			fTemplateEngine.reset();
@@ -376,9 +354,9 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			// update relevance of template proposals that match with a keyword
 			// give those templates slightly more relevance than the keyword to 
 			// sort them first
-			JavaCompletionProposal[] keyWordResults= collector.getKeywordCompletions();
+			IJavaCompletionProposal[] keyWordResults= collector.getKeywordCompletionProposals();
 			for (int i= 0; i < keyWordResults.length; i++) {
-				String keyword= keyWordResults[i].getReplacementString();
+				String keyword= keyWordResults[i].getDisplayString();
 				for (int k= 0; k < templateResults.length; k++) {
 					TemplateProposal curr= templateResults[k];
 					if (curr.getTemplate().getName().startsWith(keyword)) {

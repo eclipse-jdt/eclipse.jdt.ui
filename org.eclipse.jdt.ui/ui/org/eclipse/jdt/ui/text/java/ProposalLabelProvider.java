@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.java;
+package org.eclipse.jdt.ui.text.java;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -34,17 +34,23 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * @see Signature
  * @since 3.1
  */
-public final class ProposalLabelProvider {
+public class ProposalLabelProvider {
+	
+	/**
+	 * Creates a new label provider.
+	 */
+	public ProposalLabelProvider() {
+	}
+	
 	/**
 	 * Creates and returns a parameter list of the given method proposal
-	 * suitable for display. The list does not include parentheses. The
-	 * parameter types are filtered trough
-	 * {@link SignatureUtil#getLowerBound(char[])}.
+	 * suitable for display. The list does not include parentheses. The lower
+	 * bound of parameter types is returned.
 	 * <p>
 	 * Examples:
 	 * <pre>
-	 *  &quot;void method(int i, Strings)&quot; -&gt; &quot;int i, String s&quot;
-	 *  &quot;? extends Number method(java.lang.String s, ? super Number n)&quot; -&gt; &quot;String s, Number n&quot;
+	 *   &quot;void method(int i, Strings)&quot; -&gt; &quot;int i, String s&quot;
+	 *   &quot;? extends Number method(java.lang.String s, ? super Number n)&quot; -&gt; &quot;String s, Number n&quot;
 	 * </pre>
 	 * </p>
 	 * 
@@ -52,7 +58,7 @@ public final class ProposalLabelProvider {
 	 *        for. Must be of kind {@link CompletionProposal#METHOD_REF}.
 	 * @return the list of comma-separated parameters suitable for display
 	 */
-	public String createUnboundedParameterList(CompletionProposal methodProposal) {
+	public String createParameterList(CompletionProposal methodProposal) {
 		Assert.isTrue(methodProposal.getKind() == CompletionProposal.METHOD_REF);
 		return appendUnboundedParameterList(new StringBuffer(), methodProposal).toString();
 	}
@@ -142,7 +148,7 @@ public final class ProposalLabelProvider {
 	 * consists of:
 	 * <ul>
 	 *   <li>the method name</li>
-	 *   <li>the parameter list (see {@link #createUnboundedParameterList(CompletionProposal)})</li>
+	 *   <li>the parameter list (see {@link #createParameterList(CompletionProposal)})</li>
 	 *   <li>the upper bound of the return type (see {@link SignatureUtil#getUpperBound(String)})</li>
 	 *   <li>the raw simple name of the declaring type</li>
 	 * </ul>
@@ -157,7 +163,7 @@ public final class ProposalLabelProvider {
 	 * @param methodProposal the method proposal to display
 	 * @return the display label for the given method proposal
 	 */
-	public String createMethodProposalLabel(CompletionProposal methodProposal) {
+	String createMethodProposalLabel(CompletionProposal methodProposal) {
 		StringBuffer nameBuffer= new StringBuffer();
 		
 		// method name
@@ -182,7 +188,7 @@ public final class ProposalLabelProvider {
 		return nameBuffer.toString();
 	}
 
-	public String createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
+	String createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
 		StringBuffer nameBuffer= new StringBuffer();
 		
 		// method name
@@ -240,7 +246,7 @@ public final class ProposalLabelProvider {
 	 * @param typeProposal the method proposal to display
 	 * @return the display label for the given type proposal
 	 */
-	public String createTypeProposalLabel(CompletionProposal typeProposal) {
+	String createTypeProposalLabel(CompletionProposal typeProposal) {
 		char[] signature= typeProposal.getSignature();
 		char[] packageName= Signature.getSignatureQualifier(signature); 
 		char[] typeName= Signature.getSignatureSimpleName(signature);
@@ -254,7 +260,7 @@ public final class ProposalLabelProvider {
 		return buf.toString();
 	}
 	
-	public String createSimpleLabelWithType(CompletionProposal proposal) {
+	String createSimpleLabelWithType(CompletionProposal proposal) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(proposal.getCompletion());
 		char[] typeName= Signature.getSignatureSimpleName(proposal.getSignature());
@@ -265,7 +271,7 @@ public final class ProposalLabelProvider {
 		return buf.toString();
 	}
 	
-	public String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
+	String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(proposal.getCompletion());
 		char[] typeName= Signature.getSignatureSimpleName(proposal.getSignature());
@@ -285,16 +291,16 @@ public final class ProposalLabelProvider {
 		return buf.toString();
 	}
 	
-	public String createPackageProposalLabel(CompletionProposal proposal) {
+	String createPackageProposalLabel(CompletionProposal proposal) {
 		Assert.isTrue(proposal.getKind() == CompletionProposal.PACKAGE_REF);
 		return String.valueOf(proposal.getDeclarationSignature());
 	}
 	
-	public String createSimpleLabel(CompletionProposal proposal) {
+	String createSimpleLabel(CompletionProposal proposal) {
 		return String.valueOf(proposal.getCompletion());
 	}
 	
-	public String createAnonymousTypeLabel(CompletionProposal proposal) {
+	String createAnonymousTypeLabel(CompletionProposal proposal) {
 		char[] declaringTypeSignature= proposal.getDeclarationSignature();
 		
 		StringBuffer buffer= new StringBuffer();
@@ -389,26 +395,26 @@ public final class ProposalLabelProvider {
 		return decorateImageDescriptor(descriptor, proposal);
 	}
 	
-	public ImageDescriptor createMethodImageDescriptor(CompletionProposal proposal) {
+	ImageDescriptor createMethodImageDescriptor(CompletionProposal proposal) {
 		final int flags= proposal.getFlags();
 		return decorateImageDescriptor(JavaElementImageProvider.getMethodImageDescriptor(false, flags), proposal);
 	}
 	
-	public ImageDescriptor createTypeImageDescriptor(CompletionProposal proposal) {
+	ImageDescriptor createTypeImageDescriptor(CompletionProposal proposal) {
 		final int flags= proposal.getFlags();
 		return decorateImageDescriptor(JavaElementImageProvider.getTypeImageDescriptor(false, false, flags, false), proposal);
 	}
 	
-	public ImageDescriptor createFieldImageDescriptor(CompletionProposal proposal) {
+	ImageDescriptor createFieldImageDescriptor(CompletionProposal proposal) {
 		final int flags= proposal.getFlags();
 		return decorateImageDescriptor(JavaElementImageProvider.getFieldImageDescriptor(false, flags), proposal);
 	}
 	
-	public ImageDescriptor createLocalImageDescriptor(CompletionProposal proposal) {
+	ImageDescriptor createLocalImageDescriptor(CompletionProposal proposal) {
 		return decorateImageDescriptor(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE, proposal);
 	}
 	
-	public ImageDescriptor createPackageImageDescriptor(CompletionProposal proposal) {
+	ImageDescriptor createPackageImageDescriptor(CompletionProposal proposal) {
 		return decorateImageDescriptor(JavaPluginImages.DESC_OBJS_PACKAGE, proposal);
 	}
 	

@@ -23,7 +23,6 @@ import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -66,8 +65,8 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	private IPositionUpdater fUpdater;
 	private final char[] fSignature;
 		
- 	public ParameterGuessingProposal(String name, char[] signature, int offset, int length, Image image, String displayName, ITextViewer viewer, int relevance, char[][] parameterNames, int codeAssistOffset, ICompilationUnit compilationUnit) {
- 		super(name, offset, length, image, displayName, relevance, viewer);
+ 	public ParameterGuessingProposal(String name, char[] signature, int offset, int length, Image image, String displayName, int relevance, char[][] parameterNames, int codeAssistOffset, ICompilationUnit compilationUnit) {
+ 		super(name, offset, length, image, displayName, relevance);
 
 		fName= name;
 		fSignature= signature;

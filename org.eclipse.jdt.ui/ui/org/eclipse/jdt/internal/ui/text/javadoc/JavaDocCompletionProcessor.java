@@ -32,13 +32,14 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
+import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
 
-import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
 
 /**

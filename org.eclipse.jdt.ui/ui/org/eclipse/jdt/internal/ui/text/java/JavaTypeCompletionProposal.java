@@ -17,16 +17,19 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -71,13 +74,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, String displayString, int relevance,
 		String typeName, String packageName)
 	{
-		this(replacementString, cu, replacementOffset, replacementLength, image, displayString, relevance, typeName, packageName, null);
-	}
-	
-	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, String displayString, int relevance,
-		String typeName, String packageName, ITextViewer viewer)
-	{
-		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance, viewer);
+		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance);
 		fCompilationUnit= cu;
 		fUnqualifiedTypeName= unqualify(typeName);
 		fFullyQualifiedTypeName= qualify(typeName, packageName);
@@ -104,7 +101,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 		try {
 			ImportsStructure impStructure= null;
 			
-			if (fCompilationUnit != null) {
+			if (fCompilationUnit != null && allowAddingImports()) {
 				IJavaProject project= fCompilationUnit.getJavaProject();
 				String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(project);
 				int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);					
@@ -128,6 +125,11 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
+	}
+
+	private boolean allowAddingImports() {
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		return preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_ADDIMPORT);
 	}
 
 	/*

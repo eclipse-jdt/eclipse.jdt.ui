@@ -49,10 +49,10 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
+import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
@@ -180,7 +180,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		}
 		
 		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
-		Arrays.sort(res, JavaCompletionProposalComparator.getInstance());
+		Arrays.sort(res, new JavaCompletionProposalComparator());
 		return res;
 	}
 	

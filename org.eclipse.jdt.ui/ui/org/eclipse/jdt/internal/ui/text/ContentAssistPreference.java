@@ -56,10 +56,9 @@ public class ContentAssistPreference {
 	private final static String SHOW_VISIBLE_PROPOSALS= PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS;
 	/** Preference key for alphabetic ordering of proposals */
 	private final static String ORDER_PROPOSALS= PreferenceConstants.CODEASSIST_ORDER_PROPOSALS;
-	/** Preference key for case sensitivity of propsals */
+	/** Preference key for case sensitivity of proposals */
 	private final static String CASE_SENSITIVITY= PreferenceConstants.CODEASSIST_CASE_SENSITIVITY;
 	/** Preference key for adding imports on code assist */
-	private final static String ADD_IMPORT= PreferenceConstants.CODEASSIST_ADDIMPORT;
 	/** Preference key for filling argument names on method completion */
 	private static final String FILL_METHOD_ARGUMENTS= PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES;
 	/** Preference key for prefix completion. */
@@ -107,9 +106,6 @@ public class ContentAssistPreference {
 		
 		enabled= store.getBoolean(ORDER_PROPOSALS);
 		jcp.orderProposalsAlphabetically(enabled);
-		
-		enabled= store.getBoolean(ADD_IMPORT);
-		jcp.allowAddingImports(enabled);		
 	}
 	
 	private static void configureJavaDocProcessor(ContentAssistant assistant, IPreferenceStore store) {
@@ -186,9 +182,6 @@ public class ContentAssistPreference {
 		} else if (ORDER_PROPOSALS.equals(key)) {
 			boolean enable= store.getBoolean(ORDER_PROPOSALS);
 			jcp.orderProposalsAlphabetically(enable);
-		} else if (ADD_IMPORT.equals(key)) {
-			boolean enabled= store.getBoolean(ADD_IMPORT);
-			jcp.allowAddingImports(enabled);
 		}
 	}
 	
