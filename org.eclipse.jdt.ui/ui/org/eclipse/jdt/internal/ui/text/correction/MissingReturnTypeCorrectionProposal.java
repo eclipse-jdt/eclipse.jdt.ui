@@ -124,7 +124,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 		Expression result= null;
 		if (returnBinding != null) {
 			ScopeAnalyzer analyzer= new ScopeAnalyzer(root);
-			IBinding[] bindings= analyzer.getDeclarationsInScope(returnOffset, ScopeAnalyzer.VARIABLES);
+			IBinding[] bindings= analyzer.getDeclarationsInScope(returnOffset, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY );
 			for (int i= 0; i < bindings.length; i++) {
 				IVariableBinding curr= (IVariableBinding) bindings[i];
 				ITypeBinding type= curr.getType();
