@@ -5,13 +5,12 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
+import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;import org.eclipse.jface.resource.ImageDescriptor;
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
 	private String fPageMessage;
-	
 	private String fPageContextHelpId;
+	private ImageDescriptor fInputPageImageDescriptor;
 	
 	private static final String INPUTPAGE_TITLE_SUFFIX= ".wizard.inputpage.title";
 	private static final String INPUTPAGE_MESSAGE_SUFFIX= ".wizard.inputpage.message";
@@ -20,6 +19,10 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		super(getInputPageResource(resourceKeyPrefix, INPUTPAGE_TITLE_SUFFIX), errorContextHelpId);
 		fPageMessage= getInputPageResource(resourceKeyPrefix, INPUTPAGE_MESSAGE_SUFFIX);
 		fPageContextHelpId= pageContextHelpId;
+	}
+	
+	public void setInputPageImageDescriptor(ImageDescriptor desc){
+		fInputPageImageDescriptor= desc;
 	}
 	
 	private static String getInputPageResource(String prefix, String suffix){
@@ -37,6 +40,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 				return validateNewName(text);
 			}	
 		};
+		page.setImageDescriptor(fInputPageImageDescriptor);
 		page.setMessage(fPageMessage);
 		addPage(page);
 	}
