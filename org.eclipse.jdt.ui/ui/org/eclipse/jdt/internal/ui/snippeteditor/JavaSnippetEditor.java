@@ -230,14 +230,23 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		DebugPlugin.getDefault().removeDebugEventListener(this);
 
 		// The real shut down
+		IDebugTarget target= fVM;
 		if (fVM != null) {
 			try {
+				IMarker bp = ScrapbookLauncher.getDefault().getMagicBreakpoint(fVM);
+				if (bp != null) {
+					fVM.breakpointRemoved(bp, null);
+				}
+				if (getThread() != null) {
+					getThread().resume();
+				}
 				fVM.terminate();
 			} catch (DebugException e) {
 				ErrorDialog.openError(getShell(), JavaPlugin.getResourceString(ERROR + "cantshutdown"), null, e.getStatus());
 				return;
 			}
 			vmTerminated();
+			ScrapbookLauncher.getDefault().cleanup(target);
 		}
 	}
 	
@@ -554,7 +563,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 					try {
 						IJavaStackFrame f= (IJavaStackFrame)jt.getTopStackFrame();
 						if (f != null) {
-							if (e.getDetail() == DebugEvent.STEP_END && f.getLineNumber() == 51 && f.getDeclaringTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain")) {
+							if (e.getDetail() == DebugEvent.STEP_END && f.getLineNumber() == 9 && f.getDeclaringTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain1")) {
 								fThread = jt;
 							} else if (e.getDetail() == DebugEvent.BREAKPOINT && jt.getBreakpoint().equals(ScrapbookLauncher.getDefault().getMagicBreakpoint(jt.getDebugTarget()))) {
 								jt.stepOver();

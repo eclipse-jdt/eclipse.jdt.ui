@@ -95,9 +95,14 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 					return false;
 				}
 				IPath osPath = outputFolder.getLocation();
-				String url = "file:/" + osPath.toOSString();
-				url = url.replace(File.separatorChar, '/');
-				url += '/';
+				java.io.File f = new java.io.File(osPath.toOSString());
+				URL u = null;
+				try {
+					u = f.toURL();
+				} catch (MalformedURLException e) {
+					return false;
+				}
+				String url = u.toExternalForm();
 				config.setProgramArguments(new String[] {url});
 			} catch (JavaModelException e) {
 				return false;
@@ -218,15 +223,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 
 	public void handleDebugEvent(DebugEvent event) {
 		if (event.getSource() instanceof IDebugTarget && event.getKind() == DebugEvent.TERMINATE) {
-			Object target = event.getSource();
-			Object page = fVMsToScrapbooks.get(target);
-			if (page != null) {
-				fVMsToScrapbooks.remove(target);
-				fScrapbookToVMs.remove(page);
-				fVMsToBreakpoints.remove(target);
-				IDebugUIEventFilter filter = (IDebugUIEventFilter)fVMsToFilters.remove(target);
-				DebugUITools.removeEventFilter(filter);
-			}
+			cleanup((IDebugTarget)event.getSource());
 		}
 	}
 	
@@ -242,5 +239,16 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		String title= JavaPlugin.getResourceString("SnippetEditor.error.nopagetitle");
 		String msg= JavaPlugin.getResourceString("SnippetEditor.error.nopagemsg");
 		MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(),title, msg);
+	}
+	
+	protected void cleanup(IDebugTarget target) {
+		Object page = fVMsToScrapbooks.get(target);
+		if (page != null) {
+			fVMsToScrapbooks.remove(target);
+			fScrapbookToVMs.remove(page);
+			fVMsToBreakpoints.remove(target);
+			IDebugUIEventFilter filter = (IDebugUIEventFilter)fVMsToFilters.remove(target);
+			DebugUITools.removeEventFilter(filter);
+		}
 	}
 }
