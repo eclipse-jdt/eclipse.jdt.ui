@@ -99,20 +99,20 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 	    
 		// global group
 		final Group globalGroup= createGroup(numColumns, composite, FormatterMessages.getString("CommentsTabPage.group1.title")); //$NON-NLS-1$
-		final CheckboxPreference global= createPref(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.enable_comment_formatting"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT); //$NON-NLS-1$
-		final CheckboxPreference header= createPref(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.format_header"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER); //$NON-NLS-1$
-		final CheckboxPreference html= createPref(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.format_html"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML); //$NON-NLS-1$
-		final CheckboxPreference code= createPref(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.format_code_snippets"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE); //$NON-NLS-1$
+		final CheckboxPreference global= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.enable_comment_formatting"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT); //$NON-NLS-1$
+		final CheckboxPreference header= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.format_header"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER); //$NON-NLS-1$
+		final CheckboxPreference html= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.format_html"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML); //$NON-NLS-1$
+		final CheckboxPreference code= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.getString("CommentsTabPage.format_code_snippets"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE); //$NON-NLS-1$
 
 		// blank lines group
 		final Group settingsGroup= createGroup(numColumns, composite, FormatterMessages.getString("CommentsTabPage.group2.title")); //$NON-NLS-1$
-		final CheckboxPreference blankComments= createPref(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.clear_blank_lines"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES); //$NON-NLS-1$
-		final CheckboxPreference blankJavadoc= createPref(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.blank_line_before_javadoc_tags"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); //$NON-NLS-1$
-		final CheckboxPreference indentJavadoc= createPref(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.indent_javadoc_tags"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS); //$NON-NLS-1$
+		final CheckboxPreference blankComments= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.clear_blank_lines"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES); //$NON-NLS-1$
+		final CheckboxPreference blankJavadoc= createPrefInsert(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.blank_line_before_javadoc_tags"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); //$NON-NLS-1$
+		final CheckboxPreference indentJavadoc= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.indent_javadoc_tags"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS); //$NON-NLS-1$
 		
 		final CheckboxPreference indentDesc= createCheckboxPref(settingsGroup, numColumns , FormatterMessages.getString("CommentsTabPage.indent_description_after_param"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, FALSE_TRUE); //$NON-NLS-1$
 		((GridData)indentDesc.getControl().getLayoutData()).horizontalIndent= fPixelConverter.convertWidthInCharsToPixels(4);
-		final CheckboxPreference nlParam= createPref(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.new_line_after_param_tags"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); //$NON-NLS-1$
+		final CheckboxPreference nlParam= createPrefInsert(settingsGroup, numColumns, FormatterMessages.getString("CommentsTabPage.new_line_after_param_tags"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); //$NON-NLS-1$
 		
 		final Group widthGroup= createGroup(numColumns, composite, FormatterMessages.getString("CommentsTabPage.group3.title")); //$NON-NLS-1$
 		final NumberPreference lineWidth= createNumberPref(widthGroup, numColumns, FormatterMessages.getString("CommentsTabPage.line_width"), DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, 0, 9999); //$NON-NLS-1$
@@ -164,7 +164,11 @@ public class CommentsTabPage extends ModifyDialogTabPage {
         fPreview.update();
     }
 	
-	private CheckboxPreference createPref(Composite composite, int numColumns, String text, String key) {
+	private CheckboxPreference createPrefTrueFalse(Composite composite, int numColumns, String text, String key) {
 		return createCheckboxPref(composite, numColumns, text, key, FALSE_TRUE);
 	}
+    
+    private CheckboxPreference createPrefInsert(Composite composite, int numColumns, String text, String key) {
+        return createCheckboxPref(composite, numColumns, text, key, DO_NOT_INSERT_INSERT);
+    }
 }

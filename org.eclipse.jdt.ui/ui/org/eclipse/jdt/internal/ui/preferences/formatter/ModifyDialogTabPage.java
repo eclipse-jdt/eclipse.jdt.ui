@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -511,6 +512,13 @@ public abstract class ModifyDialogTabPage {
 		DefaultCodeFormatterConstants.TRUE
 	};	
 	
+    /**
+     * Constant array for insert / not_insert. 
+     */
+    protected static String[] DO_NOT_INSERT_INSERT = {
+        JavaCore.DO_NOT_INSERT,
+        JavaCore.INSERT
+    };
 
 	/**
 	 * A pixel converter for layout calculations

@@ -142,7 +142,6 @@ public class ProfileVersioner {
 
 	}
 	
-	
 	private static void checkAndReplace(Map settings, String oldKey, String newKey) {
 		checkAndReplace(settings, oldKey, new String [] {newKey});
 	}
@@ -165,12 +164,25 @@ public class ProfileVersioner {
 		}
 	}
 	
+	private static void checkAndReplaceBooleanWithINSERT(Map settings, String oldKey, String newKey) {
+		if (!settings.containsKey(oldKey)) 
+			return;
+		
+		String value= (String)settings.get(oldKey);
+
+		if (value == null) 
+			return;
+		
+		if (DefaultCodeFormatterConstants.TRUE.equals(value))
+			value= JavaCore.INSERT;
+		else
+			value= JavaCore.DO_NOT_INSERT;
+		
+		settings.put(newKey, value);
+	}
 	
 	
 	private static void version2to3(Map oldSettings) {
-		
-		
-
 
 		checkAndReplace(oldSettings, 
 			FORMATTER_ARRAY_INITIALIZER_CONTINUATION_INDENTATION,
@@ -388,10 +400,6 @@ public class ProfileVersioner {
 			FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATORS,
 			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR); 
 
-		
-		
-
-
 		checkAndReplace(oldSettings,
 			FORMATTER_ALLOCATION_EXPRESSION_ARGUMENTS_ALIGNMENT, 
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION);
@@ -450,28 +458,23 @@ public class ProfileVersioner {
 			FORMATTER_EXPLICIT_CONSTRUCTOR_ARGUMENTS_ALIGNMENT,
 			DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL);
 
+		
 		mapOldValueRangeToNew(oldSettings, 
 			FORMATTER_TYPE_MEMBER_ALIGNMENT, new String [] {FORMATTER_NO_ALIGNMENT,	FORMATTER_MULTICOLUMN}, 
 			DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS, new String [] {DefaultCodeFormatterConstants.FALSE, DefaultCodeFormatterConstants.TRUE});
-		
-		
-			
 
 
 		checkAndReplace(oldSettings, 
 			FORMATTER_ANONYMOUS_TYPE_DECLARATION_BRACE_POSITION,
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANONYMOUS_TYPE_DECLARATION);
 		
-		
 		checkAndReplace(oldSettings, 
 			FORMATTER_ARRAY_INITIALIZER_BRACE_POSITION,
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER);
 		
-		
 		checkAndReplace(oldSettings, 
 			FORMATTER_BLOCK_BRACE_POSITION,
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK);
-		
 		
 		checkAndReplace(oldSettings, 
 			FORMATTER_METHOD_DECLARATION_BRACE_POSITION,
@@ -481,13 +484,11 @@ public class ProfileVersioner {
 			FORMATTER_TYPE_DECLARATION_BRACE_POSITION,
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION);
 		
-		
 		checkAndReplace(oldSettings,
 			FORMATTER_SWITCH_BRACE_POSITION,
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH);
 		
 	}
-	
 	
 	private static void version3to4(Map oldSettings) {
 		checkAndReplace(oldSettings, 
@@ -530,11 +531,12 @@ public class ProfileVersioner {
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATSOURCE, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION); 
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_INDENTROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS);
-		checkAndReplace(oldSettings, FORMATTER_COMMENT_NEWLINEFORPARAMETER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); 
-		checkAndReplace(oldSettings, FORMATTER_COMMENT_SEPARATEROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); 
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_LINELENGTH, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH); 
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_CLEARBLANKLINES, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES);
 		checkAndReplace(oldSettings, FORMATTER_COMMENT_FORMATHTML, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML);
+		
+		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_NEWLINEFORPARAMETER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); 
+		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_SEPARATEROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); 
 	}
 
 	
