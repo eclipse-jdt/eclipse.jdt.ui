@@ -78,7 +78,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		IJavaElement element= delta.getElement();
 
 		if (!getProvideWorkingCopy() && isWorkingCopy(element))
-			return;
+			return; 
 
 		if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT && !element.getJavaProject().isOnClasspath(element))
 			return;
@@ -145,6 +145,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 			if (kind == IJavaElementDelta.CHANGED) {
 				postRefresh(element);
+				updateSelection(delta);
 				return;
 			}
 		}
@@ -192,6 +193,35 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		for (int i= 0; i < affectedChildren.length; i++) {
 			processDelta(affectedChildren[i]);
 		}
+	}
+
+	/**
+	 * Updates the selection. It finds newly added elements
+	 * and selects them.
+	 */
+	private void updateSelection(IJavaElementDelta delta) {
+		final IJavaElement addedElement= findAddedElement(delta);
+		if (addedElement != null) {
+			final StructuredSelection selection= new StructuredSelection(addedElement);
+			postRunnable(new Runnable() {
+				public void run() {
+					Control ctrl= fViewer.getControl();
+					if (ctrl != null && !ctrl.isDisposed()) 
+						fViewer.setSelection(selection);
+				}
+			});	
+		}	
+	}
+
+	private IJavaElement findAddedElement(IJavaElementDelta delta) {
+		if (delta.getKind() == IJavaElementDelta.ADDED)  
+			return delta.getElement();
+		
+		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
+		for (int i= 0; i < affectedChildren.length; i++) 
+			return findAddedElement(affectedChildren[i]);
+			
+		return null;
 	}
 
 	/**
