@@ -45,6 +45,21 @@
 	</perspective>
 </extension>
 
+<extension point="org.eclipse.ui.perspectiveExtensions">
+	<perspectiveExtension 
+		targetID="org.eclipse.ui.resourcePerspective">
+		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
+	</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.jdt.ui.JavaPerspective">
+		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
+	</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.debug.ui.DebugPerspective">
+		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
+	</perspectiveExtension>
+</extension>
+
 <extension 
 	point="org.eclipse.ui.views">
 	<category 
