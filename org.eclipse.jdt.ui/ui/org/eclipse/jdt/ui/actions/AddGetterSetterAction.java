@@ -477,10 +477,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 */		
 	public void run(ITextSelection selection) {
 		try {
-			IJavaElement input= SelectionConverter.getInput(fEditor);
-				
-			if (!ActionUtil.isProcessable(getShell(), input))
-				return;					
+			if (!ActionUtil.isProcessable(getShell(), fEditor))
+				return;		
 			
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {

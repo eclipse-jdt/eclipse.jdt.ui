@@ -157,9 +157,10 @@ public class SortMembersAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		IJavaElement input= SelectionConverter.getInput(fEditor);
 		if (input instanceof ICompilationUnit) {
-			if (ElementValidator.check(input, getShell(), getDialogTitle(), true)) {
-				run(shell, (ICompilationUnit) input, fEditor);
+			if (!ElementValidator.check(input, getShell(), getDialogTitle(), true)) {
+				return;
 			}
+			run(shell, (ICompilationUnit) input, fEditor);
 		} else {
 			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("SortMembersAction.not_applicable")); //$NON-NLS-1$
 		}

@@ -289,6 +289,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	 * Method declared on SelectionDispatchAction
 	 */
 	public void run(ITextSelection selection) {
+		if (!ActionUtil.isProcessable(getShell(), fEditor))
+			return;
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
@@ -309,7 +311,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			}
 			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.not_applicable")); //$NON-NLS-1$
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.actionfailed")); //$NON-NLS-1$
 		}
 	}
 
@@ -418,7 +420,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				EditorUtility.revealInEditor(editor, res);
 
 			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
+				ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.actionfailed")); //$NON-NLS-1$
 			} catch (InterruptedException e) {
 				// Do nothing. Operation has been cancelled by user.
 			} finally {

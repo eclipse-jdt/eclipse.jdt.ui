@@ -187,6 +187,8 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	 */
 	public void run(ITextSelection selection) {
 		Shell shell= getShell();
+		if (!ActionUtil.isProcessable(shell, fEditor))
+			return;
 		try {
 			IType type= SelectionConverter.getTypeAtOffset(fEditor);
 			if (type != null)

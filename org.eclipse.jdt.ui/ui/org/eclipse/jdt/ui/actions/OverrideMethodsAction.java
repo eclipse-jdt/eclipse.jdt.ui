@@ -176,10 +176,13 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		try {
 			IType type= SelectionConverter.getTypeAtOffset(fEditor);
 			if (type != null) {
-				if (!ElementValidator.check(type, shell, getDialogTitle(), false) || !ActionUtil.isProcessable(shell, type) || type.isInterface() || type.isAnonymous()) {
+				if (!ElementValidator.check(type, shell, getDialogTitle(), false) || !ActionUtil.isProcessable(shell, type)) {
+					return;
+				}
+				if (type.isInterface() || type.isAnonymous()) {
 					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
 					return;
-				}						
+				}
 				run(shell, type);
 			} else {
 				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
