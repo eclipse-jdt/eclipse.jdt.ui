@@ -17,12 +17,15 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 
+import org.eclipse.ui.*;
+
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.compare.*;
 import org.eclipse.compare.internal.TimeoutContext;
@@ -138,6 +141,9 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				};
 				
 				if (inEditor) {
+					JavaEditor je= getEditor(file);
+					if (je != null)
+						je.setFocus();
 					// we don't show progress
 					r.run(nullProgressMonitor);
 				} else {
@@ -161,5 +167,21 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				TextBuffer.release(buffer);
 		}
 	}
+	
+	private JavaEditor getEditor(IFile file) {
+		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
+		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
+		for (int i= 0; i < windows.length; i++) {
+			IWorkbenchPage[] pages= windows[i].getPages();
+			for (int x= 0; x < pages.length; x++) {
+				IEditorPart[] editors= pages[x].getDirtyEditors();
+				for (int z= 0; z < editors.length; z++) {
+					IEditorPart ep= editors[z];
+					if (ep instanceof JavaEditor)
+						return (JavaEditor) ep;
+				}
+			}
+		}
+		return null;
+	}
 }
-
