@@ -19,10 +19,11 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.Document;
@@ -46,87 +47,26 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
  */
 public class SourceViewerInformationControl implements IInformationControl, IInformationControlExtension {
 	
-	/**
-	 * Layout used to achive the "tool tip" look, i.e., flat with a thin boarder.
-	 */
-	private static class BorderFillLayout extends Layout {
-		
-		/** The border widths. */
-		final int fBorderSize;
-
-		/**
-		 * Creates a fill layout with a border.
-		 * 
-		 * @param borderSize the size of the border
-		 */
-		public BorderFillLayout(int borderSize) {
-			if (borderSize < 0)
-				throw new IllegalArgumentException();
-			fBorderSize= borderSize;				
-		}
-
-		/**
-		 * Returns the border size.
-		 * 
-		 * @return the border size
-		 */		
-		public int getBorderSize() {
-			return fBorderSize;
-		}
-		
-		/*
-		 * @see org.eclipse.swt.widgets.Layout#computeSize(org.eclipse.swt.widgets.Composite, int, int, boolean)
-		 */
-		protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
-
-			Control[] children= composite.getChildren();
-			Point minSize= new Point(0, 0);
-
-			if (children != null) {
-				for (int i= 0; i < children.length; i++) {
-					Point size= children[i].computeSize(wHint, hHint, flushCache);
-					minSize.x= Math.max(minSize.x, size.x);
-					minSize.y= Math.max(minSize.y, size.y);					
-				}	
-			}
-									
-			minSize.x += fBorderSize * 2 + RIGHT_MARGIN;
-			minSize.y += fBorderSize * 2;
-
-			return minSize;			
-		}
-		/*
-		 * @see org.eclipse.swt.widgets.Layout#layout(org.eclipse.swt.widgets.Composite, boolean)
-		 */
-		protected void layout(Composite composite, boolean flushCache) {
-
-			Control[] children= composite.getChildren();
-			Point minSize= new Point(composite.getClientArea().width, composite.getClientArea().height);
-
-			if (children != null) {
-				for (int i= 0; i < children.length; i++) {
-					Control child= children[i];
-					child.setSize(minSize.x - fBorderSize * 2, minSize.y - fBorderSize * 2);
-					child.setLocation(fBorderSize, fBorderSize);			
-				}
-			}												
-		}
-	}
-	
-	
 	/** Border thickness in pixels. */
 	private static final int BORDER= 1;
-	/** Right margin in pixels. */
-	private static final int RIGHT_MARGIN= 3;
-	
 	/** The control's shell */
 	private Shell fShell;
 	/** The control's text widget */
 	private StyledText fText;
 	/** The control's source viewer */
 	private SourceViewer fViewer;	
-	
-
+	/**
+	 * The optional status field.
+	 * 
+	 * @since 3.0
+	 */
+	private Label fStatusField; 
+	/**
+	 * The separator for the optional status field.
+	 * 
+	 * @since 3.0
+	 */
+	private Label fSeparator; 
 
 	/**
 	 * Creates a default information control with the given shell as parent. The given
@@ -138,24 +78,60 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @param style the additional styles for the styled text widget
 	 */
 	public SourceViewerInformationControl(Shell parent, int shellStyle, int style) {
-		
+		this(parent, shellStyle, style, null);
+	}
+	
+	/**
+	 * Creates a default information control with the given shell as parent. The given
+	 * information presenter is used to process the information to be displayed. The given
+	 * styles are applied to the created styled text widget.
+	 * 
+	 * @param parent the parent shell
+	 * @param shellStyle the additional styles for the shell
+	 * @param style the additional styles for the styled text widget
+	 * @param statusFieldText the text to be used in the optional status field
+	 *                         or <code>null</code> if the status field should be hidden
+	 * @since 3.0
+	 */
+	public SourceViewerInformationControl(Shell parent, int shellStyle, int style, String statusFieldText) {
+		GridLayout layout;
+		GridData gd;
+
 		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
-		fViewer= new JavaSourceViewer(fShell, null, null, false, style);
+		Display display= fShell.getDisplay();		
+		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+
+		Composite composite= fShell;
+		layout= new GridLayout(1, false);
+		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
+		layout.marginHeight= border;
+		layout.marginWidth= border;
+		composite.setLayout(layout);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		composite.setLayoutData(gd);
+
+		if (statusFieldText != null) {
+			composite= new Composite(composite, SWT.NONE);
+			layout= new GridLayout(1, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			composite.setLayout(layout);
+			gd= new GridData(GridData.FILL_BOTH);
+			composite.setLayoutData(gd);
+			composite.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+			composite.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		}		
+
+		// Source viewer
+		fViewer= new JavaSourceViewer(composite, null, null, false, style);
 		fViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools(), null));
 		fViewer.setEditable(false);
 		
 		fText= fViewer.getTextWidget();
-		
+		gd= new GridData(GridData.BEGINNING | GridData.FILL_BOTH);
+		fText.setLayoutData(gd);
 		fText.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
 		fText.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-
-			
-		Display display= fShell.getDisplay();
-
-		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
-		
-		fShell.setLayout(new BorderFillLayout(border));
-		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
 			
 		fText.addKeyListener(new KeyListener() {
 				
@@ -166,6 +142,22 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 				
 			public void keyReleased(KeyEvent e) {}
 		});
+
+		// Status field
+		if (statusFieldText != null) {
+
+			// Horizontal separator line
+			fSeparator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.LINE_DOT);
+			fSeparator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			// Status field label
+			fStatusField= new Label(composite, SWT.RIGHT);
+			fStatusField.setText(statusFieldText);
+			GridData gd2= new GridData(GridData.FILL_VERTICAL | GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
+			fStatusField.setLayoutData(gd2);
+			fStatusField.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+			fStatusField.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		}
 	}
 
 	/**
@@ -179,8 +171,24 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 */	
 	public SourceViewerInformationControl(Shell parent,int style) {
 		this(parent, SWT.NO_TRIM, style);
-	}	
+	}
 	
+	/**
+	 * Creates a default information control with the given shell as parent. The given
+	 * information presenter is used to process the information to be displayed. The given
+	 * styles are applied to the created styled text widget.
+	 * 
+	 * @param parent the parent shell
+	 * @param style the additional styles for the styled text widget
+	 * @param presenter the presenter to be used
+	 * @param statusFieldText the text to be used in the optional status field
+	 *                         or <code>null</code> if the status field should be hidden
+	 * @since 3.0
+	 */	
+	public SourceViewerInformationControl(Shell parent,int style, String statusFieldText) {
+		this(parent, SWT.NO_TRIM, style, statusFieldText);
+	}
+
 	/**
 	 * Creates a default information control with the given shell as parent.
 	 * No information presenter is used to process the information
@@ -190,6 +198,20 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 */
 	public SourceViewerInformationControl(Shell parent) {
 		this(parent, SWT.NONE);
+	}
+
+	/**
+	 * Creates a default information control with the given shell as parent.
+	 * No information presenter is used to process the information
+	 * to be displayed. No additional styles are applied to the styled text widget.
+	 * 
+	 * @param parent the parent shell
+	 * @param statusFieldText the text to be used in the optional status field
+	 *                         or <code>null</code> if the status field should be hidden
+	 * @since 3.0
+	 */
+	public SourceViewerInformationControl(Shell parent, String statusFieldText) {
+		this(parent, SWT.NONE, statusFieldText);
 	}
 	
 	/*
@@ -219,7 +241,6 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		}
 		fViewer.setInput(doc);
 	}
-
 	
 	/*
 	 * @see IInformationControl#setVisible(boolean)
@@ -244,7 +265,17 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @see IInformationControl#setSize(int, int)
 	 */
 	public void setSize(int width, int height) {
+		
+		if (fStatusField != null) {
+			GridData gd= (GridData)fViewer.getTextWidget().getLayoutData();
+			Point statusSize= fStatusField.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+			Point separatorSize= fSeparator.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+			gd.heightHint= height - statusSize.y - separatorSize.y;
+		}
 		fShell.setSize(width, height);
+		
+		if (fStatusField != null)
+			fShell.pack(true);
 	}
 	
 	/*
@@ -262,6 +293,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @see IInformationControl#setSizeConstraints(int, int)
 	 */
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
+		maxWidth= maxHeight;
 	}
 	
 	/*
@@ -339,4 +371,3 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		return fViewer;
 	}
 }
-

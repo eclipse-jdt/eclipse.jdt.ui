@@ -120,7 +120,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	public IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new SourceViewerInformationControl(parent);
+				return new SourceViewerInformationControl(parent, JavaHoverMessages.getString("JavaTextHover.makeStickyHint")); //$NON-NLS-1$
 			}
 		};
 	}

@@ -11,7 +11,14 @@
 
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorInput;
@@ -22,12 +29,11 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
-
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 /**
@@ -35,7 +41,7 @@ import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
  * 
  * @since 2.1
  */
-public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover {
+public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover, ITextHoverExtension {
 
 
 	private IEditorPart fEditor;
@@ -112,5 +118,13 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	 */
 	protected String getHoverInfo(IJavaElement[] javaElements) {
 		return null;
+	}
+
+	public IInformationControlCreator getInformationControlCreator() {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), JavaHoverMessages.getString("JavaTextHover.makeStickyHint")); //$NON-NLS-1$
+			}
+		};
 	}
 }
