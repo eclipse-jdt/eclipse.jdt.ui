@@ -27,6 +27,7 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
@@ -2598,6 +2599,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.LINK_BROWSING_MEMBERS_TO_EDITOR, true);
 
 		store.setDefault(PreferenceConstants.SEARCH_USE_REDUCED_MENU, true);
+		
+		store.setDefault(JavaBasePreferencePage.LIMIT_ROOTS_TO, 1000);
 		// AppearancePreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE, false);

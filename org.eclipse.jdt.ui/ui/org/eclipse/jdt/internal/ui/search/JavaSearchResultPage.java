@@ -24,7 +24,9 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.ui.JavaUI;
@@ -33,8 +35,14 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -50,7 +58,8 @@ import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -65,11 +74,15 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public class JavaSearchResultPage extends AbstractTextSearchViewPage implements IAdaptable {
+	private static final String FALSE = "FALSE"; //$NON-NLS-1$
+	private static final String TRUE = "TRUE"; //$NON-NLS-1$
 	private static final String KEY_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
 	private static final String KEY_SORTING= "org.eclipse.jdt.search.resultpage.sorting"; //$NON-NLS-1$
 	private static final String KEY_FILTERS= "org.eclipse.jdt.search.resultpage.filters"; //$NON-NLS-1$
+	private static final String KEY_LIMIT_ENABLED= "org.eclipse.jdt.search.resultpage.limit_enabled"; //$NON-NLS-1$
 	
 	private static final String GROUP_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
+	private static final String GROUP_FILTERING = "org.eclipse.jdt.search.resultpage.filtering"; //$NON-NLS-1$
 	
 	private NewSearchViewActionGroup fActionGroup;
 	private JavaSearchContentProvider fContentProvider;
@@ -86,6 +99,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	private Set fMatchFilters= new HashSet();
 	private FilterAction[] fFilterActions;
+	private LimitElementsAction fLimitElementsAction;
 	
 	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES , IPageLayout.ID_RES_NAV };
 	public static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
@@ -95,11 +109,21 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	};
 	
 	private JavaSearchEditorOpener fEditorOpener= new JavaSearchEditorOpener();
+	private boolean fLimitElements= false;
+	private IPropertyChangeListener fPropertyChangeListener;
 
 	public JavaSearchResultPage() {
 		initSortActions();
 		initGroupingActions();
 		initFilterActions();
+
+		fPropertyChangeListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (JavaBasePreferencePage.LIMIT_ROOTS_TO.equals(event.getProperty()))
+					limitChanged();
+			}
+		};
+		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 	}
 	
 	private void initFilterActions() {
@@ -109,6 +133,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			fFilterActions[i]= new FilterAction(this, allFilters[i]);
 			fFilterActions[i].setId("org.eclipse.jdt.search.filters."+i); //$NON-NLS-1$
 		}
+		fLimitElementsAction= new LimitElementsAction(this);
+		fLimitElementsAction.setId("org.eclipse.jdt.search.filters."+allFilters.length); //$NON-NLS-1$
 	}
 
 	private void initSortActions() {
@@ -184,12 +210,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 	
 	private void addFilterActions(IMenuManager viewMenu) {
-		String filteringGroup= "Filtering"; //$NON-NLS-1$
-		viewMenu.insertBefore(IContextMenuConstants.GROUP_VIEWER_SETUP, new Separator(filteringGroup));
+		viewMenu.appendToGroup(GROUP_FILTERING, fLimitElementsAction);		
 		for (int i= 0; i < fFilterActions.length; i++) {
-			viewMenu.appendToGroup(filteringGroup, fFilterActions[i]);
+			viewMenu.appendToGroup(GROUP_FILTERING, fFilterActions[i]);
 		}
-		
 	}
 
 	private void addSortActions(IMenuManager mgr) {
@@ -234,6 +258,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	public void dispose() {
 		fActionGroup.dispose();
+		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 		super.dispose();
 	}
 	
@@ -264,40 +289,50 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 	
 	protected TreeViewer createTreeViewer(Composite parent) {
-		return new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-	}
-	
-	class MyProblemTable extends ProblemTableViewer {
-		MyProblemTable(Composite parent, int flags) {
-			super(parent, flags);
-		}
-	
-		protected void internalRefresh(Object element, boolean updateLabels) {
-			if (element == null || equals(element, getRoot())) {
-				// the parent
+		return new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL) {
+			public void add(Object parentElement, Object[] childElements) {
+				if (limitElements() && parentElement.equals(getInput())) {
+					int elementLimit= getElementLimit();
+					Widget parentWidget= findItem(parentElement);
+					if (parentWidget == null)
+						return;
+					Item[] children= getChildren(parentWidget);
+					if (children.length >= elementLimit)
+						return;
+					if (children.length + childElements.length <= elementLimit) {
+						super.add(parentElement, childElements);
+						return;
+					}
+					int toAdd= elementLimit-children.length;
+					Object[] limited= new Object[toAdd];
+					System.arraycopy(childElements, 0, limited, 0, limited.length);
+					super.add(parentElement, limited);
+					return;
+				} else {
+					super.add(parentElement, childElements);
+				}
+			}
 
-				// in the code below, it is important to do all disassociates
-				// before any associates, since a later disassociate can undo an earlier associate
-				// e.g. if (a, b) is replaced by (b, a), the disassociate of b to item 1 could undo
-				// the associate of b to item 0.
-				
-				Object[] children = getSortedChildren(getRoot());
-				getTable().removeAll();
-			
-				// add any remaining elements
-				for (int i = 0; i < children.length; ++i) {
-					updateItem(new TableItem(getTable(), SWT.NONE, i), children[i]);
-				}
+			protected Object[] getFilteredChildren(Object parentElement) {
+				if (parentElement == null)
+					return new Object[0];
+				Object[] filtered= super.getFilteredChildren(parentElement);
+				int elementLimit = getElementLimit();
+				if (limitElements() && parentElement.equals(getInput()) &&  filtered.length > elementLimit) {
+					Object[] limited= new Object[elementLimit];
+					System.arraycopy(filtered, 0, limited, 0, limited.length);
+					return limited;
+				} else 
+					return filtered;
 			}
-			else {
-				Widget w = findItem(element);
-				if (w != null) {
-					updateItem(w, element);
-				}
-			}
-		}
+		};
 	}
 	
+	private int getElementLimit() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getInt(JavaBasePreferencePage.LIMIT_ROOTS_TO);
+	}
+
 	protected TableViewer createTableViewer(Composite parent) {
 		return new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL) {
 			protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
@@ -307,6 +342,39 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 				} finally {
 					getTable().setRedraw(true);
 				}
+			}
+			
+			public void add(Object[] elements) {
+				if (limitElements()) {
+					int elementLimit= getElementLimit();
+					int currentCount= getTable().getItemCount();
+					if (currentCount >= elementLimit)
+						return;
+					if (currentCount + elements.length <= elementLimit) {
+						super.add(elements);
+						return;
+					}
+					int toAdd= elementLimit-currentCount;
+					Object[] limited= new Object[toAdd];
+					System.arraycopy(elements, 0, limited, 0, limited.length);
+					super.add(limited);
+					return;
+				} else {
+					super.add(elements);
+				}
+			}
+
+			protected Object[] getFilteredChildren(Object parentElement) {
+				if (parentElement == null)
+					return new Object[0];
+				Object[] filtered= super.getFilteredChildren(parentElement);
+				int elementLimit = getElementLimit();
+				if (limitElements() && parentElement.equals(getInput()) &&  filtered.length > elementLimit) {
+					Object[] limited= new Object[elementLimit];
+					System.arraycopy(filtered, 0, limited, 0, limited.length);
+					return limited;
+				} else 
+					return filtered;
 			}
 		};
 	}
@@ -329,8 +397,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	public void init(IPageSite site) {
 		super.init(site);
+		IMenuManager menuManager = site.getActionBars().getMenuManager();
+		menuManager.insertBefore(IContextMenuConstants.GROUP_PROPERTIES, new Separator(GROUP_FILTERING));
 		fActionGroup.fillActionBars(site.getActionBars());
-		addFilterActions(site.getActionBars().getMenuManager());
+		addFilterActions(menuManager);
 	}
 
 	/**
@@ -368,6 +438,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		}
 		String encodedFilters= getSettings().get(KEY_FILTERS);
 		restoreFilters(encodedFilters);
+		fLimitElements= !FALSE.equals(getSettings().get(KEY_LIMIT_ENABLED));
 		if (memento != null) {
 			Integer value= memento.getInteger(KEY_GROUPING);
 			if (value != null)
@@ -377,7 +448,9 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 				fCurrentSortOrder= value.intValue();
 			encodedFilters= memento.getString(KEY_FILTERS);
 			restoreFilters(encodedFilters);
+			fLimitElements= !FALSE.equals(memento.getString(KEY_LIMIT_ENABLED));
 		}
+		fLimitElementsAction.setChecked(fLimitElements);
 	}
 	
 	private void restoreFilters(String encodedFilters) {
@@ -410,11 +483,37 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		memento.putInteger(KEY_GROUPING, fCurrentGrouping);
 		memento.putInteger(KEY_SORTING, fCurrentSortOrder);
 		memento.putString(KEY_FILTERS, encodeFilters());
+		if (fLimitElements)
+			memento.putString(KEY_GROUPING, TRUE);
+		else 
+			memento.putString(KEY_LIMIT_ENABLED, FALSE);
 	}
 	
 	void addMatchFilter(MatchFilter filter) {
 		fMatchFilters.add(filter);
 		filtersChanged();
+	}
+	
+	void enableLimit(boolean enable) {
+		fLimitElements= enable;
+		fLimitElementsAction.setChecked(enable);
+		if (fLimitElements)
+			getSettings().put(KEY_GROUPING, TRUE);
+		else 
+			getSettings().put(KEY_LIMIT_ENABLED, FALSE);
+		limitChanged();
+	}
+	
+	/**
+	 * 
+	 */
+	private void limitChanged() {
+		getViewer().refresh();
+		getViewPart().updateLabel();
+	}
+
+	boolean limitElements() {
+		return fLimitElements;
 	}
 	
 	void removeMatchFilter(MatchFilter filter) {
@@ -531,7 +630,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 		for (int i= 0; i < fFilterActions.length; i++) {
 			if (shouldEnable(result, fFilterActions[i]))
-				menu.add(fFilterActions[i]);
+				menu.appendToGroup(GROUP_FILTERING, fFilterActions[i]);
 		}
 		
 		menu.updateAll(true);
@@ -559,14 +658,15 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	public String getLabel() {
 		String label= super.getLabel();
 		int matchFilterCount= getMatchFiltersCount();
-		if (matchFilterCount > 0) {
+		int filteredMatchCount = getFilteredMatchCount();
+		if (getInput() != null &&  (matchFilterCount > 0 || filteredMatchCount < getInput().getMatchCount())) {
 			if (isQueryRunning()) {
 				String message= SearchMessages.getString("JavaSearchResultPage.filtered.message"); //$NON-NLS-1$
 				return MessageFormat.format(message, new Object[] { label });
 			
 			} else {
 				String message= SearchMessages.getString("JavaSearchResultPage.filteredWithCount.message"); //$NON-NLS-1$
-				return MessageFormat.format(message, new Object[] { label, new Integer(getFilteredMatchCount()) });
+				return MessageFormat.format(message, new Object[] { label, new Integer(filteredMatchCount) });
 			}
 		}
 		return label;
@@ -586,16 +686,44 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 
 	private int getFilteredMatchCount() {
-		AbstractTextSearchResult result= getInput();
-		if (result == null)
-			return 0;
-		Object[] elements= result.getElements();
+		IContentProvider cp= getViewer().getContentProvider();
+		if (cp instanceof ITreeContentProvider) {
+			ITreeContentProvider tp= (ITreeContentProvider) cp;
+			return getMatchCount(tp, getRootElements((TreeViewer) getViewer()));
+		} else {
+			return getMatchCount((IStructuredContentProvider) cp);
+		}
+	}
+	
+	private Object[] getRootElements(TreeViewer viewer) {
+		Tree t= viewer.getTree();
+		Item[] roots= t.getItems();
+		Object[] elements= new Object[roots.length];
+		for (int i = 0; i < elements.length; i++) {
+			elements[i]= roots[i].getData();
+		}
+		return elements;
+	}
+
+	private int getMatchCount(ITreeContentProvider cp, Object[] elements) {
 		int count= 0;
-		for (int i= 0; i < elements.length; i++) {
+		for (int j = 0; j < elements.length; j++) {
+			count+= getDisplayedMatchCount(elements[j]);
+			Object[] children = cp.getChildren(elements[j]);
+			count+= getMatchCount(cp, children);
+		}
+		return count;
+	}
+	
+	private int getMatchCount(IStructuredContentProvider cp) {
+		Object[] elements= cp.getElements(getInput());
+		int count= 0;
+		for (int i = 0; i < elements.length; i++) {
 			count+= getDisplayedMatchCount(elements[i]);
 		}
 		return count;
 	}
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)

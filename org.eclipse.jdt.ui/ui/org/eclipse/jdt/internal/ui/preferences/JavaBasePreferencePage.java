@@ -13,29 +13,28 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 	
 /*
  * The page for setting general java plugin preferences.
@@ -51,9 +50,14 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private static final String DOUBLE_CLICK_GOES_INTO= PreferenceConstants.DOUBLE_CLICK_GOES_INTO;
 	private static final String DOUBLE_CLICK_EXPANDS= PreferenceConstants.DOUBLE_CLICK_EXPANDS;
 
+	// keep this out of the public preference constants. Will move to be filter dialog only.
+	public static final String LIMIT_ROOTS_TO= "org.eclipse.jdt.ui.search.limitRootsTo"; //$NON-NLS-1$
+
+	
 	private ArrayList fCheckBoxes;
 	private ArrayList fRadioButtons;
 	private ArrayList fTextControls;
+	private Text fLimitTableValue;
 	
 	public JavaBasePreferencePage() {
 		super();
@@ -107,6 +111,51 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		return button;
 	}
 	
+	private void createTableLimit(Composite parent) {		
+		Label limitTableLabel= new Label(parent, SWT.NONE);
+		limitTableLabel.setText(PreferencesMessages.getString("JavaBasePreferencePage.roots_limit.label")); //$NON-NLS-1$
+		limitTableLabel.setLayoutData(new GridData());
+		
+		fLimitTableValue= new Text(parent, SWT.BORDER);
+		GridData gd= new GridData();
+		gd.widthHint= convertWidthInCharsToPixels(6);
+		fLimitTableValue.setLayoutData(gd);
+
+		applyDialogFont(parent);
+
+		fLimitTableValue.addKeyListener(new KeyAdapter() {
+			public void keyReleased(KeyEvent e) {
+				validateText();
+			}
+		});
+		initLimit();
+	}
+	
+	private void initLimit() {
+		IPreferenceStore preferenceStore= getPreferenceStore();
+		if (preferenceStore != null) {
+			int count= preferenceStore.getInt(LIMIT_ROOTS_TO);
+			fLimitTableValue.setText(String.valueOf(count));
+		}
+	}
+
+	
+	protected void validateText() {
+		String text= fLimitTableValue.getText();
+		int value= -1;
+		try {
+			value= Integer.valueOf(text).intValue();
+		} catch (NumberFormatException e) {
+			
+		}
+		setValid(value > 0);
+		if (value <= 0)
+			setErrorMessage(PreferencesMessages.getString("JavaBasePreferencePage.roots_limit.error")); //$NON-NLS-1$
+		else 
+			setErrorMessage(null);
+	}
+
+
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
 		
@@ -154,12 +203,18 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			RefactoringSavePreferences.PREF_SAVE_ALL_EDITORS);
 
 		Group group= new Group(result, SWT.NONE);
-		group.setLayout(new GridLayout());
+		GridLayout gl= new GridLayout();
+		gl.numColumns= 2;
+		group.setLayout(gl);
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.getString("JavaBasePreferencePage.search")); //$NON-NLS-1$
 		
 		addCheckBox(group, PreferencesMessages.getString("JavaBasePreferencePage.search.small_menu"), PreferenceConstants.SEARCH_USE_REDUCED_MENU); //$NON-NLS-1$
-
+		// filler
+		Label l= new Label(group, SWT.NONE);
+		
+		createTableLimit(group);
+		
 		Dialog.applyDialogFont(result);
 		return result;
 	}
@@ -184,6 +239,9 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			String key= (String) text.getData();
 			text.setText(store.getDefaultString(key));
 		}
+		int count= store.getDefaultInt(LIMIT_ROOTS_TO);
+		fLimitTableValue.setText(String.valueOf(count));
+
 		super.performDefaults();
 	}
 
@@ -210,6 +268,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			store.setValue(key, text.getText());
 		}
 		
+		store.setValue(LIMIT_ROOTS_TO, Integer.valueOf(fLimitTableValue.getText()).intValue());
+
 		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}

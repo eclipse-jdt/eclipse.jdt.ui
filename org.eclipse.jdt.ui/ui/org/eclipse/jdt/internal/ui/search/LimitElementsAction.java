@@ -13,29 +13,16 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jface.action.Action;
 
 
-public class FilterAction extends Action {
-	private MatchFilter fFilter;
+public class LimitElementsAction extends Action {
 	private JavaSearchResultPage fPage;
 	
-	public FilterAction(JavaSearchResultPage page, MatchFilter filter) {
-		super(filter.getName(), Action.AS_CHECK_BOX);
+	public LimitElementsAction(JavaSearchResultPage page) {
+		super(SearchMessages.getString("LimitElementsAction.label"), Action.AS_CHECK_BOX); //$NON-NLS-1$
 		fPage= page;
-		fFilter= filter;
 	}
 
 	public void run() {
-		if (fPage.hasMatchFilter(getFilter())) {
-			fPage.removeMatchFilter(fFilter);
-		} else {
-			fPage.addMatchFilter(fFilter);
-		}
+		fPage.enableLimit(!fPage.limitElements());
 	}
 
-	public MatchFilter getFilter() {
-		return fFilter;
-	}
-
-	public void updateCheckState() {
-		setChecked(fPage.hasMatchFilter(getFilter()));
-	}
 }
