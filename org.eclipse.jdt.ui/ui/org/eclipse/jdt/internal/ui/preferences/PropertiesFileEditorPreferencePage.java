@@ -365,15 +365,12 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	}
 
 	private Control createSyntaxPage(Composite parent) {
-		
-		Composite colorComposite= new Composite(parent, SWT.NONE);
-		colorComposite.setLayout(new GridLayout());
 
-		Label label= new Label(colorComposite, SWT.LEFT);
+		Label label= new Label(parent, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.foreground")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Composite editorComposite= new Composite(colorComposite, SWT.NONE);
+		Composite editorComposite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginHeight= 0;
@@ -427,11 +424,11 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		gd.horizontalSpan= 2;
 		fItalicCheckBox.setLayoutData(gd);
 		
-		label= new Label(colorComposite, SWT.LEFT);
+		label= new Label(parent, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.preview")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		Control previewer= createPreviewer(colorComposite);
+		Control previewer= createPreviewer(parent);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(20);
 		gd.heightHint= convertHeightInCharsToPixels(5);
@@ -474,9 +471,9 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			}
 		});
 		
-		colorComposite.layout();
+		parent.layout();
 		
-		return colorComposite;
+		return parent;
 	}
 	
 	private Control createPreviewer(Composite parent) {
@@ -532,6 +529,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		contents.setLayout(layout);
+		contents.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		createHeader(contents);
 		
