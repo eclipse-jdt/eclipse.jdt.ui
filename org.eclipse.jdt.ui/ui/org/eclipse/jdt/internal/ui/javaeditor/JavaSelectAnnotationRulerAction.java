@@ -62,7 +62,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 	}
 	
 	public void run() {
-		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
+		if (fStore.getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
 			return;
 
 		if (fAnnotation instanceof OverrideIndicatorManager.OverrideIndicator) {
