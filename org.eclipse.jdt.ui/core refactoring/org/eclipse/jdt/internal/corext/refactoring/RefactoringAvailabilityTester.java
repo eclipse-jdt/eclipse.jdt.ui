@@ -17,6 +17,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -34,6 +37,7 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -41,9 +45,11 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Statement;
 
+import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
@@ -679,6 +685,126 @@ public final class RefactoringAvailabilityTester {
 		if (!(element instanceof IMember))
 			return false;
 		return isPullUpAvailable(new IMember[] { (IMember) element});
+	}
+
+	public static boolean isRenameAvailable(final ICompilationUnit unit) {
+		if (unit == null)
+			return false;
+		if (!unit.exists())
+			return false;
+		if (!JavaModelUtil.isPrimary(unit))
+			return false;
+		if (unit.isReadOnly())
+			return false;
+		return true;
+	}
+
+	public static boolean isRenameAvailable(final IJavaProject project) throws JavaModelException {
+		if (project == null)
+			return false;
+		if (!Checks.isAvailable(project))
+			return false;
+		if (!project.isConsistent())
+			return false;
+		return true;
+	}
+
+	public static boolean isRenameAvailable(final ILocalVariable variable) throws JavaModelException {
+		return Checks.isAvailable(variable);
+	}
+
+	public static boolean isRenameAvailable(final IMethod method) throws CoreException {
+		if (method == null)
+			return false;
+		if (!Checks.isAvailable(method))
+			return false;
+		if (method.isConstructor())
+			return false;
+		if (isRenameProhibited(method))
+			return false;
+		return true;
+	}
+
+	public static boolean isRenameAvailable(final IPackageFragment fragment) throws JavaModelException {
+		if (fragment == null)
+			return false;
+		if (!Checks.isAvailable(fragment))
+			return false;
+		if (fragment.isDefaultPackage())
+			return false;
+		return true;
+	}
+
+	public static boolean isRenameAvailable(final IPackageFragmentRoot root) throws JavaModelException {
+		if (root == null)
+			return false;
+		if (!Checks.isAvailable(root))
+			return false;
+		if (root.isArchive())
+			return false;
+		if (root.isExternal())
+			return false;
+		if (!root.isConsistent())
+			return false;
+		if (root.getResource() instanceof IProject)
+			return false;
+		return true;
+	}
+
+	public static boolean isRenameAvailable(final IResource resource) {
+		if (resource == null)
+			return false;
+		if (!resource.exists())
+			return false;
+		if (!resource.isAccessible())
+			return false;
+		return true;
+	}
+
+	public static boolean isRenameAvailable(final IType type) throws JavaModelException {
+		if (type == null)
+			return false;
+		if (type.isAnonymous())
+			return false;
+		if (!Checks.isAvailable(type))
+			return false;
+		if (isRenameProhibited(type))
+			return false;
+		return true;
+	}
+
+	public static boolean isRenameAvailable(final ITypeParameter parameter) throws JavaModelException {
+		return Checks.isAvailable(parameter);
+	}
+
+	public static boolean isRenameEnumConstAvailable(final IField field) throws JavaModelException {
+		return Checks.isAvailable(field) && field.getDeclaringType().isEnum();
+	}
+
+	public static boolean isRenameFieldAvailable(final IField field) throws JavaModelException {
+		return Checks.isAvailable(field) && !JdtFlags.isEnum(field);
+	}
+
+	public static boolean isRenameNonVirtualMethodAvailable(final IMethod method) throws JavaModelException, CoreException {
+		return isRenameAvailable(method) && !MethodChecks.isVirtual(method);
+	}
+
+	public static boolean isRenameProhibited(final IMethod method) throws CoreException {
+		if (method.getElementName().equals("toString") //$NON-NLS-1$
+				&& (method.getNumberOfParameters() == 0) && (method.getReturnType().equals("Ljava.lang.String;") //$NON-NLS-1$
+						|| method.getReturnType().equals("QString;") //$NON-NLS-1$
+				|| method.getReturnType().equals("Qjava.lang.String;"))) //$NON-NLS-1$
+			return true;
+		else
+			return false;
+	}
+
+	public static boolean isRenameProhibited(final IType type) {
+		return type.getPackageFragment().getElementName().equals("java.lang"); //$NON-NLS-1$
+	}
+
+	public static boolean isRenameVirtualMethodAvailable(final IMethod method) throws CoreException {
+		return isRenameAvailable(method) && MethodChecks.isVirtual(method);
 	}
 
 	public static boolean isSelfEncapsulateAvailable(IField field) throws JavaModelException {
