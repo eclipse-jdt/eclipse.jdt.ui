@@ -322,7 +322,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			
 			fSourceViewer.setDocument(document);
 			fSourceViewer.setEditable(false);
-			fSourceViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
+			
+			GridData gd= new GridData(GridData.FILL_BOTH);
+			gd.heightHint= convertHeightInCharsToPixels(10);
+			fSourceViewer.getControl().setLayoutData(gd);
 			
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage.title"), NLSUIMessages.getString("wizardPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
