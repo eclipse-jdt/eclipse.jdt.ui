@@ -44,7 +44,7 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  The class that implements this query participan. The class must be public and implement &lt;samp&gt;org.eclipse.jdt.ui.search.IQueryParticipant&lt;/samp&gt; with a zero-argument constructor.
+                  The class that implements this query participant. The class must be public and implement &lt;samp&gt;org.eclipse.jdt.ui.search.IQueryParticipant&lt;/samp&gt; with a zero-argument constructor.
                </documentation>
                <appInfo>
                   <meta.attribute kind="java"/>
