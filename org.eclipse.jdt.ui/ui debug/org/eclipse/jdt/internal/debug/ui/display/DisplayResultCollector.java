@@ -25,10 +25,16 @@ public class DisplayResultCollector extends ResultCollector {
 	protected int fEnd= -1;
 	
 	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, IImportDeclaration importDeclaration, ProposalInfo proposalInfo) {
-		return createCompletion(start, end, completion, iconName, name, qualification, placeCursorBehindInsertion, contextInformation, importDeclaration, proposalInfo);
+		//isKeyWords param not used
+		return createCompletion(start, end, completion, iconName, name, qualification, placeCursorBehindInsertion, contextInformation, importDeclaration, GENERAL_TRIGGERS, proposalInfo);
 	}
 	
-	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, IImportDeclaration importDeclaration, ProposalInfo proposalInfo) {
+	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, IImportDeclaration importDeclaration, char[] triggers, ProposalInfo proposalInfo) {
+		//isKeyWords param not used
+		return createCompletion(start, end, completion, iconName, name, qualification, placeCursorBehindInsertion, contextInformation, importDeclaration, triggers, proposalInfo);
+	}
+	
+	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, IImportDeclaration importDeclaration, char[] triggers, ProposalInfo proposalInfo) {
 		if (qualification != null) {
 			name += (" - " + qualification); //$NON-NLS-1$
 		}
@@ -48,7 +54,7 @@ public class DisplayResultCollector extends ResultCollector {
 			contextInformation.setImage(icon);
 		}
 		
-		return new JavaCompletionProposal(completion, adjustedStart, length, cursorPosition, icon, name, contextInformation, importDeclaration, proposalInfo);
+		return new JavaCompletionProposal(completion, adjustedStart, length, cursorPosition, icon, name, contextInformation, importDeclaration, triggers, proposalInfo);
 	} 
 	
 	/**
