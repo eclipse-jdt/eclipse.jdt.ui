@@ -15,7 +15,6 @@ import junit.framework.TestCase;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -37,11 +36,9 @@ public abstract class MouseScrollEditorTest extends TestCase {
 	
 	public static class ThumbScrollPoster extends Poster {
 
-		private Point fThumb;
-
 		private Display fDisplay;
 
-		private int fMouseY;
+		private Point fThumb;
 
 		public void initializeFromForeground(StyledText text) {
 			fDisplay= text.getDisplay();
@@ -52,21 +49,20 @@ public abstract class MouseScrollEditorTest extends TestCase {
 		}
 
 		public void initializeFromBackground() {
-			fMouseY= fThumb.y + 1;
-			SWTEventHelper.mouseMoveEvent(fDisplay, fThumb.x, fThumb.y, false);
+			SWTEventHelper.mouseMoveEvent(fDisplay, fThumb.x, fThumb.y++, false);
 			SWTEventHelper.mouseDownEvent(fDisplay, 1, false);
 		}
 		
 		public void driveFromBackground() {
-			SWTEventHelper.mouseMoveEvent(fDisplay, fThumb.x, fMouseY++, false);
+			SWTEventHelper.mouseMoveEvent(fDisplay, fThumb.x, fThumb.y++, false);
 		}
 	}
 
 	public static class AutoScrollPoster extends Poster {
 
-		private Rectangle fTextBounds;
-		
 		private Display fDisplay;
+		
+		private Rectangle fTextBounds;
 
 		public void initializeFromForeground(StyledText text) {
 			fDisplay= text.getDisplay();
@@ -83,10 +79,6 @@ public abstract class MouseScrollEditorTest extends TestCase {
 		}
 	}
 
-	private static final int[] CTRL_HOME= new int[] { SWT.CTRL, SWT.HOME };
-
-	private static final int[] CTRL_END= new int[] { SWT.CTRL, SWT.END };
-	
 	private PerformanceMeter fPerformanceMeter;
 
 	private IEditorPart fEditor;
@@ -141,13 +133,13 @@ public abstract class MouseScrollEditorTest extends TestCase {
 		fEditor= EditorTestHelper.openInEditor(getFile(), true);
 		EditorTestHelper.calmDown(5000, 10000, 100);
 
-		fDisplay= SWTEventHelper.getActiveDisplay();
 		fText= (StyledText) fEditor.getAdapter(Control.class);
+		fDisplay= fText.getDisplay();
 		
-		SWTEventHelper.pressKeyCodeCombination(fDisplay, CTRL_END);
+		fText.setTopPixel(Integer.MAX_VALUE);
 		fMaxTopPixel= fText.getTopPixel();
-		assertEquals(fText.getLineCount(), fText.getTopIndex() + fText.getClientArea().height / fText.getLineHeight());
-		SWTEventHelper.pressKeyCodeCombination(fDisplay, CTRL_HOME);
+		fText.setTopPixel(0);
+		EditorTestHelper.calmDown(100, 1000, 100);
 	}
 
 	protected void tearDown() throws Exception {
@@ -158,9 +150,10 @@ public abstract class MouseScrollEditorTest extends TestCase {
 
 	protected void measureScrolling(int nOfRuns, Poster poster) {
 		fPoster= poster;
-		fPoster.initializeFromForeground(fText);
 		
 		for (int i= 0; i < nOfRuns; i++) {
+			fPoster.initializeFromForeground(fText);
+			
 			fDone= false;
 			new Thread(fThreadRunnable).start();
 			fPerformanceMeter.start();
@@ -169,9 +162,8 @@ public abstract class MouseScrollEditorTest extends TestCase {
 					fDisplay.sleep();
 			fPerformanceMeter.stop();
 			assertEquals(fMaxTopPixel, fText.getTopPixel());
-			SWTEventHelper.pressKeyCodeCombination(fDisplay, CTRL_END);
-			SWTEventHelper.pressKeyCodeCombination(fDisplay, CTRL_HOME);
-			assertEquals(0, fText.getTopPixel());
+			fText.setTopPixel(0);
+			EditorTestHelper.calmDown(100, 1000, 100);
 		}
 		fPerformanceMeter.commit();
 	}
