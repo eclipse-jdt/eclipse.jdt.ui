@@ -519,6 +519,11 @@ public class ChangeParametersControl extends Composite {
 							fTableViewer.cancelEditing();
 							e.doit= false;
 							break;
+						
+						case SWT.TRAVERSE_RETURN :
+							editor.deactivate();
+							e.doit= false;
+							break;
 							
 						default :
 							break;
@@ -557,6 +562,11 @@ public class ChangeParametersControl extends Composite {
 							break;
 						getTable().setSelection(prevRow);
 						editColumnOrPrevPossible(editorColumn);
+						break;
+						
+					case SWT.F2 :
+						e.doit= false;
+						editor.deactivate();
 						break;
 					}
 				}
