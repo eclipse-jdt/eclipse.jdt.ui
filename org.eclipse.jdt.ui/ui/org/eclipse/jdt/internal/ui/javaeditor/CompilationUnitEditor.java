@@ -291,6 +291,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			IAutoEditStrategy smartSemi= new SmartSemicolonAutoEditStrategy(IJavaPartitions.JAVA_PARTITIONING);
 			prependAutoEditStrategy(smartSemi, IDocument.DEFAULT_CONTENT_TYPE);
 			prependAutoEditStrategy(smartSemi, IJavaPartitions.JAVA_STRING);
+			prependAutoEditStrategy(smartSemi, IJavaPartitions.JAVA_CHARACTER);
 		}
 		
 		/*
