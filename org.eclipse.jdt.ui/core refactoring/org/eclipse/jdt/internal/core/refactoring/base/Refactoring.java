@@ -28,9 +28,9 @@ import org.eclipse.jdt.internal.core.refactoring.UndoManager;
  */
 public abstract class Refactoring implements IRefactoring {
 	private static IUndoManager fgUndoManager= new UndoManager();
-	private static final IJavaSearchScope DEFAULT_SCOPE= SearchEngine.createWorkspaceScope();
 	
-	private IJavaSearchScope fScope= DEFAULT_SCOPE;
+	//fox for: 1GEYLBZ: ITPJUI:WIN2000 - smoke 120: refactoring doesn't find any reference to TestCase although there are
+	private IJavaSearchScope fScope= SearchEngine.createWorkspaceScope();
 	private List fUnsavedFileList; //list of IFiles
 		
 	public Refactoring(){
