@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 public class RefactoringFileBuffers {
 
 	/**
-	 * Acquires a text file buffer for the specified compilation unit.
+	 * Connects to and acquires a text file buffer for the specified compilation unit.
 	 * 
 	 * @param unit the compilation unit to acquire a text file buffer for
 	 * @return the text file buffer, or <code>if</code> no buffer could be acquired
