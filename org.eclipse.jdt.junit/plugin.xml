@@ -200,7 +200,7 @@
             visible="false"
             id="org.eclipse.jdt.junit.JUnitActionSet">
          <menu
-               label="%searchMenu.label"
+               label="Search"
                path="navigate"
                id="org.eclipse.search.menu">
             <groupMarker
