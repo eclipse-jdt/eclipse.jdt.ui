@@ -112,7 +112,7 @@ public class StubUtility {
 			buf.append(destTypeName);
 		} else {
 			String retTypeFrm;
-			if (!isBuiltInType(retTypeSig)) {
+			if (!isPrimitiveType(retTypeSig)) {
 				retTypeFrm= resolveAndAdd(retTypeSig, declaringtype, imports);
 			} else {
 				retTypeFrm= Signature.toString(retTypeSig);
@@ -126,7 +126,7 @@ public class StubUtility {
 			String paramTypeSig= paramTypes[i];
 			String paramTypeFrm;
 			
-			if (!isBuiltInType(paramTypeSig)) {
+			if (!isPrimitiveType(paramTypeSig)) {
 				paramTypeFrm= resolveAndAdd(paramTypeSig, declaringtype, imports);
 			} else {
 				paramTypeFrm= Signature.toString(paramTypeSig);
@@ -159,7 +159,7 @@ public class StubUtility {
 			if (!settings.callSuper) {
 				if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
 					buf.append('\t');
-					if (!isBuiltInType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
+					if (!isPrimitiveType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
 						buf.append("return null;\n\t"); //$NON-NLS-1$
 					} else if (retTypeSig.equals(Signature.SIG_BOOLEAN)) {
 						buf.append("return false;\n\t"); //$NON-NLS-1$
@@ -196,7 +196,7 @@ public class StubUtility {
 		return (options & flag) != 0;
 	}	
 
-	private static boolean isBuiltInType(String typeName) {
+	private static boolean isPrimitiveType(String typeName) {
 		char first= Signature.getElementType(typeName).charAt(0);
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
 	}
