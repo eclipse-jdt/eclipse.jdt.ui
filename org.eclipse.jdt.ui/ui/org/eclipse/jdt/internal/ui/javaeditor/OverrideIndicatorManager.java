@@ -292,13 +292,13 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
 	 */
-	public synchronized void aboutToBeReconciled() {
+	public void aboutToBeReconciled() {
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 */
-	public synchronized void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
+	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
 		updateAnnotations(ast, progressMonitor);
 	}
 }
