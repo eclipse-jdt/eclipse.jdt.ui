@@ -11,20 +11,34 @@
 
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 public class InferTypeArgumentsTests extends RefactoringTest {
 
@@ -52,13 +66,30 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	private void performCu(int expectedInitialStatus, int expectedFinalStatus) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IJavaElement[] elements= { cu };
+		boolean performed= perform(elements, expectedInitialStatus, expectedFinalStatus);
+		if (! performed)
+			return;
+		
+		String expected= getFileContents(getOutputTestFileName("A"));
+		String actual= cu.getSource();
+		assertEqualLines(expected, actual);
+	}
+
+	/**
+	 * @param elements 
+	 * @param expectedInitialStatus 
+	 * @param expectedFinalStatus 
+	 * @return <code>true</code> iff performed
+	 * @throws CoreException 
+	 */
+	private boolean perform(IJavaElement[] elements, int expectedInitialStatus, int expectedFinalStatus) throws CoreException {
 		InferTypeArgumentsRefactoring refactoring= InferTypeArgumentsRefactoring.create(elements);
 		
 		NullProgressMonitor pm= new NullProgressMonitor();
 		RefactoringStatus initialStatus= refactoring.checkInitialConditions(pm);
 		assertEquals("wrong initial condition status: " + initialStatus, expectedInitialStatus, initialStatus.getSeverity());
 		if (! initialStatus.isOK())
-			return;
+			return false;
 		
 		// set client options here (from instance variables)
 
@@ -68,21 +99,104 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		RefactoringStatus finalStatus= op.getConditionStatus();
 		assertEquals("wrong final condition status: " + finalStatus, expectedFinalStatus, finalStatus.getSeverity());
 		if (finalStatus.getSeverity() == RefactoringStatus.FATAL)
-			return;
+			return false;
 		
 		assertTrue("Validation check failed", !op.getValidationStatus().hasFatalError());
 		assertNotNull("No Undo", op.getUndoChange());
-			
-		String expected= getFileContents(getOutputTestFileName("A"));
-		String actual= cu.getSource();
-		assertEqualLines(expected, actual);
+		return true;
 	}
 	
 	private void performCuOK() throws Exception {
 		performCu(RefactoringStatus.OK, RefactoringStatus.OK);
 	}
 	
+	static String getSourceFileName(String fileName) {
+		if (fileName.lastIndexOf('/') == -1){
+			return fileName;
+		} else {
+			return fileName.substring(fileName.lastIndexOf('/')+1);
+		}
+	}
+
+	static String getPackageName(String fileName) {
+		String packageName= null;
+		if (fileName.lastIndexOf('/') == -1){
+			packageName= "";
+		} else {
+			packageName= fileName.substring(0, fileName.lastIndexOf('/')).replace('/', '.');
+		}
+		return packageName;
+	}
+	
+	private void compareWithZipFile(IPackageFragmentRoot src, String zipFileName) throws Exception {
+		String fullName= TEST_PATH_PREFIX + getRefactoringPath() + zipFileName;
+		ZipInputStream zis= new ZipInputStream(getFileInputStream(fullName));
+		try {
+			ArrayList zipCus= new ArrayList();
+			ZipEntry ze;
+			while ((ze= zis.getNextEntry()) != null){
+				String fileName = ze.getName();
+				if (fileName.endsWith(".java")){
+					String packageName = getPackageName(fileName);
+					String sourceFileName= getSourceFileName(fileName);
+					zipCus.add(packageName + "/" + sourceFileName);
+
+					ByteArrayOutputStream bout = new ByteArrayOutputStream();
+					byte data[] = new byte[10000];
+					int count = -1;
+					while ( (count = zis.read(data, 0, data.length)) != -1) {
+						bout.write(data, 0, count);
+					}
+			        String zipContents= bout.toString();
+					
+					IPackageFragment pack= src.getPackageFragment(packageName);
+					ICompilationUnit cu= pack.getCompilationUnit(sourceFileName);
+					String cuContents= cu.getSource();
+					
+					assertEqualLines(packageName + "/" + sourceFileName, zipContents, cuContents);
+				}
+			}
+			
+			IJavaElement[] packageFragments= src.getChildren();
+			for (int i= 0; i < packageFragments.length; i++) {
+				IPackageFragment packageFragment= (IPackageFragment) packageFragments[i];
+				ICompilationUnit[] cus= packageFragment.getCompilationUnits();
+				for (int j= 0; j < cus.length; j++) {
+					ICompilationUnit cu= cus[j];
+					String cuDescr= packageFragment.getElementName() + "/" + cu.getElementName();
+					assertTrue(cuDescr, zipCus.remove(cuDescr));
+				}
+			}
+			assertEquals(zipCus.toString(), 0, zipCus.size());
+			
+		} finally {
+			zis.close();
+		}
+	}
+
 // -------------------------------------------------------------------------------
+	
+	public void testJUnit() throws Exception {
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject("InferTypeArguments", "bin");
+		try {
+			IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(javaProject);
+			Assert.assertNotNull(jdk);
+			
+			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
+			Assert.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
+			
+			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainerWithImport(javaProject, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
+			
+			boolean performed= perform(new IJavaElement[] { javaProject }, RefactoringStatus.OK, RefactoringStatus.OK);
+			assertTrue(performed);
+			
+			compareWithZipFile(src, "junit381-noUI-generified-src.zip");
+		} finally {
+			if (javaProject != null && javaProject.exists())
+				JavaProjectHelper.delete(javaProject);
+		}
+		
+	}
 	
 	public void testCuTwoVectorElements() throws Exception {
 		performCuOK();

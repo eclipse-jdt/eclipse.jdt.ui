@@ -146,6 +146,9 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		
 		Expression expression= node.getExpression();
 		ConstraintVariable2 expressionCv= getConstraintVariable(expression);
+		if (expressionCv == null)
+			return;
+		
 		fTCModel.makeCastVariable(node, expressionCv);
 		
 		boolean eitherIsIntf= type.resolveBinding().isInterface() || expression.resolveTypeBinding().isInterface();
