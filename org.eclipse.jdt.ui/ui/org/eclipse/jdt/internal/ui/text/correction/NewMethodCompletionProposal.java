@@ -16,6 +16,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorPart;
@@ -64,15 +66,15 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	private ITypeBinding fSenderBinding;
 	private boolean fIsLocalChange;
 	
-	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode,  List arguments, ITypeBinding binding, int relevance) {
-		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
+	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode,  List arguments, ITypeBinding binding, int relevance, Image image) {
+		super(label, targetCU, null, relevance, image);
 		
 		fNode= invocationNode;
 		fArguments= arguments;
 		fSenderBinding= binding;
 	}
 		
-	protected ASTRewrite getRewrite() {
+	protected ASTRewrite getRewrite() throws CoreException {
 		ASTRewrite rewrite;
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
@@ -118,7 +120,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	}
 
 
-	private MethodDeclaration getStub(AST ast) {
+	private MethodDeclaration getStub(AST ast) throws CoreException {
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		
 		decl.setConstructor(isConstructor());
@@ -228,7 +230,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		
 	}
 	
-	private Type evaluateMethodType(AST ast) {
+	private Type evaluateMethodType(AST ast) throws CoreException {
 		ITypeBinding binding= ASTResolving.getTypeBinding(fNode);
 		if (binding != null) {
 			addImport(binding);
@@ -237,7 +239,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		return ast.newPrimitiveType(PrimitiveType.VOID);
 	}
 	
-	private Type evaluateParameterType(AST ast, Expression expr) {
+	private Type evaluateParameterType(AST ast, Expression expr) throws CoreException {
 		ITypeBinding binding= ASTResolving.getTypeBinding(expr.resolveTypeBinding());
 		if (binding != null) {
 			addImport(binding);

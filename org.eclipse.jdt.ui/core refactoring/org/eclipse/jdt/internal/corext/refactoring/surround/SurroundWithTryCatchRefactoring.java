@@ -191,7 +191,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		change.addTextEdit(NN, CodeBlockEdit.createReplace(selectionStart, fSelection.getLength(), codeBlock));
 	}
 	
-	private void addImportEdit(TextChange change, ITypeBinding[] exceptions) {
+	private void addImportEdit(TextChange change, ITypeBinding[] exceptions) throws JavaModelException {
 		ImportEdit edit= new ImportEdit(fCUnit, fSettings);
 		for (int i= 0; i < exceptions.length; i++) {
 			edit.addImport(Bindings.getFullyQualifiedImportName(exceptions[i]));

@@ -210,7 +210,7 @@ class MoveCuUpdateCreator {
 		return true;
 	}
 	
-	private ImportEdit getImportEdit(ICompilationUnit cu){
+	private ImportEdit getImportEdit(ICompilationUnit cu) throws JavaModelException{
 		if (fImportEdits.containsKey(cu))	
 			return (ImportEdit)fImportEdits.get(cu);
 		ImportEdit importEdit= new ImportEdit(cu, fSettings);

@@ -41,6 +41,7 @@ public class ImportsStructure implements IImportsStructure {
 	private boolean fFilterImplicitImports;
 	
 	private int fNumberOfImportsCreated;
+	private boolean fHasChanges= false;
 	
 	/**
 	 * Creates an ImportsStructure for a compilation unit. New imports
@@ -76,6 +77,7 @@ public class ImportsStructure implements IImportsStructure {
 		addPreferenceOrderHolders(preferenceOrder);
 		
 		fNumberOfImportsCreated= 0;
+		fHasChanges= false;
 	}
 	
 	
@@ -120,7 +122,7 @@ public class ImportsStructure implements IImportsStructure {
 	}
 
 	
-	private void addExistingImports(TextBuffer buffer, IImportDeclaration[] decls) throws CoreException {
+	private void addExistingImports(TextBuffer buffer, IImportDeclaration[] decls) throws JavaModelException {
 		if (decls.length == 0) {
 			return;
 		}				
@@ -272,18 +274,18 @@ public class ImportsStructure implements IImportsStructure {
 			return str.charAt(index);
 		}
 		return 0;
-	}		
-
-	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param qualifiedTypeName The fully qualified name of the type to import
-	 */			
-	public String addImport(String qualifiedTypeName) {
-		String typeContainerName= Signature.getQualifier(qualifiedTypeName);
-		String typeName= Signature.getSimpleName(qualifiedTypeName);
-		return addImport(typeContainerName, typeName);
+	}	
+	
+	public static boolean isImplicitImport(String qualifier, ICompilationUnit cu) {
+		if (qualifier.length() == 0 || "java.lang".equals(qualifier)) { //$NON-NLS-1$
+			return true;
+		}
+		String packageName= cu.getParent().getElementName();
+		if (qualifier.equals(packageName)) {
+			return true;
+		}
+		String mainTypeName= JavaModelUtil.concatenateName(packageName, Signature.getQualifier(cu.getElementName()));
+		return qualifier.equals(mainTypeName);
 	}
 	
 	/**
@@ -294,7 +296,18 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
 	 */			
 	public String addImport(String typeContainerName, String typeName) {
-		String fullTypeName= JavaModelUtil.concatenateName(typeContainerName, typeName);
+		return addImport(JavaModelUtil.concatenateName(typeContainerName, typeName));
+	}
+
+	/**
+	 * Adds a new import declaration that is sorted in the structure using
+	 * a best match algorithm. If an import already exists, the import is
+	 * not added.
+	 * @param qualifiedTypeName The fully qualified name of the type to import
+	 */			
+	public String addImport(String fullTypeName) {
+		String typeContainerName= Signature.getQualifier(fullTypeName);
+		String typeName= Signature.getSimpleName(fullTypeName);
 		
 		if (!"*".equals(typeName)) { //$NON-NLS-1$
 			String existing= findImport(typeName);
@@ -304,6 +317,9 @@ public class ImportsStructure implements IImportsStructure {
 				} else {
 					return fullTypeName;
 				}
+			}
+			if (fFilterImplicitImports && isImplicitImport(typeContainerName, fCompilationUnit)) {
+				return typeName;
 			}
 		}
 		
@@ -330,6 +346,7 @@ public class ImportsStructure implements IImportsStructure {
 				}
 			}
 		}
+		fHasChanges= true;
 		return typeName;
 	}
 	
@@ -342,7 +359,7 @@ public class ImportsStructure implements IImportsStructure {
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
 			if (entry.getName().equals(typeContainerName)) {
-				entry.remove(qualifiedTypeName);
+				fHasChanges= entry.remove(qualifiedTypeName);
 				return;
 			}
 		}
@@ -451,7 +468,7 @@ public class ImportsStructure implements IImportsStructure {
 		for (int i= 0; i < nPackageEntries; i++) {
 			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
 			int nImports= pack.getNumberOfImports();
-			if (nImports == 0 || (fFilterImplicitImports && !pack.isComment() && !isImportNeeded(pack.getName(), topLevelTypes))) {
+			if (nImports == 0) {
 				continue;
 			}
 			
@@ -518,23 +535,6 @@ public class ImportsStructure implements IImportsStructure {
 			}
 		}
 		return false;	
-	}
-	
-	private boolean isImportNeeded(String packName, IType[] cuTypes) {
-		if (packName.length() == 0 || "java.lang".equals(packName)) { //$NON-NLS-1$
-			return false;
-		}
-		if (cuTypes.length > 0) {
-			if (packName.equals(cuTypes[0].getPackageFragment().getElementName())) {
-				return false;
-			}
-			for (int i= 0; i < cuTypes.length; i++) {
-				if (packName.equals(JavaModelUtil.getFullyQualifiedName(cuTypes[i]))) {
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 	private void appendImportToBuffer(StringBuffer buf, String importName, String lineDelim) {
@@ -678,15 +678,16 @@ public class ImportsStructure implements IImportsStructure {
 			return null;
 		}		
 		
-		public void remove(String fullName) {
+		public boolean remove(String fullName) {
 			int nInports= fImportEntries.size();
 			for (int i= 0; i < nInports; i++) {
 				ImportDeclEntry curr= getImportAt(i);
 				if (!curr.isComment() && fullName.equals(curr.getElementName())) {
 					fImportEntries.remove(i);
-					return;
+					return true;
 				}
 			}
+			return false;
 		}		
 		
 		public final ImportDeclEntry getImportAt(int index) {
@@ -752,5 +753,13 @@ public class ImportsStructure implements IImportsStructure {
 		return fNumberOfImportsCreated;
 	}
 
+
+	/**
+	 * Returns <code>true</code> if imports have been added or removed.
+	 * @return boolean
+	 */
+	public boolean hasChanges() {
+		return fHasChanges;
+	}
 
 }

@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -27,7 +28,7 @@ public class ImportEditManager {
 		fImportEdits= new HashMap();
 	}
 
-	private ImportEdit getImportEdit(ICompilationUnit cu){
+	private ImportEdit getImportEdit(ICompilationUnit cu) throws JavaModelException{
 		if (fImportEdits.containsKey(cu))
 			return (ImportEdit)fImportEdits.get(cu);
 		
@@ -36,19 +37,19 @@ public class ImportEditManager {
 		return edit;
 	}
 
-	public void addImportTo(String fullyQualifiedName, ICompilationUnit cu){
+	public void addImportTo(String fullyQualifiedName, ICompilationUnit cu) throws JavaModelException{
 		getImportEdit(cu).addImport(fullyQualifiedName);
 	}
 	
-	public void addImportTo(IType type, ICompilationUnit cu){
+	public void addImportTo(IType type, ICompilationUnit cu) throws JavaModelException{
 		addImportTo(JavaModelUtil.getFullyQualifiedName(type), cu);
 	}
 	
-	public void removeImportTo(IType type, ICompilationUnit cu){
+	public void removeImportTo(IType type, ICompilationUnit cu) throws JavaModelException{
 		removeImportTo(JavaModelUtil.getFullyQualifiedName(type), cu);
 	}
 	
-	public void removeImportTo(String fullyQualifiedName, ICompilationUnit cu){
+	public void removeImportTo(String fullyQualifiedName, ICompilationUnit cu) throws JavaModelException{
 		getImportEdit(cu).removeImport(fullyQualifiedName);
 	}
 	

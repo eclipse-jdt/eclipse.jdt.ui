@@ -78,7 +78,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		setEnabled(checkEnabled(selection));
 	}
 	
-	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws JavaModelException {
 		return new ExtractMethodRefactoring(
 			cunit, 
 			selection.getOffset(), selection.getLength(),

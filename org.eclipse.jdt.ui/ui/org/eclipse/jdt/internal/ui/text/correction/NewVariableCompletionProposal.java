@@ -63,7 +63,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 		}
 	}
 		
-	protected ASTRewrite getRewrite() {
+	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= new AST();
 		CompilationUnit origCU= ASTResolving.findParentCompilationUnit(fOriginalNode);
 		
@@ -86,7 +86,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 		return rewrite;
 	}
 
-	private void doAddParam(AST ast, SimpleName node, ASTRewrite rewrite) {
+	private void doAddParam(AST ast, SimpleName node, ASTRewrite rewrite) throws CoreException {
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration) {
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
@@ -98,7 +98,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 		}
 	}
 
-	private void doAddLocal(AST ast, SimpleName node, ASTRewrite rewrite) {
+	private void doAddLocal(AST ast, SimpleName node, ASTRewrite rewrite) throws CoreException {
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration || decl instanceof Initializer) {
 			
@@ -151,7 +151,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 		}
 	}
 
-	private void doAddField(AST ast, SimpleName node, ASTRewrite rewrite) {
+	private void doAddField(AST ast, SimpleName node, ASTRewrite rewrite) throws CoreException {
 		ASTNode parentType= ASTResolving.findParentType(node);
 		if (parentType != null) {
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
@@ -186,7 +186,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 		return 0;
 	}
 		
-	private Type evaluateVariableType(AST ast) {
+	private Type evaluateVariableType(AST ast) throws CoreException {
 		ITypeBinding binding= ASTResolving.getTypeBinding(fOriginalNode);
 		if (binding != null) {
 			addImport(binding);

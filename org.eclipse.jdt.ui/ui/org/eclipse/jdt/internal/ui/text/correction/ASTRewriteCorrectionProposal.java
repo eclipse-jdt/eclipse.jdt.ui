@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -55,21 +56,21 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		return change;
 	}
 	
-	public void addImport(String qualifiedTypeName) {
+	public void addImport(String qualifiedTypeName) throws CoreException {
 		if (fImportEdit == null) {
 			fImportEdit= new ImportEdit(getCompilationUnit(), JavaPreferencesSettings.getCodeGenerationSettings());
 		}
 		fImportEdit.addImport(qualifiedTypeName);
 	}
 	
-	public void addImport(ITypeBinding binding) {
+	public void addImport(ITypeBinding binding) throws CoreException {
 		ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
 		if (baseType.isMember() || baseType.isTopLevel()) {
 			addImport(Bindings.getFullyQualifiedName(baseType));
 		}
 	}	
 	
-	protected ASTRewrite getRewrite() {
+	protected ASTRewrite getRewrite() throws CoreException {
 		return fRewrite;
 	}
 

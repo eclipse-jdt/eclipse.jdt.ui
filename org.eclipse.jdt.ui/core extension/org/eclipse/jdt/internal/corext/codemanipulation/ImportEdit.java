@@ -4,20 +4,17 @@
  */
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
@@ -26,34 +23,29 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
  */
 public final class ImportEdit extends SimpleTextEdit {
 	
-	private ICompilationUnit fCUnit;
-	private CodeGenerationSettings fSettings;
-	private List fAddedImports;
-	private List fRemovedImports;
-	private boolean fFilterImplicitImports;
+	private ImportsStructure fImportsStructure;
 	
-	public ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings) {
+	public ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings) throws JavaModelException {
 		Assert.isNotNull(cunit);
 		Assert.isNotNull(settings);
-		fCUnit= cunit;
-		fSettings= settings;
-		fAddedImports= new ArrayList(3);
-		fRemovedImports= new ArrayList(0);
-		fFilterImplicitImports= true;
+		try {
+			fImportsStructure= new ImportsStructure(cunit, settings.importOrder, settings.importThreshold, true);
+		} catch (JavaModelException e) {
+			throw e;
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
+		}
 	}
-
-	private ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings, List addedImports, List removedImports, boolean filterImplicitImports) {
-		this(cunit, settings);
-		fAddedImports= new ArrayList(addedImports);
-		fRemovedImports= new ArrayList(removedImports);
-		fFilterImplicitImports= filterImplicitImports;
+	
+	private ImportEdit(ImportsStructure importsStructure) {
+		fImportsStructure= importsStructure;
 	}
 	
 	/**
 	 * @see ImportsStructure#setFilterImplicitImports(boolean)
 	 */
 	public void setFilterImplicitImports(boolean filterImplicitImports) {
-		fFilterImplicitImports= filterImplicitImports;
+		fImportsStructure.setFilterImplicitImports(filterImplicitImports);
 	}
 	
 	/**
@@ -61,28 +53,18 @@ public final class ImportEdit extends SimpleTextEdit {
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
-	 */			
-	public void addImport(String qualifiedTypeName) {
-		int lastDotIndex= qualifiedTypeName.lastIndexOf('.');
-		if (lastDotIndex == -1)	// no default package
-			return;
-		if ("java.lang".equals(qualifiedTypeName.substring(0, lastDotIndex))) //$NON-NLS-1$
-			return;
-		
+	 * @return Retuns the simple type name that can be used in the code or the
+	 * fully qualified type name if an import conflict prevented the import.
+	 */
+	public String addImport(String qualifiedTypeName) {
 		//XXX workaround for 11622, 11537 and related problems with array types
-		String bracketsRemoved= removeTrailingBrackets(qualifiedTypeName);			
+		qualifiedTypeName= removeTrailingBrackets(qualifiedTypeName);
 		
-		if (fAddedImports.contains(bracketsRemoved))	//do not add twice
-			return;
-			
-		fAddedImports.add(bracketsRemoved);
+		return fImportsStructure.addImport(qualifiedTypeName);
 	}
 	
 	public void removeImport(String qualifiedTypeName) {
-		if (fRemovedImports.contains(qualifiedTypeName))	//do not remove twice
-			return;
-		
-		fRemovedImports.add(qualifiedTypeName);
+		fImportsStructure.removeImport(qualifiedTypeName);
 	}
 	
 	private static String removeTrailingBrackets(String s){
@@ -100,24 +82,15 @@ public final class ImportEdit extends SimpleTextEdit {
 	 * 	container; otherwise <code>false</code> is returned
 	 */
 	public boolean isEmpty() {
-		return fAddedImports.isEmpty() && fRemovedImports.isEmpty();
+		return fImportsStructure.hasChanges();
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
 	public void connect(TextBuffer buffer) throws CoreException {
-		ImportsStructure importStructure= new ImportsStructure(fCUnit, fSettings.importOrder, fSettings.importThreshold, true);
-		importStructure.setFilterImplicitImports(fFilterImplicitImports);
-		for (Iterator iter= fRemovedImports.iterator(); iter.hasNext();) {
-			importStructure.removeImport((String)iter.next());
-		}
-		for (Iterator iter= fAddedImports.iterator(); iter.hasNext();) {
-			importStructure.addImport((String)iter.next());
-		}
-		
-		TextRange range= importStructure.getReplaceRange(buffer);
-		String text= importStructure.getReplaceString(buffer, range);
+		TextRange range= fImportsStructure.getReplaceRange(buffer);
+		String text= fImportsStructure.getReplaceString(buffer, range);
 		if (text != null) {
 			setText(text);
 			setTextRange(range);
@@ -132,17 +105,18 @@ public final class ImportEdit extends SimpleTextEdit {
 	 * @see TextEdit#connect
 	 */
 	protected TextEdit copy0(TextEditCopier copier) {
-		return new ImportEdit(fCUnit, fSettings, fAddedImports, fRemovedImports, fFilterImplicitImports);
+		return new ImportEdit(fImportsStructure);
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#getModifiedElement
 	 */
 	public Object getModifiedElement() {
-		IImportContainer container= fCUnit.getImportContainer();
+		ICompilationUnit cu= fImportsStructure.getCompilationUnit();
+		IImportContainer container= cu.getImportContainer();
 		if (container.exists())
 			return container;
-		return fCUnit;
+		return cu;
 	}	
 }
 

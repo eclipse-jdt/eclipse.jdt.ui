@@ -17,6 +17,8 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -58,29 +60,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class UnresolvedElementsSubProcessor {
-	
-	
-	private static SimpleName getVariableNode(ASTNode selectedNode) {
-		if (selectedNode instanceof SimpleName) {
-			return (SimpleName) selectedNode;
-		} else if (selectedNode instanceof QualifiedName) {
-			QualifiedName qualifierName= (QualifiedName) selectedNode;
-			Name qualifier= qualifierName.getQualifier();
-			if (qualifier instanceof SimpleName) {
-				SimpleName simpleQualifier= (SimpleName) qualifier;
-
-			}
-		} else if (selectedNode instanceof FieldAccess) {
-			FieldAccess access= (FieldAccess) selectedNode;
-			Expression expression= access.getExpression();
-			if (expression == null || expression instanceof ThisExpression) {
-				return access.getName();
-			}
-		}		
-		return null;		
+		
+	private static ProblemPosition createProblemPosition(ASTNode node, ProblemPosition problemPos) {
+		Position pos= new Position(node.getStartPosition(), node.getLength());
+		return new ProblemPosition(pos, problemPos.getAnnotation(), problemPos.getCompilationUnit());
 	}
-	
-	
 	
 	public static void getVariableProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		
@@ -92,14 +76,16 @@ public class UnresolvedElementsSubProcessor {
 		SimpleName node= null;
 		if (selectedNode instanceof SimpleName) {
 			node= (SimpleName) selectedNode;
+			ASTNode parent= node.getParent();
+			if (parent instanceof MethodInvocation && node.equals(((MethodInvocation)parent).getExpression())) {
+				getTypeProposals(createProblemPosition(node, problemPos), SimilarElementsRequestor.CLASSES, proposals);
+			}
 		} else if (selectedNode instanceof QualifiedName) {
 			QualifiedName qualifierName= (QualifiedName) selectedNode;
 			Name qualifier= qualifierName.getQualifier();
 			if (qualifier instanceof SimpleName) {
 				SimpleName simpleQualifier= (SimpleName) qualifier;
-				Position pos= new Position(simpleQualifier.getStartPosition(), simpleQualifier.getLength());
-				ProblemPosition updatedProb= new ProblemPosition(pos, problemPos.getAnnotation(), problemPos.getCompilationUnit());
-				getTypeProposals(updatedProb, SimilarElementsRequestor.REF_TYPES, proposals);
+				getTypeProposals(createProblemPosition(simpleQualifier, problemPos), SimilarElementsRequestor.REF_TYPES, proposals);
 			}
 		} else if (selectedNode instanceof FieldAccess) {
 			FieldAccess access= (FieldAccess) selectedNode;
@@ -172,7 +158,7 @@ public class UnresolvedElementsSubProcessor {
 				importEdit.addImport(curr);
 			}
 						
-			importEdit.addImport(curr);
+			replaceName= importEdit.addImport(curr);
 						
 			boolean importOnly= replaceName.equals(typeName);
 			
@@ -277,12 +263,15 @@ public class UnresolvedElementsSubProcessor {
 			ICompilationUnit targetCU= getCompilationUnit(binding, cu, astRoot);
 			if (targetCU != null) {			
 				String label;
+				Image image;
 				if (cu.equals(targetCU)) {
 					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
+					image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
 				} else {
 					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, targetCU.getElementName() } ); //$NON-NLS-1$
+					image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 				}
-				proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, binding, 1));
+				proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, binding, 1, image));
 			}
 		}
 	}
@@ -329,7 +318,8 @@ public class UnresolvedElementsSubProcessor {
 			ICompilationUnit targetCU= getCompilationUnit(targetBinding, cu, astRoot);
 			if (targetCU != null) {
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", targetBinding.getName()); //$NON-NLS-1$
-				proposals.add(new NewMethodCompletionProposal(label, targetCU, selectedNode, arguments, targetBinding, 1));
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+				proposals.add(new NewMethodCompletionProposal(label, targetCU, selectedNode, arguments, targetBinding, 1, image));
 			}
 		}
 	}

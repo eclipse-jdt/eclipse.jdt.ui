@@ -92,7 +92,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @param cu the compilation unit which is going to be modified.
 	 * @param accessor a callback object to access the source this refactoring is working on.
 	 */
-	public ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
+	public ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws JavaModelException {
 		Assert.isNotNull(cu);
 		Assert.isNotNull(settings);
 		fCUnit= cu;
