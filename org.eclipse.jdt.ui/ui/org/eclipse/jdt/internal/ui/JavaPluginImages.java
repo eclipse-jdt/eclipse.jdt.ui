@@ -140,6 +140,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_VIEW_CLASSFILEGENERATION_TAB= create(T_CVIEW, "classfilegeneration_tab.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_VIEW_JDKCOMPLIANCE_TAB= create(T_CVIEW, "jdkcompliance_tab.gif"); //$NON-NLS-1$
 	
+	public static final ImageDescriptor DESC_CLCL_FILTER= create(T_CLCL, "filter_ps.gif"); //$NON-NLS-1$
+
 	public static final ImageDescriptor DESC_CLCL_CODE_ASSIST= create(T_CLCL, "metharg_obj.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_DLCL_CODE_ASSIST= create(T_DLCL, "metharg_obj.gif"); //$NON-NLS-1$
 

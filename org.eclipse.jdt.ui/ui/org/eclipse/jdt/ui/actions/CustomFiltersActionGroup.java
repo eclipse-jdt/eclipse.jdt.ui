@@ -19,13 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
-
-import org.eclipse.jface.action.ContributionItem;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.filters.CustomFiltersDialog;
+import org.eclipse.jdt.internal.ui.filters.FilterDescriptor;
+import org.eclipse.jdt.internal.ui.filters.FilterMessages;
+import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
@@ -34,17 +34,10 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionGroup;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.filters.CustomFiltersDialog;
-import org.eclipse.jdt.internal.ui.filters.FilterDescriptor;
-import org.eclipse.jdt.internal.ui.filters.FilterMessages;
-import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
 
 /**
  * Action group to add the filter action to a view part's toolbar
@@ -57,6 +50,16 @@ import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
  */
 public class CustomFiltersActionGroup extends ActionGroup {
 
+	class ShowFilterDialogAction extends Action {
+		ShowFilterDialogAction() {
+			setText(FilterMessages.getString("OpenCustomFiltersDialogAction.text")); //$NON-NLS-1$
+			setImageDescriptor(JavaPluginImages.DESC_CLCL_FILTER);
+		}
+		
+		public void run() {
+			openDialog();
+		}
+	}
 	private static final String TAG_CUSTOM_FILTERS = "customFilters"; //$NON-NLS-1$
 	private static final String TAG_USER_DEFINED_PATTERNS_ENABLED= "userDefinedPatternsEnabled"; //$NON-NLS-1$
 	private static final String TAG_USER_DEFINED_PATTERNS= "userDefinedPatterns"; //$NON-NLS-1$
@@ -79,6 +82,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private boolean fUserDefinedPatternsEnabled;
 	private String[] fUserDefinedPatterns;
 
+	
 	/**
 	 * Creates a new <code>CustomFiltersActionGroup</code>.
 	 * 
@@ -146,21 +150,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 	private void fillViewMenu(IMenuManager viewMenu) {
 		viewMenu.add(new Separator("filters")); //$NON-NLS-1$
-		viewMenu.add(new ContributionItem() {
-			public void fill(Menu menu, int index) {
-				MenuItem mi= new MenuItem(menu, SWT.NONE, index);
-				mi.setText(FilterMessages.getString("OpenCustomFiltersDialogAction.text")); //$NON-NLS-1$
-				mi.setSelection(areUserDefinedPatternsEnabled() || getEnabledFilterIds().length > 0);
-				mi.addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
-						openDialog();
-					}
-				});
-			}
-			public boolean isDynamic() {
-				return true;
-			}
-		});
+		viewMenu.add(new ShowFilterDialogAction());
 	}
 
 	/* (non-Javadoc)
