@@ -28,7 +28,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class PromoteTempInputPage extends UserInputWizardPage {
 
@@ -45,6 +44,7 @@ class PromoteTempInputPage extends UserInputWizardPage {
     private Button fDeclareStaticCheckbox;
     private Button fDeclareFinalCheckbox;
 	private Button[] fInitializeInRadioButtons;
+	private Text fNameField;
 	
 	public PromoteTempInputPage() {
 		super(PAGE_NAME, true);
@@ -73,13 +73,13 @@ class PromoteTempInputPage extends UserInputWizardPage {
         nameLabel.setText(RefactoringMessages.getString("PromoteTempInputPage.Field_name")); //$NON-NLS-1$
         nameLabel.setLayoutData(new GridData());
         
-        final Text nameField= new Text(result, SWT.BORDER | SWT.SINGLE);
-        nameField.setText(getPromoteTempRefactoring().getFieldName());
-        nameField.selectAll();
-        nameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        nameField.addModifyListener(new ModifyListener(){
+		fNameField = new Text(result, SWT.BORDER | SWT.SINGLE);
+        fNameField.setText(getPromoteTempRefactoring().getFieldName());
+        fNameField.selectAll();
+        fNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        fNameField.addModifyListener(new ModifyListener(){
         	public void modifyText(ModifyEvent e) {
-        		PromoteTempInputPage.this.getPromoteTempRefactoring().setFieldName(nameField.getText());
+        		PromoteTempInputPage.this.getPromoteTempRefactoring().setFieldName(fNameField.getText());
         		PromoteTempInputPage.this.updateStatus();
             }
         });
@@ -193,4 +193,13 @@ class PromoteTempInputPage extends UserInputWizardPage {
 	private PromoteTempToFieldRefactoring getPromoteTempRefactoring(){
 		return (PromoteTempToFieldRefactoring)getRefactoring();
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible && fNameField != null)
+			fNameField.setFocus();
+	}
+
 }
