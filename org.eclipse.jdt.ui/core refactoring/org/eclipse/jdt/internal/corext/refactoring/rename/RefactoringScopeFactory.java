@@ -20,6 +20,10 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 public class RefactoringScopeFactory {
+	
+	private RefactoringScopeFactory(){
+	}
+	
 	private static IJavaSearchScope create(IJavaProject javaProject) {
 		List projects= new  ArrayList();
 		projects.add(javaProject);
