@@ -132,7 +132,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	 * Is the specified member extractable from the type?
 	 * 
 	 * @param member the member to test
-	 * @return <code>true</code> if the member is extractable, <code>false</code> otherwise
+	 * @return <code>true</code> if the member is extractable, <code>false</code>
+	 *         otherwise
 	 * @throws JavaModelException if an error occurs
 	 */
 	protected static boolean isExtractableMember(final IMember member) throws JavaModelException {
@@ -141,7 +142,7 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 			case IJavaElement.METHOD:
 				return JdtFlags.isPublic(member) && !JdtFlags.isStatic(member) && !((IMethod) member).isConstructor();
 			case IJavaElement.FIELD:
-				return JdtFlags.isPublic(member) && JdtFlags.isStatic(member) && JdtFlags.isFinal(member);
+				return JdtFlags.isPublic(member) && JdtFlags.isStatic(member) && JdtFlags.isFinal(member) && !JdtFlags.isEnum(member);
 			default:
 				return false;
 		}
@@ -227,7 +228,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	}
 
 	/*
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor,
+	 *      org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
 	 */
 	public final RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
@@ -437,7 +439,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	}
 
 	/**
-	 * Creates the declaration of the new interface, excluding any comments or package declaration.
+	 * Creates the declaration of the new interface, excluding any comments or package
+	 * declaration.
 	 * 
 	 * @param sourceRewrite the source compilation unit rewrite
 	 * @param sourceDeclaration the type declaration of the source type
@@ -647,8 +650,10 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	 * 
 	 * @param rewrite the ast rewrite
 	 * @param declaration the method declaration
-	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
-	 * @param javadoc <code>true</code> if javadoc comments are processed, <code>false</code> otherwise
+	 * @param replacements the set of variable binding keys of formal parameters which
+	 *        must be replaced
+	 * @param javadoc <code>true</code> if javadoc comments are processed,
+	 *        <code>false</code> otherwise
 	 * @throws CoreException if an error occurs
 	 */
 	protected void createMethodComment(final ASTRewrite rewrite, final MethodDeclaration declaration, final Set replacements, final boolean javadoc) throws CoreException {
@@ -689,10 +694,12 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	}
 
 	/**
-	 * Creates the method annotations and comments of the extracted methods in the source type.
+	 * Creates the method annotations and comments of the extracted methods in the source
+	 * type.
 	 * 
 	 * @param sourceRewrite the source compilation unit rewrite
-	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
+	 * @param replacements the set of variable binding keys of formal parameters which
+	 *        must be replaced
 	 * @throws CoreException if an error occurs
 	 */
 	protected void createMethodComments(final CompilationUnitRewrite sourceRewrite, final Set replacements) throws CoreException {
@@ -788,7 +795,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	 * @param rewrite the ast rewrite to use
 	 * @param target the compilation unit node of the ast to rewrite
 	 * @param source the compilation unit node of the working copy ast
-	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
+	 * @param replacements the set of variable binding keys of formal parameters which
+	 *        must be replaced
 	 * @param group the text edit group to use
 	 */
 	protected void createOccurrenceReplacement(final CompilationUnitRange range, final ASTRewrite rewrite, final CompilationUnit target, final CompilationUnit source, final Set replacements, final TextEditGroup group) {
@@ -882,13 +890,15 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	}
 
 	/**
-	 * Creates the necessary replace edits to replace all occurrences of the new type with the interface.
+	 * Creates the necessary replace edits to replace all occurrences of the new type with
+	 * the interface.
 	 * 
 	 * @param manager the text change manager
 	 * @param extracted the working copy of the new interface
 	 * @param sourceRewrite the compilation unit source rewrite
 	 * @param declaration the type declaration
-	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
+	 * @param replacements the set of variable binding keys of formal parameters which
+	 *        must be replaced
 	 * @param status the refactoring status
 	 * @param monitor the progress monitor to display progress
 	 * @throws CoreException if an error occurs
@@ -1023,7 +1033,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	/**
 	 * Should extracted methods be declared as abstract?
 	 * 
-	 * @return <code>true</code> if the should be declared as abstract, <code>false</code> otherwise
+	 * @return <code>true</code> if the should be declared as abstract,
+	 *         <code>false</code> otherwise
 	 */
 	public final boolean getAbstract() {
 		return fAbstract;
@@ -1135,7 +1146,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	/**
 	 * Should extracted methods be declared as public?
 	 * 
-	 * @return <code>true</code> if the should be declared as public, <code>false</code> otherwise
+	 * @return <code>true</code> if the should be declared as public, <code>false</code>
+	 *         otherwise
 	 */
 	public final boolean getPublic() {
 		return fPublic;
@@ -1153,7 +1165,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	/**
 	 * Should override annotations be generated?
 	 * 
-	 * @return <code>true</code> if annotations should be generated, <code>false</code> otherwise
+	 * @return <code>true</code> if annotations should be generated, <code>false</code>
+	 *         otherwise
 	 */
 	public final boolean isAnnotations() {
 		return fAnnotations;
@@ -1169,7 +1182,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	/**
 	 * Should comments be generated?
 	 * 
-	 * @return <code>true</code> if comments should be generated, <code>false</code> otherwise
+	 * @return <code>true</code> if comments should be generated, <code>false</code>
+	 *         otherwise
 	 */
 	public final boolean isComments() {
 		return fComments;
@@ -1178,14 +1192,16 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	/**
 	 * Should occurrences of the type be replaced by the interface?
 	 * 
-	 * @return <code>true</code> if the should be replaced, <code>false</code> otherwise
+	 * @return <code>true</code> if the should be replaced, <code>false</code>
+	 *         otherwise
 	 */
 	public final boolean isReplace() {
 		return fReplace;
 	}
 
 	/*
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#loadParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus, org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#loadParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus,
+	 *      org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
 	 */
 	public final RefactoringParticipant[] loadParticipants(final RefactoringStatus status, final SharableParticipants sharedParticipants) throws CoreException {
 		return new RefactoringParticipant[0];
@@ -1208,7 +1224,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	/**
 	 * Determines whether extracted methods should be declared as abstract.
 	 * 
-	 * @param declare <code>true</code> to declare them public, <code>false</code> otherwise
+	 * @param declare <code>true</code> to declare them public, <code>false</code>
+	 *        otherwise
 	 */
 	public final void setAbstract(final boolean declare) {
 		fAbstract= declare;
@@ -1217,7 +1234,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	/**
 	 * Determines whether override annotations should be generated.
 	 * 
-	 * @param annotations <code>true</code> to generate override annotations, <code>false</code> otherwise
+	 * @param annotations <code>true</code> to generate override annotations,
+	 *        <code>false</code> otherwise
 	 */
 	public final void setAnnotations(final boolean annotations) {
 		fAnnotations= annotations;
@@ -1226,7 +1244,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	/**
 	 * Determines whether comments should be generated.
 	 * 
-	 * @param comments <code>true</code> to generate comments, <code>false</code> otherwise
+	 * @param comments <code>true</code> to generate comments, <code>false</code>
+	 *        otherwise
 	 */
 	public final void setComments(final boolean comments) {
 		fComments= comments;
@@ -1255,7 +1274,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	/**
 	 * Determines whether extracted methods should be declared as public.
 	 * 
-	 * @param declare <code>true</code> to declare them public, <code>false</code> otherwise
+	 * @param declare <code>true</code> to declare them public, <code>false</code>
+	 *        otherwise
 	 */
 	public final void setPublic(final boolean declare) {
 		fPublic= declare;
@@ -1264,7 +1284,8 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	/**
 	 * Determines whether occurrences of the type should be replaced by the interface.
 	 * 
-	 * @param replace <code>true</code> to replace occurrences where possible, <code>false</code> otherwise
+	 * @param replace <code>true</code> to replace occurrences where possible,
+	 *        <code>false</code> otherwise
 	 */
 	public final void setReplace(final boolean replace) {
 		fReplace= replace;
