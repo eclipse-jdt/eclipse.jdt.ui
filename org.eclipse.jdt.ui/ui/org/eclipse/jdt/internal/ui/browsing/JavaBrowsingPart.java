@@ -39,6 +39,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
@@ -732,8 +733,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	/**
 	 * Creates the the content provider of this part.
 	 */
-	protected StandardJavaElementContentProvider createContentProvider() {
-		return new JavaBrowsingContentProvider(true, this); //
+	protected IContentProvider createContentProvider() {
+		return new JavaBrowsingContentProvider(true, this);
 	}
 
 	protected void setInitialInput() {

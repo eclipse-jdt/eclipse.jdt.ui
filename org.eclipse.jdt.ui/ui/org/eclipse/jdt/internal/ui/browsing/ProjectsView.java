@@ -8,6 +8,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -18,8 +19,6 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 
@@ -42,7 +41,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/**
 	 * Creates the the content provider of this part.
 	 */
-	protected StandardJavaElementContentProvider createContentProvider() {
+	protected IContentProvider createContentProvider() {
 		return new ProjectAndSourceFolderContentProvider(this);
 	}
 
