@@ -20,12 +20,6 @@ import junit.framework.Test;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.ui.IViewReference;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
@@ -55,13 +49,7 @@ public class PerformanceTestSetup extends TestSetup {
 	 * @see junit.extensions.TestSetup#setUp()
 	 */
 	protected void setUp() throws Exception {
-		IWorkbench workbench= PlatformUI.getWorkbench();
-		IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
-		IWorkbenchPage activePage= activeWindow.getActivePage();
-		
-		IViewReference viewReference= activePage.findViewReference(EditorTestHelper.INTRO_VIEW_ID);
-		if (viewReference != null)
-			activePage.hideView(viewReference);
+		EditorTestHelper.showView(EditorTestHelper.INTRO_VIEW_ID, false);
 		
 		if (fSetPerspective)
 			EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE_ID);

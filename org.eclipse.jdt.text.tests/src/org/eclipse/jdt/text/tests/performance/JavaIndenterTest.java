@@ -26,8 +26,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
 public class JavaIndenterTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= JavaIndenterTest.class;
@@ -74,7 +72,7 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 	}
 
 	private void measureJavaIndenter(PerformanceMeter performanceMeter, int runs) {
-		IDocument document= ((JavaEditor) fEditor).getViewer().getDocument();
+		IDocument document= EditorTestHelper.getDocument(fEditor);
 		Display display= EditorTestHelper.getActiveDisplay();
 		IAction undo= fEditor.getAction(ITextEditorActionConstants.UNDO);
 		int originalNumberOfLines= document.getNumberOfLines();

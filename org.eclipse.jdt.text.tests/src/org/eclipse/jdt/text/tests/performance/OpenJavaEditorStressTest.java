@@ -21,7 +21,6 @@ import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.ide.IDE;
 
 public class OpenJavaEditorStressTest extends TextPerformanceTestCase {
 
@@ -40,7 +39,7 @@ public class OpenJavaEditorStressTest extends TextPerformanceTestCase {
 		IFile file= ResourceTestHelper.findFile(FILE);
 		
 		// make sure everything has been activated and loaded at least once
-		IDE.openEditor(EditorTestHelper.getActivePage(), file);
+		EditorTestHelper.openInEditor(file, true);
 		EditorTestHelper.closeAllEditors();
 		
 		Performance performance= Performance.getDefault();

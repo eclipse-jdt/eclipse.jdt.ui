@@ -297,24 +297,6 @@ public class EditorTestHelper {
 		return shown;
 	}
 	
-	public static boolean showView(String viewId) throws PartInitException {
-		IWorkbenchPage activePage= getActivePage();
-		IViewReference view= activePage.findViewReference(viewId);
-		boolean notShown= view == null;
-		if (notShown)
-			activePage.showView(viewId);
-		return notShown;
-	}
-	
-	public static boolean hideView(String viewId) {
-		IWorkbenchPage activePage= getActivePage();
-		IViewReference view= activePage.findViewReference(viewId);
-		boolean shown= view != null;
-		if (shown)
-			activePage.hideView(view);
-		return shown;
-	}
-	
 	public static void bringToTop() {
 		getActiveWorkbenchWindow().getShell().forceActive();
 	}
