@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.TestCase;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Control;
@@ -23,7 +21,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.IEditorPart;
 
-public abstract class ScrollEditorTest extends TestCase {
+public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 	
 	private static final int[] CTRL_HOME= new int[] { SWT.CTRL, SWT.HOME };
 	private static final int[] CTRL_DOWN= new int[] { SWT.CTRL, SWT.ARROW_DOWN };
@@ -82,7 +80,9 @@ public abstract class ScrollEditorTest extends TestCase {
 		fPerformanceMeter.dispose();
 	}
 	
-	protected void measureScrolling(String file, ScrollingMode mode, boolean preload, int nOfRuns, int nOfColdRuns) throws Exception {
+	protected void measureScrolling(String file, ScrollingMode mode, boolean preload) throws Exception {
+		int warmUpRuns= getWarmUpRuns();
+		int measuredRuns= getMeasuredRuns();
 		IEditorPart editor= null;
 		try {
 			editor= EditorTestHelper.openInEditor(ResourceTestHelper.findFile(file), true);
@@ -97,25 +97,25 @@ public abstract class ScrollEditorTest extends TestCase {
 			int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
 			int operations= mode.computeOperations(numberOfLines, visibleLinesInViewport);
 			
-			for (int i= 0; i < nOfRuns; i++) {
+			for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 				if (preload) {
 					for (int j= 0; j < operations; j++) {
 						// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
 						SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO, false);
 					}
-					if (i >= nOfColdRuns)
+					if (i >= warmUpRuns)
 						fPerformanceMeter.start();
 					EditorTestHelper.runEventQueue(100);
-					if (i >= nOfColdRuns)
+					if (i >= warmUpRuns)
 						fPerformanceMeter.stop();
 				} else {
-					if (i >= nOfColdRuns)
+					if (i >= warmUpRuns)
 						fPerformanceMeter.start();
 					for (int j= 0; j < operations; j++) {
 						// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
 						SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO);
 					}
-					if (i >= nOfColdRuns)
+					if (i >= warmUpRuns)
 						fPerformanceMeter.stop();
 					EditorTestHelper.runEventQueue(100);
 				}

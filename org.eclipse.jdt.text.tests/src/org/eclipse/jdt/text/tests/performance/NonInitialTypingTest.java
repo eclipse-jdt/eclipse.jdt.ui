@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.TestCase;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
@@ -30,7 +28,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * Measures the time to type in one single method into a large file. Abstract implementation.
  * @since 3.1
  */
-public abstract class NonInitialTypingTest extends TestCase {
+public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
@@ -38,9 +36,9 @@ public abstract class NonInitialTypingTest extends TestCase {
 			"return 42;\r" +
 			"}\r").toCharArray();
 	
-	private static final int N_OF_RUNS= 6;
+	private static final int WARM_UP_RUNS= 3;
 	
-	private static final int N_OF_COLD_RUNS= 3;
+	private static final int MEASURED_RUNS= 3;
 
 	private ITextEditor fEditor;
 	
@@ -58,7 +56,9 @@ public abstract class NonInitialTypingTest extends TestCase {
 		fMeter= performance.createPerformanceMeter(getScenarioId());
 		String summaryName= getSummaryName();
 		if (summaryName != null)
-			performance.tagAsSummary(fMeter, summaryName, Dimension.ELAPSED_PROCESS); 
+			performance.tagAsSummary(fMeter, summaryName, Dimension.ELAPSED_PROCESS);
+		setWarmUpRuns(WARM_UP_RUNS);
+		setMeasuredRuns(MEASURED_RUNS);
 	}
 	
 	protected String getSummaryName() {
@@ -94,17 +94,19 @@ public abstract class NonInitialTypingTest extends TestCase {
 		Display display= EditorTestHelper.getActiveDisplay();
 		int offset= getInsertPosition();
 		
-		for (int i= 0; i < N_OF_RUNS; i++) {
+		int warmUpRuns= getWarmUpRuns();
+		int measuredRuns= getMeasuredRuns();
+		for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 			fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
 			EditorTestHelper.runEventQueue(1000);
 			
-			if (i >= N_OF_COLD_RUNS)
+			if (i >= warmUpRuns)
 				fMeter.start();
 			for (int j= 0; j < METHOD.length; j++) {
 				fKeyboardProbe.pressChar(METHOD[j], display);
 				EditorTestHelper.runEventQueue();
 			}
-			if (i >= N_OF_COLD_RUNS)
+			if (i >= warmUpRuns)
 				fMeter.stop();
 			EditorTestHelper.revertEditor(fEditor, true);
 		}

@@ -12,7 +12,6 @@
 package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
@@ -23,15 +22,15 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-public class ToggleCommentTest extends TestCase {
+public class ToggleCommentTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= ToggleCommentTest.class;
 	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
-	private static final int N_OF_RUNS= 6;
+	private static final int WARM_UP_RUNS= 3;
 
-	private static final int N_OF_COLD_RUNS= 3;
+	private static final int MEASURED_RUNS= 3;
 
 	private PerformanceMeter fCommentMeter;
 
@@ -49,6 +48,8 @@ public class ToggleCommentTest extends TestCase {
 		fUncommentMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "uncomment"));
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
+		setWarmUpRuns(WARM_UP_RUNS);
+		setMeasuredRuns(MEASURED_RUNS);
 	}
 	
 	protected void tearDown() throws Exception {
@@ -64,17 +65,19 @@ public class ToggleCommentTest extends TestCase {
 
 	private void measureToggleComment() throws PartInitException {
 		IAction toggleComment= fEditor.getAction("ToggleComment");
-		for (int i= 0; i < N_OF_RUNS; i++) {
-			if (i >= N_OF_COLD_RUNS)
+		int warmUpRuns= getWarmUpRuns();
+		int measuredRuns= getMeasuredRuns();
+		for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
+			if (i >= warmUpRuns)
 				fCommentMeter.start();
 			runAction(toggleComment);
-			if (i >= N_OF_COLD_RUNS)
+			if (i >= warmUpRuns)
 				fCommentMeter.stop();
 			EditorTestHelper.runEventQueue(5000);
-			if (i >= N_OF_COLD_RUNS)
+			if (i >= warmUpRuns)
 				fUncommentMeter.start();
 			runAction(toggleComment);
-			if (i >= N_OF_COLD_RUNS)
+			if (i >= warmUpRuns)
 				fUncommentMeter.stop();
 			EditorTestHelper.runEventQueue(5000);
 		}

@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.TestCase;
-
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.test.performance.Performance;
@@ -24,11 +22,11 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-public abstract class RevertEditorTest extends TestCase {
+public abstract class RevertEditorTest extends TextPerformanceTestCase {
 	
-	private static final int RUNS= 15;
+	private static final int WARM_UP_RUNS= 10;
 	
-	private static final int COLD_RUNS= 10;
+	private static final int MEASURED_RUNS= 5;
 	
 	private static final String REPLACE_TEXT= "XXX"; //$NON-NLS-1$
 	
@@ -37,16 +35,20 @@ public abstract class RevertEditorTest extends TestCase {
 	protected void setUp() throws Exception {
 		Performance performance= Performance.getDefault();
 		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		setWarmUpRuns(WARM_UP_RUNS);
+		setMeasuredRuns(MEASURED_RUNS);
 	}
 	
 	protected void measureRevert(IFile file) throws PartInitException, BadLocationException {
+		int warmUpRuns= getWarmUpRuns();
+		int measuredRuns= getMeasuredRuns();
 		ITextEditor part= (ITextEditor) EditorTestHelper.openInEditor(file, true);
-		for (int i= 0; i < RUNS; i++) {
+		for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 			dirtyEditor(part);
-			if (i >= COLD_RUNS)
+			if (i >= warmUpRuns)
 				fPerformanceMeter.start();
 			EditorTestHelper.revertEditor(part, true);
-			if (i >= COLD_RUNS)
+			if (i >= warmUpRuns)
 				fPerformanceMeter.stop();
 			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
 			EditorTestHelper.runEventQueue(part);

@@ -37,9 +37,9 @@ public class OpenTextEditorTest extends OpenEditorTest {
 
 	private static final String SHORT_NAME_WARM_RUN= "Open text editor (reopen)";
 
-	public static final int N_OF_RUNS= 15;
+	public static final int WARM_UP_RUNS= 10;
 	
-	public static final int N_OF_COLD_RUNS= 10;
+	public static final int MEASURED_RUNS= 5;
 	
 	public static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
 	
@@ -68,6 +68,8 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	
 	protected void setUp() {
 		EditorTestHelper.runEventQueue();
+		setWarmUpRuns(WARM_UP_RUNS);
+		setMeasuredRuns(MEASURED_RUNS);
 	}
 
 	public void testOpenFirstEditor() throws PartInitException {
@@ -78,17 +80,17 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	}
 	
 	public void testOpenTextEditor1() throws PartInitException {
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COLD_RUNS), null, false);
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, getWarmUpRuns()), null, false);
 		Performance performance= Performance.getDefault();
 		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, N_OF_COLD_RUNS, N_OF_RUNS - N_OF_COLD_RUNS), performanceMeter, true);
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, getWarmUpRuns(), getMeasuredRuns()), performanceMeter, true);
 	}
 	
 	public void testOpenTextEditor2() throws PartInitException {
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COLD_RUNS), null, false);
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, getWarmUpRuns()), null, false);
 		Performance performance= Performance.getDefault();
 		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		performance.tagAsGlobalSummary(performanceMeter, SHORT_NAME_WARM_RUN, Dimension.ELAPSED_PROCESS); 
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, N_OF_COLD_RUNS, N_OF_RUNS - N_OF_COLD_RUNS), performanceMeter, true);
+		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, getWarmUpRuns(), getMeasuredRuns()), performanceMeter, true);
 	}
 }

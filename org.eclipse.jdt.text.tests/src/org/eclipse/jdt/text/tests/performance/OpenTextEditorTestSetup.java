@@ -21,7 +21,7 @@ public class OpenTextEditorTestSetup extends TestSetup {
 	}
 
 	protected void setUp() throws Exception {
-		ResourceTestHelper.replicate("/" + PerformanceTestSetup.PROJECT + OpenTextEditorTest.ORIG_FILE, "/" + PerformanceTestSetup.PROJECT + OpenTextEditorTest.PATH + OpenTextEditorTest.FILE_PREFIX, OpenTextEditorTest.FILE_SUFFIX, OpenTextEditorTest.N_OF_RUNS, ResourceTestHelper.SKIP_IF_EXISTS);
+		ResourceTestHelper.replicate("/" + PerformanceTestSetup.PROJECT + OpenTextEditorTest.ORIG_FILE, "/" + PerformanceTestSetup.PROJECT + OpenTextEditorTest.PATH + OpenTextEditorTest.FILE_PREFIX, OpenTextEditorTest.FILE_SUFFIX, OpenTextEditorTest.WARM_UP_RUNS + OpenTextEditorTest.MEASURED_RUNS, ResourceTestHelper.SKIP_IF_EXISTS);
 	}
 	
 	protected void tearDown() {

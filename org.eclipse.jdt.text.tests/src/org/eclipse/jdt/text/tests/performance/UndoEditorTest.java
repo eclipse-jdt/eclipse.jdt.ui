@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.TestCase;
-
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.test.performance.Performance;
@@ -24,7 +22,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-public abstract class UndoEditorTest extends TestCase {
+public abstract class UndoEditorTest extends TextPerformanceTestCase {
 
 	private PerformanceMeter fPerformanceMeter;
 
@@ -39,22 +37,24 @@ public abstract class UndoEditorTest extends TestCase {
 		fPerformanceMeter.dispose();
 	}
 	
-	protected void measureUndo(IFile file, int nOfRuns, int nOfColdRuns) throws PartInitException {
+	protected void measureUndo(IFile file) throws PartInitException {
 		AbstractDecoratedTextEditor editor= (AbstractDecoratedTextEditor) EditorTestHelper.openInEditor(file, true);
 		editor.showChangeInformation(false); // TODO: remove when undo does no longer trigger timing issue
 		
 		IAction selectAll= editor.getAction(ITextEditorActionConstants.SELECT_ALL);
 		IAction shiftRight= editor.getAction(ITextEditorActionConstants.SHIFT_RIGHT);
 		IAction undo= editor.getAction(ITextEditorActionConstants.UNDO);
-		for (int i= 0; i < nOfRuns; i++) {
+		int warmUpRuns= getWarmUpRuns();
+		int measuredRuns= getMeasuredRuns();
+		for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 			runAction(selectAll);
 			runAction(shiftRight);
 			sleep(5000);
 			EditorTestHelper.runEventQueue();
-			if (i >= nOfColdRuns)
+			if (i >= warmUpRuns)
 				fPerformanceMeter.start();
 			runAction(undo);
-			if (i >= nOfColdRuns)
+			if (i >= warmUpRuns)
 				fPerformanceMeter.stop();
 			sleep(5000); // NOTE: runnables posted from other threads, while the main thread waits here, are not measured at all
 		}

@@ -14,7 +14,6 @@ package org.eclipse.jdt.text.tests.performance;
 import java.io.IOException;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
@@ -30,7 +29,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
-public class OpenQuickOutlineTest extends TestCase {
+public class OpenQuickOutlineTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= OpenQuickOutlineTest.class;
 	
@@ -40,9 +39,9 @@ public class OpenQuickOutlineTest extends TestCase {
 	
 	private static final String ORIG_FILE= PATH + ORIG_NAME + ".java";
 
-	private static final int N_OF_RUNS= 20;
+	private static final int WARM_UP_RUNS= 10;
 
-	private static final int N_OF_COLD_RUNS= 10;
+	private static final int MEASURED_RUNS= 10;
 
 	private PerformanceMeter fFirstMeter;
 
@@ -57,18 +56,20 @@ public class OpenQuickOutlineTest extends TestCase {
 	}
 	
 	protected void setUp() throws Exception {
+		setWarmUpRuns(WARM_UP_RUNS);
+		setMeasuredRuns(MEASURED_RUNS);
 		Performance performance= Performance.getDefault();
 		fFirstMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "cold"));
 		fSecondMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "warm"));
 		fWasOutlineViewShown= EditorTestHelper.hideView(OUTLINE_VIEW); // TODO: find solution to hide view in other perspectives too
-		ResourceTestHelper.replicate(ORIG_FILE, PATH + ORIG_NAME, ".java", N_OF_RUNS, ORIG_NAME, ORIG_NAME, ResourceTestHelper.FAIL_IF_EXISTS);
+		ResourceTestHelper.replicate(ORIG_FILE, PATH + ORIG_NAME, ".java", getWarmUpRuns() + getMeasuredRuns(), ORIG_NAME, ORIG_NAME, ResourceTestHelper.FAIL_IF_EXISTS);
 		ResourceTestHelper.incrementalBuild();
 		EditorTestHelper.bringToTop();
 		EditorTestHelper.joinJobs(1000, 10000, 100);
 	}
 	
 	protected void tearDown() throws Exception {
-		for (int i= 0; i < N_OF_RUNS; i++)
+		for (int i= 0, n= getWarmUpRuns() + getMeasuredRuns(); i < n; i++)
 			ResourceTestHelper.delete(PATH + ORIG_NAME + i + ".java");
 		if (fWasOutlineViewShown)
 			EditorTestHelper.showView(OUTLINE_VIEW);
@@ -77,14 +78,16 @@ public class OpenQuickOutlineTest extends TestCase {
 	}
 
 	public void testOpenQuickOutline1() throws IOException, CoreException {
-		for (int i= 0; i < N_OF_RUNS; i++) {
+		int warmUpRuns= getWarmUpRuns();
+		int measuredRuns= getMeasuredRuns();
+		for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 			String name= ORIG_NAME + i;
 			String file= PATH + name + ".java";
 			ITextEditor editor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(file), true);
 			EditorTestHelper.joinJobs(5000, 10000, 100);
 			
-			measureOpenQuickOutline(editor, i < N_OF_COLD_RUNS ? null : fFirstMeter);
-			measureOpenQuickOutline(editor, i < N_OF_COLD_RUNS ? null : fSecondMeter);
+			measureOpenQuickOutline(editor, i < warmUpRuns ? null : fFirstMeter);
+			measureOpenQuickOutline(editor, i < warmUpRuns ? null : fSecondMeter);
 			
 			EditorTestHelper.closeAllEditors();
 		}

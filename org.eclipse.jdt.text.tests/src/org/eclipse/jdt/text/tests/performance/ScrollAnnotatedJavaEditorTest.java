@@ -39,10 +39,10 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 
 	private static final String LINE_SCROLLING_FILE= "/org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 
-	private static final int N_OF_RUNS= 6;
-
-	private static final int N_OF_COLD_RUNS= 3;
+	private static final int WARM_UP_RUNS= 3;
 	
+	private static final int MEASURED_RUNS= 3;
+
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -51,6 +51,8 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 		super.setUp(editor);
 		createAnnotations(editor);
 		EditorTestHelper.joinJobs(1000, 20000, 100);
+		setWarmUpRuns(WARM_UP_RUNS);
+		setMeasuredRuns(MEASURED_RUNS);
 	}
 	
 	private void createAnnotations(IEditorPart editor) throws BadLocationException, JavaModelException {
@@ -94,30 +96,30 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 	}
 	
 	public void testScrollJavaEditorLineWise1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE, false, N_OF_RUNS, N_OF_COLD_RUNS);
+		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE, false);
 	}
 
 	public void testScrollJavaEditorPageWise() throws Exception {
-		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE, false, N_OF_RUNS, N_OF_COLD_RUNS);
+		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE, false);
 	}
 
 	public void testScrollJavaEditorLineWisePreloaded1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE, true, N_OF_RUNS, N_OF_COLD_RUNS);
+		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_NO_CARET_MOVE, true);
 	}
 	
 	public void testScrollJavaEditorPageWisePreloaded1() throws Exception {
-		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE, true, N_OF_RUNS, N_OF_COLD_RUNS);
+		measureScrolling(PAGE_SCROLLING_FILE, PAGE_WISE, true);
 	}
 
 	public void testScrollJavaEditorLineWiseMoveCaret1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE, false, N_OF_RUNS, N_OF_COLD_RUNS);
+		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE, false);
 	}
 	
 	public void testScrollJavaEditorLineWiseMoveCaretPreloaded1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE, true, N_OF_RUNS, N_OF_COLD_RUNS);
+		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE, true);
 	}
 	
 	public void testScrollJavaEditorLineWiseSelect1() throws Exception {
-		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_SELECT, false, N_OF_RUNS, N_OF_COLD_RUNS);
+		measureScrolling(LINE_SCROLLING_FILE, LINE_WISE_SELECT, false);
 	}
 }

@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.TestCase;
-
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.custom.StyledText;
@@ -27,7 +25,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 
-public abstract class MouseScrollEditorTest extends TestCase {
+public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 	
 	public static abstract class Poster {
 		
@@ -142,7 +140,7 @@ public abstract class MouseScrollEditorTest extends TestCase {
 		fPerformanceMeter.dispose();
 	}
 
-	protected void measureScrolling(int nOfRuns, int nOfColdRuns, Poster poster, IFile file) throws PartInitException {
+	protected void measureScrolling(Poster poster, IFile file) throws PartInitException {
 		try {
 			IEditorPart editor= EditorTestHelper.openInEditor(file, true);
 			EditorTestHelper.joinJobs(5000, 10000, 100);
@@ -157,19 +155,21 @@ public abstract class MouseScrollEditorTest extends TestCase {
 			
 			fPoster= poster;
 			
-			for (int i= 0; i < nOfRuns; i++) {
+			int warmUpRuns= getWarmUpRuns();
+			int measuredRuns= getMeasuredRuns();
+			for (int i= 0; i < warmUpRuns + measuredRuns; i++) {
 				fPoster.initializeFromForeground(fText);
 				
 				fDone= false;
 				new Thread(fThreadRunnable).start();
-				if (i >= nOfColdRuns)
+				if (i >= warmUpRuns)
 					fPerformanceMeter.start();
 				while (!fDone)
 					if (!fDisplay.readAndDispatch())
 						fDisplay.sleep();
 				if (fBackgroundError != null)
 					throw fBackgroundError;
-				if (i >= nOfColdRuns)
+				if (i >= warmUpRuns)
 					fPerformanceMeter.stop();
 				assertEquals(fMaxTopPixel, fText.getTopPixel());
 				EditorTestHelper.joinJobs(100, 1000, 100);

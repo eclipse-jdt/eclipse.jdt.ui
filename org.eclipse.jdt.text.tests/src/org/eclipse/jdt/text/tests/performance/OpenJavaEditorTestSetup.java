@@ -25,7 +25,7 @@ public class OpenJavaEditorTestSetup extends TestSetup {
 		String destPrefix= "/" + PerformanceTestSetup.PROJECT + OpenJavaEditorTest.PATH + OpenJavaEditorTest.FILE_PREFIX;
 		String destSuffix= OpenJavaEditorTest.FILE_SUFFIX;
 		String name= OpenJavaEditorTest.FILE_PREFIX;
-		ResourceTestHelper.replicate(src, destPrefix, destSuffix, OpenJavaEditorTest.N_OF_RUNS, name, name, ResourceTestHelper.SKIP_IF_EXISTS);
+		ResourceTestHelper.replicate(src, destPrefix, destSuffix, OpenJavaEditorTest.WARM_UP_RUNS + OpenJavaEditorTest.MEASURED_RUNS, name, name, ResourceTestHelper.SKIP_IF_EXISTS);
 	}
 	
 	protected void tearDown() throws Exception {

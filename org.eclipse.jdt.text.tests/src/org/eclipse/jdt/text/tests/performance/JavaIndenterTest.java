@@ -12,7 +12,6 @@
 package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.swt.SWT;
@@ -30,13 +29,15 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-public class JavaIndenterTest extends TestCase {
+public class JavaIndenterTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= JavaIndenterTest.class;
 
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 
-	private static final int N_OF_RUNS= 2;
+	private static final int WARM_UP_RUNS= 2;
+
+	private static final int MEASURED_RUNS= 2;
 
 	private static final int[] CTRL_END= new int[] { SWT.CTRL, SWT.END };
 	
@@ -59,6 +60,9 @@ public class JavaIndenterTest extends TestCase {
 		runAction(fEditor.getAction("ToggleComment"));
 		SWTEventHelper.pressKeyCodeCombination(EditorTestHelper.getActiveDisplay(), CTRL_END);
 		EditorTestHelper.joinJobs(2000, 5000, 100);
+		
+		setWarmUpRuns(WARM_UP_RUNS);
+		setMeasuredRuns(MEASURED_RUNS);
 	}
 
 	protected void tearDown() throws Exception {
@@ -68,17 +72,17 @@ public class JavaIndenterTest extends TestCase {
 	
 	public void testJavaIndenter2() {
 		// cold run
-		measureJavaIndenter(false);
+		measureJavaIndenter(getWarmUpRuns(), false);
 		// warm run
-		measureJavaIndenter(true);
+		measureJavaIndenter(getMeasuredRuns(), true);
 	}
 
-	private void measureJavaIndenter(boolean measure) {
+	private void measureJavaIndenter(int runs, boolean measure) {
 		IDocument document= ((JavaEditor) fEditor).getViewer().getDocument();
 		Display display= EditorTestHelper.getActiveDisplay();
 		IAction undo= fEditor.getAction(ITextEditorActionConstants.UNDO);
 		int originalNumberOfLines= document.getNumberOfLines();
-		for (int i= 0; i < N_OF_RUNS; i++) {
+		for (int i= 0; i < runs; i++) {
 			if (measure)
 				fPerformanceMeter.start();
 			SWTEventHelper.pressKeyCode(display, SWT.CR);

@@ -22,15 +22,21 @@ public class UndoJavaEditorTest extends UndoEditorTest {
 	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
-	private static final int N_OF_RUNS= 4;
+	private static final int WARM_UP_RUNS= 2;
 
-	private static final int N_OF_COLD_RUNS= 2;
+	private static final int MEASURED_RUNS= 2;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 	
+	protected void setUp() throws Exception {
+		super.setUp();
+		setWarmUpRuns(WARM_UP_RUNS);
+		setMeasuredRuns(MEASURED_RUNS);
+	}
+	
 	public void testUndoJavaEditor2() throws PartInitException {
-		measureUndo(ResourceTestHelper.findFile(FILE), N_OF_RUNS, N_OF_COLD_RUNS);
+		measureUndo(ResourceTestHelper.findFile(FILE));
 	}
 }

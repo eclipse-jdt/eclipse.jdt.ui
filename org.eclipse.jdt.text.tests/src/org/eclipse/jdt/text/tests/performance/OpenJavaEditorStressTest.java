@@ -12,7 +12,6 @@
 package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
@@ -24,7 +23,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 
-public class OpenJavaEditorStressTest extends TestCase {
+public class OpenJavaEditorStressTest extends TextPerformanceTestCase {
 
 	private static final Class THIS= OpenJavaEditorStressTest.class;
 	
@@ -37,6 +36,7 @@ public class OpenJavaEditorStressTest extends TestCase {
 	}
 
 	public void testOpenJavaEditor1() throws PartInitException {
+		setMeasuredRuns(NUMBER_OF_RUNS);
 		IFile file= ResourceTestHelper.findFile(FILE);
 		
 		// make sure everything has been activated and loaded at least once
@@ -47,7 +47,7 @@ public class OpenJavaEditorStressTest extends TestCase {
 		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		performanceMeter.start();
 		try {
-			for (int i= 0; i < NUMBER_OF_RUNS; i++) {
+			for (int i= 0, n= getMeasuredRuns(); i < n; i++) {
 				EditorTestHelper.openInEditor(file, true);
 				EditorTestHelper.closeAllEditors();
 				EditorTestHelper.runEventQueue();
