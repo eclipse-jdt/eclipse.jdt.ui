@@ -341,7 +341,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 				continue;
 				
 			IResource resource= (IResource)each;
-			if (dest.equals(resource.getParent()))
+			if (ReorgUtils.isParent(resource, dest))
 				return true;
 		}
 		return false;
@@ -409,16 +409,10 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 			Object each= iter.next();
 			if (! (each instanceof ICompilationUnit))
 				continue;
-			if (isDefaultPackage(((ICompilationUnit)each).getParent()))	
+			if (JavaElementUtil.isDefaultPackage(((ICompilationUnit)each).getParent()))	
 				return true;
 		}
 		return false;
-	}
-	
-	private static boolean isDefaultPackage(IJavaElement element){		
-			if (! (element instanceof IPackageFragment))
-				return false;
-			return (((IPackageFragment)element).isDefaultPackage());
 	}
 	
 	private boolean anyHasSyntaxErrors() throws JavaModelException{

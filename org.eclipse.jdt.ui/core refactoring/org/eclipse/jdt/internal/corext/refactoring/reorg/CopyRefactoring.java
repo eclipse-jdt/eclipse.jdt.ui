@@ -109,12 +109,12 @@ public class CopyRefactoring extends ReorgRefactoring {
 
 	private static boolean isNewNameOk(IPackageFragmentRoot root, String newName) {
 		return ! root.getPackageFragment(newName).exists() ;
-	}	
+	}
 	
 	private String createNewName(ICompilationUnit cu, IPackageFragment dest){
 		if (isNewNameOk(dest, cu.getElementName()))
 			return null;
-		if (! cu.getParent().equals(dest))	
+		if (! ReorgUtils.isParent(cu, dest))
 			return null;
 		int i= 1;
 		while (true){
@@ -136,7 +136,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 	private String createNewName(IResource res, IContainer container){
 		if (isNewNameOk(container, res.getName()))
 			return null;
-		if (! res.getParent().equals(container))	
+		if (! ReorgUtils.isParent(res, container))
 			return null;
 		int i= 1;
 		while (true){
@@ -158,13 +158,12 @@ public class CopyRefactoring extends ReorgRefactoring {
 	private String createNewName(IPackageFragment pack, IPackageFragmentRoot root){
 		if (isNewNameOk(root, pack.getElementName()))
 			return null;
-		if (! pack.getParent().equals(root))	
+		if (! ReorgUtils.isParent(pack, root))
 			return null;
-			
 		int i= 1;
 		while (true){
 			String newName;
-			if (i==0)
+			if (i == 0)
 				newName= RefactoringCoreMessages.getFormattedString("CopyRefactoring.package.copyOf1", //$NON-NLS-1$
 							pack.getElementName());
 			else

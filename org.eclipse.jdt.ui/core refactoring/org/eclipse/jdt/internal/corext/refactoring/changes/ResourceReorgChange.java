@@ -23,12 +23,12 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 abstract class ResourceReorgChange extends Change {
 	
@@ -61,9 +61,9 @@ abstract class ResourceReorgChange extends Change {
 				return;
 			
 			String newName= getNewResourceName();
-			deleteIfAlreadyExists(new SubProgressMonitor(pm, 1), newName);
-				
-			doPerform(getDestinationPath(newName), new SubProgressMonitor(pm, 1));	
+			boolean performReorg= deleteIfAlreadyExists(new SubProgressMonitor(pm, 1), newName);
+			if (performReorg)
+				doPerform(getDestinationPath(newName), new SubProgressMonitor(pm, 1));	
 		} catch (JavaModelException e){
 			throw e;
 		} catch (CoreException e){
@@ -77,21 +77,35 @@ abstract class ResourceReorgChange extends Change {
 		return getDestination().getFullPath().append(newName);
 	}
 
-	private void deleteIfAlreadyExists(IProgressMonitor pm, String newName) throws CoreException {
+	/**
+	 * returns false if source and destination are the same (in workspace or on disk)
+	 * in such case, no action should be performed
+	 */
+	private boolean deleteIfAlreadyExists(IProgressMonitor pm, String newName) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		IResource current= getDestination().findMember(newName);
 		if (current == null)
-			return;
+			return true;
 		if (! current.exists())
-			return;
+			return true;
+
+		IResource resource= getResource();
+		Assert.isNotNull(resource);
+			
+		if (ReorgUtils.equalInWorkspaceOrOnDisk(resource, current))
+			return false;
+		
 		if (current instanceof IFile)
 			((IFile)current).delete(false, true, new SubProgressMonitor(pm, 1));
 		else if (current instanceof IFolder)
 			((IFolder)current).delete(false, true, new SubProgressMonitor(pm, 1));
 		else 
-			Assert.isTrue(false, RefactoringCoreMessages.getString("ResourceReorgChange.assert"));	 //$NON-NLS-1$
+			Assert.isTrue(false);
+			
+		return true;	
 	}
 	
+
 	private String getNewResourceName(){
 		if (fNewNameQuery == null)
 			return getResource().getName();

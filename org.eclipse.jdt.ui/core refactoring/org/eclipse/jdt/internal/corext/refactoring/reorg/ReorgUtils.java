@@ -14,11 +14,16 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 public class ReorgUtils {
 	
@@ -101,6 +106,50 @@ public class ReorgUtils {
 		IProject definingProject= res.getProject();
 		IProject occurringProject= pkgRoot.getJavaProject().getProject();
 		return !definingProject.equals(occurringProject);
+	}
+
+	public static boolean isParent(IPackageFragment pack, IPackageFragmentRoot root){
+		if (pack == null)
+			return false;		
+		IJavaElement packParent= pack.getParent();
+		if (packParent == null)
+			return false;		
+		if (packParent.equals(root))	
+			return true;
+		IResource packageResource= ResourceUtil.getResource(pack);
+		IResource packageRootResource= ResourceUtil.getResource(root);
+		return isParent(packageResource, packageRootResource);
+	}
+
+	public static boolean isParent(ICompilationUnit cu, IPackageFragment dest){
+		if (cu == null)
+			return false;
+		IJavaElement cuParent= cu.getParent();
+		if (cuParent == null)
+			return false;
+		if (cuParent.equals(dest))	
+			return true;
+		IResource cuResource= ResourceUtil.getResource(cu);
+		IResource packageResource= ResourceUtil.getResource(dest);
+		return isParent(cuResource, packageResource);
+	}
+
+	public static boolean isParent(IResource res, IResource maybeParent){
+		if (res == null)
+			return false;
+		return equalInWorkspaceOrOnDisk(res.getParent(), maybeParent);
+	}
+	
+	public static boolean equalInWorkspaceOrOnDisk(IResource r1, IResource r2){
+		if (r1 == null || r2 == null)
+			return false;
+		if (r1.equals(r2))
+			return true;
+		IPath r1Location= r1.getLocation();
+		IPath r2Location= r2.getLocation();
+		if (r1Location == null || r2Location == null)
+			return false;
+		return r1Location.equals(r2Location);
 	}
 }
 
