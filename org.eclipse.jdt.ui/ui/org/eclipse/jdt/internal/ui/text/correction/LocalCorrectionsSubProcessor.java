@@ -626,27 +626,31 @@ public class LocalCorrectionsSubProcessor {
 			if (expression.getOperator() == PrefixExpression.Operator.NOT) {
 				ASTNode parent= expression.getParent();
 				
+				String label= null;
 				switch (parent.getNodeType()) {
 					case ASTNode.INSTANCEOF_EXPRESSION:
-					case ASTNode.INFIX_EXPRESSION: {
-						ASTRewrite rewrite= ASTRewrite.create(ast);
-						rewrite.replace(selectedNode, rewrite.createMoveTarget(expression.getOperand()), null);
-						
-						ParenthesizedExpression newParentExpr= ast.newParenthesizedExpression();
-						newParentExpr.setExpression((Expression) rewrite.createMoveTarget(parent));
-						PrefixExpression newPrefixExpr= ast.newPrefixExpression();
-						newPrefixExpr.setOperand(newParentExpr);
-						newPrefixExpr.setOperator(PrefixExpression.Operator.NOT);
-						
-						rewrite.replace(parent, newPrefixExpr, null);
-						
-						String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.setparenteses.description"); //$NON-NLS-1$
-						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-						ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); //$NON-NLS-1$
-						proposals.add(proposal);
-					}
-					break;
-
+						label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.setparenteses.instanceof.description"); //$NON-NLS-1$
+						break;
+					case ASTNode.INFIX_EXPRESSION:
+						label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.setparenteses.description"); //$NON-NLS-1$
+						break;
+				}
+				
+				if (label != null) {
+					ASTRewrite rewrite= ASTRewrite.create(ast);
+					rewrite.replace(selectedNode, rewrite.createMoveTarget(expression.getOperand()), null);
+					
+					ParenthesizedExpression newParentExpr= ast.newParenthesizedExpression();
+					newParentExpr.setExpression((Expression) rewrite.createMoveTarget(parent));
+					PrefixExpression newPrefixExpr= ast.newPrefixExpression();
+					newPrefixExpr.setOperand(newParentExpr);
+					newPrefixExpr.setOperator(PrefixExpression.Operator.NOT);
+					
+					rewrite.replace(parent, newPrefixExpr, null);
+					
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); //$NON-NLS-1$
+					proposals.add(proposal);	
 				}
 			}
 		}
