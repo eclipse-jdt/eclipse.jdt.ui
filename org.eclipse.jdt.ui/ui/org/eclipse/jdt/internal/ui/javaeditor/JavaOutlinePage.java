@@ -72,7 +72,6 @@ import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
@@ -826,6 +825,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		registerToolbarActions();
 				
 		fActionGroups= new ContextMenuGroup[] { new GenerateGroup(), new JavaSearchGroup(), new ReorgGroup() };
+
+		ReorgGroup.addGlobalReorgActions(getSite().getActionBars(), fOutlineViewer);
 		
 		fOutlineViewer.setInput(fInput);	
 		fOutlineViewer.getControl().addKeyListener(new KeyAdapter() {
@@ -834,7 +835,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			}
 		});
 	}
-	
+
 	public void dispose() {
 		
 		if (fEditor == null)

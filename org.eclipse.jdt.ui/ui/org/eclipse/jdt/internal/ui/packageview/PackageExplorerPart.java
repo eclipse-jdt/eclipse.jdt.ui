@@ -103,7 +103,6 @@ import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -128,7 +127,6 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.typehierarchy.MethodsViewerFilter;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyMessages;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -626,9 +624,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fGotoPackageAction= new GotoPackageAction(this);
 		IActionBars actionService= getViewSite().getActionBars();
 		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
+		ReorgGroup.addGlobalReorgActions(actionService, getSelectionProvider());
 	}
 	
-
 	private void addRefactoring(IMenuManager menu){
 		MenuManager refactoring= new MenuManager(PackagesMessages.getString("PackageExplorer.refactoringTitle"));  //$NON-NLS-1$
 		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup() }, fViewer);

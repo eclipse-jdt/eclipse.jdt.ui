@@ -557,7 +557,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fTypeMethodsSplitter.setVisible(false);
 
 		fTypeViewerViewForm= new ViewForm(fTypeMethodsSplitter, SWT.NONE);
-		
+				
 		Control typeViewerControl= createTypeViewerControl(fTypeViewerViewForm);
 		fTypeViewerViewForm.setContent(typeViewerControl);
 				
@@ -636,6 +636,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		} else {
 			setViewerVisibility(false);
 		}
+
+		ReorgGroup.addGlobalReorgActions(getViewSite().getActionBars(), getViewSite().getSelectionProvider());
 		
 		// fixed for 1GETAYN: ITPJUI:WIN - F1 help does nothing
 		WorkbenchHelp.setHelp(fPagebook, new ViewContextComputer(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW));
