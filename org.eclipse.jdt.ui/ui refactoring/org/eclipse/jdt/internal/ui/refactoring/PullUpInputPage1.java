@@ -100,8 +100,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 			if (! ACTION_PROPERTY.equals(property))
 				return false;
 			
-			MemberActionInfo mac= (MemberActionInfo)element;
-			return mac.isEditable();
+			return ((MemberActionInfo)element).isEditable();
 		}
 		/*
 		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object, java.lang.String, java.lang.Object)
@@ -109,13 +108,14 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		public void modify(Object element, String property, Object value) {
 			if (! ACTION_PROPERTY.equals(property))
 				return;
-
 			int action= ((Integer)value).intValue();
 			MemberActionInfo mac;
 			if (element instanceof Item) {
 				mac= (MemberActionInfo)((Item)element).getData();
 			} else
 				mac= (MemberActionInfo)element;
+			if (! canModify(mac, property))
+				return;
 			Assert.isTrue(mac.isMethodInfo());
 			mac.setAction(action);
 			PullUpInputPage1.this.updateUIElements(null);
