@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -26,20 +27,21 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
  */
 public final class ChangeVisibilityEdit extends SimpleTextEdit {
 
-	private IMember fMember;
-	private String fVisibility;
+	private final IMember fMember;
+	private final int fVisibility;
 
 	/**
 	 * Create a new text edit that changes the visibility of the given member.
 	 * 
 	 * @param member the member for which the visibility is to be changed
 	 * @param visibility the new visibility
-	 */	
-	public ChangeVisibilityEdit(IMember member, String visibility) {
+	 * @see JdtFlags
+	 */		
+	public ChangeVisibilityEdit(IMember member, int visibility) {
+		JdtFlags.assertVisibility(visibility);
 		fMember= member;
 		Assert.isNotNull(fMember);
 		fVisibility= visibility;
-		Assert.isNotNull(fVisibility);
 	}
 	
 	/* non Java-doc
@@ -76,12 +78,16 @@ public final class ChangeVisibilityEdit extends SimpleTextEdit {
 		} catch (InvalidInputException e) {
 			throw new JavaModelException(e, IJavaModelStatusConstants.INVALID_CONTENTS);
 		}
-		String text= fVisibility;
-		if (length == 0)
-			text+= " "; //$NON-NLS-1$
 		setTextRange(new TextRange(offset, length));
-		setText(text);
+		setText(getVisibilityString(length));
 		super.connect(buffer);
 	}	
+	
+	private String getVisibilityString(int tokenLength){
+		String text= JdtFlags.getVisibilityString(fVisibility);
+		if (tokenLength == 0)
+			text+= " "; //$NON-NLS-1$
+		return text;
+	}
 }
 

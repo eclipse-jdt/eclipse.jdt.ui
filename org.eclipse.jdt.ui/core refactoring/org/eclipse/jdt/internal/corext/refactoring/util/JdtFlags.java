@@ -6,12 +6,25 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 
 public class JdtFlags {
 	private JdtFlags(){
 	}
 	
+	public static final String VISIBILITY_STRING_PRIVATE= 	"private";		//$NON-NLS-1$
+	public static final String VISIBILITY_STRING_PACKAGE= 	"";				//$NON-NLS-1$
+	public static final String VISIBILITY_STRING_PROTECTED= 	"protected";	//$NON-NLS-1$
+	public static final String VISIBILITY_STRING_PUBLIC= 	"public";		//$NON-NLS-1$
+	
+
+	public static final int VISIBILITY_CODE_INVALID= 	-1;
+	public static final int VISIBILITY_CODE_PRIVATE= 	0;
+	public static final int VISIBILITY_CODE_PACKAGE=		1;
+	public static final int VISIBILITY_CODE_PROTECTED=	2;
+	public static final int VISIBILITY_CODE_PUBLIC= 		3;
+
 	public static boolean isAbstract(IMember member) throws JavaModelException{
 		if (isInterfaceMethod(member))
 			return true;
@@ -24,6 +37,8 @@ public class JdtFlags {
 
 	public static boolean isFinal(IMember member) throws JavaModelException{
 		if (isInterfaceField(member))
+			return true;
+		if (isAnonymousType(member))	
 			return true;
 		return Flags.isFinal(member.getFlags());
 	}
@@ -94,5 +109,64 @@ public class JdtFlags {
 				!Checks.isTopLevel((IType)member) &&
 				((IType)member).isInterface();
 	}
+
+	private static boolean isAnonymousType(IMember member) throws JavaModelException {
+		return member.getElementType() == IJavaElement.TYPE && 
+				((IType)member).isAnonymous();
+	}
+
+	public static int getVisibilityCode(IMember member) throws JavaModelException{
+		if (isPublic(member))
+			return VISIBILITY_CODE_PUBLIC;
+		else if (isProtected(member))
+			return VISIBILITY_CODE_PROTECTED;
+		else if (isPackageVisible(member))
+			return VISIBILITY_CODE_PACKAGE;
+		else if (isPrivate(member))
+			return VISIBILITY_CODE_PRIVATE;
+		Assert.isTrue(false);
+		return VISIBILITY_CODE_INVALID;
+	}
 	
+	public static String getVisibilityString(int visibilityCode){
+		switch(visibilityCode){
+			case VISIBILITY_CODE_PUBLIC: return VISIBILITY_STRING_PUBLIC;
+			case VISIBILITY_CODE_PROTECTED: return VISIBILITY_STRING_PROTECTED;
+			case VISIBILITY_CODE_PACKAGE: return VISIBILITY_STRING_PACKAGE;
+			case VISIBILITY_CODE_PRIVATE: return VISIBILITY_STRING_PRIVATE;
+			default:
+				Assert.isTrue(false);
+				return null;
+		}
+	}
+	
+	public static void assertVisibility(int visibility){
+		Assert.isTrue(	visibility == JdtFlags.VISIBILITY_CODE_PUBLIC ||
+		            	visibility == JdtFlags.VISIBILITY_CODE_PROTECTED ||
+		            	visibility == JdtFlags.VISIBILITY_CODE_PACKAGE ||
+		            	visibility == JdtFlags.VISIBILITY_CODE_PRIVATE);  
+	}
+	
+	public static boolean isHigherVisibility(int newVisibility, int oldVisibility){
+		assertVisibility(oldVisibility);
+		assertVisibility(newVisibility);
+		switch (oldVisibility) {
+			case JdtFlags.VISIBILITY_CODE_PRIVATE :
+				return 	newVisibility == JdtFlags.VISIBILITY_CODE_PACKAGE
+						||	newVisibility == JdtFlags.VISIBILITY_CODE_PUBLIC
+						||  newVisibility == JdtFlags.VISIBILITY_CODE_PROTECTED;
+			case JdtFlags.VISIBILITY_CODE_PACKAGE :
+				return 	newVisibility == JdtFlags.VISIBILITY_CODE_PUBLIC
+						||  newVisibility == JdtFlags.VISIBILITY_CODE_PROTECTED;
+
+			case JdtFlags.VISIBILITY_CODE_PROTECTED :
+				return newVisibility == JdtFlags.VISIBILITY_CODE_PUBLIC;
+
+			case JdtFlags.VISIBILITY_CODE_PUBLIC :
+				return false;
+			default: 
+				Assert.isTrue(false);
+				return false;	
+		}
+	}
 }

@@ -360,7 +360,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		TextChange change= fChangeManager.get(fField.getCompilationUnit());
 		
 		if (!JdtFlags.isPrivate(fField))
-			change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility"), new ChangeVisibilityEdit(fField, "private")); //$NON-NLS-1$ //$NON-NLS-2$
+			change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility"), new ChangeVisibilityEdit(fField, JdtFlags.VISIBILITY_CODE_PRIVATE)); //$NON-NLS-1$
 		
 		String modifiers= createModifiers();
 		String type= Signature.toString(fField.getTypeSignature());
