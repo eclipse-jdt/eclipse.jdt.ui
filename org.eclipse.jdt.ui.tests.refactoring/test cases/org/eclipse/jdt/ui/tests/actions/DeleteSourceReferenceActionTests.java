@@ -203,5 +203,16 @@ public class DeleteSourceReferenceActionTests extends RefactoringTest{
 		SourceReferenceTestUtil.delete(elems);
 		check();
 	}
+
+	public void test17() throws Exception{
+//		printTestDisabledMessage("test for bug#15936 delete methods deletes too much (indent messing)");		
+//		if (true)
+//			return;
+		
+		Object elem0= fCuA.getType("A").getMethod("f", new String[0]);
+		Object[] elems= new Object[]{elem0};
+		SourceReferenceTestUtil.delete(elems);
+		check();
+	}
 	
 }
