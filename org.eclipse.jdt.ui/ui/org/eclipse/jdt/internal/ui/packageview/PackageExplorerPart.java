@@ -14,11 +14,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -52,13 +61,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -71,8 +73,10 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ResourceWorkingSetFilter;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.actions.NewWizardMenu;
@@ -89,9 +93,6 @@ import org.eclipse.ui.views.framelist.FrameList;
 import org.eclipse.ui.views.framelist.GoIntoAction;
 import org.eclipse.ui.views.framelist.UpAction;
 
-import org.eclipse.search.ui.IWorkingSet;
-import org.eclipse.search.ui.SearchUI;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -103,9 +104,20 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.JavaElementContentProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
@@ -115,6 +127,7 @@ import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -130,15 +143,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterActionGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IPackagesViewPart;
-import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.OpenActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 
 /**
@@ -163,11 +167,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
 	static final String TAG_SHOWLIBRARIES = "showLibraries"; //$NON-NLS-1$
 	static final String TAG_SHOWBINARIES = "showBinaries"; //$NON-NLS-1$
-	static final String TAG_WORKINGSET = "workingset"; //$NON-NLS-1$
 
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
-	private WorkingSetFilter fWorkingSetFilter= new WorkingSetFilter();
+
+//	private WorkingSetFilter fWorkingSetFilter= new WorkingSetFilter();
+	private ResourceWorkingSetFilter fWorkingSetFilter;	
 	
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 
@@ -196,8 +201,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	
  	private FilterSelectionAction fFilterAction;
  	private ShowLibrariesAction fShowLibrariesAction;
-	private FilterWorkingSetAction fFilterWorkingSetAction;
-	private RemoveWorkingSetFilterAction fRemoveWorkingSetAction;
+
 	private IMemento fMemento;
 	
 	private ISelectionChangedListener fSelectionListener;
@@ -316,7 +320,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		fMemberFilterActionGroup= new MemberFilterActionGroup(fViewer, "PackageView");  //$NON-NLS-1$
 	
-		fViewer.addFilter(fWorkingSetFilter);
+		addWorkingSetChangeSupport();
+		IWorkingSet workingSet= getSite().getPage().getWorkingSet();
+		if (workingSet != null) {
+			fWorkingSetFilter= new ResourceWorkingSetFilter();
+			fWorkingSetFilter.setWorkingSet(workingSet);		
+			fViewer.addFilter(fWorkingSetFilter);
+		}		
+		
 		if(fMemento != null) 
 			restoreFilters();
 		else
@@ -383,8 +394,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		menu.add(fShowLibrariesAction);  
 		//menu.add(fShowBinariesAction);
-		menu.add(fFilterWorkingSetAction); 
-		menu.add(fRemoveWorkingSetAction); 
 
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
@@ -481,16 +490,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.getTree().setFocus();
 	}
 
-	/**
-	 * Sets the working set to be used for filtering this part
-	 */
-	public void setWorkingSet(IWorkingSet ws) {
-		fWorkingSetFilter.setWorkingSet(ws);
-		firePropertyChange(IWorkbenchPart.PROP_TITLE);
-		fFilterWorkingSetAction.setChecked(ws != null);
-		fRemoveWorkingSetAction.setEnabled(ws != null);
-	} 
-	
 	/**
 	 * Returns the shell to use for opening dialogs.
 	 * Used in this class, and in the actions.
@@ -632,8 +631,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		provider.addSelectionChangedListener(fRefreshAction);
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 		fShowLibrariesAction = new ShowLibrariesAction(this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
-		fFilterWorkingSetAction = new FilterWorkingSetAction(getShell(), this, "Filter Working Set..."); //$NON-NLS-1$
-		fRemoveWorkingSetAction = new RemoveWorkingSetFilterAction(getShell(), this, "Remove Working Set Filter"); //$NON-NLS-1$
 		
 		fBackAction= new BackAction(fFrameList);
 		fForwardAction= new ForwardAction(fFrameList);
@@ -869,7 +866,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		saveScrollState(memento, fViewer.getTree());
 		savePatternFilterState(memento);
 		saveFilterState(memento);
-		saveWorkingSetState(memento);
 		saveMemberFilterState(memento);
 	}
 
@@ -930,12 +926,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 	}
 
-	protected void saveWorkingSetState(IMemento memento) {
-		IWorkingSet ws= getWorkingSetFilter().getWorkingSet();
-		if (ws != null) {
-			memento.putString(TAG_WORKINGSET, ws.getName());
-		}
-	}
+
 	/**
 	 * Saves the state of the filter actions
 	 */
@@ -1148,13 +1139,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		return fLibraryFilter;
 	}
 
-	/**
- 	 * Returns the working set filter for this view.
- 	 * @return the working set filter
- 	 */
-	WorkingSetFilter getWorkingSetFilter() {
-		return fWorkingSetFilter;
-	}
+
 
 	void restoreFilters() {
 		IMemento filtersMem= fMemento.getChild(TAG_FILTERS);
@@ -1174,15 +1159,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			getLibraryFilter().setShowLibraries(show.equals("true")); //$NON-NLS-1$
 		else 
 			initLibraryFilterFromPreferences();		
-					
-		//restore working set
-		String workingSetName= fMemento.getString(TAG_WORKINGSET);
-		if (workingSetName != null) {
-			IWorkingSet ws= SearchUI.findWorkingSet(workingSetName);
-			if (ws != null) {
-				getWorkingSetFilter().setWorkingSet(ws);
-			}
-		}
+
 		fMemberFilterActionGroup.restoreState(fMemento);
 	}
 	
@@ -1196,6 +1173,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		getLibraryFilter().setShowLibraries(show);
 	}
 
+
+	
 	boolean isExpandable(Object element) {
 		if (fViewer == null)
 			return false;
@@ -1207,7 +1186,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Called whenever the input of the viewer changes.
 	 */ 
 	void updateTitle() {		
-		Object input= getViewer().getInput();
+		Object input= fViewer.getInput();
 		String viewName= getConfigurationElement().getAttribute("name"); //$NON-NLS-1$
 		if (input == null
 			|| (input instanceof IJavaModel)) {
@@ -1258,4 +1237,56 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			fViewer.refresh();
 	}
 
+	private IPropertyChangeListener addWorkingSetChangeSupport() {
+		final IPropertyChangeListener propertyChangeListener= createWorkingSetChangeListener();
+		final IWorkbenchPage page= getSite().getPage();
+
+		fWorkingSetFilter= new ResourceWorkingSetFilter();
+		fViewer.addFilter(fWorkingSetFilter);
+
+		// Register listener on working set
+		if (page.getWorkingSet() != null)		
+			page.getWorkingSet().addPropertyChangeListener(propertyChangeListener);				
+		
+		// Register listener on page
+		page.addPropertyChangeListener(propertyChangeListener);
+		
+		// Register dispose listener which removes the page listener
+		fViewer.getControl().addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				if (page!= null)
+					page.removePropertyChangeListener(propertyChangeListener);
+			}
+		});
+		
+		return propertyChangeListener;		
+	}
+
+	private IPropertyChangeListener createWorkingSetChangeListener() {
+		return new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				String property= event.getProperty();
+				if (IWorkbenchPage.CHANGE_WORKING_SET_REPLACE.equals(property)) {
+					IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();
+
+					if (fWorkingSetFilter.getWorkingSet() != null)
+						fWorkingSetFilter.getWorkingSet().removePropertyChangeListener(this);
+
+					fWorkingSetFilter.setWorkingSet(newWorkingSet);	
+
+					if (newWorkingSet != null)
+						newWorkingSet.addPropertyChangeListener(this);	
+						
+					fViewer.getControl().setRedraw(false);
+					fViewer.refresh();
+					updateTitle();
+					fViewer.getControl().setRedraw(true);
+				}
+				else if (IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
+					updateTitle();
+				else if (IWorkingSet.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property))
+					fViewer.refresh();			
+			}
+		};
+	}
 }
