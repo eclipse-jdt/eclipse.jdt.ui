@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
@@ -103,18 +104,6 @@ class ReorderParametersRefactoring extends Refactoring {
 
 			RefactoringStatus result= new RefactoringStatus();
 			
-			if (MethodChecks.isVirtual(fMethod)){
-				if (MethodChecks.overridesAnotherMethod(fMethod, new SubProgressMonitor(pm, 1)))
-					result.addError("Method '" + JavaElementUtil.createMethodSignature(fMethod)+"' overrides another method. Perform this action in the most abstract type that declares it.");
-				if (MethodChecks.isDeclaredInInterface(fMethod, new SubProgressMonitor(pm, 1)))	
-					result.addError("Method '" + JavaElementUtil.createMethodSignature(fMethod)+"' is declared in an interface. Perform this action there.");
-			}
-		
-			if (fMethod.getDeclaringType().isInterface()){
-				if (MethodChecks.overridesAnotherMethod(fMethod, new SubProgressMonitor(pm, 1)))
-					result.addError("Method '" + JavaElementUtil.createMethodSignature(fMethod)+"' overrides another method. Perform this action in the most abstract type that declares it.");
-			}	
-			
 			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1));
 			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 1));			
 			fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
@@ -154,7 +143,20 @@ class ReorderParametersRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 
-		//XX			
+		if (MethodChecks.isVirtual(fMethod)){
+			result.merge(MethodChecks.checkIfComesFromInterface(getMethod(), new SubProgressMonitor(pm, 1)));
+			if (result.hasFatalError())
+				return result;	
+			
+			result.merge(MethodChecks.checkIfOverridesAnother(getMethod(), new SubProgressMonitor(pm, 1)));
+			if (result.hasFatalError())
+				return result;			
+		} 
+		if (fMethod.getDeclaringType().isInterface()){
+			result.merge(MethodChecks.checkIfOverridesAnother(getMethod(), new SubProgressMonitor(pm, 1)));
+			if (result.hasFatalError())
+				return result;
+		}
 			
 		return result;
 	}

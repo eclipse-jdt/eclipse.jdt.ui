@@ -14,14 +14,16 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 
@@ -42,6 +44,28 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 		return result;
 	}
 	
+	/*
+	 * non java-doc
+	 * @see Refactoring#checkActivation
+	 */		
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+		try{
+			pm.beginTask("", 1);
+			RefactoringStatus result= new RefactoringStatus();
+			result.merge(super.checkActivation(new SubProgressMonitor(pm, 1)));
+			if (result.hasFatalError())
+				return result;			
+			
+			result.merge(MethodChecks.checkIfOverridesAnother(getMethod(), new SubProgressMonitor(pm, 1)));
+			if (result.hasFatalError())
+				return result;
+			
+			return result;
+		} finally {
+			pm.done();
+		}
+	}
+	
 	/* non java-doc
 	 * @see Refactoring#checkInput
 	 */	
@@ -58,8 +82,6 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 			if (relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 3), getMethod(), getNewName()))
 				result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.already_defined")); //$NON-NLS-1$
-			if (MethodChecks.overridesAnotherMethod(getMethod(), new SubProgressMonitor(pm, 1)))
-				result.addError("This method overrides another method from - please rename it in the base type.");
 			return result;
 		} finally {
 			pm.done();

@@ -10,6 +10,11 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class MethodChecks {
 
@@ -26,9 +31,32 @@ public class MethodChecks {
 			return false;
 		return true;	
 	}	
+		
+	public static RefactoringStatus checkIfOverridesAnother(IMethod method, IProgressMonitor pm) throws JavaModelException {
+		IMethod overrides= MethodChecks.overridesAnotherMethod(method, pm);
+		if (overrides != null){
+			Context context= JavaSourceContext.create(overrides);
+			String msg= "The selected method overrides method \'" + JavaElementUtil.createMethodSignature(overrides) + "\'"
+							 + " declared in type \'" + overrides.getDeclaringType().getFullyQualifiedName() + "\'. Reform the operation there.";
+			return RefactoringStatus.createFatalErrorStatus(msg, context);
+		}	
+		return null;		
+	}
+	
+	public static RefactoringStatus checkIfComesFromInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
+		IMethod inInterface= MethodChecks.isDeclaredInInterface(method, pm);
+			
+		if (inInterface != null){
+			Context context= JavaSourceContext.create(inInterface);
+			String msg= "The selected method is an implementation of method \'" + JavaElementUtil.createMethodSignature(inInterface) + "\'"
+							 + " declared in type \'" + inInterface.getDeclaringType().getFullyQualifiedName() + "\'.";
+			return RefactoringStatus.createFatalErrorStatus(msg, context);
+		}	
+		return null;
+	}
 	
 	//works for virtual methods
-	public static boolean isDeclaredInInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
+	private static IMethod isDeclaredInInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		try{	
 			pm.beginTask("", 4);
 			ITypeHierarchy hier= method.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(pm, 1));
@@ -39,58 +67,31 @@ public class MethodChecks {
 				ITypeHierarchy superTypes= classes[i].newSupertypeHierarchy(new SubProgressMonitor(subPm, 1));
 				IType[] superinterfaces= superTypes.getAllSuperInterfaces(classes[i]);
 				for (int j= 0; j < superinterfaces.length; j++) {
-					if (Checks.findMethod(method, superinterfaces[j]) != null)
-						return true;
+					IMethod found= Checks.findMethod(method, superinterfaces[j]);
+					if (found != null)
+						return found;
 				}
 				subPm.worked(1);
 			}
-			return false;
+			return null;
 		} finally{
 			pm.done();
 		}
 	}
 	
-	public static boolean overridesAnotherMethod(IMethod method, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1); //$NON-NLS-1$
-		//XXX: use the commented code once this is fixed: 1GCZZS1: ITPJCORE:WINNT - inconsistent search for method declarations
-		//XXX: and delete findMethod
+	private static IMethod overridesAnotherMethod(IMethod method, IProgressMonitor pm) throws JavaModelException {
+		IMethod found= JavaModelUtil.findMethodImplementationInHierarchy(
+						method.getDeclaringType().newSupertypeHierarchy(pm), 
+						method.getDeclaringType(), 
+						method.getElementName(), 
+						method.getParameterTypes(), 
+						method.isConstructor());
 		
-//		IType declaringType= getMethod().getDeclaringType();	
-//		ITypeHierarchy superTypes= declaringType.newSupertypeHierarchy(new SubProgressMonitor(pm, 1));
-//		pm.worked(1);
-//		IJavaSearchScope scope= SearchEngine.createHierarchyScope(declaringType);
-//		ISearchPattern pattern= SearchEngine.createSearchPattern(getMethod(), IJavaSearchConstants.DECLARATIONS);
-//		SearchResultCollector collector= new SearchResultCollector(new SubProgressMonitor(pm, 1));
-//		new SearchEngine().search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
-//		pm.done();
-//		for (Iterator iter= collector.getResults().iterator(); iter.hasNext(); ){
-//			SearchResult result= (SearchResult)iter.next();
-//			IType t= ((IMethod)result.getEnclosingElement()).getDeclaringType();
-//			if ((!t.equals(declaringType)) && superTypes.contains(t))
-//				return true;
-//		}
-//		return false;
-		IMethod found= findInHierarchy(method.getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(pm, 1)), method);
-		return (found != null && (! Flags.isStatic(found.getFlags())) && (! Flags.isPrivate(found.getFlags())));	
-	}
-	
-	/**
-	 * Finds a method in a type's hierarchy
-	 * This searches for a method with the same name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done
-	 * The input type of the hierarchy is not searched for the method
-	 * @return The first found method or null, if nothing found
-	 */	
-	private static final IMethod findInHierarchy(ITypeHierarchy hierarchy, IMethod method) throws JavaModelException {
-		IType curr= hierarchy.getSuperclass(hierarchy.getType());
-		while (curr != null) {
-			IMethod found= Checks.findMethod(method, curr);
-			if (found != null) {
-				return found;
-			}
-			curr= hierarchy.getSuperclass(curr);
-		}
-		return null;
+		boolean overrides= (found != null && (! Flags.isStatic(found.getFlags())) && (! Flags.isPrivate(found.getFlags())));	
+		if (overrides)
+			return found;
+		else
+			return null;	
 	}
 	
 }
