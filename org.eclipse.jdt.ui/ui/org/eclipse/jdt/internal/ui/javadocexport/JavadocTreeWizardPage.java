@@ -17,8 +17,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
@@ -27,6 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -42,9 +41,15 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceNode;
+import org.eclipse.jface.preference.IPreferencePage;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.preference.PreferenceManager;
+import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -56,6 +61,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -63,6 +70,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.jarpackager.CheckboxTreeAndListGroup;
+import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class JavadocTreeWizardPage extends JavadocWizardPage {
@@ -75,6 +83,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	//private JavadocTreeViewerFilter fFilter;
 
 	protected Text fDestinationText;
+	protected Text fJavadocCommandText;
 	protected Text fDocletText;
 	protected Text fDocletTypeText;
 	protected Button fStandardButton;
@@ -88,13 +97,14 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private Label fDocletTypeLabel;
 	private Label fDestinationLabel;
 	private CLabel fDescriptionLabel;
-
+	
 	protected String fVisibilitySelection;
 	protected boolean fDocletSelected;
 
 	private JavadocOptionsManager fStore;
 	private JavadocWizard fWizard;
 
+	protected StatusInfo fJavadocStatus;
 	protected StatusInfo fDestinationStatus;
 	protected StatusInfo fDocletStatus;
 	protected StatusInfo fTreeStatus;
@@ -105,6 +115,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private final int CUSTOMSTATUS= 1;
 	private final int STANDARDSTATUS= 2;
 	private final int TREESTATUS= 3;
+	private final int JAVADOCSTATUS= 4;
 
 	/**
 	 * Constructor for JavadocTreeWizardPage.
@@ -117,6 +128,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fStore= store;
 
 		// Status variables
+		fJavadocStatus= new StatusInfo();
 		fDestinationStatus= new StatusInfo();
 		fDocletStatus= new StatusInfo();
 		fTreeStatus= new StatusInfo();
@@ -137,6 +149,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		compositeGridLayout.numColumns= 6;
 		composite.setLayout(compositeGridLayout);
 
+		createJavadocCommandSet(composite);
 		createInputGroup(composite);
 		createVisibilitySet(composite);
 		createOptionsSet(composite);
@@ -145,7 +158,40 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		Dialog.applyDialogFont(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAVADOC_TREE_PAGE);
 	}
+	
+	protected void createJavadocCommandSet(Composite composite) {
+		
+		GridLayout commandSetLayout= createGridLayout(2);
+		commandSetLayout.marginHeight= 0;
+		commandSetLayout.marginWidth= 0;
+		Composite c = new Composite(composite, SWT.NONE);
+		c.setLayoutData(createGridData(GridData.FILL_BOTH, 6, 0));
+		c.setLayout(commandSetLayout);
 
+		createLabel(c, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccommand.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 2, 0)); //$NON-NLS-1$
+		fJavadocCommandText= createText(c, SWT.READ_ONLY | SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		((GridData) fJavadocCommandText.getLayoutData()).widthHint= 200;
+		fJavadocCommandText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				doValidation(JAVADOCSTATUS);
+			}
+		});
+
+		Button javadocCommandBrowserButton= createButton(c, SWT.PUSH, JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccommand.button.label"), createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, 0)); //$NON-NLS-1$
+		SWTUtil.setButtonDimensionHint(javadocCommandBrowserButton);
+
+		javadocCommandBrowserButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				JavadocPreferencePage page= new JavadocPreferencePage();
+				showPreferencePage(JavadocPreferencePage.ID, page); //$NON-NLS-1$
+				fJavadocCommandText.setText(JavadocPreferencePage.getJavaDocCommand());
+			}
+		});
+	}
+	
+
+	
+	
 	protected void createInputGroup(Composite composite) {
 
 		createLabel(composite, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.checkboxtreeandlistgroup.label"), createGridData(6)); //$NON-NLS-1$
@@ -316,8 +362,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		});
 		fDestinationBrowserButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-					String text= handleFolderBrowseButtonPressed(fDestinationText.getText(), fDestinationText.getShell(), JavadocExportMessages.getString("JavadocTreeWizardPage.destinationbrowsedialog.title"), //$NON-NLS-1$
-	JavadocExportMessages.getString("JavadocTreeWizardPage.destinationbrowsedialog.label")); //$NON-NLS-1$
+										String text= handleFolderBrowseButtonPressed(fDestinationText.getText(), fDestinationText.getShell(), JavadocExportMessages.getString("JavadocTreeWizardPage.destinationbrowsedialog.title"), //$NON-NLS-1$
+						    		JavadocExportMessages.getString("JavadocTreeWizardPage.destinationbrowsedialog.label")); //$NON-NLS-1$
 				fDestinationText.setText(text);
 			}
 		});
@@ -340,6 +386,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			fDestinationText.setEnabled(false);
 			fDestinationBrowserButton.setEnabled(false);
 			fDestinationLabel.setEnabled(false);
+			
 		} else {
 			fStandardButton.setSelection(true);
 			if (fWizard.getSelectedProjects().size() == 1)
@@ -353,7 +400,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			fDocletTypeText.setEnabled(false);
 			fDocletTypeLabel.setEnabled(false);
 		}
-
+		String javadocCommand = JavadocPreferencePage.getJavaDocCommand();
+		fJavadocCommandText.setText(javadocCommand);
+		fJavadocCommandText.setToolTipText(javadocCommand);
 	}
 
 	/**
@@ -593,6 +642,15 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				updateStatus(findMostSevereStatus());
 
 				break;
+				
+			case JAVADOCSTATUS:
+				fJavadocStatus= new StatusInfo();
+				IPath path= new Path(fJavadocCommandText.getText());
+				if (!path.toFile().isFile()) {
+					fJavadocStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.javadoccommandfile.error"));  //$NON-NLS-1$
+				}
+				updateStatus(findMostSevereStatus());
+				break;
 		} //end switch
 	}
 
@@ -606,11 +664,31 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		return true;
 	}
 
+	private boolean showPreferencePage(String id, IPreferencePage page) {
+		final IPreferenceNode targetNode = new PreferenceNode(id, page);
+		
+		PreferenceManager manager = new PreferenceManager();
+		manager.addToRoot(targetNode);
+		final PreferenceDialog dialog = new PreferenceDialog(getShell(), manager);
+		final boolean [] result = new boolean[] { false };
+		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
+			public void run() {
+				dialog.create();
+				dialog.setMessage(targetNode.getLabelText());
+				result[0]= (dialog.open() == Window.OK);
+			}
+		});
+		return result[0];
+	}	
+	
+
+
+
 	/**
 	 * Finds the most severe error (if there is one)
 	 */
 	private IStatus findMostSevereStatus() {
-		return StatusUtil.getMostSevere(new IStatus[] { fPreferenceStatus, fDestinationStatus, fDocletStatus, fTreeStatus, fWizardStatus });
+		return StatusUtil.getMostSevere(new IStatus[] { fJavadocStatus, fPreferenceStatus, fDestinationStatus, fDocletStatus, fTreeStatus, fWizardStatus });
 	}
 
 	public void init() {
@@ -620,6 +698,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
+			doValidation(JAVADOCSTATUS);
 			doValidation(STANDARDSTATUS);
 			doValidation(CUSTOMSTATUS);
 			doValidation(TREESTATUS);

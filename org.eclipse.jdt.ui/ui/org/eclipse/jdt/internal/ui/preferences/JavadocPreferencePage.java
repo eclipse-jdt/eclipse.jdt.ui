@@ -48,6 +48,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 public class JavadocPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
+	public static final String ID= "org.eclipse.jdt.ui.preferences.JavadocPreferencePage"; //$NON-NLS-1$
+	
+	
 	private StringButtonDialogField fJavadocSelection;
 	private Composite fComposite;
 
@@ -86,6 +89,8 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 
 	public JavadocPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+		setTitle(PreferencesMessages.getString("JavadocPreferencePage.title"));  //$NON-NLS-1$
+		
 		//setDescription("Javadoc command"); //$NON-NLS-1$
 	}
 	
