@@ -308,7 +308,7 @@ public class ReorgTests extends RefactoringTest {
 			assertEquals("copy4", true, copyRef.isValidDestination(getRoot().getJavaProject()));
 			assertEquals("copy5", false, copyRef.isValidDestination(getRtJar()));
 			assertEquals("copy6", true, copyRef.isValidDestination(folder));
-			assertEquals("copy7", false, copyRef.isValidDestination(file));
+			assertEquals("copy7", true, copyRef.isValidDestination(file));
 			
 			MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings());
 			assertEquals("moveRef0", false, moveRef.isValidDestination(cu));
