@@ -687,9 +687,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			return builder;	
 		} catch (CoreException e){
 			throw new JavaModelException(e);
-		} finally{
-			pm.done();
-		}	
+		} 
 	}
 	
 	private boolean willRenameCU() throws JavaModelException{
@@ -715,24 +713,28 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", 6);
-		TextChangeManager manager= new TextChangeManager();
-				
-		if (fUpdateReferences)
-			addReferenceUpdates(manager, new SubProgressMonitor(pm, 3));
-
-		pm.worked(1);
-		
-		addTypeDeclarationUpdate(manager);
-		pm.worked(1);
-		
-		addConstructorRenames(manager);
-		pm.worked(1);
-		
-		pm.subTask("searching for text matches...");
-		addTextMatches(manager, new SubProgressMonitor(pm, 1));
-		
-		return manager;
+		try{
+			pm.beginTask("", 6);
+			TextChangeManager manager= new TextChangeManager();
+					
+			if (fUpdateReferences)
+				addReferenceUpdates(manager, new SubProgressMonitor(pm, 3));
+	
+			pm.worked(1);
+			
+			addTypeDeclarationUpdate(manager);
+			pm.worked(1);
+			
+			addConstructorRenames(manager);
+			pm.worked(1);
+			
+			pm.subTask("searching for text matches...");
+			addTextMatches(manager, new SubProgressMonitor(pm, 1));
+			
+			return manager;
+		} finally{
+			pm.done();
+		}	
 	}
 	
 	private void addTypeDeclarationUpdate(TextChangeManager manager) throws CoreException{
