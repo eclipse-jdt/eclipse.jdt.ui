@@ -85,6 +85,7 @@ public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
 
 				String replacement= StubUtility.codeFormat(stub, indent, lineDelim);
 				setReplacementString(Strings.trimLeadingTabsAndSpaces(replacement));
+				return true;
 			}
 		}
 
