@@ -49,11 +49,14 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	private Comparator fComparator;
 	private TemplateEngine fTemplateEngine;
 	
+	private boolean fRestrictToMatchingCase;
+	
 	
 	public JavaDocCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 		fTemplateEngine= new TemplateEngine(TemplateContext.JAVADOC);
+		fRestrictToMatchingCase= false;
 	}
 	
 	/**
@@ -72,7 +75,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	 * @param restrict <code>true</code> if proposals should be restricted
 	 */
 	public void restrictProposalsToMatchingCases(boolean restrict) {
-		// not yet supported
+		fRestrictToMatchingCase= restrict;
 	}
 	
 	/**
@@ -142,6 +145,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 				}
 				
 				CompletionEvaluator evaluator= new CompletionEvaluator(unit, document, offset, length);
+				evaluator.restrictProposalsToMatchingCases(fRestrictToMatchingCase);
 				results= evaluator.computeProposals();
 			}
 		} catch (JavaModelException x) {

@@ -63,14 +63,28 @@ public class CompletionEvaluator {
 	private JavaElementLabelProvider fLabelProvider;
 	private List fResult;
 	
+	private boolean fRestrictToMatchingCase;
+	
 	public CompletionEvaluator(ICompilationUnit cu, IDocument doc, int pos, int length) {
 		fCompilationUnit= cu;
 		fDocument= doc;
 		fCurrentPos= pos;
 		fCurrentLength= length;
 		fResult= new ArrayList();
+		fRestrictToMatchingCase= false;
 		
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_PARAMETERS);
+	}
+
+
+	/**
+	 * Tells this evaluator to restrict is proposals to those
+	 * starting with matching cases.
+	 * 
+	 * @param restrict <code>true</code> if proposals should be restricted
+	 */
+	public void restrictProposalsToMatchingCases(boolean restrict) {
+		fRestrictToMatchingCase= restrict;
 	}
 	
 	private static boolean isWordPart(char ch) {
@@ -196,19 +210,31 @@ public class CompletionEvaluator {
 			// ignore
 		}
 	}
+	
+	private boolean prefixMatches(String prefix, String proposal) {
+		if (fRestrictToMatchingCase) {
+			return proposal.startsWith(prefix);
+		} else if (proposal.length() >= prefix.length()) {
+			return prefix.equalsIgnoreCase(proposal.substring(0, prefix.length()));
+		}
+		return false;
+	}
+		
+		
+	
 
 	private void addAllTags(String prefix) {
 		String jdocPrefix= "@" + prefix; //$NON-NLS-1$
 		for (int i= 0; i < fgTagProposals.length; i++) {
 			String curr= fgTagProposals[i];
-			if (curr.startsWith(jdocPrefix)) {
+			if (prefixMatches(jdocPrefix, curr)) {
 				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), null));
 			}		
 		}
 		String htmlPrefix= "<" + prefix; //$NON-NLS-1$
 		for (int i= 0; i < fgHTMLProposals.length; i++) {
 			String curr= fgHTMLProposals[i];
-			if (curr.startsWith(htmlPrefix)) {
+			if (prefixMatches(htmlPrefix, curr)) {
 				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG), null));
 			}		
 		}
@@ -217,7 +243,7 @@ public class CompletionEvaluator {
 	private void addProposals(String prefix, String[] choices, String imageName) {	
 		for (int i= 0; i < choices.length; i++) {
 			String curr= choices[i];
-			if (curr.startsWith(prefix)) {
+			if (prefixMatches(prefix, curr)) {
 				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(imageName), null));
 			}
 		}
@@ -226,8 +252,8 @@ public class CompletionEvaluator {
 	private void addProposals(String prefix, IJavaElement[] choices) {	
 		for (int i= 0; i < choices.length; i++) {
 			IJavaElement elem= choices[i];
-			String curr= getReplaceString(elem);			
-			if (curr.startsWith(prefix)) {
+			String curr= getReplaceString(elem);
+			if (prefixMatches(prefix, curr)) {
 				String info= getProposalInfo(elem);
 				fResult.add(createCompletion(curr, prefix, fLabelProvider.getText(elem), fLabelProvider.getImage(elem), info));
 			}
@@ -287,7 +313,7 @@ public class CompletionEvaluator {
 				String[] exceptions= ((IMethod)elem).getExceptionTypes();
 				for (int i= 0; i < exceptions.length; i++) {
 					String curr= Signature.toString(exceptions[i]);
-					if (curr.startsWith(argument)) {
+					if (prefixMatches(argument, curr)) {
 						fResult.add(createCompletion(curr, argument, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS), null));
 					}
 				}
