@@ -1384,6 +1384,7 @@ JavaStructureDiffViewerCreator
 	<workingSet
 		id="org.eclipse.jdt.ui.JavaWorkingSetPage"
 		name="%JavaWorkingSetPage.name"
+		icon="icons/full/ctool16/java_workingSet.gif"
 		pageClass="org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetPage">
 	</workingSet>
 </extension>
