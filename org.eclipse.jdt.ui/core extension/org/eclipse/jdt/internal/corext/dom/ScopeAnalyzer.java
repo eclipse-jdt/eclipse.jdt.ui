@@ -290,7 +290,14 @@ public class ScopeAnalyzer {
 		}
 		
 		public boolean visit(MethodDeclaration node) {
-			return isInside(node);
+			if (isInside(node)) {
+				Block body= node.getBody();
+				if (body != null) {
+					body.accept(this);
+				}
+				visitBackwards(node.parameters());
+			}
+			return false;
 		}
 		
 		public boolean visit(Initializer node) {
@@ -307,13 +314,7 @@ public class ScopeAnalyzer {
 		
 		public boolean visit(Block node) {
 			if (isInside(node)) {
-				List list= node.statements();
-				for (int i= 0; i < list.size(); i++) {
-					ASTNode curr= (ASTNode) list.get(i);
-					if (curr.getStartPosition() <  fPosition) {
-						curr.accept(this);
-					}
-				}
+				visitBackwards(node.statements());
 			}
 			return false;
 		}		
@@ -329,17 +330,30 @@ public class ScopeAnalyzer {
 		}
 		
 		public boolean visit(VariableDeclarationStatement node) {
-			return true;
+			visitBackwards(node.fragments());
+			return false;
 		}		
 		
 		public boolean visit(VariableDeclarationExpression node) {
-			return true;
+			visitBackwards(node.fragments());
+			return false;
 		}
-
+	
 		public boolean visit(CatchClause node) {
-			return isInside(node);
+			if (isInside(node)) {
+				node.getBody().accept(this);
+				node.getException().accept(this);
+			}
+			return false;			
 		}
-
+		
+		public boolean visit(ForStatement node) {
+			node.getBody().accept(this);
+			visitBackwards(node.initializers());
+			return false;			
+		}
+	
+	
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && node.getStartPosition() + node.getLength() < fPosition) {
 				ITypeBinding binding= node.getTypeDeclaration().resolveBinding();
@@ -349,6 +363,15 @@ public class ScopeAnalyzer {
 				return false;
 			}
 			return isInside(node);
+		}
+		
+		private void visitBackwards(List list) {
+			for (int i= list.size() - 1; i >= 0; i--) {
+				ASTNode curr= (ASTNode) list.get(i);
+				if (curr.getStartPosition() <  fPosition) {
+					curr.accept(this);
+				}
+			}			
 		}
 	}
 	
