@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.MoveRefactoring2;
 
 
@@ -58,6 +59,10 @@ public class MoveTest extends RefactoringTest {
 		return REFACTORING_PATH;
 	}
 
+	private IReorgQueries createReorgQueries(){
+		return new MockReorgQueries();
+	}
+
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		assertTrue("move should be disabled", ! MoveRefactoring2.isAvailable(resources, javaElements, settings));
@@ -65,14 +70,27 @@ public class MoveTest extends RefactoringTest {
 		assertTrue(refactoring2 == null);
 	}
 	
-	private MoveRefactoring2 verifyEnabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
+	private MoveRefactoring2 verifyEnabled(IResource[] resources, IJavaElement[] javaElements, IReorgQueries reorgQueries) throws JavaModelException {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		assertTrue("move should be enabled", MoveRefactoring2.isAvailable(resources, javaElements, settings));
 		MoveRefactoring2 refactoring2= MoveRefactoring2.create(resources, javaElements, settings);
+		if (reorgQueries != null)
+			refactoring2.setReorgQueries(reorgQueries);
 		assertNotNull(refactoring2);
 		return refactoring2;
 	}
 	
+	private void verifyValidDestination(MoveRefactoring2 ref, Object destination) throws Exception {
+		RefactoringStatus status= null;
+		if (destination instanceof IResource)
+			status= ref.setDestination((IResource)destination);
+		else if (destination instanceof IJavaElement)
+			status= ref.setDestination((IJavaElement)destination);
+		else assertTrue(false);
+		
+		assertEquals("destination was expected to be valid: " + status.getFirstMessage(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
+	}
+
 	private void verifyInvalidDestination(MoveRefactoring2 ref, Object destination) throws Exception {
 		RefactoringStatus status= null;
 		if (destination instanceof IResource)
@@ -237,7 +255,7 @@ public class MoveTest extends RefactoringTest {
 		}
 	}
 
-	public void testDestination_no_fileToItsef() throws Exception {
+	public void testDestination_no_fileToItself() throws Exception {
 		IFolder superFolder= (IFolder)getPackageP().getResource();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
@@ -245,7 +263,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -265,7 +283,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file1};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= file2;
 			verifyInvalidDestination(ref, destination);
@@ -283,7 +301,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -298,7 +316,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu;
 			verifyInvalidDestination(ref, destination);
@@ -314,7 +332,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu1;
 			verifyInvalidDestination(ref, destination);
@@ -335,7 +353,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= file1;
 			verifyInvalidDestination(ref, destination);
@@ -349,7 +367,7 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_no_packageToItsef() throws Exception {
 		IJavaElement[] javaElements= {getPackageP()};
 		IResource[] resources= {};
-		MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+		MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 		Object destination= getPackageP();
 		verifyInvalidDestination(ref, destination);
@@ -358,7 +376,7 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_no_sourceFolderToItsef() throws Exception {
 		IJavaElement[] javaElements= {getRoot()};
 		IResource[] resources= {};
-		MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+		MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 		Object destination= getRoot();
 		verifyInvalidDestination(ref, destination);
@@ -370,7 +388,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= method;
 			verifyInvalidDestination(ref, destination);
@@ -390,7 +408,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -409,7 +427,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= getPackageP();
 			verifyInvalidDestination(ref, destination);
@@ -427,7 +445,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= getRoot();
 			verifyInvalidDestination(ref, destination);
@@ -448,7 +466,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {parentFolder};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= parentFolder;
 			verifyInvalidDestination(ref, destination);
@@ -463,7 +481,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {cu};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu.getParent();
 			verifyInvalidDestination(ref, destination);
@@ -476,7 +494,7 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_no_packageToParentSourceFolder() throws Exception {
 		IJavaElement[] javaElements= {getPackageP()};
 		IResource[] resources= {};
-		MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+		MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 		Object destination= getRoot();
 		verifyInvalidDestination(ref, destination);
@@ -485,7 +503,7 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_no_sourceFolderToParentProject() throws Exception {
 		IJavaElement[] javaElements= {getRoot()};
 		IResource[] resources= {};
-		MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+		MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 		Object destination= getRoot().getParent();
 		verifyInvalidDestination(ref, destination);
@@ -497,7 +515,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu.getType("A");
 			verifyInvalidDestination(ref, destination);
@@ -516,7 +534,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= method;
 			verifyInvalidDestination(ref, destination);
@@ -534,7 +552,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {cu1};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= method;
 			verifyInvalidDestination(ref, destination);
@@ -551,7 +569,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {pack1};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu;
 			verifyInvalidDestination(ref, destination);
@@ -570,7 +588,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {pack1};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -590,7 +608,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {pack1};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -610,7 +628,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {pack1};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= simpleProject;
 			verifyInvalidDestination(ref, destination);
@@ -628,7 +646,7 @@ public class MoveTest extends RefactoringTest {
 //		try{
 //			IJavaElement[] javaElements= {pack1};
 //			IResource[] resources= {};
-//			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+//			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 //
 //			Object destination= otherProject;
 //			verifyInvalidDestination(ref, destination);
@@ -639,12 +657,12 @@ public class MoveTest extends RefactoringTest {
 //		}
 //	}
 	
-	public void testDestination_no_packageToPackage() throws Exception {
+	public void testDestination_no_packageToSiblingPackage() throws Exception {
 		IPackageFragment pack1= getRoot().createPackageFragment("q", true, new NullProgressMonitor());
 		try{
 			IJavaElement[] javaElements= {getPackageP()};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= pack1;
 			verifyInvalidDestination(ref, destination);
@@ -660,7 +678,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= cu;
 			verifyInvalidDestination(ref, destination);
@@ -676,7 +694,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= getPackageP();
 			verifyInvalidDestination(ref, destination);
@@ -695,7 +713,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -715,7 +733,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -731,7 +749,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= getRoot();
 			verifyInvalidDestination(ref, destination);
@@ -750,7 +768,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= simpleProject;
 			verifyInvalidDestination(ref, destination);
@@ -769,7 +787,7 @@ public class MoveTest extends RefactoringTest {
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= otherProject;
 			verifyInvalidDestination(ref, destination);
@@ -787,7 +805,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= cu1;
 			verifyInvalidDestination(ref, destination);
@@ -808,7 +826,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= file;
 			verifyInvalidDestination(ref, destination);
@@ -829,7 +847,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= folder;
 			verifyInvalidDestination(ref, destination);
@@ -846,7 +864,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= getPackageP();
 			verifyInvalidDestination(ref, destination);
@@ -862,7 +880,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= getRoot();
 			verifyInvalidDestination(ref, destination);
@@ -878,7 +896,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= MySetup.getProject();
 			verifyInvalidDestination(ref, destination);
@@ -897,7 +915,7 @@ public class MoveTest extends RefactoringTest {
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= {method};
 			IResource[] resources= {};
-			MoveRefactoring2 ref= verifyEnabled(resources, javaElements);
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= simpleProject;
 			verifyInvalidDestination(ref, destination);
@@ -907,4 +925,394 @@ public class MoveTest extends RefactoringTest {
 			simpleProject.delete(true, true, null);
 		}
 	}
+	
+	public void testDestination_no_cuToItself() throws Exception{
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		try{
+			IJavaElement[] javaElements= { cu1};
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			Object destination= cu1;
+			verifyInvalidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			cu1.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_cuToOtherPackage() throws Exception{
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		IPackageFragment otherPackage= getRoot().createPackageFragment("otherPackage", true, new NullProgressMonitor());
+		try{
+			IJavaElement[] javaElements= { cu1};
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= otherPackage;
+			verifyValidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			cu1.delete(true, new NullProgressMonitor());
+			otherPackage.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_cuToRoot() throws Exception{
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		try{
+			IJavaElement[] javaElements= { cu1};
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= getRoot();
+			verifyValidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			cu1.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_cuToProject() throws Exception{
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		try{
+			IJavaElement[] javaElements= { cu1};
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= MySetup.getProject();
+			verifyValidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			cu1.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_cuToSimpleProject() throws Exception{
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		IProject simpleProject= ResourcesPlugin.getWorkspace().getRoot().getProject("mySImpleProject");
+		simpleProject.create(null);
+		simpleProject.open(null);
+		try{
+			IJavaElement[] javaElements= { cu1};
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= simpleProject;
+			verifyValidDestination(ref, destination);
+		}finally{
+			performDummySearch();
+			cu1.delete(true, new NullProgressMonitor());
+			simpleProject.delete(true, true, null);
+		}
+	}
+
+	public void testDestination_yes_cuToFileInDifferentPackage() throws Exception{
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		IProject superFolder= MySetup.getProject().getProject();
+		IFile file= superFolder.getFile("a.txt");
+		file.create(getStream("123"), true, null);
+		try{
+			IJavaElement[] javaElements= { cu1};
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= file;
+			verifyValidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			cu1.delete(true, new NullProgressMonitor());
+			file.delete(true, false, null);
+		}
+	}
+
+	public void testDestination_yes_cuToFolder() throws Exception{
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		IProject superFolder= MySetup.getProject().getProject();
+		IFolder folder= superFolder.getFolder("folder");
+		folder.create(true, true, null);
+		try{
+			IJavaElement[] javaElements= { cu1};
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= folder;
+			verifyValidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			cu1.delete(true, new NullProgressMonitor());
+			folder.delete(true, false, null);
+		}
+	}
+
+	public void testDestination_yes_fileToSiblingFolder() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFile file= superFolder.getFile("a.txt");
+		file.create(getStream("123"), true, null);
+		
+		IFolder folder= superFolder.getFolder("folder");
+		folder.create(true, true, null);
+
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {file};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= folder;
+			verifyValidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			file.delete(true, new NullProgressMonitor());
+			folder.delete(true, new NullProgressMonitor());
+		}
+	}		
+
+	public void testDestination_yes_fileToCu() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFile file= superFolder.getFile("a.txt");
+		file.create(getStream("123"), true, null);
+		
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());			
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {file};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= cu1;
+			verifyValidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			file.delete(true, new NullProgressMonitor());
+			cu1.delete(true, new NullProgressMonitor());
+		}
+	}		
+	
+	public void testDestination_yes_fileToPackage() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFile file= superFolder.getFile("a.txt");
+		file.create(getStream("123"), true, null);
+		
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {file};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= getPackageP();
+			verifyValidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			file.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_fileToRoot() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFile file= superFolder.getFile("a.txt");
+		file.create(getStream("123"), true, null);
+		
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {file};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= getRoot();
+			verifyValidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			file.delete(true, new NullProgressMonitor());
+		}
+	}		
+
+	public void testDestination_no_fileToParentProject() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFile file= superFolder.getFile("a.txt");
+		file.create(getStream("123"), true, null);
+		
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {file};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= MySetup.getProject();
+			verifyInvalidDestination(ref, destination);			
+		}finally{
+			performDummySearch();
+			file.delete(true, new NullProgressMonitor());
+		}
+	}		
+
+	public void testDestination_yes_folderToSiblingFolder() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFolder folder= superFolder.getFolder("folder");
+		folder.create(true, true, null);
+
+		IFolder otherFolder= superFolder.getFolder("otherfolder");
+		otherFolder.create(true, true, null);
+		
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= otherFolder;
+			verifyValidDestination(ref, destination);						
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+			otherFolder.delete(true, new NullProgressMonitor());			
+		}
+	}
+
+	public void testDestination_no_folderToParentProject() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFolder folder= superFolder.getFolder("folder");
+		folder.create(true, true, null);
+
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= MySetup.getProject();
+			verifyInvalidDestination(ref, destination);						
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+		}
+	}
+
+	public void testDestination_yes_folderToSiblingRoot() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFolder folder= superFolder.getFolder("folder");
+		folder.create(true, true, null);
+
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= getRoot();
+			verifyValidDestination(ref, destination);						
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+		}
+	}
+
+	public void testDestination_yes_folderToPackage() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFolder folder= superFolder.getFolder("folder");
+		folder.create(true, true, null);
+
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= getPackageP();
+			verifyValidDestination(ref, destination);						
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+		}
+	}
+	
+	public void testDestination_yes_folderToFileInAnotherFolder() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFolder folder= superFolder.getFolder("folder");
+		folder.create(true, true, null);
+
+		IFolder otherFolder= superFolder.getFolder("otherfolder");
+		otherFolder.create(true, true, null);
+		IFile fileInAnotherFolder= otherFolder.getFile("f.tex");
+		fileInAnotherFolder.create(getStream("123"), true, null);
+
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= fileInAnotherFolder;
+			verifyValidDestination(ref, destination);						
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());	
+			otherFolder.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_folderToCu() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFolder folder= superFolder.getFolder("folder");
+		folder.create(true, true, null);
+
+		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= cu;
+			verifyValidDestination(ref, destination);						
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_folderToSimpleProject() throws Exception{
+		IProject superFolder= MySetup.getProject().getProject();
+		IFolder folder= superFolder.getFolder("folder");
+		folder.create(true, true, null);
+
+		IProject simpleProject= ResourcesPlugin.getWorkspace().getRoot().getProject("mySImpleProject");
+		simpleProject.create(null);
+		simpleProject.open(null);
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= simpleProject;
+			verifyValidDestination(ref, destination);						
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+			simpleProject.delete(true, true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_sourceFolderToOtherProject() throws Exception{
+		IJavaProject otherJavaProject= JavaProjectHelper.createJavaProject("other", "bin");
+		
+		try {
+			IJavaElement[] javaElements= { getRoot()};
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			Object destination= otherJavaProject;
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			JavaProjectHelper.delete(otherJavaProject);
+		}						
+	}
+
+	public void testDestination_no_methodToItself() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			IResource[] resources= {};
+			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			Object destination= method;
+			verifyInvalidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			if (cu != null)
+				cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
 }
