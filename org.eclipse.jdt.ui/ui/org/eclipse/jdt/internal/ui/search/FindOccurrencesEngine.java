@@ -232,7 +232,7 @@ public abstract class FindOccurrencesEngine {
 				new OccurrencesInFileLabelProvider(),
 				new GotoMarkerAction(), 
 				new SearchGroupByKeyComputer(),
-				fNullOperation
+				null
 			);	
 		return view;
 	}
