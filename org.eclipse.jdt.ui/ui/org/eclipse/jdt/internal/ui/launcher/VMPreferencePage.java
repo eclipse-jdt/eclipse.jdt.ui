@@ -46,7 +46,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 				
 		fVMList= new CheckboxTableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		GridData gd= new GridData(GridData.FILL_BOTH);
-		gd.widthHint= convertWidthInCharsToPixels(60);
+		gd.widthHint= convertWidthInCharsToPixels(80);
 		fVMList.getTable().setLayoutData(gd);
 		fVMList.setLabelProvider(new VMLabelProvider());
 		fVMList.setContentProvider(new VMContentProvider());	
@@ -60,14 +60,13 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		
 		TableColumn column1= table.getColumn(0);
 		column1.setText("JRE Type");
-		tableLayout.addColumnData(new ColumnWeightData(50));
+		tableLayout.addColumnData(new ColumnWeightData(30));
 	
 		TableColumn column2= new TableColumn(table, SWT.NULL);
 		column2.setText("Name");
-		column2.setWidth(convertWidthInCharsToPixels(30));
-		tableLayout.addColumnData(new ColumnWeightData(50));
+		tableLayout.addColumnData(new ColumnWeightData(30));
 		
-		fVMList.setInput(JavaRuntime.getVMInstallTypes());	
+		TableColumn column3= new TableColumn(table, SWT.NULL);		column3.setText("Location");		tableLayout.addColumnData(new ColumnWeightData(50));				fVMList.setInput(JavaRuntime.getVMInstallTypes());	
 		
 		fVMList.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent evt) {

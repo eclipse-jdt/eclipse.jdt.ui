@@ -143,6 +143,7 @@ public class AddVMDialog extends StatusDialog {
 		l= new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		gd= new MGridData();
 		gd.horizontalAlignment= gd.FILL;
+		gd.heightHint= convertVerticalDLUsToPixels(12);
 		gd.horizontalSpan= 3;
 		l.setLayoutData(gd);
 		
