@@ -29,7 +29,7 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements IOverwrite
 			public void run() {
 				String title= PackagesMessages.getString("DropAdapter.question"); //$NON-NLS-1$
 				String msg= PackagesMessages.getFormattedString("DropAdapter.alreadyExists", file); //$NON-NLS-1$
-				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
+				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL};
 				MessageDialog dialog= new MessageDialog(control.getShell(), title, null, msg, MessageDialog.QUESTION, options, 0);
 				result[0]= dialog.open();
 			}
