@@ -24,8 +24,10 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.refactoring.participants.RenameRefactoringAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -93,6 +95,8 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractConstantAction;
     private SelectionDispatchAction fConvertLocalToFieldAction;
 	private SelectionDispatchAction fSelfEncapsulateField;
+	
+	private SelectionDispatchAction fRenameRefactoringAction;
 	
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -237,6 +241,9 @@ public class RefactorActionGroup extends ActionGroup {
 		
 		fInlineAction= new InlineAction(fSite);
 		initAction(fInlineAction, provider, selection);
+		
+		fRenameRefactoringAction= new RenameRefactoringAction(fSite);
+		initAction(fRenameRefactoringAction, provider, selection);
 	}
 
 	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
@@ -323,6 +330,10 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fExtractConstantAction);
 		added+= addAction(refactorSubmenu, fConvertLocalToFieldAction);
 		added+= addAction(refactorSubmenu, fSelfEncapsulateField);
+		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean("org.eclipse.jdt.refactoring.participants")) { //$NON-NLS-1$
+			refactorSubmenu.add(new Separator());
+			added+= addAction(refactorSubmenu, fRenameRefactoringAction);
+		}
 		if (added > 0)
 			menu.appendToGroup(fGroupName, refactorSubmenu);
 	}
