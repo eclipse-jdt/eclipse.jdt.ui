@@ -188,10 +188,13 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 					AST ast= new AST(affectedCUs[i]);
 					TextChange change= fChangeManager.get(unit);
 					AccessAnalyzer analyzer= new AccessAnalyzer(this, fFieldDeclaration, change);
-					ast.accept(analyzer);
-					if (ast.hasProblems()) {
-						compilerErrorFound(result, unit);
-					}
+					if (ast.isMalformed()){
+						syntaxErrorFound(result, unit);
+					} else {	
+						ast.accept(analyzer);
+						if (ast.hasProblems()) 
+							compilerErrorFound(result, unit);
+					}		
 					result.merge(analyzer.getStatus());
 					if (result.hasFatalError())
 						break;
