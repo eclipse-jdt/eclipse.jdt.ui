@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
+import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
@@ -187,6 +188,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private CompositeActionGroup fActionGroups;
 	private CCPActionGroup fCCPActionGroup;
+	private SelectAllAction fSelectAllAction;
 	
 	public TypeHierarchyViewPart() {
 		fSelectedType= null;
@@ -732,7 +734,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				new GenerateActionGroup(this),
 				new JavaSearchActionGroup(this)});
 		
-		fActionGroups.fillActionBars(getViewSite().getActionBars());
+		fActionGroups.fillActionBars(actionBars);
+		fSelectAllAction= new SelectAllAction(fMethodsViewer);
+		
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
 		
 		initDragAndDrop();		
 	}
@@ -964,8 +969,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private void doSelectionChanged(SelectionChangedEvent e) {
 		if (e.getSelectionProvider() == fMethodsViewer) {
 			methodSelectionChanged(e.getSelection());
+			fSelectAllAction.setEnabled(true);
 		} else {
 			typeSelectionChanged(e.getSelection());
+			fSelectAllAction.setEnabled(false);
 		}
 	}
 	
