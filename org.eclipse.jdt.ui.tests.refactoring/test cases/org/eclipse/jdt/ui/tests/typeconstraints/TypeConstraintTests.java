@@ -10,21 +10,27 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.tests.typeconstraints;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCollector;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ExtractInterfaceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint;
 
 public class TypeConstraintTests extends RefactoringTest {
@@ -77,15 +83,15 @@ public class TypeConstraintTests extends RefactoringTest {
 	}
 
 	public void testNumber0() throws Exception{
-		numberHelper(1);
-	}
-
-	public void testNumber1() throws Exception{
 		numberHelper(2);
 	}
 
+	public void testNumber1() throws Exception{
+		numberHelper(3);
+	}
+
 	public void testNumber2() throws Exception{
-		numberHelper(7);
+		numberHelper(10);
 	}
 
 	private static List allToStrings(Object[] elements) {
@@ -93,7 +99,7 @@ public class TypeConstraintTests extends RefactoringTest {
 		for (int i= 0; i < elements.length; i++) {
 			strings[i]= elements[i].toString();
 		}
-		return Arrays.asList(strings);
+		return new ArrayList(Arrays.asList(strings));//want to be able to remove stuff from it
 	}
 	
 	private void testConstraints(String[] constraintStrings) throws Exception{
@@ -105,30 +111,115 @@ public class TypeConstraintTests extends RefactoringTest {
 		List externals= allToStrings(constraints);
 		assertEquals("length", constraintStrings.length, constraints.length);
 		for (int i= 0; i < constraintStrings.length; i++) {
-			assertTrue("missing constraint:" + constraintStrings[i], externals.contains(constraintStrings[i]));
+			assertTrue("missing constraint:" + constraintStrings[i], externals.remove(constraintStrings[i]));
 		}
 		assertAllSatisfied(constraints);
 	}
 	
 	public void testConstraints0() throws Exception{
-		String[] strings= {"[null] <= [a0]", "[a0] <= [a1]", "[a0] =^= A", "[a1] =^= A"};
+		String[] strings= {"[null] <= [a0]", "[a0] <= [a1]", "[a0] =^= A", "[a1] =^= A", "Decl(A:f()) =^= p.A"};
 		testConstraints(strings);
 	}
 
 	public void testConstraints1() throws Exception{
-		String[] strings= {"[null] <= [a0]", "[a0] == [a1]", "[a0] =^= A", "[a1] =^= A"};
+		String[] strings= {"[null] <= [a0]", "[a0] == [a1]", "[a0] =^= A", "[a1] =^= A", "Decl(A:a0) =^= p.A", "Decl(A:a1) =^= p.A"};
 		testConstraints(strings);
 	}
 
 	public void testConstraints2() throws Exception{
-		String[] strings= {"[null] <= [a0]", "[(A)a0] <= [a1]", "[a0] <= [(A)a0] or [(A)a0] <= [a0]", "[a0] =^= A", "[a1] =^= A"};
+		String[] strings= {"[null] <= [a0]", "[(A)a0] =^= A", "[(A)a0] <= [a1]", "[a0] <= [(A)a0] or [(A)a0] <= [a0]", "[a0] =^= A", "[a1] =^= A", "Decl(A:f()) =^= p.A"};
 		testConstraints(strings);
 	}
 
 	public void testConstraints3() throws Exception{
-		String[] strings= {"[null] <= [a]", "[null] <= [b]", "[a] == [b]", "[a] =^= A", "[b] =^= A"};
+		String[] strings= {"[null] <= [a]", "[null] <= [b]", "[a] == [b]", "[a] =^= A", "[b] =^= A", "Decl(A:f()) =^= p.A"};
 		testConstraints(strings);
 	}
+//
+//	public void testConstraints4() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+//
+//	public void testConstraints5() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+
+	public void testConstraints6() throws Exception{
+		String[] strings= {"Decl(A:f()) =^= p.A", "Decl(A:A(A)) =^= p.A", "[new A(a0)] =^= p.A", "[a0] <= [Parameter(0,A:A(A))]", "[a1] =^= A", "[a0] =^= A", "[null] <= [a0]", "[new A(a0)] <= [a1]", "[Parameter(0,A:A(A))] =^= [a]"};
+		testConstraints(strings);
+	}	
+
+	public void testConstraints7() throws Exception{
+		String[] strings= {"Decl(A:A()) =^= p.A", "Decl(A:A(A)) =^= p.A", "[null] <= [Parameter(0,A:A(A))]", "[Parameter(0,A:A(A))] =^= [a]"};
+		testConstraints(strings);
+	}	
+
+//	public void testConstraints8() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+//
+	public void testConstraints9() throws Exception{
+		String[] strings= {"Decl(A:f()) =^= p.A", "[a] =^= A", "[x] =^= boolean", "[a instanceof A] <= [x]", "[null] <= [a]", "[a] <= A or A <= [a]"};
+		testConstraints(strings);
+	}	
+//
+//	public void testConstraints10() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+//
+//	public void testConstraints11() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+
+//	public void testConstraints12() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+//
+//	public void testConstraints13() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+//
+//	public void testConstraints14() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+//
+//	public void testConstraints15() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+
+	public void testConstraints16() throws Exception{
+		String[] strings= {"Decl(A:aField) =^= p.A", "Decl(A:f()) =^= p.A", "[this] =^= p.A", "[this] =^= p.A", "[this] <= [aTemp]", "[this] <= [aField]", "[this] <= [a]", "[a] =^= A", "[aField] =^= A", "[aTemp] =^= A", "[this] =^= p.A"};
+		testConstraints(strings);
+	}	
+
+	public void testConstraints17() throws Exception{
+		String[] strings= {"Decl(A:f()) =^= p.A", "[null] <= [a]", "[A:f()]_returnType =^= A", "[a] =^= A", "[a] <= [A:f()]_returnType"};
+		testConstraints(strings);
+	}	
+
+//	public void testConstraints18() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+//
+//	public void testConstraints19() throws Exception{
+//		String[] strings= {};
+//		testConstraints(strings);
+//	}	
+
+	public void testConstraints20() throws Exception{
+		String[] strings= {"Decl(B:aField) =^= p.B", "Decl(A:aField) =^= p.A", "Decl(B:aField) < Decl(A:aField)", "[aField] =^= A", "[aField] =^= A"};
+		testConstraints(strings);
+	}	
 	
 //	private void testBadVars(String[] badVars, String[] initiallyBadVars) throws Exception {
 //		CompilationUnit cuNode= getCuNode();
@@ -186,4 +277,12 @@ public class TypeConstraintTests extends RefactoringTest {
 //		String[] badVars= {"[a2]", "[(A)a1]"};
 //		testBadVars(badVars, initialBad);
 //	}
+
+	public void testUpdatableExtractInterfaceRanges0() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP());
+		IType theInterface= cu.getType("Bag");
+		IType theClass= cu.getType("A");
+		CompilationUnitRange[] ranges= ExtractInterfaceUtil.getUpdatableRanges(theClass, theInterface, new NullProgressMonitor());		
+		assertEquals(10, ranges.length);
+	}
 }
