@@ -635,7 +635,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 				control.addSelectionListener(new SelectionAdapter() {
 
 					public final void widgetSelected(final SelectionEvent event) {
-						PreferencesUtil.createPreferenceDialogOn(target, new String[] { target}, subTarget).open();
+						PreferencesUtil.createPreferenceDialogOn(control.getShell(), target, new String[] { target}, subTarget).open();
 					}
 				});
 				if (strings.length > 2)
