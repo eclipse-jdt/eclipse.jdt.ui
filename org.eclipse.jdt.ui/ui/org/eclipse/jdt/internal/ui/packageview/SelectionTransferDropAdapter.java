@@ -53,7 +53,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage;
-import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtCopyAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 import org.eclipse.jdt.internal.ui.reorg.MockWorkbenchSite;
@@ -69,6 +68,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootMan
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.DeleteAction;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
@@ -164,10 +164,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				
 				if (! canPasteSourceReferences(target))
 					return;
-				DeleteSourceReferencesAction delete= ReorgActionFactory.createDeleteSourceReferencesAction(getDragableSourceReferences());
-				delete.setAskForDeleteConfirmation(true);
-				delete.setCanDeleteGetterSetter(false);
-				delete.update(delete.getSelection());
+				DeleteAction delete= ReorgActionFactory.createDeleteAction(getDragableSourceReferences());
+				delete.setSuggestGetterSetterDeletion(false);
 				if (delete.isEnabled())
 					delete.run();
 				
@@ -354,7 +352,6 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	//--
 	private static class DragNDropMoveAction extends JdtMoveAction{
 		private Object fTarget;
-		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
 		
 		public DragNDropMoveAction(ISelectionProvider provider, Object target){
 			super(new MockWorkbenchSite(provider));
