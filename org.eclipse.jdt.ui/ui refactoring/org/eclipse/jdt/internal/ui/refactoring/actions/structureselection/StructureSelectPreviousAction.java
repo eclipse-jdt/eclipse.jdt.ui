@@ -13,6 +13,7 @@ public class StructureSelectPreviousAction extends StructureSelectionAction{
 	
 	public StructureSelectPreviousAction() {
 		super("Structure Select Previous"); 
+		setText("Previous Element@Alt+ARROW_LEFT");
 	}
 	
 	/* non java doc
