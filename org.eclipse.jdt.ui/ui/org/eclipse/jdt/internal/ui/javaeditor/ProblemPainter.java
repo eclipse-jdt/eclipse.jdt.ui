@@ -40,6 +40,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	
 	private boolean fIsActive= false;
 	private boolean fIsPainting= false;
+	private boolean fIsModelChanging= false;
 	
 	private Color fColor;
 	private ITextEditor fTextEditor;
@@ -82,9 +83,9 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		if (fModel != model) {
 			if (fModel != null)
 				fModel.removeAnnotationModelListener(this);
-			if (model != null)
-				model.addAnnotationModelListener(this);
 			fModel= model;
+			if (fModel != null)
+				fModel.addAnnotationModelListener(this);
 		}
 		
 		fProblemPositions.clear();
@@ -97,18 +98,23 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 			}
 		}
 	}
-
+	
 	/*
 	 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
 	 */
 	public void modelChanged(final IAnnotationModel model) {
-		if (fTextWidget != null && !fTextWidget.isDisposed()) {
+		if (fTextWidget != null && !fTextWidget.isDisposed() && !fIsModelChanging) {
 			Display d= fTextWidget.getDisplay();
 			if (d != null) {
 				d.asyncExec(new Runnable() {
 					public void run() {
 						disablePainting(true);
-						setModel(model);
+						try {
+							fIsModelChanging= true;
+							setModel(model);
+						} finally {
+							fIsModelChanging= false;
+						}
 						enablePainting();					
 					}
 				});

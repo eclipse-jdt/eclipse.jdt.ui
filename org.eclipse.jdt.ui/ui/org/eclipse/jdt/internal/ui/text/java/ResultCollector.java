@@ -310,15 +310,15 @@ public class ResultCollector implements ICompletionRequestor {
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
 		nameBuffer.append('(');
-		if (parameterTypeNames.length > 0) {
+		if (parameterTypeNames != null && parameterTypeNames.length > 0) {
 			nameBuffer.append(getParameterSignature(parameterTypeNames, parameterNames));
 		}
 		nameBuffer.append(')'); 
-		if (returnTypeName.length > 0) {
+		if (returnTypeName != null && returnTypeName.length > 0) {
 			nameBuffer.append("  "); //$NON-NLS-1$
 			nameBuffer.append(returnTypeName);
 		}
-		if (declaringTypeName.length > 0) {
+		if (declaringTypeName != null && declaringTypeName.length > 0) {
 			nameBuffer.append(" - "); //$NON-NLS-1$
 			nameBuffer.append(declaringTypeName);
 		}
@@ -415,7 +415,7 @@ public class ResultCollector implements ICompletionRequestor {
 		Image icon= (descriptor == null) ? null : fRegistry.get(descriptor);
 		return new JavaCompletionProposal(completion, start, length, icon, name);
 	}
-		
+	
 	/**
 	 * Specifies the context of the code assist operation.
 	 * @param codeAssistOffset The Offset on which the code assist will be called.

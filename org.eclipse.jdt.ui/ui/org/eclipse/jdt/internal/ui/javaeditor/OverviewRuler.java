@@ -85,8 +85,10 @@ public class OverviewRuler {
 		
 		public FilterIterator(int type) {
 			fType= type;
-			fIterator= fModel.getAnnotationIterator();
-			skip();
+			if (fModel != null) {
+				fIterator= fModel.getAnnotationIterator();
+				skip();
+			}
 		}
 		
 		private void skip() {
@@ -105,7 +107,6 @@ public class OverviewRuler {
 		public boolean hasNext() {
 			return fNext != null;
 		}
-
 		/*
 		 * @see Iterator#next()
 		 */
@@ -113,10 +114,10 @@ public class OverviewRuler {
 			try {
 				return fNext;
 			} finally {
-				skip();
+				if (fModel != null)
+					skip();
 			}
 		}
-
 		/*
 		 * @see Iterator#remove()
 		 */
@@ -197,7 +198,7 @@ public class OverviewRuler {
 	}
 	
 	public void setModel(IAnnotationModel model) {
-		if (model != fModel) {
+		if (model != fModel || model != null) {
 			
 			if (fModel != null)
 				fModel.removeAnnotationModelListener(fInternalListener);
