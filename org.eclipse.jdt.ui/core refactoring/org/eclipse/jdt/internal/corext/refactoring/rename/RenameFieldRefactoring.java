@@ -172,10 +172,10 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			
 		IMethod getter= getGetter();
 		if (getter == null) 
-			return "";	
-		if (null != MethodChecks.isDeclaredInInterface(getter, new NullProgressMonitor()))
+			return "";
+		if (MethodChecks.isVirtual(getter) && null != MethodChecks.isDeclaredInInterface(getter, new NullProgressMonitor()))
 			return DECLARED_SUPERTYPE;
-		if (null != MethodChecks.overridesAnotherMethod(getter, new NullProgressMonitor()))
+		if (MethodChecks.isVirtual(getter) && null != MethodChecks.overridesAnotherMethod(getter, new NullProgressMonitor()))
 			return DECLARED_SUPERTYPE;
 		return null;	
 	}
@@ -190,9 +190,9 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		IMethod setter= getSetter();
 		if (setter == null) 
 			return "";	
-		if (null != MethodChecks.isDeclaredInInterface(setter, new NullProgressMonitor()))
+		if (MethodChecks.isVirtual(setter) && null != MethodChecks.isDeclaredInInterface(setter, new NullProgressMonitor()))
 			return DECLARED_SUPERTYPE;
-		if (null != MethodChecks.overridesAnotherMethod(setter, new NullProgressMonitor()))
+		if (MethodChecks.isVirtual(setter) && null != MethodChecks.overridesAnotherMethod(setter, new NullProgressMonitor()))
 			return DECLARED_SUPERTYPE;
 		return null;	
 	}
