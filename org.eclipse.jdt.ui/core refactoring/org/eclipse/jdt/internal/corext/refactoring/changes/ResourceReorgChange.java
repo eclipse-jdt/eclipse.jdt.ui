@@ -21,17 +21,17 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
 abstract class ResourceReorgChange extends Change {
 	
 	private IPath fResourcePath;
 	private boolean fIsFile;
-	
 	private IPath fDestinationPath;
 	private boolean fIsDestinationProject;
-	private String fNewName;
+	private INewNameQuery fNewNameQuery;
 	
-	ResourceReorgChange(IResource res, IContainer dest, String newName){
+	ResourceReorgChange(IResource res, IContainer dest, INewNameQuery nameQuery){
 		Assert.isTrue(res instanceof IFile || res instanceof IFolder);
 		fIsFile= (res instanceof IFile);
 		fResourcePath= Utils.getResourcePath(res);
@@ -39,7 +39,7 @@ abstract class ResourceReorgChange extends Change {
 		Assert.isTrue(dest instanceof IProject || dest instanceof IFolder);
 		fIsDestinationProject= (dest instanceof IProject);
 		fDestinationPath= Utils.getResourcePath(dest);
-		fNewName= newName;
+		fNewNameQuery= nameQuery;
 	}
 	
 	protected abstract void doPerform(IPath path, IProgressMonitor pm) throws JavaModelException;
@@ -47,15 +47,16 @@ abstract class ResourceReorgChange extends Change {
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
-	public final void perform(ChangeContext context, IProgressMonitor pm)	throws JavaModelException, ChangeAbortException {
+	public final void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
 		try{
 			pm.beginTask(getName(), 2);
 			if (!isActive())
 				return;
 			
-			deleteIfAlreadyExists(new SubProgressMonitor(pm, 1));
+			String newName= getNewResourceName();
+			deleteIfAlreadyExists(new SubProgressMonitor(pm, 1), newName);
 				
-			doPerform(getDestination().getFullPath().append(getNewResourceName()), new SubProgressMonitor(pm, 1));	
+			doPerform(getDestination().getFullPath().append(newName), new SubProgressMonitor(pm, 1));	
 		} catch (CoreException e){
 			throw new JavaModelException(e);			
 		} finally {
@@ -63,9 +64,9 @@ abstract class ResourceReorgChange extends Change {
 		}
 	}
 
-	private void deleteIfAlreadyExists(IProgressMonitor pm) throws CoreException {
+	private void deleteIfAlreadyExists(IProgressMonitor pm, String newName) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
-		IResource current= getDestination().findMember(getNewResourceName());
+		IResource current= getDestination().findMember(newName);
 		if (current == null)
 			return;
 		if (! current.exists())
@@ -79,9 +80,12 @@ abstract class ResourceReorgChange extends Change {
 	}
 	
 	private String getNewResourceName(){
-		if (fNewName == null)
+		if (fNewNameQuery == null)
 			return getResource().getName();
-		return fNewName;	
+		String name= fNewNameQuery.getNewName();
+		if (name == null)
+			return getResource().getName();
+		return name;
 	}
 	
 	/* non java-doc

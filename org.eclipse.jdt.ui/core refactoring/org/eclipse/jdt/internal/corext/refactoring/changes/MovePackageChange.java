@@ -16,12 +16,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 
 public class MovePackageChange extends PackageReorgChange {
 	
-	public MovePackageChange(IPackageFragment pack, IPackageFragmentRoot dest, String newName){
-		super(pack, dest, newName);
-	}
-	
 	public MovePackageChange(IPackageFragment pack, IPackageFragmentRoot dest){
-		this(pack, dest, null);
+		super(pack, dest, null);
 	}
 	
 	protected void doPerform(IProgressMonitor pm) throws JavaModelException{

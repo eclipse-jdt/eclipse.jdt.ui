@@ -14,17 +14,18 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
 abstract class PackageReorgChange extends Change {
 
 	private String fPackageHandle;
-	private String fNewName;
 	private String fDestinationHandle;
+	private INewNameQuery fNameQuery;
 	
-	PackageReorgChange(IPackageFragment pack, IPackageFragmentRoot dest, String newName){
+	PackageReorgChange(IPackageFragment pack, IPackageFragmentRoot dest, INewNameQuery nameQuery){
 		fPackageHandle= pack.getHandleIdentifier();
 		fDestinationHandle= dest.getHandleIdentifier();
-		fNewName= newName;
+		fNameQuery= nameQuery;
 	}
 	
 	abstract void doPerform(IProgressMonitor pm) throws JavaModelException;
@@ -62,7 +63,9 @@ abstract class PackageReorgChange extends Change {
 	}
 
 	String getNewName() {
-		return fNewName;
+		if (fNameQuery == null)
+			return null;
+		return fNameQuery.getNewName();
 	}
 }
 

@@ -5,22 +5,19 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.*;
-import org.eclipse.jdt.internal.corext.refactoring.*;
 
 public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 
 	private boolean fUndoable;
 	
-	public MoveCompilationUnitChange(ICompilationUnit cu, IPackageFragment newPackage, String newName){
-		super(cu, newPackage, newName);
-	}
-		
 	public MoveCompilationUnitChange(ICompilationUnit cu, IPackageFragment newPackage){
 		super(cu, newPackage);
 	}
@@ -63,12 +60,13 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 	 */
 	void doPeform(IProgressMonitor pm) throws JavaModelException{
 		String name;
-		if (getNewName() == null)
+		String newName= getNewName();
+		if (newName == null)
 			name= getCu().getElementName();
 		else
-			name= getNewName();	
+			name= newName;	
 		fUndoable= ! getDestinationPackage().getCompilationUnit(name).exists();
 		
-		getCu().move(getDestinationPackage(), null, getNewName(), true, pm);
+		getCu().move(getDestinationPackage(), null, newName, true, pm);
 	}
 }

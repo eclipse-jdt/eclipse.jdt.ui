@@ -11,18 +11,20 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
 abstract class CompilationUnitReorgChange extends Change {
 
 	private String fCuHandle;
 	private String fOldPackageHandle;
 	private String fNewPackageHandle;
-	private String fNewName;
+
+	private INewNameQuery fNewNameQuery;
 	
-	CompilationUnitReorgChange(ICompilationUnit cu, IPackageFragment dest, String newName){
+	CompilationUnitReorgChange(ICompilationUnit cu, IPackageFragment dest, INewNameQuery newNameQuery){
 		fCuHandle= cu.getHandleIdentifier();
 		fNewPackageHandle= dest.getHandleIdentifier();
-		fNewName= newName;
+		fNewNameQuery= newNameQuery;
 		fOldPackageHandle= cu.getParent().getHandleIdentifier();
 	}
 	
@@ -55,7 +57,7 @@ abstract class CompilationUnitReorgChange extends Change {
 	
 	abstract void doPeform(IProgressMonitor pm) throws JavaModelException;
 	
-	/**
+	/*
 	 * @see IChange#getModifiedLanguageElement()
 	 */
 	public Object getModifiedLanguageElement() {
@@ -75,7 +77,9 @@ abstract class CompilationUnitReorgChange extends Change {
 	}
 	
 	String getNewName() {
-		return fNewName;
+		if (fNewNameQuery == null)
+			return null;
+		return fNewNameQuery.getNewName();	
 	}
 
 	static String getPackageName(IPackageFragment pack){

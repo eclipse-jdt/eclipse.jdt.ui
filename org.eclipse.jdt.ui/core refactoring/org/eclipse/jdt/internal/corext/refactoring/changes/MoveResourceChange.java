@@ -17,12 +17,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 
 public class MoveResourceChange extends ResourceReorgChange {
 	
-	public MoveResourceChange(IResource res, IContainer dest, String newName){
-		super(res, dest, newName);
-	}
-	
 	public MoveResourceChange(IResource res, IContainer dest){
-		this(res, dest, null);
+		super(res, dest, null);
 	}
 	
 	/* non java-doc

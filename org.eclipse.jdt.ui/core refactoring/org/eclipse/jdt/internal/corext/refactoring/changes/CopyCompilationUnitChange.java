@@ -7,15 +7,12 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
 public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 	
-	public CopyCompilationUnitChange(ICompilationUnit cu, IPackageFragment dest){
-		this(cu, dest, null);
-	}
-	
-	public CopyCompilationUnitChange(ICompilationUnit cu, IPackageFragment dest, String newName){
-		super(cu, dest, newName);
+	public CopyCompilationUnitChange(ICompilationUnit cu, IPackageFragment dest, INewNameQuery newNameQuery){
+		super(cu, dest, newNameQuery);
 	}
 		
 	/* non java-doc

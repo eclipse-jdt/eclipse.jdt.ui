@@ -5,23 +5,20 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.*;
-import org.eclipse.jdt.internal.corext.refactoring.*;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
 public class CopyPackageChange extends PackageReorgChange {
 	
-	public CopyPackageChange(IPackageFragment pack, IPackageFragmentRoot dest){
-		this(pack, dest, null);
-	}
-	
-	public CopyPackageChange(IPackageFragment pack, IPackageFragmentRoot dest, String newName){
-		super(pack, dest, newName);
+	public CopyPackageChange(IPackageFragment pack, IPackageFragmentRoot dest, INewNameQuery nameQuery){
+		super(pack, dest, nameQuery);
 	}
 	
 	protected void doPerform(IProgressMonitor pm) throws JavaModelException{

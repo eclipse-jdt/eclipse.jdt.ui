@@ -5,28 +5,22 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.*;
-import org.eclipse.jdt.internal.corext.refactoring.*;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
 public class CopyResourceChange extends ResourceReorgChange {
 	
-	public CopyResourceChange(IResource res, IContainer dest, String newName){
-		super(res, dest, newName);
-	}
-	
-	public CopyResourceChange(IResource res, IContainer dest){
-		this(res, dest, null);
+	public CopyResourceChange(IResource res, IContainer dest, INewNameQuery newNameQuery){
+		super(res, dest, newNameQuery);
 	}
 	
 	/* non java-doc
