@@ -6,6 +6,6 @@ public class TestNoCast {
 		return fName;
 	}
 	void foo(TestNoCast o) {
-		System.out.println(fName);
+		System.out.println(o.fName);
 	}
 }
