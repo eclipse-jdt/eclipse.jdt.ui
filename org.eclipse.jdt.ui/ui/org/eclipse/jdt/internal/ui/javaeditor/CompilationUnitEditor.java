@@ -114,16 +114,22 @@ public class CompilationUnitEditor extends JavaEditor {
 	 * @see JavaEditor#getJavaSourceReferenceAt
 	 */
 	protected ISourceReference getJavaSourceReferenceAt(int position) {
+		
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
+		
 		if (unit != null) {
-			try {
-				IJavaElement element= unit.getElementAt(position);
-				if (element instanceof ISourceReference)
-					return (ISourceReference) element;
-			} catch (JavaModelException x) {
+			synchronized (unit) {
+				try {
+					unit.reconcile();
+					IJavaElement element= unit.getElementAt(position);
+					if (element instanceof ISourceReference)
+						return (ISourceReference) element;
+				} catch (JavaModelException x) {
+				}
 			}
 		}
+		
 		return null;
 	}
 	

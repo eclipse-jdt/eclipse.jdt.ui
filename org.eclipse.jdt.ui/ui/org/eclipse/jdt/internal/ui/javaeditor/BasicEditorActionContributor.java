@@ -10,7 +10,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.ResourceBundle;
 
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -125,6 +125,10 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 	public void setActiveEditor(IEditorPart part) {
 		
 		super.setActiveEditor(part);
+		
+		IStatusLineManager manager= getActionBars().getStatusLineManager();
+		manager.setMessage(null);
+		manager.setErrorMessage(null);
 		
 		ITextEditor textEditor= null;
 		if (part instanceof ITextEditor)
