@@ -72,7 +72,6 @@ import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
-import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 
 import org.eclipse.jdt.core.IClassFile;
