@@ -91,18 +91,21 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	public static class TypeVariableFinder extends ASTVisitor {
 
 		private final Map fBindings= new HashMap();
-
+		private final List fFound= new ArrayList();
+		
 		public final boolean visit(final SimpleName node) {
 			Assert.isNotNull(node);
 			final ITypeBinding binding= node.resolveTypeBinding();
-			if (binding != null && binding.isTypeVariable() && !fBindings.containsKey(binding.getKey()))
+			if (binding != null && binding.isTypeVariable() && !fBindings.containsKey(binding.getKey())) {
 				fBindings.put(binding.getKey(), binding);
+				fFound.add(binding);
+			}
 			return true;
 		}
 
 		public final ITypeBinding[] getResult() {
-			final ITypeBinding[] result= new ITypeBinding[fBindings.values().size()];
-			fBindings.values().toArray(result);
+			final ITypeBinding[] result= new ITypeBinding[fFound.size()];
+			fFound.toArray(result);
 			return result;
 		}
 	}
@@ -381,7 +384,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	}
 
 	private ITypeBinding[] getTypeParameters() {
-		final Map map= new HashMap();
+		final List list= new ArrayList();
 		final ClassInstanceCreation creation= getClassInstanceCreation();
 		if (fDeclareStatic) {
 			final TypeVariableFinder finder= new TypeVariableFinder();
@@ -396,12 +399,12 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 					parameter= (TypeParameter) iterator.next();
 					binding= (ITypeBinding) parameter.resolveBinding();
 					if (binding != null)
-						map.put(binding.getKey(), binding);
+						list.add(binding);
 				}
 			}
 		}
-		final ITypeBinding[] result= new ITypeBinding[map.values().size()];
-		map.values().toArray(result);
+		final ITypeBinding[] result= new ITypeBinding[list.size()];
+		list.toArray(result);
 		return result;
 	}
 
