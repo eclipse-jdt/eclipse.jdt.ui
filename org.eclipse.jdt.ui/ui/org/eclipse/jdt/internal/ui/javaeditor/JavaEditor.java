@@ -114,6 +114,7 @@ import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.IEncodingSupport;
 
 import org.eclipse.ui.IEditorActionBarContributor;
@@ -145,8 +146,6 @@ import org.eclipse.ui.texteditor.TextNavigationAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-
-import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -3126,7 +3125,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @since 3.0
 	 */
 	private boolean isNavigationTarget(Annotation annotation) {
-		Preferences preferences= Platform.getPlugin(EditorsPlugin.PLUGIN_ID).getPluginPreferences();
+		Preferences preferences= Platform.getPlugin(EditorsUI.PLUGIN_ID).getPluginPreferences();
 		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
 //		See bug 41689
 //		String key= forward ? preference.getIsGoToNextNavigationTargetKey() : preference.getIsGoToPreviousNavigationTargetKey();
