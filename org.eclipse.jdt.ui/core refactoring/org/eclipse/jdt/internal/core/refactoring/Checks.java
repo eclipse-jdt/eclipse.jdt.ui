@@ -65,7 +65,14 @@ public class Checks {
 	 *  name is not a valid java package name.
 	 */
 	public static RefactoringStatus checkPackageName(String name) {
-		return checkName(name, JavaConventions.validatePackageName(name));
+		RefactoringStatus result= checkName(name, JavaConventions.validatePackageName(name));
+		if (! result.isOK())
+			return result;
+		//if name == null or "", then JavaConventions.validatePackageName reports an error anyway
+		//so this call is safe
+		if (! Character.isLowerCase(name.charAt(0))) 
+			result.addWarning(RefactoringCoreMessages.getString("Checks.should_start_lowercase")); //$NON-NLS-1$
+		return result;	
 	}
 	
 	/**
@@ -97,6 +104,15 @@ public class Checks {
 			return result;
 		} else
 			return null;
+	}
+	
+	public static boolean startsWithLowerCase(String s){
+		if (s == null)
+			return false;
+		else if ("".equals(s)) //$NON-NLS-1$
+			return false;
+		else
+			return (Character.isLowerCase(s.charAt(0)));		
 	}
 
 	public static boolean resourceExists(IPath resourcePath){

@@ -163,6 +163,8 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fNewParameterNames.length; i++){
 			result.merge(Checks.checkFieldName(fNewParameterNames[i]));
+			if (! Checks.startsWithLowerCase(fNewParameterNames[i]))
+				result.addWarning(RefactoringCoreMessages.getString("RenameParametersRefactoring.should_start_lowercase")); //$NON-NLS-1$
 		}
 		return result;			
 	}

@@ -130,10 +130,13 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	/**
 	 * @see IRenameRefactoring#checkNewName
 	 */
-	public RefactoringStatus checkNewName() {
+	public RefactoringStatus checkNewName() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		
 		result.merge(Checks.checkFieldName(getNewName()));
+		
+		if (isInstaceField(getField()) && (! Checks.startsWithLowerCase(getNewName())))
+			result.addWarning(RefactoringCoreMessages.getString("RenameFieldRefactoring.should_start_lowercase")); //$NON-NLS-1$
 			
 		if (Checks.isAlreadyNamed(getField(), getNewName()))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameFieldRefactoring.another_name")); //$NON-NLS-1$
@@ -164,6 +167,12 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		return result;
 	}
 	
+	private static boolean isInstaceField(IField field) throws JavaModelException{
+		if (field.getDeclaringType().isInterface())
+			return false;
+		else 
+			return ! Flags.isStatic(field.getFlags());
+	}
 	
 	private RefactoringStatus checkNestedHierarchy(IType type) throws JavaModelException {
 		IType[] nestedTypes= type.getTypes();
