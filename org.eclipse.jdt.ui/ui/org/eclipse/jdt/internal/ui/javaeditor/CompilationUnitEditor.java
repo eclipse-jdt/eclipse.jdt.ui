@@ -783,7 +783,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return -1;
 
 				int newLine= fLine + newElementLine - fElementLine;
-				int maxColumn= document.getLineLength(newLine) - document.getLineDelimiter(newLine).length();
+				int maxColumn= document.getLineLength(newLine);
+				String lineDelimiter= document.getLineDelimiter(newLine);
+				if (lineDelimiter != null)
+					maxColumn= maxColumn - lineDelimiter.length();
 				int offset;
 				if (fColumn > maxColumn)
 					offset= document.getLineOffset(newLine) + maxColumn;
