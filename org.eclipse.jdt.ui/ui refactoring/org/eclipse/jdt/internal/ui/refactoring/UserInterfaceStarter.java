@@ -43,19 +43,34 @@ public class UserInterfaceStarter {
 	 * @exception CoreException if the user interface can't be activated
 	 */
 	public static void run(Refactoring refactoring, Shell parent) throws CoreException {
+		run(refactoring, parent, true);
+	}
+	
+	/**
+	 * Opens the user interface for the given refactoring. The provided
+	 * shell should be used as a parent shell.
+	 * 
+	 * @param refactoring the refactoring for which the user interface
+	 *  should be opened
+	 * @param parent the parent shell to be used
+	 * @param forceSave <code>true<code> if saving is needed before
+	 *  executing the refactoring
+	 * 
+	 * @exception CoreException if the user interface can't be activated
+	 */
+	public static void run(Refactoring refactoring, Shell parent, boolean forceSave) throws CoreException {
 		IRefactoringProcessor processor= (IRefactoringProcessor)refactoring.getAdapter(IRefactoringProcessor.class);
 		// TODO this should change. Either IRefactoring models Refactoring API. 
 		Assert.isNotNull(processor);
 		UserInterfaceDescriptor descriptor= UserInterfaceDescriptor.get(processor);
 		if (descriptor != null) {
 			UserInterfaceStarter starter= descriptor.create();
-			starter.activate(refactoring, parent);
+			starter.activate(refactoring, parent, forceSave);
 		} else {
 			MessageDialog.openInformation(parent, 
 				refactoring.getName(), 
 				"No user interface found");
 		}
-		
 	}
 	
 	/**
@@ -91,9 +106,9 @@ public class UserInterfaceStarter {
 	 * 
 	 * @exception CoreException if the user interface can't be activated
 	 */
-	protected void activate(Refactoring refactoring, Shell parent) throws CoreException {
+	protected void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
 		RefactoringWizard wizard= (RefactoringWizard)fConfigElement.createExecutableExtension(WIZARD);	
 		wizard.initialize(refactoring);	
-		new RefactoringStarter().activate(refactoring, wizard, parent, wizard.getDefaultPageTitle(), true);
+		new RefactoringStarter().activate(refactoring, wizard, parent, wizard.getDefaultPageTitle(), save);
 	}
 }

@@ -96,7 +96,7 @@ public class DeleteAction extends SelectionDispatchAction {
 					"No refactoring available to process the selected elements.");
 				return;
 			}
-			UserInterfaceStarter.run(ref, getShell());
+			UserInterfaceStarter.run(ref, getShell(), false);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
