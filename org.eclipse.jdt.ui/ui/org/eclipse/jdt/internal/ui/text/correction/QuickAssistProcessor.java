@@ -46,7 +46,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return getCatchClauseToThrowsProposals(context, coveringNode, null) 
 				|| getRenameLocalProposals(context, coveringNode, null)
 				|| getAssignToVariableProposals(context, coveringNode, null)
-				|| getUnWrapProposals(context, coveringNode, null);
+				|| getUnWrapProposals(context, coveringNode, null)
+				|| getAssignParamToFieldProposals(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -65,6 +66,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 			if (locations == null || locations.length == 0) {
 				getAssignToVariableProposals(context, coveringNode, resultingCollections);
+				getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
@@ -110,8 +112,30 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding, 1);
 			resultingCollections.add(fieldProposal);
 		}
+		return false;
+		
+	}
+	
+	private boolean getAssignParamToFieldProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+		ASTNode parent= node.getParent();
+		if (node.getNodeType() != ASTNode.SIMPLE_NAME || !(parent instanceof SingleVariableDeclaration) || !(parent.getParent() instanceof MethodDeclaration)) {
+			return false;
+		}
+		SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) parent;
+		ITypeBinding binding= paramDecl.getType().resolveBinding();
+		
+		MethodDeclaration methodDecl= (MethodDeclaration) parent.getParent();		
+		if (binding == null || methodDecl.getBody() == null) {
+			return false;
+		}
+		
+		if (resultingCollections != null) {
+			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, 1);
+			resultingCollections.add(fieldProposal);
+		}
 		return true;				
 	}
+	
 	
 	private boolean getCatchClauseToThrowsProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(node, ASTNode.CATCH_CLAUSE);
