@@ -515,7 +515,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private final static String FORMAT_JAVADOCS= PreferenceConstants.EDITOR_FORMAT_JAVADOCS;
 	/** Preference key for smart paste */
 	private final static String SMART_PASTE= PreferenceConstants.EDITOR_SMART_PASTE;
-
 	
 	
 	private final static class AnnotationInfo {
@@ -1479,23 +1478,36 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		public void setCloseStringsEnabled(boolean enabled) {
 			fCloseStrings= enabled;
 		}
-		
-		private boolean isResfOfLineEmpty(IDocument document, int offset) {
 
-			if (offset == document.getLength())
-				return true;
-				
+		private boolean hasIdentifierToTheLeft(IDocument document, int offset) {
 			try {
-				IRegion line= document.getLineInformationOfOffset(offset);
-				String string= document.get(offset, line.getOffset() + line.getLength() - offset);
-				for (int i= 0; i < string.length(); i++)
-					if (!Character.isWhitespace(string.charAt(i)))
-						return false;
-				return true;
+				int start= offset;
+				IRegion startLine= document.getLineInformationOfOffset(start);
+				int minStart= startLine.getOffset();
+				while (start != minStart && Character.isWhitespace(document.getChar(start - 1)))
+					--start;
 				
+				return start != minStart && Character.isJavaIdentifierPart(document.getChar(start - 1));
+
 			} catch (BadLocationException e) {
 				return true;
-			}
+			}			
+		}
+
+		private boolean hasIdentifierToTheRight(IDocument document, int offset) {
+			try {
+				int end= offset;
+				IRegion endLine= document.getLineInformationOfOffset(end);
+				int maxEnd= endLine.getOffset() + endLine.getLength();
+				while (end != maxEnd && Character.isWhitespace(document.getChar(end)))
+					++end;
+				
+				return end != maxEnd && Character.isJavaIdentifierPart(document.getChar(end));
+
+
+			} catch (BadLocationException e) {
+				return true;
+			}			
 		}
 		
 		/*
@@ -1516,12 +1528,18 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			switch (event.character) {
 			case '(':
 			case '[':
-				if (!fCloseBrackets || !isResfOfLineEmpty(document, offset + length))
-					return;
+					if (!fCloseBrackets)
+						return;
+ 					if (hasIdentifierToTheRight(document, offset + length))
+ 						return;
 			
 			case '"':
-				if (event.character == '"' && !fCloseStrings)
-					return;
+				if (event.character == '"') {
+					if (!fCloseStrings)
+						return;
+ 					if (hasIdentifierToTheLeft(document, offset) || hasIdentifierToTheRight(document, offset + length))
+ 						return;
+				}
 				
 				try {		
 					ITypedRegion partition= document.getPartition(offset);
