@@ -75,7 +75,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getMethod().getCompilationUnit());
-		addReferenceUpdates(manager.get(cu));
+		addReferenceUpdates(manager);
 		addDeclarationUpdate(manager.get(cu));
 		pm.worked(1);
 	}
@@ -90,14 +90,17 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		return pattern;
 	}
 	
-	private void addReferenceUpdates(TextChange change) throws CoreException {
+	private void addReferenceUpdates(TextChangeManager manager) throws CoreException {
 		SearchResultGroup[] grouped= getOccurrences();
-		if (grouped.length == 0)
-			return;
-		SearchResult[] results= grouped[0].getSearchResults();
-		for (int i= 0; i < results.length; i++){
-			String editName= RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.update"); //$NON-NLS-1$
-			change.addTextEdit(editName , createTextChange(results[i]));
-		}
+		for (int i= 0; i < grouped.length; i++) {
+			SearchResultGroup group= grouped[i];
+			SearchResult[] results= group.getSearchResults();
+			ICompilationUnit cu= group.getCompilationUnit();
+			TextChange change= manager.get(cu);
+			for (int j= 0; j < results.length; j++){
+				String editName= RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.update"); //$NON-NLS-1$
+				change.addTextEdit(editName , createTextChange(results[j]));
+			}
+		}	
 	}
 }
