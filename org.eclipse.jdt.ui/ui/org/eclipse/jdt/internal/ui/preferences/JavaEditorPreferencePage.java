@@ -382,17 +382,16 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 
 	private void initialize() {
 		initializeFields();
-	}
-	
-	private void initializeFields() {
+		
 		for (int i= 0; i < fConfigurationBlocks.length; i++) {
 			fConfigurationBlocks[i].initialize();
 		}
-		
+	}
+	
+	private void initializeFields() {
         fFieldsInitialized= true;
         
         updateStatus(new StatusInfo()); //$NON-NLS-1$
-        
 	}
 	
 	/*

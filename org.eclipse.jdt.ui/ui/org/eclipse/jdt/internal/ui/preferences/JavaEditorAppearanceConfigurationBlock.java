@@ -242,6 +242,8 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
     
     private void handleAppearanceColorListSelection() {	
 		int i= fAppearanceColorList.getSelectionIndex();
+		if (i == -1)
+			return;
 		String key= fAppearanceColorListModel[i][1];
 		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
 		fAppearanceColorEditor.setColorValue(rgb);		
@@ -261,12 +263,16 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		}
 	}
 
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#initialize()
+	 */
 	public void initialize() {
 
 		super.initialize();
 		
 		for (int i= 0; i < fAppearanceColorListModel.length; i++)
 			fAppearanceColorList.add(fAppearanceColorListModel[i][0]);
+		
 		fAppearanceColorList.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
@@ -278,6 +284,9 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 	}
 
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#performDefaults()
+	 */
 	public void performDefaults() {
 		super.performDefaults();
 		handleAppearanceColorListSelection();

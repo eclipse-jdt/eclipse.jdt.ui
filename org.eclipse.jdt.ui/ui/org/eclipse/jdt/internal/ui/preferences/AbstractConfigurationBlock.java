@@ -142,7 +142,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		 * sections. A <code>ScrolledPageComposite</code> is created and a new
 		 * composite within that, to ensure that expanding the sections will
 		 * always have enough space, unless there already is a
-		 * <code>ScrolledComposite</code> along the parent chaing of
+		 * <code>ScrolledComposite</code> along the parent chain of
 		 * <code>parent</code>, in which case a normal <code>Composite</code>
 		 * is created.
 		 * <p>
@@ -207,7 +207,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		}
 	}
 
-	protected static final int INDENT= 0;
+	protected static final int INDENT= 20;
 	private OverlayPreferenceStore fStore;
 	
 	private Map fCheckBoxes= new HashMap();
@@ -442,7 +442,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		initializeFields();
 	}
 
-	protected void initializeFields() {
+	private void initializeFields() {
 		
 		Iterator iter= fCheckBoxes.keySet().iterator();
 		while (iter.hasNext()) {

@@ -283,6 +283,8 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 	}
 	
 	public void initialize() {
+		super.initialize();
+		
 		initializeFields();
 		
 		for (int i= 0; i < fContentAssistColorListModel.length; i++)
@@ -298,9 +300,7 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		
 	}
 
-	protected void initializeFields() {
-		super.initializeFields();
-		
+	private void initializeFields() {
 		boolean completionInserts= getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 		fCompletionInsertsRadioButton.setSelection(completionInserts);
 		fCompletionOverwritesRadioButton.setSelection(! completionInserts);
@@ -321,8 +321,9 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
     }
 
 	public void performDefaults() {
-		handleContentAssistColorListSelection();
 		super.performDefaults();
+		initializeFields();
+		handleContentAssistColorListSelection();
 	}
 	
 	private void handleContentAssistColorListSelection() {	

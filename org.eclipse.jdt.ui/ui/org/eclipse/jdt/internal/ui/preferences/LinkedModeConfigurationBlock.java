@@ -264,7 +264,6 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		label.setText(PreferencesMessages.getString("LinkedModeConfigurationBlock.color")); //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
-		gd.horizontalIndent= 20;
 		label.setLayoutData(gd);
 
 		fAnnotationForegroundColorEditor= new ColorEditor(optionsComposite);
@@ -273,7 +272,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		gd.horizontalAlignment= GridData.BEGINNING;
 		foregroundColorButton.setLayoutData(gd);
 		
-		createDependency(fShowInTextCheckBox, new Control[] {foregroundColorButton, label});
+		createDependency(fShowInTextCheckBox, new Control[] {label, foregroundColorButton});
 
 		fAnnotationTypeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -290,7 +289,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 				ListItem item= getSelectedItem();
 				final boolean value= fShowInTextCheckBox.getSelection();
 				if (value) {
-					// enable whatever is in the dropdown
+					// enable whatever is in the combo
 					String[] decoration= (String[]) ((IStructuredSelection) fDecorationViewer.getSelection()).getFirstElement();
 					if (HIGHLIGHT.equals(decoration))
 						getPreferenceStore().setValue(item.highlightKey, true);
@@ -424,6 +423,8 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#initialize()
 	 */
 	public void initialize() {
+		super.initialize();
+		
 		fAnnotationTypeViewer.setInput(fListModel);
 		fAnnotationTypeViewer.getControl().getDisplay().asyncExec(new Runnable() {
 			public void run() {
@@ -441,7 +442,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 
 	private void updateDecorationViewer(ListItem item, boolean changed) {
 		// decoration selection: if the checkbox is enabled, there is
-		// only one case where the combois not enabled: if both the highlight and textStyle keys are null
+		// only one case where the combo is not enabled: if both the highlight and textStyle keys are null
 		final boolean enabled= fShowInTextCheckBox.getSelection() && !(item.highlightKey == null && item.textStyleKey == null);
 		fDecorationViewer.getControl().setEnabled(enabled);
 		
@@ -486,6 +487,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		getPreferenceStore().loadDefaults();
 		
 		super.performDefaults();
+		handleAnnotationListSelection();
 	}
 	
 	public void dispose() {
