@@ -91,7 +91,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private ImportRewrite fImportRewriter;
 	private int fSelectionStart;
 	private int fSelectionLength;
-	private CodeGenerationSettings fSettings;
 	private AST fAST;
 	private ASTRewrite fRewriter;
 	private ExtractMethodAnalyzer fAnalyzer;
@@ -168,7 +167,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		fSettings= settings;
 		fVisibility= -1;
 	}
 	
