@@ -94,7 +94,7 @@ public class VariableCreationDialog extends StatusDialog {
 		inner.setLayout(layout);
 		
 		fNameField.doFillIntoGrid(inner, 2);
-		//DialogField.createEmptySpace(inner, 2);
+		DialogField.createEmptySpace(inner, 1);
 		
 		fPathField.doFillIntoGrid(inner, 3);
 		DialogField.createEmptySpace(inner, 2);

@@ -241,7 +241,8 @@ public class VariableSelectionBlock {
 	}
 
 	private String chooseVariable() {
-		ChooseVariableDialog dialog= new ChooseVariableDialog(getShell(), fLastVariableSelection);
+		String selecteVariable= (fVariable != null) ? fVariable : fLastVariableSelection;
+		ChooseVariableDialog dialog= new ChooseVariableDialog(getShell(), selecteVariable);
 		if (dialog.open() == dialog.OK) {
 			return 	dialog.getSelectedVariable();
 		}
