@@ -24,28 +24,25 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class OpenBrowserUtil {
 	
-	public static void open(final URL url, Display display, String dialogTitle) {
-		if (WorkbenchHelp.getHelpSupport() != null) {
+	public static void open(final URL url, Display display, final String dialogTitle) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				internalOpen(url, dialogTitle);
+			}
+		});
+	}
+	
+	private static void internalOpen(final URL url, String title) {
+		if (WorkbenchHelp.getHelpSupport() != null) {	// filed bug 57435 to avoid deprecation
 			BusyIndicator.showWhile(null, new Runnable() {
 				public void run() {
 					WorkbenchHelp.displayHelpResource(url.toExternalForm() + "?noframes=true"); //$NON-NLS-1$
 				}
 			});			
 		} else {
-			showMessage(display, dialogTitle, ActionMessages.getString("OpenBrowserUtil.help_not_available"), false); //$NON-NLS-1$
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			String message= ActionMessages.getString("OpenBrowserUtil.help_not_available"); //$NON-NLS-1$
+			MessageDialog.openInformation(shell, title, message);
 		}
 	}
-	
-	private static void showMessage(Display display, final String title, final String message, final boolean isError) {
-		display.asyncExec(new Runnable() {
-			public void run() {
-				Shell shell= JavaPlugin.getActiveWorkbenchShell();
-				if (isError) {
-					MessageDialog.openError(shell, title, message);
-				} else {
-					MessageDialog.openInformation(shell, title, message);
-				}
-			}
-		});
-	}	
 }
