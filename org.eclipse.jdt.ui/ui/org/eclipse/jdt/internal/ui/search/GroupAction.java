@@ -17,8 +17,9 @@ public class GroupAction extends Action {
 	private int fGrouping;
 	private JavaSearchResultPage fPage;
 	
-	public GroupAction(String label, JavaSearchResultPage page, int grouping) {
+	public GroupAction(String label, String tooltip, JavaSearchResultPage page, int grouping) {
 		super(label);
+		setToolTipText(tooltip);
 		fPage= page;
 		fGrouping= grouping;
 	}

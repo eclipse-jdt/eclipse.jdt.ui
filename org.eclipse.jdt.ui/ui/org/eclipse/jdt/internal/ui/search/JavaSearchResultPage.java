@@ -69,13 +69,13 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 
 	private void initGroupingActions() {
-		fGroupProjectAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_project"), this, LevelTreeContentProvider.LEVEL_PROJECT); //$NON-NLS-1$
+		fGroupProjectAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_project"), SearchMessages.getString("JavaSearchResultPage.groupby_project.tooltip"), this, LevelTreeContentProvider.LEVEL_PROJECT); //$NON-NLS-1$ //$NON-NLS-2$
 		JavaPluginImages.setLocalImageDescriptors(fGroupProjectAction, "prj_mode.gif"); //$NON-NLS-1$
-		fGroupPackageAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_package"), this, LevelTreeContentProvider.LEVEL_PACKAGE); //$NON-NLS-1$
+		fGroupPackageAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_package"), SearchMessages.getString("JavaSearchResultPage.groupby_package.tooltip"), this, LevelTreeContentProvider.LEVEL_PACKAGE); //$NON-NLS-1$ //$NON-NLS-2$
 		JavaPluginImages.setLocalImageDescriptors(fGroupPackageAction, "package_mode.gif"); //$NON-NLS-1$
-		fGroupFileAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_file"), this, LevelTreeContentProvider.LEVEL_FILE); //$NON-NLS-1$
+		fGroupFileAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_file"), SearchMessages.getString("JavaSearchResultPage.groupby_file.tooltip"), this, LevelTreeContentProvider.LEVEL_FILE); //$NON-NLS-1$ //$NON-NLS-2$
 		JavaPluginImages.setLocalImageDescriptors(fGroupFileAction, "file_mode.gif"); //$NON-NLS-1$
-		fGroupTypeAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_type"), this, LevelTreeContentProvider.LEVEL_TYPE); //$NON-NLS-1$
+		fGroupTypeAction= new GroupAction(SearchMessages.getString("JavaSearchResultPage.groupby_type"), SearchMessages.getString("JavaSearchResultPage.groupby_type.tooltip"), this, LevelTreeContentProvider.LEVEL_TYPE); //$NON-NLS-1$ //$NON-NLS-2$
 		JavaPluginImages.setLocalImageDescriptors(fGroupTypeAction, "class_obj.gif"); //$NON-NLS-1$
 		fCurrentGrouping= LevelTreeContentProvider.LEVEL_PACKAGE;
 	}
