@@ -37,7 +37,9 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.ui.IEditorPart;
 
 
+import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -355,7 +357,12 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 				if (selection.y > 0)
 				collector.setReplacementLength(selection.y);
 				
-				unit.codeComplete(offset, collector);
+				boolean useCompletionRequestor= true;
+				// also check CodeCompletionTests.USE_COMPLETION_REQUESTOR
+				if (useCompletionRequestor)
+					unit.codeComplete(offset, (CompletionRequestor) collector);
+				else
+					unit.codeComplete(offset, (ICompletionRequestor) collector);
 			}
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();

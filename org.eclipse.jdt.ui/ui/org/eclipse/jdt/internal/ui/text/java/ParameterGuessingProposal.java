@@ -156,7 +156,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		
 			super.apply(document, trigger, offset);
 
-			if (parameterCount > 0) {
+			if (parameterCount > 0 && fViewer != null) {
 				LinkedModeModel model= new LinkedModeModel();
 				for (int i= 0; i != parameterCount; i++) {
 					LinkedPositionGroup group= new LinkedPositionGroup();

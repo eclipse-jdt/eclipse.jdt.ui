@@ -69,7 +69,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 		int replacementOffset= getReplacementOffset();
 		String replacementString= getReplacementString();
 
-		if (fPositionOffsets.length > 0) {
+		if (fPositionOffsets.length > 0 && fViewer != null) {
 			try {
 				LinkedModeModel model= new LinkedModeModel();
 				for (int i= 0; i != fPositionOffsets.length; i++) {

@@ -20,22 +20,28 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jface.text.ITextViewer;
 
-import org.eclipse.jdt.core.CompletionRequestorAdapter;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
+
+import org.eclipse.jdt.internal.codeassist.IExtendedCompletionRequestor;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
-import org.eclipse.jdt.internal.codeassist.IExtendedCompletionRequestor;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
@@ -44,7 +50,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
  */
-public class ResultCollector extends CompletionRequestorAdapter implements IExtendedCompletionRequestor {
+public class ResultCollector extends CompletionRequestor implements ICompletionRequestor, IExtendedCompletionRequestor {
 		
 	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
 	private final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
@@ -99,13 +105,6 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
 		fTypes.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
 	}
-	
-	/*
-	 * @see ICompletionRequestor#acceptError
-	 */
-	public void acceptError(IProblem error) {
-		fLastProblem= error;
-	}	
 	
 	/*
 	 * @see ICompletionRequestor#acceptField
@@ -588,4 +587,186 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 		fPreventEating= preventEating;
 	}
 
+	/* copied from CompletionRequestorWrapper */
+	public void accept(CompletionProposal proposal) {
+		switch(proposal.getKind()) {
+			case CompletionProposal.KEYWORD:
+				this.acceptKeyword(
+						proposal.getName(),
+						proposal.getReplaceStart(),
+						proposal.getReplaceEnd(),
+						proposal.getRelevance());
+				break;
+			case CompletionProposal.PACKAGE_REF:
+				this.acceptPackage(
+						proposal.getDeclarationSignature(),
+						proposal.getCompletion(),
+						proposal.getReplaceStart(),
+						proposal.getReplaceEnd(),
+						proposal.getRelevance());
+				break;
+			case CompletionProposal.TYPE_REF:
+//				if((proposal.getFlags() & Flags.AccEnum) != 0) {
+//					// XXX handle enums
+//				} else 
+				if((proposal.getFlags() & Flags.AccInterface) != 0) {
+					this.acceptInterface(
+							proposal.getDeclarationSignature(),
+							Signature.getSignatureSimpleName(proposal.getSignature()),
+							proposal.getCompletion(),
+							proposal.getFlags() & ~Flags.AccInterface,
+							proposal.getReplaceStart(),
+							proposal.getReplaceEnd(),
+							proposal.getRelevance());
+				} else {
+					this.acceptClass(
+							proposal.getDeclarationSignature(),
+							Signature.getSignatureSimpleName(proposal.getSignature()),
+							proposal.getCompletion(),
+							proposal.getFlags(),
+							proposal.getReplaceStart(),
+							proposal.getReplaceEnd(),
+							proposal.getRelevance());
+				}
+				break;
+			case CompletionProposal.FIELD_REF:
+				this.acceptField(
+						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
+						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
+						proposal.getName(),
+						Signature.getSignatureQualifier(proposal.getSignature()),
+						Signature.getSignatureSimpleName(proposal.getSignature()), 
+						proposal.getCompletion(),
+						proposal.getFlags(),
+						proposal.getReplaceStart(),
+						proposal.getReplaceEnd(),
+						proposal.getRelevance()
+				);
+				break;
+			case CompletionProposal.METHOD_REF:
+				this.acceptMethod(
+						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
+						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
+						proposal.getName(),
+						getParameterPackages(proposal.getSignature()),
+						getParameterTypes(proposal.getSignature()),
+						proposal.findParameterNames(null) == null ? CharOperation.NO_CHAR_CHAR : proposal.findParameterNames(null),
+						Signature.getSignatureQualifier(Signature.getReturnType(proposal.getSignature())),
+						Signature.getSignatureSimpleName(Signature.getReturnType(proposal.getSignature())),
+						proposal.getCompletion(),
+						proposal.getFlags(),
+						proposal.getReplaceStart(),
+						proposal.getReplaceEnd(),
+						proposal.getRelevance()
+				);
+				break;
+			case CompletionProposal.METHOD_DECLARATION:
+				this.acceptMethodDeclaration(
+						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
+						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
+						proposal.getName(),
+						getParameterPackages(proposal.getSignature()),
+						getParameterTypes(proposal.getSignature()),
+						proposal.findParameterNames(null) == null ? CharOperation.NO_CHAR_CHAR : proposal.findParameterNames(null),
+						Signature.getSignatureQualifier(Signature.getReturnType(proposal.getSignature())),
+						Signature.getSignatureSimpleName(Signature.getReturnType(proposal.getSignature())),
+						proposal.getCompletion(),
+						proposal.getFlags(),
+						proposal.getReplaceStart(),
+						proposal.getReplaceEnd(),
+						proposal.getRelevance()
+				);
+				break;
+			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
+				this.acceptAnonymousType(
+						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
+						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()), 
+						getParameterPackages(proposal.getSignature()),
+						getParameterTypes(proposal.getSignature()),
+						proposal.findParameterNames(null) == null ? CharOperation.NO_CHAR_CHAR : proposal.findParameterNames(null),
+						proposal.getCompletion(),
+						proposal.getFlags(),
+						proposal.getReplaceStart(),
+						proposal.getReplaceEnd(),
+						proposal.getRelevance()
+				);
+				break;
+			case CompletionProposal.LABEL_REF :
+				this.acceptLabel(
+						proposal.getCompletion(),
+						proposal.getReplaceStart(),
+						proposal.getReplaceEnd(),
+						proposal.getRelevance()
+				);
+				break;
+			case CompletionProposal.LOCAL_VARIABLE_REF:
+				this.acceptLocalVariable(
+						proposal.getCompletion(),
+						Signature.getSignatureQualifier(proposal.getSignature()),
+						Signature.getSignatureSimpleName(proposal.getSignature()),
+						proposal.getFlags(),
+						proposal.getReplaceStart(),
+						proposal.getReplaceEnd(),
+						proposal.getRelevance()
+				);
+				break;
+			case CompletionProposal.VARIABLE_DECLARATION:
+				this.acceptLocalVariable(
+						proposal.getCompletion(),
+						Signature.getSignatureQualifier(proposal.getSignature()),
+						Signature.getSignatureSimpleName(proposal.getSignature()),
+						proposal.getFlags(),
+						proposal.getReplaceStart(),
+						proposal.getReplaceEnd(),
+						proposal.getRelevance()
+				);
+				break;
+			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
+				this.acceptPotentialMethodDeclaration(
+						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
+						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
+						proposal.getName(),
+						proposal.getReplaceStart(),
+						proposal.getReplaceEnd(),
+						proposal.getRelevance()
+				);
+				break;
+				
+		}
+	}	
+	public void beginReporting() {
+	}
+	
+	public void endReporting() {
+	}
+	
+	public void completionFailure(IProblem problem) {
+		fLastProblem= problem;
+	}
+	
+	private char[][] getParameterPackages(char[] methodSignature) {
+		char[][] parameterQualifiedTypes = Signature.getParameterTypes(methodSignature);
+		int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
+		char[][] parameterPackages = new char[length][];
+		for(int i = 0; i < length; i++) {
+			parameterPackages[i] = Signature.getSignatureQualifier(parameterQualifiedTypes[i]);
+		}
+
+		return parameterPackages;
+	}
+	
+	private char[][] getParameterTypes(char[] methodSignature) {
+		char[][] parameterQualifiedTypes = Signature.getParameterTypes(methodSignature);
+		int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
+		char[][] parameterPackages = new char[length][];
+		for(int i = 0; i < length; i++) {
+			parameterPackages[i] = Signature.getSignatureSimpleName(parameterQualifiedTypes[i]);
+		}
+
+		return parameterPackages;
+	}
+
+	public void acceptError(IProblem error) {
+		completionFailure(error);
+	}
 }
