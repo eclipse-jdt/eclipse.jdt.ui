@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids: sdavids@gmx.de bug 37333, 26653 
+ *     Johan Walles: walles@mailblocks.com bug 68737
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -123,20 +124,19 @@ class FailureTrace implements IMenuListener {
 
 	private Action createOpenEditorAction(String traceLine) {
 		try { 
-			//TODO: works for JDK stack trace only
 			String testName= traceLine;
 			testName= testName.substring(testName.indexOf(FRAME_PREFIX)); //$NON-NLS-1$
-			testName= testName.substring(FRAME_PREFIX.length(), testName.indexOf('(')).trim();
+			testName= testName.substring(FRAME_PREFIX.length(), testName.lastIndexOf('(')).trim();
 			testName= testName.substring(0, testName.lastIndexOf('.'));
 			int innerSeparatorIndex= testName.indexOf('$');
 			if (innerSeparatorIndex != -1)
 				testName= testName.substring(0, innerSeparatorIndex);
 			
 			String lineNumber= traceLine;
-			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.indexOf(')'));
+			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.lastIndexOf(')'));
 			int line= Integer.valueOf(lineNumber).intValue();
 			//fix for bug 37333	
-			String cuName= traceLine.substring(traceLine.indexOf('(') + 1, traceLine.indexOf(':'));
+			String cuName= traceLine.substring(traceLine.lastIndexOf('(') + 1, traceLine.lastIndexOf(':'));
 			return new OpenEditorAtLineAction(fTestRunner, cuName, testName, line);
 		} catch(NumberFormatException e) {
 		}
