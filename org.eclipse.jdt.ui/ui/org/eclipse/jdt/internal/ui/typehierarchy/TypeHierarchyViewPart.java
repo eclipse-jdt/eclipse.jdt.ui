@@ -7,6 +7,10 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
@@ -25,7 +29,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.ToolBar;
 
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -36,18 +39,15 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
-import org.eclipse.jface.viewers.IInputSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -72,31 +72,32 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.ui.actions.CCPActionGroup;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.dnd.BasicSelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
+import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
+import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
-import org.eclipse.jdt.ui.actions.CCPActionGroup;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 /**
  * view showing the supertypes/subtypes of its input.
@@ -538,18 +539,31 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private void initDragAndDrop() {
 		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance() };
-		int ops= DND.DROP_COPY;
+		int ops= DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK;
 
-		DragSource source= new DragSource(fMethodsViewer.getControl(), ops);
-		source.setTransfer(transfers);
-		source.addDragListener(new BasicSelectionTransferDragAdapter(fMethodsViewer));
-		
 		for (int i= 0; i < fAllViewers.length; i++) {
-			TypeHierarchyViewer curr= fAllViewers[i];
-			curr.addDropSupport(ops, transfers, new TypeHierarchyTransferDropAdapter(this, curr));
+			addDragAdapters(fAllViewers[i], ops, transfers);
+			addDropAdapters(fAllViewers[i], ops, transfers);
 		}	
+		addDragAdapters(fMethodsViewer, ops, transfers);
 	}
 	
+	private void addDropAdapters(AbstractTreeViewer viewer, int ops, Transfer[] transfers){
+		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
+			new TypeHierarchyTransferDropAdapter(this, viewer)
+		};
+		viewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
+	}
+
+	private void addDragAdapters(StructuredViewer viewer, int ops, Transfer[] transfers){
+		Control control= viewer.getControl();
+		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
+			new SelectionTransferDragAdapter(viewer)
+		};
+		DragSource source= new DragSource(control, ops);
+		// Note, that the transfer agents are set by the delegating drag adapter itself.
+		source.addDragListener(new DelegatingDragAdapter(dragListeners));		
+	}	
 	
 	private void viewPartKeyShortcuts(KeyEvent event) {
 		if (event.stateMask == SWT.CTRL) {
