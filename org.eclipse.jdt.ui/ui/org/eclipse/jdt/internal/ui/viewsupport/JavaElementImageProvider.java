@@ -89,7 +89,7 @@ public class JavaElementImageProvider {
 		return getImageLabel(computeDescriptor(element, flags));
 	}
 	
-	public Image getImageLabel(ImageDescriptor descriptor){
+	private Image getImageLabel(ImageDescriptor descriptor){
 		if (descriptor == null) 
 			return null;	
 		return fRegistry.get(descriptor);

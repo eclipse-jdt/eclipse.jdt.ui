@@ -41,15 +41,7 @@ public class NameProposer {
 			return GETTER_NAME + proposeAccessorName(fieldName);
 		}
 	}
-	
-	public String proposeGetterSignature(IField field) throws JavaModelException {
-		return proposeGetterName(field) + "()"; 
-	}
-	
-	public String proposeSetterSignature(IField field) throws JavaModelException {
-		return proposeSetterName(field) + "(" + Signature.toString(field.getTypeSignature()) + ")"; 
-	}
-	
+		
 	public String proposeGetterName(IField field) throws JavaModelException {
 		boolean isBoolean=	field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
 		return proposeGetterName(field.getElementName(), isBoolean);

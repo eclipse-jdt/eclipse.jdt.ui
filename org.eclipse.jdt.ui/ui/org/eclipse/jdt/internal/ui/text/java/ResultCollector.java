@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
@@ -66,7 +67,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	 * @see ICompletionRequestor#acceptClass
 	 */	
 	public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		ImageDescriptor descriptor= JavaPluginImages.DESC_OBJS_CLASS;
+		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers);
 		if (Flags.isDeprecated(modifiers))
 			descriptor= getDeprecatedDescriptor(descriptor);
 
@@ -89,7 +90,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		char[] typePackageName, char[] typeName, char[] completionName,
 		int modifiers, int start, int end, int relevance) {
 
-		ImageDescriptor descriptor= getMemberDescriptor(modifiers);	
+		ImageDescriptor descriptor= getFieldDescriptor(modifiers);	
 		
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
@@ -113,7 +114,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	 * @see ICompletionRequestor#acceptInterface
 	 */	
 	public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		ImageDescriptor descriptor= JavaPluginImages.DESC_OBJS_INTERFACE;
+		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(true, false, modifiers);
 		if (Flags.isDeprecated(modifiers))
 			descriptor= getDeprecatedDescriptor(descriptor);
 
@@ -387,21 +388,20 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	}
 
 	protected ImageDescriptor getMemberDescriptor(int modifiers) {
-		ImageDescriptor desc;
-		if (Flags.isPublic(modifiers)) {
-			desc= JavaPluginImages.DESC_MISC_PUBLIC;
-		} else if (Flags.isProtected(modifiers)) {
-			desc= JavaPluginImages.DESC_MISC_PROTECTED;
-		} else if (Flags.isPrivate(modifiers)) {
-			desc= JavaPluginImages.DESC_MISC_PRIVATE;
-		} else {
-			desc= JavaPluginImages.DESC_MISC_DEFAULT;
-		}
+		ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(false, modifiers);
 		if (Flags.isDeprecated(modifiers))
 		 	return getDeprecatedDescriptor(desc);
 		
 		return desc;
 	}
+	
+	protected ImageDescriptor getFieldDescriptor(int modifiers) {
+		ImageDescriptor desc= JavaElementImageProvider.getFieldImageDescriptor(false, modifiers);
+		if (Flags.isDeprecated(modifiers))
+		 	return getDeprecatedDescriptor(desc);
+		
+		return desc;
+	}	
 	
 	protected ImageDescriptor getDeprecatedDescriptor(ImageDescriptor descriptor) {
 		Point size= new Point(16, 16);

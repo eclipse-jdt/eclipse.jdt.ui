@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -38,6 +39,7 @@ import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -45,6 +47,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -59,7 +62,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -503,36 +505,48 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 	}
 	
-	private static class AddGetterSetterLabelProvider extends JavaElementLabelProvider{
+	private static class AddGetterSetterLabelProvider extends JavaElementLabelProvider {
 		private final NameProposer fNameProposer;
-		private static final Image IMAGE= new JavaElementImageProvider().getImageLabel(new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC, 0, JavaElementImageProvider.BIG_SIZE));
 		
-		AddGetterSetterLabelProvider(NameProposer nameProposer){
+		AddGetterSetterLabelProvider(NameProposer nameProposer) {
 			fNameProposer= nameProposer;
 		}
+		
 		/*
 		 * @see ILabelProvider#getText(Object)
 		 */
 		public String getText(Object element) {
-			try {
-				if (! (element instanceof GetterSetterEntry))
-					return super.getText(element);
-				GetterSetterEntry entry= (GetterSetterEntry)element;
-				if (entry.isGetterEntry)
-					return fNameProposer.proposeGetterSignature(entry.field);
-				else
-					return fNameProposer.proposeSetterSignature(entry.field);
-			} catch (JavaModelException e) {
-				return ""; //$NON-NLS-1$
+			if (element instanceof GetterSetterEntry) {
+				GetterSetterEntry entry= (GetterSetterEntry) element;
+				try {
+					if (entry.isGetterEntry) {
+						return fNameProposer.proposeGetterName(entry.field) + "()"; //$NON-NLS-1$
+					} else {
+						return fNameProposer.proposeSetterName(entry.field) + '(' + Signature.getSimpleName(Signature.toString(entry.field.getTypeSignature())) + ')';
+					}
+				} catch (JavaModelException e) {
+					return ""; //$NON-NLS-1$
+				}
 			}
+			return super.getText(element);
 		}
 
 		/*
 		 * @see ILabelProvider#getImage(Object)
 		 */
 		public Image getImage(Object element) {
-			if (element instanceof GetterSetterEntry)
-				return IMAGE;	
+			if (element instanceof GetterSetterEntry) {
+				int flags= 0;
+				try {
+					flags= ((GetterSetterEntry) element).field.getFlags();
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+				ImageDescriptor desc= JavaElementImageProvider.getFieldImageDescriptor(false, Flags.AccPublic);
+				int adornmentFlags= Flags.isStatic(flags) ? JavaElementImageDescriptor.STATIC : 0;
+				desc= new JavaElementImageDescriptor(desc, adornmentFlags, JavaElementImageProvider.BIG_SIZE);
+				return JavaPlugin.getImageDescriptorRegistry().get(desc);
+			}
 			return super.getImage(element);
 		}
 	}
@@ -598,18 +612,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		 * @see IStructuredContentProvider#getElements(Object)
 		 */
 		public Object[] getElements(Object inputElement) {
-			try {
-				IType type= (IType)inputElement;
-				IField[] fields= type.getFields();
-				List fieldList= new ArrayList(fields.length);
-				for (int i = 0; i < fields.length; i++) {
-					if (fGetterSetterEntries.containsKey(fields[i]))
-						fieldList.add(fields[i]);
-				}
-				return (IField[]) fieldList.toArray(new IField[fieldList.size()]);
-			} catch (JavaModelException e) {
-				return EMPTY;
-			}
+			return fGetterSetterEntries.keySet().toArray();
 		}
 
 		/*
