@@ -57,12 +57,6 @@ public class JavaElementImageProvider {
 	 */	
 	public final static int LIGHT_TYPE_ICONS= 0x4;	
 
-	/**
-	 * Use the package image for packages with subpackages
-	 * with resources but no Java Elements.
-	 */	
-	public final static int ALWAYS_PACKAGE_ICON= 0x8;
-
 
 	public static final Point SMALL_SIZE= new Point(16, 16);
 	public static final Point BIG_SIZE= new Point(22, 16);
@@ -119,10 +113,6 @@ public class JavaElementImageProvider {
 	private static boolean useLightIcons(int flags) {
 		return (flags & LIGHT_TYPE_ICONS) != 0;
 	}	
-	
-	private static boolean useAlwaysPackageIcon(int flags) {
-		return (flags & ALWAYS_PACKAGE_ICON) != 0;	
-	}
 	
 	/**
 	 * Returns an image descriptor for a java element. The descriptor includes overlays, if specified.
@@ -262,18 +252,15 @@ public class JavaElementImageProvider {
 	
 	protected ImageDescriptor getPackageFragmentIcon(IJavaElement element, int renderFlags) throws JavaModelException {
 		IPackageFragment fragment= (IPackageFragment)element;
-		boolean doesNotContainJavaElements= false;
+		boolean containsJavaElements= false;
 		try {
-			doesNotContainJavaElements= !fragment.hasChildren();
+			containsJavaElements= fragment.hasChildren();
 		} catch(JavaModelException e) {
-			return DESC_OBJ_FOLDER;
+			// assuming no children;
 		}
-		if(doesNotContainJavaElements && (fragment.getNonJavaResources().length > 0)) {
-			if (fragment.hasSubpackages() && useAlwaysPackageIcon(renderFlags))
-				return JavaPluginImages.DESC_OBJS_PACKAGE;
-			else 
-				return DESC_OBJ_FOLDER;
-		 } else if (doesNotContainJavaElements)
+		if(!containsJavaElements && (fragment.getNonJavaResources().length > 0))
+			return JavaPluginImages.DESC_OBJS_EMPTY_PACKAGE_RESOURCES;
+		else if (!containsJavaElements)
 			return JavaPluginImages.DESC_OBJS_EMPTY_PACKAGE;
 		return JavaPluginImages.DESC_OBJS_PACKAGE;
 	}
