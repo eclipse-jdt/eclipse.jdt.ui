@@ -20,17 +20,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -80,9 +83,6 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public final class PushDownRefactoring extends HierarchyRefactoring {
 
@@ -361,41 +361,6 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		monitor.done();
 	}
 
-	private void addImportsToSubclasses(Map imports, IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), 4); //$NON-NLS-1$
-		IMember[] allMembers= MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
-		List list= new ArrayList(); // Arrays.asList does not support removing
-		list.addAll(Arrays.asList(allMembers));
-		list.removeAll(Arrays.asList(getAbstractMembers(allMembers)));
-		IMember[] nonAbstractMembers= (IMember[]) list.toArray(new IMember[list.size()]);
-		IType[] destForNonAbstract= getAbstractDestinations(new SubProgressMonitor(monitor, 1));
-		addImportsToTypesReferencedInMembers(imports, nonAbstractMembers, destForNonAbstract, new SubProgressMonitor(monitor, 1));
-		IMember[] abstractMembers= getAbstractMembers(allMembers);
-		list= Arrays.asList(getAbstractMembers(getAbstractDestinations(new SubProgressMonitor(monitor, 1))));
-		IType[] destForAbstract= (IType[]) list.toArray(new IType[list.size()]);
-		addImportsToTypesReferencedInMembers(imports, abstractMembers, destForAbstract, new SubProgressMonitor(monitor, 1));
-		monitor.done();
-	}
-
-	private void addImportsToTypesReferencedInMembers(Map importMap, IMember[] members, IType[] destinations, IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), 1); //$NON-NLS-1$
-		final IType[] types= ReferenceFinderUtil.getTypesReferencedIn(members, monitor);
-		for (int index= 0; index < destinations.length; index++) {
-			final ICompilationUnit unit= destinations[index].getCompilationUnit();
-			for (int offset= 0; offset < types.length; offset++) {
-				Set imports= null;
-				if (importMap.containsKey(unit))
-					imports= (Set) importMap.get(unit);
-				else {
-					imports= new HashSet();
-					importMap.put(unit, imports);
-				}
-				imports.add(types[offset]);
-			}
-		}
-		monitor.done();
-	}
-
 	private RefactoringStatus checkAbstractMembersInDestinationClasses(IMember[] membersToPushDown, IType[] destinationClassesForAbstract) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		IMember[] abstractMembersToPushDown= getAbstractMembers(membersToPushDown);
@@ -663,11 +628,15 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 						adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
 						adjustors.add(adjustor);
 						if (infos[offset].isFieldInfo()) {
-							FieldDeclaration newField= createNewFieldDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite());
+							final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) infos[offset].getMember(), sourceRewriter.getRoot());
+							FieldDeclaration newField= createNewFieldDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldField);
 							unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+							ImportUpdateUtil.addImports(unitRewriter, oldField.getParent(), new HashMap(), new HashMap(), false);
 						} else {
-							MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite());
+							final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) infos[offset].getMember(), sourceRewriter.getRoot());
+							MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldMethod);
 							unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+							ImportUpdateUtil.addImports(unitRewriter, oldMethod, new HashMap(), new HashMap(), false);
 						}
 					}
 				}
@@ -690,13 +659,11 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		try {
-			monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), 8); //$NON-NLS-1$
+			monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), 7); //$NON-NLS-1$
 			final ICompilationUnit source= getDeclaringType().getCompilationUnit();
 			final CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(source);
 			final Map rewrites= new HashMap(2);
 			rewrites.put(source, sourceRewriter);
-			final Map importMap= new HashMap();
-			addImportsToSubclasses(importMap, new SubProgressMonitor(monitor, 1));
 			IType[] types= getHierarchyOfDeclaringClass(new SubProgressMonitor(monitor, 1)).getSubclasses(getDeclaringType());
 			final Set result= new HashSet(types.length + 1);
 			for (int index= 0; index < types.length; index++)
@@ -721,16 +688,6 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 						MemberActionInfo[] methods= getAbstractDeclarationInfos();
 						for (int offset= 0; offset < methods.length; offset++)
 							declareMethodAbstract(methods[offset], sourceRewriter, rewrite);
-					}
-					final Set imports= (Set) importMap.get(unit);
-					if (imports != null) {
-						IType type= null;
-						for (final Iterator iterator= imports.iterator(); iterator.hasNext();) {
-							type= (IType) iterator.next();
-							final String name= type.getFullyQualifiedName('.');
-							rewrite.getImportRewrite().addImport(name);
-							rewrite.getImportRemover().registerAddedImport(name);
-						}
 					}
 					final IMember[] members= getAbstractMembers(getAbstractDestinations(new SubProgressMonitor(monitor, 1)));
 					final IType[] classes= new IType[members.length];
@@ -761,11 +718,10 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		}
 	}
 
-	private FieldDeclaration createNewFieldDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, ASTRewrite rewrite) throws JavaModelException {
+	private FieldDeclaration createNewFieldDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, ASTRewrite rewrite, VariableDeclarationFragment oldFieldFragment) throws JavaModelException {
 		Assert.isTrue(info.isFieldInfo());
 		IField field= (IField) info.getMember();
 		AST ast= rewrite.getAST();
-		VariableDeclarationFragment oldFieldFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, declaringCuNode);
 		VariableDeclarationFragment newFragment= ast.newVariableDeclarationFragment();
 		newFragment.setExtraDimensions(oldFieldFragment.getExtraDimensions());
 		Expression initializer= oldFieldFragment.getInitializer();
@@ -795,10 +751,9 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		return newField;
 	}
 
-	private MethodDeclaration createNewMethodDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, ASTRewrite rewrite) throws JavaModelException {
+	private MethodDeclaration createNewMethodDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, ASTRewrite rewrite, MethodDeclaration oldMethod) throws JavaModelException {
 		Assert.isTrue(!info.isFieldInfo());
 		IMethod method= (IMethod) info.getMember();
-		MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode(method, declaringCuNode);
 		AST ast= rewrite.getAST();
 		MethodDeclaration newMethod= ast.newMethodDeclaration();
 		copyBodyOfPushedDownMethod(rewrite, method, oldMethod, newMethod, mapping);
