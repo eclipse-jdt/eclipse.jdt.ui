@@ -39,9 +39,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class MembersOrderPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
@@ -119,6 +119,8 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	 * @see org.eclipse.jface.preference.PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
+		
+		
 		Composite composite= new Composite(parent, SWT.NONE);
 
 		GridLayout layout= new GridLayout();
@@ -137,11 +139,16 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	}
 
 	private void createSortOrderListDialogField(Composite composite, int span) {
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		
 		fSortOrderList.doFillIntoGrid(composite, span);
 		
 		fSortOrderList.getLabelControl(null).dispose();
 		
-		LayoutUtil.setHorizontalGrabbing(fSortOrderList.getListControl(null));
+		GridData data= (GridData) fSortOrderList.getListControl(null).getLayoutData();
+		data.grabExcessHorizontalSpace= true;
+		data.verticalAlignment= 0;
+		data.heightHint= pixelConverter.convertHeightInCharsToPixels(11);
 	}
 
 	/*
