@@ -43,7 +43,7 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 	protected static final Object[] NO_CHILDREN= new Object[0];
 
 	protected boolean fProvideMembers= false;
-	protected boolean fProvideWorkingCopy= true;
+	protected boolean fProvideWorkingCopy= false;
 	
 	public BaseJavaElementContentProvider() {
 	}
