@@ -93,7 +93,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (fValidTypes == null || fValidTypes.length == 0)
 			return false;
 		
-		if (element != null && element.exists()) {
+		if (element != null) {
 			for (int i= 0; i < fValidTypes.length; i++) {
 				if (fValidTypes[i].isInstance(element)) {
 					if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
@@ -211,7 +211,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 */
 	protected void run(IStructuredSelection selection) {
 		IJavaElement element= getJavaElement(selection, false);
-		if (element == null) {
+		if (element == null || !element.exists()) {
 			showOperationUnavailableDialog();
 			return;
 		} 
