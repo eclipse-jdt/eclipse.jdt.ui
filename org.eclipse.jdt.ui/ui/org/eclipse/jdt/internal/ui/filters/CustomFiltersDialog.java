@@ -156,6 +156,12 @@ public class CustomFiltersDialog extends SelectionDialog {
 	}
 
 	private void createCheckBoxList(Composite parent) {
+		// Filler
+		new Label(parent, SWT.NONE);
+		
+		Label info= new Label(parent, SWT.LEFT);
+		info.setText(FilterMessages.getString("CustomFiltersDialog.filterList.label"));
+		
 		fCheckBoxList= CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.heightHint= convertHeightInCharsToPixels(15);
