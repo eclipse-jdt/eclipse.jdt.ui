@@ -152,7 +152,37 @@ public final class JavaUI {
 	 * @see org.eclipse.ui.IWorkbenchPage#showView
 	 */ 
 	public static final String ID_TYPE_HIERARCHY= 		"org.eclipse.jdt.ui.TypeHierarchy"; //$NON-NLS-1$
-	
+
+	/**
+	 * The id of the Java Browsing Perspective
+	 * (value <code>"org.eclipse.jdt.ui.JavaBrowsingPerspective"</code>).
+	 */
+	public static String ID_BROWSING_PERSPECTIVE= "org.eclipse.jdt.ui.JavaBrowsingPerspective"; //$NON-NLS-1$
+
+	/**
+	 * The view part id of the Java Browsing Projects view
+	 * (value <code>"org.eclipse.jdt.ui.ProjectsView"</code>).
+	 */
+	public static String ID_PROJECTS_VIEW= "org.eclipse.jdt.ui.ProjectsView"; //$NON-NLS-1$
+
+	/**
+	 * The view part id of the Java Browsing Packages view
+	 * (value <code>"org.eclipse.jdt.ui.PackagesView"</code>).
+	 */
+	public static String ID_PACKAGES_VIEW= "org.eclipse.jdt.ui.PackagesView"; //$NON-NLS-1$
+
+	/**
+	 * The view part id of the Java Browsing Types view
+	 * (value <code>"org.eclipse.jdt.ui.TypesView"</code>).
+	 */
+	public static String ID_TYPES_VIEW= "org.eclipse.jdt.ui.TypesView"; //$NON-NLS-1$
+
+	/**
+	 * The view part id of the Java Browsing Members view
+	 * (value <code>"org.eclipse.jdt.ui.MembersView"</code>).
+	 */
+	public static String ID_MEMBERS_VIEW= "org.eclipse.jdt.ui.MembersView"; //$NON-NLS-1$
+
 	/**
 	 * The class org.eclipse.debug.core.model.IProcess allows attaching
 	 * String properties to processes. The Java UI contributes a property

@@ -22,12 +22,11 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -65,12 +64,12 @@ public class MembersView extends JavaBrowsingPart {
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer viewer= new ProblemTreeViewer(parent, SWT.MULTI);
-		fMemberFilterActionGroup= new MemberFilterActionGroup(viewer, JavaPlugin.ID_MEMBERS_VIEW);
+		fMemberFilterActionGroup= new MemberFilterActionGroup(viewer, JavaUI.ID_MEMBERS_VIEW);
 		return viewer;
 	}
 
 	protected void fillToolBar(IToolBarManager tbm) {
-		tbm.add(new LexicalSortingAction(getViewer(), JavaPlugin.ID_MEMBERS_VIEW));
+		tbm.add(new LexicalSortingAction(getViewer(), JavaUI.ID_MEMBERS_VIEW));
 		fMemberFilterActionGroup.contributeToToolBar(tbm);
 	}
 	
