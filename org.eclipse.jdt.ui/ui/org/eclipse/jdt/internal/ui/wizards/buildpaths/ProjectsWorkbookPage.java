@@ -274,6 +274,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		if (selElements.size() == 0) {
 			return false;
 		}
+		int elements= 0;
+		int attributes= 0;
 		for (int i= 0; i < selElements.size(); i++) {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
@@ -290,11 +292,12 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				} else if (attrib.getValue() == null) {
 					return false;
 				}
+				attributes++;
 			} else if (elem instanceof CPListElement) {
-				return false;
+				elements++;
 			}
 		}
-		return true;
+		return attributes == selElements.size() || elements == selElements.size();
 	}	
 
 	private boolean canEdit(List selElements) {
