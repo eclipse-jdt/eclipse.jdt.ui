@@ -49,7 +49,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -64,7 +64,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_INVALID_JAVADOC, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS, JavaCore.ERROR);
 		JavaCore.setOptions(options);			
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();

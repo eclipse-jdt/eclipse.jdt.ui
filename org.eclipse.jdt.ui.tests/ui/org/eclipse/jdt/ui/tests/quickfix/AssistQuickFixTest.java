@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -32,10 +32,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
 
 public class AssistQuickFixTest extends QuickFixTest {
@@ -105,50 +103,39 @@ public class AssistQuickFixTest extends QuickFixTest {
 				
 		int offset= buf.toString().indexOf("getClass()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private Class class1;\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        class1 = getClass();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
 		
-		boolean doField= true, doLocal= true;
-		for (int i= 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
-			if (!(curr instanceof AssignToVariableAssistProposal)) {
-				continue;
-			}
-			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
-			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
-				assertTrue("same proposal kind", doField);
-				doField= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Class class1 = getClass();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
 		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("    private Class class1;\n");
-				buf.append("\n");
-				buf.append("    public void foo() {\n");
-				buf.append("        class1 = getClass();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-				
-			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
-				assertTrue("same proposal kind", doLocal);
-				doLocal= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("    public void foo() {\n");
-				buf.append("        Class class1 = getClass();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-			}
-		}
 	}
 	
 	public void testAssignToLocal2() throws Exception {
@@ -168,60 +155,48 @@ public class AssistQuickFixTest extends QuickFixTest {
 				
 		int offset= buf.toString().indexOf("goo().iterator()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
-
-		boolean doField= true, doLocal= true;
-		for (int i= 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
-			if (!(curr instanceof AssignToVariableAssistProposal)) {
-				continue;
-			}			
-			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
-			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
-				assertTrue("same proposal kind", doField);
-				doField= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
 		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("import java.util.Iterator;\n");
-				buf.append("import java.util.Vector;\n");				
-				buf.append("public class E {\n");
-				buf.append("    private Iterator iterator;\n");
-				buf.append("    public Vector goo() {\n");
-				buf.append("        return null;\n");
-				buf.append("    }\n");		
-				buf.append("    public void foo() {\n");
-				buf.append("        iterator = goo().iterator();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-				
-			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
-				assertTrue("same proposal kind", doLocal);
-				doLocal= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
-		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("import java.util.Iterator;\n");
-				buf.append("import java.util.Vector;\n");				
-				buf.append("public class E {\n");
-				buf.append("    public Vector goo() {\n");
-				buf.append("        return null;\n");
-				buf.append("    }\n");		
-				buf.append("    public void foo() {\n");
-				buf.append("        Iterator iterator = goo().iterator();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
-			}
-		}
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");				
+		buf.append("public class E {\n");
+		buf.append("    private Iterator iterator;\n");
+		buf.append("    public Vector goo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        iterator = goo().iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");				
+		buf.append("public class E {\n");
+		buf.append("    public Vector goo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        Iterator iterator = goo().iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
 	
 	public void testAssignToLocal3() throws Exception {
@@ -249,56 +224,43 @@ public class AssistQuickFixTest extends QuickFixTest {
 				
 		int offset= buf.toString().indexOf("System");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
-
-		boolean doField= true, doLocal= true;
-		for (int i= 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
-			if (!(curr instanceof AssignToVariableAssistProposal)) {
-				continue;
-			}			
-			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
-			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
-				assertTrue("same proposal kind", doField);
-				doField= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
 		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("\n");
-				buf.append("    private int fCount;\n");
-				buf.append("    private SecurityManager fManager;\n");
-				buf.append("\n");				
-				buf.append("    public void foo() {\n");
-				buf.append("        this.fManager = System.getSecurityManager();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-				
-			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
-				assertTrue("same proposal kind", doLocal);
-				doLocal= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
-		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("\n");
-				buf.append("    private int fCount;\n");
-				buf.append("\n");
-				buf.append("    public void foo() {\n");
-				buf.append("        SecurityManager _manager = System.getSecurityManager();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
-			}
-		}
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private int fCount;\n");
+		buf.append("    private SecurityManager fManager;\n");
+		buf.append("\n");				
+		buf.append("    public void foo() {\n");
+		buf.append("        this.fManager = System.getSecurityManager();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private int fCount;\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        SecurityManager _manager = System.getSecurityManager();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
 	
 	public void testAssignToLocal4() throws Exception {
@@ -319,56 +281,43 @@ public class AssistQuickFixTest extends QuickFixTest {
 				
 		int offset= buf.toString().indexOf("Math");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
-
-		boolean doField= true, doLocal= true;
-		for (int i= 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
-			if (!(curr instanceof AssignToVariableAssistProposal)) {
-				continue;
-			}			
-			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
-			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
-				assertTrue("same proposal kind", doField);
-				doField= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
 		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("\n");
-				buf.append("    private int f;\n");
-				buf.append("    private float g;\n");
-				buf.append("\n");				
-				buf.append("    public void foo() {\n");
-				buf.append("        g = Math.min(1.0f, 2.0f);\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-				
-			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
-				assertTrue("same proposal kind", doLocal);
-				doLocal= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
-		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("\n");
-				buf.append("    private int f;\n");
-				buf.append("\n");
-				buf.append("    public void foo() {\n");
-				buf.append("        float g = Math.min(1.0f, 2.0f);\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
-			}
-		}
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private int f;\n");
+		buf.append("    private float g;\n");
+		buf.append("\n");				
+		buf.append("    public void foo() {\n");
+		buf.append("        g = Math.min(1.0f, 2.0f);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private int f;\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        float g = Math.min(1.0f, 2.0f);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
 
 	public void testAssignToLocal5() throws Exception {
@@ -397,56 +346,43 @@ public class AssistQuickFixTest extends QuickFixTest {
 				
 		int offset= buf.toString().indexOf("System");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
-
-		boolean doField= true, doLocal= true;
-		for (int i= 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
-			if (!(curr instanceof AssignToVariableAssistProposal)) {
-				continue;
-			}			
-			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
-			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
-				assertTrue("same proposal kind", doField);
-				doField= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
 		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("\n");
-				buf.append("    private int fCount;\n");
-				buf.append("    private static SecurityManager fgManager;\n");
-				buf.append("\n");				
-				buf.append("    public static void foo() {\n");
-				buf.append("        E.fgManager = System.getSecurityManager();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-				
-			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
-				assertTrue("same proposal kind", doLocal);
-				doLocal= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
-		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("\n");
-				buf.append("    private int fCount;\n");
-				buf.append("\n");
-				buf.append("    public static void foo() {\n");
-				buf.append("        SecurityManager _manager = System.getSecurityManager();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
-			}
-		}
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private int fCount;\n");
+		buf.append("    private static SecurityManager fgManager;\n");
+		buf.append("\n");				
+		buf.append("    public static void foo() {\n");
+		buf.append("        E.fgManager = System.getSecurityManager();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private int fCount;\n");
+		buf.append("\n");
+		buf.append("    public static void foo() {\n");
+		buf.append("        SecurityManager _manager = System.getSecurityManager();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
 
 	public void testAssignToLocal6() throws Exception {
@@ -462,50 +398,38 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		int offset= buf.toString().indexOf("getClass()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
-		boolean doField= true, doLocal= true;
-		for (int i= 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
-			if (!(curr instanceof AssignToVariableAssistProposal)) {
-				continue;
-			}
-			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
-			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
-				assertTrue("same proposal kind", doField);
-				doField= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
-				
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("    private static Class class1;\n");
-				buf.append("\n");
-				buf.append("    static {\n");
-				buf.append("        class1 = getClass();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-				
-			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
-				assertTrue("same proposal kind", doLocal);
-				doLocal= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
-				
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("    static {\n");
-				buf.append("        Class class1 = getClass();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-			}
-		}
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static Class class1;\n");
+		buf.append("\n");
+		buf.append("    static {\n");
+		buf.append("        class1 = getClass();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    static {\n");
+		buf.append("        Class class1 = getClass();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
 
 	
@@ -521,10 +445,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 				
 		int offset= buf.toString().indexOf("count");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
 		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
@@ -561,10 +484,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 				
 		int offset= buf.toString().indexOf("vec");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
 		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
@@ -607,10 +529,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 				
 		int offset= buf.toString().indexOf("vec[]");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
 		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
@@ -650,9 +571,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 				
 		int offset= buf.toString().indexOf("int count");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -691,9 +611,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		int offset= buf.toString().indexOf("int p2");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -716,11 +635,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	
 	
 	
-	public void testAssignToLocal2CursorAtEnd() throws Exception {
-//		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
-//		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-//		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "_m");
-		
+	public void testAssignToLocal2CursorAtEnd() throws Exception {	
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -737,54 +652,45 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "goo().toArray();";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
-		boolean doField= true, doLocal= true;
-		for (int i= 0; i < proposals.size(); i++) {
-			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) proposals.get(i);
-			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
-				assertTrue("same proposal kind", doField);
-				doField= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");				
+		buf.append("public class E {\n");
+		buf.append("    private Object[] objects;\n");
+		buf.append("    public Vector goo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        objects = goo().toArray();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
 		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("import java.util.Vector;\n");				
-				buf.append("public class E {\n");
-				buf.append("    private Object[] objects;\n");
-				buf.append("    public Vector goo() {\n");
-				buf.append("        return null;\n");
-				buf.append("    }\n");		
-				buf.append("    public void foo() {\n");
-				buf.append("        objects = goo().toArray();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-				
-			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
-				assertTrue("same proposal kind", doLocal);
-				doLocal= false;
-				String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");				
+		buf.append("public class E {\n");
+		buf.append("    public Vector goo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        Object[] objects = goo().toArray();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
 		
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("import java.util.Vector;\n");				
-				buf.append("public class E {\n");
-				buf.append("    public Vector goo() {\n");
-				buf.append("        return null;\n");
-				buf.append("    }\n");		
-				buf.append("    public void foo() {\n");
-				buf.append("        Object[] objects = goo().toArray();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-				
-			}
-		}
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
 	
 	public void testReplaceCatchClauseWithThrowsWithFinally() throws Exception {
@@ -806,9 +712,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "(IOException e)";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -866,9 +771,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "(IOException e)";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 		
@@ -935,9 +839,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "for";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -972,9 +875,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "do";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -1010,9 +912,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "while";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -1049,9 +950,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "if";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
@@ -1112,9 +1012,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "try";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -1152,9 +1051,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "};";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -1189,9 +1087,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "}//comment";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -1223,9 +1120,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "(9+ 8)";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -1255,9 +1151,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "Math.abs(9+ 8)";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -1287,9 +1182,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "9";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -1321,9 +1215,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "0";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
@@ -1355,14 +1248,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "i[]";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
@@ -1390,14 +1281,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "var";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
@@ -1411,6 +1300,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		assertEqualString(preview, buf.toString());	
 	}
+	
 	
 	public void testJoinDeclaration2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1427,15 +1317,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "var";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ArrayList proposals= new ArrayList();
+		List proposals= collectAssists(context, false);
 		
-		JavaCorrectionProcessor.collectAssists(context, null, proposals);
-		
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
 		
-		int index= (proposals.get(0) instanceof LinkedNamesAssistProposal) ? 1 : 0;
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(index);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
@@ -1447,9 +1334,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("       }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
+		assertEqualString(preview, buf.toString());
 	}	
-	
-	
 	
 }

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Test;
@@ -39,6 +40,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
@@ -48,7 +50,7 @@ public class QuickFixTest extends TestCase {
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
 		suite.addTest(UnresolvedTypesQuickFixTest.allTests());
-		//suite.addTest(UnresolvedVariablesQuickFixTest.allTests());
+		suite.addTest(UnresolvedVariablesQuickFixTest.allTests());
 		suite.addTest(UnresolvedMethodsQuickFixTest.allTests());
 		suite.addTest(ReturnTypeQuickFixTest.allTests());
 		suite.addTest(LocalCorrectionsQuickFixTest.allTests());
@@ -56,6 +58,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(ModifierCorrectionsQuickFixTest.allTests());
 		suite.addTest(AssistQuickFixTest.allTests());
 		suite.addTest(MarkerResolutionTest.allTests());
+		suite.addTest(JavadocQuickFixTest.allTests());
 		return new ProjectTestSetup(suite);
 	}
 
@@ -259,7 +262,7 @@ public class QuickFixTest extends TestCase {
 		try {
 			wc.reconcile(true, null);
 		} finally {
-			wc.destroy();
+			wc.discardWorkingCopy();
 		}
 		
 		IProblem[] problems= (IProblem[]) problemsList.toArray(new IProblem[problemsList.size()]);
@@ -288,6 +291,20 @@ public class QuickFixTest extends TestCase {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  new ProblemLocation[] { problem }, proposals);
+		return proposals;
+	}
+
+
+	protected final ArrayList collectAssists(IInvocationContext context, boolean includeLinkedRename) {
+		ArrayList proposals= new ArrayList();
+		JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		if (!includeLinkedRename) {
+			for (Iterator iter= proposals.iterator(); iter.hasNext(); ) {
+				if (iter.next() instanceof LinkedNamesAssistProposal) {
+					iter.remove();
+				}
+			}
+		}
 		return proposals;
 	}	
 	
