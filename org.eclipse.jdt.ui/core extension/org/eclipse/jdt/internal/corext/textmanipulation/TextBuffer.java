@@ -184,7 +184,8 @@ public class TextBuffer {
 	
 	/**
 	 * Returns the line for the given line number. If there isn't any line for
-	 * the given line number, <code>null</code> is returned.
+	 * the given line number, <code>null</code> is returned. The return string 
+	 * doesn't contain any line delimiters.
 	 *
 	 * @return the line for the given line number or <code>null</code>
 	 */
