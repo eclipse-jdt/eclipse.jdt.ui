@@ -106,9 +106,7 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 			return true;
 		ITypeBinding[] exceptions= binding.getExceptionTypes();
 		for (int i= 0; i < exceptions.length; i++) {
-			ITypeBinding exception= exceptions[i];
-			if (!Bindings.isRuntimeException(exception, ast))
-				addException(exception);
+			addException(exceptions[i]);
 		}
 		return true;
 	}
