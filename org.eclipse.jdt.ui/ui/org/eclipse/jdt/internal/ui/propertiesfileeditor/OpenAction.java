@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -86,13 +87,13 @@ public class OpenAction extends SelectionDispatchAction {
 	
 	
 	private static class KeyReference extends PlatformObject implements IWorkbenchAdapter {
-		private IFile file;
+		private IStorage storage;
 		private int offset;
 		private int length;
 
-		private KeyReference(IFile file, int offset, int length) {
-			Assert.isNotNull(file);
-			this.file= file;
+		private KeyReference(IStorage storage, int offset, int length) {
+			Assert.isNotNull(storage);
+			this.storage= storage;
 			this.offset= offset;
 			this.length= length;
 		}
@@ -116,24 +117,16 @@ public class OpenAction extends SelectionDispatchAction {
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
 		 */
 		public ImageDescriptor getImageDescriptor(Object object) {
-			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)file.getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)storage.getAdapter(IWorkbenchAdapter.class);
 			if (wbAdapter != null)
-				return wbAdapter.getImageDescriptor(file);
+				return wbAdapter.getImageDescriptor(storage);
 			return null;
 		}
 		/*
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
 		 */
 		public String getLabel(Object o) {
-//			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)file.getAdapter(IWorkbenchAdapter.class);
-//			if (wbAdapter != null) {
-//				Object[] args= new Object[] { wbAdapter.getLabel(file), new Integer(offset), new Integer(length) }; 
-//				Object[] args= new Object[] { file.getFullPath(), new Integer(offset), new Integer(length) }; 
-//				return PropertiesFileEditorMessages.getFormattedString("OpenAction.SelectionDialog.elementLabel", args); //$NON-NLS-1$
-//			}
-//			return null;
-			
-			Object[] args= new Object[] { file.getFullPath(), new Integer(offset), new Integer(length) }; 
+			Object[] args= new Object[] { storage.getFullPath(), new Integer(offset), new Integer(length) }; 
 			return PropertiesFileEditorMessages.getFormattedString("OpenAction.SelectionDialog.elementLabel", args); //$NON-NLS-1$
 		}
 		/*
@@ -238,7 +231,6 @@ public class OpenAction extends SelectionDispatchAction {
 			
 			// Check whether the key is valid
 			Properties properties= new Properties();
-//			properties.load(new StringBufferInputStream(document.get()));
 			properties.load(new ByteArrayInputStream(document.get().getBytes()));
 			if (properties.getProperty(key) == null) {
 				showNoKeyErrorInStatusLine();
@@ -308,7 +300,7 @@ public class OpenAction extends SelectionDispatchAction {
 		
 		try {	
 			boolean activateOnOpen= fEditor != null ? true : OpenStrategy.activateOnOpen();
-			IEditorPart part= EditorUtility.openInEditor(keyReference.file, activateOnOpen);
+			IEditorPart part= EditorUtility.openInEditor(keyReference.storage, activateOnOpen);
 			EditorUtility.revealInEditor(part, keyReference.offset, keyReference.length);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
