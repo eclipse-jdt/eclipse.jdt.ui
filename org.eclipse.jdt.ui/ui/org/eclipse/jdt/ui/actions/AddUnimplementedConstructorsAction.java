@@ -227,7 +227,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 
 		AddUnimplementedConstructorsDialog dialog= new AddUnimplementedConstructorsDialog(shell, labelProvider, contentProvider, fEditor, type);
 		dialog.setCommentString(ActionMessages.getString("SourceActionDialog.createConstructorComment")); //$NON-NLS-1$
-		dialog.setTitle(getDialogTitle());
+		dialog.setTitle(ActionMessages.getString("AddUnimplementedConstructorsAction.dialog.title")); //$NON-NLS-1$
 		dialog.setInitialSelections(constructorMethods);
 		dialog.setContainerMode(true);
 		dialog.setSorter(new JavaElementSorter());

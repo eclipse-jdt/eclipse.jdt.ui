@@ -340,7 +340,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		GenerateConstructorUsingFieldsContentProvider contentProvider= new GenerateConstructorUsingFieldsContentProvider(constructorFieldsList);
 		GenerateConstructorUsingFieldsSelectionDialog dialog= new GenerateConstructorUsingFieldsSelectionDialog(getShell(), labelProvider, contentProvider, fEditor, type);
 		dialog.setCommentString(ActionMessages.getString("SourceActionDialog.createConstructorComment")); //$NON-NLS-1$
-		dialog.setTitle(getDialogTitle());
+		dialog.setTitle(ActionMessages.getString("GenerateConstructorUsingFieldsAction.dialog.title")); //$NON-NLS-1$
 		dialog.setInitialSelections(preselected);
 		dialog.setContainerMode(true);
 		dialog.setSize(60, 18);
