@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
-<codetemplate name="constructorcomment" description="Comment for created constructors" context="constructorcomment_context" enabled="true">/**
+<codetemplate name="constructorcomment" description="%CodeTemplates.constructorcomment" context="constructorcomment_context" enabled="true">/**
  * ${tags}
  */</codetemplate>
- <codetemplate name="typecomment" description="Comment for created types" context="typecomment_context" enabled="true">/**
+ <codetemplate name="typecomment" description="%CodeTemplates.typecomment" context="typecomment_context" enabled="true">/**
  * @author ${user}
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
+ * %CodeTemplates.typecomment.content1
+ * %CodeTemplates.typecomment.content2
  */</codetemplate>
- <codetemplate name="methodcomment" description="Comment for non-overriding methods" context="methodcomment_context" enabled="true">/**
+ <codetemplate name="methodcomment" description="%CodeTemplates.nonoverridingcomment" context="methodcomment_context" enabled="true">/**
  * ${tags}
  */</codetemplate>
-<codetemplate name="overridecomment" description="Comment for overriding methods" context="overridecomment_context" enabled="true">/* (non-Javadoc)
+<codetemplate name="overridecomment" description="%CodeTemplates.overridecomment" context="overridecomment_context" enabled="true">/* %CodeTemplates.overridecomment.nonjd
  * ${see_to_overridden}
  */</codetemplate>
- <codetemplate name="newtype" description="New classes and interfaces" context="newtype_context" enabled="true">/*
- * Created on ${date}
+ <codetemplate name="newtype" description="%CodeTemplates.newfile" context="newtype_context" enabled="true">/*
+ * %CodeTemplates.newfile.content1
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
+ * %CodeTemplates.newfile.content2
+ * %CodeTemplates.newfile.content3
  */
 ${package_declaration}
 
 ${typecomment}
 ${type_declaration}</codetemplate>
-<codetemplate name="catchblock" description="Code in new catch blocks" context="catchblock_context" enabled="true">// ${todo} Auto-generated catch block
-${exception_var}.printStackTrace();</codetemplate><codetemplate name="methodbody" description="Code in created method stubs" context="methodbody_context" enabled="true">// ${todo} Auto-generated method stub
+<codetemplate name="catchblock" description="%CodeTemplates.catchblock" context="catchblock_context" enabled="true">// ${todo} %CodeTemplates.catchblock.tododesc
+${exception_var}.printStackTrace();</codetemplate><codetemplate name="methodbody" description="%CodeTemplates.methodstub" context="methodbody_context" enabled="true">// ${todo} %CodeTemplates.methodstub.tododesc
 ${body_statement}</codetemplate>
-<codetemplate name="constructorbody" description="Code in created constructor stubs" context="constructorbody_context" enabled="true">${body_statement}
-// ${todo} Auto-generated constructor stub</codetemplate>
+<codetemplate name="constructorbody" description="%CodeTemplates.constructorstub" context="constructorbody_context" enabled="true">${body_statement}
+// ${todo} %CodeTemplates.constructorstub.tododesc</codetemplate>
 </templates>

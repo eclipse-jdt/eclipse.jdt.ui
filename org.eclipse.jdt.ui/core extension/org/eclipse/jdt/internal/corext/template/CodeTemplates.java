@@ -64,7 +64,7 @@ public class CodeTemplates extends TemplateSet {
 	
 	private void create() {
 		try {
-			addFromStream(getDefaultsAsStream(), false);
+			addFromStream(getDefaultsAsStream(), false, true);
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
 				addFromFile(templateFile, false);
@@ -95,7 +95,7 @@ public class CodeTemplates extends TemplateSet {
 	 */
 	public void restoreDefaults() throws CoreException {
 		clear();
-		addFromStream(getDefaultsAsStream(), false);
+		addFromStream(getDefaultsAsStream(), false, true);
 	}
 
 	/**
