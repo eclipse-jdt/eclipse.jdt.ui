@@ -15,6 +15,7 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -25,10 +26,10 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
 
 public class StubUtility {
 	
@@ -500,9 +501,8 @@ public class StubUtility {
 	}
 	
 	public static String codeFormat(String sourceString, int initialIndentationLevel, String lineDelim) {
-		CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
-		formatter.options.setLineSeparator(lineDelim);
-		return formatter.format(sourceString, initialIndentationLevel) + lineDelim;
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
+		return formatter.format(sourceString, initialIndentationLevel, null, lineDelim) + lineDelim;
 	}
 	
 	/**

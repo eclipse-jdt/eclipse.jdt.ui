@@ -8,11 +8,11 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.formatter.IFormattingStrategy;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.ICodeFormatter;
+import org.eclipse.jdt.core.ToolFactory;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage; 
 
 public class JavaFormattingStrategy implements IFormattingStrategy {
@@ -41,16 +41,15 @@ public class JavaFormattingStrategy implements IFormattingStrategy {
 	 * @see IFormattingStrategy#format(String, boolean, String, int[])
 	 */
 	public String format(String content, boolean isLineStart, String indentation, int[] positions) {
-		CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
 		
 		IDocument doc= fViewer.getDocument();
 		String lineDelimiter= StubUtility.getLineDelimiterFor(doc);
-		formatter.options.setLineSeparator(lineDelimiter);
 
 		int indent= 0;
 		if (fInitialIndentation != null) {
 			indent= TextUtil.getIndent(fInitialIndentation, CodeFormatterPreferencePage.getTabSize());
 		}
-		return formatter.format(content, indent, positions);
+		return formatter.format(content, indent, positions, lineDelimiter);
 	}	
 }

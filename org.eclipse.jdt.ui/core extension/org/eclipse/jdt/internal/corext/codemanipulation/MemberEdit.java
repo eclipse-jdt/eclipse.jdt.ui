@@ -6,17 +6,17 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -24,7 +24,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
 
 public class MemberEdit extends SimpleTextEdit {
 	
@@ -272,9 +271,8 @@ public class MemberEdit extends SimpleTextEdit {
 		}		
 
 		if (fUseFormatter) {
-			CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
-			formatter.options.setLineSeparator(lineDelimiter);
-			return formatter.format(buffer.toString(), initialIndentationLevel);
+			ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
+			return formatter.format(buffer.toString(), initialIndentationLevel, null, lineDelimiter);
 		}
 		return buffer.toString();
 	}

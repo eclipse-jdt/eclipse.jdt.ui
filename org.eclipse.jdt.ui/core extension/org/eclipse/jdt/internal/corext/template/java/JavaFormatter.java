@@ -10,7 +10,8 @@ import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.ICodeFormatter;
+import org.eclipse.jdt.core.ToolFactory;
 
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
@@ -24,7 +25,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
 
 /**
@@ -103,8 +103,8 @@ public class JavaFormatter implements ITemplateEditor {
 
 		int[] offsets= variablesToOffsets(variables);
 		
-		CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
-		string= formatter.format(string, indentationLevel, offsets);
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
+		string= formatter.format(string, indentationLevel, offsets, "\n"); // XXX: to be reviewed
 		
 		offsetsToVariables(offsets, variables);
 
