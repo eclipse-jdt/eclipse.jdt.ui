@@ -3,6 +3,7 @@
     <classpathentry kind="src" path="examples/"/>
     <classpathentry kind="src" path="test plugin/"/>
     <classpathentry kind="src" path="ui/"/>
+    <classpathentry kind="src" path="chkpii"/>
     <classpathentry kind="src" path="/org.junit"/>
     <classpathentry kind="src" path="/org.eclipse.core.resources"/>
     <classpathentry kind="src" path="/org.apache.xerces"/>
