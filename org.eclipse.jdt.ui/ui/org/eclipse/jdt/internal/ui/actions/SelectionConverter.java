@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -152,8 +153,19 @@ public class SelectionConverter {
 		return null;
 	}
 	
-	public static IJavaElement elementAtOffset(JavaEditor editor) throws JavaModelException {
-			return elementAtOffset(getInput(editor), (ITextSelection)editor.getSelectionProvider().getSelection());
+	public static IJavaElement getElementAtOffset(JavaEditor editor) throws JavaModelException {
+			return getElementAtOffset(getInput(editor), (ITextSelection)editor.getSelectionProvider().getSelection());
+	}
+	
+	public static IType getTypeAtOffset(JavaEditor editor) throws JavaModelException {
+		IJavaElement element= SelectionConverter.getElementAtOffset(editor);
+		IType type= (IType)element.getAncestor(IJavaElement.TYPE);
+		if (type == null) {
+			ICompilationUnit unit= SelectionConverter.getInputAsCompilationUnit(editor);
+			if (unit != null)
+				type= unit.findPrimaryType();
+		}
+		return type;
 	}
 	
 	public static IJavaElement getInput(JavaEditor editor) {
@@ -181,7 +193,7 @@ public class SelectionConverter {
 			return EMPTY_RESULT;
 	}
 	
-	private static IJavaElement elementAtOffset(IJavaElement input, ITextSelection selection) throws JavaModelException {
+	private static IJavaElement getElementAtOffset(IJavaElement input, ITextSelection selection) throws JavaModelException {
 		if (input instanceof ICompilationUnit) {
 			ICompilationUnit cunit= (ICompilationUnit)input;
 			if (cunit.isWorkingCopy()) {

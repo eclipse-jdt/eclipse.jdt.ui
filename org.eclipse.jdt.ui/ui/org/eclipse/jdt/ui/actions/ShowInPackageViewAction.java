@@ -95,7 +95,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	 */
 	protected void run(ITextSelection selection) {
 		try {
-			IJavaElement element= SelectionConverter.elementAtOffset(fEditor);
+			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
 			if (element != null)
 				run(element);
 		} catch (JavaModelException e) {

@@ -102,7 +102,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 
 	private boolean checkEnabled(ITextSelection selection) {
 		try {
-			return fEditor != null && SelectionConverter.elementAtOffset(fEditor) != null;
+			return fEditor != null && SelectionConverter.getElementAtOffset(fEditor) != null;
 		} catch (JavaModelException e) {
 		}
 		return false;
@@ -187,7 +187,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	
 	private Object elementAtOffset() {
 		try {
-			return SelectionConverter.elementAtOffset(fEditor);
+			return SelectionConverter.getElementAtOffset(fEditor);
 		} catch(JavaModelException e) {
 		}
 		return null;

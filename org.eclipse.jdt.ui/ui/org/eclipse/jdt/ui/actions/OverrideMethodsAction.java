@@ -109,16 +109,9 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */
 	protected void run(ITextSelection selection) {
-		IType type= null;
 		Shell shell= getShell();
 		try {
-			IJavaElement element= SelectionConverter.elementAtOffset(fEditor);
-			type= (IType)element.getAncestor(IJavaElement.TYPE);
-			if (type == null) {
-				ICompilationUnit unit= SelectionConverter.getInputAsCompilationUnit(fEditor);
-				if (unit != null)
-					type= unit.findPrimaryType();
-			}
+			IType type= SelectionConverter.getTypeAtOffset(fEditor);
 			if (type != null)
 				run(shell, type, fEditor);
 			else
