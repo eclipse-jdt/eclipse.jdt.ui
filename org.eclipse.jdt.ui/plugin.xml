@@ -1210,7 +1210,7 @@
                disabledIcon="icons/full/dtool16/newclass_wiz.gif"
                icon="icons/full/etool16/newclass_wiz.gif"
                label="%OpenClassWizardAction.label"
-               pulldown="true"
+               style="pulldown"
                tooltip="%OpenClassWizardAction.tooltip">
          </action>
          <action
