@@ -123,6 +123,15 @@ public class SortMembersAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		try {
 			ICompilationUnit cu= getSelectedCompilationUnit(selection);
+			int cuMembers= cu.getTypes().length;
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38496
+			IType type= cu.findPrimaryType();
+			int memberCount= type.getChildren().length;
+			if (cuMembers <= 1 && memberCount <= 1) {
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("SortMembersAction.no_members")); //$NON-NLS-1$			
+				return;
+			}
+			
 			if (cu == null || !ElementValidator.check(cu, getShell(), getDialogTitle(), false)) {
 				return;
 			}
