@@ -24,10 +24,12 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IDeclaredConstraintVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.OrOrSubTypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
 
 /**
@@ -37,8 +39,8 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
  */
 public final class SuperTypeConstraintsSolver {
 
-	/** The type estimate data */
-	private final static String DATA_TYPE_ESTIMATE= "te"; //$NON-NLS-1$
+	/** The type estimate data (type: <code>TType</code> */
+	public final static String DATA_TYPE_ESTIMATE= "te"; //$NON-NLS-1$
 
 	/** The type constraint model to solve */
 	private final SuperTypeConstraintsModel fModel;
@@ -49,8 +51,8 @@ public final class SuperTypeConstraintsSolver {
 	/** The list of constraint variables to be processed */
 	private LinkedList fProcessable= null;
 
-	/** The type matches (element type: <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt</code>) */
-	private Map fTypeMatches= null;
+	/** The type occurrences (element type: <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt</code>) */
+	private Map fTypeOccurrences= null;
 
 	/**
 	 * Creates a new super type constraints solver.
@@ -61,6 +63,20 @@ public final class SuperTypeConstraintsSolver {
 		Assert.isNotNull(model);
 
 		fModel= model;
+	}
+
+	/**
+	 * Computes the initial type estimate for the specified constraint variable.
+	 * 
+	 * @param variable the constraint variable
+	 * @return the initial type estimate
+	 */
+	private ITypeSet computeInitialTypeEstimate(final ConstraintVariable2 variable) {
+		Assert.isNotNull(variable);
+		final TType type= variable.getType();
+		if (variable instanceof PlainTypeVariable2 || !type.equals(fModel.getSubType()))
+			return TypeSet.create(type);
+		return TypeSet.create(new TType[] { type, fModel.getSuperType()});
 	}
 
 	/**
@@ -90,7 +106,7 @@ public final class SuperTypeConstraintsSolver {
 	}
 
 	/**
-	 * Computes the type estimates for the specified variables.
+	 * Computes the initial type estimates for the specified variables.
 	 * 
 	 * @param variables the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
@@ -99,19 +115,19 @@ public final class SuperTypeConstraintsSolver {
 		ConstraintVariable2 variable= null;
 		for (final Iterator iterator= variables.iterator(); iterator.hasNext();) {
 			variable= (ConstraintVariable2) iterator.next();
-			EquivalenceRepresentative representative= variable.getRepresentative();
-			if (representative == null) {
-				representative= new EquivalenceRepresentative(variable);
-				representative.setTypeEstimate(TypeSet.create(variable.getType()));
-				variable.setRepresentative(representative);
+			TypeEquivalenceSet set= variable.getTypeEquivalenceSet();
+			if (set == null) {
+				set= new TypeEquivalenceSet(variable);
+				set.setTypeEstimate(computeInitialTypeEstimate(variable));
+				variable.setTypeEquivalenceSet(set);
 			} else {
 				ITypeSet estimate= variable.getTypeEstimate();
 				if (estimate == null) {
-					final ConstraintVariable2[] constraints= representative.getElements();
+					final ConstraintVariable2[] contributing= set.getContributingVariables();
 					estimate= TypeSet.getTypeUniverse();
-					for (int index= 0; index < constraints.length; index++)
-						estimate= estimate.restrictedTo(TypeSet.create(constraints[index].getType()));
-					representative.setTypeEstimate(estimate);
+					for (int index= 0; index < contributing.length; index++)
+						estimate= estimate.restrictedTo(computeInitialTypeEstimate(contributing[index]));
+					set.setTypeEstimate(estimate);
 				}
 			}
 		}
@@ -122,25 +138,29 @@ public final class SuperTypeConstraintsSolver {
 	 * 
 	 * @param variables the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
-	private void computeTypeMatches(final Collection variables) {
+	private void computeTypeOccurrences(final Collection variables) {
 		Assert.isNotNull(variables);
-		fTypeMatches= new HashMap();
+		fTypeOccurrences= new HashMap();
 		ConstraintVariable2 variable= null;
 		for (final Iterator iterator= variables.iterator(); iterator.hasNext();) {
 			variable= (ConstraintVariable2) iterator.next();
 			if (variable instanceof IDeclaredConstraintVariable) {
-				final ITypeSet set= (ITypeSet) variable.getData(DATA_TYPE_ESTIMATE);
-				if (set != null) {
-					variable.setData(DATA_TYPE_ESTIMATE, set.chooseSingleType());
-					final IDeclaredConstraintVariable declaration= (IDeclaredConstraintVariable) variable;
-					final ICompilationUnit unit= declaration.getCompilationUnit();
-					Collection matches= (Collection) fTypeMatches.get(unit);
-					if (matches != null)
-						matches.add(variable);
-					else {
-						matches= new ArrayList(1);
-						matches.add(variable);
-						fTypeMatches.put(unit, matches);
+				final ITypeSet estimate= variable.getTypeEstimate();
+				if (estimate != null) {
+					variable.setData(DATA_TYPE_ESTIMATE, estimate.chooseSingleType());
+					if (variable instanceof IDeclaredConstraintVariable) {
+						final IDeclaredConstraintVariable declaration= (IDeclaredConstraintVariable) variable;
+						final ICompilationUnit unit= declaration.getCompilationUnit();
+						if (unit != null) {
+							Collection matches= (Collection) fTypeOccurrences.get(unit);
+							if (matches != null)
+								matches.add(variable);
+							else {
+								matches= new ArrayList(1);
+								matches.add(variable);
+								fTypeOccurrences.put(unit, matches);
+							}
+						}
 					}
 				}
 			}
@@ -157,34 +177,38 @@ public final class SuperTypeConstraintsSolver {
 	}
 
 	/**
-	 * Returns the computed type matches.
+	 * Returns the computed type occurrences.
 	 * 
-	 * @return the type matches (element type: <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt</code>)
+	 * @return the type occurrences (element type: <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt</code>)
 	 */
-	public final Map getTypeMatches() {
-		return fTypeMatches;
+	public final Map getTypeOccurrences() {
+		return fTypeOccurrences;
 	}
 
 	/**
 	 * Processes the given constraints on the constraint variable and propagates it.
 	 * 
 	 * @param constraints the type constraints to process (element type: <code>ITypeConstraint2</code>)
-	 * @param variable the constraint variable
 	 */
-	private void processConstraints(final Collection constraints, final ConstraintVariable2 variable) {
+	private void processConstraints(final Collection constraints) {
 		Assert.isNotNull(constraints);
-		Assert.isNotNull(variable);
-		TypeConstraint2 constraint= null;
+		ITypeConstraint2 constraint= null;
 		for (final Iterator iterator= constraints.iterator(); iterator.hasNext();) {
-			constraint= (TypeConstraint2) iterator.next();
-			final TypeConstraint2 simple= constraint;
-			final ConstraintVariable2 rightVariable= simple.getRight();
-			final EquivalenceRepresentative representative= rightVariable.getRepresentative();
-			final ITypeSet rightEstimate= rightVariable.getTypeEstimate();
-			final ITypeSet newEstimate= rightEstimate.restrictedTo(simple.getLeft().getTypeEstimate());
-			if (rightEstimate != newEstimate) {
-				representative.setTypeEstimate(newEstimate);
-				fProcessable.addAll(Arrays.asList(representative.getElements()));
+			constraint= (ITypeConstraint2) iterator.next();
+			final ConstraintVariable2 leftVariable= constraint.getLeft();
+			final ConstraintVariable2 rightVariable= constraint.getRight();
+			if (constraint instanceof OrOrSubTypeConstraint2) {
+
+				// TODO implement
+
+			} else {
+				final TypeEquivalenceSet set= rightVariable.getTypeEquivalenceSet();
+				final ITypeSet rightEstimate= rightVariable.getTypeEstimate();
+				final ITypeSet newEstimate= rightEstimate.restrictedTo(leftVariable.getTypeEstimate());
+				if (rightEstimate != newEstimate) {
+					set.setTypeEstimate(newEstimate);
+					fProcessable.addAll(Arrays.asList(set.getContributingVariables()));
+				}
 			}
 		}
 	}
@@ -200,9 +224,9 @@ public final class SuperTypeConstraintsSolver {
 		ConstraintVariable2 variable= null;
 		while (!fProcessable.isEmpty()) {
 			variable= (ConstraintVariable2) fProcessable.removeFirst();
-			processConstraints(SuperTypeConstraintsModel.getVariableUsage(variable), variable);
+			processConstraints(SuperTypeConstraintsModel.getVariableUsage(variable));
 		}
-		computeTypeMatches(variables);
+		computeTypeOccurrences(variables);
 		computeObsoleteCasts(fModel.getCastVariables());
 	}
 }
