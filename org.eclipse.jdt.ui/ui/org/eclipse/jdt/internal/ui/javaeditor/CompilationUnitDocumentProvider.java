@@ -782,7 +782,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 */
 	public CompilationUnitDocumentProvider() {
 		
-		IDocumentProvider provider= new TextFileDocumentProvider(new JavaStorageDocumentProvider());
+		IDocumentProvider provider= new TextFileDocumentProvider();
 		provider= new ForwardingDocumentProvider(IJavaPartitions.JAVA_PARTITIONING, new JavaDocumentSetupParticipant(), provider);
 		setParentDocumentProvider(provider);
 		
