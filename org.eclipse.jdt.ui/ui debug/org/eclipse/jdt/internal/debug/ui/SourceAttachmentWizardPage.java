@@ -123,19 +123,7 @@ public class SourceAttachmentWizardPage extends WizardPage implements IStatusCha
 		return -1;
 	}
 			
-	private boolean modifyClasspathEntry(IClasspathEntry[] entries, IPath attachPath, IPath attachRoot) {
-		int index= findClasspathEntry(entries, fJarRoot.getPath());
-		if (index != -1) {
-			IClasspathEntry old= entries[index];
-			if (old.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-				entries[index]= JavaCore.newVariableEntry(old.getPath(), attachPath, attachRoot);
-			} else {
-				entries[index]= JavaCore.newLibraryEntry(old.getPath(), attachPath, attachRoot);
-			}
-			return true;
-		}
-		return false;
-	}	
+	private IClasspathEntry[] modifyClasspath(IPackageFragmentRoot root, IPath attachPath, IPath attachRoot) throws JavaModelException{		IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry(root);		if (entry != null) {			IClasspathEntry[] oldClasspath= root.getJavaProject().getRawClasspath();			IClasspathEntry[] newClasspath= new IClasspathEntry[oldClasspath.length];			for (int i= 0; i < oldClasspath.length; i++) {				if (oldClasspath[i] == entry) {					if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {						newClasspath[i]= JavaCore.newVariableEntry(entry.getPath(), attachPath, attachRoot);					} else {						newClasspath[i]= JavaCore.newLibraryEntry(entry.getPath(), attachPath, attachRoot);					}				} else {					newClasspath[i]= oldClasspath[i];				}			}			return newClasspath;		}		return null;	}		
 	
 	/**
 	 * The status has changed.  Update the state
@@ -176,8 +164,7 @@ public class SourceAttachmentWizardPage extends WizardPage implements IStatusCha
 				IPath attachPath= fSourceAttachmentBlock.getSourceAttachmentPath();
 				IPath attachRoot= fSourceAttachmentBlock.getSourceAttachmentRootPath();				
 				
-				IClasspathEntry[] entries= jproject.getRawClasspath();
-				if (!modifyClasspathEntry(entries, attachPath, attachRoot)) {
+				IClasspathEntry[] entries= modifyClasspath(fJarRoot, attachPath, attachRoot);				if (entries == null) {
 					// root not found in classpath
 					if (fSourceAttachmentBlock.getSourceAttachmentPath() == null) {
 						return true;
