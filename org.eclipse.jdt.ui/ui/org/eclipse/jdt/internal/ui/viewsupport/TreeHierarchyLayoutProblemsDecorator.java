@@ -41,7 +41,7 @@ public class TreeHierarchyLayoutProblemsDecorator extends ProblemsLabelDecorator
 	}
 	
 	protected int computePackageAdornmentFlags(IPackageFragment fragment) {
-		if (!fIsFlatLayout) {
+		if (!fIsFlatLayout && !fragment.isDefaultPackage()) {
 			return super.computeAdornmentFlags(fragment.getResource());
 		}
 		return super.computeAdornmentFlags(fragment);
