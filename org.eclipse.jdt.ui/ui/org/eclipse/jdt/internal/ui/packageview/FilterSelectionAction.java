@@ -1,4 +1,5 @@
-package org.eclipse.jdt.internal.ui.packageview;import java.io.StringWriter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.actions.SelectionProviderAction;import org.eclipse.ui.dialogs.ListSelectionDialog;
+package org.eclipse.jdt.internal.ui.packageview;import java.io.StringWriter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.actions.SelectionProviderAction;import org.eclipse.ui.dialogs.ListSelectionDialog;
 
 /**
  * The FilterAction is the class that adds the filter views to a PackagesView.
@@ -49,7 +50,10 @@ class FilterSelectionAction extends SelectionProviderAction {
 			System.arraycopy(results, 0, selectedPatterns, 0, results.length);
 			filter.setPatterns(selectedPatterns);
 			saveInPreferences(selectedPatterns);
-			fPackagesView.getViewer().refresh();
+			TreeViewer viewer= fPackagesView.getViewer();
+			viewer.getControl().setRedraw(false);
+			viewer.refresh();
+			viewer.getControl().setRedraw(true);
 		}
 	}
 	/**

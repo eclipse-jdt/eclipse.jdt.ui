@@ -7,13 +7,15 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import java.util.Vector;
+import java.util.ArrayList;import java.util.List;import java.util.Vector;
 
 /**
  * The FiltersContentProvider provides the elements for use by the list dialog
  * for selecting the patterns to apply.
  */ 
 class FiltersContentProvider implements IStructuredContentProvider {
+	private static List fgDefinedFilters;
+	private static List fgDefaultFilters;
 
 	private JavaElementPatternFilter fJavaFilter; 
 	
@@ -22,7 +24,6 @@ class FiltersContentProvider implements IStructuredContentProvider {
 	 * resource filter.
 	 */
 	public FiltersContentProvider(JavaElementPatternFilter filter) {
-		super();
 		fJavaFilter= filter;
 	}
 	/**
@@ -33,32 +34,26 @@ class FiltersContentProvider implements IStructuredContentProvider {
 	/**
 	 * Returns the filters currently defined for the workbench. 
 	 */
-	public static Vector getDefinedFilters() { 
-		JavaPlugin plugin= JavaPlugin.getDefault();
-	
-		IExtensionPoint extension = plugin.getDescriptor().getExtensionPoint(JavaElementPatternFilter.FILTERS_TAG);
-		IExtension[] extensions =  extension.getExtensions();
-	
-		Vector elements = new Vector();
-		for(int i = 0; i < extensions.length; i++){
-			IConfigurationElement [] configElements = extensions[i].getConfigurationElements();
-			for(int j = 0; j < configElements.length; j++){
-				String pattern = configElements[j].getAttribute(JavaElementPatternFilter.PATTERN);
-				if(pattern != null)
-					elements.add(pattern);
-			}		
+	public static List getDefinedFilters() {
+		if (fgDefinedFilters == null) {
+			readFilters();
 		}
-		return elements;
+		return fgDefinedFilters;
+	}
+	/**
+	 * Returns the filters which are enabled by default.
+	 *
+	 * @return a list of strings
+	 */
+	public static List getDefaultFilters() {
+		if (fgDefaultFilters == null) {
+			readFilters();
+		}
+		return fgDefaultFilters;
 	}
 	
-	/**
-	 * Returns the elements to display in the viewer 
-	 * when its input is set to the given element. 
-	 * These elements can be presented as rows in a table, items in a list, etc.
-	 * The result is not modified by the viewer.
-	 *
-	 * @param inputElement the input element
-	 * @return the array of elements to display in the viewer
+	/* (non-Jaadoc)
+	 * Method declared in IStructuredContentProvider.
 	 */
 	public Object[] getElements(Object inputElement) {
 		return getDefinedFilters().toArray();
@@ -74,5 +69,31 @@ class FiltersContentProvider implements IStructuredContentProvider {
 	 * Method declared on IContentProvider.
 	 */
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+	}
+	
+	/**
+ 	 * Reads the filters currently defined for the workbench. 
+ 	 */
+	private static void readFilters() {
+		fgDefinedFilters = new ArrayList();
+		fgDefaultFilters = new ArrayList();
+		JavaPlugin plugin = JavaPlugin.getDefault();
+		if (plugin != null) {
+			IExtensionPoint extension = plugin.getDescriptor().getExtensionPoint(JavaElementPatternFilter.FILTERS_TAG);
+			if (extension != null) {
+				IExtension[] extensions =  extension.getExtensions();
+				for(int i = 0; i < extensions.length; i++){
+					IConfigurationElement [] configElements = extensions[i].getConfigurationElements();
+					for(int j = 0; j < configElements.length; j++){
+						String pattern = configElements[j].getAttribute("pattern");
+						if (pattern != null)
+							fgDefinedFilters.add(pattern);
+						String selected = configElements[j].getAttribute("selected");
+						if (selected != null && selected.equalsIgnoreCase("true"))
+							fgDefaultFilters.add(pattern);
+					}
+				}
+			}		
+		}
 	}
 }

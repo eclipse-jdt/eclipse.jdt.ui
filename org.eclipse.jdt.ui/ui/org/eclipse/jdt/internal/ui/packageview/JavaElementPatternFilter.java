@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.packageview;import java.util.StringTokenizer;import java.util.Vector;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.StringMatcher;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerFilter;
+package org.eclipse.jdt.internal.ui.packageview;import java.util.List;import java.util.StringTokenizer;import java.util.Vector;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.StringMatcher;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerFilter;
 
 
 /**
@@ -11,7 +11,6 @@ class JavaElementPatternFilter extends ViewerFilter {
 	
 	static String COMMA_SEPARATOR = ",";
 	static String FILTERS_TAG= "javaElementFilters";
-	static String PATTERN= "pattern";
 	
 	/**
 	 * Creates a new resource pattern filter.
@@ -48,14 +47,17 @@ class JavaElementPatternFilter extends ViewerFilter {
 		String storedPatterns= plugin.getPreferenceStore().getString(FILTERS_TAG);
 	
 		if (storedPatterns.length() == 0) {
-			setPatterns(new String[0]);
+			List defaultFilters= FiltersContentProvider.getDefaultFilters();
+			String[] patterns= new String[defaultFilters.size()];
+			defaultFilters.toArray(patterns);
+			setPatterns(patterns);
 			return;
 		}
 	
 		//Get the strings separated by a comma and filter them from the currently
 		//defined ones
 	
-		Vector definedFilters = FiltersContentProvider.getDefinedFilters();
+		List definedFilters = FiltersContentProvider.getDefinedFilters();
 	
 		StringTokenizer entries = new StringTokenizer(storedPatterns, COMMA_SEPARATOR);
 		Vector patterns = new Vector();
