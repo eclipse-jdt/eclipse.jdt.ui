@@ -201,7 +201,7 @@ public class ResultCollector extends CompletionRequestor {
 		return buf.toString();
 	}
 	
-	private void internalAcceptMethod(CompletionProposal method) {
+	protected void internalAcceptMethod(CompletionProposal method) {
 		String rawDeclaringType= extractTypeFQN(method);
 		if (TypeFilter.isFiltered(rawDeclaringType))
 			return;
@@ -746,7 +746,7 @@ public class ResultCollector extends CompletionRequestor {
 		}
 	}	
 	
-	private void internalAcceptAnnotationAttributeReference(CompletionProposal proposal) {
+	protected void internalAcceptAnnotationAttributeReference(CompletionProposal proposal) {
 		String displayString= createAnnotationAttributeDisplayString(proposal).toString();
 		ImageDescriptor descriptor= createMemberDescriptor(proposal.getFlags());
 		String completion= String.valueOf(proposal.getCompletion());
