@@ -1,4 +1,4 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.jface.dialogs.DialogPage;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.jface.dialogs.TitleAreaDialog;import org.eclipse.core.runtime.IStatus;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.DialogPage;
 /** * A utility class to work with IStatus. */
 public class StatusUtil {
 
@@ -38,7 +38,6 @@ public class StatusUtil {
 	 * Applies the status to the status line of a dialog page.
 	 */
 	public static void applyToStatusLine(DialogPage page, IStatus status) {
-		String message= status.getMessage();		switch (status.getSeverity()) {			case IStatus.OK:				page.setErrorMessage(null);				page.setMessage(message);				break;			case IStatus.WARNING:				case IStatus.INFO:				page.setErrorMessage(null);				page.setMessage(message);				break;						default:				if (message.length() == 0) {					message= null;				}				page.setErrorMessage(message);				page.setMessage(null);				break;				}
-	}		/**	 * Applies the status to the status line of a dialog page.	 */	public static void applyToStatusLine(WizardPage page, IStatus status) {		String message= status.getMessage();		switch (status.getSeverity()) {			case IStatus.OK:				page.setErrorMessage(null);				page.setMessage(message, null);				break;			case IStatus.WARNING:				page.setErrorMessage(null);				page.setMessage(message, WizardPage.WARNING_MESSAGE);				break;							case IStatus.INFO:				page.setErrorMessage(null);				page.setMessage(message, WizardPage.INFO_MESSAGE);				break;						default:				if (message.length() == 0) {					message= null;				}				page.setErrorMessage(message);				page.setMessage(null);				break;				}	}	
-	
+		int messageType= page.NONE;		switch (status.getSeverity()) {			case IStatus.ERROR:				messageType= page.ERROR;			case IStatus.WARNING:				messageType= page.WARNING;					case IStatus.INFO:				messageType= page.INFORMATION;		}		page.setMessage(status.getMessage(), messageType);
+	}
 }
