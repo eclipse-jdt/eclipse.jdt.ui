@@ -37,6 +37,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 
@@ -186,7 +187,7 @@ public class JavaDocLocations {
 	}
 	
 	private static JavaUIException createException(Throwable t, String message) {
-		return new JavaUIException(JavaUIStatus.createError(JavaUIStatus.ERROR, message, t));
+		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
 	}	
 
 	private static synchronized void storeLocations() throws CoreException {
@@ -405,7 +406,7 @@ public class JavaDocLocations {
 					}
 				} else {
 					IType imp= element.getJavaProject().findType(decl.getElementName());
-					appendTypePath((IType) imp, pathBuffer);
+					appendTypePath(imp, pathBuffer);
 				}
 				break;
 			case IJavaElement.PACKAGE_DECLARATION :
