@@ -4795,7 +4795,7 @@
     	<launchConfigurationType
            delegate="org.eclipse.jdt.internal.ui.text.correction.SerialVersionLaunchConfigurationDelegate"
            public="false"
-           name="Serial Version Computer"
+           name="%serialVersionLaunchConfigName"
            modes="run"
            id="org.eclipse.jdt.ui.serial.support">
     	</launchConfigurationType>
