@@ -285,15 +285,15 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 				fOccurrences= getReferences(new SubProgressMonitor(pm, 6));	
 				pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 				result.merge(analyzeAffectedCompilationUnits());
-				result.merge(checkPackageName(fNewName));
 				pm.worked(1);
-				if (result.hasFatalError())
-					return result;
-			
-				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
 			} else {
 				pm.worked(9);
 			}
+			result.merge(checkPackageName(fNewName));
+			if (result.hasFatalError())
+				return result;
+				
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
 			
 			if (fUpdateQualifiedNames)			
 				computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
@@ -451,8 +451,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	private IFile[] getAllFilesToModify() throws CoreException{
 		//cannot use Arrays.asList to create this temp - addAll is not supported on list created by Arrays.asList
 		List combined= new ArrayList();
-		if (fChangeManager != null)
-			combined.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
+		combined.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 		combined.addAll(Arrays.asList(getAllCusInPackageAsFiles()));
 		if (fQualifiedNameSearchResult != null)
 			combined.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
@@ -470,8 +469,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			pm.beginTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.creating_change"), 1); //$NON-NLS-1$
 			CompositeChange builder= new CompositeChange();
 	
-			if (fUpdateReferences)
-				builder.addAll(fChangeManager.getAllChanges());
+			builder.addAll(fChangeManager.getAllChanges());
 			
 			if (fQualifiedNameSearchResult != null)	
 				builder.addAll(fQualifiedNameSearchResult.getAllChanges());
@@ -501,7 +499,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching_text")); //$NON-NLS-1$
 		addTextMatches(manager, new SubProgressMonitor(pm, 1));
 		
-		addReferenceUpdates(manager, new SubProgressMonitor(pm, 1));
+		if (fUpdateReferences)
+			addReferenceUpdates(manager, new SubProgressMonitor(pm, 1));
 		
 		return manager;
 	}
