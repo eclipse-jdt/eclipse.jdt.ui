@@ -125,8 +125,15 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				fProblem= problem;
 				setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
 				
-				if (fgImage == null)
-					fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+				if (fgImage == null) {
+					// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
+					Display display= Display.getDefault();
+					display.syncExec(new Runnable() {
+						public void run() {
+							fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+						}
+					});
+				}
 				
 				if (JavaEditorPreferencePage.showTempProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID()))
 					fImage= fgImage;
