@@ -1,15 +1,15 @@
 package p1;
 
 public class A {
-    public int foo() {
-        class P {
+	public int foo() {
+		class P {
 
-            public void p() {
-            }
+			public void m() {
+			}
 
-        };      
-        class O {
-        };
-        return 0;
-    }
+		};		
+		class O {
+		};
+		return 0;
+	}
 }
