@@ -74,7 +74,7 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 		return;	
 	}
 
-	public void drop(Object dropTarget, DropTargetEvent event) {
+	public void drop(Object dropTarget, final DropTargetEvent event) {
 		try {
 			int operation= event.detail;
 
