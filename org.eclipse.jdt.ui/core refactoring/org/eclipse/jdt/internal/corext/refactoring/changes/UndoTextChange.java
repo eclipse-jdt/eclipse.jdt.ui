@@ -12,13 +12,13 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.text.edits.UndoMemento;
+import org.eclipse.text.edits.UndoEdit;
 
 abstract class UndoTextChange extends AbstractTextChange {
 
-	private UndoMemento fUndos;
+	private UndoEdit fUndos;
 
-	public UndoTextChange(String name, int changeKind, UndoMemento undos) {
+	public UndoTextChange(String name, int changeKind, UndoEdit undos) {
 		super(name, changeKind);
 		fUndos= undos;
 	}

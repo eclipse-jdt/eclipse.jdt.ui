@@ -19,7 +19,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.text.edits.UndoMemento;
+import org.eclipse.text.edits.UndoEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
@@ -34,7 +34,7 @@ public class TextFileChange extends TextChange  {
 		private IFile fFile;
 		private TextBuffer fAcquiredTextBuffer;
 		private int fAcquireCounter;
-		public UndoTextFileChange(String name, IFile file, int changeKind, UndoMemento undo) {
+		public UndoTextFileChange(String name, IFile file, int changeKind, UndoEdit undo) {
 			super(name, changeKind, undo);
 			fFile= file;
 		}
@@ -59,7 +59,7 @@ public class TextFileChange extends TextChange  {
 		protected TextBuffer createTextBuffer() throws CoreException {
 			return TextBuffer.create(fFile);
 		}
-		protected IChange createReverseChange(UndoMemento undo, int changeKind) {
+		protected IChange createReverseChange(UndoEdit undo, int changeKind) {
 			return new UndoTextFileChange(getName(), fFile, changeKind, undo);
 		}
 		public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
@@ -171,7 +171,7 @@ public class TextFileChange extends TextChange  {
 	/* non java-doc
 	 * Method declared in TextChange
 	 */
-	protected IChange createReverseChange(UndoMemento undo, int changeKind) {
+	protected IChange createReverseChange(UndoEdit undo, int changeKind) {
 		return new UndoTextFileChange(getName(), fFile, changeKind, undo);
 	}
 	

@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditProcessor;
-import org.eclipse.text.edits.UndoMemento;
+import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,7 +30,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class TextBufferEditor extends TextEditProcessor {
 
 	private TextBuffer fBuffer;
-	private UndoMemento fUndoMemento;
+	private TextEditProcessor fUndoProcessor;
 		
 	/**
 	 * Creates a new <code>TextBufferEditor</code> for the given 
@@ -36,7 +39,7 @@ public class TextBufferEditor extends TextEditProcessor {
 	 * @param the text buffer this editor is working on.
 	 */
 	public TextBufferEditor(TextBuffer buffer) {
-		super(buffer.getDocument());
+		super(buffer.getDocument(), new MultiTextEdit(0, buffer.getDocument().getLength()));
 		fBuffer= buffer;
 	}
 	
@@ -50,6 +53,22 @@ public class TextBufferEditor extends TextEditProcessor {
 	}
 	
 	/**
+	 * Adds an <code>Edit</code> to this edit processor. Adding an edit
+	 * to an edit processor transfers ownership of the edit to the 
+	 * processor. So after an edit has been added to a processor the 
+	 * creator of the edit <b>must</b> not continue modifying the edit.
+	 * 
+	 * @param edit the edit to add
+	 * @exception MalformedTreeException if the text edit can not be 
+	 *  added to this edit processor.
+	 * 
+	 * @see TextEdit#addChild(TextEdit)
+	 */
+	public void add(TextEdit edit) throws MalformedTreeException {
+		getRoot().addChild(edit);
+	}
+		
+	/**
 	 * Adds an undo memento to this edit processor. Adding an undo memento
 	 * transfers ownership of the memento to the processor. So after a memento 
 	 * has been added the creator of that memento <b>must</b> not continue
@@ -59,16 +78,18 @@ public class TextBufferEditor extends TextEditProcessor {
 	 * @exception EditException if the undo memento can not be added
 	 * 	to this processor
 	 */
-	public void add(UndoMemento undo) {
+	public void add(UndoEdit undo) {
 		Assert.isTrue(!getRoot().hasChildren());
-		fUndoMemento= undo;
+		fUndoProcessor= new TextEditProcessor(getDocument(), undo);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.text.edits.TextEditProcessor#canPerformEdits()
+	 */
 	public boolean canPerformEdits() {
-		if (fUndoMemento != null)
-			return fUndoMemento.canBeApplied(getDocument());
-		else 
-			return super.canPerformEdits();
+		if (fUndoProcessor != null)
+			return fUndoProcessor.canPerformEdits();
+		return super.canPerformEdits();
 	}
 	
 	/**
@@ -80,14 +101,17 @@ public class TextBufferEditor extends TextEditProcessor {
 	 * @return an object representing the undo of the executed <code>TextEdit</code>s
 	 * @exception CoreException if the edits cannot be executed
 	 */
-	public UndoMemento performEdits(IProgressMonitor pm) throws CoreException {
+	public UndoEdit performEdits(IProgressMonitor pm) throws CoreException {
 		try {
-			if (fUndoMemento != null) {
-				return fUndoMemento.apply(getDocument());
+			if (fUndoProcessor != null) {
+				return fUndoProcessor.performEdits();
 			} else {
 				return super.performEdits();
 			}
 		} catch (BadLocationException e) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
+				IStatus.ERROR, e.getMessage(), e));
+		} catch (MalformedTreeException e) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
 				IStatus.ERROR, e.getMessage(), e));
 		}

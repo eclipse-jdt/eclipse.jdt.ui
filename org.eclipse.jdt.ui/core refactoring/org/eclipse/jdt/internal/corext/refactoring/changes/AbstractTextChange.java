@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.UndoMemento;
+import org.eclipse.text.edits.UndoEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
@@ -149,7 +149,7 @@ public abstract class AbstractTextChange extends Change {
 	 * 	UNDO_CHANGE</code> or </code>REDO_CHANGE</code>
 	 * @return a change that can undo this change
 	 */
-	protected abstract IChange createReverseChange(UndoMemento edits , int changeKind);
+	protected abstract IChange createReverseChange(UndoEdit edits , int changeKind);
 	
 	/**
 	 * Returns <code>true</code> if this change is a reverse change. This is the case for an undo

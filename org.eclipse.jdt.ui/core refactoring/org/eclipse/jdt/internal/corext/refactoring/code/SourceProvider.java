@@ -21,7 +21,7 @@ import java.util.List;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.RangeMarker;
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.UndoMemento;
+import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -245,7 +245,7 @@ public class SourceProvider {
 		root.addChildren(markers);
 		TextBufferEditor editor= new TextBufferEditor(fBuffer);
 		editor.add(root);
-		UndoMemento undo= editor.performEdits(null);
+		UndoEdit undo= editor.performEdits(null);
 		String[] result= getBlocks(markers);
 		// It is faster to undo the changes than coping the buffer over and over again.
 		TextBufferEditor undoEditor= new TextBufferEditor(fBuffer);
