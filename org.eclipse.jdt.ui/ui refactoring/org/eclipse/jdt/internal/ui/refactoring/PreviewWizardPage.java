@@ -144,7 +144,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 * the given change.
 	 * @param change the new change.
 	 */
-	public void setChange(IChange change){
+	public void setChange(IChange change) {
 		if (fChange == change)
 			return;
 		
@@ -296,18 +296,37 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	
 	private void setTreeViewerInput() {
 		ChangeElement input;
-		if (fChange == null) {
+		IChange change= computeChangeInput();
+		if (change == null) {
 			input= null;
-		} else if (fChange instanceof ICompositeChange && !(fChange instanceof TextChange)) {
-			input= new DefaultChangeElement(null, fChange);
+		} else if (change instanceof ICompositeChange && !(change instanceof TextChange)) {
+			input= new DefaultChangeElement(null, change);
 		} else {
-			input= new DefaultChangeElement(null, new DummyRootNode(fChange));
+			input= new DefaultChangeElement(null, new DummyRootNode(change));
 		}
 		if (fTreeViewer != null) {
 			fTreeViewer.setInput(input);
 		}
 	}
 	
+	private IChange computeChangeInput() {
+		IChange result= fChange;
+		if (result == null)
+			return result;
+		while (true) {
+			if (result instanceof ICompositeChange) {
+				IChange[] children= ((ICompositeChange)result).getChildren();
+				if (children.length == 1) {
+					result= children[0];
+				} else {
+					return result;
+				}
+			} else {
+				return result;
+			}
+		}
+	}
+
 	private ICheckStateListener createCheckStateListener() {
 		return new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event){
