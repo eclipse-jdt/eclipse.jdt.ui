@@ -10,23 +10,29 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.internal.corext.Assert;
 
 /**
- * Abstract superclass of all type extenders. 
+ * Abstract superclass of all type extenders.
+ * 
+ * @since 3.0 
  */
-public abstract class TypeExtender implements ITypeExtender, IAdaptable {
+public abstract class PropertyTester implements IPropertyTester {
 	
-	private String fProperties;
+	private String fMethods;
+	private String fNamespace;
 	
-	/* package */ void initialize(String properties) {
-		fProperties= properties;
+	/* package */ void initialize(String namespace, String methods) {
+		Assert.isNotNull(methods);
+		Assert.isNotNull(namespace);
+		fMethods= methods;
+		fNamespace= namespace;
 	}
 	
 	/* (non-Javadoc)
 	 */
-	public final boolean handles(String property) {
-		return fProperties.indexOf("," + property + ",") != -1;  //$NON-NLS-1$//$NON-NLS-2$
+	public final boolean handles(String namespace, String method) {
+		return fNamespace.equals(namespace) && fMethods.indexOf("," + method + ",") != -1;  //$NON-NLS-1$//$NON-NLS-2$
 	}
 	
 	/* (non-Javadoc)
@@ -40,11 +46,10 @@ public abstract class TypeExtender implements ITypeExtender, IAdaptable {
 	public final boolean canLoad() {
 		return true;
 	}
-
-	/**
-	 * {@inheritDoc}
+	
+	/* (non-Javadoc)
 	 */
-	public Object getAdapter(Class adapter) {
-		return null;
+	public IPropertyTester load() {
+		return this;
 	}
 }

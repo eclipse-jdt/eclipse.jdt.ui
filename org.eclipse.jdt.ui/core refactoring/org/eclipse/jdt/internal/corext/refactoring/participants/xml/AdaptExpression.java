@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginDescriptor;
 
 public class AdaptExpression extends CompositeExpression {
 
-	public static final String NAME= "adapt"; //$NON-NLS-1$
-	
 	private static final String ATT_TYPE= "type"; //$NON-NLS-1$
 	
 	private String fTypeName;
@@ -25,7 +24,7 @@ public class AdaptExpression extends CompositeExpression {
 
 	private IPluginDescriptor fPluginDescriptor;
 	
-	public AdaptExpression(IConfigurationElement configElement) throws ExpressionException {
+	public AdaptExpression(IConfigurationElement configElement) throws CoreException {
 		fTypeName= configElement.getAttribute(ATT_TYPE);
 		Expressions.checkAttribute(ATT_TYPE, fTypeName);
 		fPluginDescriptor= configElement.getDeclaringExtension().getDeclaringPluginDescriptor();
@@ -34,12 +33,12 @@ public class AdaptExpression extends CompositeExpression {
 	/* (non-Javadoc)
 	 * @see Expression#evaluate(IVariablePool)
 	 */
-	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
+	public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
 		if (fTypeName == null)
-			return TestResult.FALSE;
-		Object var= pool.getDefaultVariable();
+			return EvaluationResult.FALSE;
+		Object var= context.getDefaultVariable();
 		if (!(var instanceof IAdaptable))
-			return TestResult.FALSE;
+			return EvaluationResult.FALSE;
 		
 		if (fType == null) {
 			ClassLoader loader= fPluginDescriptor.getPluginClassLoader();
@@ -47,12 +46,12 @@ public class AdaptExpression extends CompositeExpression {
 				fType= loader.loadClass(fTypeName);
 			} catch (ClassNotFoundException e) {
 				fTypeName= null;
-				return TestResult.FALSE;
+				return EvaluationResult.FALSE;
 			}
 		}
 		Object adapted= ((IAdaptable)var).getAdapter(fType);
 		if (adapted == null)
-			return TestResult.FALSE;
-		return evaluateAnd(new DefaultVariable(pool, adapted));
+			return EvaluationResult.FALSE;
+		return evaluateAnd(new DefaultVariable(context, adapted));
 	}
 }

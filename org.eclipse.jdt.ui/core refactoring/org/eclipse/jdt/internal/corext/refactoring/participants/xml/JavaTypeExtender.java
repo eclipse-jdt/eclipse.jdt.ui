@@ -17,37 +17,34 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
-public class JavaTypeExtender extends TypeExtender {
+public class JavaTypeExtender extends PropertyTester {
 
 	private static final String PROPERTY_HAS_MAIN_TYPE= "hasMainType"; //$NON-NLS-1$
 	private static final String IS_ANONYMOUES= "isAnonymous";  //$NON-NLS-1$
 	private static final String IS_LOCAL= "isLocal"; //$NON-NLS-1$
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
-	 */
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		IType type= (IType)receiver;
 		if (PROPERTY_HAS_MAIN_TYPE.equals(method)) { //$NON-NLS-1$
 			try {
-				return Boolean.valueOf(JavaModelUtil.hasMainMethod(type));
+				return JavaModelUtil.hasMainMethod(type);
 			} catch (JavaModelException e) {
-				return Boolean.FALSE;
+				return false;
 			}
 		} else if (IS_ANONYMOUES.equals(method)) {
 			try {
-				return Boolean.valueOf(type.isAnonymous());
+				return type.isAnonymous();
 			} catch (JavaModelException e) {
-				return Boolean.FALSE;
+				return false;
 			}
 		} else if (IS_LOCAL.equals(method)) {
 			try {
-				return Boolean.valueOf(type.isLocal());
+				return type.isLocal();
 			} catch (JavaModelException e) {
-				return Boolean.FALSE;
+				return false;
 			}
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 }

@@ -16,22 +16,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EnablementExpression;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationResult;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IElementHandler;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IVariablePool;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.StandardElementHandler;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionConverter;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionTagNames;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IEvaluationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ParticipantDescriptor {
 	
 	private IConfigurationElement fConfigurationElement;
-
-	private static final ExpressionParser EXPRESSION_PARSER= 
-		new ExpressionParser(new IElementHandler[] { StandardElementHandler.getInstance() }); 
 
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
@@ -65,21 +60,21 @@ public class ParticipantDescriptor {
 			"Syntactically correct rename participant element", null);
 	}
 	
-	public boolean matches(IVariablePool pool) throws CoreException {
-		IConfigurationElement[] elements= fConfigurationElement.getChildren(EnablementExpression.NAME);
+	public boolean matches(IEvaluationContext context) throws CoreException {
+		IConfigurationElement[] elements= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
 		if (elements.length == 0)
 			return false;
 		Assert.isTrue(elements.length == 1);
-		Expression exp= EXPRESSION_PARSER.parse(elements[0]);
-		return convert(exp.evaluate(pool));
+		Expression exp= ExpressionConverter.getDefault().perform(elements[0]);
+		return convert(exp.evaluate(context));
 	}
 
 	public IRefactoringParticipant createParticipant() throws CoreException {
 		return (IRefactoringParticipant)fConfigurationElement.createExecutableExtension(CLASS);
 	}
 	
-	private boolean convert(TestResult eval) {
-		if (eval == TestResult.FALSE)
+	private boolean convert(EvaluationResult eval) {
+		if (eval == EvaluationResult.FALSE)
 			return false;
 		return true;
 	}

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 public abstract class CompositeExpression extends Expression {
 	
 	private static final Expression[] EMPTY_ARRAY= new Expression[0]; 
@@ -35,29 +37,29 @@ public abstract class CompositeExpression extends Expression {
 		return (Expression[])fExpressions.toArray(new Expression[fExpressions.size()]);
 	}
 	
-	protected TestResult evaluateAnd(IVariablePool scope) throws ExpressionException {
+	protected EvaluationResult evaluateAnd(IEvaluationContext scope) throws CoreException {
 		if (fExpressions == null)
-			return TestResult.TRUE;
-		TestResult result= TestResult.TRUE;
+			return EvaluationResult.TRUE;
+		EvaluationResult result= EvaluationResult.TRUE;
 		for (Iterator iter= fExpressions.iterator(); iter.hasNext();) {
 			Expression expression= (Expression)iter.next();
 			result= result.and(expression.evaluate(scope));
 			// keep iterating even if we have a not loaded found. It can be
 			// that we find a false which will result in a better result.
-			if (result == TestResult.FALSE)
+			if (result == EvaluationResult.FALSE)
 				return result;
 		}
 		return result;
 	}
 	
-	protected TestResult evaluateOr(IVariablePool scope) throws ExpressionException {
+	protected EvaluationResult evaluateOr(IEvaluationContext scope) throws CoreException {
 		if (fExpressions == null)
-			return TestResult.TRUE;
-		TestResult result= TestResult.FALSE;
+			return EvaluationResult.TRUE;
+		EvaluationResult result= EvaluationResult.FALSE;
 		for (Iterator iter= fExpressions.iterator(); iter.hasNext();) {
 			Expression expression= (Expression)iter.next();
 			result= result.or(expression.evaluate(scope));
-			if (result == TestResult.TRUE)
+			if (result == EvaluationResult.TRUE)
 				return result;
 		}
 		return result;

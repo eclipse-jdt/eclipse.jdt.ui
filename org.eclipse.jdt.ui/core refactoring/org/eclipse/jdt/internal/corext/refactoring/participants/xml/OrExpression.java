@@ -10,12 +10,11 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.CoreException;
 
 public class OrExpression extends CompositeExpression { 
 
-	public static final Object NAME= "or"; //$NON-NLS-1$
-
-	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
-		return evaluateOr(pool);
+	public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
+		return evaluateOr(context);
 	}	
 }

@@ -12,43 +12,49 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-
-public class Method {
+public class Property {
 	
 	private Class fType;
+	private String fNamespace;
 	private String fName;
 	
-	private ITypeExtender fExtender;
+	private IPropertyTester fTester;
 
-	/* package */ Method(Class type, String name) {
+	/* package */ Property(Class type, String namespace, String name) {
 		Assert.isNotNull(type);
+		Assert.isNotNull(namespace);
 		Assert.isNotNull(name);
 		
 		fType= type;
+		fNamespace= namespace;
 		fName= name;
 	}
 	
-	/* package */ void setExtender(ITypeExtender extender) {
-		Assert.isNotNull(extender);
-		fExtender= extender;
+	/* package */ void setPropertyTester(IPropertyTester tester) {
+		Assert.isNotNull(tester);
+		fTester= tester;
 	}
 	
 	public boolean isLoaded() {
-		return fExtender.isLoaded();
+		return fTester.isLoaded();
+	}
+	
+	public boolean canLoad() {
+		return fTester.canLoad();
 	}
  	
-	public Object invoke(Object receiver, Object[] args) throws ExpressionException {
-		return fExtender.invoke(receiver, fName, args);
+	public boolean test(Object receiver, Object[] args, Object expectedValue) {
+		return fTester.test(receiver, fName, args, expectedValue);
 	}
 	
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Method))
+		if (!(obj instanceof Property))
 			return false;
-		Method other= (Method)obj;
-		return fType.equals(other.fType) && fName.equals(other.fName);
+		Property other= (Property)obj;
+		return fType.equals(other.fType) && fNamespace.equals(other.fNamespace) && fName.equals(other.fName);
 	}
 	
 	public int hashCode() {
-		return (fType.hashCode() << 16) | fName.hashCode();
+		return (fType.hashCode() << 16) | fNamespace.hashCode() << 8 | fName.hashCode();
 	}
 }

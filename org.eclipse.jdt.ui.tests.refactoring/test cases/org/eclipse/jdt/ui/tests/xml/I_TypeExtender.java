@@ -11,16 +11,15 @@
 package org.eclipse.jdt.ui.tests.xml;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtender;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.PropertyTester;
 
+public class I_TypeExtender extends PropertyTester {
 
-public class I_TypeExtender extends TypeExtender {
-
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		if ("ordering".equals(method)) {
-			return "I";
+			return "I".equals(expectedValue);
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 }

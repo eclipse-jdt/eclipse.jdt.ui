@@ -20,7 +20,7 @@ public class CopyExtensionManager {
 	private static ExtensionManager fgInstance= new ExtensionManager("Copy", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
 	
 	public static ICopyProcessor getProcessor(Object[] elements) throws CoreException {
-		return (ICopyProcessor)fgInstance.getProcessor(elements, fgInstance.createProcessorPool(elements));
+		return (ICopyProcessor)fgInstance.getProcessor(elements, fgInstance.createProcessorEvaluationContext(elements));
 	}
 	
 	public static ICopyParticipant[] getParticipants(IRefactoringProcessor processor) throws CoreException {
@@ -29,7 +29,7 @@ public class CopyExtensionManager {
 
 	public static ICopyParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
 		IRefactoringParticipant[] participants= fgInstance.getParticipants(processor, elements, 
-			fgInstance.createParticipantPool(elements, processor), new SharableParticipants());
+			fgInstance.createParticipantEvaluationContext(elements, processor), new SharableParticipants());
 		ICopyParticipant[] result= new ICopyParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);
 		return result;

@@ -17,17 +17,17 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public class FolderExtender extends TypeExtender {
+public class FolderExtender extends PropertyTester {
 
 	private static final String PROPERTY_IS_SOURCE_FOLDER= "isSourceFolder"; //$NON-NLS-1$
 	
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		IFolder folder= (IFolder)receiver;
 		if (PROPERTY_IS_SOURCE_FOLDER.equals(method)) {
 			IJavaElement jElement= JavaCore.create(folder);
-			return Boolean.valueOf(jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			return jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT;
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 }

@@ -10,63 +10,57 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.CoreException;
 
 /**
- * Abstract base class of all expression provided by the common
+ * Abstract base class for all expressions provided by the common
  * expression language.
  * <p>
  * An expression is evaluated by calling {@link #evaluate(IVariablePool)}.
  * </p>
  * <p>
- * This class may be subclassed by other plug-ins to provide their
- * own specific expressions.
+ * This class may be subclassed to provide specific expressions.
  * </p>
  * 
  * @since 3.0
  */
 public abstract class Expression {
 	
+	/**
+	 * Name of the value attribute of an expression (value is 
+	 * <code>value</code>).
+	 */ 
 	protected static final String ATT_VALUE= "value"; //$NON-NLS-1$
 	
 	/**
-	 * The expression corresponding to {@link TestResult#TRUE}.
+	 * The expression corresponding to {@link EvaluationResult#TRUE}.
 	 */
 	public static final Expression TRUE= new Expression() {
-		public TestResult evaluate(IVariablePool pool) {
-			return TestResult.TRUE;
+		public EvaluationResult evaluate(IEvaluationContext context) {
+			return EvaluationResult.TRUE;
 		}	
 	};
 	
 	/**
-	 * The expression corresponding to {@link TestResult#FALSE}.
+	 * The expression corresponding to {@link EvaluationResult#FALSE}.
 	 */
 	public static final Expression FALSE= new Expression() {
-		public TestResult evaluate(IVariablePool pool) {
-			return TestResult.FALSE;
+		public EvaluationResult evaluate(IEvaluationContext context) {
+			return EvaluationResult.FALSE;
 		}	
 	};
 	
-	public abstract TestResult evaluate(IVariablePool pool) throws ExpressionException;
-
+	/**
+	 * Evalutes this expression. 
+	 * 
+	 * @param context a evaluation context providing information like variable,
+	 *  namespaces, etc. necessary to evaluate this expression
+	 * 
+	 * @return the result of the expression evaluation
+	 * 
+	 * @throws CoreException if the evaluation failed. The concrete reason is 
+	 *  defined by the subclass implementing this method
+	 */
+	public abstract EvaluationResult evaluate(IEvaluationContext context) throws CoreException;
 	
-	protected static boolean isInstanceOf(Object element, String type) {
-		// null isn't an instanceof of anything.
-		if (element == null)
-			return false;
-		return isSubtype(element.getClass(), type); 
-	}
-	
-	private static boolean isSubtype(Class clazz, String type) {
-		if (clazz.getName().equals(type))
-			return true;
-		Class superClass= clazz.getSuperclass();
-		if (superClass != null && isSubtype(superClass, type))
-			return true;
-		Class[] interfaces= clazz.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			if (isSubtype(interfaces[i], type))
-				return true;
-		} 
-		return false;
-	}		
 }

@@ -22,16 +22,16 @@ public class RenameExtensionManager {
 	public static boolean hasProcessor(Object[] elements) throws CoreException {
 		if (elements.length == 0)
 			return false;
-		return fgInstance.hasProcessor(fgInstance.createProcessorPool(elements));
+		return fgInstance.hasProcessor(fgInstance.createProcessorEvaluationContext(elements));
 	}
 	
 	public static IRenameProcessor getProcessor(Object[] elements) throws CoreException {
-		return (IRenameProcessor)fgInstance.getProcessor(elements, fgInstance.createProcessorPool(elements));
+		return (IRenameProcessor)fgInstance.getProcessor(elements, fgInstance.createProcessorEvaluationContext(elements));
 	}
 
 	public static IRenameParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
 		IRefactoringParticipant[] participants= fgInstance.getParticipants(
-			processor, elements, fgInstance.createParticipantPool(elements, processor), 
+			processor, elements, fgInstance.createParticipantEvaluationContext(elements, processor), 
 			new SharableParticipants());
 		IRenameParticipant[] result= new IRenameParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);

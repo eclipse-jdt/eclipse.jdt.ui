@@ -40,13 +40,13 @@
 	  	<enablement>
 	  	  <with variable="affectedProjects">
 	  	    <iterate>
-	  	      <test property="projectNature" value="org.eclipse.jdt.core.javanature"/>
+	  	      <test property="org.eclipse.jdt.ui.projectNature" value="org.eclipse.jdt.core.javanature"/>
 	  	    </iterate>
 	  	  </with>
 	  	  <with variable="selection">
 	  	    <count value="1"/>
 	  	    <iterate>
-		  	  <test property="instanceof" value="org.eclipse.jdt.core.IType"/>
+		  	  <instanceof value="org.eclipse.jdt.core.IType"/>
 	  	    </iterate>
 	  	  </with>
 	  	</enablement>

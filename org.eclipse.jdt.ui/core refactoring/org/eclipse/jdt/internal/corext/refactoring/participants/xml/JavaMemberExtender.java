@@ -17,23 +17,23 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 
-public class JavaMemberExtender extends TypeExtender {
+public class JavaMemberExtender extends PropertyTester {
 
 	private static final String PROPERTY_IS_STATIC= "isStatic"; //$NON-NLS-1$
 	private static final String PROPERTY_IS_PRIVATE= "isPrivate"; //$NON-NLS-1$
 	
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		IMember member= (IMember)receiver;
 		try {
 			if (PROPERTY_IS_STATIC.equals(method)) {
-				return Boolean.valueOf(JdtFlags.isStatic(member));
+				return JdtFlags.isStatic(member);
 			} else if (PROPERTY_IS_PRIVATE.equals(method)) {
-				return Boolean.valueOf(JdtFlags.isPrivate(member));
+				return JdtFlags.isPrivate(member);
 			}
 		} catch (JavaModelException e) {
-			return Boolean.FALSE;
+			return false;
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 }

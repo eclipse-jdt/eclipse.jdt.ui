@@ -10,16 +10,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 public class EnablementExpression extends CompositeExpression {
 
-	public static final String NAME= "enablement"; //$NON-NLS-1$
-	
 	public EnablementExpression(IConfigurationElement configElement) {
 	}
 	
-	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
-		return evaluateAnd(pool);
+	public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
+		long start= 0;
+		if (Expressions.TRACING)
+			start= System.currentTimeMillis();
+		EvaluationResult result= evaluateAnd(context);
+		if (Expressions.TRACING) {
+			System.out.println("[Enablement Expression] - evaluation time: " + //$NON-NLS-1$
+				(System.currentTimeMillis() - start) + " ms."); //$NON-NLS-1$
+		}
+		return result;
 	}
 }

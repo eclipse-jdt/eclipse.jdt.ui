@@ -22,24 +22,22 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public class IterateExpression extends CompositeExpression {
 	
-	public static final String NAME= "iterate";  //$NON-NLS-1$
-	
-	private static class IteratePool implements IVariablePool {
+	private static class IteratePool implements IEvaluationContext {
 		
 		private Iterator fIterator;
 		private Object fDefaultVariable;
-		private IVariablePool fParent;
+		private IEvaluationContext fParent;
 		
-		public IteratePool(IVariablePool parent, Iterator iterator) {
+		public IteratePool(IEvaluationContext parent, Iterator iterator) {
 			Assert.isNotNull(parent);
 			Assert.isNotNull(iterator);
 			fParent= parent;
 			fIterator= iterator;
 		}
-		public IVariablePool getParent() {
+		public IEvaluationContext getParent() {
 			return fParent;
 		}
-		public IVariablePool getRoot() {
+		public IEvaluationContext getRoot() {
 			return fParent.getRoot();
 		}
 		public Object getDefaultVariable() {
@@ -89,31 +87,31 @@ public class IterateExpression extends CompositeExpression {
 	/* (non-Javadoc)
 	 * @see Expression#evaluate(IVariablePool)
 	 */
-	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
-		Object var= pool.getDefaultVariable();
+	public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
+		Object var= context.getDefaultVariable();
 		Expressions.checkCollection(var, this);
 		Collection col= (Collection)var;
 		switch (col.size()) {
 			case 0:
-				return fOperator == AND ? TestResult.TRUE : TestResult.FALSE;
+				return fOperator == AND ? EvaluationResult.TRUE : EvaluationResult.FALSE;
 			case 1:
 				if (col instanceof List)
-					return evaluateAnd(new DefaultVariable(pool, ((List)col).get(0)));
+					return evaluateAnd(new DefaultVariable(context, ((List)col).get(0)));
 				// fall through
 			default:
-				IteratePool iter= new IteratePool(pool, col.iterator());
-				TestResult result= fOperator == AND ? TestResult.TRUE : TestResult.FALSE;
+				IteratePool iter= new IteratePool(context, col.iterator());
+				EvaluationResult result= fOperator == AND ? EvaluationResult.TRUE : EvaluationResult.FALSE;
 				while (iter.hasNext()) {
 					iter.next();
 					switch(fOperator) {
 						case OR:
 							result= result.or(evaluateAnd(iter));
-							if (result == TestResult.TRUE)
+							if (result == EvaluationResult.TRUE)
 								return result;
 							break;
 						case AND:
 							result= result.and(evaluateAnd(iter));
-							if (result != TestResult.TRUE)
+							if (result != EvaluationResult.TRUE)
 								return result;
 							break;
 					}

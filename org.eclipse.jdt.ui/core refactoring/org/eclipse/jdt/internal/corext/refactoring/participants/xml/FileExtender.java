@@ -17,20 +17,17 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public class FileExtender extends TypeExtender {
+public class FileExtender extends PropertyTester {
 
 	private static final String PROPERTY_IS_CU= "isCompilationUnit"; //$NON-NLS-1$
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
-	 */
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		IFile file= (IFile)receiver;
 		if (PROPERTY_IS_CU.equals(method)) {
 			IJavaElement jElement= JavaCore.create(file);
-			return Boolean.valueOf(jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.COMPILATION_UNIT);
+			return jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.COMPILATION_UNIT;
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 }

@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 
-public class ResourceExtender extends TypeExtender {
+public class ResourceExtender extends PropertyTester {
 
 	private static final String PROPERTY_MATCHES_PATTERN= "matchesPattern";	 //$NON-NLS-1$
 	private static final String PROJECT_NATURE = "projectNature";	 //$NON-NLS-1$
@@ -29,24 +29,24 @@ public class ResourceExtender extends TypeExtender {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
 	 */
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		IResource resource= (IResource)receiver;
 		if (PROPERTY_MATCHES_PATTERN.equals(method)) { //$NON-NLS-1$
 			String fileName= resource.getName();
-			StringMatcher matcher= new StringMatcher((String)args[0], false, false);
-			return Boolean.valueOf(matcher.match(fileName));
+			StringMatcher matcher= new StringMatcher((String)expectedValue, false, false);
+			return matcher.match(fileName);
 		} else if (PROJECT_NATURE.equals(method)) {
 			try {
 				IProject proj = resource.getProject();
-				return Boolean.valueOf(proj.isAccessible() && proj.hasNature((String)args[0]));
+				return proj.isAccessible() && proj.hasNature((String)expectedValue);
 			} catch (CoreException e) {
-				return Boolean.FALSE;		
+				return false;		
 			}
 		} else if (CAN_DELETE.equals(method)) {
-			return Boolean.valueOf(canDelete(resource));
+			return canDelete(resource);
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 	
 	private boolean canDelete(IResource resource) {

@@ -21,7 +21,7 @@ public class MoveExtensionManager {
 	
 	public static IMoveProcessor getProcessor(Object[] elements) throws CoreException {
 		return (IMoveProcessor)fgInstance.getProcessor(
-			elements, fgInstance.createProcessorPool(elements));
+			elements, fgInstance.createProcessorEvaluationContext(elements));
 	}
 	
 	public static IMoveParticipant[] getParticipants(IRefactoringProcessor processor) throws CoreException {
@@ -30,7 +30,7 @@ public class MoveExtensionManager {
 
 	public static IMoveParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
 		IRefactoringParticipant[] participants= fgInstance.getParticipants(processor, elements, 
-			fgInstance.createParticipantPool(elements, processor), new SharableParticipants());
+			fgInstance.createParticipantEvaluationContext(elements, processor), new SharableParticipants());
 		IMoveParticipant[] result= new IMoveParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);
 		return result;

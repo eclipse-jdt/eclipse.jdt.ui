@@ -10,22 +10,20 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.internal.corext.Assert;
 
 public class NotExpression extends Expression {
 
 	private Expression fExpression;
 
-	public static final String NAME= "not"; //$NON-NLS-1$
-
-	
 	public NotExpression(Expression expression) {
 		Assert.isNotNull(expression);
 		fExpression= expression;
 	}
 	
-	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
-		return fExpression.evaluate(pool).not();
+	public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
+		return fExpression.evaluate(context).not();
 	}
 }

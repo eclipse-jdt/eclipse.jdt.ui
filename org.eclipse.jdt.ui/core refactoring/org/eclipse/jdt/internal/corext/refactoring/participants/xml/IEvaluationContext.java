@@ -13,20 +13,19 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- * A variable pool is used to manage a set of objects needed during
- * XML expression evaluation. A pool has a parent pool, can manage
- * a set of named variables and had a default variable. Default variable 
+ * A evaluation context is used to manage a set of objects needed during
+ * XML expression evaluation. A context has a parent context, can manage
+ * a set of named variables and has a default variable. The default variable 
  * is used during XML expression evaluation if no explicit variable is 
  * referenced.
  * <p>
  * This interface is not intended to be implemented by clients. Clients
- * are allowed to instantiate <code>VariablePool</code> and <code>
- * DefaultVariable</code>
+ * are allowed to instantiate and subclass <code>EvaluationContext</code>. 
  * </p>
  * 
  * @since 3.0
  */
-public interface IVariablePool {
+public interface IEvaluationContext {
 
 	/** Variable name to denote a plug-in descriptor */
 	public static final String PLUGIN_DESCRIPTOR= "pluginDescriptor";  //$NON-NLS-1$
@@ -38,19 +37,19 @@ public interface IVariablePool {
 	public static final String SYSTEM= "System";  //$NON-NLS-1$
 	
 	/**
-	 * Returns the parent pool or <code>null</code> if no
-	 * this is the root of the pool hierarchy.
+	 * Returns the parent context or <code>null</code> if 
+	 * this is the root of the evaluation context hierarchy.
 	 * 
-	 * @return the parent variable pool or <code>null</code>
+	 * @return the parent evaluation context or <code>null</code>
 	 */
-	public IVariablePool getParent();
+	public IEvaluationContext getParent();
 	
 	/**
-	 * Returns the root variable pool.
+	 * Returns the root evaluation context.
 	 * 
-	 * @return the root variable pool.
+	 * @return the root evaluation context
 	 */
-	public IVariablePool getRoot();
+	public IEvaluationContext getRoot();
 	
 	/**
 	 * Returns the default variable.
@@ -61,7 +60,7 @@ public interface IVariablePool {
 	public Object getDefaultVariable();
 	
 	/**
-	 * Adds a new named variable to this pool. If a variable
+	 * Adds a new named variable to this context. If a variable
 	 * with the name already exists the new one overrides the
 	 * existing one.
 	 * 
@@ -72,7 +71,7 @@ public interface IVariablePool {
 	
 	/**
 	 * Removes the variable managed under the given name
-	 * from this pool.
+	 * from this evaluation context.
 	 * 
 	 * @param name the variable's name
 	 * @return the currently stored value or <code>null</code> if

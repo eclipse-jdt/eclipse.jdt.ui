@@ -14,18 +14,22 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginDescriptor;
 
-/* package */ class TypeExtenderDescriptor implements ITypeExtender {
+import org.eclipse.jdt.internal.corext.Assert;
+
+/* package */ class PropertyTesterDescriptor implements IPropertyTester {
 	
 	private String fProperties;
+	private String fNamespace;
 	private IConfigurationElement fConfigElement;
 	
-	private static final String METHODS= "methods"; //$NON-NLS-1$
+	private static final String PROPERTIES= "properties"; //$NON-NLS-1$
+	private static final String NAMESPACE= "namespace"; //$NON-NLS-1$
 	private static final String CLASS= "class";  //$NON-NLS-1$
 	
-	public TypeExtenderDescriptor(IConfigurationElement element) {
+	public PropertyTesterDescriptor(IConfigurationElement element) {
 		fConfigElement= element;
 		StringBuffer buffer= new StringBuffer(","); //$NON-NLS-1$
-		String properties= element.getAttribute(METHODS);
+		String properties= element.getAttribute(PROPERTIES);
 		for (int i= 0; i < properties.length(); i++) {
 			char ch= properties.charAt(i);
 			if (!Character.isWhitespace(ch))
@@ -33,14 +37,19 @@ import org.eclipse.core.runtime.IPluginDescriptor;
 		}
 		buffer.append(',');
 		fProperties= buffer.toString();
+		fNamespace= fConfigElement.getAttribute(NAMESPACE);
 	}
 	
 	public String getProperties() {
 		return fProperties;
 	}
 	
-	public boolean handles(String property) {
-		return fProperties.indexOf("," + property + ",") != -1;  //$NON-NLS-1$//$NON-NLS-2$
+	public String getNamespace() {
+		return fNamespace;
+	}
+	
+	public boolean handles(String namespace, String property) {
+		return fNamespace.equals(namespace) && fProperties.indexOf("," + property + ",") != -1;  //$NON-NLS-1$//$NON-NLS-2$
 	}
 	
 	public boolean isLoaded() {
@@ -52,14 +61,12 @@ import org.eclipse.core.runtime.IPluginDescriptor;
 		return plugin.isPluginActivated();
 	}
 	
-	public Object invoke(Object receiver, String method, Object[] args) throws ExpressionException {
-		throw new ExpressionException(ExpressionException.TYPE_EXTENDER_PLUGIN_NOT_LOADED,
-			ExpressionMessages.getFormattedString(
-				"TypeExtender.plugin.not_loaded",  //$NON-NLS-1$
-				fConfigElement.getDeclaringExtension().getDeclaringPluginDescriptor().getUniqueIdentifier()));
+	public IPropertyTester load() throws CoreException {
+		return (PropertyTester)fConfigElement.createExecutableExtension(CLASS);
 	}
 	
-	public TypeExtender create() throws CoreException {
-		return (TypeExtender)fConfigElement.createExecutableExtension(CLASS);
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
+		Assert.isTrue(false, "Method should never be called"); //$NON-NLS-1$
+		return false;
 	}
 }

@@ -232,13 +232,14 @@
             id="org.eclipse.jdt.junit.JUnitQuickFixProcessor">
       </quickFixProcessor>
    </extension>
-   <extension point="org.eclipse.jdt.ui.typeExtenders">
-      <typeExtender
-            methods="isTest"
+   <extension point="org.eclipse.jdt.ui.propertyTesters">
+      <propertyTester
+      		namespace="org.eclipse.jdt.junit"
+            properties="isTest"
             type="org.eclipse.jdt.core.IType"
             class="org.eclipse.jdt.internal.junit.ui.JavaTypeExtender"
             id="org.eclipse.jdt.junit.ITypeExtender">
-      </typeExtender>
+      </propertyTester>
    </extension>
    <extension point="org.eclipse.jdt.ui.renameParticipants">
       <renameParticipant
@@ -247,14 +248,14 @@
          <enablement>
            <with variable="affectedProjects">
              <iterate>
-               <test property="projectNature" value="org.eclipse.jdt.core.javanature"/>
+               <test property="org.eclipse.jdt.ui.projectNature" value="org.eclipse.jdt.core.javanature"/>
              </iterate>
            </with>
            <with variable="selection">
              <count value="1"/>
              <iterate>
                <instanceof value="org.eclipse.jdt.core.IType"/>
-               <test property="isTest"/>
+               <test property="org.eclipse.jdt.junit.isTest"/>
              </iterate>
            </with>
          </enablement>

@@ -26,8 +26,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IVariablePool;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.VariablePool;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IEvaluationContext;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -61,21 +61,21 @@ public class ExtensionManager {
 		init();
 	}
 	
-	public IVariablePool createProcessorPool(Object[] elements) {
+	public IEvaluationContext createProcessorEvaluationContext(Object[] elements) {
 		Collection col= Arrays.asList(elements);
-		IVariablePool result= new VariablePool(null, col);
+		IEvaluationContext result= new EvaluationContext(null, col);
 		result.addVariable("selection", col); //$NON-NLS-1$
 		return result;
 	}
 	
-	public boolean hasProcessor(IVariablePool pool) throws CoreException {
+	public boolean hasProcessor(IEvaluationContext context) throws CoreException {
 		// check last recently used processors
 		long start= 0;
 		if (EXIST_TRACING)
 			start= System.currentTimeMillis();
 		for (Iterator iter= fLRUProcessors.iterator(); iter.hasNext();) {
 			ProcessorDescriptor descriptor= (ProcessorDescriptor)iter.next();
-			if (descriptor.matches(pool)) {
+			if (descriptor.matches(context)) {
 				if (fLRUProcessors.getFirst() != descriptor) {
 					iter.remove();
 					fLRUProcessors.addFirst(descriptor);
@@ -88,7 +88,7 @@ public class ExtensionManager {
 		// now check normal list of processors
 		for (Iterator iter= fProcessors.iterator(); iter.hasNext();) {
 			ProcessorDescriptor descriptor= (ProcessorDescriptor)iter.next();
-			if (descriptor.matches(pool)) {
+			if (descriptor.matches(context)) {
 				if (fLRUProcessors.size() >= MAX_ENTRIES) {
 					fLRUProcessors.removeLast();
 				}
@@ -109,11 +109,11 @@ public class ExtensionManager {
 			(System.currentTimeMillis() - start) + " ms"); //$NON-NLS-1$
 	}
 	
-	public IRefactoringProcessor getProcessor(Object[] elements, IVariablePool pool) throws CoreException {
+	public IRefactoringProcessor getProcessor(Object[] elements, IEvaluationContext context) throws CoreException {
 		List selected= new ArrayList();
 		for (Iterator p= fProcessors.iterator(); p.hasNext();) {
 			ProcessorDescriptor ce= (ProcessorDescriptor)p.next();
-			if (ce.matches(pool)) {
+			if (ce.matches(context)) {
 				selected.add(ce);
 			}
 		}
@@ -155,15 +155,15 @@ public class ExtensionManager {
 		return null;
 	}
 	
-	public IVariablePool createParticipantPool(Object elements[], IRefactoringProcessor processor) throws CoreException {
-		IVariablePool result= createProcessorPool(elements);
+	public IEvaluationContext createParticipantEvaluationContext(Object elements[], IRefactoringProcessor processor) throws CoreException {
+		IEvaluationContext result= createProcessorEvaluationContext(elements);
 		result.addVariable(
 			"affectedProjects", 
 			Arrays.asList(processor.getAffectedProjects())); //$NON-NLS-1$
 		return result;
 	}
 	
-	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements, IVariablePool pool, SharableParticipants shared) throws CoreException {
+	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements, IEvaluationContext pool, SharableParticipants shared) throws CoreException {
 		List result= new ArrayList();
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];

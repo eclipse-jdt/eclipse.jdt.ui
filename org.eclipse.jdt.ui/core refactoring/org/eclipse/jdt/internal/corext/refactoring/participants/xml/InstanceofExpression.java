@@ -14,8 +14,6 @@ import org.eclipse.core.runtime.IConfigurationElement;
 
 public class InstanceofExpression extends Expression {
 
-	public static final String NAME= "instanceof"; //$NON-NLS-1$
-	
 	private String fValue;
 	
 	public InstanceofExpression(IConfigurationElement element) {
@@ -25,9 +23,9 @@ public class InstanceofExpression extends Expression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public TestResult evaluate(IVariablePool pool) {
-		Object element= pool.getDefaultVariable();
-		return TestResult.valueOf(isInstanceOf(element, fValue));
+	public EvaluationResult evaluate(IEvaluationContext context) {
+		Object element= context.getDefaultVariable();
+		return EvaluationResult.valueOf(Expressions.isInstanceOf(element, fValue));
 	}
 	
 	//---- Debugging ---------------------------------------------------

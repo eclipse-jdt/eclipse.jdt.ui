@@ -10,12 +10,11 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.CoreException;
 
 public class AndExpression extends CompositeExpression { 
 
-	public static final Object NAME= "and"; //$NON-NLS-1$
-
-	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
-		return evaluateAnd(pool);
+	public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
+		return evaluateAnd(context);
 	}	
 }

@@ -11,19 +11,18 @@
 package org.eclipse.jdt.ui.tests.xml;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtender;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.PropertyTester;
 
+public class A_TypeExtender2 extends PropertyTester {
 
-public class A_TypeExtender2 extends TypeExtender {
-
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		if ("chaining".equals(method)) {
-			return "A2";
+			return "A2".equals(expectedValue);
 		} else if ("chainOrdering".equals(method)) {
-			return "A2";
+			return "A2".equals(expectedValue);
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 
 }

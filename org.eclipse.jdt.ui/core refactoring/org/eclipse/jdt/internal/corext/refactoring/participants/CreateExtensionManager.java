@@ -30,7 +30,7 @@ public class CreateExtensionManager {
 
 	public static ICreateParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
 		IRefactoringParticipant[] participants= fgInstance.getParticipants(processor, elements, 
-			fgInstance.createParticipantPool(elements, processor), new SharableParticipants());
+			fgInstance.createParticipantEvaluationContext(elements, processor), new SharableParticipants());
 		ICreateParticipant[] result= new ICreateParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);
 		return result;

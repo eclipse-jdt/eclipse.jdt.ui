@@ -12,13 +12,12 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import java.util.Collection;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 
 public class CountExpression extends Expression {
 
-	public static final String NAME= "count"; //$NON-NLS-1$
-	
 	private static final int ANY_NUMBER=	5;
 	private static final int EXACT=			4;
 	private static final int ONE_OR_MORE=	3;
@@ -51,23 +50,23 @@ public class CountExpression extends Expression {
 		}
 	}
 	
-	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
-		Object var= pool.getDefaultVariable();
+	public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
+		Object var= context.getDefaultVariable();
 		Expressions.checkCollection(var, this);
 		Collection collection= (Collection)var;
 		int size= collection.size();
 		switch (fMode) {
 			case UNKNOWN:
-				return TestResult.FALSE;
+				return EvaluationResult.FALSE;
 			case NONE:
-				return TestResult.valueOf(size == 0);
+				return EvaluationResult.valueOf(size == 0);
 			case ONE_OR_MORE:
-				return TestResult.valueOf(size >= 1);
+				return EvaluationResult.valueOf(size >= 1);
 			case EXACT:
-				return TestResult.valueOf(fSize == size);
+				return EvaluationResult.valueOf(fSize == size);
 			case ANY_NUMBER:
-				return TestResult.TRUE;
+				return EvaluationResult.TRUE;
 		}
-		return TestResult.FALSE;
+		return EvaluationResult.FALSE;
 	}
 }

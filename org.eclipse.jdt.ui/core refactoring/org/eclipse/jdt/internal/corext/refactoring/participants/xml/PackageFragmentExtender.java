@@ -14,19 +14,16 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public class PackageFragmentExtender extends TypeExtender {
+public class PackageFragmentExtender extends PropertyTester {
 
 	private static final String IS_DEFAULT_PACKAGE= "isDefaultPackage"; //$NON-NLS-1$
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
-	 */
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		IPackageFragment fragement= (IPackageFragment)receiver;
 		if (IS_DEFAULT_PACKAGE.equals(method)) { 
-			return Boolean.valueOf(fragement.isDefaultPackage());
+			return fragement.isDefaultPackage();
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 }

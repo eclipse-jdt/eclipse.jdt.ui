@@ -15,11 +15,11 @@ import org.eclipse.core.runtime.IConfigurationElement;
 
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EnablementExpression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.VariablePool;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionConverter;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationContext;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionTagNames;
 
 public abstract class AbstractDescriptor {
 
@@ -40,7 +40,7 @@ public abstract class AbstractDescriptor {
 	
 	public boolean matches(Object element) throws CoreException {
 		Expression exp= getExpression();
-		if (exp.evaluate(new VariablePool(null, element)) == TestResult.FALSE)
+		if (exp.evaluate(new EvaluationContext(null, element)) == EvaluationResult.FALSE)
 			return false;
 		return true;
 	}
@@ -56,11 +56,11 @@ public abstract class AbstractDescriptor {
 	}
 		
 	protected Expression createExpression(IConfigurationElement element) throws CoreException {
-		IConfigurationElement[] children= element.getChildren(EnablementExpression.NAME);
+		IConfigurationElement[] children= element.getChildren(ExpressionTagNames.ENABLEMENT);
 		if (children.length == 0)
 			return Expression.FALSE;
 		// TODO we should add some sort of syntax check and throw an core exception in this case
 		Assert.isTrue(children.length == 1);
-		return ExpressionParser.getStandard().parse(children[0]);
+		return ExpressionConverter.getDefault().perform(children[0]);
 	} 
 }

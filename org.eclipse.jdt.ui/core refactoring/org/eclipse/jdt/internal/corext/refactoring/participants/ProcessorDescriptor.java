@@ -14,18 +14,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EnablementExpression;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationResult;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IElementHandler;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IVariablePool;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.StandardElementHandler;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionConverter;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionTagNames;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IEvaluationContext;
 
 public class ProcessorDescriptor {
 	
 	private IConfigurationElement fConfigurationElement;
-	private static final ExpressionParser PARSER= new ExpressionParser(new IElementHandler[] { StandardElementHandler.getInstance() }); 
 
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String OVERRIDE= "override"; //$NON-NLS-1$
@@ -47,13 +44,13 @@ public class ProcessorDescriptor {
 		return fConfigurationElement.getAttribute(OVERRIDE);
 	}
 
-	public boolean matches(IVariablePool pool) throws CoreException {
-		Assert.isNotNull(pool);
-		IConfigurationElement[] configElements= fConfigurationElement.getChildren(EnablementExpression.NAME);
+	public boolean matches(IEvaluationContext context) throws CoreException {
+		Assert.isNotNull(context);
+		IConfigurationElement[] configElements= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
 		IConfigurationElement enablement= configElements.length > 0 ? configElements[0] : null; 
 		if (enablement != null) {
-			Expression exp= PARSER.parse(enablement);
-			return (convert(exp.evaluate(pool)));
+			Expression exp= ExpressionConverter.getDefault().perform(enablement);
+			return (convert(exp.evaluate(context)));
 		}
 		return false;
 	}
@@ -62,8 +59,8 @@ public class ProcessorDescriptor {
 		return (IRefactoringProcessor)fConfigurationElement.createExecutableExtension(CLASS);
 	}
 	
-	private boolean convert(TestResult eval) {
-		if (eval == TestResult.FALSE)
+	private boolean convert(EvaluationResult eval) {
+		if (eval == EvaluationResult.FALSE)
 			return false;
 		return true;
 	}

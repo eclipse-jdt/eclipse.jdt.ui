@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 /**
- * A special exception thrown when an error occurrs while evaluation
- * an expression tree.
+ * Represents the outcome of an expression evaluation. Status objects are
+ * used inside {@link org.eclipse.core.runtime.CoreException} objects to 
+ * indicate what went wrong.
  * 
- * @see Expression#evaluate
+ * @see org.eclipse.core.runtime.CoreException
  * 
  * @since 3.0
  */
-public class ExpressionException extends CoreException {
+public class ExpressionStatus extends Status {
 	
 	/** Error code indicating that the variable in focus in not a collection */
 	public static final int VARIABLE_IS_NOT_A_COLLECTION= 3;
@@ -51,17 +51,31 @@ public class ExpressionException extends CoreException {
 	/** Error indicating that a property referenced in a test expression can't be resolved */
 	public static final int TYPE_EXTENDER_UNKOWN_METHOD= 201;
 	
+	/** Error code indicating that the implementation class of a type extender is not of type TypeExtender */
+	public static final int TYPE_EXTENDER_INCORRECT_TYPE= 202;
+	
 	/** Error indicating that the value returned from a type extender isn't of type boolean */
-	public static final int TEST_EXPRESSION_NOT_A_BOOLEAN= 202;
+	public static final int TEST_EXPRESSION_NOT_A_BOOLEAN= 203;
 	
 	
 	/**
-	 * Creates a new evaluation exception.
+	 * Creates a new expression status.
 	 * 
-	 * @param errorCode the exception's error code
+	 * @param errorCode the error code of the status
 	 * @param message a human-readable message, localized to the current locale
 	 */
-	public ExpressionException(int errorCode, String message) {
-		super(new Status(IStatus.ERROR, ExpressionPlugin.getPluginId(), errorCode, message, null));
+	public ExpressionStatus(int errorCode, String message) {
+		this(errorCode, message, null);
 	}
+	
+	/**
+	 * Creates a new expression status.
+	 * 
+	 * @param errorCode the error code of the status
+	 * @param message a human-readable message, localized to the current locale
+	 * @param exception a low-level exception, or <code>null</code> if not applicable 
+	 */
+	public ExpressionStatus(int errorCode, String message, Throwable exception) {
+		super(IStatus.ERROR, ExpressionPlugin.getPluginId(), errorCode, message, exception);
+	}	
 }

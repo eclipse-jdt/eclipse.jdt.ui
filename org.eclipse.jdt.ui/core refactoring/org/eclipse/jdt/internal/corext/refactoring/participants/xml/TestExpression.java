@@ -10,143 +10,47 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
 public class TestExpression extends Expression {
 
+	private String fNamespace;
 	private String fProperty;
 	private Object[] fArgs;
+	private Object fExpectedValue;
 	
-	public static final String NAME= "test"; //$NON-NLS-1$
 	private static final String ATT_PROPERTY= "property"; //$NON-NLS-1$
 	private static final String ATT_ARGS= "args"; //$NON-NLS-1$
 	
-	private static final Object[] EMPTY_ARGS= new Object[0];
-	
-	private static class Tokenizer {
-		private String fString;
-		private int fPosition;
-		public Tokenizer(String s) {
-			fString= s;
-			fPosition= 0;
-		}
-		public String next() {
-			if (fPosition >= fString.length())
-				return null;
-			int nextComma= getNextCommna();
-			String result;
-			if (nextComma == -1) {
-				result= fString.substring(fPosition, fString.length()).trim();
-				fPosition= fString.length();
-			} else {
-				result= fString.substring(fPosition, nextComma).trim();
-				fPosition= nextComma + 1;
-			}
-			return result;
-		}
-		private int getNextCommna() {
-			boolean quoted= false;
-			for (int i= fPosition; i < fString.length(); i++) {
-				char ch= fString.charAt(i);
-				switch (ch) {
-					case '\'':
-						quoted= !quoted;
-					case ',':
-						if (!quoted)
-							return i;
-							
-				}
-			}
-			return -1;
-		}
-	}
+	private static final TypeExtensionManager fgTypeExtensionManager= new TypeExtensionManager("propertyTesters"); //$NON-NLS-1$
 	
 	public TestExpression(IConfigurationElement element) {
-		fProperty= element.getAttribute(ATT_PROPERTY);
-		fArgs= getArguments(element);
+		String property= element.getAttribute(ATT_PROPERTY);
+		int pos= property.lastIndexOf('.');
+		Assert.isTrue(pos != -1);
+		fNamespace= property.substring(0, pos);
+		fProperty= property.substring(pos + 1);
+		fArgs= Expressions.getArguments(element, ATT_ARGS);
+		fExpectedValue= element.getAttribute(ATT_VALUE);
 	}
 	
-	public TestExpression(String property, Object[] args) {
-		fProperty= property;
-		fArgs= args;
-	}
-	
-	public TestResult evaluate(IVariablePool pool) throws ExpressionException {
-		Object element= pool.getDefaultVariable();
-		// hard coded instanceof check to ensure it is evaluated fast.
-		if ("instanceof".equals(fProperty)) { //$NON-NLS-1$
-			return TestResult.valueOf(isInstanceOf(element, (String)fArgs[0]));
-		}
+	public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
+		Object element= context.getDefaultVariable();
 		if (System.class.equals(element)) {
 			String str= System.getProperty(fProperty);
 			if (str == null) 
-				return TestResult.FALSE;
-			return TestResult.valueOf(str.equals(fArgs[0]));
+				return EvaluationResult.FALSE;
+			return EvaluationResult.valueOf(str.equals(fArgs[0]));
 		}
-		Method method= TypeExtension.getMethod(element, fProperty);
-		if (!method.isLoaded())
-			return TestResult.NOT_LOADED;
-		Object returnValue= method.invoke(element, fArgs);
-		if (!(returnValue instanceof Boolean)) {
-			throw new ExpressionException(ExpressionException.TEST_EXPRESSION_NOT_A_BOOLEAN,
-				ExpressionMessages.getFormattedString(
-					"TestExpression.return_type.not_a_boolean", //$NON-NLS-1$
-					this.toString()));
-		}
-		return TestResult.valueOf((Boolean)returnValue);
+		Property property= fgTypeExtensionManager.getProperty(element, fNamespace, fProperty);
+		if (!property.isLoaded())
+			return EvaluationResult.NOT_LOADED;
+		return EvaluationResult.valueOf(property.test(element, fArgs, fExpectedValue));
 	}
 	
-	//---- Argument parsing --------------------------------------------
-	
-	public Object[] getArguments(IConfigurationElement element) {
-		String args= element.getAttribute(ATT_ARGS);
-		if (args == null) {
-			String value= element.getAttribute(ATT_VALUE);
-			if (value != null) {
-				return new Object[] { convertToken(value) };
-			} else { 
-				// in version two we can support sub elements <string></string> <long></long>
-				return EMPTY_ARGS;
-			}
-		} else {
-			List result= new ArrayList();
-			Tokenizer tokenizer= new Tokenizer(args);
-			String arg;
-			while ((arg= tokenizer.next()) != null) {
-				result.add(convertToken(arg));
-			}
-			return result.toArray();
-		}
-	}
-		
-	private Object convertToken(String arg) {
-		Assert.isTrue(arg.length() > 0);
-		if (arg.charAt(0) == '\'' && arg.charAt(arg.length() - 1) == '\'') {
-			return arg.substring(1, arg.length() - 1);
-		} else if ("true".equals(arg)) { //$NON-NLS-1$
-			return Boolean.TRUE;
-		} else if ("false".equals(arg)) { //$NON-NLS-1$
-			return Boolean.FALSE;
-		} else if (arg.indexOf('.') != -1) {
-			try {
-				return Float.valueOf(arg);
-			} catch (NumberFormatException e) {
-				return arg;
-			}
-		} else {
-			try {
-				return Integer.valueOf(arg);
-			} catch (NumberFormatException e) {
-				return arg;
-			}
-		}
-	}
-
 	//---- Debugging ---------------------------------------------------
 	
 	/* (non-Javadoc)
@@ -166,6 +70,9 @@ public class TestExpression extends Expression {
 			if (i < fArgs.length - 1)
 				args.append(", "); //$NON-NLS-1$
 		}
-		return "<test property=\"" + fProperty + "\" args=\"" + args + "\"/>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return "<test property=\"" + fProperty +  //$NON-NLS-1$
+		  (fArgs.length != 0 ? "\" args=\"" + args + "\"" : "\"") + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		  (fExpectedValue != null ? "\" value=\"" + fExpectedValue + "\"" : "\"") + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		  "/>"; //$NON-NLS-1$
 	}
 }

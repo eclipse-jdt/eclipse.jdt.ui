@@ -11,22 +11,22 @@
 package org.eclipse.jdt.ui.tests.xml;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtender;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.PropertyTester;
 
 
-public class A_TypeExtender extends TypeExtender {
+public class A_TypeExtender extends PropertyTester {
 
-	public Object invoke(Object receiver, String method, Object[] args) {
-		if ("simple".equals(method)) {
-			return "simple";
-		} else if ("overridden".equals(method)) {
-			return "A";
-		} else if ("ordering".equals(method)) {
-			return "A";
-		} else if ("chainOrdering".equals(method)) {
-			return "A";
+	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+		if ("simple".equals(property)) {
+			return "simple".equals(expectedValue);
+		} else if ("overridden".equals(property)) {
+			return "A".equals(expectedValue);
+		} else if ("ordering".equals(property)) {
+			return "A".equals(expectedValue);
+		} else if ("chainOrdering".equals(property)) {
+			return "A".equals(expectedValue);
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 }

@@ -1,2 +1,3 @@
 # Report processor existing testing
 org.eclipse.jdt.ui/processor/existTracing=true
+org.eclipse.jdt.ui/typeExtension/tracing=true

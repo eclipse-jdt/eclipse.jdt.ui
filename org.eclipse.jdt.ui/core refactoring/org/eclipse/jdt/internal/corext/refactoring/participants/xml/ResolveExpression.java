@@ -13,17 +13,21 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
-public class WithExpression extends CompositeExpression {
+public class ResolveExpression extends CompositeExpression {
 
 	private String fVariable;
-	private static final String ATT_VARIABLE= "variable";  //$NON-NLS-1$
+	private Object[] fArgs;
 	
-	public WithExpression(IConfigurationElement configElement) throws CoreException {
+	private static final String ATT_VARIABLE= "variable";  //$NON-NLS-1$
+	private static final String ATT_ARGS= "args";  //$NON-NLS-1$
+	
+	public ResolveExpression(IConfigurationElement configElement) throws CoreException {
 		fVariable= configElement.getAttribute(ATT_VARIABLE);
 		Expressions.checkAttribute(ATT_VARIABLE, fVariable);
+		fArgs= Expressions.getArguments(configElement, ATT_ARGS);
 	}
 	
 	public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
-		return evaluateAnd(new EvaluationContext(context, context.getVariable(fVariable)));
+		return evaluateAnd(new EvaluationContext(context, context.resolveVariable(fVariable, fArgs)));
 	}
 }

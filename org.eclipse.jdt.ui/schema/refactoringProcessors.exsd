@@ -1,19 +1,21 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.eclipse.jdt.ui">
-   <annotation>
+<annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.jdt.ui" id="typeExtenders" name="Type Extenders"/>
+         <meta.schema plugin="org.eclipse.jdt.ui" id="refactoringProcessors" name="Refactoring Processors"/>
       </appInfo>
       <documentation>
-         This extension point allows to add methods to an already existing type.
+         This extension point is used to define refactoring processors.
       </documentation>
    </annotation>
 
-   <element name="extension">
+   <include schemaLocation="commonExpressionLanguage.mxsd"/>
+
+   <element name="refactoringProcessors">
       <complexType>
          <sequence>
-            <element ref="typeExtender" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="refactoringProcessor" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -39,43 +41,53 @@
       </complexType>
    </element>
 
-   <element name="typeExtender">
+   <element name="refactoringProcessor">
       <complexType>
+         <all>
+            <element ref="natures"/>
+            <element ref="enablement"/>
+         </all>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  Unique identifier for the type extender
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="type" type="string" use="required">
-            <annotation>
-               <documentation>
-                  The type to be extended by this extender.
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="namespace" type="string" use="required">
-            <annotation>
-               <documentation>
-                  The name space to which this type extender contributes additional properties
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="methods" type="string" use="required">
-            <annotation>
-               <documentation>
-                  The methods provided by this type extender.
+                  unique identifier for the refactoring processor.
                </documentation>
             </annotation>
          </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  the name of the class that implements this type extender. The
-class must be public and implement
-&lt;samp&gt;@@@.TypeExtender&lt;/samp&gt;
-with a public 0-argument constructor.
+                  the name of the class that provides the processor implementation.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="java.lang.Object"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="operation" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the operation this processor is performing.
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="natures">
+      <complexType>
+         <sequence>
+            <element ref="nature" minOccurs="1" maxOccurs="unbounded"/>
+         </sequence>
+      </complexType>
+   </element>
+
+   <element name="nature">
+      <complexType>
+         <attribute name="value" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a valid project nature.
                </documentation>
             </annotation>
          </attribute>
@@ -130,7 +142,7 @@ with a public 0-argument constructor.
          &lt;p&gt;
 &lt;a href=&quot;hglegal.htm&quot;&gt;
  &lt;img SRC=&quot;ngibmcpy.gif&quot;
-   ALT=&quot;Copyright (c) 2000, 2003 IBM Corporation and others. All Rights Reserved.&quot;
+   ALT=&quot;Copyright (c) 2000, 2004 IBM Corporation and others. All Rights Reserved.&quot;
    BORDER=0 height=14 width=324&gt;&lt;/a&gt;
 &lt;/p&gt;
       </documentation>

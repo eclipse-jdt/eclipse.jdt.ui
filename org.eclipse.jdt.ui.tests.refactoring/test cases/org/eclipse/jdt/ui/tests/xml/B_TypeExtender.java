@@ -11,16 +11,15 @@
 package org.eclipse.jdt.ui.tests.xml;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtender;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.PropertyTester;
 
+public class B_TypeExtender extends PropertyTester {
 
-public class B_TypeExtender extends TypeExtender {
-
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		if ("overridden".equals(method)) {
-			return "B";
+			return "B".equals(expectedValue);
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 }

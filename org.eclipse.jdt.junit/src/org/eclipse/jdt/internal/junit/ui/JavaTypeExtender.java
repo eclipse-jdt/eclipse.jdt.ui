@@ -13,25 +13,25 @@ package org.eclipse.jdt.internal.junit.ui;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtender;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.PropertyTester;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 /**
  * Contributes an "isTest" property for ITypes.
  */
-public class JavaTypeExtender extends TypeExtender  {
+public class JavaTypeExtender extends PropertyTester  {
 	private static final String IS_TEST= "isTest"; //$NON-NLS-1$
 	/**
 	 * @inheritDoc
 	 */
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		IType type= (IType)receiver;
 		try {
 			if (IS_TEST.equals(method)) 
-				return Boolean.valueOf(TestSearchEngine.isTestOrTestSuite(type));
+				return TestSearchEngine.isTestOrTestSuite(type);
 		} catch (JavaModelException e) {
-			return Boolean.FALSE;
+			return false;
 		}
-		return null;
+		return false;
 	}
 }

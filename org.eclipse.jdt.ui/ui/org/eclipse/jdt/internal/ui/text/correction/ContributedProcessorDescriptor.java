@@ -16,11 +16,11 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EnablementExpression;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TestResult;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.VariablePool;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionConverter;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationContext;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionTagNames;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -42,7 +42,7 @@ public class ContributedProcessorDescriptor {
 			
 	public IStatus checkSyntax() {
 		String id= fConfigurationElement.getAttribute(ID);
-		IConfigurationElement[] children= fConfigurationElement.getChildren(EnablementExpression.NAME);
+		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
 		if (children.length > 1) {
 			return new StatusInfo(IStatus.ERROR, "Only one <enablement> element allowed. Disabling " + id); //$NON-NLS-1$
 		}
@@ -50,15 +50,15 @@ public class ContributedProcessorDescriptor {
 	}
 	
 	private boolean matches(ICompilationUnit cunit) throws CoreException {
-		IConfigurationElement[] children= fConfigurationElement.getChildren(EnablementExpression.NAME);
+		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
 		if (children.length == 1) {
 			if (cunit.equals(fLastCUnit)) {
 				return fLastResult;
 			}
 			
-			ExpressionParser parser= ExpressionParser.getStandard();
-			Expression expression= parser.parse(children[0]);
-			fLastResult= !(expression.evaluate(new VariablePool(null, cunit, cunit)) != TestResult.TRUE);
+			ExpressionConverter parser= ExpressionConverter.getDefault();
+			Expression expression= parser.perform(children[0]);
+			fLastResult= !(expression.evaluate(new EvaluationContext(null, cunit, cunit)) != EvaluationResult.TRUE);
 			fLastCUnit= cunit;
 			return fLastResult;
 

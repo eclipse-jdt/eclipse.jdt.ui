@@ -1,19 +1,21 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.eclipse.jdt.ui">
-   <annotation>
+<annotation>
       <appInfo>
          <meta.schema plugin="org.eclipse.jdt.ui" id="typeExtenders" name="Type Extenders"/>
       </appInfo>
       <documentation>
-         This extension point allows to add methods to an already existing type.
+         This extension point allows to add properties to an already existing type. Those
+         properties can then be used inside the common expression language&apos;s &lt;test&gt; expression
+         element.
       </documentation>
    </annotation>
 
-   <element name="extension">
+   <element name="propteryTesters">
       <complexType>
          <sequence>
-            <element ref="typeExtender" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="propertyTester" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -39,43 +41,41 @@
       </complexType>
    </element>
 
-   <element name="typeExtender">
+   <element name="propertyTester">
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  Unique identifier for the type extender
+                  unique identifier for the property tester
                </documentation>
             </annotation>
          </attribute>
          <attribute name="type" type="string" use="required">
             <annotation>
                <documentation>
-                  The type to be extended by this extender.
+                  the type to be extended by this property tester
                </documentation>
             </annotation>
          </attribute>
          <attribute name="namespace" type="string" use="required">
             <annotation>
                <documentation>
-                  The name space to which this type extender contributes additional properties
+                  a unique id determining the name space the properties are added to
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="methods" type="string" use="required">
+         <attribute name="properties" type="string" use="required">
             <annotation>
                <documentation>
-                  The methods provided by this type extender.
+                  a comma separated list of properties provided by this property tester
                </documentation>
             </annotation>
          </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  the name of the class that implements this type extender. The
-class must be public and implement
-&lt;samp&gt;@@@.TypeExtender&lt;/samp&gt;
-with a public 0-argument constructor.
+                  the name of the class that implements the testing methods. The class must be public and extend
+&lt;samp&gt;org.eclipse.core.expressions.PropertyTester&lt;/samp&gt; with a public 0-argument constructor.
                </documentation>
             </annotation>
          </attribute>
@@ -91,14 +91,14 @@ with a public 0-argument constructor.
 
 &lt;p&gt;
 &lt;pre&gt;
- &lt;extension point=&quot;org.eclipse.jdt.ui.typeExtenders&quot;&gt;
-  &lt;typeExtender
-   id=&quot;org.eclipse.jdt.ui.IResourceExtender&quot;
-   type=&quot;org.eclipse.core.resources.IResource&quot;
-   methods=&quot;canDelete&quot;
-   class=&quot;org.eclipse.jdt.ui.internal.ResourceExtender&quot;&gt;
-  &lt;/typeExtender&gt;
- &lt;/extension&gt;
+  &lt;extension point=&quot;org.eclipse.core.expressions.propertyTester&quot;&gt;
+    &lt;propertyTester
+      id=&quot;org.eclipse.jdt.ui.IResourceTester&quot;
+      type=&quot;org.eclipse.core.resources.IResource&quot;
+      properties=&quot;canDelete&quot;
+      class=&quot;org.eclipse.jdt.ui.internal.ResourceTester&quot;&gt;
+    &lt;/propertyTester&gt;
+  &lt;/extension&gt;
 &lt;/pre&gt;
 &lt;/p&gt;
       </documentation>
@@ -109,7 +109,7 @@ with a public 0-argument constructor.
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         The contributed class must implement &lt;code&gt;???.TypeExtender&lt;/code&gt;
+         The contributed class must extend &lt;code&gt;org.eclipse.core.expressions.PropertyTester&lt;/code&gt;
       </documentation>
    </annotation>
 

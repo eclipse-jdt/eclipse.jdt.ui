@@ -13,74 +13,77 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
 /**
- * A default variable pool implementation.
+ * A default implementation of an evaluation context. Clients may
+ * instantiate this default context or subclass it to extend the
+ * implementation of method {@link #resolveVariable(String, Object[])} 
  * 
  * @since 3.0
  */
-public class VariablePool implements IVariablePool {
+public class EvaluationContext implements IEvaluationContext {
 
-	private IVariablePool fParent;
+	private IEvaluationContext fParent;
 	private Object fDefaultVariable;
 	private Map/*<String, Object>*/ fVariables;
 	
 	/**
-	 * Create a new variable pool with the given parent and default
+	 * Create a new evaluation context with the given parent and default
 	 * variable.
 	 * 
-	 * @param parent the parent pool. Can be <code>null</code>.
+	 * @param parent the parent context. Can be <code>null</code>.
 	 * @param defaultVariable the default variable. Can be <code>null</code>.
 	 */
-	public VariablePool(IVariablePool parent, Object defaultVariable) {
+	public EvaluationContext(IEvaluationContext parent, Object defaultVariable) {
 		fParent= parent;
 		fDefaultVariable= defaultVariable;
 	}
 	
 	/**
-	 * Create a new variable pool with the given parent, default
+	 * Create a new evaluation context with the given parent, default
 	 * variable and the variable stored under the name selection.
 	 * 
-	 * @param parent the parent pool. Can be <code>null</code>.
+	 * @param parent the parent context. Can be <code>null</code>.
 	 * @param defaultVariable the default variable. Can be <code>null</code>.
 	 * @param selection the variable stored under the name selection. Can
 	 *  be <code>null</code>
 	 */
-	public VariablePool(IVariablePool parent, Object defaultVariable, Object selection) {
+	public EvaluationContext(IEvaluationContext parent, Object defaultVariable, Object selection) {
 		fParent= parent;
 		fDefaultVariable= defaultVariable;
 		if (selection != null)
 			addVariable(SELECTION, selection);
 	}
 	
-	/* (non-Javadoc)
-	 * @see IVariablePool#getParent()
+	/**
+	 * {@inheritDoc}
 	 */
-	public IVariablePool getParent() {
+	public IEvaluationContext getParent() {
 		return fParent;
 	}
 	
-	/* (non-Javadoc)
-	 * @see IVariablePool#getRoot()
+	/**
+	 * {@inheritDoc}
 	 */
-	public IVariablePool getRoot() {
+	public IEvaluationContext getRoot() {
 		if (fParent == null)
 			return this;
 		return fParent.getRoot();
 	}
 	
-	/* (non-Javadoc)
-	 * @see IVariablePool#getDefaultVariable()
+	/**
+	 * {@inheritDoc}
 	 */
 	public Object getDefaultVariable() {
 		return fDefaultVariable;
 	}
 	
-	/* (non-Javadoc)
-	 * @see IVariablePool#addVariable(java.lang.String, java.lang.Object)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void addVariable(String name, Object value) {
 		Assert.isNotNull(name);
@@ -90,8 +93,8 @@ public class VariablePool implements IVariablePool {
 		fVariables.put(name, value);
 	}
 	
-	/* (non-Javadoc)
-	 * @see IVariablePool#removeVariable(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public Object removeVariable(String name) {
 		Assert.isNotNull(name);
@@ -100,8 +103,8 @@ public class VariablePool implements IVariablePool {
 		return fVariables.remove(name);
 	}
 	
-	/* (non-Javadoc)
-	 * @see IVariablePool#getVariable(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public Object getVariable(String name) {
 		Assert.isNotNull(name);
@@ -112,21 +115,23 @@ public class VariablePool implements IVariablePool {
 		return fVariables.get(name);
 	}
 	
-	/* (non-Javadoc)
-	 * @IVariablePool#resolveVariable(java.lang.String, java.lang.Object[])
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * Subclasses may extend this method to resolve specific variables.
 	 */
-	public Object resolveVariable(String name, Object[] args) throws ExpressionException {
+	public Object resolveVariable(String name, Object[] args) throws CoreException {
 		if (PLUGIN_DESCRIPTOR.equals(name)) {
 			if (args == null ||args.length != 1)
-				throw new ExpressionException(
-					ExpressionException.VARAIBLE_POOL_WRONG_NUMBER_OF_ARGUMENTS,
+				throw new CoreException(new ExpressionStatus(
+					ExpressionStatus.VARAIBLE_POOL_WRONG_NUMBER_OF_ARGUMENTS,
 					ExpressionMessages.getFormattedString(
 						"VariablePool.resolveVariable.arguments.wrong_number",  //$NON-NLS-1$
-						new Object[] { "1", args == null ? "0" : ("" + args.length)})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						new Object[] { "1", args == null ? "0" : ("" + args.length)}))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (!(args[0] instanceof String)) 
-				throw new ExpressionException(
-					ExpressionException.VARAIBLE_POOL_ARGUMENT_IS_NOT_A_STRING,
-					ExpressionMessages.getString("VariablePool.resolveVariable.arguments.not_a_string")); //$NON-NLS-1$
+				throw new CoreException(new ExpressionStatus(
+					ExpressionStatus.VARAIBLE_POOL_ARGUMENT_IS_NOT_A_STRING,
+					ExpressionMessages.getString("VariablePool.resolveVariable.arguments.not_a_string"))); //$NON-NLS-1$
 			return Platform.getPluginRegistry().getPluginDescriptor((String)(args[0]));
 		}
 		return null;

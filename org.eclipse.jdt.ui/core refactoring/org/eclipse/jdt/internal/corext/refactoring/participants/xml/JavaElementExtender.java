@@ -26,24 +26,24 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 
-public class JavaElementExtender extends TypeExtender {
+public class JavaElementExtender extends PropertyTester {
 
 	private static final String PROPERTY_IS_AVAILABLE= "isAvailable"; //$NON-NLS-1$
 	private static final String CAN_DELETE= "canDelete"; //$NON-NLS-1$
 	
-	public Object invoke(Object receiver, String method, Object[] args) {
+	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		IJavaElement jElement= (IJavaElement)receiver;
 		try {
 			if (PROPERTY_IS_AVAILABLE.equals(method)) {
-				return Boolean.valueOf(Checks.isAvailable(jElement));
+				return Checks.isAvailable(jElement);
 			} else if (CAN_DELETE.equals(method)) {
-				return Boolean.valueOf(canDelete(jElement));
+				return canDelete(jElement);
 			}
 		} catch (CoreException e) {
-			return Boolean.FALSE;
+			return false;
 		}
 		Assert.isTrue(false);
-		return null;
+		return false;
 	}
 	
 	private boolean canDelete(IJavaElement element) throws CoreException {

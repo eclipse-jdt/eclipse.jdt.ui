@@ -15,76 +15,78 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.internal.corext.Assert;
 
 /**
- * A variable pool that can be used to add a new default variable
- * to a hierarchy of variable pools.
+ * An evaluation context that can be used to add a new default variable
+ * to a hierarchy of evaluation contexts.
  * 
  * @since 3.0
  */
-public final class DefaultVariable implements IVariablePool {
+public final class DefaultVariable implements IEvaluationContext {
 
 	private Object fDefaultVariable;
-	private IVariablePool fParent;
-	private IVariablePool fManagedPool;
+	private IEvaluationContext fParent;
+	private IEvaluationContext fManagedPool;
 	
 	/**
 	 * Constructs a new variable pool for a single default variable.
 	 * 
-	 * @param parent the pool's parent pool. Must not be <code>null</code>.
+	 * @param parent the parent context for the default variable. Must not 
+	 *  be <code>null</code>.
 	 * @param defaultVariable the default variable
 	 */
-	public DefaultVariable(IVariablePool parent, Object defaultVariable) {
+	public DefaultVariable(IEvaluationContext parent, Object defaultVariable) {
 		Assert.isNotNull(parent);
+		fParent= parent;
 		while (parent instanceof DefaultVariable) {
 			parent= parent.getParent();
 		}
 		fManagedPool= parent;
 		fDefaultVariable= defaultVariable;
 	}
-	
-	/* (non-Javadoc)
-	 * @see IVariablePool#getParent()
+
+	/**
+	 * {@inheritDoc}
 	 */
-	public IVariablePool getParent() {
+	public IEvaluationContext getParent() {
 		return fParent;
 	}
 
-	/* (non-Javadoc)
-	 * @see IVariablePool#getRoot()
+	/**
+	 * {@inheritDoc}
 	 */
-	public IVariablePool getRoot() {
+	public IEvaluationContext getRoot() {
 		return fParent.getRoot();
 	}
 
-	/* (non-Javadoc)
-	 * @see IVariablePool#getDefaultVariable()
+	/**
+	 * {@inheritDoc}
 	 */
 	public Object getDefaultVariable() {
 		return fDefaultVariable;
 	}
 
-	/* (non-Javadoc)
-	 * @see IVariablePool#addVariable(java.lang.String, java.lang.Object)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void addVariable(String name, Object value) {
 		fManagedPool.addVariable(name, value);
 	}
 
-	/* (non-Javadoc)
-	 * @see IVariablePool#removeVariable(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public Object removeVariable(String name) {
 		return fManagedPool.removeVariable(name);
 	}
 
-	/* (non-Javadoc)
-	 * @see IVariablePool#getVariable(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public Object getVariable(String name) {
 		return fManagedPool.getVariable(name);
 	}
 
-	/* (non-Javadoc)
-	 * @see IVariablePool#resolveVariable(java.lang.String, java.lang.Object[])
+	/**
+	 * {@inheritDoc}
 	 */
 	public Object resolveVariable(String name, Object[] args) throws CoreException {
 		return fManagedPool.resolveVariable(name, args);
