@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
@@ -977,10 +978,14 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		IJavaElement je= (IJavaElement)o;
 		IJavaElement elementToSelect= getSuitableJavaElement(findElementToSelect(je));
 		IJavaElement newInput= findInputForJavaElement(je);
-		if (elementToSelect == null && !isValidInput(newInput))
+		IJavaElement oldInput= null;
+		if (getInput() instanceof IJavaElement)
+			oldInput= (IJavaElement)getInput();
+
+		if (elementToSelect == null && !isValidInput(newInput) && (newInput == null && !isAncestorOf(je, oldInput)))
 			// Clear input
 			setInput(null);
-		else if (elementToSelect == null || getViewer().testFindItem(elementToSelect) == null) {
+		else if (mustSetNewInput(elementToSelect, oldInput, newInput)) {
 			// Adjust input to selection
 			setInput(newInput);
 			// Recompute suitable element since it depends on the viewer's input
@@ -993,6 +998,21 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			setSelection(StructuredSelection.EMPTY, true);
 	}
 
+	/**
+	 * Compute if a new input must be set.
+	 * 
+	 * @return	<code>true</code> if the input has to be set
+	 * @since 3.0
+	 */	
+	private boolean mustSetNewInput(IJavaElement elementToSelect, IJavaElement oldInput, IJavaElement newInput) {
+		return (newInput == null || !newInput.equals(oldInput))
+			&& (elementToSelect == null
+				|| oldInput == null
+				|| (!((elementToSelect instanceof IPackageDeclaration)
+					&& (elementToSelect.getParent().equals(oldInput.getParent()))
+					&& (!isAncestorOf(getViewPartInput(), elementToSelect)))));
+	}
+	
 	/**
 	 * Finds the closest Java element which can be used as input for
 	 * this part and has the given Java element as child
