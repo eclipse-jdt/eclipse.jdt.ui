@@ -14,6 +14,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -263,6 +265,16 @@ public class JavaProjectHelper {
 		IClasspathEntry[] newEntries= (IClasspathEntry[])list.toArray(new IClasspathEntry[list.size()]);
 		jproject.setRawClasspath(newEntries, null);
 	}	
+
+	/**
+	 * Sets autobuilding state for the test workspace.
+	 */	public static void setAutoBuilding(boolean state) throws CoreException {
+		// disable auto build
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IWorkspaceDescription desc= workspace.getDescription();
+		desc.setAutoBuilding(state);
+		workspace.setDescription(desc);
+	}
 
 	private static void addToClasspath(IJavaProject jproject, IClasspathEntry cpe) throws JavaModelException {
 		IClasspathEntry[] oldEntries= jproject.getRawClasspath();
