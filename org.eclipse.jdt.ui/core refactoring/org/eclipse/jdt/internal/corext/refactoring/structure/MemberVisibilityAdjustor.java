@@ -480,6 +480,9 @@ public final class MemberVisibilityAdjustor {
 	/** Should getters be used to resolve visibility issues? */
 	private boolean fGetters= true;
 
+	/** Should incoming references be adjusted? */
+	private boolean fIncoming= true;
+
 	/** The referenced element causing the visibility adjustment */
 	private final IMember fReferenced;
 
@@ -736,7 +739,8 @@ public final class MemberVisibilityAdjustor {
 			engine.setScope(fScope);
 			engine.setStatus(fStatus);
 			engine.searchPattern(new SubProgressMonitor(monitor, 1));
-			adjustIncomingVisibility((SearchResultGroup[]) engine.getResults(), new SubProgressMonitor(monitor, 1));
+			if (fIncoming)
+				adjustIncomingVisibility((SearchResultGroup[]) engine.getResults(), new SubProgressMonitor(monitor, 1));
 			engine.clearResults();
 			engine.searchReferencedTypes(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			engine.searchReferencedFields(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
@@ -1027,10 +1031,21 @@ public final class MemberVisibilityAdjustor {
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use getters where possible.
 	 * 
-	 * @param use
+	 * @param use <code>true</code> if getters should be used, <code>false</code> otherwise
 	 */
 	public final void setGetters(final boolean use) {
 		fGetters= use;
+	}
+
+	/**
+	 * Determines whether incoming references should be adjusted too.
+	 * <p>
+	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use setters where possible.
+	 * 
+	 * @param incoming <code>true</code> if incoming references should be adjusted, <code>false</code> otherwise
+	 */
+	public final void setIncoming(final boolean incoming) {
+		fIncoming= incoming;
 	}
 
 	/**
@@ -1076,7 +1091,7 @@ public final class MemberVisibilityAdjustor {
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use setters where possible.
 	 * 
-	 * @param use
+	 * @param use <code>true</code> if setters should be used, <code>false</code> otherwise
 	 */
 	public final void setSetters(final boolean use) {
 		fSetters= use;
