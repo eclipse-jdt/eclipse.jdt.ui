@@ -14,22 +14,21 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 
 /**
- * Utility class used to get better source ranges for <code>ISourceReference</code>.
+ * Utility class used to get better source ranges for <code>ISourceReference</code>
+ * and temp declarations.
  */
-public class SourceReferenceSourceRangeComputer {
+public class SourceRangeComputer {
 	
-	private ISourceReference fSourceReference;
-	private String fCuSource;
+	private final ISourceRange fSourceRange;
+	private final String fCuSource;
 	
-	private SourceReferenceSourceRangeComputer(ISourceReference element, String cuSource){
-		Assert.isTrue(((IJavaElement)element).exists());
-		fSourceReference= element;
+	private SourceRangeComputer(ISourceRange sourceRange, String cuSource){
+		fSourceRange= sourceRange;
 		fCuSource= cuSource;
 	}
 	
@@ -39,7 +38,7 @@ public class SourceReferenceSourceRangeComputer {
 	 */
 	public static String computeSource(ISourceReference elem) throws JavaModelException{
 		String cuSource= getCuSource(elem);
-		ISourceRange range= SourceReferenceSourceRangeComputer.computeSourceRange(elem, cuSource);
+		ISourceRange range= SourceRangeComputer.computeSourceRange(elem, cuSource);
 		int endIndex= range.getOffset() + range.getLength();
 		return cuSource.substring(range.getOffset(), endIndex);
 	}
@@ -61,25 +60,37 @@ public class SourceReferenceSourceRangeComputer {
     }
 	
 	public static ISourceRange computeSourceRange(ISourceReference element, String cuSource) throws JavaModelException{
-		try{
-			if ((element instanceof IJavaElement) && ! ((IJavaElement)element).exists())
+			if (! element.exists())
 				return element.getSourceRange();
 			if (cuSource == null)
 				return element.getSourceRange();
-			
-		 	SourceReferenceSourceRangeComputer inst= new SourceReferenceSourceRangeComputer(element, cuSource);
-		 	int offset= inst.computeOffset();
-		 	int end= inst.computeEnd();
-		 	int length= end - offset;
-		 	return new SourceRange(offset, length);
-		}	catch(CoreException e){
-			//fall back to the default
-			return element.getSourceRange();
-		}	
+			return computeSourceRange(element.getSourceRange(), cuSource);			
+//		 	SourceRangeComputer inst= new SourceRangeComputer(element, cuSource);
+//		 	int offset= inst.computeOffset();
+//		 	int end= inst.computeEnd();
+//		 	int length= end - offset;
+//		 	return new SourceRange(offset, length);
+//		}	catch(CoreException e){
+//			//fall back to the default
+//			return element.getSourceRange();
+//		}	
 	}
 	
+	public static ISourceRange computeSourceRange(ISourceRange sourceRange, String cuSource) throws JavaModelException{
+		try{
+			SourceRangeComputer inst= new SourceRangeComputer(sourceRange, cuSource);
+			int offset= inst.computeOffset();
+			int end= inst.computeEnd();
+			int length= end - offset;
+			return new SourceRange(offset, length);
+		}	catch(CoreException e){
+			//fall back to the default
+			return sourceRange;
+		}	
+	}
+
 	private int computeEnd() throws CoreException{
-		int end= fSourceReference.getSourceRange().getOffset() + fSourceReference.getSourceRange().getLength();
+		int end= fSourceRange.getOffset() + fSourceRange.getLength();
 		try{	
 			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 			scanner.setSource(fCuSource.toCharArray());
@@ -138,7 +149,7 @@ public class SourceReferenceSourceRangeComputer {
 	}
 	
 	private int computeOffset() throws CoreException{
-		int offset= fSourceReference.getSourceRange().getOffset();
+		int offset= fSourceRange.getOffset();
 		try{
 			TextBuffer buff= TextBuffer.create(fCuSource);
 			int lineOffset= buff.getLineInformationOfOffset(offset).getOffset();
