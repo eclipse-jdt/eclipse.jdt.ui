@@ -15,15 +15,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IFileEditorMapping;
 import org.eclipse.ui.PlatformUI;
 
@@ -32,8 +32,7 @@ import org.eclipse.ui.PlatformUI;
  * Use this class when you want to present IStorage objects in a viewer.
  */
 public class StorageLabelProvider extends LabelProvider {
-	
-	private IEditorRegistry fEditorRegistry= PlatformUI.getWorkbench().getEditorRegistry();
+
 	private Map fJarImageMap= new HashMap(10);
 	private Image fDefaultImage;
 
@@ -91,7 +90,7 @@ public class StorageLabelProvider extends LabelProvider {
 		Image image= (Image)fJarImageMap.get(name);
 		if (image != null) 
 			return image;
-		IFileEditorMapping[] mappings= fEditorRegistry.getFileEditorMappings();
+		IFileEditorMapping[] mappings= PlatformUI.getWorkbench().getEditorRegistry().getFileEditorMappings();
 		int i= 0;
 		while (i < mappings.length) {
 			if (mappings[i].getLabel().equals(name))
@@ -113,7 +112,7 @@ public class StorageLabelProvider extends LabelProvider {
 		}
 
 		// Get the image from the editor registry	
-		ImageDescriptor desc= fEditorRegistry.getImageDescriptor(name);
+		ImageDescriptor desc= PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor(name);
 		image= desc.createImage();
 
 		fJarImageMap.put(key, image);
@@ -123,7 +122,7 @@ public class StorageLabelProvider extends LabelProvider {
 	
 	private Image getDefaultImage() {
 		if (fDefaultImage == null)
-			fDefaultImage= fEditorRegistry.getImageDescriptor((String)null).createImage();
+			fDefaultImage= PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor((String)null).createImage();
 		return fDefaultImage;
 	}
 }

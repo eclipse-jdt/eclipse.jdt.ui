@@ -46,8 +46,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -180,7 +180,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 
 		fCheckBoxList.setLabelProvider(createLabelPrivder());
 		fCheckBoxList.setContentProvider(new ArrayContentProvider());
-
+		Arrays.sort(fBuiltInFilters);
 		fCheckBoxList.setInput(fBuiltInFilters);
 		setInitialSelections(getEnabledFilterDescriptors());
 		

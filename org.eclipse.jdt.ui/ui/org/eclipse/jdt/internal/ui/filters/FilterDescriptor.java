@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.filters;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,9 +25,10 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.ui.IPluginContribution;
 import org.eclipse.ui.activities.WorkbenchActivityHelper;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Represents a custom filter which is provided by the
@@ -264,7 +264,6 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 				}
 			}
 		}
-		Collections.sort(result);
 		return (FilterDescriptor[])result.toArray(new FilterDescriptor[result.size()]);
 	}
 	
@@ -275,5 +274,4 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
     public String getPluginId() {
         return fElement.getNamespace();
     }
-
 }
