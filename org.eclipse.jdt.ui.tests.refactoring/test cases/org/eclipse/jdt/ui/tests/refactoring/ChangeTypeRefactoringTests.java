@@ -257,8 +257,9 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		System.out.println("running testReturnType()");
 		createAdditionalCU("A_testReturnType2", getPackageP());
 		Collection types= helper1(6, 12, 6, 15, "java.util.Collection").getValidTypeNames();
-		Assert.assertTrue(types.size() == 1);
+		Assert.assertTrue(types.size() == 2);
 		Assert.assertTrue(types.contains("java.util.Collection"));
+		Assert.assertTrue(types.contains("java.lang.Object"));
 	}	
 	public void testFieldWithAccess() throws Exception {
 		System.out.println("running testFieldWithAccess()");
@@ -351,5 +352,9 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	public void testOverriddenBinaryMethod() throws Exception {
 		System.out.println("running testOverriddenBinaryMethod()");
 		failHelper1(3, 12, 3, 17, 4, "java.lang.Object");
+	}
+	public void testFieldOfLocalType() throws Exception {
+		System.out.println("running testFieldOfLocalType()");
+		failHelper1(5, 21, 5, 45, 4, "java.lang.Object");
 	}
 }

@@ -22,8 +22,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -41,6 +39,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -128,7 +127,8 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		private final  String MESSAGE= RefactoringMessages.getString("ChangeTypeInputPage.Select_Type"); //$NON-NLS-1$
 		private ChangeTypeLabelProvider fLabelProvider;
 		private TreeViewer fTreeViewer;
-
+		private boolean fTreeUpdated= false;
+		
 		public ChangeTypeInputPage() {
 			super(PAGE_NAME, true);
 			setMessage(MESSAGE);
@@ -154,9 +154,9 @@ public class ChangeTypeWizard extends RefactoringWizard {
 				try {
 					getWizard().getContainer().run(true, true, runnable);
 				} catch (InvocationTargetException e) {
-					ChangeTypeInputPage.this.setErrorMessage("Internal error during computation of valid types"); //$NON-NLS-1$
+					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.getString("ChangeTypeWizard.internalError")); //$NON-NLS-1$
 				} catch (InterruptedException e) {
-					ChangeTypeInputPage.this.setMessage("Computation of valid types was interrupted"); //$NON-NLS-1$
+					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getString("ChangeTypeWizard.computationInterrupted")); //$NON-NLS-1$
 	
 				}
 													
@@ -170,13 +170,14 @@ public class ChangeTypeWizard extends RefactoringWizard {
 				fTreeViewer.expandToLevel(10);
 				grayOutInvalidTypes(tree.getItems());
 				
-				if (fValidTypes.size() == 0){
+				if (fValidTypes == null || fValidTypes.size() == 0){
 					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.getString("ChangeTypeWizard.declCannotBeChanged")); //$NON-NLS-1$
+					setPageComplete(false);
 				} else {
-					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getString("ChangeTypeWizard.pleaseChooseType")); //$NON-NLS-1$
 					TreeItem selection= getInitialSelection(fValidTypes);
 					fTreeViewer.getTree().setSelection(new TreeItem[]{ selection });
 					setPageComplete(true);
+					ChangeTypeInputPage.this.setMessage(""); //$NON-NLS-1$
 				}
 			}			
 		}
@@ -213,6 +214,11 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			setControl(composite);
 			composite.setLayout(new GridLayout());
 			composite.setLayoutData(new GridData());
+			
+			Label label= new Label(composite, SWT.NONE);
+			label.setText(RefactoringMessages.getString("ChangeTypeWizard.pleaseChooseType")); //$NON-NLS-1$
+			label.setLayoutData(new GridData());
+			
 			addTreeComponent(composite);			
 			Dialog.applyDialogFont(composite);
 		}
@@ -235,8 +241,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			ISelectionChangedListener listener= new ISelectionChangedListener(){
 				public void selectionChanged(SelectionChangedEvent event) {
 					IStructuredSelection selection= (IStructuredSelection)event.getSelection();
-					IType type= (IType)selection.getFirstElement();
-					ChangeTypeInputPage.this.setPageComplete(getGeneralizeTypeRefactoring().getValidTypes().contains(type));
+					typeSelected((IType)selection.getFirstElement());
 				}
 			};
 			fTreeViewer.addSelectionChangedListener(listener);
@@ -244,6 +249,24 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			fTreeViewer.expandToLevel(10);
 		}
 
+		private void typeSelected(IType type) {
+			boolean isValid= getGeneralizeTypeRefactoring().getValidTypes().contains(type);
+			ChangeTypeInputPage.this.setPageComplete(isValid);
+			if (isValid) {
+				ChangeTypeInputPage.this.setMessage(""); //$NON-NLS-1$
+			} else {
+				if (getGeneralizeTypeRefactoring().getOriginalType().equals(type)) {
+					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getFormattedString(
+						"ChangeTypeWizard.with_itself", type.getElementName())); //$NON-NLS-1$
+					
+				} else {
+					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getFormattedString(
+						"ChangeTypeWizard.grayed_types",  //$NON-NLS-1$
+						new Object[] {type.getElementName(), getGeneralizeTypeRefactoring().getOriginalType().getElementName()}));
+				}
+			}
+		}
+		
 		// NEEDED for WORKAROUND
 		private void grayOutInvalidTypes(TreeItem[] items) {
 			for (int i=0; i < items.length; i++){
@@ -314,10 +337,5 @@ public class ChangeTypeWizard extends RefactoringWizard {
 					fTreeUpdated= true;
 				}
 		}
-
-		private boolean fTreeUpdated= false;
-	}
-
-	
-	
+	}	
 }

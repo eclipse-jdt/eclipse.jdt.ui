@@ -20,15 +20,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MultiTextEdit;
-
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -58,7 +54,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -94,8 +89,8 @@ import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.text.edits.MultiTextEdit;
 
 /**
  * @author tip
@@ -186,6 +181,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private IType fSelectedType;
 	
 	/**
+	 * Organizes SearchResults by CompilationUnit
+	 */
+	private Map/*<ICompilationUnit,SearchResultGroup>*/ fCuToSearchResultGroup= new HashMap();
+	
+	
+	/**
 	 * The type hierarchy of the original type.
 	 */
 	private ITypeHierarchy fTypeHierarchy;
@@ -208,7 +209,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	public static final short SUPERTYPES_ONLY= 1;
 	public static final short SUPERTYPES_AND_SUBTYPES= 2;
 	private ConstraintVariable fCv;
-
+	
 	public static boolean isAvailable(IJavaElement element) throws JavaModelException {
 		if (element == null || ! element.exists())
 			return false;
@@ -301,7 +302,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 						+ (fSelectionStart + fSelectionLength)
 						+ "] in " //$NON-NLS-1$
 						+ fCu.getElementName());
-				System.out.println("node= " + node + ", type= " + typeName(node.getNodeType())); //$NON-NLS-1$ //$NON-NLS-2$
+				System.out.println("node= " + node + ", type= " + node.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 
 			String selectionValid= determineSelection(node);
@@ -336,6 +337,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnBinary")); //$NON-NLS-1$
 			
 			if (typeBinding.isLocal()){
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.localTypesNotSupported")); //$NON-NLS-1$
+			}
+			
+			if (fFieldBinding != null && fFieldBinding.getDeclaringClass().isLocal()){
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.localTypesNotSupported")); //$NON-NLS-1$
 			}
 			
@@ -688,9 +693,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 		ASTNode parent= node.getParent();
 		ASTNode grandParent= parent.getParent();
 		
-		if (DEBUG) System.out.println("parent nodeType= " + typeName(parent.getNodeType())); //$NON-NLS-1$
-		if (DEBUG) System.out.println("GrandParent nodeType= " + typeName(grandParent.getNodeType())); //$NON-NLS-1$
-
+		if (DEBUG) System.out.println("parent nodeType= " + parent.getClass().getName()); //$NON-NLS-1$
+		if (DEBUG) System.out.println("GrandParent nodeType= " + grandParent.getClass().getName()); //$NON-NLS-1$
+		
 		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT){
 			VariableDeclarationStatement vds= (VariableDeclarationStatement)parent;
 			if (vds.fragments().size() > 1){
@@ -706,6 +711,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				fEffectiveSelectionLength= node.getLength();
 			} else if (grandParent.getNodeType() == ASTNode.FIELD_DECLARATION) {
 				FieldDeclaration fd= (FieldDeclaration)grandParent;
+				fFieldBinding= ((VariableDeclarationFragment)parent).resolveBinding();
 				if (fd.fragments().size() > 1){
 					return RefactoringCoreMessages.getString("ChangeTypeRefactoring.multiDeclarationsNotSupported"); //$NON-NLS-1$
 				}
@@ -728,6 +734,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 			fParamIndex= -1;
 		} else if (parent.getNodeType() == ASTNode.METHOD_DECLARATION && 
 				   grandParent.getNodeType() == ASTNode.TYPE_DECLARATION) {
+			MethodDeclaration methodDeclaration= (MethodDeclaration)parent;
+			if (methodDeclaration.getName().equals(node)){
+				return RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnNodeType"); //$NON-NLS-1$
+			}
 			fMethodBinding= ((MethodDeclaration)parent).resolveBinding();
 			fParamIndex= -1;
 		} else if (
@@ -738,10 +748,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment)decl;
 			fEffectiveSelectionStart= fragment.getName().getStartPosition(); 
 			fEffectiveSelectionLength= fragment.getName().getLength();
-		} else if (
-			parent.getNodeType() == ASTNode.SIMPLE_TYPE && 
-			grandParent.getNodeType() == ASTNode.FIELD_DECLARATION) {
+		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && 
+			       grandParent.getNodeType() == ASTNode.FIELD_DECLARATION) {
 			return fieldDeclarationSelected((FieldDeclaration) grandParent);
+		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && 
+			       grandParent.getNodeType() == ASTNode.ARRAY_TYPE){
+			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.arraysNotSupported"); //$NON-NLS-1$
 		} else {
 			return RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnNodeType"); //$NON-NLS-1$
 		}
@@ -812,8 +824,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}		
 		return false;
 	}
-	
-	
+		
 	/**
 	 * Determine the set of constraint variables related to the selected
 	 * expression. In addition to the expression itself, this consists of
@@ -932,11 +943,26 @@ public class ChangeTypeRefactoring extends Refactoring {
 		Collection/*<IType>*/ result= new HashSet();
 		IJavaProject project= fCu.getJavaProject();
 
-		IType[] allTypes= fTypesToConsider == SUPERTYPES_ONLY ? fTypeHierarchy.getAllSupertypes(originalType): fTypeHierarchy.getAllTypes();
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), allTypes.length); //$NON-NLS-1$
-		for (int i= 0; i < allTypes.length; i++) {
-			if (isValid(project, allTypes[i], relevantVars, relevantConstraints, new SubProgressMonitor(pm, 1))) {
-				result.add(allTypes[i]);
+		Collection/*<IType>*/ allTypes = new HashSet/*<IType>*/();
+		if (fTypesToConsider == SUPERTYPES_ONLY){ 
+			allTypes.addAll(Arrays.asList(fTypeHierarchy.getAllSupertypes(originalType))); 
+		} else {
+			allTypes.addAll(Arrays.asList(fTypeHierarchy.getAllTypes()));
+		}
+		
+		// Object is not considered a supertype of any interface type
+		// (see ITypeHierarchy.getAllSuperTypes())
+		if (fOriginalTypeOfSelection.isInterface()){
+			IType object= JavaModelUtil.findType(fCu.getJavaProject(), "java.lang.Object"); //$NON-NLS-1$
+			allTypes.add(object);
+		}
+		
+		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), allTypes.size()); //$NON-NLS-1$
+
+		for (Iterator it= allTypes.iterator(); it.hasNext(); ) {
+			IType type= (IType)it.next();
+			if (isValid(project, type, relevantVars, relevantConstraints, new SubProgressMonitor(pm, 1))) {
+				result.add(type);
 			}
 		} 		
 		// "changing" to the original type is a no-op
@@ -1058,16 +1084,37 @@ public class ChangeTypeRefactoring extends Refactoring {
 		return result;
 	}
 
-	private List getConstraints(ICompilationUnit unit) {
+	private List/*<ITypeConstraint>*/ getConstraints(ICompilationUnit unit) {
 		if (fConstraintCache.containsKey(unit))
 			return (List) fConstraintCache.get(unit);
 		ConstraintCollector collector= new ConstraintCollector(new FullConstraintCreator());
-		ASTCreator.createAST(unit, null).accept(collector);
-		List constraints= Arrays.asList(collector.getConstraints());
+		
+		CompilationUnit cu= ASTCreator.createAST(unit, null);
+		
+		// only generate type constraints for relevant MethodDeclaration subtrees 
+		if (fMethodBinding != null && fCuToSearchResultGroup.containsKey(unit)){
+			SearchResultGroup group= (SearchResultGroup) fCuToSearchResultGroup.get(unit);
+			ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), cu);
+			for (int i=0; i < nodes.length; i++){
+				ASTNode node = nodes[i];
+				if (fMethodBinding != null){
+					// find MethodDeclaration above it in the tree
+					ASTNode n= node;
+					while (!(n instanceof MethodDeclaration)){
+						n = n.getParent();
+					}
+					MethodDeclaration md = (MethodDeclaration)n;
+					md.accept(collector);
+				}
+			}
+		} else {
+			cu.accept(collector);
+		}
+		List/*<ITypeConstraint>*/ constraints= Arrays.asList(collector.getConstraints());
 		fConstraintCache.put(unit, constraints);
 		return constraints;
 	}
-
+	
 	/**
 	 * update a CompilationUnit's imports after changing the type of declarations
 	 */
@@ -1133,7 +1180,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		// BUG: currently, no type constraints are generated for methods that are related
 		// but that do not override each other. As a result, we may miss certain relevant
 		// variables
-
+		
 		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.analyzingMessage"), 100); //$NON-NLS-1$
 		
 		if (fAffectedUnits != null) {
@@ -1144,18 +1191,31 @@ public class ChangeTypeRefactoring extends Refactoring {
 		if (fMethodBinding != null) {
 			IJavaProject project= fCu.getJavaProject();
 			if (fMethodBinding != null) {
+				
+				
 				IMethod selectedMethod= Bindings.findMethod(fMethodBinding, project);
+				if (selectedMethod == null){
+					throw new Error(RefactoringCoreMessages.getString("ChangeTypeAction.exception")); //$NON-NLS-1$
+				}
+				
+				// the following code fragment appears to be the source of a memory leak, when
+				// GT is repeatedly applied
+						
 				IMethod root= selectedMethod;
 				if (! root.getDeclaringType().isInterface() && MethodChecks.isVirtual(root)) {
 					IMethod inInterface= MethodChecks.isDeclaredInInterface(root, new SubProgressMonitor(pm, 5));
 					if (inInterface != null && !inInterface.equals(root))
 						root= inInterface;
 				}
+
+				// end code fragment
+				
 				IMethod[] rippleMethods= RippleMethodFinder.getRelatedMethods(
 						root, new SubProgressMonitor(pm, 15), new IWorkingCopy[0]);
 				ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(
 					rippleMethods,
 					IJavaSearchConstants.ALL_OCCURRENCES);
+
 				// To compute the scope we have to use the selected method. Otherwise we
 				// might start from the wrong project.
 				IJavaSearchScope scope= RefactoringScopeFactory.create(selectedMethod);
@@ -1171,13 +1231,16 @@ public class ChangeTypeRefactoring extends Refactoring {
 		} else if (fFieldBinding != null) {
 			try {
 				IField iField= Bindings.findField(fFieldBinding, fCu.getJavaProject());
+				if (iField == null){
+					throw new Error(RefactoringCoreMessages.getString("ChangeTypeAction.exception")); //$NON-NLS-1$
+				}
 				ISearchPattern pattern=
-					SearchEngine.createSearchPattern(iField, IJavaSearchConstants.ALL_OCCURRENCES);
+					SearchEngine.createSearchPattern(iField,
+													 IJavaSearchConstants.ALL_OCCURRENCES);
 				IJavaSearchScope scope= RefactoringScopeFactory.create(iField);
 				ICompilationUnit[] workingCopies= null;
 				SearchResultGroup[] groups=
 					RefactoringSearchEngine.search(new SubProgressMonitor(pm, 100), scope, pattern, workingCopies);
-				
 				fAffectedUnits= getCus(groups);
 			} catch (JavaModelException e) {
 				throw new Error(RefactoringCoreMessages.getString("ChangeTypeRefactoring.unhandledSearchException") + e); //$NON-NLS-1$
@@ -1194,7 +1257,6 @@ public class ChangeTypeRefactoring extends Refactoring {
 			}
 		}
 		pm.done();	
-		if (DEBUG) printCollection("affected units: ", Arrays.asList(fAffectedUnits)); //$NON-NLS-1$
 		return fAffectedUnits;
 	}
 
@@ -1226,35 +1288,6 @@ public class ChangeTypeRefactoring extends Refactoring {
 		return cv instanceof ExpressionVariable && ((ExpressionVariable)cv).getExpressionType() == ASTNode.NULL_LITERAL;
 	}
 
-	/**
-	 * (For debugging) Print the type of the ASTNode.
-	 */
-	private static String typeName(int type) {
-		if (type == ASTNode.SIMPLE_NAME) {
-			return "SimpleName"; //$NON-NLS-1$
-		} else if (ASTNode.SIMPLE_TYPE == 43) {
-			return "SimpleType"; //$NON-NLS-1$
-		} else if (type == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-			return "SingleVariableDeclaration"; //$NON-NLS-1$
-		} else if (type == ASTNode.METHOD_DECLARATION) {
-			return "MethodDeclaration"; //$NON-NLS-1$
-		} else if (type == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			return "VariableDeclarationFragment"; //$NON-NLS-1$
-		} else if (type == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
-			return "VariableDeclarationStatement"; //$NON-NLS-1$
-		} else if (type == ASTNode.FIELD_DECLARATION) {
-			return "FieldDeclaration"; //$NON-NLS-1$
-		} else if (type == ASTNode.METHOD_INVOCATION) {
-			return "MethodInvocation"; //$NON-NLS-1$
-		} else if (type == ASTNode.EXPRESSION_STATEMENT) {
-			return "ExpressionStatement"; //$NON-NLS-1$
-		} else if (type == ASTNode.CAST_EXPRESSION) {
-			return "CastExpression"; //$NON-NLS-1$
-		} else if (type == ASTNode.CLASS_INSTANCE_CREATION) {
-			return "ClassInstanceCreation"; //$NON-NLS-1$
-		}
-		return "<<unknown>> (" + type + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-	}
 
 	/**
 	 * For debugging.
@@ -1269,13 +1302,14 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/**
 	 * Returns the compilation units that contain the search results.
 	 */
-	private static ICompilationUnit[] getCus(SearchResultGroup[] groups) {
+	private ICompilationUnit[] getCus(SearchResultGroup[] groups) {
 		List result= new ArrayList(groups.length);
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu != null)
 				result.add(WorkingCopyUtil.getWorkingCopyIfExists(cu));
+				fCuToSearchResultGroup.put(cu, group);
 		}
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
@@ -1284,6 +1318,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * Returns true if and only if type1 is a direct or indirect subtype of type2.
      */
     public boolean isSubTypeOf(IType type1, IType type2) {
+    	if (type2.getFullyQualifiedName().equals("java.lang.Object")) return true; //$NON-NLS-1$
 		if (type1.equals(type2))
 			return true;	
 		if (type2.getFullyQualifiedName().equals(RefactoringCoreMessages.getString("ChangeTypeRefactoring.javaLangObject"))) // workaround for bug #46052 //$NON-NLS-1$
@@ -1300,4 +1335,5 @@ public class ChangeTypeRefactoring extends Refactoring {
     public IJavaProject getProject(){
     	return fCu.getJavaProject();
     }
+    
 }
