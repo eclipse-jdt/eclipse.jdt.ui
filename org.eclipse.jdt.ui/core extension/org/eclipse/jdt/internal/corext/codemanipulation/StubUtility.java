@@ -203,11 +203,18 @@ public class StubUtility {
 	private static String resolveAndAdd(String refTypeSig, IType declaringType, IImportsStructure imports) throws JavaModelException {
 		String resolvedTypeName= JavaModelUtil.getResolvedTypeName(refTypeSig, declaringType);
 		if (resolvedTypeName != null) {
+			StringBuffer buf= new StringBuffer();
 			if (imports != null) {
 				imports.addImport(resolvedTypeName);
-				return Signature.getSimpleName(resolvedTypeName);
+				buf.append(Signature.getSimpleName(resolvedTypeName));
+			} else {
+				buf.append(resolvedTypeName);
 			}
-			return resolvedTypeName;
+			int arrayCount= Signature.getArrayCount(refTypeSig);
+			for (int i= 0; i < arrayCount; i++) {
+				buf.append("[]");
+			}
+			return buf.toString();
 		}
 		return Signature.toString(refTypeSig);
 	}
