@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.reorg;
 
 import java.util.List;
 
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 public class RenameAction extends ReorgAction {
@@ -17,23 +18,21 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 		setDescription(ReorgMessages.getString("renameAction.description")); //$NON-NLS-1$
 	}
 
-	public void update() {
-		List sel= ((IStructuredSelection)getSelectionProvider().getSelection()).toList();
-		setEnabled(canExecute(sel));
-	}
-	
 	/**
 	 *The user has invoked this action
 	 */
 	public void run() {
 		fRefactoringSupport.rename(getStructuredSelection().getFirstElement());
 	}
-		
-	protected boolean canExecute(List selection) {
+	
+	/* non java-doc
+	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
+	 */
+	public boolean canOperateOn(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return false;
 
-		Object element= selection.get(0);
+		Object element= selection.getFirstElement();
 		fRefactoringSupport= RefactoringSupportFactory.createRenameSupport(element);
 		if (fRefactoringSupport == null)
 			return false;

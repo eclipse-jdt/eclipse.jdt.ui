@@ -78,8 +78,11 @@ public class DeleteAction extends ReorgAction {
 		return false;
 	}
 
-	protected boolean canExecute(List selection) {
-		return canActivate(new DeleteRefactoring(selection));
+	/* non java-doc
+	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
+	 */
+	public boolean canOperateOn(IStructuredSelection selection) {
+		return canActivate(new DeleteRefactoring(selection.toList()));
 	}
 	
 	private boolean confirmDelete(IStructuredSelection selection) {

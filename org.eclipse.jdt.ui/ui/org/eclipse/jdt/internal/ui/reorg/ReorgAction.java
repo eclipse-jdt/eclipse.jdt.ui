@@ -26,32 +26,19 @@ import org.eclipse.ui.actions.SelectionProviderAction;
 /**
  * Base class for actions related to reorganizing resources
  */
-public abstract class ReorgAction extends SelectionProviderAction {
+public abstract class ReorgAction extends SelectionProviderAction implements IRefactoringAction{
 	
 	public ReorgAction(ISelectionProvider p, String name) {
 		super(p, name);
 	}
 	
 	/**
-	 * Hook to update the action's enable state before it is added to the context
-	 * menu. This default implementation does nothing.
-	 */
-	public void update() {
-	}
-
-	/**
 	 *Set self's enablement based upon the currently selected resources
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(canBeEnabledOn(selection));
+		setEnabled(canOperateOn(selection));
 	}
-		public boolean canBeEnabledOn(IStructuredSelection selection){
-		return canExecute(selection.toList());
-	}
-	
-	abstract boolean canExecute(List list);
-
-	boolean canActivate(Refactoring ref){
+		static boolean canActivate(Refactoring ref){
 		try {
 			return ref.checkActivation(new NullProgressMonitor()).isOK();
 		} catch (JavaModelException e) {

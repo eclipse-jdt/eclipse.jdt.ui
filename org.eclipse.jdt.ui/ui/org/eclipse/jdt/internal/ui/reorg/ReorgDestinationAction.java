@@ -49,6 +49,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
@@ -290,8 +291,11 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		return null;
 	}
 
-	protected boolean canExecute(List sel) {
-		return canActivate(createRefactoring(sel));
+	/* non java-doc
+	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
+	 */
+	public boolean canOperateOn(IStructuredSelection selection) {
+		return canActivate(createRefactoring(selection.toList()));
 	}
 	
 	//-----

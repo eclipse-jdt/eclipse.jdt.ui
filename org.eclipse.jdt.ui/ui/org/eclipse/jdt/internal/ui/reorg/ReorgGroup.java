@@ -26,7 +26,6 @@ public class ReorgGroup extends ContextMenuGroup {
 		
 		for (int i= 0; i < fActions.length; i++) {
 			ReorgAction action= fActions[i];
-			action.update();
 			if (action.isEnabled())
 				manager.appendToGroup(GROUP_NAME, action);
 		}
