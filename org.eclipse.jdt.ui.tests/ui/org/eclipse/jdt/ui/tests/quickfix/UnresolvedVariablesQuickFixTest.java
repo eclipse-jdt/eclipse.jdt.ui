@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewVariableCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.ReplaceCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.RenameNodeCompletionProposal;
 
 public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	
@@ -788,7 +788,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		for (int i= proposals.size() - 1; i >= 0; i--) {
 			Object curr= proposals.get(i);
-			if (!(curr instanceof ReplaceCorrectionProposal)) {
+			if (!(curr instanceof RenameNodeCompletionProposal)) {
 				proposals.remove(i);
 			}
 		}
@@ -854,7 +854,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		for (int i= proposals.size() - 1; i >= 0; i--) {
 			Object curr= proposals.get(i);
-			if (!(curr instanceof ReplaceCorrectionProposal)) {
+			if (!(curr instanceof RenameNodeCompletionProposal)) {
 				proposals.remove(i);
 			}
 		}
@@ -899,6 +899,56 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		String expected2= buf.toString();
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
+	
+	public void testSimilarVariableNamesMultipleOcc() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
+		buf= new StringBuffer();
+		buf.append("package test3;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int cout;\n");
+		buf.append("    public void setCount(int x) {\n");
+		buf.append("        count= x;\n");
+		buf.append("        count++;\n");	
+		buf.append("    }\n");
+		buf.append("    public int getCount() {\n");
+		buf.append("        return count;\n");	
+		buf.append("    }\n");			
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot, 3);
+		for (int i= proposals.size() - 1; i >= 0; i--) {
+			Object curr= proposals.get(i);
+			if (!(curr instanceof RenameNodeCompletionProposal)) {
+				proposals.remove(i);
+			}
+		}
+		
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test3;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int cout;\n");
+		buf.append("    public void setCount(int x) {\n");
+		buf.append("        cout= x;\n");
+		buf.append("        cout++;\n");	
+		buf.append("    }\n");
+		buf.append("    public int getCount() {\n");
+		buf.append("        return cout;\n");	
+		buf.append("    }\n");			
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertEqualString( preview1, expected1);
 	}
 	
 	public void testVarMultipleOccurances1() throws Exception {
