@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -140,23 +141,34 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		
 		// put default class to test		
 		if (element != null) {
-			IType enclosingType= null;
+			IType classToTest= null;
 			// evaluate the enclosing type
 			IPackageFragment pack= (IPackageFragment) JavaModelUtil.findElementOfKind(element, IJavaElement.PACKAGE_FRAGMENT);
 			IType typeInCompUnit= (IType) JavaModelUtil.findElementOfKind(element, IJavaElement.TYPE);
 			if (typeInCompUnit != null) {
 				if (typeInCompUnit.getCompilationUnit() != null) {
-					enclosingType= typeInCompUnit;
+					classToTest= typeInCompUnit;
 				}
 			} else {
 				ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(element, IJavaElement.COMPILATION_UNIT);
 				if (cu != null) 
-					enclosingType= JavaModelUtil.findPrimaryType(cu);
+					classToTest= JavaModelUtil.findPrimaryType(cu);
+				else {
+					if (element instanceof IClassFile) {
+						try {
+							IClassFile cf= (IClassFile) element;
+							if (cf.isStructureKnown())
+								classToTest= cf.getType();
+						} catch(JavaModelException e) {
+							JUnitPlugin.log(e);
+						}
+					}					
+				}
 			}
-			if (enclosingType != null) {
+			if (classToTest != null) {
 				try {
-					if (!TestSearchEngine.isTestImplementor(enclosingType)) {
-						fDefaultClassToTest= enclosingType.getFullyQualifiedName();
+					if (!TestSearchEngine.isTestImplementor(classToTest)) {
+						fDefaultClassToTest= classToTest.getFullyQualifiedName();
 					}
 				} catch (JavaModelException e) {
 					JUnitPlugin.log(e);
@@ -784,11 +796,11 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				} else {
 					if (type.isInterface()) {
 						status.setWarning(Messages.getFormattedString("NewTestClassWizPage.warning.class_to_test.is_interface",classToTestName)); //$NON-NLS-1$
-						return status;
+//						return status;
 					}
 					if (pack != null && !JavaModelUtil.isVisible(type, pack)) {
 						status.setWarning(Messages.getFormattedString("NewTestClassWizPage.warning.class_to_test.interface_not_visible",classToTestName));//$NON-NLS-1$
-						return status;
+//						return status;
 					}
 				}
 				fClassToTest= type;
