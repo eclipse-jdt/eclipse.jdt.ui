@@ -29,24 +29,23 @@ import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -292,10 +291,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			List/*<String>*/ oldSingleImports= new ArrayList();
 			List/*<String>*/  oldDemandImports= new ArrayList();
 			List/*<SimpleName>*/ typeReferences= new ArrayList();
-			List/*<IBinding>*/ staticReferences= null;
-			if (JavaCore.VERSION_1_5.equals(cu.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true))) {
-				staticReferences= new ArrayList();
-			}
+			List/*<SimpleName>*/ staticReferences= new ArrayList();
 			
 			boolean res= collectReferences(typeReferences, staticReferences, oldSingleImports, oldDemandImports);
 			if (!res) {
@@ -356,25 +352,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 	}
 	
-	private void addStaticImports(List/*<IBinding>*/ staticReferences, ImportsStructure importsStructure) {
+	private void addStaticImports(List/*<SimpleName>*/ staticReferences, ImportsStructure importsStructure) {
 		for (int i= 0; i < staticReferences.size(); i++) {
-			IBinding binding= (IBinding) staticReferences.get(i);
-			String containerName;
-			switch (binding.getKind()) {
-				case IBinding.VARIABLE:
-					containerName= ((IVariableBinding) binding).getDeclaringClass().getQualifiedName();
-					break;
-				case IBinding.METHOD:
-					containerName= ((IMethodBinding) binding).getDeclaringClass().getQualifiedName();
-					break;
-				case IBinding.TYPE:
-					containerName= ((ITypeBinding) binding).getDeclaringClass().getQualifiedName();
-					break;
-				default:
-					continue;
+			Name name= (Name) staticReferences.get(i);
+			IBinding binding= name.resolveBinding();
+			if (binding != null) { // paranoidal check
+				importsStructure.addImport(Bindings.getImportName(binding), true);
 			}
-			
-			importsStructure.addImport(JavaModelUtil.concatenateName(containerName, binding.getName()), true);
 		}
 	}
 
@@ -404,7 +388,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 		
-		ImportReferencesCollector visitor = new ImportReferencesCollector(fRange, typeReferences, staticReferences);
+		IJavaProject project= fImportsStructure.getCompilationUnit().getJavaProject();
+		ImportReferencesCollector visitor = new ImportReferencesCollector(project, fRange, typeReferences, staticReferences);
 		fASTRoot.accept(visitor);
 
 		return true;

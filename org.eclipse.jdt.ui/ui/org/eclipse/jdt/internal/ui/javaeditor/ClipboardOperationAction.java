@@ -54,13 +54,14 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -71,32 +72,54 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public final class ClipboardOperationAction extends TextEditorAction {
 	
 	public static class ClipboardData {
-		
 		private String fOriginHandle;
-		private String[] fImports;
+		private String[] fTypeImports;
+		private String[] fStaticImports;
 						
-		public ClipboardData(IJavaElement origin, String[] imports) {
-			fImports= imports;
+		public ClipboardData(IJavaElement origin, String[] typeImports, String[] staticImports) {
+			Assert.isNotNull(origin);
+			Assert.isNotNull(typeImports);
+			Assert.isNotNull(staticImports);
+			
+			fTypeImports= typeImports;
+			fStaticImports= staticImports;
 			fOriginHandle= origin.getHandleIdentifier();
 		}
 		
 		public ClipboardData(byte[] bytes) throws IOException {
 			DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(bytes));
-			
-			fOriginHandle= dataIn.readUTF();
-			int count= dataIn.readInt();
-			
-			fImports= new String[count];
-			for (int i = 0; i < count; i++) {
-				fImports[i]= dataIn.readUTF();
+			try {
+				fOriginHandle= dataIn.readUTF();
+				fTypeImports= readArray(dataIn);
+				fStaticImports= readArray(dataIn);
+			} finally {
+				dataIn.close();
 			}
-			
-			dataIn.close();
 		}
 		
-
-		public String[] getImports() {
-			return fImports;
+		private static String[] readArray(DataInputStream dataIn) throws IOException {
+			int count= dataIn.readInt();
+			
+			String[] array= new String[count];
+			for (int i = 0; i < count; i++) {
+				array[i]= dataIn.readUTF();
+			}
+			return array;
+		}
+		
+		private static void writeArray(DataOutputStream dataOut, String[] array) throws IOException {
+			dataOut.writeInt(array.length);
+			for (int i = 0; i < array.length; i++) {
+				dataOut.writeUTF(array[i]);
+			}
+		}
+		
+		public String[] getTypeImports() {
+			return fTypeImports;
+		}
+		
+		public String[] getStaticImports() {
+			return fStaticImports;
 		}
 		
 		public boolean isFromSame(IJavaElement elem) {
@@ -106,16 +129,14 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		public byte[] serialize() throws IOException {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			DataOutputStream dataOut = new DataOutputStream(out);
-			
-			dataOut.writeUTF(fOriginHandle);
-			dataOut.writeInt(fImports.length);
-
-			for (int i = 0; i < fImports.length; i++) {
-				dataOut.writeUTF(fImports[i]);
+			try {
+				dataOut.writeUTF(fOriginHandle);
+				writeArray(dataOut, fTypeImports);
+				writeArray(dataOut, fStaticImports);
+			} finally {
+				dataOut.close();
+				out.close();
 			}
-			
-			dataOut.close();
-			out.close();
 			
 			return out.toByteArray();
 		}
@@ -385,13 +406,19 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			}
 		}
 		
-		ArrayList res= new ArrayList();
-		ImportReferencesCollector collector= new ImportReferencesCollector(new Region(offset, length), res, null);
+		ArrayList typeImportsRefs= new ArrayList();
+		ArrayList staticImportsRefs= new ArrayList();
+		
+		ImportReferencesCollector collector= new ImportReferencesCollector(inputElement.getJavaProject(), new Region(offset, length), typeImportsRefs, staticImportsRefs);
 		astRoot.accept(collector);
 		
-		HashSet namesToImport= new HashSet(res.size());
-		for (int i= 0; i < res.size(); i++) {
-			SimpleName curr= (SimpleName) res.get(i);
+		if (typeImportsRefs.isEmpty() && staticImportsRefs.isEmpty()) {
+			return null;
+		}
+		
+		HashSet namesToImport= new HashSet(typeImportsRefs.size());
+		for (int i= 0; i < typeImportsRefs.size(); i++) {
+			Name curr= (Name) typeImportsRefs.get(i);
 			IBinding binding= curr.resolveBinding();
 			if (binding != null && binding.getKind() == IBinding.TYPE) {
 				ITypeBinding typeBinding= (ITypeBinding) binding;
@@ -406,11 +433,24 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				}
 			}
 		}
-		if (namesToImport.isEmpty()) {
+		
+		HashSet staticsToImport= new HashSet(staticImportsRefs.size());
+		for (int i= 0; i < staticImportsRefs.size(); i++) {
+			Name curr= (Name) staticImportsRefs.get(i);
+			IBinding binding= curr.resolveBinding();
+			if (binding != null) {
+				staticsToImport.add(Bindings.getImportName(binding));
+			}
+		}
+		
+		
+		if (namesToImport.isEmpty() && staticsToImport.isEmpty()) {
 			return null;
 		}
 		
-		return new ClipboardData(inputElement, (String[]) namesToImport.toArray(new String[namesToImport.size()]));
+		String[] typeImports= (String[]) namesToImport.toArray(new String[namesToImport.size()]);
+		String[] staticImports= (String[]) staticsToImport.toArray(new String[staticsToImport.size()]);
+		return new ClipboardData(inputElement, typeImports, staticImports);
 	}
 
 
@@ -446,10 +486,15 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		ImportsStructure importsStructure= new ImportsStructure(unit, settings.importOrder, settings.importThreshold, true);
 		importsStructure.setFindAmbiguousImports(false);
-		String[] imports= data.getImports();
+		String[] imports= data.getTypeImports();
 		for (int i= 0; i < imports.length; i++) {
-			importsStructure.addImport(imports[i]);
+			importsStructure.addImport(imports[i], false);
 		}
+		String[] staticImports= data.getStaticImports();
+		for (int i= 0; i < staticImports.length; i++) {
+			importsStructure.addImport(staticImports[i], true);
+		}
+		
 		importsStructure.create(false, null);
 	}
 

@@ -168,7 +168,7 @@ public class CompilationUnitRewrite {
 	
 	public ImportRemover getImportRemover() {
 		if (fImportRemover == null) {
-			fImportRemover= new ImportRemover(fRoot);
+			fImportRemover= new ImportRemover(fCu.getJavaProject(), fRoot);
 		}
 		return fImportRemover;
 	}

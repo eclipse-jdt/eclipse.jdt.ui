@@ -162,6 +162,24 @@ public class Bindings {
 		return type.getQualifiedName();
 	}	
 	
+	public static String getImportName(IBinding binding) {
+		ITypeBinding declaring= null;
+		switch (binding.getKind()) {
+			case IBinding.TYPE:
+				return ((ITypeBinding) binding).getQualifiedName();
+			case IBinding.PACKAGE:
+				return binding.getName() + ".*"; //$NON-NLS-1$
+			case IBinding.METHOD:
+				declaring= ((IMethodBinding) binding).getDeclaringClass();
+				break;
+			case IBinding.VARIABLE:
+				declaring= ((IVariableBinding) binding).getDeclaringClass();
+				break;			
+		}
+		return JavaModelUtil.concatenateName(declaring.getQualifiedName(), binding.getName());
+	}	
+	
+	
 	private static void createName(ITypeBinding type, boolean includePackage, List list) {
 		ITypeBinding baseType= type;
 		if (type.isArray()) {

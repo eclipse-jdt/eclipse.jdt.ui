@@ -18,6 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -35,8 +37,10 @@ public class ImportRemover {
 	private Set/*<String>*/ fAddedImports;
 	private List/*<ASTNode>*/ fRemovedNodes;
 	private final CompilationUnit fRoot;
+	private final IJavaProject fProject;
 
-	public ImportRemover(CompilationUnit root) {
+	public ImportRemover(IJavaProject project, CompilationUnit root) {
+		fProject= project;
 		fRoot= root;
 		fAddedImports= new HashSet();
 		fRemovedNodes= new ArrayList();
@@ -60,7 +64,7 @@ public class ImportRemover {
 	
 	public ITypeBinding[] getImportsToRemove() {
 		ArrayList/*<SimpleName>*/ simpleNames= new ArrayList();
-		fRoot.accept(new ImportReferencesCollector(null, simpleNames, null));
+		fRoot.accept(new ImportReferencesCollector(fProject, null, simpleNames, null));
 		List/*<SimpleName>*/ removedTypeRefs= new ArrayList();
 		List/*<SimpleName>*/ notRemovedTypeRefs= new ArrayList();
 		divideTypeRefs(simpleNames, removedTypeRefs, notRemovedTypeRefs);

@@ -16,6 +16,9 @@ import java.util.List;
 
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -25,14 +28,17 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 public class ImportReferencesCollector extends GenericVisitor {
 
 	private Region fSubRange;
-	private Collection fTypeImports;
-	private Collection fStaticImports;
+	private Collection/*<Name>*/ fTypeImports;
+	private Collection/*<Name>*/ fStaticImports;
 
-	public ImportReferencesCollector(Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
+	public ImportReferencesCollector(IJavaProject project, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
 		super(true);
 		fTypeImports= resultingTypeImports;
 		fStaticImports= resultingStaticImports;
 		fSubRange= rangeLimit;
+		if (project == null || !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_SOURCE, true))) {
+			fStaticImports= null; // do not collect
+		}
 	}
 	
 	private boolean isAffected(ASTNode node) {
@@ -80,14 +86,14 @@ public class ImportReferencesCollector extends GenericVisitor {
 		while (name.isQualifiedName()) {
 			name= ((QualifiedName) name).getQualifier();
 		}
+		if (!isAffected(name)) {
+			return;
+		}
+		
 		IBinding binding= name.resolveBinding();
 		if (binding == null || !Modifier.isStatic(binding.getModifiers()) || ((SimpleName) name).isDeclaration()) {
 			return;
 		}
-		if (fStaticImports.contains(binding)) {
-			return;
-		}
-		
 		
 		int flags= 0;
 		ITypeBinding declaringClass= null;
@@ -109,7 +115,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 					return;
 				}
 			}
-			fStaticImports.add(binding);
+			fStaticImports.add(name);
 		}
 	}
 	
