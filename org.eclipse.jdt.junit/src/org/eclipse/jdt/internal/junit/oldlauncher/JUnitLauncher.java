@@ -38,10 +38,7 @@ public class JUnitLauncher extends JUnitBaseLauncherDelegate {
 		argv.add(Integer.toString(port));
 		//argv("-debugging");
 		argv.add("-classNames");
-				
-		if (JUnitPreferencePage.getKeepJUnitAlive() && runMode.equals(ILaunchManager.DEBUG_MODE))
-			argv.add(0, "-keepalive");
-			
+							
 		for (int i= 0; i < testTypes.length; i++) 
 			argv.add(testTypes[i].getFullyQualifiedName());
 	

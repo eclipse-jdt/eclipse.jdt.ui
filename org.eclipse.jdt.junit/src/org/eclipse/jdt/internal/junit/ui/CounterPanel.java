@@ -36,7 +36,7 @@ public class CounterPanel extends Composite {
 		gridLayout.marginWidth= 0;
 		setLayout(gridLayout);
 		
-		fNumberOfRuns= createLabel("Runs: ", fRunIcon, " 0/0  ");
+		fNumberOfRuns= createLabel("Runs: ", null, " 0/0  "); 
 		fNumberOfErrors= createLabel("Errors: ", fErrorIcon, " 0 ");
 		fNumberOfFailures= createLabel("Failures: ", fFailureIcon, " 0 ");
 

@@ -93,6 +93,16 @@
 		</launchConfigurationTabGroup>
 	</extension>
 
+	<extension point = "org.eclipse.debug.ui.launchConfigurationShortcuts">
+		<shortcut
+			id="org.eclipse.jdt.debug.ui.junitShortcut"
+			configTypeID="org.eclipse.jdt.junit.launchconfig">
+			<perspective id="org.eclipse.jdt.ui.JavaPerspective"/>
+			<perspective id="org.eclipse.jdt.ui.JavaHierarchyPerspective"/>
+			<perspective id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
+		</shortcut>
+	</extension>
+
 	<extension point="org.eclipse.ui.newWizards">
 		<category
 		   id = "org.eclipse.jdt.junit"

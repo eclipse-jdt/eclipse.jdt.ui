@@ -46,6 +46,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 
 	public static final String PORT_ATTR= JUnitPlugin.PLUGIN_ID+".PORT";
 	public static final String TESTTYPE_ATTR= JUnitPlugin.PLUGIN_ID+".TESTTYPE";
+	public static final String ATTR_KEEPRUNNING = JUnitPlugin.PLUGIN_ID+ ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
 	
 	/**
 	 * @see ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String)
@@ -172,4 +173,12 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	 * Override to create a custom VMRunnerConfiguration for a launch configuration.
 	 */
 	protected abstract VMRunnerConfiguration createVMRunner(ILaunchConfiguration configuration, IType[] testTypes, int port, String runMode) throws CoreException;
+
+	protected boolean keepAlive(ILaunchConfiguration config) {
+		try {
+			return config.getAttribute(ATTR_KEEPRUNNING, false);
+		} catch(CoreException e) {
+		}
+		return false;
+	}
 }

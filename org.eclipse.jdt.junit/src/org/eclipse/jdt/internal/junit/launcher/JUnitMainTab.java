@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.ui.IWorkbenchWindow;
@@ -65,6 +66,7 @@ import org.eclipse.jdt.internal.debug.ui.launcher.VMStandin;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.util.*;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
@@ -77,7 +79,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	private Label fProjLabel;
 	private Text fProjText;
 	private Button fProjButton;
-
+	private Button fKeepRunning;
+	
 	// Test class UI widgets
 	private Label fTestLabel;
 	private Text fTestText;
@@ -91,27 +94,19 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		setControl(comp);
 
 		GridLayout topLayout = new GridLayout();
+		topLayout.numColumns= 2;
 		comp.setLayout(topLayout);		
 		GridData gd;
 		
 		createVerticalSpacer(comp);
 		
-		Composite projComp = new Composite(comp, SWT.NONE);
-		GridLayout projLayout = new GridLayout();
-		projLayout.numColumns = 2;
-		projLayout.marginHeight = 0;
-		projLayout.marginWidth = 0;
-		projComp.setLayout(projLayout);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		projComp.setLayoutData(gd);
-		
-		fProjLabel = new Label(projComp, SWT.NONE);
+		fProjLabel = new Label(comp, SWT.NONE);
 		fProjLabel.setText("&Project:");
-		gd = new GridData();
+		gd= new GridData();
 		gd.horizontalSpan = 2;
 		fProjLabel.setLayoutData(gd);
 		
-		fProjText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
+		fProjText= new Text(comp, SWT.SINGLE | SWT.BORDER);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		fProjText.setLayoutData(gd);
 		fProjText.addModifyListener(new ModifyListener() {
@@ -120,30 +115,22 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			}
 		});
 		
-		fProjButton = new Button(projComp, SWT.PUSH);
-		fProjButton.setText("&Browse....");
+		fProjButton = new Button(comp, SWT.PUSH);
+		fProjButton.setText("&Browse...");
 		fProjButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
 				handleProjectButtonSelected();
 			}
 		});
+		setButtonGridData(fProjButton); 
 		
-		Composite testComp = new Composite(comp, SWT.NONE);
-		GridLayout testLayout = new GridLayout();
-		testLayout.numColumns = 3;
-		testLayout.marginHeight = 0;
-		testLayout.marginWidth = 0;
-		testComp.setLayout(testLayout);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		testComp.setLayoutData(gd);
-		
-		fTestLabel = new Label(testComp, SWT.NONE);
+		fTestLabel = new Label(comp, SWT.NONE);
 		fTestLabel.setText("&Test class:");
 		gd = new GridData();
-		gd.horizontalSpan = 3;
+		gd.horizontalSpan = 2;
 		fTestLabel.setLayoutData(gd);
 
-		fTestText = new Text(testComp, SWT.SINGLE | SWT.BORDER);
+		fTestText = new Text(comp, SWT.SINGLE | SWT.BORDER);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		fTestText.setLayoutData(gd);
 		fTestText.addModifyListener(new ModifyListener() {
@@ -152,21 +139,40 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			}
 		});
 		
-		fSearchButton = new Button(testComp, SWT.PUSH);
-		fSearchButton.setText("Searc&h...");
+		fSearchButton = new Button(comp, SWT.PUSH);
+		fSearchButton.setText("&Search...");
 		fSearchButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
 				handleSearchButtonSelected();
 			}
 		});
+		setButtonGridData(fSearchButton);
+		
+		fKeepRunning = new Button(comp, SWT.CHECK);
+		fKeepRunning.setText("&Keep JUnit running after a test run when debugging");
+		gd= new GridData();
+		gd.horizontalAlignment= GridData.FILL;
+		gd.horizontalSpan= 2;
+		fKeepRunning.setLayoutData(gd);
 	}
 	
+
 	/**
 	 * @see ILaunchConfigurationTab#initializeFrom(ILaunchConfiguration)
 	 */
 	public void initializeFrom(ILaunchConfiguration config) {
 		updateProjectFromConfig(config);
 		updateTestTypeFromConfig(config);
+		updateKeepRunning(config);
+	}
+
+	private void updateKeepRunning(ILaunchConfiguration config) {
+		boolean running= false;
+		try {
+			running= config.getAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, false);
+		} catch (CoreException ce) {
+		}
+		fKeepRunning.setSelection(running);	 	
 	}
 	
 	protected void updateProjectFromConfig(ILaunchConfiguration config) {
@@ -193,6 +199,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	public void performApply(ILaunchConfigurationWorkingCopy config) {
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)fProjText.getText());
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)fTestText.getText());
+		config.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
 	}
 
 	/**

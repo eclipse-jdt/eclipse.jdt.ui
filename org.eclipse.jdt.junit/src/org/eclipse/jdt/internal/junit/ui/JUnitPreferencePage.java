@@ -4,23 +4,13 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.preference.*;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.swt.events.*;
+import org.eclipse.swt.layout.*;
+import org.eclipse.swt.widgets.*;
+import org.eclipse.ui.*;
 
 /**
  * Preference page for JUnit settings. Supports to define the failure
@@ -33,12 +23,10 @@ public class JUnitPreferencePage extends PreferencePage
 	private Table fTable;
 	private Button fAddButton;
 	private Button fRemoveButton;
-	private Button fFilterCheckBox;
 	
 	public static String STACK_FILTER_ENTRIES_COUNT= "NOF_STACK_FILTER_ENTRIES";
 	public static String STACK_FILTER_ENTRY_= "STACK_FILTER_ENTRY_";
 	public static String DO_FILTER_STACK= "DO_FILTER_STACK";
-	public static String DO_KEEP_JUNITVM_ALIVE= "KEEP_ALIVE";
 
 	private static String[] fgDefaultFilterPatterns= new String[] {
 		"org.eclipse.jdt.internal.junit.runner",
@@ -50,9 +38,6 @@ public class JUnitPreferencePage extends PreferencePage
 		"java.lang.reflect.Method.invoke"
 	};
 
-	/*
-	 * Constructor for JUnitPluginTestPreferencePage
-	 */
 	public JUnitPreferencePage() {
 		super();
 		setPreferenceStore(JUnitPlugin.getDefault().getPreferenceStore());
@@ -73,11 +58,6 @@ public class JUnitPreferencePage extends PreferencePage
 		return store.getBoolean(DO_FILTER_STACK);
 	}
 	
-	public static boolean getKeepJUnitAlive() {
-		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(DO_KEEP_JUNITVM_ALIVE);
-	}
-	
 	public static void setFilterStack(boolean filter) {
 		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
 		store.setValue(DO_FILTER_STACK, filter);
@@ -85,7 +65,6 @@ public class JUnitPreferencePage extends PreferencePage
 	
 	public static void initializeDefaults(IPreferenceStore store) {
 		store.setDefault(JUnitPreferencePage.DO_FILTER_STACK, true); 
-		store.setDefault(JUnitPreferencePage.DO_KEEP_JUNITVM_ALIVE, true); 
 		int count= store.getInt(STACK_FILTER_ENTRIES_COUNT);
 		if (count == 0) {
 			store.setValue(STACK_FILTER_ENTRIES_COUNT, fgDefaultFilterPatterns.length);
@@ -94,98 +73,77 @@ public class JUnitPreferencePage extends PreferencePage
 			}
 		}
 	}
-
-	/*
-	 * @see PreferencePage#createControl(Composite)
-	 */
-	public void createControl(Composite parent) {
-		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
-		super.createControl(parent);
-	}
 	
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
 		noDefaultAndApplyButton();
-		Composite composite= createContainer(parent);
-		createCheckPanel(composite);			
-		createFilterTable(composite);
-		createAddRemovePanel(composite);
-		return composite;
-	}
-
-	protected Composite createContainer(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
-		layout.makeColumnsEqualWidth= false;
-		composite.setLayout(layout);
-		GridData gridData= new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
-		composite.setLayoutData(gridData);
-		return composite;
-	}
-	
-	protected void createCheckPanel(Composite composite) {
-		Composite checkPanel= new Composite(composite, SWT.NONE);
-		GridData gridData= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
-		gridData.horizontalSpan= 2;
-		checkPanel.setLayoutData(gridData);
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
-		layout.makeColumnsEqualWidth= false;
-		checkPanel.setLayout(layout);
-		createFilterCheckLabel(checkPanel);
-	}
-	
-	protected void createFilterCheckLabel(Composite checkPanel) {
-		IPreferenceStore store= getPreferenceStore();
-		fFilterCheckBox= new Button(checkPanel, SWT.CHECK);
-		GridData gridData= new GridData();
-		fFilterCheckBox.setLayoutData(gridData);		
-		fFilterCheckBox.setSelection(getKeepJUnitAlive());
-
-		Label label= new Label(checkPanel, SWT.WRAP);
-		label.setText("&Keep JUnit running after a test run when debugging.\nThis allows to fix a test and to run it again (requires hot code replace support)");
-		gridData= new GridData(GridData.FILL_HORIZONTAL);
-		label.setLayoutData(gridData);
-	}
-
-	protected void createAddRemovePanel(Composite composite) {
-		Composite buttonPanel= new Composite(composite, SWT.NONE);
-		GridLayout layout= new GridLayout();
-		buttonPanel.setLayout(layout);	
-		GridData gridData= new GridData();
-		buttonPanel.setLayoutData(gridData);
 		
-		createAddButton(buttonPanel);
-		createRemoveButton(buttonPanel);
+		Composite composite= new Composite(parent, SWT.NULL);
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
+		composite.setLayout(layout);
+		GridData data = new GridData();
+		data.verticalAlignment = GridData.FILL;
+		data.horizontalAlignment = GridData.FILL;
+		composite.setLayoutData(data);
+		
+		createFilterTable(composite);
+		createListButtons(composite);
+		return composite;
 	}
+		
+	protected void createListButtons(Composite composite) {
+		Composite buttonComposite= new Composite(composite, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		buttonComposite.setLayout(layout);	
+		GridData gridData= new GridData();
+		gridData.verticalAlignment= GridData.FILL;
+		gridData.horizontalAlignment= GridData.FILL;
+		buttonComposite.setLayoutData(gridData);
+		
+		fAddButton= new Button(buttonComposite, SWT.CENTER | SWT.PUSH);
+		fAddButton.setText("&Add...");
+		setButtonGridData(fAddButton);
+		fAddButton.addSelectionListener(this);
 
-	protected void createRemoveButton(Composite buttonPanel) {
-		fRemoveButton= new Button(buttonPanel, SWT.PUSH);
+		fRemoveButton= new Button(buttonComposite, SWT.CENTER | SWT.PUSH);
 		fRemoveButton.setText("&Remove");
-		fRemoveButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
+		setButtonGridData(fRemoveButton);
 		fRemoveButton.addSelectionListener(this);
 	}
-
-	protected void createAddButton(Composite buttonPanel) {
-		fAddButton= new Button(buttonPanel, SWT.PUSH);
-		fAddButton.setText("&Add...");
-		fAddButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fAddButton.addSelectionListener(this);
+	
+	private void setButtonGridData(Button button) {
+		GridData data = new GridData();
+		data.horizontalAlignment = GridData.FILL;
+		data.grabExcessHorizontalSpace = true;
+		data.heightHint= convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+		int widthHint= convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+		data.widthHint= Math.max(widthHint, button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
+		button.setLayoutData(data);
 	}
 
 	protected void createFilterTable(Composite composite) {
-		Label label= new Label(composite, SWT.WRAP);
-		GridData gridData= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
+		Label label= new Label(composite, SWT.NONE);
+		label.setText("&Stack filter patterns:");
+		GridData gridData= new GridData();
+		gridData.horizontalAlignment= GridData.FILL;
 		gridData.horizontalSpan= 2;
 		label.setLayoutData(gridData);
-		label.setText("&Stack filter patterns:");
 		
-		fTable= new Table(composite, SWT.BORDER | SWT.SINGLE | SWT.NONE);
-		gridData= new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL | GridData.FILL_BOTH);
-		fTable.setLayoutData(gridData);
+		fTable= new Table(composite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		GridData data= new GridData();
+		//Set heightHint with a small value so the list size will be defined by 
+		//the space available in the dialog instead of resizing the dialog to
+		//fit all the items in the list.
+		data.heightHint= fTable.getItemHeight();
+		data.verticalAlignment= GridData.FILL;
+		data.horizontalAlignment= GridData.FILL;
+		data.grabExcessHorizontalSpace= true;
+		data.grabExcessVerticalSpace= true;
+
+		fTable.setLayoutData(data);
 		fTable.addSelectionListener(this);
 		fillList();
 		if (fTable.getItemCount() > 0)
@@ -222,10 +180,11 @@ public class JUnitPreferencePage extends PreferencePage
 			dialog.open();
 			String pattern= dialog.getValue();
 			addFilterString(pattern);
+			fTable.deselectAll();
 			fTable.select(fTable.getItemCount()-1);
 		}
 		else if (selectionEvent.getSource().equals(fRemoveButton)) {
-			fTable.remove(fTable.getSelectionIndex());
+			fTable.remove(fTable.getSelectionIndices());
 		}	
 	    fRemoveButton.setEnabled(fTable.getSelectionIndex() != -1);
 	}
@@ -238,7 +197,6 @@ public class JUnitPreferencePage extends PreferencePage
 		for (int i= 0; i < filterEntriesCount; i++) {
 			store.setValue(STACK_FILTER_ENTRY_ + i, fTable.getItem(i).getText());
 		}
-		store.setValue(DO_FILTER_STACK, fFilterCheckBox.getSelection());
 		return true;			
 	}
 	

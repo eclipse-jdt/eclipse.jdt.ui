@@ -18,9 +18,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -79,5 +82,12 @@ public abstract class JUnitLaunchConfigurationTab extends AbstractLaunchConfigur
 			name = javaProject.getElementName();
 		}
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, name);
-	}	
+	}
+
+	protected void setButtonGridData(Button button) {
+		GridData gridData= new GridData();
+		button.setLayoutData(gridData);
+		SWTUtil.setButtonDimensionHint(button);
+	}
+	
 }

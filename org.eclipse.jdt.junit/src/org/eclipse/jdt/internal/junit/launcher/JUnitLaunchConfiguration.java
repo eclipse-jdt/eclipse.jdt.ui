@@ -43,7 +43,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 		//argv("-debugging");
 		argv.add("-classNames");
 				
-		if (JUnitPreferencePage.getKeepJUnitAlive() && runMode.equals(ILaunchManager.DEBUG_MODE))
+		if (keepAlive(configuration) && runMode.equals(ILaunchManager.DEBUG_MODE))
 			argv.add(0, "-keepalive");
 			
 		for (int i= 0; i < testTypes.length; i++) 

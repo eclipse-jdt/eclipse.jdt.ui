@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.*;
+import java.util.HashSet;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.internal.junit.oldlauncher.*;
@@ -56,6 +58,13 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$
 
 	private static URL fgIconBaseURL;
+	
+	/**
+	 * Use to track new launches. We need to do this
+	 * so that we only attach a TestRunner once to a launch.
+	 * Once a test runner is connected it is removed from the set.
+	 */
+	private AbstractSet fTrackedLaunches= new HashSet(20);
 	
 	public JUnitPlugin(IPluginDescriptor desc) {
 		super(desc);
@@ -127,12 +136,14 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * @see ILaunchListener#launchRemoved(ILaunch)
 	 */
 	public void launchRemoved(ILaunch launch) {
+		fTrackedLaunches.remove(launch);
 	}
 
 	/*
 	 * @see ILaunchListener#launchAdded(ILaunch)
 	 */
 	public void launchAdded(ILaunch launch) {
+		fTrackedLaunches.add(launch);
 	}
 
 	public void connectTestRunner(ILaunch launch, IType launchedType, int port) {
@@ -159,7 +170,10 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * @see ILaunchListener#launchChanged(ILaunch)
 	 */
 	public void launchChanged(final ILaunch launch) {
-		ILauncher launcher=launch.getLauncher();
+		if (!fTrackedLaunches.contains(launch))
+			return;
+			
+		ILauncher launcher= launch.getLauncher();
 		IType launchedType= null;
 		int port= -1;
 		
@@ -184,6 +198,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			}	
 		}
 		if (launchedType != null) {
+			fTrackedLaunches.remove(launch);
 			final int finalPort= port;
 			final IType finalType= launchedType;
 			getDisplay().asyncExec(new Runnable() {

@@ -296,8 +296,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		showInformation(msg);
 		postInfo(msg);
 		
-		if (fTestRunnerClient != null) 
+		if (fTestRunnerClient != null) {
 			stopTest();
+		}
 		fTestRunnerClient= new RemoteTestRunnerClient();
 		fTestRunnerClient.startListening(this, port);
 		
