@@ -20,12 +20,12 @@ import org.eclipse.jdt.internal.core.refactoring.packageroots.*;
 
 public class RenameProjectChange extends AbstractRenameChange {
 
-	protected RenameProjectChange(IJavaProject project, String newName) throws JavaModelException {
+	/*package*/ RenameProjectChange(IJavaProject project, String newName) throws JavaModelException {
 		this(project.getCorrespondingResource().getFullPath(), project.getElementName(), newName);
 		Assert.isTrue(!project.isReadOnly(), "should not be read-only"); 
 	}
 	
-	protected RenameProjectChange(IPath resourcePath, String oldName, String newName) {
+	private RenameProjectChange(IPath resourcePath, String oldName, String newName) {
 		super(resourcePath, oldName, newName);
 	}
 

@@ -1,11 +1,9 @@
 package org.eclipse.jdt.internal.core.refactoring.projects;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
@@ -14,21 +12,18 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.refactoring.projects.*;
 
+public class RenameResourceRefactoring extends Refactoring implements IRenameRefactoring {
 
-public class RenameProjectRefactoring extends Refactoring implements IRenameRefactoring {
-
-	private IJavaProject fProject;
+	private IResource fResource;
 	private String fNewName;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	
-	public RenameProjectRefactoring(ITextBufferChangeCreator changeCreator, IJavaProject project){
-		Assert.isNotNull(project, "source folder"); 
+	public RenameResourceRefactoring(ITextBufferChangeCreator changeCreator, IResource resource){
+		Assert.isNotNull(resource, "resource"); 
 		Assert.isNotNull(changeCreator, "change creator");
 		fTextBufferChangeCreator= changeCreator;		
-		fProject= project;
+		fResource= resource;
 	}
 	
 	/**
@@ -47,17 +42,14 @@ public class RenameProjectRefactoring extends Refactoring implements IRenameRefa
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		if (! fProject.exists())
+		if (! fResource.exists())
 			return RefactoringStatus.createFatalErrorStatus("");
 		
-		if (fProject.isReadOnly())
+		if (! fResource.isAccessible())	
 			return RefactoringStatus.createFatalErrorStatus("");
 		
-		if (! fProject.isConsistent())
-			return RefactoringStatus.createFatalErrorStatus("");
-		
-		if (! fProject.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus("");
+		if (fResource.isReadOnly())	
+			return RefactoringStatus.createFatalErrorStatus("");	
 		
 		return new RefactoringStatus();
 	}
@@ -74,38 +66,58 @@ public class RenameProjectRefactoring extends Refactoring implements IRenameRefa
 	 * @see IRenameRefactoring#getCurrentName()
 	 */
 	public String getCurrentName() {
-		return fProject.getElementName();
+		return fResource.getName();
 	}
 
 	/**
 	 * @see IRenameRefactoring#checkNewName()
 	 */
 	public RefactoringStatus checkNewName() throws JavaModelException {
-		IStatus status= JavaPlugin.getWorkspace().validateName(fNewName, IResource.PROJECT);
-		if (!status.isOK()){
-			if (status.isMultiStatus())
-				return RefactoringStatus.createFatalErrorStatus("It is an invalid name for a project.");
-			return 
-				RefactoringStatus.createFatalErrorStatus(status.getMessage());
-		}
-		
-		if (projectNameAlreadyExists())
-			return RefactoringStatus.createFatalErrorStatus("A project with that name already exists.");
-		
-		return new RefactoringStatus();
+		IContainer c= fResource.getParent();
+		if (c == null)
+			return RefactoringStatus.createFatalErrorStatus("Internal Error");
+						
+		if (c.findMember(fNewName) != null)
+			return RefactoringStatus.createFatalErrorStatus("A file or folder with this name already exists.");
+			
+		if (!c.getFullPath().isValidSegment(fNewName))
+			return RefactoringStatus.createFatalErrorStatus("This is an invalid name for a file or folder.");
+	
+		RefactoringStatus result= new RefactoringStatus();
+		result.merge(validateStatus(c.getWorkspace().validateName(fNewName, IResource.FOLDER)));
+		if (! result.hasFatalError())
+			result.merge(validateStatus(c.getWorkspace().validatePath(createNewPath(), IResource.FOLDER)));		
+		return result;		
 	}
 	
-	private boolean projectNameAlreadyExists(){
-		return fProject.getJavaModel().getJavaProject(fNewName).exists();
+	private String createNewPath(){
+		return fResource.getFullPath().removeLastSegments(1).append(fNewName).toString();
 	}
-
+	
+	private static RefactoringStatus validateStatus(IStatus status){
+		RefactoringStatus result= new RefactoringStatus();
+		if (! status.isOK()){
+			switch (status.getSeverity()){
+				case IStatus.INFO:
+					result.addWarning(status.getMessage());
+					break;
+				case IStatus.WARNING:
+					result.addError(status.getMessage());
+					break;
+				case IStatus.ERROR:
+					return RefactoringStatus.createFatalErrorStatus(status.getMessage());
+			}
+		}	
+		return result;
+	}
+	
 	/**
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
-			return new RenameProjectChange(fProject, fNewName);
+			return new RenameResourceChange(fResource, fNewName);
 		} finally{
 			pm.done();
 		}	
@@ -115,8 +127,7 @@ public class RenameProjectRefactoring extends Refactoring implements IRenameRefa
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Rename project " + getCurrentName() + " to:" + fNewName;
+		return "Rename resource " +  getCurrentName() + " to:" + fNewName;
 	}
-
 }
 

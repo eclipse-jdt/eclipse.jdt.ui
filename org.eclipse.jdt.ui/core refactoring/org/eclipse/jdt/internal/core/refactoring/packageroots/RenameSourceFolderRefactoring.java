@@ -113,13 +113,10 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
-			CompositeChange builder= new CompositeChange();
-			builder.addChange(new RenameSourceFolderChange(fSourceFolder, fNewName));
-			return builder;
+			return new RenameSourceFolderChange(fSourceFolder, fNewName);
 		} finally{
 			pm.done();
 		}	
-		
 	}
 }
 
