@@ -138,6 +138,8 @@ public class CompositeChange extends Change implements ICompositeChange {
 	 * @see IChange#perform
 	 */
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", 1);
+		pm.setTaskName("Performing changes...");
 		if (!isActive()){
 			fUndoChange= new NullChange();
 		} else{
