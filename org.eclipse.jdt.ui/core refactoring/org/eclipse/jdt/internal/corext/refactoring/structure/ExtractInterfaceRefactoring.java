@@ -219,6 +219,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		pm.beginTask("", 1);//$NON-NLS-1$
 		try {
 			RefactoringStatus result= new RefactoringStatus();
+			result.merge(checkInterfaceTypeName());
+			if (result.hasFatalError())
+				return result;
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
 			if (result.hasFatalError())
 				return result;
