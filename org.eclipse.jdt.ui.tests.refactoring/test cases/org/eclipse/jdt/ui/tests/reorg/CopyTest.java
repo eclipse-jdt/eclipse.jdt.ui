@@ -2263,6 +2263,9 @@ public class CopyTest extends RefactoringTest {
 			
 			newCu= getPackageP().getCompilationUnit(MockNewNameQueries.NEW_CU_NAME + ".java");
 			assertTrue("new file does not exist after copying", newCu.exists());
+			
+			String expectedSource= "package p;class "+ MockNewNameQueries.NEW_CU_NAME +"{void foo(){}class Inner{}}";
+			SourceCompareUtil.compare("source compare failed", newCu.getSource(), expectedSource);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());

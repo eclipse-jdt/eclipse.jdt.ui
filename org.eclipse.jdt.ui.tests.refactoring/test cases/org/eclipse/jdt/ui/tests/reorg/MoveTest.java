@@ -33,6 +33,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -1008,19 +1009,37 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDestination_yes_cuToFileInDifferentPackage() throws Exception{
 		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
-		IProject superFolder= MySetup.getProject().getProject();
+		IPackageFragment otherPackage= getRoot().createPackageFragment("other", true, new NullProgressMonitor());
+		IFolder superFolder= (IFolder) otherPackage.getResource();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
+		
+		ICompilationUnit newCu= null;
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
 			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= file;
-			verifyValidDestination(ref, destination);			
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source file does not exist before", cu1.exists());
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source file not moved", ! cu1.exists());
+			
+			newCu= otherPackage.getCompilationUnit(cu1.getElementName());
+			assertTrue("new file does not exist after", newCu.exists());
+
+			String expectedSource= "package other;class A{void foo(){}class Inner{}}";
+			SourceCompareUtil.compare("source compare failed", newCu.getSource(), expectedSource);
 		}finally{
 			performDummySearch();
-			cu1.delete(true, new NullProgressMonitor());
+			otherPackage.delete(true, null);	
+			if (newCu != null && newCu.exists())
+				newCu.delete(true, new NullProgressMonitor());
 			file.delete(true, false, null);
 		}
 	}
@@ -1030,6 +1049,8 @@ public class MoveTest extends RefactoringTest {
 		IProject superFolder= MySetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
+		
+		IFile newFile= null;
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
@@ -1037,9 +1058,22 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= folder;
 			verifyValidDestination(ref, destination);			
+
+			assertTrue("source file does not exist before", cu1.exists());
+			String expectedSource= cu1.getSource();
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source file not moved", ! cu1.exists());
+			
+			newFile= folder.getFile(cu1.getElementName());
+			assertTrue("new file does not exist after", newFile.exists());
+
+			SourceCompareUtil.compare("source compare failed", getContents(newFile), expectedSource);
 		}finally{
 			performDummySearch();
-			cu1.delete(true, new NullProgressMonitor());
+			newFile.delete(true, false, null);
 			folder.delete(true, false, null);
 		}
 	}
@@ -1052,6 +1086,7 @@ public class MoveTest extends RefactoringTest {
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
+		IFile newFile= null;
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
@@ -1059,9 +1094,19 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= folder;
 			verifyValidDestination(ref, destination);			
+
+			assertTrue("source file does not exist before", file.exists());
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source file not moved", ! file.exists());
+			
+			newFile= folder.getFile(file.getName());
+			assertTrue("new file does not exist after", newFile.exists());
 		}finally{
 			performDummySearch();
-			file.delete(true, new NullProgressMonitor());
+			newFile.delete(true, new NullProgressMonitor());
 			folder.delete(true, new NullProgressMonitor());
 		}
 	}		
@@ -1072,16 +1117,27 @@ public class MoveTest extends RefactoringTest {
 		file.create(getStream("123"), true, null);
 		
 		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());			
+		IFile newFile= null;
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
 			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= cu1;
-			verifyValidDestination(ref, destination);			
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source file does not exist before", file.exists());
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source file not moved", ! file.exists());
+			
+			newFile= ((IFolder)cu1.getParent().getResource()).getFile(file.getName());
+			assertTrue("new file does not exist after", newFile.exists());
 		}finally{
 			performDummySearch();
-			file.delete(true, new NullProgressMonitor());
+			newFile.delete(true, new NullProgressMonitor());
 			cu1.delete(true, new NullProgressMonitor());
 		}
 	}		
@@ -1091,6 +1147,7 @@ public class MoveTest extends RefactoringTest {
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
+		IFile newFile= null;
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
@@ -1098,9 +1155,19 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= getPackageP();
 			verifyValidDestination(ref, destination);			
+
+			assertTrue("source file does not exist before", file.exists());
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source file not moved", ! file.exists());
+			
+			newFile= ((IFolder)getPackageP().getResource()).getFile(file.getName());
+			assertTrue("new file does not exist after", newFile.exists());
 		}finally{
 			performDummySearch();
-			file.delete(true, new NullProgressMonitor());
+			newFile.delete(true, new NullProgressMonitor());
 		}
 	}
 
@@ -1108,7 +1175,8 @@ public class MoveTest extends RefactoringTest {
 		IProject superFolder= MySetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
-		
+
+		IFile newFile= null;	
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
@@ -1116,9 +1184,19 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);			
+
+			assertTrue("source file does not exist before", file.exists());
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source file not moved", ! file.exists());
+			
+			newFile= ((IFolder)getRoot().getResource()).getFile(file.getName());
+			assertTrue("new file does not exist after", newFile.exists());
 		}finally{
 			performDummySearch();
-			file.delete(true, new NullProgressMonitor());
+			newFile.delete(true, new NullProgressMonitor());
 		}
 	}		
 
@@ -1148,16 +1226,27 @@ public class MoveTest extends RefactoringTest {
 		IFolder otherFolder= superFolder.getFolder("otherfolder");
 		otherFolder.create(true, true, null);
 		
+		IFolder newFolder= null;
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
 			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= otherFolder;
-			verifyValidDestination(ref, destination);						
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source file does not exist before", folder.exists());
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source file not moved", ! folder.exists());
+			
+			newFolder= otherFolder.getFolder(folder.getName());
+			assertTrue("new file does not exist after", newFolder.exists());		
 		} finally{
 			performDummySearch();
-			folder.delete(true, new NullProgressMonitor());			
+			newFolder.delete(true, new NullProgressMonitor());			
 			otherFolder.delete(true, new NullProgressMonitor());			
 		}
 	}
