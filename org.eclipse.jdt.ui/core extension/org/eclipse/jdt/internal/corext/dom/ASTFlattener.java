@@ -536,6 +536,9 @@ import org.eclipse.jdt.internal.corext.Assert;
 			}
 		}
 		fResult.append(")");//$NON-NLS-1$
+		for (int i = 0; i < node.getExtraDimensions(); i++) {
+			fResult.append("[]");//$NON-NLS-1$
+		}		
 		if (!node.thrownExceptions().isEmpty()) {
 			fResult.append(" throws ");//$NON-NLS-1$
 			for (Iterator it = node.thrownExceptions().iterator(); it.hasNext(); ) {
@@ -684,6 +687,9 @@ import org.eclipse.jdt.internal.corext.Assert;
 		node.getType().accept(this);
 		fResult.append(" ");//$NON-NLS-1$
 		node.getName().accept(this);
+		for (int i = 0; i < node.getExtraDimensions(); i++) {
+			fResult.append("[]");//$NON-NLS-1$
+		}			
 		if (node.getInitializer() != null) {
 			fResult.append("=");//$NON-NLS-1$
 			node.getInitializer().accept(this);
