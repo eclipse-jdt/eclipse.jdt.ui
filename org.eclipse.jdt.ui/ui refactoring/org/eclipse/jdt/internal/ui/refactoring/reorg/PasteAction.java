@@ -17,8 +17,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,6 +30,21 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
+import org.eclipse.ui.actions.CopyProjectOperation;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -43,22 +61,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.FileTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.dnd.TransferData;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
-import org.eclipse.ui.actions.CopyProjectOperation;
-import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.part.ResourceTransfer;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -73,15 +76,12 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -104,7 +104,7 @@ public class PasteAction extends SelectionDispatchAction{
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE));
-		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE_HOVER));
+		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE));
 
 		update(getSelection());
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.PASTE_ACTION);
@@ -114,31 +114,9 @@ public class PasteAction extends SelectionDispatchAction{
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		try {
-			setEnabled(canOperateOn(selection));
-		} catch (JavaModelException e) {
-			//no ui here - this happens on selection changes
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
-			setEnabled(false);
-		}
+		// Moved condition checking to run (see http://bugs.eclipse.org/bugs/show_bug.cgi?id=78450)
 	}
 
-	private boolean canOperateOn(IStructuredSelection selection) throws JavaModelException {
-		TransferData[] availableDataTypes= fClipboard.getAvailableTypes();
-
-		List elements= selection.toList();
-		IResource[] resources= ReorgUtils.getResources(elements);
-		IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-		Paster[] pasters= createEnabledPasters(availableDataTypes);
-		for (int i= 0; i < pasters.length; i++) {
-			if (pasters[i].canPasteOn(javaElements, resources))
-				return true;
-		}
-		return false;
-	}
-	
 	private Paster[] createEnabledPasters(TransferData[] availableDataTypes) throws JavaModelException {
 		Paster paster;
 		Shell shell = getShell();
@@ -190,16 +168,16 @@ public class PasteAction extends SelectionDispatchAction{
 			for (int i= 0; i < pasters.length; i++) {
 				if (pasters[i].canPasteOn(javaElements, resources)) {
 					pasters[i].paste(javaElements, resources, availableTypes);
-					return;//one is enough
-				}	
+					return;// one is enough
+				}
 			}
-
+			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.disabled")); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch(InvocationTargetException e) {
+		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (InterruptedException e) {
-			//ok
+			// OK
 		}
 	}
 
@@ -600,7 +578,7 @@ public class PasteAction extends SelectionDispatchAction{
 				if (node != null)
 					rewrite.markAsInserted(node);
 			}
-			
+
 			private ASTNode createAndInsertNewNode(TypedSource source, CompilationUnit cuNode, OldASTRewrite rewrite) throws CoreException {
 				ASTNode destinationNode= getDestinationNodeForSourceElement(fDestination, source.getType(), cuNode);
 				if (destinationNode == null) {
@@ -629,7 +607,7 @@ public class PasteAction extends SelectionDispatchAction{
 						Assert.isTrue(false, String.valueOf(node.getNodeType()));
 				}
 			}
-			
+
 			private static void insertToCu(ASTNode node, CompilationUnit cuNode) {
 				switch(node.getNodeType()){
 					case ASTNode.TYPE_DECLARATION: 
@@ -639,16 +617,16 @@ public class PasteAction extends SelectionDispatchAction{
 						cuNode.imports().add(node);
 						break;
 					case ASTNode.PACKAGE_DECLARATION:
-						//only insert if none exists
+						// only insert if none exists
 						if (cuNode.getPackage() == null)
-							cuNode.setPackage((PackageDeclaration)node);
-						break;						
+							cuNode.setPackage((PackageDeclaration) node);
+						break;
 					default:
 						Assert.isTrue(false, String.valueOf(node.getNodeType()));
 				}
 			}
-			
-			//returns TypeDeclaration, CompilationUnit or null
+
+			// returns TypeDeclaration, CompilationUnit or null
 			private ASTNode getDestinationNodeForSourceElement(IJavaElement destinationElement, int elementType, CompilationUnit cuNode) throws JavaModelException {
 				IType ancestorType= getAncestorType(destinationElement);
 				if (ancestorType != null)
