@@ -187,6 +187,7 @@ public class JavaProjectHelper {
 		return jproject.getPackageFragmentRoot(path.toString());
 	}
 
+
 	/**
 	 * Copies the library into the project and adds it as library entry.
 	 */			
@@ -206,10 +207,39 @@ public class JavaProjectHelper {
 	}	
 
 	/**
+	 * Creates and adds a class folder to the class path.
+	 */			
+	public static IPackageFragmentRoot addClassFolder(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot) throws IOException, CoreException {
+		IProject project= jproject.getProject();
+		IContainer container= null;
+		if (containerName == null || containerName.length() == 0) {
+			container= project;
+		} else {
+			IFolder folder= project.getFolder(containerName);
+			if (!folder.exists()) {
+				CoreUtility.createFolder(folder, false, true, null);
+			}
+			container= folder;
+		}
+		return addLibrary(jproject, container.getFullPath(), sourceAttachPath, sourceAttachRoot);
+	}
+
+	/**
+	 * Creates and adds a class folder to the class path and imports all files
+	 * contained in the given Zip file.
+	 */			
+	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot, ZipFile zipFile) throws IOException, CoreException, InvocationTargetException {
+		IPackageFragmentRoot root= addClassFolder(jproject, containerName, sourceAttachPath, sourceAttachRoot);
+		importFilesFromZip(zipFile, root.getPath(), null);
+		return root;
+	}
+
+	/**
 	 * Adds a library entry pointing to a JRE.
 	 * Can return null, if no JRE installation was found.
 	 */	
 	public static IPackageFragmentRoot addRTJar(IJavaProject jproject) throws CoreException {
+
 		IPath[] rtJarPath= findRtJar();
 		if (rtJarPath != null) {
 			return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);

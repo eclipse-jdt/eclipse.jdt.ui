@@ -12,6 +12,7 @@ import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
 import org.eclipse.jdt.ui.tests.core.AddImportTest;
 import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
+import org.eclipse.jdt.ui.tests.core.ClassPathDetectorTest;
 import org.eclipse.jdt.ui.tests.core.HierarchicalASTVisitorTest;
 import org.eclipse.jdt.ui.tests.core.ImportOrganizeTest;
 import org.eclipse.jdt.ui.tests.core.JavaModelUtilTest;
@@ -56,6 +57,7 @@ public class AutomatedSuite extends TestSuite {
 		addTest(HTML2TextReaderTester.suite());
 		addTest(JavaDoc2HTMLTextReaderTester.suite());
 		addTest(NameProposerTest.suite());
+		addTest(ClassPathDetectorTest.suite());	
 		
 		addTest(ASTRewritingTest.suite());
 		addTest(QuickFixTest.suite());

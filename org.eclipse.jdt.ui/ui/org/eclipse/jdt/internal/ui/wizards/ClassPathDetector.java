@@ -130,13 +130,9 @@ public class ClassPathDetector implements IResourceVisitor {
 					fSourceFolders.add(packPath);
 				} else {
 					IPath relpath= new Path(decls[0].getElementName().replace('.', '/'));
-					int remainingSegments= packPath.segmentCount() - relpath.segmentCount();
-					if (remainingSegments >= 0) {
-						IPath common= packPath.removeFirstSegments(remainingSegments);
-						if (common.equals(relpath)) {
-							IPath prefix= packPath.uptoSegment(remainingSegments);
-							fSourceFolders.add(prefix);
-						}
+					IPath folderPath= getFolderPath(packPath, relpath);
+					if (folderPath != null) {
+						fSourceFolders.add(folderPath);
 					}
 				}						
 			} finally {
@@ -147,11 +143,36 @@ public class ClassPathDetector implements IResourceVisitor {
 		}
 		return true;
 	}
+
+
+	private IPath getFolderPath(IPath packPath, IPath relpath) {
+		int remainingSegments= packPath.segmentCount() - relpath.segmentCount();
+		if (remainingSegments >= 0) {
+			IPath common= packPath.removeFirstSegments(remainingSegments);
+			if (common.equals(relpath)) {
+				return packPath.uptoSegment(remainingSegments);
+			}
+		}
+		return null;
+	}
 		
 	private boolean visitClassFile(IFile file) {
-		/*IClassFileReader reader= ToolFactory.createDefaultClassFileReader(file.getLocation().toOSString(), 0);
+		/*
+		IClassFileReader reader= ToolFactory.createDefaultClassFileReader(file.getLocation().toOSString(), IClassFileReader.CLASSFILE_ATTRIBUTES);
 		char[] className= reader.getClassName();
-		String str= new String(className);
+		if (className != null) {
+			IPath packPath= file.getParent().getFullPath();
+			int idx= CharOperation.indexOf('/', className) + 1;
+			if (idx == 0) {
+				fClassFolders.add(packPath);
+			} else {
+				IPath relPath= new Path(new String(className, 0, idx));
+				IPath folderPath= getFolderPath(packPath, relPath);
+				if (folderPath != null) {
+					fClassFolders.add(folderPath);
+				}
+			}
+		}
 		*/
 		return true;
 	}	

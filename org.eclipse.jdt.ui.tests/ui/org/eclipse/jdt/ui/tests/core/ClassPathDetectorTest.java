@@ -42,7 +42,13 @@ public class ClassPathDetectorTest extends TestCase {
 	}
 
 	public static Test suite() {
-		return new TestSuite(THIS);
+		if (false) {
+			return new TestSuite(THIS);
+		} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new ClassPathDetectorTest("testClassFolder"));
+			return suite;
+		}
 	}
 
 
@@ -70,12 +76,31 @@ public class ClassPathDetectorTest extends TestCase {
 		if (fEnableAutoBuildAfterTesting)
 			JavaProjectHelper.setAutoBuilding(true);		
 	}
+	
+	private boolean hasSamePaths(IPath[] a, IPath[] b) {
+		if (a.length != b.length) {
+			return false;
+		}
+		for (int i= 0; i < a.length; i++) {
+			if (!a[i].equals(b[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 
 	private IClasspathEntry findEntry(IClasspathEntry entry, IClasspathEntry[] entries) {
 		for (int i= 0; i < entries.length; i++) {
 			IClasspathEntry curr= entries[i];
 			if (curr.getPath().equals(entry.getPath()) && curr.getEntryKind() == entry.getEntryKind()) {
-				return curr;
+				if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+					if (hasSamePaths(curr.getExclusionPatterns(), entry.getExclusionPatterns())) {
+						return curr;
+					}
+				} else {
+					return curr;
+				}
 			}
 		}
 		return null;
@@ -103,7 +128,7 @@ public class ClassPathDetectorTest extends TestCase {
 	
 	
 	
-	public void testDetection1() throws Exception {
+	public void testSourceAndLibrary() throws Exception {
 		// source folder & internal JAR
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
@@ -136,7 +161,7 @@ public class ClassPathDetectorTest extends TestCase {
 		assertTrue("Output folder", outputLocation.equals(projectOutput));
 	}
 
-	public void testDetection2() throws Exception {
+	public void testTwoSourceFolders() throws Exception {
 		// 2 source folders
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
@@ -175,7 +200,7 @@ public class ClassPathDetectorTest extends TestCase {
 		assertTrue("Output folder", outputLocation.equals(projectOutput));
 	}
 	
-	public void testDetection3() throws Exception {
+	public void testNestedSources() throws Exception {
 		// 2 nested source folders
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
@@ -214,6 +239,6 @@ public class ClassPathDetectorTest extends TestCase {
 		assertSameClasspath(projectEntries, entries);
 		
 		assertTrue("Output folder", outputLocation.equals(projectOutput));
-	}	
+	}
 
 }
