@@ -12,14 +12,10 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -28,9 +24,6 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
@@ -166,16 +159,4 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 		}
 		return status;
 	}
-	
-	private IFile[] getUnsavedFiles() {
-		IEditorPart[] parts= JavaPlugin.getDirtyEditors();
-		List result= new ArrayList(parts.length);
-		for (int i= 0; i < parts.length; i++) {
-			IEditorInput input= parts[i].getEditorInput();
-			if (input instanceof IFileEditorInput) {
-				result.add(((IFileEditorInput)input).getFile());
-			}
-		}
-		return (IFile[])result.toArray(new IFile[result.size()]);
-	}	
 }
