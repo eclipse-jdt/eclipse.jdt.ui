@@ -17,14 +17,14 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 public abstract class SpecialMethod {
 
-	protected final ITypeBinding fTypeBinding;
+	protected final ITypeBinding fDeclaringType;
 	protected final String fName;
 	protected final ITypeBinding fReturnType;
 	protected final ITypeBinding[] fParameterTypes;
 
 
-	public SpecialMethod(ITypeBinding typeBinding, String name, ITypeBinding returnType, ITypeBinding[] argumentTypes) {
-		fTypeBinding= typeBinding;
+	public SpecialMethod(ITypeBinding declaringType, String name, ITypeBinding returnType, ITypeBinding[] argumentTypes) {
+		fDeclaringType= declaringType;
 		fName= name;
 		fReturnType= returnType;
 		fParameterTypes= argumentTypes;

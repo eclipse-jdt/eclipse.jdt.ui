@@ -228,11 +228,13 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 			} else if (element instanceof TypeVariable2) {
 				ASTNode node= ((TypeVariable2) element).getRange().getNode(compilationUnit);
 				if (node instanceof SimpleName) {
+					ITypeBinding chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
+					if (chosenType == null)
+						return; // couldn't infer an element type
 					Type originalType= (Type) ((SimpleName) node).getParent();
 					//TODO: C&P'd
 					Type movingType= (Type) rewrite.createMoveTarget(originalType);
 					ParameterizedType newType= ast.newParameterizedType(movingType);
-					ITypeBinding chosenType= AugmentRawContClConstraintsSolver.getChosenType(elementCv);
 					String typeName= chosenType.getName(); // TODO: use ImportRewrite
 					newType.typeArguments().add(rewrite.createStringPlaceholder(typeName, ASTNode.SIMPLE_TYPE));
 					rewrite.replace(originalType, newType, null);

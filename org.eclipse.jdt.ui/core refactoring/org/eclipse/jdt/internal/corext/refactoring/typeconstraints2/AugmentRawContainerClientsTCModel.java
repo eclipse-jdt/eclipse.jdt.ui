@@ -93,9 +93,11 @@ public class AugmentRawContainerClientsTCModel {
 	private Collection fNewConstraintVariables; //TODO: remove?
 	
 	protected final ITypeBinding fCollection;
+	protected final ITypeBinding fList;
 	protected final ITypeBinding fIterator;
 	protected final ITypeBinding fObject;
 	protected final ITypeBinding fPrimitiveInt;
+	protected final ITypeBinding fPrimitiveBoolean;
 
 	public AugmentRawContainerClientsTCModel(IJavaProject project) {
 		fTypeConstraints= new CustomHashtable(new TypeConstraintComparer());
@@ -109,7 +111,7 @@ public class AugmentRawContainerClientsTCModel {
 		
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		
-		String source= "class X {java.util.Collection coll; java.util.Iterator iter}"; //$NON-NLS-1$
+		String source= "class X {java.util.Collection coll; java.util.Iterator iter; java.util.List list;}"; //$NON-NLS-1$
 		parser.setSource(source.toCharArray());
 		parser.setUnitName("X.java"); //$NON-NLS-1$
 		parser.setProject(project);
@@ -120,8 +122,10 @@ public class AugmentRawContainerClientsTCModel {
 		//TODO: make sure this is in the compiler loop!
 		fCollection= ((FieldDeclaration) typeBodyDeclarations.get(0)).getType().resolveBinding();
 		fIterator= ((FieldDeclaration) typeBodyDeclarations.get(1)).getType().resolveBinding();
+		fList= ((FieldDeclaration) typeBodyDeclarations.get(2)).getType().resolveBinding();
 		fObject= unit.getAST().resolveWellKnownType("java.lang.Object");
 		fPrimitiveInt= unit.getAST().resolveWellKnownType("int");
+		fPrimitiveBoolean= unit.getAST().resolveWellKnownType("boolean");
 	}
 	
 	/**
@@ -176,10 +180,18 @@ public class AugmentRawContainerClientsTCModel {
 		return fIterator;
 	}
 	
+	public ITypeBinding getListType() {
+		return fList;
+	}
+	
 	public ITypeBinding getObjectType() {
 		return fObject;
 	}
 	
+	public ITypeBinding getPrimitiveBooleanType() {
+		return fPrimitiveBoolean;
+	}
+
 	public ITypeBinding getPrimitiveIntType() {
 		return fPrimitiveInt;
 	}
@@ -385,6 +397,8 @@ public class AugmentRawContainerClientsTCModel {
 
 	public VariableVariable2 makeDeclaredVariableVariable(IVariableBinding variableBinding, ICompilationUnit cu) {
 		VariableVariable2 cv= makeVariableVariable(variableBinding);
+		if (cv == null)
+			return null;
 		VariableVariable2 storedCv= (VariableVariable2) registerDeclaredVariable(cv, cu);
 		if (! variableBinding.isField())
 			fCuScopedConstraintVariables.add(storedCv);
@@ -528,6 +542,7 @@ public class AugmentRawContainerClientsTCModel {
 	public boolean isACollectionType(ITypeBinding typeBinding) {
 		return TypeBindings.isSuperType(getCollectionType(), typeBinding)
 				|| TypeBindings.isSuperType(getIteratorType(), typeBinding);
+		//TODO: Enumeration, ...
 	}
 
 	public void makeCastVariable(CastExpression castExpression, CollectionElementVariable2 expressionCv) {

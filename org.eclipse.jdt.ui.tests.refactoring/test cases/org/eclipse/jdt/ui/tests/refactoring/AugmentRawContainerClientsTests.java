@@ -113,4 +113,8 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 		performCuOK();
 	}
 	
+	public void testCuContains() throws Exception {
+		performCuOK();
+	}
+	
 }

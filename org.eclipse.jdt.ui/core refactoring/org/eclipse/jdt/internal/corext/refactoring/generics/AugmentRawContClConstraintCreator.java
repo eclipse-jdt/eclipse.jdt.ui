@@ -274,6 +274,8 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		// The VariableDeclarationExpression can be split up when fragments get different types.
 		// Warning: still need to connect fragments with type!
 		ConstraintVariable2 typeCv= getConstraintVariable(node.getType());
+		if (typeCv == null)
+			return;
 		CollectionElementVariable2 typeElement= fTCFactory.getElementVariable(typeCv);
 		if (typeElement == null)
 			return;
