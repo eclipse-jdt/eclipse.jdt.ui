@@ -285,7 +285,22 @@ public abstract class AbstractTextBufferChange extends Change implements ITextBu
 		mod.setChange(this);
 		fTextModifications.add(mod);
 	}
-
+	
+	/* (Non-Javadoc)
+	 * debugging only
+	 */
+	public String toString(){
+		StringBuffer buff= new StringBuffer();
+		buff.append("name: ")
+			.append(getName())
+			.append(" javaElement:")
+			.append(getCorrespondingJavaElement().getElementName());
+		for (Iterator iter= fTextModifications.iterator(); iter.hasNext(); ){
+			Object each= iter.next();
+			buff.append("< ").append(each.toString()).append(" />");
+		}
+		return buff.toString();
+	}
 	//---- ITextChange --------------------------------------------------
 	
 	/* (Non-Javadoc)

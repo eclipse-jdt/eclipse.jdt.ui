@@ -67,7 +67,19 @@ public class SimpleReplaceTextChange extends SimpleTextChange {
 		setLength(length);
 		setText(text);
 	}
-
+	
+	/* non java-doc
+	 * debugging only
+	 */	public String toString(){
+		try{
+			return "[Replace " + fName + " : " + getOffset() + ", " 
+					+ fLength + " ("+ getCurrentContent().substring(getOffset(), getOffset() + getLength()) 
+					+ " -> " + fText + ")]";
+		} catch (JavaModelException e){
+			return super.toString();
+		}	
+	}
+	
 	/**
 	 * Creates the undo change for this change.
 	 *
