@@ -18,6 +18,7 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -238,28 +239,37 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		IMenuManager target= menu;
-		IMenuManager generateMenu= null;
 		if (fEditorIsOwner) {
-			generateMenu= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
-			generateMenu.add(new GroupMarker(fGroupName));
-			target= generateMenu;
+			IMenuManager subMenu= createEditorSubMenu(menu);
+			if (subMenu != null)
+				menu.appendToGroup(fGroupName, subMenu);
+		} else {
+			appendToGroup(menu, fOrganizeImports);
+			appendToGroup(menu, fOverrideMethods);
+			appendToGroup(menu, fAddGetterSetter);
+			appendToGroup(menu, fAddUnimplementedConstructors);
+			appendToGroup(menu, fAddJavaDocStub);
+			appendToGroup(menu, fAddBookmark);
 		}
+	}
+	
+	private IMenuManager createEditorSubMenu(IMenuManager mainMenu) {
+		IMenuManager result= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
 		int added= 0;
-		if (fEditorIsOwner)
-			added+= appendToGroup(target, fAddImport);
-		added+= appendToGroup(target, fOrganizeImports);
-		if (fEditorIsOwner)
-			added+= appendToGroup(target, fSurroundWithTryCatch);
-		added+= appendToGroup(target, fOverrideMethods);
-		added+= appendToGroup(target, fAddGetterSetter);
-		added+= appendToGroup(target, fAddUnimplementedConstructors);
-		added+= appendToGroup(target, fAddJavaDocStub);
-		added+= appendToGroup(target, fAddBookmark);
-		if (fEditorIsOwner)
-			added+= appendToGroup(target, fExternalizeStrings);
-		if (generateMenu != null && added > 0)
-			menu.appendToGroup(fGroupName, generateMenu);
+		added+= addAction(result, fAddImport);
+		added+= addAction(result, fOrganizeImports);
+		result.add(new Separator());
+		added+= addAction(result, fOverrideMethods);
+		added+= addAction(result, fAddGetterSetter);
+		added+= addAction(result, fAddUnimplementedConstructors);
+		added+= addAction(result, fAddJavaDocStub);
+		added+= addAction(result, fAddBookmark);
+		result.add(new Separator());		
+		added+= addAction(result, fSurroundWithTryCatch);
+		added+= addAction(result, fExternalizeStrings);
+		if (added == 0)
+			result= null;
+		return result;
 	}
 
 	/* (non-Javadoc)
@@ -301,8 +311,11 @@ public class GenerateActionGroup extends ActionGroup {
 		return 0;
 	}	
 
-	private void addAction(IMenuManager menu, IAction action) {
-		if (action != null && action.isEnabled())
+	private int addAction(IMenuManager menu, IAction action) {
+		if (action != null && action.isEnabled()) {
 			menu.add(action);
+			return 1;
+		}
+		return 0;
 	}	
 }
