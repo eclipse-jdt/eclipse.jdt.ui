@@ -15,6 +15,12 @@
  * %CodeTemplates.typecomment.content1
  * %CodeTemplates.typecomment.content2
  */</codetemplate>
+ 
+ <codetemplate name="fieldcomment" description="%CodeTemplates.fieldcomment" context="fieldcomment_context" enabled="true">
+ /**
+ * %CodeTemplates.fieldcomment.content
+ */</codetemplate>
+ 
  <codetemplate name="methodcomment" description="%CodeTemplates.nonoverridingcomment" context="methodcomment_context" enabled="true">/**
  * ${tags}
  */</codetemplate>

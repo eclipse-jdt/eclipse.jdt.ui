@@ -57,6 +57,19 @@ public class CodeGeneration {
 	}
 
 	/**
+	 * Returns the content for a new field comment using the 'fieldcomment' code template. The returned content is unformatted and is not indented.
+	 * @param cu The compilation where the type is contained. The compilation unit does not need to exist.
+	 * @param typeName The name of the type of the field to which the comment is added.
+	 * @param fieldName The name of the field to which the comment is added.
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @return Returns the new content or <code>null</code> if the code template is undefined or empty. The returned content is unformatted and is not indented.
+	 * @throws CoreException
+	 */	
+	public static String getFieldComment(ICompilationUnit cu, String typeName, String fieldName, String lineDelimiter) throws CoreException {
+		return StubUtility.getFieldComment(cu, typeName, fieldName, lineDelimiter);
+	}	
+	
+	/**
 	 * Returns the comment for a method or constructor using the comment code templates (constructor / method / overriding method).
 	 * <code>null</code> is returned if the template is empty.
 	 * @param cu The compilation unit to which the method belongs. The compilation unit does not need to exist.

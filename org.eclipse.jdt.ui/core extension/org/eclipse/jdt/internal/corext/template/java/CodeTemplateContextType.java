@@ -37,6 +37,7 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String SETTERBODY_CONTEXTTYPE= "setterbody_context"; //$NON-NLS-1$
 	public static final String NEWTYPE_CONTEXTTYPE= "newtype_context"; //$NON-NLS-1$
 	public static final String TYPECOMMENT_CONTEXTTYPE= "typecomment_context"; //$NON-NLS-1$
+	public static final String FIELDCOMMENT_CONTEXTTYPE= "fieldcomment_context"; //$NON-NLS-1$
 	public static final String METHODCOMMENT_CONTEXTTYPE= "methodcomment_context"; //$NON-NLS-1$
 	public static final String CONSTRUCTORCOMMENT_CONTEXTTYPE= "constructorcomment_context"; //$NON-NLS-1$
 	public static final String OVERRIDECOMMENT_CONTEXTTYPE= "overridecomment_context"; //$NON-NLS-1$
@@ -131,11 +132,11 @@ public class CodeTemplateContextType extends ContextType {
 		} else if (GETTERBODY_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
-			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.field"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldname"))); //$NON-NLS-1$
 		} else if (SETTERBODY_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(ENCLOSING_METHOD,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingmethod"))); //$NON-NLS-1$
-			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.field"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldname"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(PARAM, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.param"))); //$NON-NLS-1$
 		} else if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(TYPENAME,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typename"))); //$NON-NLS-1$
@@ -147,6 +148,11 @@ public class CodeTemplateContextType extends ContextType {
 			addVariable(new CodeTemplateVariable(TYPENAME,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typename"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
 			addVariable(new TagsTemplateVariable());
+			addCompilationUnitVariables();
+			fIsComment= true;
+		} else if (FIELDCOMMENT_CONTEXTTYPE.equals(contextName)) {
+			addVariable(new CodeTemplateVariable(FIELD_TYPE, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.fieldtype"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.fieldname"))); //$NON-NLS-1$
 			addCompilationUnitVariables();
 			fIsComment= true;
 		} else if (METHODCOMMENT_CONTEXTTYPE.equals(contextName)) {
@@ -170,15 +176,15 @@ public class CodeTemplateContextType extends ContextType {
 			fIsComment= true;
 		} else if (GETTERCOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addVariable(new CodeTemplateVariable(FIELD_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.fieldtype"))); //$NON-NLS-1$
-			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.field"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldtype"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldname"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(BARE_FIELD_NAME, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.barefieldname"))); //$NON-NLS-1$
 			addCompilationUnitVariables();
 			fIsComment= true;
 		} else if (SETTERCOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addVariable(new CodeTemplateVariable(FIELD_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.fieldtype"))); //$NON-NLS-1$
-			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.field"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldtype"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(FIELD, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.getterfieldname"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(PARAM, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.param"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(BARE_FIELD_NAME, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.barefieldname"))); //$NON-NLS-1$
 			addCompilationUnitVariables();
@@ -234,6 +240,7 @@ public class CodeTemplateContextType extends ContextType {
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.NEWTYPE_CONTEXTTYPE));
 		
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.TYPECOMMENT_CONTEXTTYPE));
+		registry.add(new CodeTemplateContextType(CodeTemplateContextType.FIELDCOMMENT_CONTEXTTYPE));
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.METHODCOMMENT_CONTEXTTYPE));
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.CONSTRUCTORCOMMENT_CONTEXTTYPE));
 		registry.add(new CodeTemplateContextType(CodeTemplateContextType.OVERRIDECOMMENT_CONTEXTTYPE));		

@@ -55,7 +55,6 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
-
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class StubUtility {
@@ -433,8 +432,7 @@ public class StubUtility {
 		}
 		buf.append(')');
 		return buf.toString();
-	}	
-
+	}
 	/**
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment
 	 */
@@ -498,6 +496,19 @@ public class StubUtility {
 		return textBuffer.getContent();
 	}
 
+	public static String getFieldComment(ICompilationUnit cu, String typeName, String fieldName, String lineDelimiter) throws CoreException {
+		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.FIELDCOMMENT);
+		if (template == null) {
+			return null;
+		}
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter);
+		context.setCompilationUnitVariables(cu);
+		context.setVariable(CodeTemplateContextType.FIELD_TYPE, typeName);
+		context.setVariable(CodeTemplateContextType.FIELD, fieldName);
+		
+		return evaluateTemplate(context, template);
+	}	
+	
 	
 	/**
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getSetterComment
@@ -1077,6 +1088,5 @@ public class StubUtility {
 			newNames[i]= suggestArgumentName(project, paramNames[i], null);			
 		}
 		return newNames;
-	}	
-
+	}
 }

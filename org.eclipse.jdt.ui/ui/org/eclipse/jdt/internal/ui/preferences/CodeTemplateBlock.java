@@ -32,26 +32,26 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.SourceViewer;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
+import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateSet;
-
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -153,6 +153,8 @@ public class CodeTemplateBlock {
 				return PreferencesMessages.getString("CodeTemplateBlock.newtype.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.TYPECOMMENT.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.typecomment.label"); //$NON-NLS-1$
+			} else if (CodeTemplates.FIELDCOMMENT.equals(name)) {
+				return PreferencesMessages.getString("CodeTemplateBlock.fieldcomment.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.METHODCOMMENT.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.methodcomment.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.OVERRIDECOMMENT.equals(name)) {
@@ -188,10 +190,12 @@ public class CodeTemplateBlock {
 	private PixelConverter fPixelConverter;
 	private SourceViewer fPatternViewer;
 	private Control fSWTWidget;
+	private TemplateVariableProcessor fTemplateProcessor;
 
 	public CodeTemplateBlock() {
 		
 		fTemplates= CodeTemplates.getInstance();
+		fTemplateProcessor= new TemplateVariableProcessor();
 		
 		CodeTemplateAdapter adapter= new CodeTemplateAdapter(fTemplates);
 
@@ -265,7 +269,7 @@ public class CodeTemplateBlock {
 		IDocument document= new Document();
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
-		viewer.configure(new JavaSourceViewerConfiguration(tools, null, IJavaPartitions.JAVA_PARTITIONING));
+		viewer.configure(new TemplateEditorSourceViewerConfiguration(tools, null, fTemplateProcessor));
 		viewer.setEditable(false);
 		viewer.setDocument(document);
 	
@@ -304,6 +308,8 @@ public class CodeTemplateBlock {
 		}
 		if (selection.size() == 1 && selection.get(0) instanceof Template) {
 			Template template= (Template) selection.get(0);
+			ContextType type= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName());
+			fTemplateProcessor.setContextType(type);
 			fPatternViewer.getDocument().set(template.getPattern());
 		} else {
 			fPatternViewer.getDocument().set(""); //$NON-NLS-1$

@@ -37,6 +37,7 @@ public class CodeTemplates extends TemplateSet {
 	public static final String GETTERSTUB= "getterbody"; //$NON-NLS-1$
 	public static final String SETTERSTUB= "setterbody"; //$NON-NLS-1$
 	public static final String TYPECOMMENT= "type" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String FIELDCOMMENT= "field" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String METHODCOMMENT= "method" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String CONSTRUCTORCOMMENT= "constructor" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String OVERRIDECOMMENT= "override" + COMMENT_SUFFIX; //$NON-NLS-1$

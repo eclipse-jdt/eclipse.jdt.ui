@@ -13,13 +13,15 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -29,17 +31,15 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
-
-import org.eclipse.jdt.ui.CodeGeneration;
 
 /**
  * Add javadoc stubs to members. All members must belong to the same compilation unit.
@@ -69,12 +69,10 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		return CodeGeneration.getMethodComment(meth, overridden, lineDelimiter);
 	}
 	
-	private String createFieldComment(IField field, String lineDelimiter) throws JavaModelException {
-		StringBuffer buf= new StringBuffer();
-		buf.append("/**").append(lineDelimiter); //$NON-NLS-1$
-		buf.append(" *").append(lineDelimiter); //$NON-NLS-1$
-		buf.append(" */").append(lineDelimiter); //$NON-NLS-1$
-		return buf.toString();			
+	private String createFieldComment(IField field, String lineDelimiter) throws JavaModelException, CoreException {
+		String typeName= Signature.toString(field.getTypeSignature());
+		String fieldName= field.getElementName();
+		return CodeGeneration.getFieldComment(field.getCompilationUnit(), typeName, fieldName, String.valueOf('\n'));
 	}		
 	
 	private void sortEntries() {

@@ -43,47 +43,34 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.jface.window.Window;
-
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplateSet;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContentProvider;
+import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -131,6 +118,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 	private SourceViewer fPatternViewer;
 	private Button fFormatButton;
+	private TemplateVariableProcessor fTemplateProcessor;
 	
 	public TemplatePreferencePage() {
 		super();
@@ -139,6 +127,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		setDescription(TemplateMessages.getString("TemplatePreferencePage.message")); //$NON-NLS-1$
 
 		fTemplates= Templates.getInstance();
+		fTemplateProcessor= new TemplateVariableProcessor();
 	}
 	
 	/*
@@ -398,7 +387,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		IDocument document= new Document();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 
-		viewer.configure(new JavaSourceViewerConfiguration(tools, null, IJavaPartitions.JAVA_PARTITIONING));
+		viewer.configure(new TemplateEditorSourceViewerConfiguration(tools, null, fTemplateProcessor));
 		viewer.setEditable(false);
 		viewer.setDocument(document);
 	
@@ -428,6 +417,8 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 		if (selection.size() == 1) {
 			Template template= (Template) selection.getFirstElement();
+			ContextType type= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName());
+			fTemplateProcessor.setContextType(type);
 			fPatternViewer.getDocument().set(template.getPattern());
 		} else {		
 			fPatternViewer.getDocument().set(""); //$NON-NLS-1$

@@ -87,9 +87,16 @@ public class JavadocTagsSubProcessor {
 				proposals.add(getNewJavadocTagProposal(cu, declaration.getStartPosition(), string, label));
 			}
 		} else if (declaration instanceof FieldDeclaration) {
-			 String comment= "/**\n *\n */\n"; //$NON-NLS-1$
-			 String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.field.description"); //$NON-NLS-1$
-			 proposals.add(getNewJavadocTagProposal(cu, declaration.getStartPosition(), comment, label));
+			String comment= "/**\n *\n */\n"; //$NON-NLS-1$
+			List fragments= ((FieldDeclaration)declaration).fragments();
+			if (fragments != null && fragments.size() > 0) {
+				VariableDeclaration decl= (VariableDeclaration)fragments.get(0);
+				String fieldName= decl.getName().getIdentifier();
+				String typeName= binding.getName();
+				comment= CodeGeneration.getFieldComment(cu, typeName, fieldName, String.valueOf('\n'));
+			}
+			String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.field.description"); //$NON-NLS-1$
+			proposals.add(getNewJavadocTagProposal(cu, declaration.getStartPosition(), comment, label));
 		}
 	}
 

@@ -28,9 +28,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -50,51 +48,37 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.TextEvent;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
-import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.IColorManager;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
-import org.eclipse.jdt.internal.corext.template.TemplateVariable;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -102,115 +86,6 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  * Dialog to edit a template.
  */
 public class EditTemplateDialog extends StatusDialog {
-
-	private static class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfiguration {
-
-		private final TemplateVariableProcessor fProcessor;
-
-		SimpleJavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor, TemplateVariableProcessor processor) {
-			super(tools, editor, IJavaPartitions.JAVA_PARTITIONING);
-			fProcessor= processor;
-		}
-		
-		/*
-		 * @see SourceViewerConfiguration#getContentAssistant(ISourceViewer)
-		 */
-		public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
-
-			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-			IColorManager manager= textTools.getColorManager();					
-			
-
-			ContentAssistant assistant= new ContentAssistant();
-			assistant.setContentAssistProcessor(fProcessor, IDocument.DEFAULT_CONTENT_TYPE);
-				// Register the same processor for strings and single line comments to get code completion at the start of those partitions.
-			assistant.setContentAssistProcessor(fProcessor, IJavaPartitions.JAVA_STRING);
-			assistant.setContentAssistProcessor(fProcessor, IJavaPartitions.JAVA_CHARACTER);
-			assistant.setContentAssistProcessor(fProcessor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-			assistant.setContentAssistProcessor(fProcessor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-			assistant.setContentAssistProcessor(fProcessor, IJavaPartitions.JAVA_DOC);
-
-			assistant.enableAutoInsert(store.getBoolean(PreferenceConstants.CODEASSIST_AUTOINSERT));
-			assistant.enableAutoActivation(store.getBoolean(PreferenceConstants.CODEASSIST_AUTOACTIVATION));
-			assistant.setAutoActivationDelay(store.getInt(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY));
-			assistant.setProposalPopupOrientation(ContentAssistant.PROPOSAL_OVERLAY);
-			assistant.setContextInformationPopupOrientation(ContentAssistant.CONTEXT_INFO_ABOVE);
-			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
-
-			Color background= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);			
-			assistant.setContextInformationPopupBackground(background);
-			assistant.setContextSelectorBackground(background);
-			assistant.setProposalSelectorBackground(background);
-
-			Color foreground= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, manager);
-			assistant.setContextInformationPopupForeground(foreground);
-			assistant.setContextSelectorForeground(foreground);
-			assistant.setProposalSelectorForeground(foreground);
-			
-			return assistant;
-		}	
-
-		private Color getColor(IPreferenceStore store, String key, IColorManager manager) {
-			RGB rgb= PreferenceConverter.getColor(store, key);
-			return manager.getColor(rgb);
-		}
-		
-		/*
-		 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
-		 * @since 2.1
-		 */
-		public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-			return new TemplateVariableTextHover(fProcessor);
-		}
-	
-	}
-
-	private static class TemplateVariableTextHover implements ITextHover {
-
-		private TemplateVariableProcessor fProcessor;
-
-		/**
-		 * @param type
-		 */
-		public TemplateVariableTextHover(TemplateVariableProcessor processor) {
-			fProcessor= processor;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.ITextHover#getHoverInfo(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
-		 */
-		public String getHoverInfo(ITextViewer textViewer, IRegion subject) {
-			try {
-				IDocument doc= textViewer.getDocument();
-				int offset= subject.getOffset();
-				if (offset >= 2 && "${".equals(doc.get(offset-2, 2))) { //$NON-NLS-1$
-					String varName= doc.get(offset, subject.getLength());
-					Iterator iter= fProcessor.getContextType().variableIterator();
-					while (iter.hasNext()) {
-						TemplateVariable var= (TemplateVariable) iter.next();
-						if (varName.equals(var.getName())) {
-							return var.getDescription();
-						}
-					}
-				}				
-			} catch (BadLocationException e) {
-			}
-			return null;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
-		 */
-		public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
-			if (textViewer != null) {
-				return JavaWordFinder.findWord(textViewer.getDocument(), offset);
-			}
-			return null;	
-		}
-		
-	} 
-
 
 	private static class TextViewerAction extends Action implements IUpdate {
 	
@@ -439,7 +314,7 @@ public class EditTemplateDialog extends StatusDialog {
 		IDocument document= new Document(fTemplate.getPattern());
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
-		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null, fTemplateProcessor));
+		viewer.configure(new TemplateEditorSourceViewerConfiguration(tools, null, fTemplateProcessor));
 		viewer.setEditable(true);
 		viewer.setDocument(document);
 		
