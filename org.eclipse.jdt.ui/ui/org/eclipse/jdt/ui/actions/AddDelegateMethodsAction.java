@@ -25,27 +25,6 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.jface.window.Window;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -55,16 +34,13 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -76,6 +52,26 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Creates delegate methods for a type's fields. Opens a dialog with a list of
@@ -342,8 +338,15 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 				
 				IEditorPart part= EditorUtility.openInEditor(type);
+				IRewriteTarget target= (IRewriteTarget) part.getAdapter(IRewriteTarget.class);
 				type= (IType) JavaModelUtil.toWorkingCopy(type);
+				
+				target.setRedraw(false);
+				
 				IMethod[] createdMethods= processResults(methods, type);
+				
+				target.setRedraw(true);
+				
 				if (createdMethods != null && createdMethods.length > 0) {
 					EditorUtility.revealInEditor(part, createdMethods[0]);
 				}
@@ -399,12 +402,15 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					settings.importOrder,
 					settings.importThreshold,
 					true);
+					
+			ArrayList res= new ArrayList();
 
 			for (int i = 0; i < fList.size(); i++) {
+				//long time=System.currentTimeMillis();
 				//check for cancel each iteration
 				if (monitor.isCanceled()) {
 					if (i > 0) {
-						addImports(imports);
+						imports.create(false, null);
 					}
 					return;
 				}
@@ -413,7 +419,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				String content = null;
 				Methods2Field wrapper = (Methods2Field) fList.get(i);
 				IMethod curr = wrapper.fMethod;
-				String fieldName = wrapper.fField.getElementName();
+				IField field= wrapper.fField;
 				IMethod overwrittenMethod =
 					JavaModelUtil.findMethodImplementationInHierarchy(
 						typeHierarchy,
@@ -422,7 +428,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						curr.getParameterTypes(),
 						curr.isConstructor());
 				if (overwrittenMethod == null) {
-					content = createStub(fieldName, curr, addComments, overwrittenMethod, imports);
+					content = createStub(field, curr, addComments, overwrittenMethod, imports);
 				} else {
 					int flags = overwrittenMethod.getFlags();
 					if (Flags.isFinal(flags) || Flags.isPrivate(flags)) {
@@ -440,7 +446,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 							curr.getElementName(),
 							curr.getParameterTypes(),
 							curr.isConstructor());
-					content = createStub(fieldName, declaration, addComments, overwrittenMethod, imports);
+					content = createStub(field, declaration, addComments, overwrittenMethod, imports);
 				}
 				IJavaElement sibling = null;
 				IMethod existing =
@@ -461,19 +467,22 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					// add constructors at the beginning
 					sibling = existingMethods[0];
 				}
+				
+				res.add(content);
+				
 
 				String formattedContent = StubUtility.codeFormat(content, indent, lineDelim) + lineDelim;
 				IMethod created= fType.createMethod(formattedContent, sibling, true, null);
 				fCreatedMethods.add(created);
 
 				monitor.worked(1);
-
+				//System.out.println(System.currentTimeMillis()-time +" for #"+i);
 			}
 
-			addImports(imports);
+			imports.create(false, null);
 		}
 		
-		private String createStub(String fieldName, IMethod curr, boolean addComment, IMethod overridden, IImportsStructure imports) throws CoreException {
+		private String createStub(IField field, IMethod curr, boolean addComment, IMethod overridden, IImportsStructure imports) throws CoreException {
 			String methodName= curr.getElementName();
 			String[] paramNames= curr.getParameterNames();
 			String returnTypSig= curr.getReturnType();
@@ -492,7 +501,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				if (!Signature.SIG_VOID.equals(returnTypSig)) {
 					body.append("return "); //$NON-NLS-1$
 				}
-				body.append(fieldName).append('.').append(methodName).append('(');
+				if (JdtFlags.isStatic(curr)) {
+					body.append(resolveTypeOfField(field).getElementName());
+				} else {
+					
+					body.append(field.getElementName());
+				}
+				body.append('.').append(methodName).append('(');
 				for (int i = 0; i < paramNames.length; i++) {
 					body.append(paramNames[i]);
 					if (i < paramNames.length - 1)
@@ -508,13 +523,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 		
 		
-		
-		/** apart method, because of a threading problem*/
-		private void addImports(final ImportsStructure imports) throws CoreException {
-			imports.create(false, null);
-		}
-		
-		
 	}
 
 	/**creates methods in class*/
@@ -525,7 +533,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		ResultRunner resultRunner=  new ResultRunner(list, type);
 		IRunnableContext runnableContext = new ProgressMonitorDialog(getShell());
 		try {
-			runnableContext.run(false, true, new WorkbenchRunnableAdapter(resultRunner));
+			runnableContext.run(true, true, new WorkbenchRunnableAdapter(resultRunner));
 		} catch (InterruptedException e) {
 			// cancel pressed
 			return null;
@@ -723,7 +731,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		for (int i = 0; i < types.length; i++) {
 			IMethod[] methods = types[i].getMethods();
 			for (int j = 0; j < methods.length; j++) {
-				map.put(methods[j].getElementName(), methods[j]);
+				map.put(createSignatureKey(methods[j]), methods[j]);
 			}
 		}
 		ArrayList list = new ArrayList();
@@ -738,6 +746,11 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	
 	/**returns a non null array of final methods of the type*/
 	private static IMethod[] resolveFinalMethods(IType type) throws JavaModelException {
+		
+		//Interfaces are java.lang.Objects
+		if(type.isInterface()){
+			type=JavaModelUtil.findType(type.getJavaProject(), "java.lang.Object");
+		}
 
 		IMethod[] methods = resolveMethodsHierarchy(type);
 		ArrayList list = new ArrayList(methods.length);
@@ -776,12 +789,25 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
 	}	
 	
+	/** 
+	 * returns Type of field.
+	 * 
+	 * if field is primitve null is returned.
+	 * if field is array java.lang.Object is returned.
+	 **/
 	private static IType resolveTypeOfField(IField field) throws JavaModelException {
-		if (!hasPrimitiveType(field)) {
-			String typeName= JavaModelUtil.getResolvedTypeName(field.getTypeSignature(), field.getDeclaringType());
-			return field.getJavaProject().findType(typeName);			
+		boolean isPrimitive = hasPrimitiveType(field);
+		boolean isArray = Signature.getArrayCount(field.getTypeSignature()) > 0;
+		if (!isPrimitive && !isArray) {
+			String typeName = JavaModelUtil.getResolvedTypeName(field.getTypeSignature(), field.getDeclaringType());
+			//if the cu has errors its possible no type name is resolved
+			IType type = typeName != null ? field.getJavaProject().findType(typeName) : null;
+			return type;
+		} else if (isArray) {
+			return JavaModelUtil.findType(field.getJavaProject(), "java.lang.Object");
 		}
 		return null;
-	}	
+
+	}
 
 }
