@@ -198,7 +198,7 @@ public class JarPackageData {
 	 * enclosing projects of the exported elements.
 	 * 
 	 * @return	<code>true</code> if output folder are exported
-	 * @since 2.1.2.1
+	 * @since 3.0
 	 */
 	public boolean areOutputFoldersExported() {
 		return fExportOutputFolders;
@@ -209,7 +209,7 @@ public class JarPackageData {
 	 * enclosing projects of the exported elements.
 	 * 
 	 * @param state a boolean indicating the new state
-	 * @since 2.1.2.1
+	 * @since 3.0
 	 */
 	public void setExportOutputFolders(boolean state) {
 		fExportOutputFolders= state;
@@ -219,7 +219,7 @@ public class JarPackageData {
 	 * Tells whether files created by the Java builder are exported.
 	 * 
 	 * @return	<code>true</code> if output folder are exported
-	 * @since 2.1.2.1
+	 * @since 3.0
 	 */
 	public boolean areGeneratedFilesExported() {
 		return fExportOutputFolders || fExportClassFiles;
