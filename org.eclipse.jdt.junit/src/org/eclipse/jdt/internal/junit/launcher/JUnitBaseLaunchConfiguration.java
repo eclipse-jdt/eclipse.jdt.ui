@@ -14,7 +14,6 @@ package org.eclipse.jdt.internal.junit.launcher;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -113,34 +112,23 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 			return findSingleTest(javaProject, testTypeName);
 		}
 		else 
-			return findTestsInContainer(javaProject, containerHandle, pm);
+			return findTestsInContainer(containerHandle, pm);
 	}
+	
 	/**
 	 * @inheritdoc 
-	 * @param javaProject
 	 * @param containerHandle
 	 * @param pm
 	 * @return
 	 */
-	private IType[] findTestsInContainer(IJavaProject javaProject, String containerHandle, IProgressMonitor pm) {
+	private IType[] findTestsInContainer(String containerHandle, IProgressMonitor pm) {
 		IJavaElement container= JavaCore.create(containerHandle);
 		Set result= new HashSet();
 		try {
 			TestSearchEngine.doFindTests(new Object[]{container}, result, pm);
-			// fix for bug 36449  JUnit should constrain tests to selected project [JUnit] 
-			filterNonProjectTests(javaProject, result);
 		} catch (InterruptedException e) {
 		}
 		return (IType[]) result.toArray(new IType[result.size()]) ;
-	}
-
-
-	private void filterNonProjectTests(IJavaProject javaProject, Set result) {
-		for (Iterator iter= result.iterator(); iter.hasNext();) {
-			IType type= (IType) iter.next();
-			if (!type.getJavaProject().equals(javaProject)) 
-				iter.remove();
-		}
 	}
 
 	public IType[] findSingleTest(IJavaProject javaProject, String testName) throws CoreException {

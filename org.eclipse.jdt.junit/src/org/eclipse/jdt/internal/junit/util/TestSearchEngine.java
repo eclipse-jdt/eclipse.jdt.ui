@@ -186,7 +186,9 @@ public class TestSearchEngine {
 	}
 	
 	private static List searchSuiteMethods(IProgressMonitor pm, IJavaElement element) throws CoreException {	
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
+		// fix for bug 36449  JUnit should constrain tests to selected project [JUnit] 
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element },
+				IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES);
 		TestSearchEngine searchEngine= new TestSearchEngine(); 
 		return searchEngine.searchMethod(pm, scope);
 	}
