@@ -245,6 +245,12 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractInterface"</code>).
 	 */
 	public static final String EXTRACT_INTERFACE= "org.eclipse.jdt.ui.actions.ExtractInterface"; //$NON-NLS-1$
+
+	/**
+	 * Refactor menu: name of standard Move Inner Type to Top Level global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.MoveInnerToTop"</code>).
+	 */
+	public static final String MOVE_INNER_TO_TOP= "org.eclipse.jdt.ui.actions.MoveInnerToTop"; //$NON-NLS-1$
 	
 	// Search Menu
 	

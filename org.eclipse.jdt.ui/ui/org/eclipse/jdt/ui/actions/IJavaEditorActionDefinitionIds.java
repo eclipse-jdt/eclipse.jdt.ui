@@ -201,6 +201,12 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String EXTRACT_INTERFACE= "org.eclipse.jdt.ui.edit.text.java.extract.interface"; //$NON-NLS-1$
 
+	/**
+	 * Action definition ID of the refactor -> move inner type to top level action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"</code>).
+	 */
+	public static final String MOVE_INNER_TO_TOP= "org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"; //$NON-NLS-1$
+
 	// navigate
 	
 	/**
