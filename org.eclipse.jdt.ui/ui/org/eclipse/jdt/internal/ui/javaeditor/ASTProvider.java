@@ -228,10 +228,13 @@ public final class ASTProvider {
 	}
 
 	void aboutToBeReconciled(IJavaElement javaElement) {
-		
+
 		if (DEBUG)
 			System.out.println(DEBUG_PREFIX + "about to reconcile: " + toString(javaElement)); //$NON-NLS-1$
 
+		if (javaElement == null)
+			return;
+		
 		synchronized (fReconcileLock) {
 			fIsReconciling= true;
 			fReconcilingJavaElement= javaElement;
