@@ -83,6 +83,8 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	}
 
 	private boolean inputDeleted() {
+		if (fInput == null)
+			return false;
 		if ((fInput instanceof IJavaElement) && ((IJavaElement) fInput).exists())
 			return false;
 		if ((fInput instanceof IResource) && ((IResource) fInput).exists())
@@ -260,7 +262,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	 * current thread but the viewer updates are posted to the UI thread.
 	 */
 	private void processDelta(IJavaElementDelta delta) throws JavaModelException {
-
+	
 		int kind= delta.getKind();
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
@@ -313,7 +315,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				return;				
 			}
 		}
-
+	
 		if (kind == IJavaElementDelta.REMOVED) {
 			Object parent= internalGetParent(element);			
 			postRemove(element);
@@ -327,7 +329,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			}  
 			return;
 		}
-
+	
 		if (kind == IJavaElementDelta.ADDED) { 
 			Object parent= internalGetParent(element);
 			// we are filtering out empty subpackages, so we
@@ -351,7 +353,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				postAdd(parent, element);
 			}
 		}
-
+	
 		if (elementType == IJavaElement.COMPILATION_UNIT) {
 			if (kind == IJavaElementDelta.CHANGED) {
 				// isStructuralCUChange already performed above
@@ -384,7 +386,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		
 		if (processResourceDeltas(delta.getResourceDeltas(), element))
 			return;
-
+	
 		handleAffectedChildren(delta, element);
 	}
 	

@@ -252,10 +252,8 @@ public class ContentProviderTests3 extends TestCase {
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
-		assertEquals("2 elements removed", 2, fMyPart.getRemovedObject().size()); //$NON-NLS-1$
-		assertTrue("Correct elements removed", fMyPart.getRemovedObject().contains(fCU2) && fMyPart.getRemovedObject().contains(fCU3)); //$NON-NLS-1$
-		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		// removing more than one CU now results in a refresh.
+		assertEquals("No refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
 	public void testRemoveCUFromPackageFragment() throws Exception {

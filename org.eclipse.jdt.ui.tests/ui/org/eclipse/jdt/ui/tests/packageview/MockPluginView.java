@@ -123,6 +123,11 @@ public class MockPluginView extends PackageExplorerPart {
 			fRefreshedObjects.add(object);
 		}
 		
+		public void refresh(final Object element, final boolean updateLabels) {
+			fRefreshHappened= true;
+			fRefreshedObjects.add(element);
+		}
+		
 		public void remove(Object object) {
 			fRemoveHappened= true;
 			fRemovedObject.add(object);
