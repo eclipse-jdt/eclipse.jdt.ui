@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 import com.sun.jdi.ClassType;
 import com.sun.jdi.Method;
 import com.sun.jdi.ObjectReference;
@@ -47,8 +49,8 @@ import org.eclipse.jdi.Bootstrap;
 
 /**
  * To use this performance meter add the following VM arguments:
- * <code>-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=PORT,suspend=n,server=y -Decilpse.perf.debugPort=PORT</code>
- * where PORT is the port on which the debugger will listen and connect to.
+ * <code>-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=7777,suspend=n,server=y -Decilpse.perf.debugPort=7777.</code>
+ * Try a different port if 7777 does not work.
  * Because the performance meter uses the VM's debugging facility, it cannot be
  * debugged itself. A {@link org.eclipse.test.performance.Performance#getNullPerformanceMeter()}
  * could be used while debugging clients.
@@ -359,9 +361,9 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			fEventReader= new EventReader(fVM.eventQueue());
 			fEventReader.start();
 		} catch (IOException x) {
-			x.printStackTrace();
 		} catch (IllegalConnectorArgumentsException x) {
-			x.printStackTrace();
+		} finally {
+			Assert.assertTrue("Could not start performance meter, hints:\n1) check the command line arguments (see InvocationCountPerformanceMeter for details)\n2) use a different port number", fEventReader != null);
 		}
 	}
 	
