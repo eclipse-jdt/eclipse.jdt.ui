@@ -14,9 +14,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
@@ -60,11 +63,12 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class ExtractTempRefactoring extends Refactoring {
 	
+	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
+	private static final int DEFAULT_TAB_SIZE= 4;
+			
 	private final int fSelectionStart;
 	private final int fSelectionLength;
 	private final ICompilationUnit fCu;
-	private final int fTabSize;
-	private final boolean fIsCompactingAssignments;
 	private final CodeGenerationSettings fSettings;
 			
 	private boolean fReplaceAllOccurrences;
@@ -72,19 +76,17 @@ public class ExtractTempRefactoring extends Refactoring {
 	private String fTempName;
 	private Map fAlreadyUsedNameMap; //String -> ISourceRange
 	private CompilationUnit fCompilationUnitNode;
+
 	
-	public ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings, int tabSize, boolean compactAssignments) {
+	public ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
-		Assert.isTrue(tabSize >= 0);
 		Assert.isNotNull(settings);	
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
 		fSettings= settings;
-		fTabSize= tabSize;
-		fIsCompactingAssignments= compactAssignments;
 		fAlreadyUsedNameMap= new HashMap(0);
 		
 		fReplaceAllOccurrences= true; //default
@@ -387,7 +389,13 @@ public class ExtractTempRefactoring extends Refactoring {
 	//without the trailing indent
 	private String createTempDeclarationSource() throws CoreException {
 		String modifier= fDeclareFinal ? "final ": ""; //$NON-NLS-1$ //$NON-NLS-2$
-		return modifier + getTempTypeName() + " " + fTempName + getAssignmentString() + getInitializerSource() + ";" + getLineDelimiter(); //$NON-NLS-1$ //$NON-NLS-2$
+		ICodeFormatter formatter= ToolFactory.createCodeFormatter();
+		String dummyInitializer= "0"; //$NON-NLS-1$
+		String semicolon= ";"; //$NON-NLS-1$
+		String dummyDeclaration= modifier + getTempTypeName() + " " + fTempName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$
+		int[] position= {dummyDeclaration.length() - dummyInitializer.length()  - semicolon.length()};
+		StringBuffer formattedDummyDeclaration= new StringBuffer(formatter.format(dummyDeclaration, 0, position, getLineDelimiter()));
+		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), getInitializerSource()).append(getLineDelimiter()).toString();
 	}
 
 	private String getTempTypeName() throws JavaModelException {
@@ -501,18 +509,20 @@ public class ExtractTempRefactoring extends Refactoring {
 			return (IFile)fCu.getCorrespondingResource();
 	}
 
-	private String getAssignmentString() {
-		if (isCompactingAssignment())
-			return "= "; //$NON-NLS-1$
-		else
-			return " = "; //$NON-NLS-1$
-	}
-
-	private boolean isCompactingAssignment() {
-		return fIsCompactingAssignments;
+	public static int getTabSize() {
+		return getPositiveIntValue(((String) JavaCore.getOptions().get(PREF_TAB_SIZE)));
 	}
 	
-	private int getTabSize() {
-		return fTabSize;
+	private static int getPositiveIntValue(String string) {
+		try {
+			if (Integer.parseInt(string) >= 0) 
+				return Integer.parseInt(string);
+			else	
+				return DEFAULT_TAB_SIZE;
+		} catch (NumberFormatException e) {
+			Assert.isTrue(false); //should never happen
+			return DEFAULT_TAB_SIZE;
+		}
 	}	
+	
 }

@@ -8,7 +8,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ExtractTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -25,9 +24,7 @@ public class ExtractTempAction extends TextSelectionRefactoringAction {
 	 */	
 	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return new ExtractTempRefactoring(cunit, selection.getOffset(), selection.getLength(), 
-																 JavaPreferencesSettings.getCodeGenerationSettings(),
-																 CodeFormatterPreferencePage.getTabSize(),
-																 CodeFormatterPreferencePage.isCompactingAssignment());
+																 JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
 	/* (non-Javadoc)

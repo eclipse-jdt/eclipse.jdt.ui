@@ -1,11 +1,14 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.Hashtable;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
@@ -18,6 +21,9 @@ public class ExtractTempTests extends RefactoringTest {
 	private static final Class clazz= ExtractTempTests.class;
 	private static final String REFACTORING_PATH= "ExtractTemp/";
 
+	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= "org.eclipse.jdt.core.formatter.style.assignment";	 //$NON-NLS-1$
+	private static final String COMPACT= "compact"; //$NON-NLS-1$
+		
 	public ExtractTempTests(String name) {
 		super(name);
 	} 
@@ -54,12 +60,18 @@ public class ExtractTempTests extends RefactoringTest {
 		return createCU(pack, getSimpleTestFileName(canExtract, input), getFileContents(getTestFileName(canExtract, input)));
 	}
 
+	protected void setUp() throws Exception {
+		super.setUp();
+		Hashtable options= JavaCore.getOptions();
+		options.put(PREF_STYLE_COMPACT_ASSIGNEMENT, COMPACT);
+		JavaCore.setOptions(options);
+	}
+
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength(), 
-																									JavaPreferencesSettings.getCodeGenerationSettings(),
-																									4, true);
+																									JavaPreferencesSettings.getCodeGenerationSettings());
 		
 		ref.setReplaceAllOccurrences(replaceAll);
 		ref.setDeclareFinal(makeFinal);
@@ -78,7 +90,7 @@ public class ExtractTempTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength(), 
-																									JavaPreferencesSettings.getCodeGenerationSettings(), 4, true);
+																									JavaPreferencesSettings.getCodeGenerationSettings());
 		
 		ref.setReplaceAllOccurrences(replaceAll);
 		ref.setDeclareFinal(makeFinal);
@@ -343,5 +355,4 @@ public class ExtractTempTests extends RefactoringTest {
 //		printTestDisabledMessage("regression test for bug#13249");
 		failHelper1(3, 9, 3, 41, false, false, "temp");
 	}	
-
 }
