@@ -42,9 +42,9 @@
 					jProject= JavaCore.create(resource.getProject());
 					try {						IPackageFragment pkgFragment= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
 						if (pkgFragment != null)
-							pkgRoot= JavaModelUtil.getPackageFragmentRoot(pkgFragment);						else							pkgRoot= jProject.findPackageFragmentRoot(resource.getFullPath().removeLastSegments(1));					} catch (JavaModelException ex) {
+							pkgRoot= JavaModelUtil.getPackageFragmentRoot(pkgFragment);						else							pkgRoot= findPackageFragmentRoot(jProject, resource.getFullPath().removeLastSegments(1));					} catch (JavaModelException ex) {
 						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.javaPackageNotDeterminable", resource.getFullPath()), ex); //$NON-NLS-1$						return;					}
-				}			}						if (pkgRoot != null) {				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();				if (fJarPackage.useSourceFolderHierarchy()&& !pkgRoot.getElementName().equals(pkgRoot.DEFAULT_PACKAGEROOT_PATH))					leadSegmentsToRemove--;			}			
+				}			}						if (pkgRoot != null) {				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();				if (mustUseSourceFolderHierarchy() && !pkgRoot.getElementName().equals(pkgRoot.DEFAULT_PACKAGEROOT_PATH))					leadSegmentsToRemove--;			}			
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
 						boolean isInOutputFolder= false;			if (isInJavaProject) {				try {					isInOutputFolder= jProject.getOutputLocation().isPrefixOf(resource.getFullPath());				} catch (JavaModelException ex) {					isInOutputFolder= false;				}			}			
 			exportClassFiles(progressMonitor, pkgRoot, resource, jProject, destinationPath);
@@ -65,7 +65,7 @@
 		for (int i= 0; i < children.length; i++)
 			exportElement(children[i], progressMonitor);
 	}
-
+	private IPackageFragmentRoot findPackageFragmentRoot(IJavaProject jProject, IPath path) throws JavaModelException {		if (jProject == null || path == null || path.segmentCount() <= 0)			return null;		IPackageFragmentRoot pkgRoot= jProject.findPackageFragmentRoot(path);		if (pkgRoot != null)			return pkgRoot;		else 			return findPackageFragmentRoot(jProject, path.removeLastSegments(1));	}
 	private void exportResource(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath, boolean isInOutputFolder) {
 		boolean isNonJavaResource= !isInJavaProject || pkgRoot == null;
 		boolean isInClassFolder= false;
@@ -304,4 +304,4 @@
 		}
 		return false;
 	}
-}
+	private boolean mustUseSourceFolderHierarchy() {		return fJarPackage.useSourceFolderHierarchy() && fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported();	}}
