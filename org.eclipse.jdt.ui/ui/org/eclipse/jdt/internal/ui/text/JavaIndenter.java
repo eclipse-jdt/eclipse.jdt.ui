@@ -530,16 +530,19 @@ public class JavaIndenter {
 					// RBRACE is a little tricky: it can be the end of an array definition, but
 					// usually it is the end of a previous block
 					int pos= fPreviousPos; // store state
-					if (skipScope() && looksLikeArrayInitializerIntro()) {
+					if (skipScope() && looksLikeArrayInitializerIntro())
 						continue; // it's an array
-					} else
+					else
 						return pos; // it's not - do as with all the above
 					
 				// scopes: skip them
 				case Symbols.TokenRPAREN:
 				case Symbols.TokenRBRACKET:
-					skipScope();
-					break;
+					pos= fPreviousPos;
+					if (skipScope())
+						break;
+					else
+						return pos; 
 					
 				// IF / ELSE: align the position after the conditional block with the if
 				// so we are ready for an else, except if danglingElse is false
@@ -551,8 +554,11 @@ public class JavaIndenter {
 						break;
 				case Symbols.TokenELSE:
 					// skip behind the next if, as we have that one covered
-					skipNextIF();
-					break;
+					pos= fPosition;
+					if (skipNextIF())
+						break;
+					else
+						return pos;
 				
 				case Symbols.TokenDO:
 					// align the WHILE position with its do
