@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.ui.text;
 
 import java.util.List;
-import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -56,6 +56,9 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tracker;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -71,18 +74,30 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.IInformationControlExtension3;
+
+import org.eclipse.ui.IKeyBindingService;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ActionHandler;
+import org.eclipse.ui.commands.HandlerSubmission;
 import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
 import org.eclipse.ui.commands.IKeySequenceBinding;
+import org.eclipse.ui.commands.Priority;
+import org.eclipse.ui.contexts.IWorkbenchContextSupport;
 import org.eclipse.ui.keys.KeySequence;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
+
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
@@ -323,6 +338,11 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private boolean fIsDecativateListenerActive= false;
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 
+	private IKeyBindingService fKeyBindingService;
+	private String[] fKeyBindingScopes;
+	private IAction fShowViewMenuAction;
+	private HandlerSubmission fShowViewMenuHandlerSubmission;
+
 	
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
@@ -531,7 +551,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	/**
 	 * Returns the name of the dialog settings section.
 	 * 
-	 * @return
+	 * @return the name of the dialog settings section
 	 */
 	protected abstract String getId();
 	
@@ -615,6 +635,32 @@ public abstract class AbstractInformationControl implements IInformationControl,
 				showViewMenu();
 			}
 		});
+		
+		
+		// Key binding service
+		IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
+		IWorkbenchPartSite site= part.getSite();
+		fKeyBindingService=  site.getKeyBindingService();
+
+		// Remember current scope and then set window context.
+		fKeyBindingScopes= fKeyBindingService.getScopes();
+		fKeyBindingService.setScopes(new String[] {IWorkbenchContextSupport.CONTEXT_ID_WINDOW});
+		
+		// Create show view menu action
+		fShowViewMenuAction= new Action("showViewMenu") { //$NON-NLS-1$
+			/*
+			 * @see org.eclipse.jface.action.Action#run()
+			 */
+			public void run() {
+				showViewMenu();
+			}
+		};
+		fShowViewMenuAction.setEnabled(true);
+		fShowViewMenuAction.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
+		
+		// Register action with command support
+		fShowViewMenuHandlerSubmission= new HandlerSubmission(null, fShell, null, fShowViewMenuAction.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction), Priority.MEDIUM);
+		PlatformUI.getWorkbench().getCommandSupport().addHandlerSubmission(fShowViewMenuHandlerSubmission);
 	}
 
 	private MenuManager getViewMenuManager() {
@@ -824,7 +870,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		viewMenu.add(new ResizeAction());
 		viewMenu.add(new RememberBoundsAction());
 		viewMenu.add(new Separator("SystemMenuEnd")); //$NON-NLS-1$
-		
+
 		fCustomFiltersActionGroup.fillViewMenu(viewMenu);
 	}
 	
@@ -870,6 +916,16 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fComposite= null;
 		fFilterText= null;
 		fStatusTextFont= null;
+		
+		// Remove handler submission
+		PlatformUI.getWorkbench().getCommandSupport().removeHandlerSubmission(fShowViewMenuHandlerSubmission);
+		
+		// Restore editor's key binding scope
+		if (fKeyBindingScopes != null && fKeyBindingService != null) {
+			fKeyBindingService.setScopes(fKeyBindingScopes);
+			fKeyBindingScopes= null;
+			fKeyBindingService= null;
+		}
 	}
 
 	/**
