@@ -124,7 +124,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(fType));
-		if (!Checks.isTopLevel(fType))
+		if (!Checks.isTopLevel(fType)) //waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types
 			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.only_toplevel")); //$NON-NLS-1$
 		if (isSpecialCase(fType))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.special_case"));	 //$NON-NLS-1$
@@ -517,7 +517,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			return false;
 		if (! fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java")) //$NON-NLS-1$
 			return false;
-		return Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), fNewName) == null;
+		return Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), fNewName).isOK();
 	}
 	
 	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
