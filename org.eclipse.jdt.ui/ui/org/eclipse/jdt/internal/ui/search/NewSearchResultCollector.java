@@ -39,7 +39,7 @@ public class NewSearchResultCollector extends SearchRequestor {
 				isWriteAccess= fieldRef.isWriteAccess();
 				isReadAccess= fieldRef.isReadAccess();
 			}
-			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getOffset(), match.getLength(), match.getAccuracy(), isWriteAccess, isWriteAccess, match.isInsideDocComment()));
+			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getOffset(), match.getLength(), match.getAccuracy(), isReadAccess, isWriteAccess, match.isInsideDocComment()));
 		}
 	}
 

@@ -104,7 +104,7 @@ class WriteFilter extends FieldFilter {
 
 class ReadFilter extends FieldFilter {
 	public boolean filters(JavaElementMatch match) {
-		return !match.isWriteAccess();
+		return match.isReadAccess();
 	}
 	public String getName() {
 		return SearchMessages.getString("MatchFilter.ReadFilter.name"); //$NON-NLS-1$
