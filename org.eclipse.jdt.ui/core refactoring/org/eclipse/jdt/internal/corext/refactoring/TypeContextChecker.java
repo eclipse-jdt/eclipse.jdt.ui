@@ -153,7 +153,8 @@ public class TypeContextChecker {
 			if (! info.isAdded() && ! info.isTypeNameChanged())
 				return null;
 
-			String newTypeName= info.getNewTypeName();
+			String newTypeName= ParameterInfo.stripEllipsis(info.getNewTypeName().trim()).trim();
+			
 			if ("".equals(newTypeName.trim())){ //$NON-NLS-1$
 				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_type", new String[]{info.getNewName()}); //$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(msg);
@@ -163,8 +164,6 @@ public class TypeContextChecker {
 				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.no_vararg_below_50", new String[]{info.getNewName()}); //$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
-			
-			newTypeName= ParameterInfo.stripEllipsis(newTypeName);
 			
 			List problemsCollector= new ArrayList(0);
 			Type parsedType= parseType(newTypeName, problemsCollector);
