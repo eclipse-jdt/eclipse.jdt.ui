@@ -196,7 +196,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public int getEnd() {
 		
-		if (getCompletionLength() == 0)		
+		if (getCompletionLength() == 0)
 			return super.getEnd();
 
 		try {			
