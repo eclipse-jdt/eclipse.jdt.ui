@@ -6,12 +6,15 @@ package org.eclipse.jdt.internal.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -292,34 +295,31 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		}
 	}
 
-	public static class ClassesInSuitContentProvider implements IStructuredContentProvider {
+	static class ClassesInSuitContentProvider implements IStructuredContentProvider {
 			
-		public ClassesInSuitContentProvider() {
-			super();
-		}
-		
 		public Object[] getElements(Object parent) {
+			if (! (parent instanceof IPackageFragment))
+				return new Object[0];
+			IPackageFragment pack= (IPackageFragment) parent;
+			if (! pack.exists())
+				return new Object[0];
 			try {
-				if (parent instanceof IPackageFragment) {
-					IPackageFragment pack= (IPackageFragment) parent;
-					if (pack.exists()) { 
-						ICompilationUnit[] cuArray= pack.getCompilationUnits();
-						ArrayList typesArrayList= new ArrayList();
-						for (int i= 0; i < cuArray.length; i++) {
-							ICompilationUnit cu= cuArray[i];
-							IType[] types= cu.getTypes();
-							for (int j= 0; j < types.length; j++) {
-								if (TestSearchEngine.isTestImplementor(types[j]))	
-									typesArrayList.add(types[j]);
-							}
-						}
-						return typesArrayList.toArray();
+				ICompilationUnit[] cuArray= pack.getCompilationUnits();
+				List typesArrayList= new ArrayList();
+				for (int i= 0; i < cuArray.length; i++) {
+					ICompilationUnit cu= cuArray[i];
+					IType[] types= cu.getTypes();
+					for (int j= 0; j < types.length; j++) {
+						IType type= types[j];
+						if (type.isClass() && ! Flags.isAbstract(type.getFlags()) && TestSearchEngine.isTestImplementor(type))	
+							typesArrayList.add(types[j]);
 					}
 				}
+				return typesArrayList.toArray();
 			} catch (JavaModelException e) {
 				JUnitPlugin.log(e);
+				return new Object[0];
 			}
-			return new Object[0];
 		}
 		
 		public void dispose() {
