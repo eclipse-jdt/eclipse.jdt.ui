@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.dom;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.*;
@@ -20,12 +19,12 @@ public class ASTRewriteClear extends ASTVisitor {
 	}
 	
 	private void clearList(List list) {
-		for (Iterator iter= list.iterator(); iter.hasNext();) {
-			ASTNode element= (ASTNode) iter.next();
+		for (int i= list.size() - 1; i >= 0 ; i--) {
+			ASTNode element= (ASTNode) list.get(i);
 			if (fRewrite.isInserted(element)) {
-				iter.remove();
-			}
-		}	
+				list.remove(i);
+			}			
+		}
 	}
 	
 	private boolean isInserted(ASTNode node) {
