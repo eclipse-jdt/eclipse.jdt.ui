@@ -281,7 +281,7 @@ public final class ASTProvider {
 	private void activeJavaEditorChanged(IWorkbenchPart editor) {
 
 		IJavaElement javaElement= null;
-		if (editor != null)
+		if (editor instanceof JavaEditor)
 			javaElement= ((JavaEditor)editor).getInputJavaElement();
 		
 		synchronized (this) {
@@ -446,7 +446,7 @@ public final class ASTProvider {
 			if (isActiveElement) {
 				if (fAST != null) {
 					if (DEBUG)
-						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning cached AST:" + toString(fAST) + " for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning cached AST:" + toString(fAST) + " for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					
 					return fAST;
 				}
