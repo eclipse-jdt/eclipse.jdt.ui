@@ -141,17 +141,24 @@ public class ChangeParametersControl extends Composite {
 				element= ((TableItem) element).getData();
 			if (!(element instanceof ParameterInfo))
 				return;
+			boolean unchanged;
 			ParameterInfo parameterInfo= (ParameterInfo) element;
-			if (property.equals(PROPERTIES[NEWNAME_PROP])) 
+			if (property.equals(PROPERTIES[NEWNAME_PROP])) {
+				unchanged= parameterInfo.getNewName().equals(value);
 				parameterInfo.setNewName((String) value);
-			else if (property.equals(PROPERTIES[DEFAULT_PROP]))
+			} else if (property.equals(PROPERTIES[DEFAULT_PROP])) {
+				unchanged= parameterInfo.getDefaultValue().equals(value);
 				parameterInfo.setDefaultValue((String) value);
-			else if (property.equals(PROPERTIES[TYPE_PROP]))
+			} else if (property.equals(PROPERTIES[TYPE_PROP])) {
+				unchanged= parameterInfo.getNewTypeName().equals(value);
 				parameterInfo.setNewTypeName((String) value);
- 			else 
- 				Assert.isTrue(false);
-			ChangeParametersControl.this.fListener.parameterChanged(parameterInfo);
-			ChangeParametersControl.this.fTableViewer.update(parameterInfo, new String[] { property });
+			} else {
+				throw new IllegalStateException();
+			}
+			if (! unchanged) {
+				ChangeParametersControl.this.fListener.parameterChanged(parameterInfo);
+				ChangeParametersControl.this.fTableViewer.update(parameterInfo, new String[] { property });
+			}
 		}
 	}
 
