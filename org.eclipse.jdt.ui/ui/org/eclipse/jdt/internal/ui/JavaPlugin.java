@@ -92,7 +92,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
-import org.eclipse.jdt.internal.ui.preferences.MockupPreferenceStore;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
