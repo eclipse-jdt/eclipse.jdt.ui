@@ -256,7 +256,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		if (!store.contains(getPreferenceKey(TAG_USER_DEFINED_PATTERNS_ENABLED)))
 			return;
 		
-		boolean fUserDefinedPatternsEnabled= store.getBoolean(getPreferenceKey(TAG_USER_DEFINED_PATTERNS_ENABLED));
+		fUserDefinedPatternsEnabled= store.getBoolean(getPreferenceKey(TAG_USER_DEFINED_PATTERNS_ENABLED));
 		setUserDefinedPatterns(CustomFiltersDialog.convertFromString(store.getString(getPreferenceKey(TAG_USER_DEFINED_PATTERNS)), SEPARATOR));
 
 		Iterator iter= fEnabledFilterIds.keySet().iterator();
@@ -341,8 +341,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		restoreUserDefinedPatterns(customFilters);
 		restoreXmlDefinedFilters(customFilters);
 		
-		fPatternFilter.setPatterns(getUserAndBuiltInPatterns());
-		updateBuiltInFilters();
+		updateViewerFilters();
 	}
 	
 	private void restoreUserDefinedPatterns(IMemento memento) {
