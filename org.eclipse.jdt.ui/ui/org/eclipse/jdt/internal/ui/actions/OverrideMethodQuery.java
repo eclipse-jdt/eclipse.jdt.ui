@@ -12,6 +12,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -20,8 +23,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.IOverrideMethodQuery;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.dialogs.CheckedTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class OverrideMethodQuery implements IOverrideMethodQuery {
@@ -130,7 +131,7 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 
 	}
 	
-	private class OverrideMethodValidator implements ISelectionValidator {
+	private class OverrideMethodValidator implements ISelectionStatusValidator {
 				
 		/*
 		 * @see ISelectionValidator#validate(Object[])

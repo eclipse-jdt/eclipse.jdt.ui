@@ -8,28 +8,26 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.ui.util;import org.eclipse.swt.widgets.Shell;
+package org.eclipse.jdt.internal.ui.util;import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -37,21 +35,18 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.actions.OpenHierarchyAction;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.actions.OpenHierarchyAction;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 
 public class OpenTypeHierarchyUtil {
 	
