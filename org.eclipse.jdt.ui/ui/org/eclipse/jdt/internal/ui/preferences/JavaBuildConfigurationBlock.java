@@ -129,8 +129,9 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		composite.setLayout(layout);
 				
 		
-		String label= "General"; //$NON-NLS-1$
+		String label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.general"); //$NON-NLS-1$
 		ExpandableComposite excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite.setExpanded(true);
 		
 		Composite othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
@@ -144,7 +145,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		text.setTextLimit(6);
 		text.setLayoutData(gd);
 
-		label= "Build path problems"; //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.build_path_problems"); //$NON-NLS-1$
 		excomposite= createStyleSection(composite, label, nColumns); 
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);
@@ -163,7 +164,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_check_prereq_binary_level.label");  //$NON-NLS-1$
 		addComboBox(othersComposite, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
 		
-		label= "Output folder"; //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.output_folder");  //$NON-NLS-1$
 		excomposite= createStyleSection(composite, label, nColumns); 
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);
@@ -189,7 +190,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 
-		label= "Type restriction"; //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.type_restrction"); //$NON-NLS-1$
 		excomposite= createStyleSection(composite, label, nColumns); 
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);
@@ -199,7 +200,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.pb_forbidden_reference.label"); //$NON-NLS-1$
 		addComboBox(othersComposite, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= "Build path properties"; //$NON-NLS-1$
+		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.build_path_properties"); //$NON-NLS-1$
 		excomposite= createStyleSection(composite, label, nColumns); 
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);

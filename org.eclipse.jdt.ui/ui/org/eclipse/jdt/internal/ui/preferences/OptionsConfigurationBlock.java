@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -136,17 +137,6 @@ public abstract class OptionsConfigurationBlock {
 		fTextBoxes= new ArrayList(2);
 		fLabels= new HashMap();
 		fExpandedComposites= new ArrayList();
-		
-//		IScopeContext scopeContext= null;
-//		if (project != null) {
-//			scopeContext= new ProjectScope(project.getProject());
-//		} else {
-//			scopeContext= new InstanceScope();
-//		}
-		
-		// String scopeName=  
-		// currnode= (IEclipsePreferences) Platform.getPreferencesService().getRootNode().node(getName());
-		// fPreferenceScope= 
 		
 	}
 		
@@ -366,6 +356,7 @@ public abstract class OptionsConfigurationBlock {
 		final ExpandableComposite excomposite= new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
 		excomposite.setText(label);
 		excomposite.setExpanded(false);
+		excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 		excomposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, nColumns, 1));
 		excomposite.addExpansionListener(new ExpansionAdapter() {
 			public void expansionStateChanged(ExpansionEvent e) {
@@ -393,11 +384,6 @@ public abstract class OptionsConfigurationBlock {
 			}
 			
 		}
-//		if (excomposite.isExpanded()) {
-//			excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
-//		} else {
-//			excomposite.setFont(JFaceResources.getFontRegistry().get(JFaceResources.DIALOG_FONT));
-//		}
 	}
 	
 	protected ImageHyperlink createHelpLink(Composite parent, final String link) {
