@@ -18,10 +18,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.resources.IFile;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -58,8 +63,10 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -96,15 +103,13 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
 
 public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private final List fParameterInfos;
 	private final CodeGenerationSettings fCodeGenerationSettings;
-	private final ImportRewriteManager fImportManager;
 
 	private CompilationUnit fCU;
 	private List fExceptionInfos;
@@ -127,7 +132,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		fParameterInfos= createParameterInfoList(method);
 		//fExceptionInfos is created in checkActivation
 		fCodeGenerationSettings= codeGenerationSettings;
-		fImportManager= new ImportRewriteManager(fCodeGenerationSettings);
 		fReturnTypeName= getInitialReturnTypeName();
 		fMethodName= getInitialMethodName();
 		fVisibility= getInitialMethodVisibility();
@@ -546,7 +550,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 			
-			result.merge(collectAndCheckImports(new SubProgressMonitor(pm, 1)));
+			result.merge(checkAndResolveTypes(new SubProgressMonitor(pm, 1)));
 
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 
@@ -564,62 +568,70 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private void clearManagers() {
-		fImportManager.clear();
+		fChangeManager= null;
 	}
 
-	private RefactoringStatus collectAndCheckImports(IProgressMonitor pm) throws CoreException {
+	private RefactoringStatus checkAndResolveTypes(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		List notDeletedParams= getNotDeletedInfos();
-		List addedExceptions= getAddedExceptions();
-		pm.beginTask("", notDeletedParams.size() + addedExceptions.size()); //$NON-NLS-1$
+		pm.beginTask("", notDeletedParams.size() + 1); //$NON-NLS-1$
 		for (Iterator iter= notDeletedParams.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
 			if (! info.isTypeNameChanged())
 				continue;
-			String typeName= getSimpleParameterTypeName(info);
+			String typeName= getElementTypeName(info.getNewTypeName());
 			if (isPrimitiveTypeName(typeName))
 				continue;
-			if (tryResolvingType(typeName))
-				continue;
-			result.merge(tryFinidingInTypeCache(typeName, info, new SubProgressMonitor(pm, 1)));
+			String qualifiedTypeName= resolveType(typeName, result, new SubProgressMonitor(pm, 1));
+			info.setNewTypeName(getFullTypeName(info.getNewTypeName(), qualifiedTypeName));
 		}
-		for (Iterator iter= addedExceptions.iterator(); iter.hasNext(); ) {
-			ExceptionInfo exInfo= (ExceptionInfo) iter.next();
-			String fullName= JavaModelUtil.getFullyQualifiedName(exInfo.getType());
-			importToAllCusOfRippleMethods(fullName);
+		if (! isReturnTypeSameAsInitial()) {
+			String typeName= getElementTypeName(fReturnTypeName);
+			if (! isPrimitiveTypeName(typeName)) {
+				String qualifiedTypeName= resolveType(typeName, result, new SubProgressMonitor(pm, 1));
+				fReturnTypeName= getFullTypeName(fReturnTypeName, qualifiedTypeName);
+			}
 		}
 		pm.done();
 		return result;
 	}
-
-	//returns true iff succeeded
-	private boolean tryResolvingType(String typeName) throws CoreException {
-		String[][] fqns= getMethod().getDeclaringType().resolveType(typeName);
-		if (fqns == null || fqns.length != 1)
-			return false;
-		String fullName= JavaModelUtil.concatenateName(fqns[0][0], fqns[0][1]);
-		importToAllCusOfRippleMethods(fullName);
-		return true;
-	}
 	
-	private RefactoringStatus tryFinidingInTypeCache(String typeName, ParameterInfo info, IProgressMonitor pm) throws CoreException {
-		List typeRefsFound= findTypeInfos(typeName, pm);
-
+	private String resolveType(String elementTypeName, RefactoringStatus status, IProgressMonitor pm) throws CoreException {
+		String[][] fqns= getMethod().getDeclaringType().resolveType(elementTypeName);
+		if (fqns != null) {
+			if (fqns.length == 1) {
+				return JavaModelUtil.concatenateName(fqns[0][0], fqns[0][1]);
+			} else if (fqns.length > 1){
+				String[] keys= {elementTypeName, String.valueOf(fqns.length)};
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.ambiguous", keys); //$NON-NLS-1$
+				status.addError(msg);
+				return elementTypeName;
+			}
+		}
+		
+		List typeRefsFound= findTypeInfos(elementTypeName, pm);
 		if (typeRefsFound.size() == 0){
-			String[] keys= {info.getNewTypeName()};
+			String[] keys= {elementTypeName};
 			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.not_unique", keys); //$NON-NLS-1$
-			return RefactoringStatus.createErrorStatus(msg);
+			status.addError(msg);
+			return elementTypeName;
 		} else if (typeRefsFound.size() == 1){
 			TypeInfo typeInfo= (TypeInfo) typeRefsFound.get(0);
-			String fullName= typeInfo.getFullyQualifiedName();
-			importToAllCusOfRippleMethods(fullName);
-			return new RefactoringStatus();
+			return typeInfo.getFullyQualifiedName();
 		} else {
 			Assert.isTrue(typeRefsFound.size() > 1);
-			String[] keys= {info.getNewTypeName(), String.valueOf(typeRefsFound.size())};
+			String[] keys= {elementTypeName, String.valueOf(typeRefsFound.size())};
 			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.ambiguous", keys); //$NON-NLS-1$
-			return RefactoringStatus.createErrorStatus(msg);
+			status.addError(msg);
+			return elementTypeName;
 		}
+	}
+
+	private String getFullTypeName(String typeName, String qualifiedName) {
+		int dimStart= typeName.indexOf('[');
+		if (dimStart != -1)
+			return qualifiedName + typeName.substring(dimStart);
+		return qualifiedName;
 	}
 
 	private List findTypeInfos(String typeName, IProgressMonitor pm) throws JavaModelException {
@@ -637,24 +649,25 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return typeRefsFound;
 	}
 	
-	private void importToAllCusOfRippleMethods(String fullName) throws CoreException {
-		for (int i= 0; i < fRippleMethods.length; i++) {
-			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(fRippleMethods[i].getCompilationUnit());
-			fImportManager.addImportTo(fullName, wc);
-		}
-	}	
-	
 	private static boolean isPrimitiveTypeName(String typeName){
 		return PrimitiveType.toCode(typeName) != null;
 	}
 	
-	private static String getSimpleParameterTypeName(ParameterInfo info) {
-		String typeName= info.getNewTypeName();
+	private static String getElementTypeName(String typeName) {
 		if (typeName.indexOf('[') != -1)
 			typeName= typeName.substring(0, typeName.indexOf('['));
 		return typeName.trim();
 	}
 	
+	private static int getArrayDimensions(String typeName) {
+		int dims= 0;
+		for (int i= 0; i < typeName.length(); i++) {
+			if (typeName.charAt(i) == '[')
+				dims++;
+		}
+		return dims;
+	}
+
 	private RefactoringStatus checkIfDeletedParametersUsed() {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fOccurrences.length; i++) {
@@ -843,16 +856,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		all.removeAll(getDeletedInfos());
 		return all;
 	}
-
-	private List getAddedExceptions(){
-		List result= new ArrayList(1);
-		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext();) {
-			ExceptionInfo info= (ExceptionInfo) iter.next();
-			if (info.isAdded())
-				result.add(info);
-		}
-		return result;
-	}
 	
 	private boolean areNamesSameAsInitial() {
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
@@ -989,9 +992,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			else
 				cuNode= AST.parseCompilationUnit(cu, true, null, null);
 			ASTRewrite rewrite= new ASTRewrite(cuNode);
+			ImportRewrite importRewrite= new ImportRewrite(cu, fCodeGenerationSettings);
 			ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), cuNode);
 			for (int j= 0; j < nodes.length; j++) {
-				updateMethodOccurrenceNode(rewrite, nodes[j]);
+				updateMethodOccurrenceNode(rewrite, importRewrite, nodes[j]);
 			}
 			if (isNoArgConstructor && namedSubclassMapping.containsKey(cu)){
 				//only non-anonymous subclasses may have noArgConstructors to modify - see bug 43444
@@ -1003,18 +1007,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 						modifyImplicitCallsToNoArgConstructor(subtypeNode, rewrite);
 				}
 			}
-			addTextEditFromRewrite(manager, cu, rewrite);
+			addTextEditFromRewrite(manager, cu, rewrite, importRewrite);
 		}
 		
 		pm.done();
 		return manager;
 	}
 
-	private void updateMethodOccurrenceNode(ASTRewrite rewrite, ASTNode node) throws JavaModelException {
+	private void updateMethodOccurrenceNode(ASTRewrite rewrite, ImportRewrite importRewrite, ASTNode node) throws JavaModelException {
 		if (isReferenceNode(node))
-			updateReferenceNode(node, rewrite);
+			updateReferenceNode(node, importRewrite, rewrite);
 		else	
-			updateDeclarationNode(node, rewrite);
+			updateDeclarationNode(node, importRewrite, rewrite);
 	}	
 	
 	//Map<ICompilationUnit, Set<IType>>
@@ -1122,13 +1126,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0;
 	}
 	
-	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
+	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite, ImportRewrite importRewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 		TextEdit resultingEdits= new MultiTextEdit();
 		rewrite.rewriteNode(textBuffer, resultingEdits);
+		importRewrite.rewrite(textBuffer, resultingEdits);
 
-		if (fImportManager.hasImportEditFor(cu))
-			resultingEdits.addChild(fImportManager.getImportRewrite(cu).createEdit(textBuffer));
 		if (resultingEdits.hasChildren() || manager.containsChangesIn(cu)) {
 		    TextChange textChange= manager.get(cu);
 		    TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
@@ -1136,48 +1139,59 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		rewrite.removeModifications();
 	}
 	
-	private void updateDeclarationNode(ASTNode methodOccurrence, ASTRewrite rewrite) throws JavaModelException {
+	private void updateDeclarationNode(ASTNode methodOccurrence, ImportRewrite importRewrite, ASTRewrite rewrite) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclaration(methodOccurrence);
 		if (methodDeclaration == null) //can be null - see bug 27236
 			return;
 		changeParameterNames(methodDeclaration, rewrite);
 		if (canChangeNameAndReturnType()) {
 			changeMethodName(methodDeclaration, rewrite);
-			changeReturnType(methodDeclaration, rewrite);
+			changeReturnType(methodDeclaration, rewrite, importRewrite);
 		}
-		changeParameterTypes(methodDeclaration, rewrite);
+		changeParameterTypes(methodDeclaration, rewrite, importRewrite);
 				
 		if (needsVisibilityUpdate(methodDeclaration))
 			changeVisibility(methodDeclaration, rewrite);
-		reshuffleElements(methodOccurrence, methodDeclaration.parameters(), rewrite);
-		changeExceptions(methodDeclaration, rewrite);
+		reshuffleElements(methodOccurrence, methodDeclaration.parameters(), rewrite, importRewrite);
+		changeExceptions(methodDeclaration, rewrite, importRewrite);
 	}
 	
-	private void changeParameterTypes(MethodDeclaration methodDeclaration, ASTRewrite rewrite) {
+	private void changeParameterTypes(MethodDeclaration methodDeclaration, ASTRewrite rewrite, ImportRewrite importRewrite) {
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
 			if (! info.isAdded() && ! info.isDeleted() && info.isTypeNameChanged()){
 				SingleVariableDeclaration oldParam= (SingleVariableDeclaration)methodDeclaration.parameters().get(info.getOldIndex());
-				replaceTypeNode(oldParam.getType(), info.getNewTypeName(), rewrite);
+				replaceTypeNode(oldParam.getType(), info.getNewTypeName(), rewrite, importRewrite);
 				removeExtraDimensions(oldParam, rewrite);
 			}
 		}
 	}
 
-	private void removeExtraDimensions(SingleVariableDeclaration oldParam, ASTRewrite rewrite) {
+	private static void removeExtraDimensions(SingleVariableDeclaration oldParam, ASTRewrite rewrite) {
 		if (oldParam.getExtraDimensions() != 0) {		
 			rewrite.markAsReplaced(oldParam, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(0), null);
 		}
 	}
 
-	private void replaceTypeNode(Type typeNode, String newTypeName, ASTRewrite rewrite){
-		Type newParamType= (Type)rewrite.createPlaceholder(newTypeName, ASTRewrite.TYPE);
-		rewrite.markAsReplaced(typeNode, newParamType);
+	private static void replaceTypeNode(Type typeNode, String newTypeName, ASTRewrite rewrite, ImportRewrite importRewrite){
+		Type newTypeNode= createNewTypeNode(newTypeName, rewrite, importRewrite);
+		rewrite.markAsReplaced(typeNode, newTypeNode);
 	}
 
-	private void changeReturnType(MethodDeclaration methodDeclaration, ASTRewrite rewrite) throws JavaModelException {
+	private static Type createNewTypeNode(String newTypeName, ASTRewrite rewrite, ImportRewrite importRewrite) {
+		String elementTypeName= getElementTypeName(newTypeName);
+		String importedTypeName= importRewrite.addImport(elementTypeName);
+		int dimensions= getArrayDimensions(newTypeName);
+		
+		Type newTypeNode= (Type) rewrite.createPlaceholder(importedTypeName, ASTRewrite.TYPE);
+		if (dimensions != 0)
+			newTypeNode= rewrite.getAST().newArrayType(newTypeNode, dimensions);
+		return newTypeNode;
+	}
+
+	private void changeReturnType(MethodDeclaration methodDeclaration, ASTRewrite rewrite, ImportRewrite importRewrite) throws JavaModelException {
 	    if (! isReturnTypeSameAsInitial())
-	        replaceTypeNode(methodDeclaration.getReturnType(), fReturnTypeName, rewrite);
+	        replaceTypeNode(methodDeclaration.getReturnType(), fReturnTypeName, rewrite, importRewrite);
 	}
 
 	private void replaceNameNode(SimpleName nameNode, String newName, ASTRewrite rewrite){
@@ -1195,14 +1209,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 	}
 
-	private void updateReferenceNode(ASTNode methodOccurrence, ASTRewrite rewrite) {
-		reshuffleElements(methodOccurrence, getArguments(methodOccurrence), rewrite);
+	private void updateReferenceNode(ASTNode methodOccurrence, ImportRewrite importRewrite, ASTRewrite rewrite) {
+		reshuffleElements(methodOccurrence, getArguments(methodOccurrence), rewrite, importRewrite);
 		if (! isMethodNameSameAsInitial())
 			replaceNameNode(getMethodNameNode(methodOccurrence), fMethodName, rewrite);
 	}
 	
-	private void reshuffleElements(ASTNode methodOccurrence, List elementList, ASTRewrite rewrite) {
-		AST ast= methodOccurrence.getAST();
+	private void reshuffleElements(ASTNode methodOccurrence, List elementList, ASTRewrite rewrite, ImportRewrite importRewrite) {
 		boolean isReference= isReferenceNode(methodOccurrence);
 		boolean isRecursiveReference= isReference ? isRecursiveReference(methodOccurrence) : false;
 		ASTNode[] nodes= getSubNodesOfMethodOccurrenceNode(methodOccurrence);
@@ -1214,7 +1227,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
 			
 			if (info.isAdded())
-				newPermutation[i]= createNewElementForList(rewrite, ast, info, isReference, isRecursiveReference);
+				newPermutation[i]= createNewElementForList(rewrite, importRewrite, info, isReference, isRecursiveReference);
 			 else if (info.getOldIndex() != i)
 			 	if (rewrite.isReplaced(nodes[info.getOldIndex()]))
 					newPermutation[i]= rewrite.getReplacingNode(nodes[info.getOldIndex()]);
@@ -1230,7 +1243,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		for (int i= nodes.length; i < newPermutation.length; i++) {
 			ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
 			if (info.isAdded()){
-				ASTNode newElement= createNewElementForList(rewrite, ast, info, isReference, isRecursiveReference);
+				ASTNode newElement= createNewElementForList(rewrite, importRewrite, info, isReference, isRecursiveReference);
 				elementList.add(i, newElement);
 				rewrite.markAsInserted(newElement);
 			} else {
@@ -1246,18 +1259,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 
-	private ASTNode createNewElementForList(ASTRewrite rewrite, AST ast, ParameterInfo info, boolean isReferenceNode,
-											boolean isRecursiveReference){
+	private ASTNode createNewElementForList(ASTRewrite rewrite, ImportRewrite importRewrite,
+			ParameterInfo info, boolean isReferenceNode, boolean isRecursiveReference) {
 		if (isReferenceNode)
 			return createNewExpression(rewrite, info, isRecursiveReference);
 		else
-			return createNewSingleVariableDeclaration(rewrite, ast, info);	
+			return createNewSingleVariableDeclaration(rewrite, importRewrite, info);	
 	}
 	
-	private static SingleVariableDeclaration createNewSingleVariableDeclaration(ASTRewrite rewrite, AST ast, ParameterInfo info) {
-		SingleVariableDeclaration newP= ast.newSingleVariableDeclaration();
-		newP.setName(ast.newSimpleName(info.getNewName()));
-		newP.setType((Type)rewrite.createPlaceholder(info.getNewTypeName(), ASTRewrite.TYPE));
+	private static SingleVariableDeclaration createNewSingleVariableDeclaration(ASTRewrite rewrite, ImportRewrite importRewrite, ParameterInfo info) {
+		SingleVariableDeclaration newP= rewrite.getAST().newSingleVariableDeclaration();
+		newP.setName(rewrite.getAST().newSimpleName(info.getNewName()));
+		newP.setType(createNewTypeNode(info.getNewTypeName(), rewrite, importRewrite));
 		return newP;
 	}
 	
@@ -1322,7 +1335,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 	
-	private void changeExceptions(MethodDeclaration methodDeclaration, ASTRewrite rewrite) {
+	private void changeExceptions(MethodDeclaration methodDeclaration, ASTRewrite rewrite, ImportRewrite importRewrite) {
 		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext();) {
 			ExceptionInfo info= (ExceptionInfo) iter.next();
 			if (info.isOld())
@@ -1330,7 +1343,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (info.isDeleted())
 				removeExceptionFromNodeList(info, methodDeclaration.thrownExceptions(), rewrite);
 			else
-				addExceptionToNodeList(info, methodDeclaration.thrownExceptions(), rewrite);
+				addExceptionToNodeList(info, methodDeclaration.thrownExceptions(), rewrite, importRewrite);
 		}
 	}
 	
@@ -1352,7 +1365,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 
-	private void addExceptionToNodeList(ExceptionInfo exceptionInfo, List exceptionsNodeList, ASTRewrite rewrite) {
+	private void addExceptionToNodeList(ExceptionInfo exceptionInfo, List exceptionsNodeList, ASTRewrite rewrite, ImportRewrite importRewrite) {
 		String fullyQualified= JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType());
 		for (Iterator iter= exceptionsNodeList.iterator(); iter.hasNext(); ) {
 			Name exName= (Name) iter.next();
@@ -1360,7 +1373,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (exName.resolveTypeBinding().getQualifiedName().equals(fullyQualified))
 				return;
 		}
-		String simple= exceptionInfo.getType().getElementName();
+		String simple= importRewrite.addImport(JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType()));
 		ASTNode exNode= rewrite.createPlaceholder(simple, ASTRewrite.NAME);
 		exceptionsNodeList.add(exNode);
 		rewrite.markAsInserted(exNode);
@@ -1518,5 +1531,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 		return Bindings.equals(m1.getParameterTypes(), m2.getParameterTypes());
 	}
+
 }
 

@@ -1262,5 +1262,54 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String[] signature= {"QString;"};
 		helperRenameMethod(signature, "newName");
 	}
+	
+	public void testFailImport01() throws Exception {
+		String[] signature= {};
+		String[] newTypes= {"Permission"};
+		String[] newNames= {"p"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+		helperAddFail(signature, newParamInfo, newIndices, RefactoringStatus.ERROR);
+	}
 
+	public void testImport01() throws Exception {
+		String[] signature= {};
+		String[] newTypes= {"java.security.acl.Permission", "Permission"};
+		String[] newNames= {"acl", "p"};
+		String[] newDefaultValues= {"null", "perm"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0, 0};
+		helperAdd(signature, newParamInfo, newIndices);
+	}
+
+	public void testImport02() throws Exception {
+		String[] signature= {};
+		String[] newTypes= {"Permission", "java.security.acl.Permission"};
+		String[] newNames= {"p", "acl"};
+		String[] newDefaultValues= {"null", "null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0, 0};
+		helperAdd(signature, newParamInfo, newIndices);
+	}
+
+	public void testImport03() throws Exception {
+		String[] signature= {};
+		String[] newTypes= {"java.security.acl.Permission", "java.security.Permission"};
+		String[] newNames= {"p", "pp"};
+		String[] newDefaultValues= {"0", "0"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0, 0};
+		helperAdd(signature, newParamInfo, newIndices);
+	}
+
+	public void testImport04() throws Exception {
+		String[] signature= {};
+		String[] newTypes= {"Object"};
+		String[] newNames= {"o"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+		helperAdd(signature, newParamInfo, newIndices);
+	}
 }
