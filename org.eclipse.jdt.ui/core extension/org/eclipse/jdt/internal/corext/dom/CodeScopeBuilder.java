@@ -151,6 +151,10 @@ public class CodeScopeBuilder extends ASTVisitor {
 		return true;
 	}
 	
+	public void endVisit(CatchClause node) {
+		fScope= (Scope)fScopes.remove(fScopes.size() - 1);
+	}
+	
 	public boolean visit(SimpleName node) {
 		if (fIgnoreBinding != null && Bindings.equals(fIgnoreBinding, node.resolveBinding()))
 			return false;
