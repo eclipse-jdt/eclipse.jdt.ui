@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 import org.eclipse.core.resources.IResource;
@@ -13,9 +12,7 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -30,14 +27,12 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.GlobalBuildAction;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -167,39 +162,18 @@ public class RefactoringStarter {
 			description.setAutoBuilding(false);
 			workspace.setDescription(description);
 			try {
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, createRunnable());
+				JavaPlugin.getActiveWorkbenchWindow().getWorkbench().saveAllEditors(false);
 				fSavedFiles= true;
 			} finally {
 				description.setAutoBuilding(autoBuild);
 				workspace.setDescription(description);
 			}
 			return true;
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, shell, 
-				RefactoringMessages.getString("RefactoringStarter.saving"), RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));  //$NON-NLS-1$ //$NON-NLS-2$
-			return false;
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, shell, 
 				RefactoringMessages.getString("RefactoringStarter.saving"), RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));  //$NON-NLS-1$ //$NON-NLS-2$
-			return false;			
-		} catch (InterruptedException e) {
-			Assert.isTrue(false); // Can't happen. Operation isn't cancelable.
 			return false;
 		}
-	}
-
-	private IRunnableWithProgress createRunnable() {
-		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) {
-				IEditorPart[] editorsToSave= JavaPlugin.getDirtyEditors();
-				pm.beginTask(RefactoringMessages.getString("RefactoringStarter.saving_dirty_editors"), editorsToSave.length); //$NON-NLS-1$
-				for (int i= 0; i < editorsToSave.length; i++) {
-					editorsToSave[i].doSave(new SubProgressMonitor(pm, 1));
-					pm.worked(1);
-				}
-				pm.done();
-			}
-		};
 	}
 
 	private boolean saveAllDirtyEditors() {
