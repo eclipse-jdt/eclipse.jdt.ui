@@ -62,6 +62,8 @@ public class OpenQuickOutlineTest extends TestCase {
 			ResourceTestHelper.delete(PATH + ORIG_NAME + i + ".java");
 		if (fWasOutlineViewShown)
 			EditorTestHelper.showView(OUTLINE_VIEW);
+		fFirstMeter.dispose();
+		fSecondMeter.dispose();
 	}
 
 	public void testOpenQuickOutline1() throws IOException, CoreException {
@@ -78,6 +80,8 @@ public class OpenQuickOutlineTest extends TestCase {
 		}
 		fFirstMeter.commit();
 		fSecondMeter.commit();
+		Performance.getDefault().assertPerformance(fFirstMeter);
+		Performance.getDefault().assertPerformance(fSecondMeter);
 	}
 
 	private void measureOpenQuickOutline(ITextEditor editor, PerformanceMeter performanceMeter) {

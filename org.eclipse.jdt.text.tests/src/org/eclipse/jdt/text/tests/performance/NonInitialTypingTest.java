@@ -73,6 +73,7 @@ public class NonInitialTypingTest extends TestCase {
 
 	protected void tearDown() throws Exception {
 		sleep(1000);
+		fMeter.dispose();
 		EditorTestHelper.revertEditor(fEditor, true);
 		EditorTestHelper.closeAllEditors();
 	}

@@ -138,6 +138,10 @@ public abstract class MouseScrollEditorTest extends TestCase {
 		EditorTestHelper.bringToTop();
 	}
 
+	protected void tearDown() throws Exception {
+		fPerformanceMeter.dispose();
+	}
+
 	protected void measureScrolling(int nOfRuns, Poster poster, IFile file) throws PartInitException {
 		try {
 			IEditorPart editor= EditorTestHelper.openInEditor(file, true);
@@ -171,6 +175,7 @@ public abstract class MouseScrollEditorTest extends TestCase {
 				EditorTestHelper.calmDown(100, 1000, 100);
 			}
 			fPerformanceMeter.commit();
+			Performance.getDefault().assertPerformance(fPerformanceMeter);
 		} finally {
 			EditorTestHelper.closeAllEditors();
 		}

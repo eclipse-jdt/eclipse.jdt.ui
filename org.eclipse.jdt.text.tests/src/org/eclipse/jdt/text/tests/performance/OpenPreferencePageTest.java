@@ -103,6 +103,7 @@ public class OpenPreferencePageTest extends TestCase {
 	}
 	
 	protected void tearDown() throws Exception {
+		fMeter.dispose();
 	}
 
 	private TreeItem findTreeItem(TreeItem[] items, String string) {

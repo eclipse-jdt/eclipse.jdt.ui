@@ -51,6 +51,7 @@ public abstract class RevertEditorTest extends TestCase {
 	}
 	
 	protected void tearDown() throws Exception {
+		fPerformanceMeter.dispose();
 		EditorTestHelper.closeAllEditors();
 	}
 

@@ -43,6 +43,8 @@ public class ToggleCommentTest extends TestCase {
 	
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
+		fCommentMeter.dispose();
+		fUncommentMeter.dispose();
 	}
 
 	public void testToggleComment1() throws PartInitException {
@@ -69,6 +71,8 @@ public class ToggleCommentTest extends TestCase {
 		}
 		fCommentMeter.commit();
 		fUncommentMeter.commit();
+		Performance.getDefault().assertPerformance(fCommentMeter);
+		Performance.getDefault().assertPerformance(fUncommentMeter);
 	}
 
 	private void runAction(IAction action) {

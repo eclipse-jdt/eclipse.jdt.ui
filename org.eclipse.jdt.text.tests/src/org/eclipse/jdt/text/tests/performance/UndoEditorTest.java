@@ -36,6 +36,7 @@ public abstract class UndoEditorTest extends TestCase {
 
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
+		fPerformanceMeter.dispose();
 	}
 	
 	protected void measureUndo(IFile file, int nOfRuns) throws PartInitException {
@@ -56,6 +57,7 @@ public abstract class UndoEditorTest extends TestCase {
 			sleep(5000); // NOTE: runnables posted from other threads, while the main thread waits here, are not measured at all
 		}
 		fPerformanceMeter.commit();
+		Performance.getDefault().assertPerformance(fPerformanceMeter);
 	}
 
 	private void runAction(IAction action) {

@@ -55,6 +55,7 @@ public class JavaIndenterTest extends TestCase {
 
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
+		fPerformanceMeter.dispose();
 	}
 	
 	public void testJavaIndenter1() {

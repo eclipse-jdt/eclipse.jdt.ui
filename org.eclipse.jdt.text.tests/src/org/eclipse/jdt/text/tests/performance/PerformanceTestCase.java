@@ -20,10 +20,14 @@ public class PerformanceTestCase extends TestCase {
 	protected void runTest() throws Throwable {
 		Performance performance= Performance.getDefault();
 		PerformanceMeter meter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
-		meter.start();
-		super.runTest();
-		meter.stop();
-		meter.commit();
-		Performance.getDefault().assertPerformance(meter);
+		try {
+			meter.start();
+			super.runTest();
+			meter.stop();
+			meter.commit();
+			Performance.getDefault().assertPerformance(meter);
+		} finally {
+			meter.dispose();
+		}
 	}
 }

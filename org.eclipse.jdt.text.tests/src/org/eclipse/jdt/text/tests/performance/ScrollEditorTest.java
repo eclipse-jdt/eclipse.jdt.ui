@@ -78,6 +78,10 @@ public abstract class ScrollEditorTest extends TestCase {
 		EditorTestHelper.bringToTop();
 	}
 	
+	protected void tearDown() throws Exception {
+		fPerformanceMeter.dispose();
+	}
+	
 	protected void measureScrolling(String file, ScrollingMode mode, boolean preload, int nOfRuns) throws Exception {
 		IEditorPart editor= null;
 		try {

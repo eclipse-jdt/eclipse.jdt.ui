@@ -31,9 +31,11 @@ public abstract class OpenEditorTest extends TestCase {
 				performanceMeter.stop();
 				sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
 			}
-		} finally {
-			EditorTestHelper.closeAllEditors();
 			performanceMeter.commit();
+			Performance.getDefault().assertPerformance(performanceMeter);
+		} finally {
+			performanceMeter.dispose();
+			EditorTestHelper.closeAllEditors();
 		}
 	}
 
