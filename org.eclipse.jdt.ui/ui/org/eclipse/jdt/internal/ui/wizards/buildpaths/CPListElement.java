@@ -69,11 +69,13 @@ public class CPListElement {
 			case IClasspathEntry.CPE_CONTAINER:
 				try {
 					IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
-					IClasspathEntry[] entries= container.getClasspathEntries();
-					for (int i= 0; i < entries.length; i++) {
-						CPListElement curr= createFromExisting(entries[i], fProject);
-						curr.setParentContainer(this);
-						fChildren.add(curr);
+					if (container != null) {
+						IClasspathEntry[] entries= container.getClasspathEntries();
+						for (int i= 0; i < entries.length; i++) {
+							CPListElement curr= createFromExisting(entries[i], fProject);
+							curr.setParentContainer(this);
+							fChildren.add(curr);
+						}						
 					}
 				} catch (JavaModelException e) {
 				}			
