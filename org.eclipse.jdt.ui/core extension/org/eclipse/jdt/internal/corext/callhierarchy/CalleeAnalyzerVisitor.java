@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -166,6 +167,17 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
 
         return true;
     }
+    
+    /**
+     * When an anonymous class declaration is reached, the traversal should not go further since it's not
+     * supposed to consider calls inside the anonymous inner class as calls from the outer method.
+     * 
+     * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnonymousClassDeclaration)
+     */
+    public boolean visit(AnonymousClassDeclaration node) {
+        return false;
+    }
+
 
     /**
      * Adds the specified method binding to the search results.
@@ -185,8 +197,13 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
                     calledType = Bindings.findType(calledTypeBinding,
                             fMethod.getJavaProject());
                 } else {
-                    calledType = Bindings.findType(calledTypeBinding.getInterfaces()[0],
-                            fMethod.getJavaProject());
+                    if (!"java.lang.Object".equals(calledTypeBinding.getSuperclass().getQualifiedName())) { //$NON-NLS-1$
+                        calledType= Bindings.findType(calledTypeBinding.getSuperclass(),
+                        fMethod.getJavaProject());
+                    } else {
+                        calledType = Bindings.findType(calledTypeBinding.getInterfaces()[0],
+                                fMethod.getJavaProject());
+                    }
                 }
 
                 IMethod calledMethod = findIncludingSupertypes(calledMethodBinding,
