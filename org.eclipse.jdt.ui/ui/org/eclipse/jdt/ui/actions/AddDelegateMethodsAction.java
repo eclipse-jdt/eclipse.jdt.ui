@@ -359,10 +359,12 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			dialog.setMessage(ActionMessages.getString("AddDelegateMethodsAction.message")); //$NON-NLS-1$
 			dialog.setTitle(ActionMessages.getString("AddDelegateMethodsAction.title")); //$NON-NLS-1$
 			
-			Object[] elements= provider.getElements(null);			
-			sorter.sort(null, elements);
-			Object[] expand= {elements[0]};
-			dialog.setExpandedElements(expand);
+			Object[] elements= provider.getElements(null);
+			if (elements.length > 0) {
+				sorter.sort(null, elements);
+				Object[] expand= {elements[0]};
+				dialog.setExpandedElements(expand);
+			}
 			dialog.setInitialSelections(preselected);
 			dialog.setSize(60, 18);
 			int result = dialog.open();
