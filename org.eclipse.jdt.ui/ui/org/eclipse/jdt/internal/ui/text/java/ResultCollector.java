@@ -395,16 +395,24 @@ public class ResultCollector extends CompletionRequestorAdapter {
 
 	protected ImageDescriptor getMemberDescriptor(int modifiers) {
 		ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(false, modifiers);
+
 		if (Flags.isDeprecated(modifiers))
-		 	return getDeprecatedDescriptor(desc);
+		 	desc= getDeprecatedDescriptor(desc);
+
+		if (Flags.isStatic(modifiers))
+			desc= getStaticDescriptor(desc);
 		
 		return desc;
 	}
 	
 	protected ImageDescriptor getFieldDescriptor(int modifiers) {
 		ImageDescriptor desc= JavaElementImageProvider.getFieldImageDescriptor(false, modifiers);
+
 		if (Flags.isDeprecated(modifiers))
-		 	return getDeprecatedDescriptor(desc);
+		 	desc= getDeprecatedDescriptor(desc);
+		 	
+		if (Flags.isStatic(modifiers))
+			desc= getStaticDescriptor(desc);
 		
 		return desc;
 	}	
@@ -412,6 +420,11 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	protected ImageDescriptor getDeprecatedDescriptor(ImageDescriptor descriptor) {
 		Point size= new Point(16, 16);
 		return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.WARNING, size);	    
+	}
+	
+	protected ImageDescriptor getStaticDescriptor(ImageDescriptor descriptor) {
+		Point size= new Point(16, 16);
+		return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, size);
 	}
 	
 	protected JavaCompletionProposal createCompletion(int start, int end, String completion, ImageDescriptor descriptor, String name, int relevance) {
