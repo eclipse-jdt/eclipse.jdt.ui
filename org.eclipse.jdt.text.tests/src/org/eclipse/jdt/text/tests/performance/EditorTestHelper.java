@@ -60,6 +60,13 @@ public class EditorTestHelper {
 		return part;
 	}
 
+	public static IEditorPart openInEditor(IFile file, String editorId, boolean runEventLoop) throws PartInitException {
+		IEditorPart part= IDE.openEditor(getActivePage(), file, editorId);
+		if (runEventLoop)
+			runEventQueue(part);
+		return part;
+	}
+
 	public static IDocument getDocument(ITextEditor editor) {
 		IDocumentProvider provider= editor.getDocumentProvider();
 		IEditorInput input= editor.getEditorInput();

@@ -38,12 +38,12 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 
 	public void testOpenJavaEditor1() throws PartInitException {
 		// cold run
-		measureOpenInEditor(findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
+		measureOpenInEditor(EditorTestHelper.findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
 	}
 	
 	public void testOpenJavaEditor2() throws PartInitException {
 		// warm run
-		measureOpenInEditor(findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
+		measureOpenInEditor(EditorTestHelper.findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES));
 	}
 
 	public static void setUpWorkspace() throws WorkbenchException, IOException {
