@@ -424,6 +424,8 @@ public class JavadocOptionsManager {
 		fNoindex= loadBoolean(element.getAttribute(NOINDEX));
 		fNotree= loadBoolean(element.getAttribute(NOTREE));
 		fSplitindex= loadBoolean(element.getAttribute(SPLITINDEX));
+		
+		fJDK14Mode= "1.4".equals(element.getAttribute(SOURCE)); //$NON-NLS-1$
 	}
 
 	/*
@@ -772,7 +774,7 @@ public class JavadocOptionsManager {
 		}
 	}
 
-	public void createXML(IJavaProject[] projects) throws CoreException {
+	public File createXML(IJavaProject[] projects) throws CoreException {
 		FileOutputStream objectStreamOutput= null;
 		//@change
 		//for now only writting ant files for single project selection
@@ -795,6 +797,7 @@ public class JavadocOptionsManager {
 				objectStreamOutput= new FileOutputStream(file);
 				JavadocWriter writer= new JavadocWriter(objectStreamOutput, basePath, projects);
 				writer.writeXML(this);
+				return file;
 			}
 		} catch (IOException e) {
 			String message= JavadocExportMessages.getString("JavadocOptionsManager.createXM.error"); //$NON-NLS-1$
@@ -813,6 +816,7 @@ public class JavadocOptionsManager {
 				}
 			}
 		}
+		return null;
 	}
 
 	public void updateDialogSettings(IDialogSettings dialogSettings, IJavaProject[] checkedProjects) {

@@ -197,7 +197,16 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			//@Improve: make a better message
 			OptionalMessageDialog.open(JAVADOC_ANT_INFORMATION_DIALOG, getShell(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.title"), null, JavadocExportMessages.getString("JavadocWizard.antInformationDialog.message"), MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0); //$NON-NLS-1$ //$NON-NLS-2$
 			try {
-				fStore.createXML(checkedProjects);
+				File file= fStore.createXML(checkedProjects);
+				if (file != null) {
+					IFile[] files= fRoot.findFilesForLocation(Path.fromOSString(file.getPath()));
+					if (files != null) {
+						for (int i= 0; i < files.length; i++) {
+							files[i].refreshLocal(IResource.DEPTH_ONE, null);
+						}
+					}
+				}
+				
 			} catch (CoreException e) {
 				ExceptionHandler.handle(e, getShell(),JavadocExportMessages.getString("JavadocWizard.error.writeANT.title"), JavadocExportMessages.getString("JavadocWizard.error.writeANT.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
