@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 
 public class InlineMethodTests extends AbstractSelectionTestCase {
 	private static InlineMethodTestSetup fgTestSetup;
+	private static final boolean BUG_82166= true;
 	
 	public InlineMethodTests(String name) {
 		super(name);
@@ -495,7 +496,19 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		
 	public void testUseInLocalClass() throws Exception {
 		performImportTest();
-	}	
+	}
+	
+	public void testStaticImport() throws Exception {
+		performImportTest();
+	}
+	
+	public void testStaticImport2() throws Exception {
+		if (BUG_82166) {
+			System.out.println("Disabled static import test 2 due to bug 82166");
+			return;
+		}
+		performImportTest();
+	}
 
 	/* *********************** Cast Tests ******************************* */
 

@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -119,7 +120,7 @@ public class SourceProvider {
 	
 	public void initialize() throws JavaModelException {
 		fDocument= new Document(fCUnit.getBuffer().getContents());
-		fAnalyzer.analyzeParameters();
+		fAnalyzer.initialize();
 		if (hasReturnValue()) {
 			ASTNode last= getLastStatement();
 			if (last != null) {
@@ -266,7 +267,8 @@ public class SourceProvider {
 		replaceParameterWithExpression(context.arguments);
 		updateImplicitReceivers(context);
 		makeNamesUnique(context.scope);
-		updateTypes(context);
+		updateTypeReferences(context);
+		updateStaticReferences(context);
 		updateTypeVariables(context);
 		updateMethodTypeVariable(context);
 		
@@ -368,6 +370,9 @@ public class SourceProvider {
 				fRewriter.set(inst, ClassInstanceCreation.EXPRESSION_PROPERTY, createReceiver(context, inst.resolveConstructorBinding()), null);
 			} else if (node instanceof ThisExpression) {
 				fRewriter.replace(node, fRewriter.createStringPlaceholder(context.receiver, ASTNode.METHOD_INVOCATION), null);
+			} else if (node instanceof FieldAccess) { 
+				final FieldAccess access= (FieldAccess)node;
+				fRewriter.set(access, FieldAccess.EXPRESSION_PROPERTY, createReceiver(context, access.resolveFieldBinding()), null);
 			} else if (node instanceof SimpleName && ((SimpleName)node).resolveBinding() instanceof IVariableBinding) {
 				IVariableBinding vb= (IVariableBinding)((SimpleName)node).resolveBinding();
 				if (vb.isField()) { 
@@ -384,18 +389,33 @@ public class SourceProvider {
 		}
 	}
 	
-	private void updateTypes(CallContext context) {
+	private void updateTypeReferences(CallContext context) {
 		ImportRewrite importer= context.importer;
-		for (Iterator iter= fAnalyzer.getUsedTypes().iterator(); iter.hasNext();) {
+		for (Iterator iter= fAnalyzer.getTypesToImport().iterator(); iter.hasNext();) {
 			Name element= (Name)iter.next();
 			ITypeBinding binding= ASTNodes.getTypeBinding(element);
 			if (binding != null && !binding.isLocal()) {
 				String s= importer.addImport(binding);
 				if (!ASTNodes.asString(element).equals(s)) {
-					fRewriter.replace(element, fRewriter.createStringPlaceholder(s, ASTNode.METHOD_INVOCATION), null);
+					fRewriter.replace(element, fRewriter.createStringPlaceholder(s, ASTNode.SIMPLE_NAME), null);
 				}
 			}
 		}
+	}
+	
+	private void updateStaticReferences(CallContext context) {
+		ImportRewrite importer= context.importer;
+		for (Iterator iter= fAnalyzer.getStaticsToImport().iterator(); iter.hasNext();) {
+			Name element= (Name)iter.next();
+			IBinding binding= element.resolveBinding();
+			if (binding != null) {
+				String s= importer.addStaticImport(binding);
+				if (!ASTNodes.asString(element).equals(s)) {
+					fRewriter.replace(element, fRewriter.createStringPlaceholder(s, ASTNode.SIMPLE_NAME), null);
+				}
+			}
+		}
+		
 	}
 
 	private Expression createReceiver(CallContext context, IMethodBinding method) {

@@ -59,6 +59,7 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 			"import java.io.File;\n" +
 			"import java.util.ArrayList;\n" +
 			"import java.util.Map;\n" +
+			"import static java.lang.Math.PI;\n" +
 			"\n" +
 			"public class Provider {\n" +
 			"	public File useAsReturn() {\n" +
@@ -93,6 +94,9 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 			"			public void bar(Byte b) {\n" +
 			"			}\n" +
 			"		}\n" +
+			"	}\n" +
+			"	public void useStaticImport() {\n" +
+			"		double i= PI;\n" +
 			"	}\n" +
 			"}\n", 
 			true, null);

@@ -4,6 +4,7 @@ import import_use.List;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
+import static java.lang.Math.PI;
 
 public class Provider {
 	public File useAsReturn() {
@@ -38,5 +39,8 @@ public class Provider {
 			public void bar(Byte b) {
 			}
 		}
+	}
+	public void useStaticImport() {
+		double i= PI;
 	}
 }

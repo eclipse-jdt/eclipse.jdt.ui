@@ -36,22 +36,24 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -164,7 +166,7 @@ class SourceAnalyzer  {
 		}
 		private boolean visitType(AbstractTypeDeclaration node) {
 			if (fTypeCounter++ == 0) {
-				addNameData(node.getName());
+				addNameReference(node.getName());
 			}
 			return true;
 		}
@@ -174,6 +176,12 @@ class SourceAnalyzer  {
 		}
 		public void endVisit(AnonymousClassDeclaration node) {
 			fTypeCounter--;
+		}
+		public boolean visit(FieldAccess node) {
+			if (node.getExpression() == null && !isStaticallyImported(node.getName())) {
+				fImplicitReceivers.add(node);
+			}
+			return true;
 		}
 		public boolean visit(MethodDeclaration node) {
 			if (node.isConstructor()) {
@@ -188,7 +196,7 @@ class SourceAnalyzer  {
 		public boolean visit(MethodInvocation node) {
 			if (fTypeCounter == 0) {
 				Expression receiver= node.getExpression();
-				if (receiver == null)
+				if (receiver == null && !isStaticallyImported(node.getName()))
 					fImplicitReceivers.add(node);
 			}
 			return true;
@@ -205,12 +213,12 @@ class SourceAnalyzer  {
 		}
 		public boolean visit(SingleVariableDeclaration node) {
 			if (fTypeCounter == 0)
-				addNameData(node.getName());
+				addNameReference(node.getName());
 			return true;
 		}
 		public boolean visit(VariableDeclarationFragment node) {
 			if (fTypeCounter == 0)
-				addNameData(node.getName());
+				addNameReference(node.getName());
 			return true;
 		}
 		public boolean visit(SimpleName node) {
@@ -226,47 +234,21 @@ class SourceAnalyzer  {
 				ITypeBinding type= (ITypeBinding)binding;
 				if (type.isTypeVariable()) {
 					addTypeVariableReference(type, node);
-				} else {
-					fTypes.add(node);
 				}
 			} else if (binding instanceof IVariableBinding) {
 				IVariableBinding vb= (IVariableBinding)binding;
-				if (vb.isField()) {
+				if (vb.isField() && ! isStaticallyImported(node)) {
 					ASTNode parent= node.getParent();
-					if (parent instanceof Statement) {
-						fImplicitReceivers.add(node);
+					if (!(parent instanceof QualifiedName)) {
+						StructuralPropertyDescriptor location= node.getLocationInParent();
+						if (location != SingleVariableDeclaration.NAME_PROPERTY 
+							&& location != VariableDeclarationFragment.NAME_PROPERTY) {
+							fImplicitReceivers.add(node);
+						}
 					}
 				}
 			}
 			return true;
-		}
-		public boolean visit(QualifiedName node) {
-			if (!(node.resolveBinding() instanceof ITypeBinding))
-				return true;
-			// the name denotes a type
-			SimpleName name= ASTNodes.getLeftMostSimpleName(node);
-			if (!(name.resolveBinding() instanceof ITypeBinding))
-				return false;
-			
-			// the left most name denotes a type. This type may not
-			// be visible in the target so check if we need to import 
-			// it.
-			fTypes.add(name);
-			
-			// don't inspect the simple names
-			return false;
-		}
-		public boolean visit(QualifiedType node) {
-			ITypeBinding tb= node.resolveBinding();
-			if (tb == null)
-				return false;
-			SimpleName name= ASTNodes.getLeftMostSimpleName(ASTNodes.getLeftMostSimpleType(node).getName());
-			if (!(name.resolveBinding() instanceof ITypeBinding))
-				return false;
-			
-			fTypes.add(name);
-			
-			return false;
 		}
 		public boolean visit(ThisExpression node) {
 			if (fTypeCounter == 0) {
@@ -274,7 +256,7 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
-		private void addNameData(SimpleName name) {
+		private void addNameReference(SimpleName name) {
 			fNames.put(name.resolveBinding(), new NameData(name.getIdentifier()));
 		}
 		private void addTypeVariableReference(ITypeBinding variable, SimpleName name) {
@@ -284,6 +266,9 @@ class SourceAnalyzer  {
 			}
 			data.addReference(name);
 		}
+		private boolean isStaticallyImported(Name name) {
+			return fStaticsToImport.contains(name);
+		}
 	}
 
 	private ICompilationUnit fCUnit;
@@ -291,7 +276,9 @@ class SourceAnalyzer  {
 	private Map fParameters;
 	private Map fNames;
 	private List fImplicitReceivers;
-	private List fTypes;
+	
+	private List/*<Name>*/ fTypesToImport;
+	private List/*<Name>*/ fStaticsToImport;
 	
 	private List/*<NameData>*/ fTypeParameterReferences;
 	private Map/*<ITypeBinding, NameData>*/ fTypeParameterMapping;
@@ -351,7 +338,6 @@ class SourceAnalyzer  {
 			}
 			fNames= new HashMap();
 			fImplicitReceivers= new ArrayList(2);
-			fTypes= new ArrayList(2);
 			
 			fTypeParameterReferences= new ArrayList(0);
 			fTypeParameterMapping= new HashMap();
@@ -383,8 +369,17 @@ class SourceAnalyzer  {
 		return result;
 	}
 
-	public void analyzeParameters() {
+	public void initialize() {
 		Block body= fDeclaration.getBody();
+		// first collect the static imports. This is neccessary to not mark
+		// static imported fields and methods as implicit visible.
+		fTypesToImport= new ArrayList();
+		fStaticsToImport= new ArrayList();
+		ImportReferencesCollector collector= new ImportReferencesCollector(
+			fCUnit.getJavaProject(), null, fTypesToImport, fStaticsToImport);
+		body.accept(collector);
+		
+		// Now collect implicit references and name references
 		body.accept(new UpdateCollector());
 		
 		int numberOfLocals= LocalVariableIndex.perform(fDeclaration);
@@ -399,7 +394,7 @@ class SourceAnalyzer  {
 			IVariableBinding binding= element.resolveBinding();
 			ParameterData data= (ParameterData)element.getProperty(ParameterData.PROPERTY);
 			data.setAccessMode(info.getAccessMode(context, binding));
-		}		
+		}
 	}
 	
 	public Collection getUsedNames() {
@@ -410,8 +405,12 @@ class SourceAnalyzer  {
 		return fImplicitReceivers;
 	}
 	
-	public List getUsedTypes() {
-		return fTypes;
+	public List getTypesToImport() {
+		return fTypesToImport;
+	}
+	
+	public List getStaticsToImport() {
+		return fStaticsToImport;
 	}
 	
 	public List getTypeParameterReferences() {
