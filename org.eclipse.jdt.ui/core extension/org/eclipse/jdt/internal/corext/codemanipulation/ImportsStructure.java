@@ -314,6 +314,15 @@ public class ImportsStructure implements IImportsStructure {
 		String typeName= Signature.getSimpleName(fullTypeName);
 		
 		if (!"*".equals(typeName)) { //$NON-NLS-1$
+			String topLevelTypeName= Signature.getQualifier(fCompilationUnit.getElementName());
+			
+			if (typeName.equals(topLevelTypeName)) {
+				if (!typeContainerName.equals(fCompilationUnit.getParent().getElementName())) {
+					return fullTypeName;
+				} else {
+					return typeName;
+				}
+			}
 			String existing= findImport(typeName);
 			if (existing != null) {
 				if (fullTypeName.equals(existing)) {
