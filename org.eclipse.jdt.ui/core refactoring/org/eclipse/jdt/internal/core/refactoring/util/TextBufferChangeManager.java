@@ -45,6 +45,32 @@ public class TextBufferChangeManager {
 	}
 	
 	/**
+	 * Deletes the text [offset, length].
+	 * @param name the changes name. The name is mainly used to render the change in the 
+	 *  user interface. The name can be <code>null</code> indicating that the change
+	 *  doesn't have a name.
+	 * @param pos the starting offset of the text to be deleted. The offset must not be
+	 *  negative.
+	 * @param length the length of the text to be deleted. The length must not be negative.
+	 */
+	public void addDelete(ICompilationUnit cu, String name, int offset, int length)throws JavaModelException{
+		get(cu).addDelete(name, offset, length);
+	}
+	
+	/**
+	 * Inserts the given text a the given pos.
+	 * @param name the changes name. The name is mainly used to render the change in the 
+	 *  user interface. The name can be <code>null</code> indicating that the change
+	 *  doesn't have a name.
+	 * @param offset the offset where the new text is to be inserted. The offset must not
+	 * be negative.
+	 * @param text the text to be inserted.
+	 */
+	public void addInsert(ICompilationUnit cu, String name, int offset, String text)throws JavaModelException{
+		get(cu).addInsert(name, offset, text);
+	}
+	
+	/**
 	 * Replaces the text [offset, length] with the given text.
 	 * @param cu compilation unit
 	 * @param name the changes name. The name is mainly used to render the change in the 
