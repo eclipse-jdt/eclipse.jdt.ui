@@ -199,9 +199,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 		layout.makeColumnsEqualWidth= true;
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		c.setLayout(layout);
 		c.setLayoutData(createGridData(GridData.FILL_BOTH, 6, 0));
-
+		
 		ITreeContentProvider treeContentProvider= new JavadocProjectContentProvider();
 		ITreeContentProvider listContentProvider= new JavadocMemberContentProvider();
 		fInputGroup= new CheckboxTreeAndListGroup(c, fStore.getRoot(), treeContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), listContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), SWT.NONE, convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(10));
