@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -81,6 +82,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -283,8 +285,8 @@ public class PushDownRefactoring extends Refactoring {
 		return fCachedDeclaringClass;
 	}
 	
-	private ICompilationUnit getDeclaringWorkingCopy(){
-		return WorkingCopyUtil.getWorkingCopyIfExists(getDeclaringClass().getCompilationUnit());
+	private ICompilationUnit getDeclaringCU(){
+		return getDeclaringClass().getCompilationUnit();
 	}
 
 	private static boolean haveCommonDeclaringType(IMember[] members) {
@@ -702,7 +704,7 @@ public class PushDownRefactoring extends Refactoring {
 			ICompilationUnit cu= groups[i].getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= AST.parseCompilationUnit(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, false);
 			ASTNode[] refNodes= ASTNodeSearchUtil.getAstNodes(groups[i].getSearchResults(), cuNode);
 			for (int j= 0; j < refNodes.length; j++) {
 				ASTNode node= refNodes[j];
@@ -747,11 +749,11 @@ public class PushDownRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify(){
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
-	private RefactoringStatus validateModifiesFiles() throws CoreException{
+	private RefactoringStatus validateModifiesFiles(){
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 
@@ -782,12 +784,12 @@ public class PushDownRefactoring extends Refactoring {
 			IType[] destinationsForNonAbstract= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
 			IType[] destinationsForAbstract= getDestinationClassesForAbstractMembers(new SubProgressMonitor(pm, 1));
 			
-			ICompilationUnit declaringCu= getDeclaringWorkingCopy();
-			CompilationUnit declaringCuNode= AST.parseCompilationUnit(declaringCu, true);
+			ICompilationUnit declaringCu= getDeclaringCU();
+			CompilationUnit declaringCuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(declaringCu, true);
 			ICompilationUnit[] cus= getCusToProcess(new SubProgressMonitor(pm, 1));
 			for (int i= 0; i < cus.length; i++) {
 				ICompilationUnit cu= cus[i];
-				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode: AST.parseCompilationUnit(cu, true);
+				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode: new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, true);
 				OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 
 				if (cu.equals(declaringCu)){
@@ -810,7 +812,7 @@ public class PushDownRefactoring extends Refactoring {
 	private void copyMembers(MemberActionInfo[] membersToCopyToSubclasses, IType[] destinationTypes, CompilationUnit declaringCuNode, ICompilationUnit cu, CompilationUnit cuNode, OldASTRewrite rewrite) throws JavaModelException {
 		for (int i= 0; i < destinationTypes.length; i++) {
 			IType dest= destinationTypes[i];
-			if (cu.equals(WorkingCopyUtil.getWorkingCopyIfExists(dest.getCompilationUnit()))) {
+			if (cu.equals(dest.getCompilationUnit())) {
 				List bodyDeclarations= ASTNodeSearchUtil.getBodyDeclarationList(dest, cuNode);
 				createAll(membersToCopyToSubclasses, bodyDeclarations, declaringCuNode, rewrite);
 			}
@@ -825,7 +827,7 @@ public class PushDownRefactoring extends Refactoring {
 		TextChange textChange= manager.get(cu);
 		if (fImportManager.hasImportEditFor(cu))
 			resultingEdits.addChild(fImportManager.getImportRewrite(cu).createEdit(textBuffer.getDocument()));
-		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("PushDownRefactoring.25"), resultingEdits);
+		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("PushDownRefactoring.25"), resultingEdits); //$NON-NLS-1$
 		rewrite.removeModifications();
 	}
 
@@ -833,9 +835,9 @@ public class PushDownRefactoring extends Refactoring {
 		IType[] subTypes= getAllDirectSubclassesOfDeclaringClass(pm);
 		Set result= new HashSet(subTypes.length + 1);
 		for (int i= 0; i < subTypes.length; i++) {
-			result.add(WorkingCopyUtil.getWorkingCopyIfExists(subTypes[i].getCompilationUnit()));
+			result.add(subTypes[i].getCompilationUnit());
 		}
-		result.add(getDeclaringWorkingCopy());
+		result.add(getDeclaringCU());
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
@@ -856,7 +858,7 @@ public class PushDownRefactoring extends Refactoring {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		IType[] typesReferenced= getTypesReferencedIn(members, pm);
 		for (int i= 0; i < destinationClasses.length; i++) {
-			ICompilationUnit cu= getWorkingCopyOfCu(destinationClasses[i]);
+			ICompilationUnit cu= destinationClasses[i].getCompilationUnit();
 			for (int j= 0; j < typesReferenced.length; j++) {
 				fImportManager.addImportTo(typesReferenced[j], cu);
 			}
@@ -1004,13 +1006,13 @@ public class PushDownRefactoring extends Refactoring {
 	private void copyParameters(OldASTRewrite targetRewrite, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
 		for (int i= 0, n= oldMethod.parameters().size(); i < n; i++) {
 			SingleVariableDeclaration oldParam= (SingleVariableDeclaration)oldMethod.parameters().get(i);
-			SingleVariableDeclaration newParam= createPlaceholderForSingleVariableDeclaration(oldParam, getDeclaringWorkingCopy(), targetRewrite);
+			SingleVariableDeclaration newParam= createPlaceholderForSingleVariableDeclaration(oldParam, getDeclaringCU(), targetRewrite);
 			newMethod.parameters().add(i, newParam);
 		}
 	}
 	
 	private void copyReturnType(OldASTRewrite targetRewrite, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
-		Type newReturnType= createPlaceholderForType(oldMethod.getReturnType(), getDeclaringWorkingCopy(), targetRewrite);
+		Type newReturnType= createPlaceholderForType(oldMethod.getReturnType(), getDeclaringCU(), targetRewrite);
 		newMethod.setReturnType(newReturnType);
 	}
 
@@ -1028,7 +1030,7 @@ public class PushDownRefactoring extends Refactoring {
 		VariableDeclarationFragment newFragment= ast.newVariableDeclarationFragment();
 		newFragment.setExtraDimensions(oldFieldFragment.getExtraDimensions());
 		if (oldFieldFragment.getInitializer() != null){
-			Expression newInitializer= createPlaceholderForExpression(oldFieldFragment.getInitializer(), getDeclaringWorkingCopy(), rewrite);
+			Expression newInitializer= createPlaceholderForExpression(oldFieldFragment.getInitializer(), getDeclaringCU(), rewrite);
 			newFragment.setInitializer(newInitializer);
 		}	
 		newFragment.setName(ast.newSimpleName(oldFieldFragment.getName().getIdentifier()));
@@ -1038,7 +1040,7 @@ public class PushDownRefactoring extends Refactoring {
 			copyJavadocNode(rewrite, field, oldField, newField);
 		newField.setModifiers(getNewModifiersForCopiedField(info, oldField));
 		
-		Type newType= createPlaceholderForType(oldField.getType(), getDeclaringWorkingCopy(), rewrite);
+		Type newType= createPlaceholderForType(oldField.getType(), getDeclaringCU(), rewrite);
 		newField.setType(newType);
 		return newField;
 	}
@@ -1195,10 +1197,6 @@ public class PushDownRefactoring extends Refactoring {
 		return info.getNewModifiersForOriginal(oldModifiers);
 	}
 
-	private ICompilationUnit getWorkingCopyOfCu(IMember member){
-		return WorkingCopyUtil.getWorkingCopyIfExists(member.getCompilationUnit());
-	}
-	
 	private static AST getAST(OldASTRewrite rewrite){
 		return rewrite.getAST();
 	}

@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -52,7 +53,9 @@ public class ASTNodeFactory {
 		StringBuffer buffer= new StringBuffer(STATEMENT_HEADER);
 		buffer.append(content);
 		buffer.append(STATEMENT_FOOTER);
-		CompilationUnit root= AST.parseCompilationUnit(buffer.toString().toCharArray());
+		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		p.setSource(buffer.toString().toCharArray());
+		CompilationUnit root= (CompilationUnit) p.createAST(null);
 		ASTNode result= ASTNode.copySubtree(ast, NodeFinder.perform(root, STATEMENT_HEADER.length(), content.length()));
 		result.accept(new PositionClearer());
 		return result;
@@ -76,7 +79,9 @@ public class ASTNodeFactory {
 		StringBuffer buffer= new StringBuffer(TYPE_HEADER);
 		buffer.append(content);
 		buffer.append(TYPE_FOOTER);
-		CompilationUnit root= AST.parseCompilationUnit(buffer.toString().toCharArray());
+		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		p.setSource(buffer.toString().toCharArray());
+		CompilationUnit root= (CompilationUnit) p.createAST(null);
 		List list= root.types();
 		TypeDeclaration typeDecl= (TypeDeclaration) list.get(0);
 		ASTNode type= typeDecl.getMethods()[0].getReturnType();

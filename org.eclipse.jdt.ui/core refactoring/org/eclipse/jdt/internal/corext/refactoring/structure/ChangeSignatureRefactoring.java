@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
@@ -75,10 +76,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -97,6 +98,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactor
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -404,7 +406,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			  .append(CONST_ASSIGN)
 			  .append("null") //$NON-NLS-1$
 			  .append(CONST_CLOSE);
-		CompilationUnit cu= AST.parseCompilationUnit(cuBuff.toString().toCharArray());
+		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		p.setSource(cuBuff.toString().toCharArray());
+		CompilationUnit cu= (CompilationUnit) p.createAST(null);
 		Selection selection= Selection.createFromStartLength(offset, string.length());
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
 		cu.accept(analyzer);
@@ -443,7 +447,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		int offset= cuBuff.length();
 		cuBuff.append(trimmed)
 			  .append(CONST_CLOSE);
-		CompilationUnit cu= AST.parseCompilationUnit(cuBuff.toString().toCharArray());
+		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		p.setSource(cuBuff.toString().toCharArray());
+		CompilationUnit cu= (CompilationUnit) p.createAST(null);
 		Selection selection= Selection.createFromStartLength(offset, trimmed.length());
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
 		cu.accept(analyzer);
@@ -482,7 +488,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (result.hasFatalError())
 					return result;
 			}
-			fCU= AST.parseCompilationUnit(getCu(), true, null, null);
+			fCU= new RefactoringASTParser(AST.LEVEL_2_0).parse(getCu(), true);
 			result.merge(createExceptionInfoList());
 			
 			return result;
@@ -750,7 +756,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		ICompilationUnit cu= getCu();
 		TextChange change= fChangeManager.get(cu);
 		String newCuSource= change.getPreviewContent();
-		CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), cu.getElementName(), cu.getJavaProject(), null, null);
+		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		p.setSource(newCuSource.toCharArray());
+		p.setUnitName(cu.getElementName());
+		p.setProject(cu.getJavaProject());
+		p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(cu));
+		CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
 		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCU);
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problems.length; i++) {
@@ -934,7 +945,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (cu.equals(getCu()))
 				cuNode= fCU;
 			else
-				cuNode= AST.parseCompilationUnit(cu, true, null, null);
+				cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, true);
 			OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 			ImportRewrite importRewrite= new ImportRewrite(cu, fCodeGenerationSettings);
 			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuNode);

@@ -45,8 +45,8 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 /**
  * This class is used to find references to construcotors.
@@ -90,10 +90,10 @@ class ConstructorReferenceFinder {
 		List result= new ArrayList(groups.length);
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(group.getCompilationUnit());
+			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= AST.parseCompilationUnit(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, false);
 			SearchResult[] allSearchResults= group.getSearchResults();
 			List realConstructorReferences= new ArrayList(Arrays.asList(allSearchResults));
 			for (int j= 0; j < allSearchResults.length; j++) {
@@ -156,10 +156,10 @@ class ConstructorReferenceFinder {
 		List result= new ArrayList();
 		for (int i= 0; i < refs.length; i++) {
 			SearchResultGroup group= refs[i];
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(group.getCompilationUnit());
+			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= AST.parseCompilationUnit(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, false);
 			SearchResult[] results= group.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
 				SearchResult searchResult= results[j];
@@ -203,7 +203,7 @@ class ConstructorReferenceFinder {
 	//Collection of SearchResults
 	private static Collection getAllSuperConstructorInvocations(IType type) throws JavaModelException {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
-		CompilationUnit cuNode= AST.parseCompilationUnit(type.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(type.getCompilationUnit(), false);
 		List result= new ArrayList(constructors.length);
 		for (int i= 0; i < constructors.length; i++) {
 			ASTNode superCall= getSuperConstructorCallNode(constructors[i], cuNode);

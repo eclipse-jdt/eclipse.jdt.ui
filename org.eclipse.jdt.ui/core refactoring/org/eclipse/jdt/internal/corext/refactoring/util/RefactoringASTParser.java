@@ -46,7 +46,7 @@ public class RefactoringASTParser {
 		return null;
 	}
 	
-	private static Map getCompilerOptions(IJavaElement element) {
+	public static Map getCompilerOptions(IJavaElement element) {
 		IJavaProject project= element.getJavaProject();
 		Map options= project.getOptions(true);
 		// turn all errors and warnings into ignore. The customizable set of compiler

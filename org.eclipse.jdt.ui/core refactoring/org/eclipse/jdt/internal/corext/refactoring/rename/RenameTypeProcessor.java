@@ -65,11 +65,13 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -142,13 +144,13 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return loadDerivedParticipants(computeDerivedElements(), arguments, computeResourceModifications());
 	}
 	
-	private Object[] computeDerivedElements() throws CoreException {
+	private Object[] computeDerivedElements() {
 		if (!isPrimaryType())
 			return new Object[0];
 		return new Object[] { fType.getCompilationUnit() };
 	}
 	
-	private ResourceModifications computeResourceModifications() throws CoreException {
+	private ResourceModifications computeResourceModifications() {
 		if (!isPrimaryType())
 			return null;
 		IResource resource= fType.getCompilationUnit().getResource();
@@ -487,7 +489,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private RefactoringStatus analyseEnclosedTypes() throws CoreException {
 		final ISourceRange typeRange= fType.getSourceRange();
 		final RefactoringStatus result= new RefactoringStatus();
-		CompilationUnit cuNode= AST.parseCompilationUnit(fType.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(fType.getCompilationUnit(), false);
 		cuNode.accept(new ASTVisitor(){
 			public boolean visit(TypeDeclaration node){
 				if (node.getStartPosition() <= typeRange.getOffset())

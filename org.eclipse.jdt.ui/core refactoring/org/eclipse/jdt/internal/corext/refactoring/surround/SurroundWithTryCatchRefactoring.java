@@ -41,8 +41,6 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -50,15 +48,19 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -127,7 +129,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		return RefactoringCoreMessages.getString("SurroundWithTryCatchRefactoring.name"); //$NON-NLS-1$
 	}
 
-	public RefactoringStatus checkActivationBasics(CompilationUnit rootNode, IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivationBasics(CompilationUnit rootNode) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		fRootNode= rootNode;
 			
@@ -142,8 +144,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		CompilationUnit rootNode= AST.parseCompilationUnit(fCUnit, true);
-		return checkActivationBasics(rootNode, pm);
+		CompilationUnit rootNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(fCUnit, true);
+		return checkActivationBasics(rootNode);
 	}
 
 	/*
@@ -349,7 +351,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		}
 	}
 	
-	private IFile getFile() throws JavaModelException {
+	private IFile getFile() {
 		return (IFile) JavaModelUtil.toOriginal(fCUnit).getResource();
 	}
 	

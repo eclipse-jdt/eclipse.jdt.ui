@@ -14,9 +14,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 
 public class ASTCreator {
@@ -24,19 +25,22 @@ public class ASTCreator {
 	public static final String CU_PROPERTY= "org.eclipse.jdt.ui.refactoring.cu"; //$NON-NLS-1$
 
 	private ASTCreator() {
+		//private
 	}
 	
 	public static CompilationUnit createAST(ICompilationUnit cu, WorkingCopyOwner workingCopyOwner) {
-		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-		CompilationUnit cuNode= getCuNode(workingCopyOwner, wc);
-		cuNode.setProperty(CU_PROPERTY, wc);
+		CompilationUnit cuNode= getCuNode(workingCopyOwner, cu);
+		cuNode.setProperty(CU_PROPERTY, cu);
 		return cuNode;
 	}
 
-	private static CompilationUnit getCuNode(WorkingCopyOwner workingCopyOwner, ICompilationUnit wc) {
-		if (workingCopyOwner == null)
-			return AST.parseCompilationUnit(wc, true);
-		return AST.parseCompilationUnit(wc, true, workingCopyOwner, null);
+	private static CompilationUnit getCuNode(WorkingCopyOwner workingCopyOwner, ICompilationUnit cu) {
+		ASTParser p = ASTParser.newParser(AST.LEVEL_2_0);
+		p.setSource(cu);
+		p.setResolveBindings(true);
+		p.setWorkingCopyOwner(workingCopyOwner);
+		p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(cu));
+		return (CompilationUnit) p.createAST(null);
 	}
 
 	public static ICompilationUnit getCu(ASTNode node) {

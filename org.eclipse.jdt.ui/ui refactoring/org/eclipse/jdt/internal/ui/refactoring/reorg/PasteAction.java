@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -204,22 +205,22 @@ public class PasteAction extends SelectionDispatchAction{
 
 	private abstract static class Paster{
 		private final Shell fShell;
-		private final Clipboard fClipboard;
+		private final Clipboard fClipboard2;
 		protected Paster(Shell shell, Clipboard clipboard){
 			fShell= shell;
-			fClipboard= clipboard;
+			fClipboard2= clipboard;
 		}
 		protected final Shell getShell() {
 			return fShell;
 		}
 		protected final Clipboard getClipboard() {
-			return fClipboard;
+			return fClipboard2;
 		}
 
 		protected final IResource[] getClipboardResources(TransferData[] availableDataTypes) {
 			Transfer transfer= ResourceTransfer.getInstance();
 			if (isAvailable(transfer, availableDataTypes)) {
-				return (IResource[])getContents(fClipboard, transfer, getShell());
+				return (IResource[])getContents(fClipboard2, transfer, getShell());
 			}
 			return null;
 		}
@@ -227,7 +228,7 @@ public class PasteAction extends SelectionDispatchAction{
 		protected final IJavaElement[] getClipboardJavaElements(TransferData[] availableDataTypes) {
 			Transfer transfer= JavaElementTransfer.getInstance();
 			if (isAvailable(transfer, availableDataTypes)) {
-				return (IJavaElement[])getContents(fClipboard, transfer, getShell());
+				return (IJavaElement[])getContents(fClipboard2, transfer, getShell());
 			}
 			return null;
 		}
@@ -235,7 +236,7 @@ public class PasteAction extends SelectionDispatchAction{
 		protected final TypedSource[] getClipboardTypedSources(TransferData[] availableDataTypes) {
 			Transfer transfer= TypedSourceTransfer.getInstance();
 			if (isAvailable(transfer, availableDataTypes)) {
-				return (TypedSource[])getContents(fClipboard, transfer, getShell());
+				return (TypedSource[])getContents(fClipboard2, transfer, getShell());
 			}
 			return null;
 		}
@@ -345,7 +346,7 @@ public class PasteAction extends SelectionDispatchAction{
 			return isAvailable(FileTransfer.getInstance(), availableDataTypes);
 		}
 				
-		private boolean canPasteFilesOn(Object target) throws JavaModelException {
+		private boolean canPasteFilesOn(Object target) {
 			boolean isPackageFragment= target instanceof IPackageFragment;
 			boolean isJavaProject= target instanceof IJavaProject;
 			boolean isPackageFragmentRoot= target instanceof IPackageFragmentRoot;
@@ -496,7 +497,7 @@ public class PasteAction extends SelectionDispatchAction{
 				fPasteRefactoring= pasteRefactoring;
 			}
 	
-			public static ReorgTypedSourcePasteStarter create(TypedSource[] typedSources, IJavaElement destination) throws JavaModelException {
+			public static ReorgTypedSourcePasteStarter create(TypedSource[] typedSources, IJavaElement destination) {
 				Assert.isNotNull(typedSources);
 				Assert.isNotNull(destination);
 				PasteTypedSourcesRefactoring pasteRefactoring= PasteTypedSourcesRefactoring.create(typedSources);
@@ -576,7 +577,9 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 
 			public Change createChange(IProgressMonitor pm) throws CoreException {
-				CompilationUnit cuNode= AST.parseCompilationUnit(getDestinationCu(), false);
+				ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+				p.setSource(getDestinationCu());
+				CompilationUnit cuNode= (CompilationUnit) p.createAST(null);
 				OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 				for (int i= 0; i < fSources.length; i++) {
 					pasteSource(fSources[i], rewrite, cuNode);

@@ -31,7 +31,9 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -106,7 +108,7 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 	}
 	
 	private MethodDeclaration findMethodDeclaration(RefactoringStatus status) {
-		CompilationUnit root=  AST.parseCompilationUnit(fCU, true);
+		CompilationUnit root=  new RefactoringASTParser(AST.LEVEL_2_0).parse(fCU, true);
 		
 		ASTNode node= NodeFinder.perform(root, fSelectionStart, fSelectionLength);
 

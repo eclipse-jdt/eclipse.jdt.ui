@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -67,6 +68,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileCha
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -194,7 +196,6 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			String message= RefactoringCoreMessages.getFormattedString("ExtractInterfaceRefactoring.deleted", keys); //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
-		fInputType= (IType) WorkingCopyUtil.getWorkingCopyIfExists(fInputType);
 		
 		if (Checks.isException(fInputType, pm)){
 			String message= RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.no_Throwable"); //$NON-NLS-1$
@@ -286,7 +287,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			TextChangeManager manager= new TextChangeManager(true);
 			
 			typeCu= WorkingCopyUtil.getNewWorkingCopy(getInputTypeCU(), fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
-			CompilationUnit typeCuNode= AST.parseCompilationUnit(typeCu, true, fWorkingCopyOwner, null);
+			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			p.setSource(typeCu);
+			p.setResolveBindings(true);
+			p.setWorkingCopyOwner(fWorkingCopyOwner);
+			p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(typeCu));
+			CompilationUnit typeCuNode= (CompilationUnit) p.createAST(null);
 			OldASTRewrite typeCuRewrite= new OldASTRewrite(typeCuNode);
 			IType theType= (IType)JavaModelUtil.findInCompilationUnit(typeCu, fInputType);
 			TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(theType, typeCuNode);
@@ -326,9 +332,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			return manager;
 		} finally{
 			if (newCuWC != null)
-				newCuWC.destroy();
+				newCuWC.discardWorkingCopy();
 			if (typeCu != null)
-				typeCu.destroy();
+				typeCu.discardWorkingCopy();
 			pm.done();
 		}	
 	}
@@ -387,7 +393,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		rewrite.rewriteNode(textBuffer, resultingEdits);
 
 		TextChange textChange= manager.get(cu);
-		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_type_declaration"), resultingEdits);
+		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_type_declaration"), resultingEdits); //$NON-NLS-1$
 		rewrite.removeModifications();
 		return textChange;
 	}
@@ -439,7 +445,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			return new CreateTextFileChange(interfaceCuPath, formattedSource, "java");	 //$NON-NLS-1$
 		} finally{
 			if (newCuWC != null)
-				newCuWC.destroy();
+				newCuWC.discardWorkingCopy();
 			pm.done();	
 		}
 	}
@@ -465,7 +471,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private String createExtractedInterfaceCUSource(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
-		CompilationUnit cuNode= AST.parseCompilationUnit(getInputTypeCU(), true);			
+		CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(getInputTypeCU(), true);			
 		String typeComment= CodeGeneration.getTypeComment(newCu, fNewInterfaceName, getLineSeperator());//$NON-NLS-1$
 		String compilationUnitContent = CodeGeneration.getCompilationUnitContent(newCu, typeComment, createInterfaceSource(cuNode), getLineSeperator());
 		if (compilationUnitContent == null)

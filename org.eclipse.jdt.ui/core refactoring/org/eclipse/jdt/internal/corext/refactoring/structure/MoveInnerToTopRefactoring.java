@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -85,8 +86,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -99,6 +100,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -138,7 +140,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		fImportManager= new ImportRewriteManager(codeGenerationSettings);
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fMarkInstanceFieldAsFinal= true; //default
-		fDeclaringCuNode= AST.parseCompilationUnit(getDeclaringCu(), true);
+		fDeclaringCuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(getDeclaringCu(), true);
 		fIsInstanceFieldCreationPossible= !JdtFlags.isStatic(type);
 		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
 		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
@@ -292,7 +294,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private RefactoringStatus checkConstructorParameterNames(){
 		RefactoringStatus result= new RefactoringStatus();
-		CompilationUnit cuNode= AST.parseCompilationUnit(getInputTypeCu(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(getInputTypeCu(), false);
 		TypeDeclaration type= findTypeDeclaration(fType, cuNode);
 		MethodDeclaration[] nodes= getConstructorDeclarationNodes(type);
 		for (int i= 0; i < nodes.length; i++) {
@@ -364,15 +366,17 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	private ICompilationUnit getDeclaringCu() {
-		return WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
+		return fType.getCompilationUnit();
 	}
 
 	private String getNewSourceForInputType(ICompilationUnit processedCu, OldASTRewrite rewrite) throws CoreException, JavaModelException {
 		TextChange ch= new CompilationUnitChange("", processedCu); //$NON-NLS-1$
 		TextEdit edit= getRewriteTextEdit(processedCu, rewrite);
-		TextChangeCompatibility.addTextEdit(ch, "", edit);
+		TextChangeCompatibility.addTextEdit(ch, "", edit); //$NON-NLS-1$
 		String newSource= ch.getPreviewContent();
-		CompilationUnit cuNode= AST.parseCompilationUnit(newSource.toCharArray());
+		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		p.setSource(newSource.toCharArray());
+		CompilationUnit cuNode= (CompilationUnit) p.createAST(null);
 		TypeDeclaration td= findTypeDeclaration(fType, cuNode);
 		return newSource.substring(td.getStartPosition(), ASTNodes.getExclusiveEnd(td));
 	}
@@ -410,7 +414,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private CompilationUnit getAST(ICompilationUnit processedCu) {		
 		if (processedCu.equals(getDeclaringCu()))
 			return fDeclaringCuNode;
-		return AST.parseCompilationUnit(processedCu, true);
+		return new RefactoringASTParser(AST.LEVEL_2_0).parse(processedCu, true);
 	}
 
 	private boolean typeHasNoConstructors() throws JavaModelException {
@@ -533,7 +537,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		Map result= new HashMap();
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(group.getCompilationUnit());
+			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
 			result.put(cu, group.getSearchResults());
@@ -551,7 +555,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, OldASTRewrite rewrite) throws CoreException {
 		TextChange textChange= manager.get(cu);
 		TextEdit resultingEdit= getRewriteTextEdit(cu, rewrite);
-		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.30"), resultingEdit);
+		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.30"), resultingEdit); //$NON-NLS-1$
 		rewrite.removeModifications();
 	}
 
@@ -842,7 +846,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private ICompilationUnit getInputTypeCu() {
-		return WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
+		return fType.getCompilationUnit();
 	}
 
 	private Change createCompilationUnitForMovedType(IProgressMonitor pm) throws CoreException {
@@ -853,7 +857,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			return new CreateTextFileChange(createPathForNewCu(), source, "java");	 //$NON-NLS-1$
 		} finally{
 			if (newCuWC != null)
-				newCuWC.destroy();
+				newCuWC.discardWorkingCopy();
 		}
 	}
 	

@@ -83,8 +83,8 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -97,6 +97,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -105,6 +106,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -751,7 +753,7 @@ public class PullUpRefactoring extends Refactoring {
 			ICompilationUnit cu= groups[i].getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= AST.parseCompilationUnit(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, false);
 			ASTNode[] refNodes= ASTNodeSearchUtil.getAstNodes(groups[i].getSearchResults(), cuNode);
 			for (int j= 0; j < refNodes.length; j++) {
 				ASTNode node= refNodes[j];
@@ -1163,11 +1165,11 @@ public class PullUpRefactoring extends Refactoring {
 		return matchingSet;
 	}
 	
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify(){
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
-	private RefactoringStatus validateModifiesFiles() throws CoreException{
+	private RefactoringStatus validateModifiesFiles(){
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
@@ -1193,8 +1195,8 @@ public class PullUpRefactoring extends Refactoring {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.preview"), 4); //$NON-NLS-1$
 
-			ICompilationUnit declaringCu= getDeclaringWorkingCopy();
-			CompilationUnit declaringCuNode= AST.parseCompilationUnit(declaringCu, true);			
+			ICompilationUnit declaringCu= getDeclaringCU();
+			CompilationUnit declaringCuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(declaringCu, true);			
 
 			addImportsToTargetCu(new SubProgressMonitor(pm, 1), declaringCuNode);
 
@@ -1208,15 +1210,15 @@ public class PullUpRefactoring extends Refactoring {
 
 			ICompilationUnit[] cus= getCompilationUnitsOfSubclassesOfTargetClass(new SubProgressMonitor(pm, 1));
 			IProgressMonitor subPm= new SubProgressMonitor(pm, 1);
-			subPm.beginTask("", cus.length*6);
-			ICompilationUnit targetCu= getTargetWorkingCopy();
+			subPm.beginTask("", cus.length*6); //$NON-NLS-1$
+			ICompilationUnit targetCu= getTargetCU();
 			for (int i= 0; i < cus.length; i++) {
 				ICompilationUnit cu= cus[i];
 				if (! needsRewriting(cu, membersToDeleteMap, nonAbstractSubclassesMap)) {
 					subPm.worked(6);
 					continue;
 				}	
-				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode : AST.parseCompilationUnit(cu, true);
+				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode : new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, true);
 				OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 				if (membersToDeleteMap.containsKey(cu)){
 					List members= (List) membersToDeleteMap.get(cu);
@@ -1303,7 +1305,7 @@ public class PullUpRefactoring extends Refactoring {
 		IMember[] membersToDelete= getMembersToDelete(pm);
 		Map result= new HashMap();
 		for (int i= 0; i < membersToDelete.length; i++) {
-			IMember member= WorkingCopyUtil.getWorkingCopyIfExists(membersToDelete[i]);
+			IMember member= membersToDelete[i];
 			ICompilationUnit cu= member.getCompilationUnit();
 			if (! result.containsKey(cu))
 				result.put(cu, new ArrayList(1));
@@ -1312,9 +1314,9 @@ public class PullUpRefactoring extends Refactoring {
 		return result;
 	}
 
-	private boolean needsRewriting(ICompilationUnit unit, Map membersToDeleteMap, Map nonAbstractSubclassesMap) throws JavaModelException {
-		return 	getDeclaringWorkingCopy().equals(unit) ||
-		 	   	getTargetWorkingCopy().equals(unit) ||
+	private boolean needsRewriting(ICompilationUnit unit, Map membersToDeleteMap, Map nonAbstractSubclassesMap) {
+		return 	getDeclaringCU().equals(unit) ||
+		 	   	getTargetCU().equals(unit) ||
 				membersToDeleteMap.containsKey(unit) ||
 				nonAbstractSubclassesMap.containsKey(unit);
 	}
@@ -1327,7 +1329,7 @@ public class PullUpRefactoring extends Refactoring {
 		TextChange textChange= manager.get(cu);
 		if (fImportManager.hasImportEditFor(cu))
 			resultingEdits.addChild(fImportManager.getImportRewrite(cu).createEdit(textBuffer.getDocument()));
-		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("PullUpRefactoring.42"), resultingEdits);
+		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("PullUpRefactoring.42"), resultingEdits); //$NON-NLS-1$
 		rewrite.removeModifications();
 	}
 
@@ -1335,9 +1337,9 @@ public class PullUpRefactoring extends Refactoring {
 		IType[] allSubtypes= getTypeHierarchyOfTargetClass(pm).getAllSubtypes(getTargetClass());
 		Set result= new HashSet(allSubtypes.length);
 		for (int i= 0; i < allSubtypes.length; i++) {
-			result.add(WorkingCopyUtil.getWorkingCopyIfExists(allSubtypes[i].getCompilationUnit()));
+			result.add(allSubtypes[i].getCompilationUnit());
 		}
-		result.add(getTargetWorkingCopy());
+		result.add(getTargetCU());
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
@@ -1355,7 +1357,7 @@ public class PullUpRefactoring extends Refactoring {
 
 	private void createAbstractMethodsInTargetClass(CompilationUnit targetCuNode, CompilationUnit declaringCuNode, OldASTRewrite rewrite, IProgressMonitor pm) throws JavaModelException {
 		TypeDeclaration targetClass= ASTNodeSearchUtil.getTypeDeclarationNode(getTargetClass(), targetCuNode);
-		pm.beginTask("", fMethodsToDeclareAbstract.length);
+		pm.beginTask("", fMethodsToDeclareAbstract.length); //$NON-NLS-1$
 		for (int i= 0; i < fMethodsToDeclareAbstract.length; i++) {
 			createAbstractMethodInTargetClass(fMethodsToDeclareAbstract[i], declaringCuNode, rewrite, targetClass, new SubProgressMonitor(pm, 1));
 		}
@@ -1372,8 +1374,8 @@ public class PullUpRefactoring extends Refactoring {
 		newMethod.setJavadoc(null);
 		newMethod.setModifiers(createModifiersForAbstractDeclaration(sourceMethod, pm));
 		newMethod.setName(createCopyOfSimpleName(methodDeclaration.getName(), ast));
-		copyReturnType(rewrite, getDeclaringWorkingCopy(), methodDeclaration, newMethod);		
-		copyParameters(rewrite, getDeclaringWorkingCopy(), methodDeclaration, newMethod);
+		copyReturnType(rewrite, getDeclaringCU(), methodDeclaration, newMethod);		
+		copyParameters(rewrite, getDeclaringCU(), methodDeclaration, newMethod);
 		copyThrownExceptions(methodDeclaration, newMethod);
 		targetClass.bodyDeclarations().add(newMethod);
 		rewrite.markAsInserted(newMethod);
@@ -1396,7 +1398,7 @@ public class PullUpRefactoring extends Refactoring {
 		IType declaringType= getDeclaringType();
 		IMethod[] methods= getAbstractMethodsAddedToTargetClass();
 		IType[] typesToImport= getTypesReferencedInDeclarations(methods, declaringCuNode);
-		pm.beginTask("", concreteSubclasses.size());
+		pm.beginTask("", concreteSubclasses.size()); //$NON-NLS-1$
 		for (Iterator iter= concreteSubclasses.iterator(); iter.hasNext();) {
 			IType clazz= (IType)iter.next();
 			if (clazz.equals(declaringType))
@@ -1405,7 +1407,7 @@ public class PullUpRefactoring extends Refactoring {
 			TypeDeclaration classToCreateStubIn= ASTNodeSearchUtil.getTypeDeclarationNode(clazz, cuNode);
 			ICompilationUnit cuToCreateStubIn= clazz.getCompilationUnit();
 			IProgressMonitor subPm= new SubProgressMonitor(pm, 1);
-			subPm.beginTask("", methods.length);
+			subPm.beginTask("", methods.length); //$NON-NLS-1$
 			for (int j= 0; j < methods.length; j++) {
 				IMethod method= methods[j];
 				if (null == JavaModelUtil.findMethod(method.getElementName(), method.getParameterTypes(), method.isConstructor(), clazz)){
@@ -1415,7 +1417,7 @@ public class PullUpRefactoring extends Refactoring {
 			}
 			subPm.done();
 			if (anyStubAdded)
-				addImports(typesToImport, WorkingCopyUtil.getWorkingCopyIfExists(clazz.getCompilationUnit()));
+				addImports(typesToImport, clazz.getCompilationUnit());
 		}
 		pm.done();
 	}
@@ -1429,8 +1431,8 @@ public class PullUpRefactoring extends Refactoring {
 		newMethod.setExtraDimensions(methodToCreateStubFor.getExtraDimensions());
 		newMethod.setModifiers(createModifiersForMethodStubs(sourceMethod, methodToCreateStubFor, pm));
 		newMethod.setName(createCopyOfSimpleName(methodToCreateStubFor.getName(), ast));
-		copyReturnType(rewrite, getDeclaringWorkingCopy(), methodToCreateStubFor, newMethod);		
-		copyParameters(rewrite, getDeclaringWorkingCopy(), methodToCreateStubFor, newMethod);
+		copyReturnType(rewrite, getDeclaringCU(), methodToCreateStubFor, newMethod);		
+		copyParameters(rewrite, getDeclaringCU(), methodToCreateStubFor, newMethod);
 		copyThrownExceptions(methodToCreateStubFor, newMethod);
 		newMethod.setJavadoc(createJavadocForStub(typeToCreateStubIn.getName().getIdentifier(), methodToCreateStubFor, newMethod, newCu, rewrite));
 		typeToCreateStubIn.bodyDeclarations().add(newMethod);
@@ -1479,7 +1481,7 @@ public class PullUpRefactoring extends Refactoring {
 		Map result= new HashMap();
 		for (Iterator iter= nonAbstractSubclasses.iterator(); iter.hasNext();) {
 			IType type= (IType)iter.next();
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(type.getCompilationUnit());
+			ICompilationUnit cu= type.getCompilationUnit();
 			if (! result.containsKey(cu))
 				result.put(cu, new ArrayList(1));
 			((List)result.get(cu)).add(type);
@@ -1575,7 +1577,7 @@ public class PullUpRefactoring extends Refactoring {
 
 	private BodyDeclaration createNewTypeDeclarationNode(IType type, CompilationUnit declaringCuNode, OldASTRewrite rewrite) throws JavaModelException {
 		TypeDeclaration oldType= ASTNodeSearchUtil.getTypeDeclarationNode(type, declaringCuNode);
-		return createPlaceholderForTypeDeclaration(oldType, getDeclaringWorkingCopy(), rewrite, true);
+		return createPlaceholderForTypeDeclaration(oldType, getDeclaringCU(), rewrite, true);
 	}
 
 	private void copyMethodToTargetClass(IMethod method, CompilationUnit declaringCuNode, TypeDeclaration targetClass, OldASTRewrite targetRewrite, IProgressMonitor pm) throws JavaModelException {
@@ -1594,8 +1596,8 @@ public class PullUpRefactoring extends Refactoring {
 		copyJavadocNode(targetRewrite, sourceMethod, sourceMethodNode, newMethod);
 		newMethod.setModifiers(getNewModifiers(sourceMethod, pm, true));
 		newMethod.setName(createCopyOfSimpleName(sourceMethodNode.getName(), ast));
-		copyReturnType(targetRewrite, getDeclaringWorkingCopy(), sourceMethodNode, newMethod);
-		copyParameters(targetRewrite, getDeclaringWorkingCopy(), sourceMethodNode, newMethod);
+		copyReturnType(targetRewrite, getDeclaringCU(), sourceMethodNode, newMethod);
+		copyParameters(targetRewrite, getDeclaringCU(), sourceMethodNode, newMethod);
 		copyThrownExceptions(sourceMethodNode, newMethod);
 		return newMethod;
 	}
@@ -1608,7 +1610,7 @@ public class PullUpRefactoring extends Refactoring {
 		Block oldBody= oldMethod.getBody();
 		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(findSuperReferenceRanges(method, getSuperclassOfDeclaringClass(pm)));
 		
-		String oldBodySource= getBufferText(oldBody, getDeclaringWorkingCopy());
+		String oldBodySource= getBufferText(oldBody, getDeclaringCU());
 		StringBuffer newBodyCodeBuff= new StringBuffer(oldBodySource);
 		for (int i= 0; i < superRefOffsert.length; i++) {
 			ISourceRange range= superRefOffsert[i];
@@ -1629,7 +1631,7 @@ public class PullUpRefactoring extends Refactoring {
 		if (JdtFlags.isStatic(method))
 			return new ISourceRange[0];
 		SuperReferenceFinderVisitor visitor= new SuperReferenceFinderVisitor(method, superType);
-		AST.parseCompilationUnit(method.getCompilationUnit(), true).accept(visitor);
+		new RefactoringASTParser(AST.LEVEL_2_0).parse(method.getCompilationUnit(), true).accept(visitor);
 		return visitor.getSuperReferenceRanges();
 	}
 	
@@ -1714,8 +1716,8 @@ public class PullUpRefactoring extends Refactoring {
 			return false;
 		if (references.length > 1)
 			return true;
-		ICompilationUnit referencingCu= WorkingCopyUtil.getWorkingCopyIfExists(references[0].getCompilationUnit());
-		if (! getDeclaringWorkingCopy().equals(referencingCu))
+		ICompilationUnit referencingCu= references[0].getCompilationUnit();
+		if (! getDeclaringCU().equals(referencingCu))
 			return true;
 		SearchResult[] searchResults= references[0].getSearchResults();
 		for (int i= 0; i < searchResults.length; i++) {
@@ -1752,7 +1754,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private void addImportsToTargetCu(IProgressMonitor pm, CompilationUnit declaringCuNode) throws CoreException {
-		addImports(getTypesThatNeedToBeImportedInTargetCu(pm, declaringCuNode), getTargetWorkingCopy());
+		addImports(getTypesThatNeedToBeImportedInTargetCu(pm, declaringCuNode), getTargetCU());
 	}
 
 	private void addImports(IType[] typesToImport, ICompilationUnit cu) throws CoreException {
@@ -1761,16 +1763,16 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 
-	private ICompilationUnit getDeclaringWorkingCopy() {
-		return WorkingCopyUtil.getWorkingCopyIfExists(getDeclaringType().getCompilationUnit());
+	private ICompilationUnit getDeclaringCU() {
+		return getDeclaringType().getCompilationUnit();
 	}
 
-	private ICompilationUnit getTargetWorkingCopy() {
-		return WorkingCopyUtil.getWorkingCopyIfExists(getTargetClass().getCompilationUnit());
+	private ICompilationUnit getTargetCU() {
+		return getTargetClass().getCompilationUnit();
 	}
 
 	private IType[] getTypesThatNeedToBeImportedInTargetCu(IProgressMonitor pm, CompilationUnit declaringCuNode) throws JavaModelException {
-		if (getTargetWorkingCopy().equals(getDeclaringWorkingCopy()))
+		if (getTargetCU().equals(getDeclaringCU()))
 			return new IType[0];
 		IType[] typesInPulledUpMembers= getTypeReferencedInPulledUpMembers(pm);
 		IType[] typesInMethodsDeclaredAbstract= getTypesReferencedInDeclarations(fMethodsToDeclareAbstract, declaringCuNode);

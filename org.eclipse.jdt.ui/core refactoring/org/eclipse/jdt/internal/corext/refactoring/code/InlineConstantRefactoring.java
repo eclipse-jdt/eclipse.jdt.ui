@@ -24,8 +24,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jface.text.Document;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaModelException;
@@ -54,16 +52,18 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -77,10 +77,11 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -239,7 +240,7 @@ public class InlineConstantRefactoring extends Refactoring {
 // ---- Begin InlineTargetCompilationUnit.InitializerExpressionRelocationPreparer.InitializerTraversal 		
 			private static class InitializerTraversal extends HierarchicalASTVisitor {
 				
-				private final RefactoringStatus fStatus;
+				private final RefactoringStatus fStatus2;
 				private final Expression fNewLocation;
 				private final ICompilationUnit fNewLocationCU;
 				private final Expression fInitializer3;//use name other than fInitializer to avoid hiding
@@ -251,7 +252,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				private Set fNamesDeclaredLocallyAtNewLocation;
 				
 				public InitializerTraversal(Expression initializer, Expression newLocation, ICompilationUnit newLocationCU, RefactoringStatus status) {
-					fStatus= status;
+					fStatus2= status;
 					fInitializer3= initializer;
 					fNewLocation= newLocation;
 					fNewLocationCU= newLocationCU;
@@ -403,7 +404,7 @@ public class InlineConstantRefactoring extends Refactoring {
 						if(qualification != null)					
 							fQualifications.add(qualification);
 					} catch (ClassQualification.ClassQualificationCannotBePerformed e) {
-						e.fillInStatus(fStatus, JavaStatusContext.create(fNewLocationCU, fNewLocation));
+						e.fillInStatus(fStatus2, JavaStatusContext.create(fNewLocationCU, fNewLocation));
 						fCanBePrepared= false;	
 					}
 				}
@@ -552,7 +553,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			return results;
 		}
 		
-		private static void validateResults(InlineTargetCompilationUnit[] results, RefactoringStatus status) throws JavaModelException, CoreException {
+		private static void validateResults(InlineTargetCompilationUnit[] results, RefactoringStatus status) {
 			ICompilationUnit[] cus= new ICompilationUnit[results.length];
 			for(int i= 0; i < results.length; i++)
 				cus[i]= results[i].fUnit;
@@ -624,7 +625,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			
 			fReferences= new Expression[references.length];
 			
-			CompilationUnit cuNode= AST.parseCompilationUnit(cu, true);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, true);
 			for(int i= 0; i < references.length; i++) {
 				ASTNode node= NodeFinder.perform(cuNode, references[i].getStart(), references[i].getEnd() - references[i].getStart());
 				Assert.isTrue(node instanceof Name);
@@ -865,7 +866,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	}
 
 	private void initializeAST() {
-		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
+		fCompilationUnitNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(fCu, true);
 	}
 
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
@@ -907,7 +908,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 
-	private RefactoringStatus checkInitializer() throws JavaModelException {
+	private RefactoringStatus checkInitializer() {
 		Expression initializer= getInitializer();
 		if(initializer == null)
 			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.blank_finals"), null, Corext.getPluginId(), RefactoringStatusCodes.CANNOT_INLINE_BLANK_FINAL, null); //$NON-NLS-1$
@@ -1015,11 +1016,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		Assert.isNotNull(field);
 		Assert.isTrue(field.exists());		
 		
-		ICompilationUnit source= field.getCompilationUnit();
-		if (source == null)
-			return null;
-			
-		return JavaModelUtil.toWorkingCopy(source);
+		return field.getCompilationUnit();
 	}
 		
 	private void checkDeclarationSelected() throws JavaModelException {
@@ -1037,7 +1034,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		return fDeclarationSelected;
 	}
 	
-	private VariableDeclarationFragment getParentDeclaration() throws JavaModelException {
+	private VariableDeclarationFragment getParentDeclaration() {
 		Assert.isNotNull(getConstantNameNode());
 		ASTNode parent= getConstantNameNode().getParent();
 		if(parent instanceof VariableDeclarationFragment)
@@ -1098,7 +1095,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		
 		for(Iterator it= changes.iterator(); it.hasNext();) {
 			CompilationUnitChange change= (CompilationUnitChange) it.next();
-			if(JavaModelUtil.toWorkingCopy(change.getCompilationUnit()).equals(declaringCU))
+			if(change.getCompilationUnit().equals(declaringCU))
 				return change;
 		}
 		

@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -86,10 +87,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -345,7 +348,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private void initializeAST() {
-		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
+		fCompilationUnitNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(fCu, true);
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
@@ -391,7 +394,12 @@ public class ExtractTempRefactoring extends Refactoring {
 			TextChange change= new DocumentChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), new Document(fCu.getSource())); //$NON-NLS-1$
 			TextChangeCompatibility.addTextEdit(change, "", getAllEdits(buffer)); //$NON-NLS-1$
 			String newCuSource= change.getPreviewContent();
-			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
+			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			p.setSource(newCuSource.toCharArray());
+			p.setUnitName(fCu.getElementName());
+			p.setProject(fCu.getJavaProject());
+			p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(fCu));
+			CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
 			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
 			for (int i= 0; i < newProblems.length; i++) {
                 IProblem problem= newProblems[i];

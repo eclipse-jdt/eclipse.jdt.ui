@@ -19,8 +19,6 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,9 +26,12 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
@@ -251,7 +252,10 @@ public class CallHierarchy {
             IClassFile classFile= member.getClassFile();
             try {
                 if (classFile != null && classFile.exists() && classFile.getSource() != null) {
-                    return AST.parseCompilationUnit(classFile, resolveBindings);
+					ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+					parser.setSource(classFile);
+					parser.setResolveBindings(resolveBindings);
+					return (CompilationUnit) parser.createAST(null);
                 }
             } catch (JavaModelException e) {
                 JavaPlugin.log(e);
@@ -259,7 +263,10 @@ public class CallHierarchy {
         } else {
             ICompilationUnit icu= member.getCompilationUnit();
             if (icu != null && icu.exists()) {
-                return AST.parseCompilationUnit(icu, resolveBindings);
+				ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+				parser.setSource(icu);
+				parser.setResolveBindings(resolveBindings);
+				return (CompilationUnit) parser.createAST(null);
             }
         }
         return null;

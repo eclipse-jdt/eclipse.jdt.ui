@@ -48,8 +48,10 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragment
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
@@ -59,6 +61,7 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 class DeleteChangeCreator {
 	private DeleteChangeCreator() {
+		//private
 	}
 	
 	static Change createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements) throws CoreException {
@@ -105,7 +108,7 @@ class DeleteChangeCreator {
 	 * List<IJavaElement> javaElements 
 	 */
 	private static Change createDeleteChange(ICompilationUnit cu, List javaElements, TextChangeManager manager) throws CoreException {
-		CompilationUnit cuNode= AST.parseCompilationUnit(cu, false, null, null);
+		CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, false);
 		OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 		IJavaElement[] elements= (IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]);
 		ASTNodeDeleteUtil.markAsDeleted(elements, cuNode, rewrite);

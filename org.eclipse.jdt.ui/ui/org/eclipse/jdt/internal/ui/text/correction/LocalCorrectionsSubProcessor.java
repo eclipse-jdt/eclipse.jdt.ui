@@ -266,7 +266,7 @@ public class LocalCorrectionsSubProcessor {
 		parser.setResolveBindings(true);
 		parser.setFocalPosition(selectedNode.getStartPosition());
 		CompilationUnit newRoot= (CompilationUnit) parser.createAST(null);
-		if (refactoring.checkActivationBasics(newRoot, null).isOK()) {
+		if (refactoring.checkActivationBasics(newRoot).isOK()) {
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.surroundwith.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			CUCorrectionProposal proposal= new CUCorrectionProposal(label, (CompilationUnitChange) refactoring.createChange(null), 4, image);

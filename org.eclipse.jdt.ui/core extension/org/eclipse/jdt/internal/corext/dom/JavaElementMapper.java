@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -41,7 +42,10 @@ public class JavaElementMapper extends GenericVisitor {
 	public static ASTNode perform(IMember member, Class type) throws JavaModelException {
 		JavaElementMapper mapper= new JavaElementMapper(member);
 		ICompilationUnit unit= member.getCompilationUnit();
-		CompilationUnit node= AST.parseCompilationUnit(unit, true);
+		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		parser.setSource(unit);
+		parser.setResolveBindings(true);
+		CompilationUnit node= (CompilationUnit) parser.createAST(null);
 		node.accept(mapper);
 		ASTNode result= mapper.fResult;
 		while(result != null && !type.isInstance(result)) {

@@ -57,8 +57,10 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -282,20 +284,6 @@ public class InlineMethodRefactoring extends Refactoring {
 				return null;
 			}
 			
-			source= JavaModelUtil.toWorkingCopy(source);
-			
-			/*if (!source.isWorkingCopy()) {
-				// try to find a working copy if exists.
-				// XXX: This is a layer breaker - should not access jdt.ui
-				IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
-				for (int i= 0; i < workingCopies.length; i++) {
-					IWorkingCopy wcopy= workingCopies[i];
-					if (source.equals(wcopy.getOriginalElement())) {
-						source= (ICompilationUnit)wcopy;
-						break;
-					}
-				}
-			}*/
 			declaration= (MethodDeclaration)JavaElementMapper.perform(method, MethodDeclaration.class);
 			if (declaration != null) {
 				return new SourceProvider(source, declaration);
@@ -306,7 +294,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 	
 	private static ASTNode getTargetNode(ICompilationUnit unit, int offset, int length) {
-		CompilationUnit root= AST.parseCompilationUnit(unit, true);
+		CompilationUnit root= new RefactoringASTParser(AST.LEVEL_2_0).parse(unit, true);
 		ASTNode node= null;
 		try {
 			node= checkNode(NodeFinder.perform(root, offset, length, unit));

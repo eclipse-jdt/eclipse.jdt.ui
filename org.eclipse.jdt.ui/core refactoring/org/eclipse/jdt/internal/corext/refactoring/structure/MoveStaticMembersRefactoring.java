@@ -21,13 +21,12 @@ import java.util.Set;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -39,19 +38,31 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -62,12 +73,14 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -90,9 +103,9 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	private BodyDeclaration[] fMemberDeclarations;
 
 	public static class ASTData {
-		public ASTData(ICompilationUnit u, boolean resolveBindings) throws JavaModelException {
+		public ASTData(ICompilationUnit u, boolean resolveBindings) {
 			unit= u;
-			root= AST.parseCompilationUnit(unit, resolveBindings);
+			root= new RefactoringASTParser(AST.LEVEL_2_0).parse(unit, resolveBindings);
 			rewriter= new OldASTRewrite(root);
 		}
 		
@@ -255,9 +268,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	public void setDestinationTypeFullyQualifiedName(String fullyQualifiedTypeName) throws JavaModelException {
 		Assert.isNotNull(fullyQualifiedTypeName);
 		fDestinationType= resolveType(fullyQualifiedTypeName);
-		if (fDestinationType != null) { //workaround for bug 36032: IJavaProject#findType(..) doesn't find secondary type
-			fDestinationType= (IType) JavaModelUtil.toWorkingCopy(fDestinationType);
-		}
+		//workaround for bug 36032: IJavaProject#findType(..) doesn't find secondary type
 		fDestinationTypeName= fullyQualifiedTypeName;
 	}
 	
@@ -473,7 +484,6 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	private RefactoringStatus checkAccessedMethodsAvailability(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fMembersToMove, pm);
-		toWorkingCopies(accessedMethods);
 		List movedElementList= Arrays.asList(fMembersToMove);
 		for (int i= 0; i < accessedMethods.length; i++) {
 			if (containsAncestorOf(movedElementList, accessedMethods[i]))
@@ -491,7 +501,6 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	private RefactoringStatus checkAccessedTypesAvailability(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		IType[] accessedTypes= ReferenceFinderUtil.getTypesReferencedIn(fMembersToMove, pm);
-		toWorkingCopies(accessedTypes);
 		List movedElementList= Arrays.asList(fMembersToMove);
 		for (int i= 0; i < accessedTypes.length; i++) {
 			if (containsAncestorOf(movedElementList, accessedTypes[i]))
@@ -509,7 +518,6 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	private RefactoringStatus checkAccessedFieldsAvailability(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(fMembersToMove, pm);
-		toWorkingCopies(accessedFields);
 		List movedElementList= Arrays.asList(fMembersToMove);
 		for (int i= 0; i < accessedFields.length; i++) {
 			if (containsAncestorOf(movedElementList, accessedFields[i]))
@@ -534,12 +542,6 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return false;
 	}
 
-	private static void toWorkingCopies(IMember[] accessedFields) {
-		for (int i= 0; i < accessedFields.length; i++) {
-			accessedFields[i]= JavaModelUtil.toWorkingCopy(accessedFields[i]);
-		}
-	}
-	
 	private RefactoringStatus checkMovedMembersAvailability(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("Check availability of members after move.", fMembersToMove.length);
 		RefactoringStatus result= new RefactoringStatus();
@@ -598,7 +600,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return (IType[]) blindAccessorTypes.toArray(new IType[blindAccessorTypes.size()]);
 	}
 
-	private String createNonAccessibleMemberMessage(IMember member, IType accessingType, boolean moved) throws JavaModelException{
+	private String createNonAccessibleMemberMessage(IMember member, IType accessingType, boolean moved){
 		//Non-visibility can have various reasons and always displaying all visibility
 		//flags for all enclosing elements would be too heavy. Context reveals exact cause.
 		IType declaringType= moved ? getDestinationType() : getDeclaringType();
@@ -697,7 +699,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	}
 
 	private boolean isWithinMemberToMove(SearchResult result) throws JavaModelException {
-		ICompilationUnit referenceCU= JavaModelUtil.toWorkingCopy(result.getCompilationUnit());
+		ICompilationUnit referenceCU= result.getCompilationUnit();
 		if (! referenceCU.equals(fSource.unit))
 			return false;
 		int referenceStart= result.getStart();

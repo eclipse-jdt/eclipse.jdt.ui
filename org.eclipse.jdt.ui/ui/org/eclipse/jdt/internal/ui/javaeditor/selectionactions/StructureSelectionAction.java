@@ -12,13 +12,6 @@ package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
 import java.util.Collection;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.ui.IEditorInput;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
@@ -26,9 +19,17 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -156,11 +157,15 @@ public abstract class StructureSelectionAction extends Action {
 	}
 	
 	private CompilationUnit getAST(ISourceReference sr) {
+
 		if (sr instanceof ICompilationUnit) {
-			return AST.parseCompilationUnit((ICompilationUnit)sr, false);
+			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			p.setSource((ICompilationUnit) sr);
+			return (CompilationUnit) p.createAST(null);
 		} else if (sr instanceof IClassFile) {
-			// Work-around http://dev.eclipse.org/bugs/show_bug.cgi?id=30471
-			return AST.parseCompilationUnit((IClassFile)sr, true);
+			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			p.setSource((IClassFile) sr);
+			return (CompilationUnit) p.createAST(null);
 		}
 		return null;
 	}

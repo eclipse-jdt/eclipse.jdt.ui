@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -114,7 +115,9 @@ public class TypedSource {
 		List result= new ArrayList(javaElements.length);
 		for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
 			ICompilationUnit cu= (ICompilationUnit) iter.next();
-			CompilationUnit cuNode= AST.parseCompilationUnit(cu, false);
+			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			p.setSource(cu);
+			CompilationUnit cuNode= (CompilationUnit) p.createAST(null);
 			for (Iterator iterator= ((List) grouped.get(cu)).iterator(); iterator.hasNext();) {
 				TypedSource[] ts= createTypedSources((IJavaElement) iterator.next(), cu, cuNode);
 				if (ts != null)
@@ -155,7 +158,7 @@ public class TypedSource {
 		int firstFragmentOffset= ((ASTNode)declaration.fragments().get(0)).getStartPosition();
 		buff.append(buffer.getText(declaration.getStartPosition(), firstFragmentOffset - declaration.getStartPosition()));
 		buff.append(buffer.getText(declarationFragment.getStartPosition(), declarationFragment.getLength()));
-		buff.append(";");
+		buff.append(";"); //$NON-NLS-1$
 		return buff.toString();
 	}
 
@@ -165,7 +168,7 @@ public class TypedSource {
 		if (nodes != null && nodes.length == 1) {
 			return trimIndent(cu.getBuffer().getText(nodes[0].getStartPosition(), nodes[0].getLength()));
 		} else 
-			return "";
+			return ""; //$NON-NLS-1$
 	}
 
 	private static String trimIndent(String source) {

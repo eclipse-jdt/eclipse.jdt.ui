@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -68,6 +69,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -348,9 +350,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 		}
 	}
 
-	// !!! --
 	private void initializeAST() {
-		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
+		fCompilationUnitNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(fCu, true);
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
@@ -421,10 +422,14 @@ public class ExtractConstantRefactoring extends Refactoring {
 			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
 			TextEdit[] edits= getAllEdits(buffer);
 			TextChange change= new DocumentChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.rename"), new Document(fCu.getSource())); //$NON-NLS-1$
-			TextChangeCompatibility.addTextEdit(change, "", edits);
+			TextChangeCompatibility.addTextEdit(change, "", edits); //$NON-NLS-1$
 
 			String newCuSource= change.getPreviewContent();
-			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
+			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			p.setSource(newCuSource.toCharArray());
+			p.setUnitName(fCu.getElementName());
+			p.setProject(fCu.getJavaProject());
+			CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
 			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
 			for (int i= 0; i < newProblems.length; i++) {
                 IProblem problem= newProblems[i];
@@ -914,7 +919,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	// !!! - from ExtractTempRefactoring
-	private IFile getFile() throws JavaModelException {
+	private IFile getFile() {
 		return ResourceUtil.getFile(fCu);
 	}
 }

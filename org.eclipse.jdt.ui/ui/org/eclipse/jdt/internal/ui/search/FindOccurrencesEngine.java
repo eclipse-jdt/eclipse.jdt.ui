@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.swt.custom.BusyIndicator;
@@ -60,7 +61,10 @@ public abstract class FindOccurrencesEngine {
 			fClassFile= file;
 		}
 		protected CompilationUnit createAST() {
-			return AST.parseCompilationUnit(fClassFile, true);
+			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			p.setSource(fClassFile);
+			p.setResolveBindings(true);
+			return (CompilationUnit) p.createAST(null);
 		}
 		protected IJavaElement getInput() {
 			return fClassFile;
@@ -86,7 +90,10 @@ public abstract class FindOccurrencesEngine {
 			fCUnit= unit;
 		}
 		protected CompilationUnit createAST() {
-			return AST.parseCompilationUnit(fCUnit, true);
+			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			p.setSource(fCUnit);
+			p.setResolveBindings(true);
+			return (CompilationUnit) p.createAST(null);
 		}
 		protected IJavaElement getInput() {
 			return fCUnit;

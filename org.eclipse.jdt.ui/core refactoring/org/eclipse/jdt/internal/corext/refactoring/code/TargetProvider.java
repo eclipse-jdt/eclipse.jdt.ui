@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -40,11 +41,14 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 abstract class TargetProvider {
@@ -305,7 +309,7 @@ abstract class TargetProvider {
 		}
 	
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
-			ASTNode root= AST.parseCompilationUnit(unit, true);
+			ASTNode root= new RefactoringASTParser(AST.LEVEL_2_0).parse(unit, true);
 			InvocationFinder finder= new InvocationFinder(fMethod.resolveBinding());
 			root.accept(finder);
 			fCurrentBodies= finder.result;
