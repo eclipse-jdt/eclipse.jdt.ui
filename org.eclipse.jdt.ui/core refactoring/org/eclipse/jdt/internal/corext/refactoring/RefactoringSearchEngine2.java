@@ -419,7 +419,27 @@ public final class RefactoringSearchEngine2 {
 	}
 
 	/**
-	 * Sets the search pattern.
+	 * Sets the search pattern to be used during search.
+	 * <p>
+	 * This method must be called before {@link RefactoringSearchEngine2#searchPattern(IProgressMonitor)}
+	 * 
+	 * @param elements the set of elements
+	 * @param limitTo determines the nature of the expected matches. This is a combination of {@link org.eclipse.jdt.core.search.IJavaSearchConstants}.
+	 */
+	public final void setPattern(final IJavaElement[] elements, final int limitTo) {
+		Assert.isNotNull(elements);
+		Assert.isTrue(elements.length > 0);
+		SearchPattern pattern= SearchPattern.createPattern(elements[0], limitTo);
+		IJavaElement element= null;
+		for (int index= 1; index < elements.length; index++) {
+			element= elements[index];
+			pattern= SearchPattern.createOrPattern(pattern, SearchPattern.createPattern(element, limitTo));
+		}
+		setPattern(pattern);
+	}
+
+	/**
+	 * Sets the search pattern to be used during search.
 	 * <p>
 	 * This method must be called before {@link RefactoringSearchEngine2#searchPattern(IProgressMonitor)}
 	 * 
@@ -461,7 +481,7 @@ public final class RefactoringSearchEngine2 {
 	 * 
 	 * @param severity the severity to set
 	 */
-	public void setSeverity(final int severity) {
+	public final void setSeverity(final int severity) {
 		Assert.isTrue(severity == RefactoringStatus.OK || severity == RefactoringStatus.WARNING || severity == RefactoringStatus.INFO || severity == RefactoringStatus.FATAL || severity == RefactoringStatus.ERROR);
 		fSeverity= severity;
 	}
