@@ -52,6 +52,11 @@ public class MoveTest extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 
+	/** See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=47316">Bug 47316</a>. */
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
+	}
+
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -968,6 +973,42 @@ public class MoveTest extends RefactoringTest {
 		}finally{
 			performDummySearch();
 			newCu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testDestination_yes_cuFromRoot() throws Exception{
+		//import statement with type from default package - only <= java 1.3
+		String oldD= "import org.test.Reference;public class Default {Reference ref;}";
+		String oldRef= "package org.test;import Default;public class Reference{Default d;}";
+		String newD= "package org;\nimport org.test.Reference;public class Default {Reference ref;}";
+		String newRef= "package org.test;import org.Default;\npublic class Reference{Default d;}";
+		ICompilationUnit cuD= getRoot().getPackageFragment("").createCompilationUnit("Default.java", oldD, false, new NullProgressMonitor());
+		IPackageFragment orgTest= getRoot().createPackageFragment("org.test", false, new NullProgressMonitor());
+		ICompilationUnit cuRef= orgTest.createCompilationUnit("Reference.java", oldRef, false, new NullProgressMonitor());
+		IPackageFragment org= getRoot().getPackageFragment("org");
+		ICompilationUnit newCuD= org.getCompilationUnit(cuD.getElementName());
+		try{
+			IJavaElement[] javaElements= { cuD };
+			IResource[] resources= {};
+			MoveRefactoring ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			verifyValidDestination(ref, org);			
+			
+			assertTrue("source file Default.java does not exist before moving", cuD.exists());
+			assertTrue("source file Reference.java does not exist before moving", cuRef.exists());
+			RefactoringStatus status= performRefactoring(ref, false);
+			assertEquals(null, status);
+			assertTrue("source file Default.java exists after moving", ! cuD.exists());
+			assertTrue("new file Default.java does not exist after moving", newCuD.exists());
+			assertTrue("source file Reference.java does not exist after moving", cuRef.exists());
+			assertEqualLines("Default.java differs", newD, newCuD.getSource());
+			assertEqualLines("Reference.java differs", newRef, cuRef.getSource());
+
+		}finally{
+			performDummySearch();
+			newCuD.delete(true, new NullProgressMonitor());
+			orgTest.delete(true, new NullProgressMonitor());
+			org.delete(true, new NullProgressMonitor());
 		}
 	}
 

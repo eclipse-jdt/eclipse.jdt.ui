@@ -182,7 +182,17 @@ public class MoveCuUpdateCreator {
 	}
 
     private String createStringForNewImport(ICompilationUnit movedUnit, IImportDeclaration importDecl) {
-        return new StringBuffer(importDecl.getElementName()).replace(0, movedUnit.getParent().getElementName().length(), fDestination.getElementName()).toString();
+    	String old= importDecl.getElementName();
+		int oldPackLength= movedUnit.getParent().getElementName().length();
+		
+		StringBuffer result= new StringBuffer(fDestination.getElementName());
+		if (oldPackLength == 0) // move FROM default package
+			result.append('.').append(old);
+		else if (result.length() == 0) // move TO default package
+			result.append(old.substring(oldPackLength + 1)); // cut "."
+		else
+			result.append(old.substring(oldPackLength));
+		return result.toString();
     }
 	
 	private void removeImportsToDestinationPackageTypes(ICompilationUnit movedUnit) throws CoreException{
