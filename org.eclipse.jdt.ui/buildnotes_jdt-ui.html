@@ -13,7 +13,22 @@ Java Development Tooling UI</h1>
 Eclipse Build Input January ??? 2002
 <h2>
 What's new in this drop</h2>
-<p>
+<ul>
+<li>
+<b>Structure Selection actions.</b>
+Their purpose it to enable you to quickly select a list of statements
+(typically for Extract Method).<br>
+
+There are 3 actions - Select (up), Select Next and Select Previous.<br>
+After you make a selection in the java source editor - 'Select up' will expand the selection 
+to the smallest AST (Abstract Syntax Tree) node covering the selection.<br>
+'Select Next' will do the same, except for the case when the selection is a statement or a 
+list of statements (then, the next statement will be added.) 
+'Select Previous' is self-explanatory.<br>
+Please note that the shortcuts used for these actions will be changed before the 2.0 release. 
+The current setting is only temporary.
+</li>
+<li>
 Due to bug report <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6185">6185</a>
 we had to split the Java action set into two actions sets. The are now named
 Java and Java Element Creation. Since the state of a perspective instance is
@@ -21,7 +36,8 @@ stored in the metadata directory starting this build on an existing workspace
 leads to missing Java Element creation actions in the tool bar of a Java
 perspective. The actions can be restored by either closing and reopening the
 perspective or by checking the &quot;Java Element Creation&quot; action set in
-Perspective-&gt;Customize...-&gt;Others.</p>
+Perspective-&gt;Customize...-&gt;Others.</li>
+</ul>
 <h3>
 Problem Reports Fixed</h3>
 <p>
