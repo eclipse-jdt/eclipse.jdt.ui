@@ -39,6 +39,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 public class MembersView extends JavaBrowsingPart {
 	
 	private MemberFilterActionGroup fMemberFilterActionGroup;
+	
+	public MembersView() {
+		setHasWorkingSetFilter(false);
+	}
 
 	/**
 	 * Creates and returns the label provider for this part.
