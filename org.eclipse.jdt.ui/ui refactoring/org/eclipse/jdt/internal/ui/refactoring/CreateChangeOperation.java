@@ -104,6 +104,8 @@ public class CreateChangeOperation implements IRunnableWithProgress {
 			}
 		} catch (JavaModelException e) {
 			throw new InvocationTargetException(e);
+		} finally {
+			pm.done();
 		}
 	}
 
