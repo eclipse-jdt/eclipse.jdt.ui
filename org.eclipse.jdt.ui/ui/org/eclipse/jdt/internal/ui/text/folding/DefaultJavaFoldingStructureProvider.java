@@ -34,6 +34,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
@@ -223,6 +224,17 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			if (fInput != null) {
 				ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
 				if (model != null) {
+					
+					if (fInput instanceof ICompilationUnit) {
+						ICompilationUnit unit= (ICompilationUnit) fInput;
+						synchronized (unit) {
+							try {
+								unit.reconcile(ICompilationUnit.NO_AST, false, null, null);
+							} catch (JavaModelException x) {
+							}
+						}
+					}
+
 					Map additions= computeAdditions((IParent) fInput);
 					model.removeAllAnnotations();
 					model.replaceAnnotations(null, additions);

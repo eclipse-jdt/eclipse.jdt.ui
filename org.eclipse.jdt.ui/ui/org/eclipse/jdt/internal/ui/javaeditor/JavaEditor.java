@@ -2763,15 +2763,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 	
 	/*
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#handleElementContentReplaced()
-	 */
-	protected void handleElementContentReplaced() {
-		super.handleElementContentReplaced();
-		if (fProjectionModelUpdater != null)
-			fProjectionModelUpdater.initialize();
-	}
-	
-	/*
 	 * @see AbstractTextEditor#doSetInput
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
@@ -4313,4 +4304,31 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		return fFoldingGroup;
 	}
 	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#performRevert()
+	 */
+	protected void performRevert() {
+		ProjectionViewer projectionViewer= (ProjectionViewer) getSourceViewer();
+		projectionViewer.setRedraw(false);
+		try {
+			
+			boolean projectionMode= projectionViewer.isProjectionMode();
+			if (projectionMode) {
+				projectionViewer.disableProjection();				
+				if (fProjectionModelUpdater != null)
+					fProjectionModelUpdater.uninstall();
+			}
+			
+			super.performRevert();
+			
+			if (projectionMode) {
+				if (fProjectionModelUpdater != null)
+					fProjectionModelUpdater.install(this, projectionViewer);	
+				projectionViewer.enableProjection();
+			}
+			
+		} finally {
+			projectionViewer.setRedraw(true);
+		}
+	}
 }
