@@ -4,6 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.util;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -176,8 +180,20 @@ public class TypeInfo {
 			if (curr.segmentCount() == 1) {
 				IJavaProject jproject= jmodel.getJavaProject(curr.segment(0));
 				IPackageFragmentRoot root= jproject.getPackageFragmentRoot(jarPath);
-				if (root.exists())
+				if (root.exists()) {
 					return jproject.findElement(elementPath);
+				}
+			}
+		}
+		List paths= Arrays.asList(enclosedPaths);
+		IJavaProject[] projects= jmodel.getJavaProjects();
+		for (int i= 0; i < projects.length; i++) {
+			IJavaProject jproject= projects[i];
+			if (!paths.contains(jproject.getPath())) {
+				IPackageFragmentRoot root= jproject.getPackageFragmentRoot(jarPath);
+				if (root.exists()) {
+					return jproject.findElement(elementPath);
+				}
 			}
 		}
 		return null;
