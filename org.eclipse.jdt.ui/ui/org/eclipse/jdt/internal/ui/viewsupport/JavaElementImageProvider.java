@@ -58,8 +58,8 @@ public class JavaElementImageProvider {
 	public final static int LIGHT_TYPE_ICONS= 0x4;	
 
 
-	private static final Point SMALL_SIZE= new Point(16, 16);
-	private static final Point BIG_SIZE= new Point(22, 16);
+	public static final Point SMALL_SIZE= new Point(16, 16);
+	public static final Point BIG_SIZE= new Point(22, 16);
 
 	private static ImageDescriptor DESC_OBJ_PROJECT_CLOSED;	
 	private static ImageDescriptor DESC_OBJ_PROJECT;	
@@ -84,16 +84,22 @@ public class JavaElementImageProvider {
 	 * @param flags Flags as defined by the JavaImageLabelProvider
 	 */
 	public Image getImageLabel(Object element, int flags) {
-		ImageDescriptor descriptor= null;
-		if (element instanceof IJavaElement) {
-			descriptor= getJavaImageDescriptor((IJavaElement) element, flags);
-		} else if (element instanceof IAdaptable) {
-			descriptor= getWorkbenchImageDescriptor((IAdaptable) element, flags);
-		}
-		if (descriptor != null) {
-			return fRegistry.get(descriptor);
-		}
+		return getImageLabel(computeDescriptor(element, flags));
+	}
+	
+	public Image getImageLabel(ImageDescriptor descriptor){
+		if (descriptor == null) 
+			return null;	
+		return fRegistry.get(descriptor);
+	}
+
+	private ImageDescriptor computeDescriptor(Object element, int flags){
+		if (element instanceof IJavaElement)
+			return getJavaImageDescriptor((IJavaElement) element, flags);
+		else if (element instanceof IAdaptable)
+			return getWorkbenchImageDescriptor((IAdaptable) element, flags);
 		return null;
+		
 	}
 	
 	private boolean showOverlayIcons(int flags) {
