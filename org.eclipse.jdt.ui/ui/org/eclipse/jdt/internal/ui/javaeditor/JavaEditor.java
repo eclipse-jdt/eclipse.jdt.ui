@@ -1440,6 +1440,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 						character= document.getChar(--position);
 
 					setCaretPosition(position + 1);
+					getTextWidget().showSelection();
 					fireSelectionChanged();
 					return;
 				}
