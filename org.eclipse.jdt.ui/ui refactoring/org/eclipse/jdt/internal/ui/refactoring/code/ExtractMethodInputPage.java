@@ -121,7 +121,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 				RefactoringMessages.getString("ExtractMethodInputPage.parameters"), //$NON-NLS-1$
 				new IParameterListChangeListener() {
 				public void parameterChanged(ParameterInfo parameter) {
-					parameterModified(parameter);
+					parameterModified();
 				}
 				public void parameterListChanged() {
 					updatePreview(getText());
@@ -258,7 +258,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		setPageComplete(validatePage(true));
 	}
 	
-	private void parameterModified(ParameterInfo parameter) {
+	private void parameterModified() {
 		updatePreview(getText());
 		setPageComplete(validatePage(false));
 	}
