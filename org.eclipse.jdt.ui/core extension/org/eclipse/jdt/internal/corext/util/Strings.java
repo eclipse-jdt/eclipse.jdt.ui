@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import java.util.StringTokenizer;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
@@ -19,6 +21,8 @@ import org.eclipse.jface.text.IRegion;
  * Helper class to provide String manipulation functions not available in standard JDK.
  */
 public class Strings {
+	
+	private Strings(){}
 	
 	/**
 	 * Indent char is a space char but not a line delimiters.
@@ -370,6 +374,15 @@ public class Strings {
 			if (s.charAt(i) != c[i])
 				return false;
 		return true;
+	}
+	
+	public static String[] splitByToken(String fullString, String splitToken) {
+		StringTokenizer tokenizer= new StringTokenizer(fullString, splitToken);
+		String[] tokens= new String[tokenizer.countTokens()];
+		for (int i= 0; tokenizer.hasMoreTokens(); i++) {
+			tokens[i]= tokenizer.nextToken();
+		}
+		return tokens;
 	}
 }
 

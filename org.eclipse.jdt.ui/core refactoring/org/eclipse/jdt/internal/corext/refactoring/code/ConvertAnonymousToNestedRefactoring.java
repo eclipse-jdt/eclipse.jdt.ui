@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -67,6 +66,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
@@ -565,16 +565,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private Name getSuperTypeName() throws JavaModelException {
-        return getAST().newName(getIdentiiers(getNodeSourceCode(getClassInstanceCreation().getName())));
-    }
-    
-    private static String[] getIdentiiers(String nameCode) {
-    	StringTokenizer tokenizer= new StringTokenizer(nameCode, "."); //$NON-NLS-1$
-    	String[] tokens= new String[tokenizer.countTokens()];
-    	for (int i= 0; tokenizer.hasMoreTokens(); i++) {
-            tokens[i]= tokenizer.nextToken();
-        }
-        return tokens;
+        return getAST().newName(Strings.splitByToken(getNodeSourceCode(getClassInstanceCreation().getName()), ".")); //$NON-NLS-1$
     }
     
     private String getNodeSourceCode(ASTNode node) throws JavaModelException{
