@@ -47,13 +47,11 @@ class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
-			pm.subTask(RefactoringCoreMessages.getString("RenameStaticMethodRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
 			if (result.hasFatalError())
 				return result;
 			
-			pm.subTask(RefactoringCoreMessages.getString("RenameStaticMethodRefactoring.analyzing_hierachy")); //$NON-NLS-1$
 			IMethod hierarchyMethod= hierarchyDeclaresMethodName(pm, getMethod(), getNewName());
 			if (hierarchyMethod != null){
 				Context context= JavaSourceContext.create(hierarchyMethod);

@@ -54,13 +54,11 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
-			pm.subTask(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
 			if (result.hasFatalError())
 				return result;
 			
-			pm.subTask(RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 			IMethod hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), getMethod(), getNewName());
 			
 			if (hierarchyMethod != null){

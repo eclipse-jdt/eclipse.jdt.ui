@@ -206,12 +206,14 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			result.merge(Checks.checkIfCuBroken(fMethod));
 			if (result.hasFatalError())
 				return result;
-			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.checking_name")); //$NON-NLS-1$	
+			pm.setTaskName("Checking preconditions...");
 			result.merge(checkNewName(fNewName));
 			pm.worked(1);
 			
+			pm.setTaskName("Searching for references...");
 			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 4));	
-			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
+			pm.setTaskName("Checking preconditions...");
+			
 			if (fUpdateReferences)
 				result.merge(checkRelatedMethods(new SubProgressMonitor(pm, 1)));
 			else
@@ -279,10 +281,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	
 	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 2);	 //$NON-NLS-1$
-		pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.creating_pattern")); //$NON-NLS-1$
 		ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
-		pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.searching")); //$NON-NLS-1$
-		pm.done();
 		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), pattern);	
 	}
 

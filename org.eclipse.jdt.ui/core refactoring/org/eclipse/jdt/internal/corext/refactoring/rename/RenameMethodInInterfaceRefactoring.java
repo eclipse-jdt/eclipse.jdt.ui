@@ -71,16 +71,13 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 11); //$NON-NLS-1$
 		try{
-			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(super.checkInput(new SubProgressMonitor(pm, 6)));
 			if (result.hasFatalError())
 				return result;
-			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 			if (isSpecialCase())
 				result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.special_case")); //$NON-NLS-1$
 			pm.worked(1);
-			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 			IMethod relatedMethod= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 3), getMethod(), getNewName());
 			if (relatedMethod != null){
 				Context context= JavaSourceContext.create(relatedMethod);

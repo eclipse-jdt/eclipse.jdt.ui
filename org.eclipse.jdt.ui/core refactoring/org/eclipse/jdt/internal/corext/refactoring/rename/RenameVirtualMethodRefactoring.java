@@ -75,21 +75,16 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		try{
 			pm.beginTask("", 12); //$NON-NLS-1$
-			pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 
 			result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
 			if (result.hasFatalError())
 				return result;
 
-			pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
-
 			if (hierarchyDeclaresSimilarNativeMethod(new SubProgressMonitor(pm, 2)))
 				result.addError(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.requieres_renaming_native",  //$NON-NLS-1$
 																		 new String[]{getMethod().getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
 
-			pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
-	
 			IMethod hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), getMethod(), getNewName());
 			if (hierarchyMethod != null){
 				Context context= JavaSourceContext.create(hierarchyMethod);
