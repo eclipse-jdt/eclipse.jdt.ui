@@ -54,17 +54,17 @@ class LayoutActionGroup extends MultiActionGroup {
 	}
 
 	static int getSelectedState(PackageExplorerPart packageExplorer) {
-		if (packageExplorer.isHierarchicalLayout())
-			return 1;
-		else
+		if (packageExplorer.isFlatLayout())
 			return 0;
+		else
+			return 1;
 	}
 	
 	static IAction[] createActions(PackageExplorerPart packageExplorer) {
-		IAction flatLayoutAction= new LayoutAction(packageExplorer, PackageExplorerPart.FLAT_LAYOUT);
+		IAction flatLayoutAction= new LayoutAction(packageExplorer, true);
 		flatLayoutAction.setText(PackagesMessages.getString("LayoutActionGroup.flatLayoutAction.label")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(flatLayoutAction, "flatLayout.gif"); //$NON-NLS-1$
-		IAction hierarchicalLayout= new LayoutAction(packageExplorer, PackageExplorerPart.HIERARCHICAL_LAYOUT);
+		IAction hierarchicalLayout= new LayoutAction(packageExplorer, false);
 		hierarchicalLayout.setText(PackagesMessages.getString("LayoutActionGroup.hierarchicalLayoutAction.label"));	  //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(hierarchicalLayout, "hierarchicalLayout.gif"); //$NON-NLS-1$
 		
@@ -74,11 +74,11 @@ class LayoutActionGroup extends MultiActionGroup {
 
 class LayoutAction extends Action implements IAction {
 
-	private int fLayout;
+	private boolean fIsFlatLayout;
 	private PackageExplorerPart fPackageExplorer;
 
-	public LayoutAction(PackageExplorerPart packageExplorer, int state) {
-		fLayout= state;
+	public LayoutAction(PackageExplorerPart packageExplorer, boolean state) {
+		fIsFlatLayout= state;
 		fPackageExplorer= packageExplorer;
 	}
 
@@ -86,7 +86,7 @@ class LayoutAction extends Action implements IAction {
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
 	public void run() {
-		if (fPackageExplorer.getLayout() != fLayout)
-			fPackageExplorer.setUpViewer(fLayout);
+		if (fPackageExplorer.isFlatLayout() != fIsFlatLayout)
+			fPackageExplorer.toggleLayout();
 	}
 }

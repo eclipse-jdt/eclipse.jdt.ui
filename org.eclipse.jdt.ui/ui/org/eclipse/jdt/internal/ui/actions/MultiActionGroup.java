@@ -40,8 +40,6 @@ public class MultiActionGroup extends ActionGroup {
 	private IAction[] fActions; 
 	
 	private int fCurrentSelection;
-	private int fOldSelection;
-	
 	private MenuItem[] fItems;
 
 	
@@ -83,13 +81,16 @@ public class MultiActionGroup extends ActionGroup {
 					mi.addSelectionListener(new SelectionAdapter() {
 
 						public void widgetSelected(SelectionEvent e) {
-							fActions[j].run();
-							fOldSelection= fCurrentSelection;
-							fCurrentSelection= j;
-
-							if (fOldSelection != fCurrentSelection) {
-								fItems[fOldSelection].setSelection(false);
+							if (fCurrentSelection == j) {
+								fItems[fCurrentSelection].setSelection(true);
+								return;
 							}
+							fActions[j].run();
+
+							// Update checked state
+							fItems[fCurrentSelection].setSelection(false);
+							fCurrentSelection= j;
+							fItems[fCurrentSelection].setSelection(true);
 						}
 
 					});
