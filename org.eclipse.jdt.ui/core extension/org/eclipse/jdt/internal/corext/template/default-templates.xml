@@ -139,7 +139,12 @@ return ${name};
   <template description="convert collection to array" name="toarray" context="java"
   >(${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
 
-  <template context="java" description="file comment used by the class and interface wizards" enabled="true" name="filecomment"></template>
+  <template context="java" description="file comment used by the class and interface wizards" enabled="true" name="filecomment">/**
+ * Created on ${date}
+ *
+ * To change this generated comment edit the template variable "filecomment":
+ * Workbench&gt;Preferences&gt;Java&gt;Templates.
+ */</template>
  
   <template context="java" description="type comment used by the class and interface wizards" enabled="true" name="typecomment"></template>
 
