@@ -63,8 +63,6 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	private final static String PAGE_NAME= "NewTestSuiteCreationWizardPage"; //$NON-NLS-1$
 	private final static String CLASSES_IN_SUITE= PAGE_NAME + ".classesinsuite"; //$NON-NLS-1$
 	private final static String SUITE_NAME= PAGE_NAME + ".suitename"; //$NON-NLS-1$
-	private final static String SELECTED_CLASSES_LABEL_TEXT_ONE= " class selected."; //$NON-NLS-1$
-	private final static String SELECTED_CLASSES_LABEL_TEXT_MANY= " classes selected.";	 //$NON-NLS-1$
 
 	protected final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
 	protected final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
@@ -478,7 +476,8 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	
 	private void updateSelectedClassesLabel() {
 		int noOfClassesChecked= fClassesInSuiteTable.getCheckedElements().length;
-			fSelectedClassesLabel.setText(noOfClassesChecked+((noOfClassesChecked==1)?SELECTED_CLASSES_LABEL_TEXT_ONE:SELECTED_CLASSES_LABEL_TEXT_MANY));
+		String key= (noOfClassesChecked==1) ? "NewTestClassWizPage.treeCaption.classSelected" : "NewTestClassWizPage.treeCaption.classesSelected"; //$NON-NLS-1$ //$NON-NLS-2$
+		fSelectedClassesLabel.setText(WizardMessages.getFormattedString(key, new Integer(noOfClassesChecked)));
 	}
 
 	protected void createSuiteNameControl(Composite composite, int nColumns) {
