@@ -38,7 +38,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-class CallHierarchyUI {
+public class CallHierarchyUI {
     private static final int DEFAULT_MAX_CALL_DEPTH= 10;    
     private static final String PREF_MAX_CALL_DEPTH = "PREF_MAX_CALL_DEPTH"; //$NON-NLS-1$
 
