@@ -475,13 +475,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 	private void processOutstandingEvents() {
-		Display display= getDisplay();	
-		if (display != null && display == Display.getCurrent()) {
-			while(!display.isDisposed()) {
-				if (!display.readAndDispatch())
-					return;
-			}
-		}			
+		Display display= getDisplay();
+		if (display != null && !display.isDisposed())
+			display.update();
 	}	
 	
 	private void clearInput() {
