@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -13,6 +11,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -28,7 +28,6 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
 public class OpenTypeAction extends Action implements IWorkbenchWindowActionDelegate {
 	
@@ -49,23 +48,19 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
 		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
 		int result= dialog.open();
-		if (result != OpenTypeSelectionDialog.IN_HIERARCHY && result != IDialogConstants.OK_ID)
+		if (result != IDialogConstants.OK_ID)
 			return;
 		
 		Object[] types= dialog.getResult();
 		if (types != null && types.length > 0) {
 			IType type= (IType)types[0];
-			if (result == OpenTypeSelectionDialog.IN_HIERARCHY) {
-				OpenTypeHierarchyUtil.open(new IType[] { type }, JavaPlugin.getActiveWorkbenchWindow());
-			} else {
-				try {
-					IEditorPart part= EditorUtility.openInEditor(type, true);
-					EditorUtility.revealInEditor(part, type);
-				} catch (CoreException x) {
-					String title= JavaUIMessages.getString("OpenTypeAction.errorTitle"); //$NON-NLS-1$
-					String message= JavaUIMessages.getString("OpenTypeAction.errorMessage"); //$NON-NLS-1$
-					ExceptionHandler.handle(x, title, message);
-				}
+			try {
+				IEditorPart part= EditorUtility.openInEditor(type, true);
+				EditorUtility.revealInEditor(part, type);
+			} catch (CoreException x) {
+				String title= JavaUIMessages.getString("OpenTypeAction.errorTitle"); //$NON-NLS-1$
+				String message= JavaUIMessages.getString("OpenTypeAction.errorMessage"); //$NON-NLS-1$
+				ExceptionHandler.handle(x, title, message);
 			}
 		}
 	}

@@ -825,10 +825,16 @@ JavaStructureDiffViewerCreator
             label="%NavigateMenu.label"
             path="edit">
          	<separator name="openGroup"/>
+         	<separator name="openTypeGroup"/>
       	</menu>
 
+		<action id="openTypeInHierarchy"
+			menubarPath="navigate/openTypeGroup"
+			label="%OpenTypeInHierarchyAction.label"
+			tooltip="%OpenTypeInHierarchyAction.tooltip"
+			class="org.eclipse.jdt.internal.ui.actions.OpenTypeInHierarchyAction"/>
 		<action id="openType"
-			menubarPath="navigate/openGroup"
+			menubarPath="navigate/openTypeGroup"
 			toolbarPath="Normal/Java"			
 			label="%OpenTypeAction.label"
 			tooltip="%OpenTypeAction.tooltip"
@@ -904,6 +910,7 @@ JavaStructureDiffViewerCreator
             label="%NavigateMenu.label"
             path="edit">
          	<separator name="openGroup"/>
+         	<separator name="openTypeGroup"/>
          	<separator name="showGroup"/>
          	<separator name="problemGroup"/>
       	</menu>

@@ -38,9 +38,7 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 	 * or <code>IJavaSearchConstants.TYPE</code>
 	 * @param scope   the java search scope.
 	 */
-	public OpenTypeSelectionDialog(Shell parent, IRunnableContext context, int elementKinds,
-		IJavaSearchScope scope)
-	{
+	public OpenTypeSelectionDialog(Shell parent, IRunnableContext context, int elementKinds, IJavaSearchScope scope) {
 		super(parent, context, elementKinds, scope);
 	}
 	
@@ -50,23 +48,5 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.OPEN_TYPE_DIALOG);
-	}	
-
-	/*
-	 * @see Dialog#createButtonsForButtonBar(Composite)
-	 */
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-		createButton(parent, IN_HIERARCHY, JavaUIMessages.getString("OpenTypeSelectionDialog.hierarchy.label"), false);		
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-	}
-	
-	protected void buttonPressed(int buttonId) {
-		super.buttonPressed(buttonId);
-		if (buttonId == IN_HIERARCHY) {
-			setReturnCode(buttonId);
-			computeResult();
-			close();
-		}
 	}
 }
