@@ -93,7 +93,7 @@ public class ExceptionHandler {
 		if (status != null) {
 			ErrorDialog.openError(shell, title, message, status);
 		} else {
-			displayMessageDialog(e, shell, title, message);
+			displayMessageDialog(e, e.getMessage(), shell, title, message);
 		}
 	}
 
@@ -103,25 +103,25 @@ public class ExceptionHandler {
 			perform((CoreException)target, shell, title, message);
 		} else {
 			if (e.getMessage() != null && e.getMessage().length() > 0) {
-				displayMessageDialog(e, shell, title, message);
+				displayMessageDialog(e, e.getMessage(), shell, title, message);
 			} else {
-				displayMessageDialog(target, shell, title, message);
+				displayMessageDialog(e, target.getMessage(), shell, title, message);
 			}
 		}
 	}
 
 	//---- Helper methods -----------------------------------------------------------------------
 	
-	private void displayMessageDialog(Throwable t, Shell shell, String title, String message) {
+	private void displayMessageDialog(Throwable t, String exceptionMessage, Shell shell, String title, String message) {
 		StringWriter msg= new StringWriter();
 		if (message != null) {
 			msg.write(message);
 			msg.write("\n\n"); //$NON-NLS-1$
 		}
-		if (t.getMessage() == null || t.getMessage().length() == 0)
+		if (exceptionMessage == null || exceptionMessage.length() == 0)
 			msg.write(t.toString());
 		else
-			msg.write(t.getMessage());
+			msg.write(exceptionMessage);
 		MessageDialog.openError(shell, title, msg.toString());			
 	}	
 }
