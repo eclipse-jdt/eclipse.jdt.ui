@@ -12,7 +12,9 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
@@ -35,7 +37,9 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -389,5 +393,29 @@ public class EditorUtility {
 		if (modifierString.length() == 0)
 			return newModifierString;
 		return JavaEditorMessages.getFormattedString("EditorUtility.concatModifierStrings", new String[] {modifierString, newModifierString}); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Returns the Java project for a given editor input or <code>null</code> if no corresponding
+	 * Java project exists.
+	 * 
+	 * @param input the editor input
+	 * @return the corresponding Java project
+	 * 
+	 * @since 3.0
+	 */
+	public static IJavaProject getJavaProject(IEditorInput input) {
+		IJavaProject jProject= null;
+		if (input instanceof IFileEditorInput) {
+			IProject project= ((IFileEditorInput)input).getFile().getProject();
+			if (project != null) {
+				jProject= JavaCore.create(project);
+				if (!jProject.exists())
+					jProject= null;
+			}
+		} else if (input instanceof IClassFileEditorInput) {
+			jProject= ((IClassFileEditorInput)input).getClassFile().getJavaProject();
+		}
+		return jProject;
 	}
 }
