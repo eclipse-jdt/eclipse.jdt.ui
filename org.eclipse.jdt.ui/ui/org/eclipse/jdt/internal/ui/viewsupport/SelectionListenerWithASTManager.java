@@ -116,11 +116,11 @@ public class SelectionListenerWithASTManager {
 						}
 					}
 					if (buffer != null) {
-						return AST.parseCompilationUnit(buffer, cu.getElementName(), cu.getJavaProject());
+						return AST.parseCompilationUnit(buffer, cu.getElementName(), cu.getJavaProject(), null, monitor);
 					}
 				} else if (element instanceof IClassFile) {
 					try {
-						return AST.parseCompilationUnit((IClassFile) element, true);
+						return AST.parseCompilationUnit((IClassFile) element, true, null, monitor);
 					} catch (IllegalArgumentException e) {
 						// element has no source
 						return null;
