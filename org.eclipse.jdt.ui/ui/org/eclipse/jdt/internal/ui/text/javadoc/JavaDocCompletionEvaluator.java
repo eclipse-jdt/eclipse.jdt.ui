@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -285,18 +284,19 @@ public class JavaDocCompletionEvaluator {
 	 * Returns true if case is handeled
 	 */
 	private boolean addArgumentProposals(String tag, String argument) throws JavaModelException {	
+		IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
 		if ("@see".equals(tag) || "@link".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-1$
-			evalSeeTag(argument);
-			return true;
+			if (elem instanceof IMember) {
+				evalSeeTag((IMember) elem, argument);
+				return true;
+			}
 		} else if ("@param".equals(tag)) { //$NON-NLS-1$
-			IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
 			if (elem instanceof IMethod) {
 				String[] names= ((IMethod)elem).getParameterNames();
 				addProposals(argument, names, JavaPluginImages.IMG_MISC_DEFAULT);
 			}
 			return true;
 		} else if ("@throws".equals(tag) || "@exception".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-1$
-			IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
 			if (elem instanceof IMethod) {
 				String[] exceptions= ((IMethod)elem).getExceptionTypes();
 				for (int i= 0; i < exceptions.length; i++) {
@@ -308,7 +308,6 @@ public class JavaDocCompletionEvaluator {
 			}
 			return true;
 		} else if ("@serialData".equals(tag)) { //$NON-NLS-1$
-			IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
 			if (elem instanceof IField) {
 				String name= ((IField)elem).getElementName();
 				fResult.add(createCompletion(name, argument, name, fLabelProvider.getImage(elem), null));
@@ -318,22 +317,19 @@ public class JavaDocCompletionEvaluator {
 		return false;
 	}
 	
-	private void evalSeeTag(String arg) throws JavaModelException {
+	private void evalSeeTag(IMember elem, String arg) throws JavaModelException {
 		int wordStart= fCurrentPos - arg.length();
 		int pidx= arg.indexOf('#');
 		if (pidx == -1) {
-			evalTypeNameCompletions(wordStart);
+			evalTypeNameCompletions(elem, wordStart);
 		} else {
 			IType parent= null;
 			if (pidx > 0) {
 				// method or field 
-				parent= getTypeNameResolve(wordStart, wordStart + pidx);
+				parent= getTypeNameResolve(elem, wordStart, wordStart + pidx);
 			} else {
 				// '@see #foo'
-				IJavaElement elem= fCompilationUnit.getElementAt(wordStart);
-				if (elem != null) {
-					parent= (IType) elem.getAncestor(IJavaElement.TYPE);
-				}
+				parent= (IType) elem.getAncestor(IJavaElement.TYPE);
 			}
 				
 			if (parent != null) {
@@ -349,8 +345,8 @@ public class JavaDocCompletionEvaluator {
 		}
 	}
 	
-	private void evalTypeNameCompletions(int wordStart) throws JavaModelException {
-		ICompilationUnit preparedCU= createPreparedCU(wordStart, fCurrentPos);
+	private void evalTypeNameCompletions(IMember currElem, int wordStart) throws JavaModelException {
+		ICompilationUnit preparedCU= createPreparedCU(currElem, wordStart, fCurrentPos);
 		if (preparedCU != null) {
 			CompletionRequestorAdapter requestor= new CompletionRequestorAdapter() {
 				public void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int start, int end, int severity) {
@@ -367,14 +363,19 @@ public class JavaDocCompletionEvaluator {
 			};
 			try {
 				preparedCU.codeComplete(fCurrentPos, requestor);
+				if (currElem.getDeclaringType() == null && fCurrentPos > wordStart) {
+					IType type= (IType) currElem;
+					char[] name= type.getElementName().toCharArray();
+					fResult.add(createSeeTypeCompletion(type.isClass(), wordStart, fCurrentPos, name, name, JavaModelUtil.getTypeContainerName(type).toCharArray()));
+				}
 			} finally {
 				preparedCU.destroy();
 			}
 		}
 	}
 		
-	private IType getTypeNameResolve(int wordStart, int wordEnd) throws JavaModelException {
-		ICompilationUnit preparedCU= createPreparedCU(wordStart, wordEnd);
+	private IType getTypeNameResolve(IMember elem, int wordStart, int wordEnd) throws JavaModelException {
+		ICompilationUnit preparedCU= createPreparedCU(elem, wordStart, wordEnd);
 		if (preparedCU != null) {
 			try {
 				IJavaElement[] elements= preparedCU.codeSelect(wordStart, wordEnd - wordStart);
@@ -389,14 +390,10 @@ public class JavaDocCompletionEvaluator {
 		return null;
 	}
 	
-	private ICompilationUnit createPreparedCU(int wordStart, int wordEnd) throws JavaModelException {
-		IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
-		if (!(elem instanceof ISourceReference)) {
-			return null;
-		}
-		int startpos= ((ISourceReference)elem).getSourceRange().getOffset();
+	private ICompilationUnit createPreparedCU(IMember elem, int wordStart, int wordEnd) throws JavaModelException {
+		int startpos= elem.getSourceRange().getOffset();
 		char[] content= (char[]) fCompilationUnit.getBuffer().getCharacters().clone();
-		if (elem instanceof IType && (((IType)elem).getDeclaringType() == null) && (wordStart + 6 < content.length)) {
+		if ((elem.getDeclaringType() == null) && (wordStart + 6 < content.length)) {
 			content[startpos++]= 'i'; content[startpos++]= 'm'; content[startpos++]= 'p';
 			content[startpos++]= 'o'; content[startpos++]= 'r'; content[startpos++]= 't';
 		}		
