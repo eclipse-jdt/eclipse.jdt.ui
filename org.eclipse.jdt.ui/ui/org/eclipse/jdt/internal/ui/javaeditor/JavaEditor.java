@@ -3623,7 +3623,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (annotationModel == null || fOccurrenceAnnotations == null)
 			return;
 
-		synchronized (annotationModel) {
+		synchronized (getLockObject(annotationModel)) {
 			if (annotationModel instanceof IAnnotationModelExtension) {
 				((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, null);
 			} else {
