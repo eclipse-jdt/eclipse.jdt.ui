@@ -535,6 +535,9 @@ public class JavaIndenter {
 			case Symbols.TokenELSE:
 				fIndent= prefSimpleIndent();
 				return fPosition;
+				
+			case Symbols.TokenTRY:
+				return skipToStatementStart(danglingElse, false);
 			case Symbols.TokenRPAREN:
 				int line= fLine;
 				if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
@@ -546,6 +549,9 @@ public class JavaIndenter {
 					}
 					fPosition= scope;
 					if (looksLikeMethodDecl()) {
+						return skipToStatementStart(danglingElse, false);
+					}
+					if (fToken == Symbols.TokenCATCH) {
 						return skipToStatementStart(danglingElse, false);
 					}
 				}
@@ -930,8 +936,13 @@ public class JavaIndenter {
 				
 				// normal: skip to the statement start before the scope introducer
 				// opening braces are often on differently ending indents than e.g. a method definition
-				fPosition= pos; // restore
-				return skipToStatementStart(true, true); // set to true to match the first if
+				if (looksLikeArrayInitializerIntro() && !prefIndentBracesForArrays()
+						|| !prefIndentBracesForBlocks()) {
+					fPosition= pos; // restore
+					return skipToStatementStart(true, true); // set to true to match the first if
+				} else {
+					return pos;
+				}
 				
 			case Symbols.TokenLBRACKET:
 				pos= fPosition; // store
@@ -1278,7 +1289,9 @@ public class JavaIndenter {
 	}
 
 	private int prefSimpleIndent() {
-		return prefBlockIndent();
+		if (prefIndentBracesForBlocks() && prefBlockIndent() == 0)
+			return 1;
+		else return prefBlockIndent();
 	}
 
 	private int prefBracketIndent() {
