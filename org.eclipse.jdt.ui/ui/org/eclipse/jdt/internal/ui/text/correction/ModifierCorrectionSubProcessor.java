@@ -6,7 +6,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -140,9 +139,7 @@ public class ModifierCorrectionSubProcessor {
 		ASTNode parentType= ASTResolving.findParentType(decl);
 		boolean parentIsAbstract= (parentType instanceof TypeDeclaration) && Modifier.isAbstract(((TypeDeclaration) parentType).getModifiers());
 		
-		int endPos= decl.getStartPosition() + decl.getLength() - 1;
-		IBuffer buffer= cu.getBuffer();
-		boolean hasNoBody= buffer.getLength() > endPos && buffer.getChar(endPos) == ';';
+		boolean hasNoBody= (decl.getBody() == null);
 		
 		if (context.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstract) {
 			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
@@ -172,6 +169,18 @@ public class ModifierCorrectionSubProcessor {
 			proposal.ensureNoModifications();
 			proposals.add(proposal);
 		}
+		
+		if (!hasNoBody && context.getProblemId() == IProblem.BodyForAbstractMethod) {
+			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
+			rewrite.markAsRemoved(decl.getBody());
+			
+			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removebody.description");
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal2= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
+			proposal2.ensureNoModifications();
+			proposals.add(proposal2);
+		}
+		
 				
 		if (context.getProblemId() == IProblem.AbstractMethodInAbstractClass && (parentType instanceof TypeDeclaration)) {
 			ASTRewriteCorrectionProposal proposal= getMakeTypeStaticProposal(cu, (TypeDeclaration) parentType);
@@ -179,6 +188,66 @@ public class ModifierCorrectionSubProcessor {
 		}		
 		
 	}
+	
+	public static void addNativeMethodProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		CompilationUnit astRoot= context.getASTRoot();
+
+		ASTNode selectedNode= context.getCoveringNode();
+		if (selectedNode == null) {
+			return;
+		}
+		MethodDeclaration decl;
+		if (selectedNode instanceof SimpleName) {
+			decl= (MethodDeclaration) selectedNode.getParent();
+		} else if (selectedNode instanceof MethodDeclaration) {
+			decl= (MethodDeclaration) selectedNode;
+		} else {
+			return;
+		}
+	
+		{
+			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
+			
+			AST ast= astRoot.getAST();
+			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+			modifiedNode.setConstructor(decl.isConstructor());
+			modifiedNode.setExtraDimensions(decl.getExtraDimensions());
+			modifiedNode.setModifiers(decl.getModifiers() & ~Modifier.NATIVE);
+			rewrite.markAsModified(decl, modifiedNode);
+
+			Block newBody= ast.newBlock();
+			rewrite.markAsInserted(newBody);
+			decl.setBody(newBody);
+			Expression expr= ASTResolving.getInitExpression(decl.getReturnType(), decl.getExtraDimensions());
+			if (expr != null) {
+				ReturnStatement returnStatement= ast.newReturnStatement();
+				returnStatement.setExpression(expr);
+				newBody.statements().add(returnStatement);
+			}
+	
+			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removenative.description");
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+			proposal.ensureNoModifications();
+			proposals.add(proposal);
+		}
+		
+		if (decl.getBody() != null) {
+			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
+			rewrite.markAsRemoved(decl.getBody());
+			
+			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removebody.description");
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal2= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
+			proposal2.ensureNoModifications();
+			proposals.add(proposal2);
+		}
+		
+	}
+	
+	
 	
 	public static ASTRewriteCorrectionProposal getMakeTypeStaticProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration) throws CoreException {
 		ASTRewrite rewrite= new ASTRewrite(typeDeclaration.getParent());

@@ -42,7 +42,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ModifierCorrectionsQuickFixTest("testInvisibleTypeRequestedFromSuperClass"));
+			suite.addTest(new ModifierCorrectionsQuickFixTest("testNativeMethodWithBody"));
 			return suite;
 		}
 	}
@@ -731,11 +731,11 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -743,19 +743,20 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    public void foo() {\n");
 		buf.append("    }\n");				
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
-		/*
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public abstract class E {\n");
-		buf.append("    public abstract void foo();\n");		
+		buf.append("    public abstract void foo();\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());		
-		*/
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
 	}
 	
 	public void testAbstractMethodInNonAbstractClass() throws Exception {	
@@ -780,7 +781,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -789,18 +790,67 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        return 0;\n");	
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
 		
 		proposal= (CUCorrectionProposal) proposals.get(1);
-		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");		
 		buf.append("public abstract class E {\n");
 		buf.append("    public abstract int foo();\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected2= buf.toString();
 		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
+	
+	public void testNativeMethodWithBody() throws Exception {	
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public native void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		/* no body
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");		
+		buf.append("public abstract class E {\n");
+		buf.append("    public abstract int foo();\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		*/
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });		
+	}	
 	
 }

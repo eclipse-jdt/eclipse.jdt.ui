@@ -59,6 +59,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.BodyForAbstractMethod:
 			case IProblem.AbstractMethodInAbstractClass:
 			case IProblem.AbstractMethodMustBeImplemented:	
+			case IProblem.BodyForNativeMethod:
 				return true;
 			default:
 				return false;
@@ -164,7 +165,10 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 				break;
 			case IProblem.AbstractMethodMustBeImplemented:
 				LocalCorrectionsSubProcessor.addUnimplementedMethodsProposals(context, proposals);
-				break;					
+				break;
+			case IProblem.BodyForNativeMethod:
+				ModifierCorrectionSubProcessor.addNativeMethodProposals(context, proposals);
+				break;
 			default:
 		}
 	}
