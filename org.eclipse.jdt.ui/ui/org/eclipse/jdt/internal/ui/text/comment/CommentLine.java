@@ -20,6 +20,9 @@ import java.util.LinkedList;
  */
 public abstract class CommentLine implements IBorderAttributes {
 
+	/** Prefix of non-formattable comments */
+	static final String NON_FORMAT_START_PREFIX= "/*-";
+
 	/** The javadoc attributes of this line */
 	private int fAttributes= 0;
 

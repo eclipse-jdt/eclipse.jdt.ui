@@ -260,6 +260,10 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 */
 	public void format(String indentation) {
 
+		final String probe= getText(0, CommentLine.NON_FORMAT_START_PREFIX.length());
+		if (probe.startsWith(CommentLine.NON_FORMAT_START_PREFIX))
+			return;
+
 		final Map preferences= fStrategy.getPreferences();
 
 		int margin= 80;
