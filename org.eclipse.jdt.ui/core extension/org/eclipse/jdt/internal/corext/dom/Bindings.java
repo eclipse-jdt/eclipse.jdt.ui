@@ -46,8 +46,6 @@ public class Bindings {
 	public static String getFullyQualifiedName(ITypeBinding type) {
 		if (type.isPrimitive())
 			return type.getName();
-		if (type.isAnonymous())
-			return getFullyQualifiedImportName(type.getSuperclass());
 		StringBuffer buffer= new StringBuffer();
 		if (!type.getPackage().isUnnamed()) {
 			buffer.append(type.getPackage().getName());
@@ -60,7 +58,9 @@ public class Bindings {
 	public static String getFullyQualifiedImportName(ITypeBinding type) {
 		if (type.isArray())
 			return getFullyQualifiedName(type.getElementType());
-		else	
+		else if (type.isAnonymous())
+			return getFullyQualifiedImportName(type.getSuperclass());
+		else
 			return getFullyQualifiedName(type);
 	}
 	
