@@ -105,9 +105,11 @@ public class ASTNodeSearchUtil {
 	private static ASTNode getAstNode(CompilationUnit cuNode, int start, int length){
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(start, length), true);
 		cuNode.accept(analyzer);
-		//XXX workaround for jdt core bug 23527
+		//XXX workaround for jdt core feature 23527
 		ASTNode node= analyzer.getFirstSelectedNode();
 		if (node == null && analyzer.getLastCoveringNode() instanceof SuperConstructorInvocation)
+			node= analyzer.getLastCoveringNode().getParent();
+		else if (node == null && analyzer.getLastCoveringNode() instanceof ConstructorInvocation)
 			node= analyzer.getLastCoveringNode().getParent();
 			
 		if (node != null && node.getParent() instanceof MethodDeclaration){
