@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceRuleFactory;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -71,12 +70,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.internal.ui.text.spelling.SpellReconcileStrategy.SpellProblem;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
+import org.eclipse.jdt.internal.ui.text.spelling.SpellReconcileStrategy.SpellProblem;
 
 
 public class CompilationUnitDocumentProvider extends TextFileDocumentProvider implements ICompilationUnitDocumentProvider {
@@ -93,7 +92,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		 */
 		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationPresentation {
 
-			private static final String SPELLING_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.spelling";
+			private static final String SPELLING_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.spelling"; //$NON-NLS-1$
 			
 			//XXX: To be fully correct these constants should be non-static
 			/** 
@@ -390,8 +389,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			private ReverseMap fReverseMap= new ReverseMap();
 			private List fPreviouslyOverlaid= null; 
 			private List fCurrentlyOverlaid= new ArrayList();
-			private boolean fIncludesProblemAnnotationChanges= false;
 
+			
 			public CompilationUnitAnnotationModel(IResource resource) {
 				super(resource);
 			}
@@ -598,17 +597,6 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				}
 				fCollectedProblems= null;
 				fGeneratedAnnotations= null;
-			}
-			
-			/*
-			 * @see org.eclipse.jface.text.source.AnnotationModel#fireModelChanged(org.eclipse.jface.text.source.AnnotationModelEvent)
-			 */
-			protected void fireModelChanged(AnnotationModelEvent event) {
-				if (event instanceof CompilationUnitAnnotationModelEvent) {
-					CompilationUnitAnnotationModelEvent e= (CompilationUnitAnnotationModelEvent) event;
-					fIncludesProblemAnnotationChanges= e.includesProblemMarkerAnnotationChanges();
-				}
-				super.fireModelChanged(event);
 			}
 			
 			/*
