@@ -28,16 +28,18 @@ import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintOperator2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.OrOrSubTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SubTypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -144,12 +146,11 @@ public final class SuperTypeConstraintsModel {
 	/**
 	 * Is the type represented by the specified binding a constrained type?
 	 * 
-	 * @param binding the binding to check
+	 * @param binding the binding to check, or <code>null</code>
 	 * @return <code>true</code> if it is constrained, <code>false</code> otherwise
 	 */
 	public static boolean isConstrainedType(final ITypeBinding binding) {
-		Assert.isNotNull(binding);
-		return !binding.isPrimitive();
+		return binding != null && !binding.isSynthetic() && !binding.isPrimitive();
 	}
 
 	/**
@@ -158,7 +159,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param variable the constraint variable
 	 * @param constraint the type constraint
 	 */
-	public static void setVariableUsage(final ConstraintVariable2 variable, final TypeConstraint2 constraint) {
+	public static void setVariableUsage(final ConstraintVariable2 variable, ITypeConstraint2 constraint) {
 		Assert.isNotNull(variable);
 		Assert.isNotNull(constraint);
 		final Object data= variable.getData(DATA_USAGE);
@@ -180,8 +181,27 @@ public final class SuperTypeConstraintsModel {
 	/** The set of constraint variables (element type: <code>ConstraintVariable2</code>) */
 	private final HashedSet fConstraintVariables= new HashedSet();
 
+	/** The subtype to replace */
+	private final TType fSubType;
+
+	/** The supertype as replacement */
+	private final TType fSuperType;
+
 	/** The set of type constraints (element type: <code>ITypeConstraint2</code>) */
 	private final Set fTypeConstraints= new HashSet();
+
+	/**
+	 * Creates a new super type constraints model.
+	 * 
+	 * @param subType the subtype to replace
+	 * @param superType the supertype replacement
+	 */
+	public SuperTypeConstraintsModel(final ITypeBinding subType, final ITypeBinding superType) {
+		Assert.isNotNull(subType);
+		Assert.isNotNull(superType);
+		fSubType= fEnvironment.create(subType);
+		fSuperType= fEnvironment.create(superType);
+	}
 
 	/**
 	 * Creates a cast variable.
@@ -210,28 +230,28 @@ public final class SuperTypeConstraintsModel {
 	 */
 	public final void createEqualsConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right) {
 		if (left != null && right != null) {
-			final EquivalenceRepresentative first= left.getRepresentative();
-			final EquivalenceRepresentative second= right.getRepresentative();
+			final TypeEquivalenceSet first= left.getTypeEquivalenceSet();
+			final TypeEquivalenceSet second= right.getTypeEquivalenceSet();
 			if (first == null) {
 				if (second == null) {
-					final EquivalenceRepresentative representative= new EquivalenceRepresentative(left, right);
-					left.setRepresentative(representative);
-					right.setRepresentative(representative);
+					final TypeEquivalenceSet set= new TypeEquivalenceSet(left, right);
+					left.setTypeEquivalenceSet(set);
+					right.setTypeEquivalenceSet(set);
 				} else {
 					second.add(left);
-					left.setRepresentative(second);
+					left.setTypeEquivalenceSet(second);
 				}
 			} else {
 				if (second == null) {
 					first.add(right);
-					right.setRepresentative(first);
+					right.setTypeEquivalenceSet(first);
 				} else if (first == second)
 					return;
 				else {
-					final ConstraintVariable2[] elements= second.getElements();
-					first.addAll(elements);
-					for (int index= 0; index < elements.length; index++)
-						elements[index].setRepresentative(first);
+					final ConstraintVariable2[] variables= second.getContributingVariables();
+					first.addAll(variables);
+					for (int index= 0; index < variables.length; index++)
+						variables[index].setTypeEquivalenceSet(first);
 				}
 			}
 		}
@@ -266,6 +286,23 @@ public final class SuperTypeConstraintsModel {
 		if (isConstrainedType(binding))
 			return (ConstraintVariable2) fConstraintVariables.addExisting(new ParameterTypeVariable2(fEnvironment.create(binding), index, method));
 		return null;
+	}
+
+	/**
+	 * Creates an or-or subtype constraint variable.
+	 * 
+	 * @param first the first type constraint variable
+	 * @param second the second type constraint variable
+	 */
+	public final void createOrOrSubtypeConstraint(final ConstraintVariable2 first, final ConstraintVariable2 second) {
+		Assert.isNotNull(first);
+		Assert.isNotNull(second);
+		final ITypeConstraint2 constraint= new OrOrSubTypeConstraint2(first, second);
+		if (!fTypeConstraints.contains(constraint)) {
+			fTypeConstraints.add(constraint);
+			setVariableUsage(first, constraint);
+			setVariableUsage(second, constraint);
+		}
 	}
 
 	/**
@@ -309,7 +346,7 @@ public final class SuperTypeConstraintsModel {
 	public final void createSubtypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor) {
 		Assert.isNotNull(descendant);
 		Assert.isNotNull(ancestor);
-		final TypeConstraint2 constraint= new TypeConstraint2(descendant, ancestor, ConstraintOperator2.createSubTypeOperator());
+		final ITypeConstraint2 constraint= new SubTypeConstraint2(descendant, ancestor);
 		if (!fTypeConstraints.contains(constraint)) {
 			fTypeConstraints.add(constraint);
 			setVariableUsage(descendant, constraint);
@@ -361,5 +398,23 @@ public final class SuperTypeConstraintsModel {
 	 */
 	public final Collection getConstraintVariables() {
 		return Collections.unmodifiableCollection(fConstraintVariables);
+	}
+
+	/**
+	 * Returns the subtype to be replaced.
+	 * 
+	 * @return the subtype to be replaced
+	 */
+	public final TType getSubType() {
+		return fSubType;
+	}
+
+	/**
+	 * Returns the supertype as replacement.
+	 * 
+	 * @return the supertype as replacement
+	 */
+	public final TType getSuperType() {
+		return fSuperType;
 	}
 }
