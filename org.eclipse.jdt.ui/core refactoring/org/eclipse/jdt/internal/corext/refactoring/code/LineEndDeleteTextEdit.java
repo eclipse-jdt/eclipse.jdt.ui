@@ -47,7 +47,7 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 		try{	
 			Scanner scanner= new Scanner(true, true); //comments, whitespaces
 			scanner.recordLineSeparator = true;
-			scanner.setSourceBuffer(fFullSource.toCharArray());
+			scanner.setSource(fFullSource.toCharArray());
 			int start= getTextRange().getOffset() + length;
 			scanner.currentPosition= start;
 			int token = scanner.getNextToken();

@@ -12,10 +12,10 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -106,24 +106,24 @@ public class MemberEdit extends SimpleTextEdit {
 			case IJavaElement.TYPE:
 				// find first opening '{' at beginning of type
 				scanner= new Scanner(true, true);	// whitespace, comments
-				scanner.setSourceBuffer(buffer.getContent(start, range.getLength()).toCharArray());
+				scanner.setSource(buffer.getContent(start, range.getLength()).toCharArray());
 				int emptyLines= 0;
 				boolean sawClosingBracket= false;
 				try {
 					int token;
-					while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
-						if (token == TerminalSymbols.TokenNameLBRACE)
+					while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+						if (token == ITerminalSymbols.TokenNameLBRACE)
 							break;
 					}
 					offset= start+scanner.currentPosition;
 					// count the number of empty lines
-					while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+					while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 						switch (token) {
-						case Scanner.TokenNameWHITESPACE:
+						case ITerminalSymbols.TokenNameWHITESPACE:
 							s= extract(buffer, start, scanner);
 							emptyLines+= countEmptyLines(s);
 							continue;
-						case TerminalSymbols.TokenNameRBRACE:
+						case ITerminalSymbols.TokenNameRBRACE:
 							sawClosingBracket= true;
 							break;
 						default:
@@ -156,12 +156,12 @@ public class MemberEdit extends SimpleTextEdit {
 			case IJavaElement.TYPE:
 				// find last closing '}' at end of type
 				scanner= new Scanner(true, true);	// whitespace, comments
-				scanner.setSourceBuffer(buffer.getContent(start, range.getLength()).toCharArray());
+				scanner.setSource(buffer.getContent(start, range.getLength()).toCharArray());
 				try {
 					int pos= -1;
 					int token;
-					while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
-						if (token == TerminalSymbols.TokenNameRBRACE)
+					while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+						if (token == ITerminalSymbols.TokenNameRBRACE)
 							pos= scanner.startPosition;	// remember the starting position of all '}'
 					}
 					if (pos >= 0)

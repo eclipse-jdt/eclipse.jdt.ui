@@ -58,7 +58,7 @@ public class SuperReferenceFinder {
 		
 		private ISourceRange getSuperRange(String scanSource){
 			IScanner scanner= ToolFactory.createScanner(false, false, false);
-			scanner.setSourceBuffer(scanSource.toCharArray());
+			scanner.setSource(scanSource.toCharArray());
 			try {
 				int token = scanner.getNextToken();
 				while (token != ITerminalSymbols.TokenNameEOF) {

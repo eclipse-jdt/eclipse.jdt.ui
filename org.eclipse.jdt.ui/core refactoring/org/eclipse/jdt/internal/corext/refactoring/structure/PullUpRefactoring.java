@@ -773,7 +773,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private static String substitutePrivateWithProtected(String methodSource) throws JavaModelException {
 		IScanner scanner= ToolFactory.createScanner(false, false, false);
-		scanner.setSourceBuffer(methodSource.toCharArray());
+		scanner.setSource(methodSource.toCharArray());
 		int offset= 0;
 		int token= 0;
 		try {

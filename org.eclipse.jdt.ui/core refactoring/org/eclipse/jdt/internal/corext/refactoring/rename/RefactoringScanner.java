@@ -61,7 +61,7 @@ public class RefactoringScanner {
 		
 		Scanner scanner = new Scanner(true, true);
 		scanner.recordLineSeparator = true;
-		scanner.setSourceBuffer(content);
+		scanner.setSource(content);
 		int token = scanner.getNextToken();
 
 		while (token != ITerminalSymbols.TokenNameEOF) {
@@ -71,17 +71,17 @@ public class RefactoringScanner {
 						break;
 					parseCurrentToken(fStringResults, scanner);	
 					break;
-				case Scanner.TokenNameCOMMENT_JAVADOC :
+				case ITerminalSymbols.TokenNameCOMMENT_JAVADOC :
 					if (!fAnalyzeJavaDoc)
 						break;
 					parseCurrentToken(fJavaDocResults, scanner);	
 					break;
-				case Scanner.TokenNameCOMMENT_LINE :
+				case ITerminalSymbols.TokenNameCOMMENT_LINE :
 					if (!fAnalyzeComments)
 						break;
 					parseCurrentToken(fCommentResults, scanner);	
 					break;
-				case Scanner.TokenNameCOMMENT_BLOCK :
+				case ITerminalSymbols.TokenNameCOMMENT_BLOCK :
 					if (!fAnalyzeComments)
 						break;
 					parseCurrentToken(fCommentResults, scanner);	

@@ -19,7 +19,7 @@ public class ExtendedBuffer {
 		fScanner= new Scanner(false, false);	// comments and white spaces.
 		char[] source= buffer.getCharacters();
 		fEndPosition= source.length - 1;
-		fScanner.setSourceBuffer(source);
+		fScanner.setSource(source);
 	}
 	
 	public char[] getCharacters() {

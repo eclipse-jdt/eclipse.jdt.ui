@@ -38,7 +38,7 @@ public class NLSScanner {
 		List lines= new ArrayList();
 		Scanner scanner= new Scanner(true, true);
 		scanner.recordLineSeparator= true;
-		scanner.setSourceBuffer(content);
+		scanner.setSource(content);
 		int token= scanner.getNextToken();
 		int currentLineNr= -1;
 		int previousLineNr= -1;
@@ -56,7 +56,7 @@ public class NLSScanner {
 					String value= new String(scanner.getCurrentTokenSource());
 					currentLine.add(new NLSElement(value, scanner.startPosition, scanner.currentPosition-scanner.startPosition));
 					break;
-				case Scanner.TokenNameCOMMENT_LINE:
+				case ITerminalSymbols.TokenNameCOMMENT_LINE:
 					// When we get the line comment this pointer is already moved to the next line
 					if (currentLineNr != scanner.linePtr - 1)
 						break;

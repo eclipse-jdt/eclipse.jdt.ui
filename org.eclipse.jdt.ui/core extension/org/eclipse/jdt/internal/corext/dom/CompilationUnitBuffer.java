@@ -6,10 +6,10 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 public class CompilationUnitBuffer {
 	private Scanner fScanner;
@@ -19,7 +19,7 @@ public class CompilationUnitBuffer {
 		fScanner= new Scanner(true, false);	// comments and white spaces.
 		char[] source= unit.getBuffer().getCharacters();
 		fEndPosition= source.length - 1;
-		fScanner.setSourceBuffer(source);
+		fScanner.setSource(source);
 	}
 	
 	public char[] getCharacters() {
@@ -49,7 +49,7 @@ public class CompilationUnitBuffer {
 		try {
 			fScanner.resetTo(start, start + length - 1);
 			int next;
-			while((next= fScanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+			while((next= fScanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 				if (next == token) {
 					return fScanner.startPosition;
 				}
@@ -80,7 +80,7 @@ public class CompilationUnitBuffer {
 		try {
 			fScanner.resetTo(start, fEndPosition);
 			int token;
-			while ((token= fScanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+			while ((token= fScanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 				if (!considerComments && isComment(token))
 					continue;
 				return fScanner.startPosition;

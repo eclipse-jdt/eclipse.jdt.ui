@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -16,7 +17,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -55,7 +55,7 @@ public final class DeleteNodeEdit extends SimpleTextEdit {
 		region= buffer.getLineInformationOfOffset(range.getInclusiveEnd());
 		int endOffset= region.getOffset() + region.getLength() - 1;		// inclusive.
 		Scanner scanner= new Scanner(true, false);							// comments, but no white spaces
-		scanner.setSourceBuffer(buffer.getContent(startOffset, endOffset - startOffset + 1).toCharArray());
+		scanner.setSource(buffer.getContent(startOffset, endOffset - startOffset + 1).toCharArray());
 		try {
 			int start= fDeleteLine ? getStart(buffer, scanner, startOffset) : range.getOffset();
 			int end= fDeleteLine ? getLineEnd(buffer, scanner, startOffset) : getEndIncludingDelimiter(buffer, scanner, startOffset);
@@ -76,11 +76,11 @@ public final class DeleteNodeEdit extends SimpleTextEdit {
 		int relativeNodeStart= getTextRange().getOffset() - startOffset;
 		scanner.resetTo(startOffset, relativeNodeStart - 1);
 		int token;
-		loop: while((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+		loop: while((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 			switch (token) {
-				case Scanner.TokenNameCOMMENT_LINE:
-				case Scanner.TokenNameCOMMENT_BLOCK:
-				case Scanner.TokenNameCOMMENT_JAVADOC:
+				case ITerminalSymbols.TokenNameCOMMENT_LINE:
+				case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
+				case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
 					continue loop;
 				default:
 					return getTextRange().getOffset();
@@ -93,9 +93,9 @@ public final class DeleteNodeEdit extends SimpleTextEdit {
 		int result= getTextRange().getExclusiveEnd();
 		scanner.resetTo(result - startOffset, scanner.source.length - 1);
 		int token;
-		while((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
-			if (token == Scanner.TokenNameCOMMENT_LINE || token == Scanner.TokenNameCOMMENT_BLOCK 
-					|| token == Scanner.TokenNameCOMMENT_JAVADOC || token == fDelimiterToken) {
+		while((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+			if (token == ITerminalSymbols.TokenNameCOMMENT_LINE || token == ITerminalSymbols.TokenNameCOMMENT_BLOCK 
+					|| token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || token == fDelimiterToken) {
 				continue;
 			} 
 			return result;
@@ -111,9 +111,9 @@ public final class DeleteNodeEdit extends SimpleTextEdit {
 		scanner.resetTo(result - startOffset, scanner.source.length);
 		int token;
 		boolean delimiterFound= false;
-		loop: while((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
-			if (token == Scanner.TokenNameCOMMENT_LINE || token == Scanner.TokenNameCOMMENT_BLOCK 
-					|| token == Scanner.TokenNameCOMMENT_JAVADOC) {
+		loop: while((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+			if (token == ITerminalSymbols.TokenNameCOMMENT_LINE || token == ITerminalSymbols.TokenNameCOMMENT_BLOCK 
+					|| token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC) {
 				if (delimiterFound) {
 					return startOffset + scanner.startPosition;
 				}

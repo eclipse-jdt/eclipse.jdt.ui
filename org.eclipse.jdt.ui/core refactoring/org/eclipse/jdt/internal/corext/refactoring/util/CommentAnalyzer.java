@@ -29,7 +29,7 @@ public class CommentAnalyzer {
 	
 	private void check(RefactoringStatus result, Selection selection, CompilationUnitBuffer source, int start, int end) {
 		Scanner scanner= new Scanner(true, false);
-		scanner.setSourceBuffer(source.getCharacters());
+		scanner.setSource(source.getCharacters());
 		scanner.resetTo(start, end);
 		
 		int token= 0;
@@ -37,9 +37,9 @@ public class CommentAnalyzer {
 			loop: while (token != ITerminalSymbols.TokenNameEOF) {
 				token= scanner.getNextToken();
 				switch(token) {
-					case Scanner.TokenNameCOMMENT_LINE:
-					case Scanner.TokenNameCOMMENT_BLOCK:
-					case Scanner.TokenNameCOMMENT_JAVADOC:
+					case ITerminalSymbols.TokenNameCOMMENT_LINE:
+					case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
+					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
 						if (checkStart(scanner, selection.getOffset())) {
 							result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.starts_inside_comment")); //$NON-NLS-1$
 							break loop;

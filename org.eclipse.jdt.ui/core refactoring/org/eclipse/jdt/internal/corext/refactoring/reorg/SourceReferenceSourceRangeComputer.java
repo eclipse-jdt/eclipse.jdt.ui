@@ -67,7 +67,7 @@ public class SourceReferenceSourceRangeComputer {
 			Scanner scanner= new Scanner(true, true);
 			scanner.recordLineSeparator = true;
 			String source= fCu.getSource();
-			scanner.setSourceBuffer(source.toCharArray());
+			scanner.setSource(source.toCharArray());
 			scanner.currentPosition= end;
 			TextBuffer buff= TextBuffer.create(source);
 			int startLine= buff.getLineOfOffset(scanner.currentPosition);
@@ -75,11 +75,11 @@ public class SourceReferenceSourceRangeComputer {
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
 				switch (token) {
-					case Scanner.TokenNameWHITESPACE:
+					case ITerminalSymbols.TokenNameWHITESPACE:
 						break;
 					case ITerminalSymbols.TokenNameSEMICOLON:
 						break;	
-					case Scanner.TokenNameCOMMENT_LINE :
+					case ITerminalSymbols.TokenNameCOMMENT_LINE :
 						break;
 					default:{
 						int currentLine= buff.getLineOfOffset(scanner.currentPosition);
@@ -110,21 +110,21 @@ public class SourceReferenceSourceRangeComputer {
 			
 			Scanner scanner= new Scanner(true, true);
 			scanner.recordLineSeparator = true;
-			scanner.setSourceBuffer(lineSource.toCharArray());
+			scanner.setSource(lineSource.toCharArray());
 			scanner.currentPosition= 0;
 
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
 				switch (token) {
-					case Scanner.TokenNameWHITESPACE:
+					case ITerminalSymbols.TokenNameWHITESPACE:
 						break;
 					case ITerminalSymbols.TokenNameSEMICOLON:
 						break;	
-					case Scanner.TokenNameCOMMENT_LINE :
+					case ITerminalSymbols.TokenNameCOMMENT_LINE :
 						break;
-					case Scanner.TokenNameCOMMENT_JAVADOC :
+					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC :
 						break;		
-					case Scanner.TokenNameCOMMENT_BLOCK :
+					case ITerminalSymbols.TokenNameCOMMENT_BLOCK :
 						break;			
 					default:
 						if (offsetDiff == scanner.currentPosition - scanner.getCurrentTokenSource().length)
