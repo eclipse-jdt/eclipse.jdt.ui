@@ -11,10 +11,8 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -69,16 +67,12 @@ public class OccurrencesFinder extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
 	 */
 	public boolean visit(ClassInstanceCreation node) {
-		match(node.getName(), fUsages, node.resolveConstructorBinding());
-		Expression expression = node.getExpression();
-		if (expression != null)
-			expression.accept(this);
-		
-		List list = node.arguments();
-		for (Iterator iter= list.iterator(); iter.hasNext();)
-			((ASTNode)iter.next()).accept(this);
-
-		return false;
+		// match with the constructor and the type.
+		Name name= node.getName();
+		if (name instanceof QualifiedName)
+			name= ((QualifiedName)name).getName();
+		match(name, fUsages, node.resolveConstructorBinding());
+		return super.visit(node);
 	}
 	public boolean visit(Assignment node) {
 		Expression lhs= node.getLeftHandSide();
