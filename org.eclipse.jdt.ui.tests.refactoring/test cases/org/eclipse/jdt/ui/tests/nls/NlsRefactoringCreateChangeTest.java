@@ -548,6 +548,103 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		checkContentOfCu("nls file", cu, buf.toString());
 	}
 	
+	public void testNoNewLineAtEnd() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		
+		// Accessor class
+		createDefaultAccessor(pack1);
+		
+		// property file
+		StringBuffer buf= new StringBuffer();
+		buf.append("Test.1=Hello1");
+		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+
+		// class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Test {\n");
+		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
+		buf.append("    String hello2= \"Hello2\";\n");
+		buf.append("}\n");
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		NLSRefactoring nls= NLSRefactoring.create(cu);
+
+		NLSSubstitution[] substitutions= nls.getSubstitutions();
+		assertEquals("number of substitutions", 2, substitutions.length);
+		NLSSubstitution sub= substitutions[1];
+		sub.setState(NLSSubstitution.EXTERNALIZED);
+		sub.setKey("2");
+
+		performChange(nls);
+		
+		buf= new StringBuffer();
+		buf.append("Test.1=Hello1\n");
+		buf.append("Test.2=Hello2\n");
+		checkContentOfFile("property file", file, buf.toString());
+
+		// class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Test {\n");
+		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
+		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
+		buf.append("}\n");
+		checkContentOfCu("nls file", cu, buf.toString());
+	}
+	
+	public void testTwoInsertsNoNewLineAtEnd() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		
+		// Accessor class
+		createDefaultAccessor(pack1);
+		
+		// property file
+		StringBuffer buf= new StringBuffer();
+		buf.append("Test.1=Hello1");
+		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+
+		// class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Test {\n");
+		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
+		buf.append("    String hello2= \"Hello2\";\n");
+		buf.append("    String hello2= \"Hello3\";\n");
+		buf.append("}\n");
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		NLSRefactoring nls= NLSRefactoring.create(cu);
+
+		NLSSubstitution[] substitutions= nls.getSubstitutions();
+		assertEquals("number of substitutions", 3, substitutions.length);
+		NLSSubstitution sub= substitutions[1];
+		sub.setState(NLSSubstitution.EXTERNALIZED);
+		sub.setKey("2");
+
+		sub= substitutions[2];
+		sub.setState(NLSSubstitution.EXTERNALIZED);
+		sub.setKey("3");
+		
+		performChange(nls);
+		
+		buf= new StringBuffer();
+		buf.append("Test.1=Hello1\n");
+		buf.append("Test.2=Hello2\n");
+		buf.append("Test.3=Hello3\n");
+		checkContentOfFile("property file", file, buf.toString());
+
+		// class to NLS
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Test {\n");
+		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
+		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
+		buf.append("    String hello2= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
+		buf.append("}\n");
+		checkContentOfCu("nls file", cu, buf.toString());
+	}
+	
 	private IFile createPropertyFile(IPackageFragment pack, String name, String content) throws UnsupportedEncodingException, CoreException {
 		ByteArrayInputStream is= new ByteArrayInputStream(content.getBytes("8859_1"));
 		IFile file= ((IFolder) pack.getResource()).getFile(name);
@@ -600,6 +697,11 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		nls.checkInitialConditions(fHelper.fNpm);
 		nls.checkFinalConditions(fHelper.fNpm);
 		Change c= nls.createChange(fHelper.fNpm);
-		c.perform(fHelper.fNpm);
+		c.initializeValidationData(fHelper.fNpm);
+		try {
+			c.perform(fHelper.fNpm);
+		} finally {
+			c.dispose();
+		}
 	}
 }

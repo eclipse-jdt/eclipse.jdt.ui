@@ -18,15 +18,20 @@ import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 public class PropertyFileDocumentModel {
 
 	private static final char[] HEX_DIGITS = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
     private List fKeyValuePairs;
+    private String fLineDelimiter;
 
     public PropertyFileDocumentModel(IDocument document) {
         parsePropertyDocument(document);
+        fLineDelimiter= StubUtility.getLineDelimiterFor(document);
     }
     
     public int getIndex(String key) {
@@ -50,7 +55,12 @@ public class PropertyFileDocumentModel {
         KeyValuePairModell insertHere = (KeyValuePairModell) fKeyValuePairs.get(index);
         int offset = insertHere.fOffset - insertHere.fLeadingWhiteSpaces;
         
-        return new InsertEdit(offset, keyValuePairModell.getEncodedText());
+        String extra= ""; //$NON-NLS-1$
+        if (insertHere instanceof LastKeyValuePair && ((LastKeyValuePair)insertHere).needsNewLine()) {
+        	extra= fLineDelimiter;
+        	((LastKeyValuePair)insertHere).resetNeedsNewLine();
+        }
+        return new InsertEdit(offset, extra + keyValuePairModell.getEncodedText());
     }
 
     public InsertEdit[] insert(KeyValuePair[] keyValuePairs) {
@@ -126,7 +136,15 @@ public class PropertyFileDocumentModel {
             offset += line.length();
             line = reader.readLine();
         }
-        fKeyValuePairs.add(new LastKeyValuePair(offset));
+        int lastLine= document.getNumberOfLines() - 1;
+        boolean needsNewLine= false;
+        try {
+        	needsNewLine= !(document.getLineLength(lastLine) == 0);
+		} catch (BadLocationException ignore) {
+			// treat last line having no new line
+		}
+        LastKeyValuePair lastKeyValuePair = new LastKeyValuePair(offset, needsNewLine);
+		fKeyValuePairs.add(lastKeyValuePair);
     } 
     
     private int getIndexOfSeparationCharacter(String line) {
@@ -292,12 +310,20 @@ public class PropertyFileDocumentModel {
      */
     private static class LastKeyValuePair extends KeyValuePairModell {
 
-        public LastKeyValuePair(int offset) {
+    	private boolean fNeedsNewLine;
+    	
+        public LastKeyValuePair(int offset, boolean needsNewLine) {
             super("last", "key", offset, 0); //$NON-NLS-1$ //$NON-NLS-2$
+            fNeedsNewLine= needsNewLine;
         }
-
         public int compareTo(Object o) {
             return 1;
+        }
+        public boolean needsNewLine() {
+        	return fNeedsNewLine;
+        }
+        public void resetNeedsNewLine() {
+        	fNeedsNewLine= false;
         }
     }
 }
