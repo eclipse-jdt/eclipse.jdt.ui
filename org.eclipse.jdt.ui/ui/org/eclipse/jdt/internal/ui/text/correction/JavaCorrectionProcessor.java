@@ -223,6 +223,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	 * @since 2.1
 	 */
 	private boolean areMultipleLinesSelected(ITextViewer viewer) {
+		if (viewer == null)
+			return false;
+		
 		Point s= viewer.getSelectedRange();
 		if (s.y == 0)
 			return false;
