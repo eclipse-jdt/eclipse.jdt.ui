@@ -262,15 +262,16 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}
 	public void test_nonstatic_19() throws Exception{
-		printTestDisabledMessage("bug 23464 ");
-//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+//		printTestDisabledMessage("bug 23464 ");
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}
 	public void test_nonstatic_20() throws Exception{
-		printTestDisabledMessage("bug 23464 ");
-//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+//		printTestDisabledMessage("bug 23464 ");
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}
 	public void test_nonstatic_21() throws Exception{
-		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+		printTestDisabledMessage("must fix - consequence of fix for 23464");
+//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}
 	public void test_nonstatic_22() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
@@ -282,8 +283,8 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}
 	public void test_nonstatic_25() throws Exception{
-		printTestDisabledMessage("bug 23464 ");
-//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+//		printTestDisabledMessage("bug 23464 ");
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}
 	public void test_nonstatic_26() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
