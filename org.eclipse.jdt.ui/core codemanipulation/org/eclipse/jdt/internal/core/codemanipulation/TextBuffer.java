@@ -390,6 +390,23 @@ public class TextBuffer {
 	}
 
 	/**
+	 * Releases the given text buffer and saves it according to the value of
+	 * <code>force</code>.
+	 * 
+	 * @param buffer the text buffer to be released
+	 * @param force if <code>true</code> the text buffer is saved in any case.
+	 * 	if <code>false</code> the text buffer is <b>ONLY</b> saved if the client 
+	 * 	is the last one that holds a reference to the text buffer. Clients of this
+	 * 	method must make sure that they don't call this method from within a <code>
+	 *  IWorkspaceRunnable</code>.
+	 * @param pm the progress monitor used to report progress if saving is
+	 * 	necessary
+	 */
+	public static void saveAndRelease(TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
+		fgFactory.release(buffer, force, pm);
+	}
+	
+	/**
 	 * Creates a new <code>TextBuffer</code> for the given file. The returned
 	 * buffer will not be managed. Any subsequent call to <code>create</code>
 	 * with the same file will return a different text buffer.

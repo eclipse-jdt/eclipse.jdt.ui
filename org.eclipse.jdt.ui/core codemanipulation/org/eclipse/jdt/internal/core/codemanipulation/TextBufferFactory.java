@@ -16,6 +16,9 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -24,6 +27,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
@@ -81,18 +85,40 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 	}
 	
 	public void release(TextBuffer buffer) {
-			Value value= (Value)fBufferValueMap.get(buffer);
-			if (value == null)
-				return;
-			
-			value.references--;
-			if (value.references == 0) {
-				buffer.release();	
-				value.annotationModel.disconnect(value.document);
-				fDocumentProvider.disconnect(value.input);
-				fFileValueMap.remove(value.input);
-				fBufferValueMap.remove(buffer);
+		final Value value= (Value)fBufferValueMap.get(buffer);
+		if (value == null)
+			return;
+						
+		value.references--;
+		if (value.references == 0) {
+			buffer.release();	
+			value.annotationModel.disconnect(value.document);
+			fDocumentProvider.disconnect(value.input);
+			fFileValueMap.remove(value.input);
+			fBufferValueMap.remove(buffer);
+		}
+	}
+	
+	public void release(TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
+		final Value value= (Value)fBufferValueMap.get(buffer);
+		if (value == null)
+			return;
+		
+		boolean save= force || fDocumentProvider.mustSaveDocument(value.input);
+		if (save) {
+			IWorkspaceRunnable action= new IWorkspaceRunnable() {
+				public void run(IProgressMonitor pm) throws CoreException {
+					fDocumentProvider.aboutToChange(value.input);
+					fDocumentProvider.saveDocument(pm, value.input, value.document, true);
+				}
+			};
+			try {
+				ResourcesPlugin.getWorkspace().run(action, pm);
+			} finally {
+				fDocumentProvider.changed(value.input);
 			}
+		}
+		release(buffer);			
 	}
 	
 	public TextBuffer create(IFile file) throws CoreException {
@@ -162,10 +188,6 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 		IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
 			JavaStatusConstants.INTERNAL_ERROR, "Buffer not managed", null);
 		throw new CoreException(s);
-	}
-	
-	private TextBufferEditor createUpdater(IDocument document) {
-		return new TextBufferEditor(new TextBuffer(document));
 	}
 }
 
