@@ -275,6 +275,16 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 
 		try {
+			if (command.text != null && command.length == 0 && endsWithDelimiter(document, command.text)) {
+				jdocIndentAfterNewLine(document, command);
+				return;
+			}
+		
+			if (command.text != null && command.text.equals("/")) { //$NON-NLS-1$
+				jdocIndentForCommentEnd(document, command);
+				return;
+			}
+
 			ITypedRegion partition= document.getPartition(command.offset);			
 			int partitionStart= partition.getOffset();
 			int partitionEnd= partition.getLength() + partitionStart;			
@@ -284,26 +294,20 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int length= command.length;
 
 			// partition change
-			final int PREFIX_LENGTH= "/**".length(); //$NON-NLS-1$
+			final int PREFIX_LENGTH= "/*".length(); //$NON-NLS-1$
 			final int POSTFIX_LENGTH= "*/".length(); //$NON-NLS-1$
 			if ((offset < partitionStart + PREFIX_LENGTH || offset + length > partitionEnd - POSTFIX_LENGTH) ||
 				text != null && text.length() >= 2 && ((text.indexOf("*/") != -1) || (document.getChar(offset) == '*' && text.startsWith("/")))) //$NON-NLS-1$ //$NON-NLS-2$
 				return;			
 
-			if (command.text != null && command.length == 0 && endsWithDelimiter(document, command.text))
-				jdocIndentAfterNewLine(document, command);
-		
-			else if (command.text != null && command.text.equals("/")) //$NON-NLS-1$
-				jdocIndentForCommentEnd(document, command);
-		
-			else if (command.text == null || command.text.length() == 0)
+			if (command.text == null || command.text.length() == 0)
 				jdocHandleBackspaceDelete(document, command);
 		
 			else if (command.text != null && command.length == 0 && command.text.length() > 0)
 				jdocWrapParagraphOnInsert(document, command);
 
 		} catch (BadLocationException e) {
-			
+			JavaPlugin.log(e);
 		}
 	}
 
