@@ -112,33 +112,6 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 			return null;
 		return l.get(0);		
 	}		
-	
-	//---- Dialog opening -------------------------------------------------------------------
-			
-	/**
-	 * Open the dialog.
-	 * @param elements The array of elements to show in the list
-	 * @param initialSelection The initial content of the match text box.
-	 * @return Returns OK or CANCEL
-	 */
-/*	
-	public int open(Object[][] elements, String[] initialSelections) {
-		setElements(elements);
-		Assert.isTrue(fNumberOfPages > 0 && initialSelections.length == fNumberOfPages);				
-		setInitialSelections(initialSelections);
-		return super.open();
-	}
-*/	
-	/**
-	 * Open the dialog.
-	 * @param elements The elements to show in the list
-	 * @return Returns OK or CANCEL
-	 */	
-/*	
-	public int open(Object[][] elements) {
-		return open(elements, new String[elements.length]);
-	}
-*/
 
 	//---- Widget creation -----------------------------------------------------------------
 
@@ -213,9 +186,9 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	}
 	
 	/**
-	 * @private
+	 *
 	 */
-	protected void handleDoubleClick() {
+	protected void handleDefaultSelected() {
 		if (verifyCurrentSelection()) {
 			if (fCurrentPage == fNumberOfPages - 1) {
 				buttonPressed(IDialogConstants.OK_ID);

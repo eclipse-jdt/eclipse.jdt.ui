@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 /**
@@ -30,8 +31,8 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	private boolean fIgnoreCase= true;
 	private boolean fIsMultipleSelection= false;
 	
-	private SelectionList fSelectionList;
 	private Label fMessage;
+	private SelectionList fSelectionList;
 	private ISelectionValidator fValidator;	
 	
 	private String fEmptyListMessage= ""; //$NON-NLS-1$
@@ -46,19 +47,20 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * @param ignoreCase Decides if the match string ignores lower/upppr case
 	 * @param multipleSelection Allow multiple selection	 
 	 */
-	protected AbstractElementListSelectionDialog(Shell parent,
-		ILabelProvider renderer)
+	protected AbstractElementListSelectionDialog(Shell parent, ILabelProvider renderer)
 	{
-		super(parent);
-		
+		super(parent);		
 		fRenderer= renderer;
 	}
 
 	/**
-	 * An element has been selected in the list by double clicking on it.
+	 * An element in the list has been default selected (double click).
 	 * Emulate a OK button pressed to close the dialog.
 	 */	
-	protected abstract void handleDoubleClick();
+	protected void handleDefaultSelected() {
+		if (verifyCurrentSelection())
+			buttonPressed(IDialogConstants.OK_ID);
+	}
 	
 	public void setIgnoreCase(boolean ignoreCase) {
 		fIgnoreCase= ignoreCase;
@@ -93,7 +95,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	
 	/**
 	 * Initializes the selection list widget with the given list of
-	 * elements.
+	 * elements. To be called within open().
 	 */
 	protected void setSelectionListElements(List elements, boolean refilter) {
 		fSelectionList.setElements(elements, refilter);
@@ -101,6 +103,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 
 	/**
 	 * Sets the filter text to the given value.
+	 * To be called within open().
 	 */
 	protected void setFilter(String text, boolean refilter) {
 		fSelectionList.setFilter(text, refilter);
@@ -108,6 +111,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	
 	/**
 	 * Returns the currently used filter text.
+	 * To be called within or after open().
 	 */
 	protected String getFilter() {
 		return fSelectionList.getFilter();
@@ -116,6 +120,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	/**
 	 * Refilters the current list according to the filter entered into the
 	 * text edit field.
+	 * To be called within open().
 	 */
 	protected void refilter() {
 		fSelectionList.filter(true);
@@ -123,6 +128,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 
 	/**
 	 * Returns the selection indices.
+	 * To be called within or after open().
 	 */
 	protected int[] getSelectionIndices() {
 		return fSelectionList.getSelectionIndices();
@@ -131,6 +137,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	/**
 	 * Selects the elements in the list determined by the given
 	 * selection indices.
+	 * To be called within open().
 	 */
 	protected void setSelection(int[] selection) {
 		fSelectionList.setSelection(selection);
@@ -139,6 +146,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	/**
 	 * Returns the widget selection. Returns empty list when the widget is not
 	 * usable.
+	 * To be called within or after open().
 	 */
 	protected List getWidgetSelection() {
 		if (fSelectionList == null || fSelectionList.isDisposed())
@@ -155,7 +163,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 				access$superOpen();
 			}
 		});
-		return getReturnCode() ;
+		return getReturnCode();
 	}
 	
 	/*
@@ -191,7 +199,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		SelectionList list= new SelectionList(parent, flags, fRenderer, fIgnoreCase);		
 		list.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
-				handleDoubleClick();
+				handleDefaultSelected();
 			}
 			public void widgetSelected(SelectionEvent e) {
 				verifyCurrentSelection();
@@ -224,23 +232,24 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 */
 	protected boolean verifyCurrentSelection() {
 		IStatus status;
-		List sel= getWidgetSelection();
-		int length= sel.size();
-		if (length > 0) {
+		List selection= getWidgetSelection();
+
+		if (selection.size() > 0) {
 			if (fValidator != null) {
-				status= fValidator.validate(sel.toArray());
+				status= fValidator.validate(selection.toArray());
 			} else {
 				status= new StatusInfo();
 			}
-		} else {
-			
+		} else {			
 			if (isEmptyList()) {
 				status= new StatusInfo(IStatus.ERROR, fEmptyListMessage);
 			} else {
 				status= new StatusInfo(IStatus.ERROR, fNothingSelectedMessage);
 			}
 		}
+
 		updateStatus(status);
+		
 		return status.isOK();
 	}
 
@@ -297,4 +306,5 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	public int[] getSize() {
 		return new int[] {fWidth, fHeight};
 	}
+	
 }

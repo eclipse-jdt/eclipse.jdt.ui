@@ -50,14 +50,6 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 	
 	/*
 	 * @private
-	 */	
-	protected void handleDoubleClick() {
-		if (verifyCurrentSelection())
-			buttonPressed(IDialogConstants.OK_ID);
-	}
-	
-	/*
-	 * @private
 	 */
 	protected void computeResult() {
 		setResult(getWidgetSelection());
