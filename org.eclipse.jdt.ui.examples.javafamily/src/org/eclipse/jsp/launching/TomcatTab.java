@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.variables.LaunchVariableUtil;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -228,15 +227,15 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		
 		String workingDirPath = fTomcatDir.getText().trim();
 		// resolve variables (if any)
-		String[] expansion = LaunchVariableUtil.expandStrings(workingDirPath, null, null);
-		if (expansion.length == 1) {
-			String path = expansion[0];
-			if (path != null) {
-				workingDirPath = path;
-			}
+		String expansion;
+		try {
+			expansion = DebugPlugin.getDefault().getStringVariableManager().performStringSubstitution(workingDirPath);
+		} catch (CoreException e) {
+			setErrorMessage(e.getMessage());
+			return false;
 		}
 		if (workingDirPath.length() > 0) {
-			File dir = new File(workingDirPath);
+			File dir = new File(expansion);
 			if (!dir.exists()) {
 				setErrorMessage(LaunchingMessages.getString("TomcatTab.5")); //$NON-NLS-1$
 				return false;

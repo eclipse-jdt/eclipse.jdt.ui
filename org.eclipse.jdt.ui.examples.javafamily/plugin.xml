@@ -139,7 +139,7 @@
       </launchConfigurationTypeImage>
    </extension>
    <extension
-         point="org.eclipse.debug.core.simpleLaunchVariables">
+         point="org.eclipse.debug.core.valueVariables">
       <variable
             name="catalina_home"
             description="%catalinaHomeDescription">

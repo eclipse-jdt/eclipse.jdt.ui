@@ -16,11 +16,11 @@ import java.text.MessageFormat;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.variables.LaunchVariableUtil;
+import org.eclipse.debug.internal.core.stringsubstitution.IValueVariable;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.internal.launching.JavaLocalApplicationLaunchConfigurationDelegate;
 import org.eclipse.jsp.JspUIPlugin;
@@ -80,11 +80,12 @@ public class TomcatLaunchDelegate extends JavaLocalApplicationLaunchConfiguratio
 	 * @exception CoreException if the variable or value is undefined
 	 */
 	public static String getCatalinaHome() throws CoreException {
-		MultiStatus status = new MultiStatus(JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.getString("TomcatLaunchDelegate.6"), null); //$NON-NLS-1$
-		String[] vars = LaunchVariableUtil.expandStrings("${catalina_home}", status, null); //$NON-NLS-1$
-		if (status.isOK() && vars != null && vars.length == 1) {
-			String home = vars[0];
-			IStatus err = null;
+		IValueVariable variable = DebugPlugin.getDefault().getStringVariableManager().getValueVariable("${catalina_home}"); //$NON-NLS-1$
+		IStatus err = null;
+		if (variable == null) {
+			err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.getString("TomcatLaunchDelegate.9"), null); //$NON-NLS-1$
+		} else {
+			String home = variable.getValue();	
 			if (home != null && home.length() > 0) {
 				File file = new File(home);
 				if (file.exists() && file.isDirectory()) {
@@ -95,8 +96,7 @@ public class TomcatLaunchDelegate extends JavaLocalApplicationLaunchConfiguratio
 			} else {
 				err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.getString("TomcatLaunchDelegate.8"), null); //$NON-NLS-1$
 			}
-			throw new CoreException(err);
 		}
-		throw new CoreException(status);
+		throw new CoreException(err);
 	}
 }
