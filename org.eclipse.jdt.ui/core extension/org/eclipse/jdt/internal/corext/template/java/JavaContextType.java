@@ -133,6 +133,7 @@ public class JavaContextType extends CompilationUnitContextType {
 		
 		// compilation unit
 		addVariable(new File());
+		addVariable(new PrimaryTypeName());
 		addVariable(new ReturnType());
 		addVariable(new Method());
 		addVariable(new Type());

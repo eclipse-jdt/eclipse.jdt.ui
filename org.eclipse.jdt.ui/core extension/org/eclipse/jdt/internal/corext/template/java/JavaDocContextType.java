@@ -40,6 +40,7 @@ public class JavaDocContextType extends CompilationUnitContextType {
 		
 		// compilation unit
 		addVariable(new File());
+		addVariable(new PrimaryTypeName());
 		addVariable(new Method());
 		addVariable(new ReturnType());
 		addVariable(new Arguments());
