@@ -13,11 +13,13 @@ package org.eclipse.jdt.internal.ui.text.folding;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -39,7 +41,6 @@ import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -106,6 +107,17 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		void setCaptionOffset(int offset) {
 			fCaptionOffset= offset;
 		}
+		
+		/*
+		 * @see java.lang.Object#toString()
+		 */
+		public String toString() {
+			return "JavaProjectionAnnotation:\n" + //$NON-NLS-1$
+					"\telement: \t"+fJavaElement.toString()+"\n" + //$NON-NLS-1$ //$NON-NLS-2$
+					"\tcollapsed: \t" + isCollapsed() + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
+					"\tcomment: \t" + fIsComment + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
+					"\tcaptionOffset: \t" + fCaptionOffset + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 	
 	private class ElementChangedListener implements IElementChangedListener {
@@ -133,8 +145,6 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				return delta;				
 			
 			IJavaElementDelta[] children= delta.getAffectedChildren();
-			if (children == null || children.length == 0)
-				return null;
 				
 			for (int i= 0; i < children.length; i++) {
 				IJavaElementDelta d= findElement(target, children[i]);
@@ -159,6 +169,11 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	private boolean fCollapseInnerTypes= true;
 	private boolean fCollapseMethods= false;
 	private boolean fCollapseHeaderComments= true;
+
+	/* caches for header comment extraction. */
+	private IType fFirstType;
+	private boolean fHasHeaderComment;
+
 	
 	public DefaultJavaFoldingStructureProvider() {
 	}
@@ -226,6 +241,9 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			fCachedDocument= provider.getDocument(fEditor.getEditorInput());
 			fAllowCollapsing= true;
 			
+			fFirstType= null;
+			fHasHeaderComment= false;
+
 			if (fEditor instanceof CompilationUnitEditor) {
 				IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 				fInput= manager.getWorkingCopy(fEditor.getEditorInput());
@@ -257,6 +275,9 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		} finally {
 			fCachedDocument= null;
 			fAllowCollapsing= false;
+			
+			fFirstType= null;
+			fHasHeaderComment= false;
 		}
 	}
 
@@ -270,7 +291,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	}
 
 	private Map computeAdditions(IParent parent) {
-		Map map= new HashMap();
+		Map map= new LinkedHashMap(); // use a linked map to maintain ordering of comments
 		try {
 			computeAdditions(parent.getChildren(), map);
 		} catch (JavaModelException x) {
@@ -310,10 +331,6 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				collapse= fAllowCollapsing && fCollapseMethods;
 				createProjection= true;
 				break;
-			case IJavaElement.PACKAGE_DECLARATION:
-				collapse= fAllowCollapsing && fCollapseHeaderComments;
-				createProjection= true;
-				break;
 		}
 		
 		if (createProjection) {
@@ -322,8 +339,15 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				// comments
 				for (int i= 0; i < regions.length - 1; i++) {
 					Position position= createProjectionPosition(regions[i]);
-					if (position != null)
-						map.put(new JavaProjectionAnnotation(element, fAllowCollapsing && fCollapseJavadoc, true, computeCaptionOffset(position, null)), position);
+					boolean commentCollapse;
+					if (position != null) {
+						if (i == 0 && (regions.length > 2 || fHasHeaderComment) && element == fFirstType) {
+							commentCollapse= fAllowCollapsing && fCollapseHeaderComments;
+						} else {
+							commentCollapse= fAllowCollapsing && fCollapseJavadoc;
+						}
+						map.put(new JavaProjectionAnnotation(element, commentCollapse, true, computeCaptionOffset(position, null)), position);
+					}
 				}
 				// code
 				Position position= createProjectionPosition(regions[regions.length - 1]);
@@ -365,22 +389,23 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				ISourceReference reference= (ISourceReference) element;
 				ISourceRange range= reference.getSourceRange();
 				
-				int offset= range.getOffset();
-				if (element instanceof IPackageDeclaration) {
-					int line= fCachedDocument.getLineOfOffset(offset);
-					if (line > 0)
-						return new IRegion[] {new Region(0, fCachedDocument.getLineOffset(line - 1))};
-					return null;
-				}
-
 				String contents= reference.getSource();
 				if (contents == null)
 					return null;
 				
+				List regions= new ArrayList();
+				if (fFirstType == null && element instanceof IType) {
+					fFirstType= (IType) element;
+					IRegion headerComment= computeHeaderComment(fFirstType);
+					if (headerComment != null) {
+						regions.add(headerComment);
+						fHasHeaderComment= true;
+					}
+				}
+				
 				IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 				scanner.setSource(contents.toCharArray());
-				List regions= new ArrayList();
-				int shift= offset;
+				final int shift= range.getOffset();
 				int start= shift;
 				while (true) {
 					
@@ -400,7 +425,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					break;
 				}
 				
-				regions.add(new Region(start, offset + range.getLength() - start));
+				regions.add(new Region(start, shift + range.getLength() - start));
 				
 				if (regions.size() > 0) {
 					IRegion[] result= new IRegion[regions.size()];
@@ -410,9 +435,64 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			}
 		} catch (JavaModelException e) {
 		} catch (InvalidInputException e) {
-		} catch (BadLocationException e) {
 		}
 		
+		return null;
+	}
+	
+	private IRegion computeHeaderComment(IType type) throws JavaModelException {
+		if (fCachedDocument == null)
+			return null;
+		
+		// search at most up to the first type
+		ISourceRange range= type.getSourceRange();
+		if (range == null)
+			return null;
+		int start= 0;
+		int end= range.getOffset();
+		
+		if (fInput instanceof ISourceReference) {
+			String content;
+			try {
+				content= fCachedDocument.get(start, end - start);
+			} catch (BadLocationException e) {
+				return null; // ignore header comment in that case
+			}
+			
+			/* code adapted from CommentFormattingStrategy:
+			 * scan the header content up to the first type. Once a comment is
+			 * found, accumulate any additional comments up to the stop condition.
+			 * The stop condition is reaching a package declaration, import container,
+			 * or the end of the input.
+			 */
+			IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+			scanner.setSource(content.toCharArray());
+
+			int headerStart= -1;
+			int headerEnd= -1;
+			try {
+				boolean foundComment= false;
+				int terminal= scanner.getNextToken();
+				while (terminal != ITerminalSymbols.TokenNameEOF && !(terminal == ITerminalSymbols.TokenNameclass || terminal == ITerminalSymbols.TokenNameinterface || terminal == ITerminalSymbols.TokenNameenum || (foundComment && (terminal == ITerminalSymbols.TokenNameimport || terminal == ITerminalSymbols.TokenNamepackage)))) {
+					
+					if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || terminal == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
+						if (!foundComment)
+							headerStart= scanner.getCurrentTokenStartPosition();
+						headerEnd= scanner.getCurrentTokenEndPosition();
+						foundComment= true;
+					}
+					terminal= scanner.getNextToken();
+				}
+				
+				
+			} catch (InvalidInputException ex) {
+				return null;
+			}
+			
+			if (headerEnd != -1) {
+				return new Region(headerStart, headerEnd - headerStart);
+			}
+		}
 		return null;
 	}
 	
@@ -425,6 +505,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	 * @return the caption offset relative to the position offset
 	 */
 	private int computeCaptionOffset(Position position, IJavaElement element) {
+		Assert.isNotNull(fCachedDocument); // must be non-null as createPosition succeeded
 		if (element instanceof IMember) {
 			try {
 				ISourceRange nameRange= ((IMember) element).getNameRange();
@@ -470,8 +551,10 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				int endOffset;
 				if (fCachedDocument.getNumberOfLines() > end + 1)
 					endOffset= fCachedDocument.getLineOffset(end + 1);
+				else if (end > start)
+					endOffset= fCachedDocument.getLineOffset(end);
 				else
-					endOffset= fCachedDocument.getLineOffset(end) + fCachedDocument.getLineLength(end);
+					return null;
 				return new Position(offset, endOffset - offset);
 			}
 			
@@ -495,6 +578,9 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			IDocumentProvider provider= fEditor.getDocumentProvider();
 			fCachedDocument= provider.getDocument(fEditor.getEditorInput());
 			fAllowCollapsing= false;
+			
+			fFirstType= null;
+			fHasHeaderComment= false;
 			
 			Map additions= new HashMap();
 			List deletions= new ArrayList();
@@ -556,6 +642,9 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		} finally {
 			fCachedDocument= null;
 			fAllowCollapsing= true;
+			
+			fFirstType= null;
+			fHasHeaderComment= false;
 		}
 	}
 	
