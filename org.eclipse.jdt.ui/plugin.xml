@@ -3020,7 +3020,7 @@
   </renameProcessor>
   
   <renameProcessor
-     id="org.eclipse.jdt.renameParticipants.ICompilationUnit"
+     id="org.eclipse.jdt.renameProcessor.ICompilationUnit"
      override="org.eclipse.jdt.renameProcessor.IFile"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.RenameCompilationUnitProcessor">
      <objectState>
@@ -3040,6 +3040,7 @@
 
 <extension-point name="%statusViewerExtensionPoint" id="statusContextViewers"/>
 <extension-point name="%changeViewerExtensionPoint" id="changePreviewViewers"/>
+<extension-point name="%refactoringWizardExtensionPoint" id="refactoringWizards"/>
 
 <extension point="org.eclipse.jdt.ui.statusContextViewers">
   <statusContextViewer
@@ -3078,6 +3079,24 @@
 	     <property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange"/>
 	  </objectState>
 	</changePreviewViewer>
+</extension>
+
+<extension point="org.eclipse.jdt.ui.refactoringWizards">
+	<refactoringWizard
+		id="org.eclipse.jdt.renameProcessor.ui.ICompilationUnit"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameCuWizard">
+		<objectState>
+			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.participants.RenameCompilationUnitProcessor"/>
+		</objectState>
+	</refactoringWizard>
+	
+	<refactoringWizard
+		id="org.eclipse.jdt.renameProcessor.ui.IType"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameTypeWizard">
+		<objectState>
+			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.participants.RenameTypeProcessor"/>
+		</objectState>
+	</refactoringWizard>	
 </extension>
 
 <extension point="org.eclipse.ui.views">

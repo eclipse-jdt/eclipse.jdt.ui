@@ -245,7 +245,10 @@ public interface IJavaHelpContextIds {
 	public static final String JAVADOC_SPECIFICS_PAGE= PREFIX + "javadoc_specifics_page_context"; //$NON-NLS-1$
 	public static final String JAVADOC_TREE_PAGE= PREFIX + "javadoc_tree_page_context"; //$NON-NLS-1$
 	public static final String JAVADOC_COMMAND_PAGE= PREFIX + "javadoc_command_page_context"; //$NON-NLS-1$
-	
+
+	// Same help for all refactoring error pages. Indidivual help can
+	// be provided per a single refactoring status.	
+	public static final String REFACTORING_ERROR_WIZARD_PAGE=	PREFIX + "refactoring_error_wizard_page_context";  //$NON-NLS-1$
 	// same help for all refactoring preview pages
 	public static final String REFACTORING_PREVIEW_WIZARD_PAGE= 				PREFIX + "refactoring_preview_wizard_page_context"; //$NON-NLS-1$
 	

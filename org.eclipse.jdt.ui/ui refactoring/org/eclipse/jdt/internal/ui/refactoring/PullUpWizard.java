@@ -104,8 +104,8 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class PullUpWizard extends RefactoringWizard {
 
-	public PullUpWizard(PullUpRefactoring ref, String pageTitle, String errorPageContextHelpId) {
-		super(ref, pageTitle, errorPageContextHelpId);
+	public PullUpWizard(PullUpRefactoring ref) {
+		super(ref, RefactoringMessages.getString("PullUpWizard.defaultPageTitle")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);
 	}
 	

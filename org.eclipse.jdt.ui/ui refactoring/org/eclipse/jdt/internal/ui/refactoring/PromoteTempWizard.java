@@ -34,8 +34,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 
 public class PromoteTempWizard extends RefactoringWizard {
 
-	public PromoteTempWizard(PromoteTempToFieldRefactoring ref, String pageTitle, String errorPageContextHelpId) {
-		super(ref, pageTitle, errorPageContextHelpId);
+	public PromoteTempWizard(PromoteTempToFieldRefactoring ref) {
+		super(ref, RefactoringMessages.getString("ConvertLocalToField.title")); //$NON-NLS-1$
 		setExpandFirstNode(true);
 	}
 

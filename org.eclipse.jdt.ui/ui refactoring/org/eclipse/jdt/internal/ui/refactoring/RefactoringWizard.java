@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class RefactoringWizard extends Wizard {
 
-	private String fPageTitle;
+	private String fDefaultPageTitle;
 	private Refactoring fRefactoring;
 	private IChange fChange;
 	private RefactoringStatus fActivationStatus= new RefactoringStatus();
@@ -42,21 +42,61 @@ public class RefactoringWizard extends Wizard {
 	private boolean fPreviewReview;
 	private boolean fPreviewShown;
 	
-	private String fErrorPageContextHelpId;
-	
-	public RefactoringWizard(Refactoring ref, String pageTitle, String errorPageContextHelpId) {
+	public RefactoringWizard(Refactoring refactoring) {
+		Assert.isNotNull(refactoring);
+		fRefactoring= refactoring;
 		setNeedsProgressMonitor(true);
-		Assert.isNotNull(pageTitle);
-		Assert.isNotNull(ref);
-		fRefactoring= ref;
-		fPageTitle= pageTitle;
-		fErrorPageContextHelpId= errorPageContextHelpId;
-		fIsChangeCreationCancelable= true;
-		
+		setChangeCreationCancelable(true);
 		setWindowTitle(RefactoringMessages.getString("RefactoringWizard.title")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
+	} 
+	
+	public RefactoringWizard(Refactoring refactoring, String defaultPageTitle) {
+		this(refactoring);
+		Assert.isNotNull(defaultPageTitle);
+		fDefaultPageTitle= defaultPageTitle;
 	}
-
+	
+	
+	/**
+	 * Creates a new refactoring wizard without initializing its
+	 * state. This constructor should only be used to create a
+	 * refactoring spcified via a plugin manifest file. Clients
+	 * that us this API must make sure that the <code>initialize</code>
+	 * method gets called.
+	 * 
+	 * @see #initialize(Refactoring)
+	 */
+	public RefactoringWizard() {
+	}
+	
+	/**
+	 * Initializes the refactoring with the given refactoring. This
+	 * method should be called right after the wizard has been created
+	 * using the default constructor.
+	 * 
+	 * @param refactoring the refactoring this wizard is working
+	 *  on
+	 * @see #RefactoringWizard()
+	 */
+	public void initialize(Refactoring refactoring) {
+		Assert.isNotNull(refactoring);
+		fRefactoring= refactoring;
+	}
+	
+	/**
+	 * Sets the default page title to the given value. This value is used
+	 * as a page title for wizard page's which don't provide their own
+	 * page title. Setting this value has only an effect as long as the
+	 * user interface hasn't been created yet. 
+	 * 
+	 * @param defaultPageTitle the default page title.
+	 * @see Wizard#setDefaultPageImageDescriptor(org.eclipse.jface.resource.ImageDescriptor)
+	 */
+	public void setDefaultPageTitle(String defaultPageTitle) {
+		fDefaultPageTitle= defaultPageTitle;
+	}
+	
 	public void setChangeCreationCancelable(boolean isChangeCreationCancelable){
 		fIsChangeCreationCancelable= isChangeCreationCancelable;
 	}
@@ -89,7 +129,7 @@ public class RefactoringWizard extends Wizard {
 	 * adds an <code>ErrorWizardPage</code> to the wizard.
 	 */
 	protected void addErrorPage(){
-		addPage(new ErrorWizardPage(fErrorPageContextHelpId));
+		addPage(new ErrorWizardPage());
 	}
 	
 	/**
@@ -210,20 +250,15 @@ public class RefactoringWizard extends Wizard {
 	}
 	
 	/**
-	 * Returns the default page title used for this refactoring.
+	 * Returns the default page title used for pages that don't
+	 * provide their own page title.
+	 * 
+	 * @return the default page title.
 	 */
-	public String getPageTitle() {
-		return fPageTitle;
+	public String getDefaultPageTitle() {
+		return fDefaultPageTitle;
 	}
 	
-	/**
-	 * Set the default page title used for this refactoring.
-	 */
-	public void setPageTitle(String title) {
-		fPageTitle= title;
-		setupPageTitles();
-	}
-	 
 	/**
 	 * Defines whether the frist node in the preview page is supposed to be expanded.
 	 * 
@@ -282,13 +317,15 @@ public class RefactoringWizard extends Wizard {
 	/**
 	 * Initialize all pages with the managed page title.
 	 */
-	protected void setupPageTitles() {
-		if (fPageTitle == null)
+	private void initializeDefaultPageTitles() {
+		if (fDefaultPageTitle == null)
 			return;
 			
 		IWizardPage[] pages= getPages();
 		for (int i= 0; i < pages.length; i++) {
-			pages[i].setTitle(fPageTitle);
+			IWizardPage page= pages[i];
+			if (page.getTitle() == null)
+				page.setTitle(fDefaultPageTitle);
 		}
 	}
 	
@@ -466,7 +503,7 @@ public class RefactoringWizard extends Wizard {
 			addErrorPage();
 			addPreviewPage();	
 		}
-		setupPageTitles();
+		initializeDefaultPageTitles();
 	}
 	
 	public void addPage(IWizardPage page) {

@@ -147,9 +147,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 	}
 
 	private static RefactoringWizard createWizard(MoveStaticMembersRefactoring refactoring){
-		String title= RefactoringMessages.getString("RefactoringGroup.move_Members"); //$NON-NLS-1$
-		String helpId= IJavaHelpContextIds.MOVE_MEMBERS_ERROR_WIZARD_PAGE;
-		return new MoveMembersWizard(refactoring, title, helpId);
+		return new MoveMembersWizard(refactoring);
 	}
 	
 	private void startRefactoring(IMember[] members) throws JavaModelException {

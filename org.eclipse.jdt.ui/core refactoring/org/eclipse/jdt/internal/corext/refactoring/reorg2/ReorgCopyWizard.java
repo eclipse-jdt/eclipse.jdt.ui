@@ -22,11 +22,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 public class ReorgCopyWizard extends RefactoringWizard {
 
-	//TODO fix help context id
-	private static final String HELP_CONTEXT_ID= "";
-
 	public ReorgCopyWizard(CopyRefactoring2 ref) {
-		super(ref, "Copy", HELP_CONTEXT_ID);
+		super(ref, "Copy");
 	}
 
 	/* (non-Javadoc)

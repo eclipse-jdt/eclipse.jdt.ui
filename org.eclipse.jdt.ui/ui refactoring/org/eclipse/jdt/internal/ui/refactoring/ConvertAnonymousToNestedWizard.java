@@ -32,8 +32,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNested
 
 public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 
-	public ConvertAnonymousToNestedWizard(ConvertAnonymousToNestedRefactoring ref, String pageTitle, String errorPageContextHelpId) {
-		super(ref, pageTitle, errorPageContextHelpId);
+	public ConvertAnonymousToNestedWizard(ConvertAnonymousToNestedRefactoring ref) {
+		super(ref, RefactoringMessages.getString("ConvertAnonymousToNestedAction.wizard_title")); //$NON-NLS-1$
 		setExpandFirstNode(true);
 	}
 

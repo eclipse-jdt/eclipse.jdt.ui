@@ -29,11 +29,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 public class DeleteWizard extends RefactoringWizard{
 	
-	//TODO fix help context id
-	private static final String HELP_CONTEXT_ID= "";
-	
 	public DeleteWizard(DeleteRefactoring2 ref) {
-		super(ref, "Confirm Delete", HELP_CONTEXT_ID);
+		super(ref, "Confirm Delete");
 	}
 
 	/* (non-Javadoc)

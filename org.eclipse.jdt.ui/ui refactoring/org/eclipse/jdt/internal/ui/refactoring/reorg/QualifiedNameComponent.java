@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.refactoring.participants;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;

@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.code;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
@@ -21,8 +21,7 @@ public class InlineMethodWizard extends RefactoringWizard {
 	/* package */ static final String DIALOG_SETTING_SECTION= "InlineMethodWizard"; //$NON-NLS-1$
 	
 	public InlineMethodWizard(InlineMethodRefactoring ref){
-		super(ref, RefactoringMessages.getString("InlineMethodWizard.page_title"),  //$NON-NLS-1$
-					IJavaHelpContextIds.INLINE_METHOD_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+		super(ref, RefactoringMessages.getString("InlineMethodWizard.page_title"));  //$NON-NLS-1$
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 

@@ -166,9 +166,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	}
 
 	private static RefactoringWizard createWizard(ChangeSignatureRefactoring refactoring){
-		String title= RefactoringMessages.getString("RefactoringGroup.modify_method_parameters"); //$NON-NLS-1$
-		String helpId= IJavaHelpContextIds.MODIFY_PARAMETERS_ERROR_WIZARD_PAGE;
-		return new ChangeSignatureWizard(refactoring, title, helpId);
+		return new ChangeSignatureWizard(refactoring);
 	}
 	
 	private void startRefactoring(IMethod method) throws JavaModelException {

@@ -23,8 +23,9 @@ public abstract class AbstractDescriptor {
 	protected IConfigurationElement fConfigurationElement;
 	protected Expression fExpression;
 	
-	private static final String ID= "id"; //$NON-NLS-1$
-	private static final String OBJECT_STATE= "objectState";  //$NON-NLS-1$
+	protected static final String ID= "id"; //$NON-NLS-1$
+	protected static final String OBJECT_STATE= "objectState";  //$NON-NLS-1$
+	protected static final String CLASS= "class"; //$NON-NLS-1$
 	
 	protected AbstractDescriptor(IConfigurationElement element) {
 		fConfigurationElement= element;
@@ -52,13 +53,13 @@ public abstract class AbstractDescriptor {
 	}
 		
 	protected Expression createExpression(IConfigurationElement element) {
-		return createObjectStateExpression(element);
+		return createObjectStateExpression(element, Expression.FALSE);
 	} 
 
-	protected static Expression createObjectStateExpression(IConfigurationElement element) {
+	protected static Expression createObjectStateExpression(IConfigurationElement element, Expression defaultValue) {
 		IConfigurationElement[] children= element.getChildren(OBJECT_STATE);
 		if (children.length == 0) {
-			return Expression.TRUE;
+			return defaultValue;
 		} else if (children.length == 1) {
 			return ExpressionParser.getStandard().parse(children[0]);
 		} else {

@@ -167,9 +167,7 @@ public class PullUpAction extends SelectionDispatchAction{
 	}
 
 	private static RefactoringWizard createWizard(PullUpRefactoring refactoring){
-		String title= RefactoringMessages.getString("RefactoringGroup.pull_up"); //$NON-NLS-1$
-		String helpId= IJavaHelpContextIds.PULL_UP_ERROR_WIZARD_PAGE;
-		return new PullUpWizard(refactoring, title, helpId);
+		return new PullUpWizard(refactoring);
 	}
 		
 	private void startRefactoring(IMember[] members) throws JavaModelException {

@@ -62,9 +62,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 	}
 
 	private static RefactoringWizard createWizard(ExtractConstantRefactoring refactoring) {
-		String helpId= IJavaHelpContextIds.EXTRACT_CONSTANT_ERROR_WIZARD_PAGE;
-		String pageTitle= RefactoringMessages.getString("ExtractConstantAction.extract_constant"); //$NON-NLS-1$
-		return new ExtractConstantWizard(refactoring, pageTitle, helpId);
+		return new ExtractConstantWizard(refactoring);
 	}
 	
 	/* (non-Javadoc)

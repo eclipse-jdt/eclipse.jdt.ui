@@ -35,11 +35,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 public class ReorgMoveWizard extends RefactoringWizard{
 
-	//TODO fix help context id
-	private static final String HELP_CONTEXT_ID= "";
-
 	public ReorgMoveWizard(MoveRefactoring2 ref) {
-		super(ref, "Move", HELP_CONTEXT_ID);
+		super(ref, "Move");
 	}
 
 	/* (non-Javadoc)

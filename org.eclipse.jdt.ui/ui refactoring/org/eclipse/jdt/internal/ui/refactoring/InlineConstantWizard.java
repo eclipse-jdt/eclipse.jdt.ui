@@ -22,8 +22,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 
 public class InlineConstantWizard extends RefactoringWizard {
@@ -31,7 +29,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 	private static final String MESSAGE = RefactoringMessages.getString("InlineConstantWizard.message"); //$NON-NLS-1$
 
 	public InlineConstantWizard(InlineConstantRefactoring ref) {
-		super(ref, RefactoringMessages.getString("InlineConstantWizard.Inline_Constant"), IJavaHelpContextIds.INLINE_CONSTANT_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+		super(ref, RefactoringMessages.getString("InlineConstantWizard.Inline_Constant")); //$NON-NLS-1$
 		setExpandFirstNode(true);
 	}
 

@@ -60,9 +60,7 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 	}
 
 	private static RefactoringWizard createWizard(PromoteTempToFieldRefactoring refactoring) {
-		String helpId= IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_ERROR_WIZARD_PAGE;
-		String pageTitle= RefactoringMessages.getString("ConvertLocalToField.title"); //$NON-NLS-1$
-		return new PromoteTempWizard(refactoring, pageTitle, helpId);
+		return new PromoteTempWizard(refactoring);
 	}
 	
 	/* (non-Javadoc)

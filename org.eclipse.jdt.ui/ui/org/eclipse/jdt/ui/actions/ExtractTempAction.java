@@ -62,9 +62,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	}
 
 	private static RefactoringWizard createWizard(ExtractTempRefactoring refactoring) {
-		String helpId= IJavaHelpContextIds.EXTRACT_TEMP_ERROR_WIZARD_PAGE;
-		String pageTitle= RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
-		return new ExtractTempWizard(refactoring, pageTitle, helpId);
+		return new ExtractTempWizard(refactoring);
 	}
 	
 	/* (non-Javadoc)

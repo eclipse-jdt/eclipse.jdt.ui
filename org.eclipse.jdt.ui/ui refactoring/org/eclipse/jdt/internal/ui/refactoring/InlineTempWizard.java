@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 public class InlineTempWizard extends RefactoringWizard {
 
 	public InlineTempWizard(InlineTempRefactoring ref) {
-		super(ref, "Inline Local Variable", IJavaHelpContextIds.INLINE_TEMP_ERROR_WIZARD_PAGE);
+		super(ref, RefactoringMessages.getString("InlineTempWizard.defaultPageTitle")); //$NON-NLS-1$
 	}
 
 	protected void addUserInputPages() {

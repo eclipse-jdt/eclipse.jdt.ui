@@ -19,6 +19,8 @@ import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
@@ -32,18 +34,15 @@ class ErrorWizardPage extends RefactoringWizardPage {
 	private RefactoringStatus fStatus;
 	private RefactoringStatusViewer fViewer;
 	
-	private final String fHelpContextID;
-
-	public ErrorWizardPage(String helpContextId){
+	public ErrorWizardPage() {
 		super(PAGE_NAME);
-		fHelpContextID= helpContextId;
 	}
 	
 	/**
 	 * Sets the page's refactoring status to the given value.
 	 * @param status the refactoring status.
 	 */
-	public void setStatus(RefactoringStatus status){
+	public void setStatus(RefactoringStatus status) {
 		fStatus= status;
 		if (fStatus != null) {
 			setPageComplete(isRefactoringPossible());
@@ -74,7 +73,7 @@ class ErrorWizardPage extends RefactoringWizardPage {
 		initializeDialogUnits(parent);
 		setControl(fViewer= new RefactoringStatusViewer(parent, SWT.NONE));
 		Dialog.applyDialogFont(fViewer);
-		WorkbenchHelp.setHelp(getControl(), fHelpContextID);			
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.REFACTORING_ERROR_WIZARD_PAGE);			
 	}
 	
 	//---- Reimplementation of WizardPage methods ------------------------------------------

@@ -166,9 +166,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	}
 
 	private static RefactoringWizard createWizard(PushDownRefactoring refactoring){
-		String title= RefactoringMessages.getString("PushDownAction.wizard_title"); //$NON-NLS-1$
-		String helpId= IJavaHelpContextIds.PUSH_DOWN_ERROR_WIZARD_PAGE;
-		return new PushDownWizard(refactoring, title, helpId);
+		return new PushDownWizard(refactoring);
 	}
 
 	private void startRefactoring(IMember[] members) throws JavaModelException {

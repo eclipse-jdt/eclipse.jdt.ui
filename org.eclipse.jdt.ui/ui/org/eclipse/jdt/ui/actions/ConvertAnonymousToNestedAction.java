@@ -59,9 +59,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	}
 
 	private static RefactoringWizard createWizard(ConvertAnonymousToNestedRefactoring refactoring) {
-		String helpId= IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ERROR_WIZARD_PAGE;
-		String pageTitle= RefactoringMessages.getString("ConvertAnonymousToNestedAction.wizard_title"); //$NON-NLS-1$
-		return new ConvertAnonymousToNestedWizard(refactoring, pageTitle, helpId);
+		return new ConvertAnonymousToNestedWizard(refactoring);
 	}
 	
 	/* (non-Javadoc)

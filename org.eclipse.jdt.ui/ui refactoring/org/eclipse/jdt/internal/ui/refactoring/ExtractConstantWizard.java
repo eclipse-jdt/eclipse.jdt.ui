@@ -39,8 +39,8 @@ public class ExtractConstantWizard extends RefactoringWizard {
 
 	private static final String MESSAGE = RefactoringMessages.getString("ExtractConstantInputPage.enter_name"); //$NON-NLS-1$
 
-	public ExtractConstantWizard(ExtractConstantRefactoring ref, String pageTitle, String errorPageContextHelpId) {
-		super(ref, pageTitle, errorPageContextHelpId);
+	public ExtractConstantWizard(ExtractConstantRefactoring ref) {
+		super(ref, RefactoringMessages.getString("ExtractConstantWizard.defaultPageTitle")); //$NON-NLS-1$
 		setExpandFirstNode(true);
 	}
 

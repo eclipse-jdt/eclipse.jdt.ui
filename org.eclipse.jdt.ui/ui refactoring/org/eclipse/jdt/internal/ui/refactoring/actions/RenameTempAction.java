@@ -49,9 +49,8 @@ public class RenameTempAction extends SelectionDispatchAction {
 	private static RefactoringWizard createWizard(RenameTempRefactoring refactoring) {
 		String message= RefactoringMessages.getString("RenameTempAction.choose_new_name"); //$NON-NLS-1$
 		String wizardPageHelp= IJavaHelpContextIds.RENAME_TEMP_WIZARD_PAGE; 
-		String errorPageHelp= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
 		String pageTitle= RefactoringMessages.getString("RenameTempAction.rename_Local_Variable");//$NON-NLS-1$
-		return new RenameRefactoringWizard(refactoring, pageTitle, message, wizardPageHelp, errorPageHelp);
+		return new RenameRefactoringWizard(refactoring, pageTitle, message, wizardPageHelp);
 	}
 	
 	public void selectionChanged(ITextSelection selection) {

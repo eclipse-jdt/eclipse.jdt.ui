@@ -13,6 +13,9 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -29,10 +32,9 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -40,13 +42,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
-
 public class ExtractInterfaceWizard extends RefactoringWizard {
 	
 	public ExtractInterfaceWizard(ExtractInterfaceRefactoring ref) {
-		super(ref, RefactoringMessages.getString("ExtractInterfaceWizard.Extract_Interface"), IJavaHelpContextIds.EXTRACT_INTERFACE_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+		super(ref, RefactoringMessages.getString("ExtractInterfaceWizard.Extract_Interface")); //$NON-NLS-1$
 	}
 
 	/* non java-doc

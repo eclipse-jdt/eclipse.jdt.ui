@@ -12,17 +12,17 @@ package org.eclipse.jdt.internal.ui.refactoring.nls;
 
 import org.eclipse.jface.wizard.IWizardContainer;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 
 public class ExternalizeWizard extends RefactoringWizard {
 
-	public ExternalizeWizard(Refactoring refactoring) {
-		super(refactoring, NLSUIMessages.getString("wizard.name"), IJavaHelpContextIds.EXTERNALIZE_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+	public ExternalizeWizard(NLSRefactoring refactoring) {
+		super(refactoring, 
+			NLSUIMessages.getFormattedString("wizard.page.title", refactoring.getCu().getElementName())); //$NON-NLS-1$
 		setWindowTitle(NLSUIMessages.getString("wizard.name"));//$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_EXTERNALIZE_STRINGS);
 	}
@@ -38,8 +38,6 @@ public class ExternalizeWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		NLSRefactoring ref= (NLSRefactoring)getRefactoring();
-		setPageTitle(NLSUIMessages.getFormattedString("wizard.page.title", ref.getCu().getElementName())); //$NON-NLS-1$
 		ExternalizeWizardPage page= new ExternalizeWizardPage();
 		page.setMessage(NLSUIMessages.getString("wizard.select")); //$NON-NLS-1$
 		addPage(page);

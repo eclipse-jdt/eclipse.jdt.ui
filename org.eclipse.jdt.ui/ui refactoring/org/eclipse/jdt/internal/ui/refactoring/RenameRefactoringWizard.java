@@ -28,8 +28,8 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	private final String fPageContextHelpId;
 	private ImageDescriptor fInputPageImageDescriptor;
 	
-	public RenameRefactoringWizard(IRenameRefactoring ref, String title, String message, String pageContextHelpId, String errorContextHelpId){
-		super((Refactoring) ref, title, errorContextHelpId);
+	public RenameRefactoringWizard(IRenameRefactoring ref, String defaultPageTitle, String message, String pageContextHelpId) {
+		super((Refactoring) ref, defaultPageTitle);
 		fPageMessage= message;
 		fPageContextHelpId= pageContextHelpId;
 	}
@@ -47,7 +47,6 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	 */ 
 	protected void addUserInputPages(){
 		String initialSetting= getRenameRefactoring().getCurrentName();
-		setPageTitle(getPageTitle());
 		RenameInputWizardPage inputPage= createInputPage(fPageMessage, initialSetting);
 		inputPage.setImageDescriptor(fInputPageImageDescriptor);
 		addPage(inputPage);

@@ -25,6 +25,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -33,8 +34,11 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 class RenameFieldWizard extends RenameRefactoringWizard {
 
-	public RenameFieldWizard(IRenameRefactoring ref, String title, String message, String pageContextHelpId, String errorContextHelpId) {
-		super(ref, title, message, pageContextHelpId, errorContextHelpId);
+	public RenameFieldWizard(IRenameRefactoring ref) {
+		super(ref, 
+			RefactoringMessages.getString("RenameFieldWizard.defaultPageTitle"),  //$NON-NLS-1$
+			RefactoringMessages.getString("RenameFieldWizard.message"),   //$NON-NLS-1$
+			IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE);
 	}
 
 	/* non java-doc

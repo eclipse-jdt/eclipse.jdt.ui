@@ -236,7 +236,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 
 	public static void openWizard(Shell parent, ReorgRefactoring refactoring) {
 		//XX incorrect help
-		RefactoringWizard wizard= new RefactoringWizard(refactoring, ReorgMessages.getString("JdtMoveAction.move"), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+		RefactoringWizard wizard= new RefactoringWizard(refactoring, ReorgMessages.getString("JdtMoveAction.move")); //$NON-NLS-1$
 		wizard.setChangeCreationCancelable(false);
 		new RefactoringWizardDialog(parent, wizard).open();	
 		return;	

@@ -10,18 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -134,7 +133,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		return null;
 	}
 	
-	private static Refactoring createNewRefactoringInstance(ICompilationUnit cu) {
+	private static NLSRefactoring createNewRefactoringInstance(ICompilationUnit cu) {
 		return NLSRefactoring.create(cu, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 	
@@ -142,7 +141,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		if (! NLSRefactoring.isAvailable(unit))
 			return;
 		
-		Refactoring refactoring= createNewRefactoringInstance(unit);
+		NLSRefactoring refactoring= createNewRefactoringInstance(unit);
 		if (refactoring == null)
 			return;
 		ExternalizeWizard wizard= new ExternalizeWizard(refactoring);

@@ -35,8 +35,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 
 public class ChangeSignatureWizard extends RefactoringWizard {
 
-	public ChangeSignatureWizard(ChangeSignatureRefactoring ref, String pageTitle, String errorPageContextHelpId) {
-		super(ref, pageTitle, errorPageContextHelpId);
+	public ChangeSignatureWizard(ChangeSignatureRefactoring ref) {
+		super(ref, RefactoringMessages.getString("ChangeSignatureRefactoring.modify_Parameters")); //$NON-NLS-1$
 	}
 
 	/* non java-doc

@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -36,11 +40,11 @@ import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -48,16 +52,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public class MoveInstanceMethodWizard extends RefactoringWizard {
 
 	public MoveInstanceMethodWizard(MoveInstanceMethodRefactoring ref) {
-		super(ref, RefactoringMessages.getString("MoveInstanceMethodWizard.Move_Method"), IJavaHelpContextIds.MOVE_MEMBERS_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+		super(ref, RefactoringMessages.getString("MoveInstanceMethodWizard.Move_Method")); //$NON-NLS-1$
 	}
 
 	/* non java-doc

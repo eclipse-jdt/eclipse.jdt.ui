@@ -35,8 +35,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
 public class ExtractTempWizard extends RefactoringWizard {
 
-	public ExtractTempWizard(ExtractTempRefactoring ref, String pageTitle, String errorPageContextHelpId) {
-		super(ref, pageTitle, errorPageContextHelpId);
+	public ExtractTempWizard(ExtractTempRefactoring ref) {
+		super(ref, RefactoringMessages.getString("ExtractTempWizard.defaultPageTitle")); //$NON-NLS-1$
 		setExpandFirstNode(true);
 	}
 

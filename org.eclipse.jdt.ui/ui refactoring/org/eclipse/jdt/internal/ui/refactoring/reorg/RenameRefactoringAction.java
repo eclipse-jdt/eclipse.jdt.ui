@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.ui.refactoring.participants;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -20,6 +20,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDescriptor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -48,14 +49,17 @@ public class RenameRefactoringAction extends SelectionDispatchAction {
 		try {
 			RenameRefactoring refactoring= new RenameRefactoring(element);
 			if (refactoring.isAvailable()) {
-				RefactoringWizard wizard= new RenameRefactoringWizard2(
-					refactoring, "Rename Refactoring", "message", "...", "...");
-				new RefactoringStarter().activate(refactoring, wizard, getShell(), "Rename", false);
-			} else {
-				MessageDialog.openInformation(getShell(), 
-					"Rename Refactoring", 
-					"No refactoring available to process the selected element.");
+				RefactoringWizardDescriptor descriptor= RefactoringWizardDescriptor.get(refactoring.getProcessor());
+				if (descriptor != null) {
+					RefactoringWizard wizard= descriptor.createWizard();	
+					wizard.initialize(refactoring);	
+					new RefactoringStarter().activate(refactoring, wizard, getShell(), "Rename", false);
+					return;
+				}
 			}
+			MessageDialog.openInformation(getShell(), 
+				"Rename Refactoring", 
+				"No refactoring available to process the selected element.");
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

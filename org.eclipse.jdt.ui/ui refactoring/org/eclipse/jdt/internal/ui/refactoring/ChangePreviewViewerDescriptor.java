@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.IConfigurationElement;
 public class ChangePreviewViewerDescriptor extends AbstractDescriptor {
 	
 	private static final String EXT_ID= "changePreviewViewers"; //$NON-NLS-1$
-	private static final String CLASS= "class"; //$NON-NLS-1$
 	
 	private static DescriptorManager fgDescriptions= new DescriptorManager(EXT_ID) {
 		protected AbstractDescriptor createDescriptor(IConfigurationElement element) {

@@ -73,8 +73,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring
 
 public class PushDownWizard extends RefactoringWizard {
 
-	public PushDownWizard(PushDownRefactoring ref, String pageTitle, String errorPageContextHelpId) {
-		super(ref, pageTitle, errorPageContextHelpId);
+	public PushDownWizard(PushDownRefactoring ref) {
+		super(ref, RefactoringMessages.getString("PushDownWizard.defaultPageTitle")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);//XXX incorrect icon
 	}
 

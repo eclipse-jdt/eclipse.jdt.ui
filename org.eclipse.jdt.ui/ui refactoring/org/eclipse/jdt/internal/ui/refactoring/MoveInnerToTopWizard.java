@@ -37,8 +37,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 public class MoveInnerToTopWizard extends RefactoringWizard {
 
 	public MoveInnerToTopWizard(Refactoring ref) {
-		super(ref, RefactoringMessages.getString("MoveInnerToTopWizard.Move_Inner"), IJavaHelpContextIds.MOVE_INNER_TO_TOP_ERROR_WIZARD_PAGE); //$NON-NLS-1$
-//		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);
+		super(ref, RefactoringMessages.getString("MoveInnerToTopWizard.Move_Inner")); //$NON-NLS-1$
 	}
 
 	/* non java-doc
@@ -66,7 +65,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		return (MoveInnerToTopRefactoring)getRefactoring();
 	}
 	
-	private static class MoveInnerToToplnputPage extends TextInputWizardPage{
+	private static class MoveInnerToToplnputPage extends TextInputWizardPage {
 
 		private final boolean fIsInitialInputValid;
 		private static final String DESCRIPTION = RefactoringMessages.getString("MoveInnerToToplnputPage.description"); //$NON-NLS-1$

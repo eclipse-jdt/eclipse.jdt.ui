@@ -27,7 +27,7 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.refactoring.participants.RenameRefactoringAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 

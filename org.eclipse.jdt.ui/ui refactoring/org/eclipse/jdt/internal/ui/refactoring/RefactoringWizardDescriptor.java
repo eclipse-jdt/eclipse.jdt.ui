@@ -14,25 +14,26 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 
-public class StatusContextViewerDescriptor extends AbstractDescriptor {
+public class RefactoringWizardDescriptor extends AbstractDescriptor {
+
+	private static final String EXT_ID= "refactoringWizards"; //$NON-NLS-1$
 	
-	private static final String EXT_ID= "statusContextViewers"; //$NON-NLS-1$
-	
+	public RefactoringWizardDescriptor(IConfigurationElement element) {
+		super(element);
+	}
+
 	private static DescriptorManager fgDescriptions= new DescriptorManager(EXT_ID) {
 		protected AbstractDescriptor createDescriptor(IConfigurationElement element) {
-			return new StatusContextViewerDescriptor(element);
+			return new RefactoringWizardDescriptor(element);
 		}
 	};
 	
-	public static StatusContextViewerDescriptor get(Object element) throws CoreException {
-		return (StatusContextViewerDescriptor)fgDescriptions.getDescriptor(element);
+	public static RefactoringWizardDescriptor get(Object element) throws CoreException {
+		return (RefactoringWizardDescriptor)fgDescriptions.getDescriptor(element);
 	}
 
-	public StatusContextViewerDescriptor(IConfigurationElement element) {
-		super(element);
+	public RefactoringWizard createWizard() throws CoreException {
+		return (RefactoringWizard)fConfigurationElement.createExecutableExtension(CLASS);
 	}
-	
-	public IStatusContextViewer createViewer() throws CoreException {
-		return (IStatusContextViewer)fConfigurationElement.createExecutableExtension(CLASS);
-	}	
+
 }
