@@ -152,6 +152,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
 				IWorkingSet workingSet= getContainer().getSelectedWorkingSet();
+				// should not happen - just to be sure
+				if (workingSet == null)
+					return false;
 				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
 				scope= SearchEngine.createJavaSearchScope(getContainer().getSelectedWorkingSet().getResources());
 		}		
@@ -283,7 +286,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				initSelections();
 			}
 			fPattern.setFocus();
-			getContainer().setPerformActionEnabled(fPattern.getText().length() > 0);
+			getContainer().setPerformActionEnabled(fPattern.getText().length() > 0 && getContainer().hasValidScope());
 		}
 		super.setVisible(visible);
 	}
@@ -349,7 +352,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		});
 		fPattern.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				getContainer().setPerformActionEnabled(getPattern().length() > 0);
+				getContainer().setPerformActionEnabled(getPattern().length() > 0 && getContainer().hasValidScope());
 			}
 		});
 
