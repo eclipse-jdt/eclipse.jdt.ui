@@ -185,11 +185,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 	
 	private boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
-		ASTNode parent= node.getParent();
-		if (!(parent instanceof VariableDeclarationFragment)) {
+		VariableDeclarationFragment fragment;
+		if (node instanceof VariableDeclarationFragment) {
+			fragment= (VariableDeclarationFragment) node;
+		} else if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
+			fragment= (VariableDeclarationFragment) node.getParent();
+		} else {
 			return false;
 		}
-		VariableDeclarationFragment fragment= (VariableDeclarationFragment) parent;
 		
 		if (fragment.getInitializer() == null) {
 			return false;
@@ -443,12 +446,21 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		} else {
 			Block block= tryStatement.getBody();
 			List statements= block.statements();
-			if (statements.size() > 0) {			
+			int nStatements= statements.size();
+			if (nStatements == 1) {
+				ASTNode first= (ASTNode) statements.get(0);
+				rewrite.replace(tryStatement, rewrite.createCopyTarget(first), null);
+			} else if (nStatements > 1) {
 				ListRewrite listRewrite= rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 				ASTNode first= (ASTNode) statements.get(0);
 				ASTNode last= (ASTNode) statements.get(statements.size() - 1);
-				ASTNode placeholder= listRewrite.createCopyTarget(first, last);
-				rewrite.replace(tryStatement, placeholder, null);
+				ASTNode newStatement= listRewrite.createCopyTarget(first, last);
+				if (ASTNodes.isControlStatementBody(tryStatement.getLocationInParent())) {
+					Block newBlock= rewrite.getAST().newBlock();
+					newBlock.statements().add(newStatement);
+					newStatement= newBlock;
+				}
+				rewrite.replace(tryStatement, newStatement, null);
 			} else {
 				rewrite.remove(tryStatement, null);
 			}
@@ -502,7 +514,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	
-	public static ASTNode getCopyOfInner(ASTRewrite rewrite, ASTNode statement) {
+	public static ASTNode getCopyOfInner(ASTRewrite rewrite, ASTNode statement, boolean toControlStatementBody) {
 		if (statement.getNodeType() == ASTNode.BLOCK) {
 			Block block= (Block) statement;
 			List innerStatements= block.statements();
@@ -510,6 +522,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (nStatements == 1) {
 				return rewrite.createCopyTarget(((ASTNode) innerStatements.get(0)));
 			} else if (nStatements > 1) {
+				if (toControlStatementBody) {
+					return rewrite.createCopyTarget(block);
+				}
 				ListRewrite listRewrite= rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 				ASTNode first= (ASTNode) innerStatements.get(0);
 				ASTNode last= (ASTNode) innerStatements.get(nStatements - 1);
@@ -582,9 +597,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			outer= block;
 			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.block");	 //$NON-NLS-1$
 		} else if (outer instanceof ParenthesizedExpression) {
-			ParenthesizedExpression expression= (ParenthesizedExpression) outer;
-			body= expression.getExpression();
-			label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.parenthesis");	 //$NON-NLS-1$
+			//ParenthesizedExpression expression= (ParenthesizedExpression) outer;
+			//body= expression.getExpression();
+			//label= CorrectionMessages.getString("QuickAssistProcessor.unwrap.parenthesis");	 //$NON-NLS-1$
 		} else if (outer instanceof MethodInvocation) {
 			MethodInvocation invocation= (MethodInvocation) outer;
 			if (invocation.arguments().size() == 1) {
@@ -603,7 +618,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false; 
 		}
 		ASTRewrite rewrite= ASTRewrite.create(outer.getAST());
-		ASTNode inner= getCopyOfInner(rewrite, body);
+		ASTNode inner= getCopyOfInner(rewrite, body, ASTNodes.isControlStatementBody(outer.getLocationInParent()));
 		if (inner == null) {
 			return false;
 		}
