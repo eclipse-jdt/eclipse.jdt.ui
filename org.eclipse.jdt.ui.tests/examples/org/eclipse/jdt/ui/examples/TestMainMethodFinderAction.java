@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.ui.examples;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -17,12 +16,13 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
+import org.eclipse.jdt.core.IType;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.debug.ui.launcher.MainMethodFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.launcher.MainMethodFinder;
 
 public class TestMainMethodFinderAction implements IWorkbenchWindowActionDelegate {
 

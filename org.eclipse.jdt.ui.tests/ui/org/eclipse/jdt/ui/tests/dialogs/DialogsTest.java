@@ -9,6 +9,9 @@ import junit.framework.TestSuite;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -16,25 +19,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.codemanipulation.CodeManipulationMessages;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.launcher.AddExceptionDialog;
-import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
-import org.eclipse.jdt.internal.ui.util.TypeInfo;
-import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
-import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
@@ -42,6 +31,18 @@ import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
 
+import org.eclipse.jdt.internal.debug.ui.launcher.AddExceptionDialog;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.codemanipulation.CodeManipulationMessages;
+import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
+import org.eclipse.jdt.internal.ui.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.junit.eclipse.util.DialogCheck;
 
 public class DialogsTest extends TestCase {

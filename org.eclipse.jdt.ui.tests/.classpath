@@ -17,5 +17,7 @@
     <classpathentry kind="lib" path="startup.jar"/>
     <classpathentry kind="src" path="nls"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.junit.eclipse"/>
+    <classpathentry kind="lib" path="/org.eclipse.swt/swt.jar"/>
+    <classpathentry kind="src" path="/org.eclipse.jdt.debug.ui"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
