@@ -52,7 +52,12 @@ public class RenameResourceChange extends JDTChange {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, false, true);
+		IResource resource= getResource();
+		if (resource == null || ! resource.exists()) {
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("RenameResourceChange.does_not_exist", fResourcePath.toString())); //$NON-NLS-1$
+		} else {
+			return super.isValid(pm, false, true);
+		}
 	}
 	
 	/*
