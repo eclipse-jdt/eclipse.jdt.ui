@@ -485,6 +485,7 @@ public class AugmentRawContainerClientsTCModel {
 		if (filterConstraintVariableType(returnTypeBinding))
 			return null;
 		ReturnTypeVariable2 cv= new ReturnTypeVariable2(returnTypeBinding, methodBinding);
+		cv= (ReturnTypeVariable2) storedCv(cv); //TODO: Should not use storedCv(..) here!
 		if (fStoreToString)
 			cv.setData(ConstraintVariable2.TO_STRING, "[ReturnType(" + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$
 		return cv;

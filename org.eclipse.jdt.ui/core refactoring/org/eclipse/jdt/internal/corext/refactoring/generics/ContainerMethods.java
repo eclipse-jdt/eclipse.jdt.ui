@@ -33,7 +33,7 @@ public class ContainerMethods {
 		}
 
 		public void generateConstraintsFor(MethodInvocation invocation, AugmentRawContClConstraintCreator constraintCreator) {
-			AugmentRawContainerClientsTCModel tcModel= constraintCreator.getTCFactory();
+			AugmentRawContainerClientsTCModel tcModel= constraintCreator.getTCModel();
 			
 			Expression receiver= invocation.getExpression();
 			//TODO: Expression can be null when visiting a non-special method in a subclass of a container type.
@@ -53,7 +53,7 @@ public class ContainerMethods {
 		}
 
 		public void generateConstraintsFor(MethodInvocation invocation, AugmentRawContClConstraintCreator constraintCreator) {
-			AugmentRawContainerClientsTCModel tcModel= constraintCreator.getTCFactory();
+			AugmentRawContainerClientsTCModel tcModel= constraintCreator.getTCModel();
 			
 			Expression receiver= invocation.getExpression();
 			//TODO: expression can be null when visiting a non-special method in a subclass of a container type.
@@ -78,7 +78,7 @@ public class ContainerMethods {
 		}
 
 		public void generateConstraintsFor(MethodInvocation invocation, AugmentRawContClConstraintCreator constraintCreator) {
-			AugmentRawContainerClientsTCModel tcModel= constraintCreator.getTCFactory();
+			AugmentRawContainerClientsTCModel tcModel= constraintCreator.getTCModel();
 			
 			Expression receiver= invocation.getExpression();
 			//TODO: expression can be null when visiting a non-special method in a subclass of a container type.
@@ -148,7 +148,7 @@ public class ContainerMethods {
 	private void initCollectionIterator() {
 		addSpecialMethod(new SpecialMethod(fTCFactory.getCollectionType(), "iterator", fTCFactory.getObjectType(), new ITypeBinding[0]) {
 			public void generateConstraintsFor(MethodInvocation invocation, AugmentRawContClConstraintCreator constraintCreator) {
-				AugmentRawContainerClientsTCModel tcModel= constraintCreator.getTCFactory();
+				AugmentRawContainerClientsTCModel tcModel= constraintCreator.getTCModel();
 				
 				Expression receiver= invocation.getExpression();
 				//TODO: expression can be null when visiting a non-special method in a subclass of a container type.

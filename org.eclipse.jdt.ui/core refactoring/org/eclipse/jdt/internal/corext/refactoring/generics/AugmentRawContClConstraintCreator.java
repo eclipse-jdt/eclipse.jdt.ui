@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
@@ -45,6 +47,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionEl
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
@@ -59,18 +62,18 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	 */
 	private static final String CV_PROP= "org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CONSTRAINT_VARIABLE"; //$NON-NLS-1$
 	
-	private AugmentRawContainerClientsTCModel fTCFactory;
+	private AugmentRawContainerClientsTCModel fTCModel;
 	private ContainerMethods fContainerMethods;
 	private ICompilationUnit fCU;
 	
 
-	public AugmentRawContClConstraintCreator(AugmentRawContainerClientsTCModel factory) {
-		fTCFactory= factory;
-		fContainerMethods= new ContainerMethods(fTCFactory);
+	public AugmentRawContClConstraintCreator(AugmentRawContainerClientsTCModel model) {
+		fTCModel= model;
+		fContainerMethods= new ContainerMethods(fTCModel);
 	}
 	
 	public boolean visit(CompilationUnit node) {
-		fTCFactory.newCu(); //TODO: make sure that accumulators are reset after last CU!
+		fTCModel.newCu(); //TODO: make sure that accumulators are reset after last CU!
 		fCU= RefactoringASTParser.getCompilationUnit(node);
 		return super.visit(node);
 	}
@@ -88,19 +91,19 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	 */
 	public void endVisit(Type node) {
 		//TODO: who needs this?
-		TypeVariable2 typeVariable= fTCFactory.makeTypeVariable(node);
+		TypeVariable2 typeVariable= fTCModel.makeTypeVariable(node);
 		if (typeVariable == null)
 			return;
 		
 		setConstraintVariable(node, typeVariable);
-		if (fTCFactory.isACollectionType(typeVariable.getTypeBinding()))
-			fTCFactory.makeElementVariable(typeVariable);
+		if (fTCModel.isACollectionType(typeVariable.getTypeBinding()))
+			fTCModel.makeElementVariable(typeVariable);
 	}
 	
 	public boolean visit(SimpleName node) {
 		IBinding binding= node.resolveBinding();
 		if (binding instanceof IVariableBinding) {
-			VariableVariable2 cv= fTCFactory.makeVariableVariable((IVariableBinding) binding);
+			VariableVariable2 cv= fTCModel.makeVariableVariable((IVariableBinding) binding);
 			setConstraintVariable(node, cv);
 		}
 		// TODO else?
@@ -119,10 +122,10 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 				lhs.resolveTypeBinding().getQualifiedName().equals("java.lang.String")) { //TODO: use util
 			//Special handling for automatic String conversion: do nothing; the RHS can be anything.
 		} else {
-			CollectionElementVariable2 leftElement= fTCFactory.getElementVariable(left);
-			CollectionElementVariable2 rightElement= fTCFactory.getElementVariable(right);
+			CollectionElementVariable2 leftElement= fTCModel.getElementVariable(left);
+			CollectionElementVariable2 rightElement= fTCModel.getElementVariable(right);
 			
-			fTCFactory.createEqualsConstraint(leftElement, rightElement);
+			fTCModel.createEqualsConstraint(leftElement, rightElement);
 			
 			//TODO: filter?
 //			fTCFactory.createSubtypeConstraint(right, left); // left= right;  -->  [right] <= [left]
@@ -138,7 +141,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		if (! (expressionCv instanceof CollectionElementVariable2))
 			return;
 		
-		fTCFactory.makeCastVariable(node, (CollectionElementVariable2) expressionCv);
+		fTCModel.makeCastVariable(node, (CollectionElementVariable2) expressionCv);
 		
 		Type type= node.getType();
 		ConstraintVariable2 typeCv= getConstraintVariable(type);
@@ -157,7 +160,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	public boolean visit(CatchClause node) {
 		SingleVariableDeclaration exception= node.getException();
 		IVariableBinding variableBinding= exception.resolveBinding();
-		VariableVariable2 cv= fTCFactory.makeDeclaredVariableVariable(variableBinding, fCU);
+		VariableVariable2 cv= fTCModel.makeDeclaredVariableVariable(variableBinding, fCU);
 		setConstraintVariable(exception, cv);
 		return true;
 	}
@@ -182,7 +185,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	
 	public void endVisit(StringLiteral node) {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
-		PlainTypeVariable2 cv= fTCFactory.makePlainTypeVariable(typeBinding);
+		PlainTypeVariable2 cv= fTCModel.makePlainTypeVariable(typeBinding);
 		setConstraintVariable(node, cv);
 	}
 	
@@ -195,33 +198,34 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		for (int i= 0, n= node.parameters().size(); i < n; i++) {
 			SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) node.parameters().get(i);
 			//parameterTypeVariable currently not used, but need to register in order to store source range
-			TypeConstraintVariable2 parameterTypeVariable= fTCFactory.makeDeclaredParameterTypeVariable(methodBinding, i, fCU);
+			TypeConstraintVariable2 parameterTypeVariable= fTCModel.makeDeclaredParameterTypeVariable(methodBinding, i, fCU);
 			//creating equals constraint between parameterTypeVariable's elements and the Type's elements
 			//TODO: should maybe avoid creating Type's ConstraintVariables
-			CollectionElementVariable2 parameterElementCv= fTCFactory.makeElementVariable(parameterTypeVariable);
+			CollectionElementVariable2 parameterElementCv= fTCModel.makeElementVariable(parameterTypeVariable);
 			if (parameterElementCv == null)
 				continue;
 			
 			ConstraintVariable2 typeCv= getConstraintVariable(paramDecl.getType());
-			CollectionElementVariable2 typeElementCv= fTCFactory.getElementVariable(typeCv);
-			fTCFactory.createEqualsConstraint(parameterElementCv, typeElementCv);
+			CollectionElementVariable2 typeElementCv= fTCModel.getElementVariable(typeCv);
+			fTCModel.createEqualsConstraint(parameterElementCv, typeElementCv);
 			
 			//TODO: should avoid having a VariableVariable as well as a ParameterVariable for a parameter
 			ConstraintVariable2 nameCv= getConstraintVariable(paramDecl.getName());
-			CollectionElementVariable2 nameElementCv= fTCFactory.getElementVariable(nameCv);
-			fTCFactory.createEqualsConstraint(parameterElementCv, nameElementCv);
+			CollectionElementVariable2 nameElementCv= fTCModel.getElementVariable(nameCv);
+			fTCModel.createEqualsConstraint(parameterElementCv, nameElementCv);
 		}
 		
 		if (! methodBinding.isConstructor()){
-			ConstraintVariable2 returnTypeBindingVariable= fTCFactory.makeDeclaredReturnTypeVariable(methodBinding, fCU);
-//			ConstraintVariable2 returnTypeVariable= getConstraintVariable(node.getReturnType2());
-//			returnTypeBindingVariable.setRepresentative(returnTypeVariable);
-			//TODO: how to ensure that returnTypeBindingVariable is stored when it is not used in a TC?
-//			ITypeConstraint2[] defines= fTCFactory.createEqualsConstraint(returnTypeBindingVariable, returnTypeVariable);
-//			addConstraints(defines);
+			TypeConstraintVariable2 returnTypeBindingCv= fTCModel.makeDeclaredReturnTypeVariable(methodBinding, fCU);
+			if (returnTypeBindingCv != null) {
+				TypeConstraintVariable2 returnTypeCv= (TypeConstraintVariable2) getConstraintVariable(node.getReturnType2());
+				CollectionElementVariable2 returnTypeBindingElementCv= fTCModel.makeElementVariable(returnTypeBindingCv);
+				CollectionElementVariable2 returnTypeElementCv= fTCModel.getElementVariable(returnTypeCv);
+				fTCModel.createEqualsConstraint(returnTypeBindingElementCv, returnTypeElementCv);
+			}
 		}
 		if (MethodChecks.isVirtual(methodBinding)){
-			//TODO
+			//TODO: RippleMethod constraints
 //			Collection constraintsForOverriding = getConstraintsForOverriding(methodBinding);
 //			result.addAll(constraintsForOverriding);
 		}
@@ -234,34 +238,52 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		
 		SpecialMethod specialMethod= fContainerMethods.getSpecialMethodFor(methodBinding);
 		if (specialMethod != null) {
-			visitContainerMethodInvocation(node, specialMethod);
-			return;
+			specialMethod.generateConstraintsFor(node, this);
+		} else {
+			ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+			List arguments= node.arguments();
+			for (int i= 0; i < parameterTypes.length; i++) {
+				ITypeBinding parameterTypeBinding= parameterTypes[i];
+				if (! fTCModel.isACollectionType(parameterTypeBinding))
+					continue;
+				ParameterTypeVariable2 parameterTypeCv= fTCModel.makeParameterTypeVariable(methodBinding, i);
+				ConstraintVariable2 argumentCv= getConstraintVariable((ASTNode) arguments.get(i));
+				CollectionElementVariable2 parameterElementCv= fTCModel.makeElementVariable(parameterTypeCv);
+				CollectionElementVariable2 argumentElementCv= fTCModel.getElementVariable(argumentCv);
+				// Elem[param] =^= Elem[arg]
+				fTCModel.createEqualsConstraint(parameterElementCv, argumentElementCv);
+			}
+			
+			ReturnTypeVariable2 returnTypeCv= fTCModel.makeReturnTypeVariable(methodBinding);
+			if (returnTypeCv == null)
+				return;
+			
+			CollectionElementVariable2 returnTypeElementCv= fTCModel.makeElementVariable(returnTypeCv);
+			setConstraintVariable(node, returnTypeCv);
 		}
-		//TODO: normal method invocation
-		
-		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
-		List arguments= node.arguments();
-		for (int i= 0; i < parameterTypes.length; i++) {
-			ITypeBinding parameterTypeBinding= parameterTypes[i];
-			if (! fTCFactory.isACollectionType(parameterTypeBinding))
-				continue;
-			ParameterTypeVariable2 parameterTypeVariable= fTCFactory.makeParameterTypeVariable(methodBinding, i);
-			ConstraintVariable2 argumentCv= getConstraintVariable((ASTNode) arguments.get(i));
-			CollectionElementVariable2 parameterElementVariable= fTCFactory.makeElementVariable(parameterTypeVariable);
-			CollectionElementVariable2 argumentElementVariable= fTCFactory.getElementVariable(argumentCv);
-			// Elem[param] =^= Elem[arg]
-			fTCFactory.createEqualsConstraint(parameterElementVariable, argumentElementVariable);
-		}
-		return;
 	}
 	
-	private void visitContainerMethodInvocation(MethodInvocation node, SpecialMethod specialMethod) {
+	public void endVisit(ReturnStatement node) {
 		Expression expression= node.getExpression();
-		specialMethod.generateConstraintsFor(node, this);
-		// TODO Auto-generated method stub
+		if (expression == null)
+			return;
+		ConstraintVariable2 expressionCv= getConstraintVariable(expression);
+		if (expressionCv == null)
+			return;
 		
+		MethodDeclaration methodDeclaration= (MethodDeclaration) ASTNodes.getParent(node, ASTNode.METHOD_DECLARATION);
+		if (methodDeclaration == null)
+			return;
+		IMethodBinding methodBinding= methodDeclaration.resolveBinding();
+		if (methodBinding == null)
+			return;
+		ReturnTypeVariable2 returnTypeCv= fTCModel.makeReturnTypeVariable(methodBinding);
+		
+		CollectionElementVariable2 returnTypeElementCv= fTCModel.makeElementVariable(returnTypeCv);
+		CollectionElementVariable2 expressionElementCv= fTCModel.getElementVariable(expressionCv);
+		fTCModel.createEqualsConstraint(returnTypeElementCv, expressionElementCv);
 	}
-
+	
 	public void endVisit(FieldDeclaration node) {
 		// No need to tie the VariableDeclarationFragments together.
 		// The FieldDeclaration can be split up when fragments get different types.
@@ -274,7 +296,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		// Pairwise constraints between adjacent variables is enough.
 		Type type= node.getType();
 		ConstraintVariable2 typeCv= getConstraintVariable(type);
-		CollectionElementVariable2 typeElement= fTCFactory.getElementVariable(typeCv);
+		CollectionElementVariable2 typeElement= fTCModel.getElementVariable(typeCv);
 		if (typeElement == null)
 			return;
 		
@@ -284,8 +306,8 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
 			ConstraintVariable2 fragmentCv= getConstraintVariable(fragment);
-			CollectionElementVariable2 fragmentElement= fTCFactory.getElementVariable(fragmentCv);
-			fTCFactory.createEqualsConstraint(typeElement, fragmentElement); //TODO: batch
+			CollectionElementVariable2 fragmentElement= fTCModel.getElementVariable(fragmentCv);
+			fTCModel.createEqualsConstraint(typeElement, fragmentElement); //TODO: batch
 		}
 		
 	}
@@ -297,7 +319,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		ConstraintVariable2 typeCv= getConstraintVariable(node.getType());
 		if (typeCv == null)
 			return;
-		CollectionElementVariable2 typeElement= fTCFactory.getElementVariable(typeCv);
+		CollectionElementVariable2 typeElement= fTCModel.getElementVariable(typeCv);
 		if (typeElement == null)
 			return;
 		
@@ -305,8 +327,8 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
 			ConstraintVariable2 fragmentCv= getConstraintVariable(fragment);
-			CollectionElementVariable2 fragmentElement= fTCFactory.getElementVariable(fragmentCv);
-			fTCFactory.createEqualsConstraint(typeElement, fragmentElement); //TODO: batch
+			CollectionElementVariable2 fragmentElement= fTCModel.getElementVariable(fragmentCv);
+			fTCModel.createEqualsConstraint(typeElement, fragmentElement); //TODO: batch
 		}
 	}
 
@@ -351,7 +373,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	}
 	
 	public void endVisit(VariableDeclarationFragment node) {
-		VariableVariable2 cv= fTCFactory.makeDeclaredVariableVariable(node.resolveBinding(), fCU);
+		VariableVariable2 cv= fTCModel.makeDeclaredVariableVariable(node.resolveBinding(), fCU);
 		setConstraintVariable(node, cv);
 		
 		//TODO: prune unused CV for local variables (but not fields)
@@ -364,9 +386,9 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		if (initializerCv == null)
 			return;
 		
-		CollectionElementVariable2 leftElement= fTCFactory.getElementVariable(cv);
-		CollectionElementVariable2 rightElement= fTCFactory.getElementVariable(initializerCv);
-		fTCFactory.createEqualsConstraint(leftElement, rightElement);
+		CollectionElementVariable2 leftElement= fTCModel.getElementVariable(cv);
+		CollectionElementVariable2 rightElement= fTCModel.getElementVariable(initializerCv);
+		fTCModel.createEqualsConstraint(leftElement, rightElement);
 		
 		// name= initializer  -->  [initializer] <= [name]
 		//fTCFactory.createSubtypeConstraint(initializerCv, cv); //TODO: not for augment raw container clients
@@ -399,8 +421,8 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 //	}
 	
 	
-	public AugmentRawContainerClientsTCModel getTCFactory() {
-		return fTCFactory;
+	public AugmentRawContainerClientsTCModel getTCModel() {
+		return fTCModel;
 	}
 	
 	/**

@@ -30,14 +30,22 @@ public class ReturnTypeVariable2 extends TypeConstraintVariable2 implements IDec
 		fMethodBindingKey= methodBinding.getKey();
 	}
 
+	public String getMethodBindingKey() {
+		return fMethodBindingKey;
+	}
+
 	protected int getHash() {
-		// TODO Auto-generated method stub
-		return 0;
+		return getMethodBindingKey().hashCode();
 	}
 
 	protected boolean isSameAs(ConstraintVariable2 other) {
-		// TODO Auto-generated method stub
-		return false;
+		if (this == other)
+			return true;
+		if (other.getClass() != ReturnTypeVariable2.class)
+			return false;
+		
+		ReturnTypeVariable2 other2= (ReturnTypeVariable2) other;
+		return getMethodBindingKey().equals(other2.getMethodBindingKey());
 	}
 
 	public void setCompilationUnit(ICompilationUnit cu) {
