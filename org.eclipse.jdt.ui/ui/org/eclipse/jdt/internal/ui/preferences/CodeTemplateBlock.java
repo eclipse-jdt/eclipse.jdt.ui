@@ -442,7 +442,14 @@ public class CodeTemplateBlock {
 	public boolean performOk(boolean enabled) {
 		IPreferenceStore prefs= PreferenceConstants.getPreferenceStore();
 		prefs.setValue(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
-		JavaPlugin.getDefault().savePluginPreferences();		
+		JavaPlugin.getDefault().savePluginPreferences();
+		
+		try {
+			fTemplates.save();
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			openWriteErrorDialog(e);
+		}		
 		return true;
 	}
 	
