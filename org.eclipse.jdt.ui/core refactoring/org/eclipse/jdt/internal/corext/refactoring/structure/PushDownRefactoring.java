@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -56,7 +55,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -924,8 +922,7 @@ public class PushDownRefactoring extends Refactoring {
 				Name newException= ast.newSimpleName(((SimpleName)oldException).getIdentifier());
 				newMethod.thrownExceptions().add(i, newException);
 			}	else {
-				String[] identifiers= ASTNodes.getIdentifiers((QualifiedName)oldException);
-				Name newException= ast.newName(identifiers);
+				Name newException= (Name)ASTNode.copySubtree(ast, oldException);
 				newMethod.thrownExceptions().add(i, newException);
 			}
 		}

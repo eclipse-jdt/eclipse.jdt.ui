@@ -60,7 +60,6 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -1532,14 +1531,11 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private static Name createCopyOfName(Name name, AST ast){
-		if (name.isSimpleName())
-			return createCopyOfSimpleName((SimpleName)name, ast);
-		else 
-			return ast.newName(ASTNodes.getIdentifiers((QualifiedName)name));
+		return (Name)ASTNode.copySubtree(ast, name);
 	}
 	
 	private static SimpleName createCopyOfSimpleName(SimpleName simpleName, AST ast){
-		return ast.newSimpleName(simpleName.getIdentifier());
+		return (SimpleName)ASTNode.copySubtree(ast, simpleName);
 	}
 	
 	private void copyParameters(ASTRewrite targetRewrite, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
