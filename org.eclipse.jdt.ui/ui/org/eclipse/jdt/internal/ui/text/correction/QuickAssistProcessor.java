@@ -65,7 +65,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getAddBlockProposals(context, coveringNode, null)
 				|| getArrayInitializerToArrayCreation(context, coveringNode, null)
 				|| getCreateInSuperClassProposals(context, coveringNode, null)
-				|| getInvertEqualsProposal(context, coveringNode, null);
+				|| getInvertEqualsProposal(context, coveringNode, null)
+				|| getConvertForLoopProposal(context, coveringNode, null);
 			
 		}
 		return false;
@@ -95,6 +96,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getInvertEqualsProposal(context, coveringNode, resultingCollections);
 				getArrayInitializerToArrayCreation(context, coveringNode, resultingCollections);
 				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
+				getConvertForLoopProposal(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -891,4 +893,23 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	
+	private boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
+		if (!(node instanceof ForStatement))
+			return false;
+		
+		if (resultingCollections == null)
+			return true;
+		
+		ConvertForLoopProposal convertForLoopProposal= new ConvertForLoopProposal(
+				CorrectionMessages.getString("QuickAssistProcessor.forLoop.description"),  //$NON-NLS-1$
+				context.getCompilationUnit(),
+				((ForStatement) node), 1, 
+				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+		
+		if (!convertForLoopProposal.satisfiesPreconditions())
+		    return false;
+		
+		resultingCollections.add(convertForLoopProposal);
+		return true;
+	}	
 }
