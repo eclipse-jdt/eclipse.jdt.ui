@@ -87,7 +87,7 @@ public class SelectionButtonDialogField extends DialogField {
 		gd.horizontalSpan= nColumns;
 		gd.horizontalAlignment= GridData.FILL;
 		if (fButtonStyle == SWT.PUSH) {
-			gd.heightHint = SWTUtil.getButtonHeigthHint(button);
+			gd.heightHint = SWTUtil.getButtonHeightHint(button);
 			gd.widthHint = SWTUtil.getButtonWidthHint(button);
 		}			
 		

@@ -108,12 +108,12 @@ public class LayoutUtil {
 	}
 	
 	/**
-	 * Sets the heigthHint hint of a control. Assumes that GridData is used.
+	 * Sets the heightHint hint of a control. Assumes that GridData is used.
 	 */
-	public static void setHeigthHint(Control control, int heigthHint) {
+	public static void setHeightHint(Control control, int heightHint) {
 		Object ld= control.getLayoutData();
 		if (ld instanceof GridData) {
-			((GridData)ld).heightHint= heigthHint;
+			((GridData)ld).heightHint= heightHint;
 		}
 	}	
 	

@@ -100,7 +100,7 @@ public class HistoryListAction extends Action {
 			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 			LayoutUtil.doDefaultLayout(inner, new DialogField[] { fHistoryList }, true, 0, 0);
-			LayoutUtil.setHeigthHint(fHistoryList.getListControl(null), convertHeightInCharsToPixels(12));
+			LayoutUtil.setHeightHint(fHistoryList.getListControl(null), convertHeightInCharsToPixels(12));
 			LayoutUtil.setHorizontalGrabbing(fHistoryList.getListControl(null));
 
 			applyDialogFont(composite);		

@@ -42,7 +42,7 @@ public class Separator extends DialogField {
 
 	/**
 	 * Creates the separator and fills it in a MGridLayout.
-	 * @param height The heigth of the separator
+	 * @param height The height of the separator
 	 */		
 	public Control[] doFillIntoGrid(Composite parent, int nColumns, int height) {
 		assertEnoughColumns(nColumns);

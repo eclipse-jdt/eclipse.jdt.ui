@@ -313,7 +313,7 @@ public class TreeListDialogField extends DialogField {
 		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= true;
 		gd.verticalAlignment= GridData.BEGINNING;
-		gd.heightHint= SWTUtil.getButtonHeigthHint(button);
+		gd.heightHint= SWTUtil.getButtonHeightHint(button);
 		gd.widthHint= SWTUtil.getButtonWidthHint(button);
 
 		button.setLayoutData(gd);

@@ -813,24 +813,24 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 */
 	protected void setEqualButtonSizes() {
 		int width= SWTUtil.getButtonWidthHint(fManifestFileBrowseButton);
-		int height= SWTUtil.getButtonHeigthHint(fManifestFileBrowseButton);
+		int height= SWTUtil.getButtonHeightHint(fManifestFileBrowseButton);
 		int width2= SWTUtil.getButtonWidthHint(fNewManifestFileBrowseButton);
-		int height2= SWTUtil.getButtonHeigthHint(fNewManifestFileBrowseButton);
+		int height2= SWTUtil.getButtonHeightHint(fNewManifestFileBrowseButton);
 		width= Math.max(width, width2);
 		height= Math.max(height, height2);
 
 		width2= SWTUtil.getButtonWidthHint(fSealedPackagesDetailsButton);
-		height2= SWTUtil.getButtonHeigthHint(fSealedPackagesDetailsButton);
+		height2= SWTUtil.getButtonHeightHint(fSealedPackagesDetailsButton);
 		width= Math.max(width, width2);
 		height= Math.max(height, height2);
 
 		width2= SWTUtil.getButtonWidthHint(fUnSealedPackagesDetailsButton);
-		height2= SWTUtil.getButtonHeigthHint(fUnSealedPackagesDetailsButton);
+		height2= SWTUtil.getButtonHeightHint(fUnSealedPackagesDetailsButton);
 		width= Math.max(width, width2);
 		height= Math.max(height, height2);
 
 		width2= SWTUtil.getButtonWidthHint(fMainClassBrowseButton);
-		height2= SWTUtil.getButtonHeigthHint(fMainClassBrowseButton);
+		height2= SWTUtil.getButtonHeightHint(fMainClassBrowseButton);
 		width= Math.max(width, width2);
 		height= Math.max(height, height2);
 

@@ -412,7 +412,7 @@ public class EditTemplateDialog extends StatusDialog {
 
 	private static GridData getButtonGridData(Button button) {
 		GridData data= new GridData(GridData.FILL_HORIZONTAL);
-		data.heightHint= SWTUtil.getButtonHeigthHint(button);
+		data.heightHint= SWTUtil.getButtonHeightHint(button);
 	
 		return data;
 	}

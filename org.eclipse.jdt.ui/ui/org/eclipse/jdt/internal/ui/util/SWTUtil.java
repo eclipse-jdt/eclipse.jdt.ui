@@ -85,7 +85,7 @@ public class SWTUtil {
 	/**
 	 * Returns a height hint for a button control.
 	 */		
-	public static int getButtonHeigthHint(Button button) {
+	public static int getButtonHeightHint(Button button) {
 		if (button.getFont().equals(JFaceResources.getDefaultFont()))
 			button.setFont(JFaceResources.getDialogFont());
 		PixelConverter converter= new PixelConverter(button);
@@ -104,7 +104,7 @@ public class SWTUtil {
 		Assert.isNotNull(button);
 		Object gd= button.getLayoutData();
 		if (gd instanceof GridData) {
-			((GridData)gd).heightHint= getButtonHeigthHint(button);
+			((GridData)gd).heightHint= getButtonHeightHint(button);
 			((GridData)gd).widthHint= getButtonWidthHint(button);		 
 		}
 	}
