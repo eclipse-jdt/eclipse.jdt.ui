@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -124,9 +126,15 @@ public class CompilationUnitRewrite {
 			return null;
 
 		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
-		ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
+		ITextFileBuffer buffer= null;
+		IDocument document= null;
 		try {
-			IDocument document= buffer.getDocument();
+			if (!JavaModelUtil.isPrimary(fCu))
+				document= new Document(fCu.getBuffer().getContents());
+			else {
+				buffer= RefactoringFileBuffers.acquire(fCu);
+				document= buffer.getDocument();
+			}
 			MultiTextEdit multiEdit= new MultiTextEdit();
 			cuChange.setEdit(multiEdit);
 			if (needsAstRewrite) {
@@ -164,7 +172,8 @@ public class CompilationUnitRewrite {
 				return null;
 			return cuChange;
 		} finally {
-			RefactoringFileBuffers.release(fCu);
+			if (buffer != null)
+				RefactoringFileBuffers.release(fCu);
 		}
 	}
 
