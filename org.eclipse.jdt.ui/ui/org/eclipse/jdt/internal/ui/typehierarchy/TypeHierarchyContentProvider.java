@@ -71,6 +71,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return fTypeHierarchy.getHierarchy();
 	}
 	
+	
 	/*
 	 * Called for the root element
 	 * @see IStructuredContentProvider#getElements	 

@@ -37,6 +37,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
@@ -340,13 +341,16 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				ICompilationUnit cu= ((IMember) element).getCompilationUnit();
 				if (cu != null && cu.isWorkingCopy()) {
 					element= cu.getOriginal(element);
+					if (!element.exists()) {
+						MessageDialog.openError(getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.message"));
+						return;
+					}
 				}
 				if (element.getElementType() == IJavaElement.METHOD || element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.INITIALIZER) {
 					element= ((IMember) element).getDeclaringType();
 				}
 			}
-		}
-		
+		}	
 		if (element != null && !element.equals(fInputElement)) {
 			addHistoryEntry(element);
 		}
@@ -367,7 +371,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement);
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
+				JavaPlugin.log(e);
 				clearInput();
 				return;
 			}

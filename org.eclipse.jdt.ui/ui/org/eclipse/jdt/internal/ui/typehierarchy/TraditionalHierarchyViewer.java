@@ -46,7 +46,12 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	 */		
 	public void updateContent() {
 		refresh();
-		expandAll();
+		TraditionalHierarchyContentProvider contentProvider= (TraditionalHierarchyContentProvider) getContentProvider();
+		int expandLevel= contentProvider.getExpandLevel();
+		if (isMethodFiltering()) {
+			expandLevel++;
+		}		
+		expandToLevel(expandLevel);
 	}	
 
 	/**
@@ -57,6 +62,27 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			
 		public TraditionalHierarchyContentProvider(TypeHierarchyLifeCycle provider) {
 			super(provider);
+		}
+		
+		public int getExpandLevel() {
+			ITypeHierarchy hierarchy= getHierarchy();
+			if (hierarchy != null) {
+				IType input= hierarchy.getType();
+				if (input != null) {
+					return getDepth(hierarchy, input) + 2;
+				}
+			}
+			return 2;
+		}
+		
+		private int getDepth(ITypeHierarchy hierarchy, IType input) {
+			int count= 0;
+			IType superType= hierarchy.getSuperclass(input);
+			while (superType != null) {
+				count++;
+				superType= hierarchy.getSuperclass(superType);
+			}
+			return count;
 		}
 		
 	
