@@ -5,11 +5,13 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -44,6 +46,8 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		if (parent.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
 			return fCu; //??
 		IPackageFragment pack= (IPackageFragment)parent;
+		if (JavaConventions.validateCompilationUnitName(fNewName).getSeverity() == IStatus.ERROR)
+			return fCu; //??
 		return pack.getCompilationUnit(fNewName);
 	}
 	
