@@ -111,28 +111,16 @@ public class VariableSelectionBlock {
 	private class VariableSelectionAdapter implements IDialogFieldListener, IStringButtonAdapter {
 		
 		// -------- IDialogFieldListener
-		
 		public void dialogFieldChanged(DialogField field) {
 			doFieldUpdated(field);
 		}
 		
 		// -------- IStringButtonAdapter
-		
 		public void changeControlPressed(DialogField field) {
-			if (field == fVariableField) {
-				String variable= chooseVariable();
-				if (variable != null) {
-					fVariableField.setText(variable);
-				}
-			} else if (field == fExtensionField) {
-				IPath filePath= chooseExtJar();
-				if (filePath != null) {
-					fExtensionField.setText(filePath.toString());
-				}
-			}
+			doChangeControlPressed(field);
 		}
 		
-	}
+	}		private void doChangeControlPressed(DialogField field) {		if (field == fVariableField) {			String variable= chooseVariable();			if (variable != null) {				fVariableField.setText(variable);			}		} else if (field == fExtensionField) {			IPath filePath= chooseExtJar();			if (filePath != null) {				fExtensionField.setText(filePath.toString());			}		}	}
 	
 	private void doFieldUpdated(DialogField field) {
 		if (field == fVariableField) {

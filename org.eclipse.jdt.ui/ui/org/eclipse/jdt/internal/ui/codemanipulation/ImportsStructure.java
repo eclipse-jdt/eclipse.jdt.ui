@@ -401,8 +401,6 @@ public class ImportsStructure implements IImportsStructure {
 			int nInports= fImportEntries.size();
 			for (int i= 0; i < nInports; i++) {
 				IImportDeclaration curr= getImportAt(i);
-				int cmp= fullImportName.compareTo(curr.getElementName());
-				
 				if (fullImportName.compareTo(curr.getElementName()) <= 0) {
 					return i;
 				}

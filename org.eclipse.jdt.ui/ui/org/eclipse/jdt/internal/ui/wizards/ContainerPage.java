@@ -126,26 +126,32 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	private class ContainerFieldAdapter implements IStringButtonAdapter, IDialogFieldListener {
 
 		// -------- IStringButtonAdapter
-		
 		public void changeControlPressed(DialogField field) {
-			// take the current jproject as init element of the dialog
-			IPackageFragmentRoot root= getPackageFragmentRoot();
-			IJavaProject jproject= (root != null) ? root.getJavaProject() : null; 
-			root= chooseSourceContainer(jproject);
-			if (root != null) {
-				fContainerDialogField.setText(root.getPath().toString());
-			}	
+			containerChangeControlPressed(field);
 		}
 		
 		// -------- IDialogFieldListener
-		
 		public void dialogFieldChanged(DialogField field) {
-			if (field == fContainerDialogField) {
-				fContainerStatus= containerChanged();
-			}
-			// tell all others
-			handleFieldChanged(CONTAINER);
+			containerDialogFieldChanged(field);
 		}
+	}
+	
+	private void containerChangeControlPressed(DialogField field) {
+		// take the current jproject as init element of the dialog
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		IJavaProject jproject= (root != null) ? root.getJavaProject() : null; 
+		root= chooseSourceContainer(jproject);
+		if (root != null) {
+			fContainerDialogField.setText(root.getPath().toString());
+		}
+	}
+	
+	private void containerDialogFieldChanged(DialogField field) {
+		if (field == fContainerDialogField) {
+			fContainerStatus= containerChanged();
+		}
+		// tell all others
+		handleFieldChanged(CONTAINER);
 	}
 	
 	// ----------- validation ----------

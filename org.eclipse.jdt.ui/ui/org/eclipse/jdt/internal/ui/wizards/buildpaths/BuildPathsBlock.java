@@ -370,28 +370,35 @@ public class BuildPathsBlock {
 	private class BuildPathAdapter implements IStringButtonAdapter, IDialogFieldListener {
 
 		// -------- IStringButtonAdapter --------
-		
 		public void changeControlPressed(DialogField field) {
-			if (field == fBuildPathDialogField) {
-				IContainer container= chooseContainer();
-				if (container != null) {
-					fBuildPathDialogField.setText(container.getFullPath().toString());
-				}
-			}
+			buildPathChangeControlPressed(field);
 		}
 		
 		// ---------- IDialogFieldListener --------
-	
 		public void dialogFieldChanged(DialogField field) {
-			if (field == fClassPathList) {
-				updateClassPathStatus();
-				updateBuildPathStatus();
-			} else if (field == fBuildPathDialogField) {
-				updateBuildPathStatus();
-			}
-			doStatusLineUpdate();
+			buildPathDialogFieldChanged(field);
 		}
 	}
+	
+	private void buildPathChangeControlPressed(DialogField field) {
+		if (field == fBuildPathDialogField) {
+			IContainer container= chooseContainer();
+			if (container != null) {
+				fBuildPathDialogField.setText(container.getFullPath().toString());
+			}
+		}
+	}
+	
+	private void buildPathDialogFieldChanged(DialogField field) {
+		if (field == fClassPathList) {
+			updateClassPathStatus();
+			updateBuildPathStatus();
+		} else if (field == fBuildPathDialogField) {
+			updateBuildPathStatus();
+		}
+		doStatusLineUpdate();
+	}	
+	
 
 	
 	// -------- verification -------------------------------
@@ -410,7 +417,7 @@ public class BuildPathsBlock {
 	private void updateClassPathStatus() {
 		fClassPathStatus.setOK();
 		List elements= fClassPathList.getElements();
-		IPath buildPath= new Path(fBuildPathDialogField.getText());
+
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 		
 		boolean entryMissing= false;

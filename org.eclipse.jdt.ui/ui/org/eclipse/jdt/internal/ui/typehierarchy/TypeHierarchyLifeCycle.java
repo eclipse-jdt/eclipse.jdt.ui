@@ -87,26 +87,13 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener {
 			freeHierarchy();
 			return;
 		}
-		final boolean hierachyCreationNeeded= (fHierarchy == null || !type.equals(fHierarchy.getType()));
+		boolean hierachyCreationNeeded= (fHierarchy == null || !type.equals(fHierarchy.getType()));
 		
 		if (hierachyCreationNeeded || fHierarchyRefreshNeeded) {
 			IRunnableWithProgress op= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					try {
-						if (hierachyCreationNeeded) {
-							if (fHierarchy != null) {
-								fHierarchy.removeTypeHierarchyChangedListener(TypeHierarchyLifeCycle.this);
-							}
-							IJavaProject jproject= type.getJavaProject();
-							if (fIsSuperTypesOnly) {
-								fHierarchy= type.newSupertypeHierarchy(pm);
-							} else {
-								fHierarchy= type.newTypeHierarchy(pm);
-							}
-							fHierarchy.addTypeHierarchyChangedListener(TypeHierarchyLifeCycle.this);
-						} else {
-							fHierarchy.refresh(pm);
-						}
+						doHierarchyRefresh(type, pm);
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
 					}
@@ -129,6 +116,25 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener {
 			fHierarchyRefreshNeeded= false;
 		}
 	}
+	
+	private void doHierarchyRefresh(IType type, IProgressMonitor pm) throws JavaModelException {
+		boolean hierachyCreationNeeded= (fHierarchy == null || !type.equals(fHierarchy.getType()));
+		if (hierachyCreationNeeded) {
+			if (fHierarchy != null) {
+				fHierarchy.removeTypeHierarchyChangedListener(TypeHierarchyLifeCycle.this);
+			}
+			if (fIsSuperTypesOnly) {
+				fHierarchy= type.newSupertypeHierarchy(pm);
+			} else {
+				fHierarchy= type.newTypeHierarchy(pm);
+			}
+			fHierarchy.addTypeHierarchyChangedListener(TypeHierarchyLifeCycle.this);
+		} else {
+			fHierarchy.refresh(pm);
+		}
+	}		
+	
+	
 	
 	/**
 	 * @see ITypeHierarchyChangedListener#typeHierarchyChanged

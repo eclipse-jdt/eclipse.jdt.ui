@@ -143,77 +143,87 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private class LibrariesAdapter implements IDialogFieldListener, IListAdapter {
 		
 		// -------- IListAdapter --------
-			
 		public void customButtonPressed(DialogField field, int index) {
-			CPListElement[] libentries= null;
-			switch (index) {
-			case 0: /* add new */
-				libentries= createNewClassContainer();
-				break;
-			case 1: /* add existing */
-				libentries= chooseClassContainers();
-				break;
-			case 2: /* add jar */
-				libentries= chooseJarFiles();
-				break;
-			case 3: /* add external jar */
-				libentries= chooseExtJarFiles();
-				break;
-			case 4: /* add variable */
-				libentries= chooseVariableEntries();
-				break;				
-			case 6: /* set source attachment */
-				List selElements= fLibrariesList.getSelectedElements();
-				CPListElement selElement= (CPListElement) selElements.get(0);				
-				SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry());
-				if (dialog.open() == dialog.OK) {
-					selElement.setSourceAttachment(dialog.getSourceAttachmentPath(), dialog.getSourceAttachmentRootPath());
-					fLibrariesList.refresh();
-					fClassPathList.refresh();
-				}
-				break;
-			}
-			if (libentries != null) {
-				int nElementsChosen= libentries.length;					
-				// remove duplicates
-				List cplist= fLibrariesList.getElements();
-				List elementsToAdd= new ArrayList(nElementsChosen);
-				
-				for (int i= 0; i < nElementsChosen; i++) {
-					CPListElement curr= libentries[i];
-					if (!cplist.contains(curr) && !elementsToAdd.contains(curr)) {
-						elementsToAdd.add(curr);
-						addAttachmentsFromExistingLibs(curr);
-					}
-				}
-				fLibrariesList.addElements(elementsToAdd);
-				fLibrariesList.postSetSelection(new StructuredSelection(libentries));
-			}
+			libaryPageCustomButtonPressed(field, index);
 		}
 		
 		public void selectionChanged(DialogField field) {
-			List selElements= fLibrariesList.getSelectedElements();
-			fLibrariesList.enableCustomButton(6, canDoSourceAttachment(selElements));
+			libaryPageSelectionChanged(field);
 		}
-		
-		private boolean canDoSourceAttachment(List selElements) {
-			if (selElements != null && selElements.size() == 1) {
-				CPListElement elem= (CPListElement) selElements.get(0);
-				return (!(elem.getResource() instanceof IFolder));
-			}
-			return false;
-		}
-			
 			
 		// ---------- IDialogFieldListener --------
 	
 		public void dialogFieldChanged(DialogField field) {
-			if (fCurrJProject != null) {
-				// already initialized
-				updateClasspathList();
-			}
+			libaryPageDialogFieldChanged(field);
 		}
 	}
+	
+	private void libaryPageCustomButtonPressed(DialogField field, int index) {
+		CPListElement[] libentries= null;
+		switch (index) {
+		case 0: /* add new */
+			libentries= createNewClassContainer();
+			break;
+		case 1: /* add existing */
+			libentries= chooseClassContainers();
+			break;
+		case 2: /* add jar */
+			libentries= chooseJarFiles();
+			break;
+		case 3: /* add external jar */
+			libentries= chooseExtJarFiles();
+			break;
+		case 4: /* add variable */
+			libentries= chooseVariableEntries();
+			break;				
+		case 6: /* set source attachment */
+			List selElements= fLibrariesList.getSelectedElements();
+			CPListElement selElement= (CPListElement) selElements.get(0);				
+			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry());
+			if (dialog.open() == dialog.OK) {
+				selElement.setSourceAttachment(dialog.getSourceAttachmentPath(), dialog.getSourceAttachmentRootPath());
+				fLibrariesList.refresh();
+				fClassPathList.refresh();
+			}
+			break;
+		}
+		if (libentries != null) {
+			int nElementsChosen= libentries.length;					
+			// remove duplicates
+			List cplist= fLibrariesList.getElements();
+			List elementsToAdd= new ArrayList(nElementsChosen);
+			
+			for (int i= 0; i < nElementsChosen; i++) {
+				CPListElement curr= libentries[i];
+				if (!cplist.contains(curr) && !elementsToAdd.contains(curr)) {
+					elementsToAdd.add(curr);
+					addAttachmentsFromExistingLibs(curr);
+				}
+			}
+			fLibrariesList.addElements(elementsToAdd);
+			fLibrariesList.postSetSelection(new StructuredSelection(libentries));
+		}
+	}
+	
+	private void libaryPageSelectionChanged(DialogField field) {
+		List selElements= fLibrariesList.getSelectedElements();
+		fLibrariesList.enableCustomButton(6, canDoSourceAttachment(selElements));
+	}
+	
+	private void libaryPageDialogFieldChanged(DialogField field) {
+		if (fCurrJProject != null) {
+			// already initialized
+			updateClasspathList();
+		}
+	}	
+	
+	private boolean canDoSourceAttachment(List selElements) {
+		if (selElements != null && selElements.size() == 1) {
+			CPListElement elem= (CPListElement) selElements.get(0);
+			return (!(elem.getResource() instanceof IFolder));
+		}
+		return false;
+	}		
 	
 	private void updateClasspathList() {
 		List projelements= fLibrariesList.getElements();
@@ -392,7 +402,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private CPListElement[] chooseVariableEntries() {
-		List existing= fLibrariesList.getElements();
 		ArrayList existingPaths= new ArrayList();
 		for (int i= 0; i < fLibrariesList.getSize(); i++) {
 			CPListElement elem= (CPListElement) fLibrariesList.getElement(i);

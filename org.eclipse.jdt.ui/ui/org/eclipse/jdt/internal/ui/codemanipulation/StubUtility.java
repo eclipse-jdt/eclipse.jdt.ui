@@ -365,7 +365,6 @@ public class StubUtility {
 	 */
 	public static void evalConstructors(IType type, IType supertype, List newMethods, IImportsStructure imports) throws JavaModelException {
 		IMethod[] methods= supertype.getMethods();
-		String stypeName= supertype.getElementName();
 		for (int i= 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
 			if (curr.isConstructor() && JavaModelUtility.isVisible(type.getPackageFragment(), curr.getFlags(), supertype.getPackageFragment())) {

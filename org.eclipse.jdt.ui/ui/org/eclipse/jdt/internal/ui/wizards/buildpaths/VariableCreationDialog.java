@@ -140,25 +140,27 @@ public class VariableCreationDialog extends StatusDialog {
 	private class NewVariableAdapter implements IDialogFieldListener, IStringButtonAdapter {
 		
 		// -------- IDialogFieldListener
-		
 		public void dialogFieldChanged(DialogField field) {
 			doFieldUpdated(field);
 		}
 		
 		// -------- IStringButtonAdapter
-		
 		public void changeControlPressed(DialogField field) {
-			if (field == fPathField) {
-				IPath path= chooseExtJarFile();
-				if (path != null) {
-					fPathField.setText(path.toString());
-				}
-			} else if (field == fDirButton) {
-				IPath path= chooseExtDirectory();
-				if (path != null) {
-					fPathField.setText(path.toString());
-				}
-			}			
+			doChangeControlPressed(field);
+		}
+	}
+	
+	protected void doChangeControlPressed(DialogField field) {
+		if (field == fPathField) {
+			IPath path= chooseExtJarFile();
+			if (path != null) {
+				fPathField.setText(path.toString());
+			}
+		} else if (field == fDirButton) {
+			IPath path= chooseExtDirectory();
+			if (path != null) {
+				fPathField.setText(path.toString());
+			}
 		}
 	}
 	

@@ -178,7 +178,6 @@ public abstract class TypePage extends ContainerPage {
 		fAccMdfButtons.setSelection(0, true);
 		
 		String[] buttonNames2;
-		int staticMdfIndex;
 		if (fIsClass) {
 			buttonNames2= new String[] {
 				NewWizardMessages.getString("TypePage.modifiers.abstract"), NewWizardMessages.getString("TypePage.modifiers.final"), //$NON-NLS-2$ //$NON-NLS-1$
@@ -361,69 +360,80 @@ public abstract class TypePage extends ContainerPage {
 	private class TypeFieldsAdapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
 		
 		// -------- IStringButtonAdapter
-		
 		public void changeControlPressed(DialogField field) {
-			if (field == fPackageDialogField) {
-				IPackageFragment pack= choosePackage();	
-				if (pack != null) {
-					fPackageDialogField.setText(pack.getElementName());
-				}
-			} else if (field == fEnclosingTypeDialogField) {
-				IType type= chooseEnclosingType();
-				if (type != null) {
-					fEnclosingTypeDialogField.setText(JavaModelUtility.getFullyQualifiedName(type));
-				}
-			} else if (field == fSuperClassDialogField) {
-				IType type= chooseSuperType();
-				if (type != null) {
-					fSuperClassDialogField.setText(JavaModelUtility.getFullyQualifiedName(type));
-				}
-			}
+			typePageChangeControlPressed(field);
 		}
 		
 		// -------- IListAdapter
-		
 		public void customButtonPressed(DialogField field, int index) {
-			if (field == fSuperInterfacesDialogField) {
-				chooseSuperInterfaces();
-			}
+			typePageCustomButtonPressed(field, index);
 		}
 		
 		public void selectionChanged(DialogField field) {}
 		
 		// -------- IDialogFieldListener
-		
 		public void dialogFieldChanged(DialogField field) {
-			String fieldName= null;
-			if (field == fPackageDialogField) {
-				fPackageStatus= packageChanged();
-				updatePackageStatusLabel();
-				fieldName= PACKAGE;
-			} else if (field == fEnclosingTypeDialogField) {
-				fEnclosingTypeStatus= enclosingTypeChanged();
-				fieldName= ENCLOSING;
-			} else if (field == fEnclosingTypeSelection) {
-				updateEnableState();
-				fieldName= ENCLOSINGSELECTION;
-			} else if (field == fTypeNameDialogField) {
-				fTypeNameStatus= typeNameChanged();
-				fieldName= TYPENAME;
-			} else if (field == fSuperClassDialogField) {
-				fSuperClassStatus= superClassChanged();
-				fieldName= SUPER;
-			} else if (field == fSuperInterfacesDialogField) {
-				fSuperInterfacesStatus= superInterfacesChanged();
-				fieldName= INTERFACES;
-			} else if (field == fOtherMdfButtons) {
-				fModifierStatus= modifiersChanged();
-				fieldName= MODIFIERS;
-			} else {
-				fieldName= METHODS;
-			}
-			// tell all others
-			handleFieldChanged(fieldName);
+			typePageDialogFieldChanged(field);
 		}
 	}
+	
+	private void typePageChangeControlPressed(DialogField field) {
+		if (field == fPackageDialogField) {
+			IPackageFragment pack= choosePackage();	
+			if (pack != null) {
+				fPackageDialogField.setText(pack.getElementName());
+			}
+		} else if (field == fEnclosingTypeDialogField) {
+			IType type= chooseEnclosingType();
+			if (type != null) {
+				fEnclosingTypeDialogField.setText(JavaModelUtility.getFullyQualifiedName(type));
+			}
+		} else if (field == fSuperClassDialogField) {
+			IType type= chooseSuperType();
+			if (type != null) {
+				fSuperClassDialogField.setText(JavaModelUtility.getFullyQualifiedName(type));
+			}
+		}
+	}
+	
+	private void typePageCustomButtonPressed(DialogField field, int index) {		
+		if (field == fSuperInterfacesDialogField) {
+			chooseSuperInterfaces();
+		}
+	}
+	
+	private void typePageDialogFieldChanged(DialogField field) {
+		String fieldName= null;
+		if (field == fPackageDialogField) {
+			fPackageStatus= packageChanged();
+			updatePackageStatusLabel();
+			fieldName= PACKAGE;
+		} else if (field == fEnclosingTypeDialogField) {
+			fEnclosingTypeStatus= enclosingTypeChanged();
+			fieldName= ENCLOSING;
+		} else if (field == fEnclosingTypeSelection) {
+			updateEnableState();
+			fieldName= ENCLOSINGSELECTION;
+		} else if (field == fTypeNameDialogField) {
+			fTypeNameStatus= typeNameChanged();
+			fieldName= TYPENAME;
+		} else if (field == fSuperClassDialogField) {
+			fSuperClassStatus= superClassChanged();
+			fieldName= SUPER;
+		} else if (field == fSuperInterfacesDialogField) {
+			fSuperInterfacesStatus= superInterfacesChanged();
+			fieldName= INTERFACES;
+		} else if (field == fOtherMdfButtons) {
+			fModifierStatus= modifiersChanged();
+			fieldName= MODIFIERS;
+		} else {
+			fieldName= METHODS;
+		}
+		// tell all others
+		handleFieldChanged(fieldName);
+	}		
+	
+	
 		
 	// -------- update message ----------------		
 

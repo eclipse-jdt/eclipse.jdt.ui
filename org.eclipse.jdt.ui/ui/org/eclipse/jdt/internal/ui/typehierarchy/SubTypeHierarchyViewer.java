@@ -28,7 +28,6 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 	 * @see TypeHierarchyViewer#getTitle
 	 */	
 	public String getTitle() {
-		String title;
 		if (getHierarchyContentProvider().getMemberFilter() != null) {
 			return TypeHierarchyMessages.getString("SubTypeHierarchyViewer.filtered.title"); //$NON-NLS-1$
 		} else {

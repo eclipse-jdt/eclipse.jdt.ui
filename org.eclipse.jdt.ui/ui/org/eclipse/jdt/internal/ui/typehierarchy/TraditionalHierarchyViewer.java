@@ -23,7 +23,6 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	 * @see TypeHierarchyViewer#getTitle
 	 */	
 	public String getTitle() {
-		String title;
 		if (getHierarchyContentProvider().getMemberFilter() != null) {
 			return TypeHierarchyMessages.getString("TraditionalHierarchyViewer.filtered.title"); //$NON-NLS-1$
 		} else {
@@ -74,7 +73,6 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		 */
 		public Object[] getElements(Object parent) {
 			updateSuperTypesList();
-			IType[] types;
 			if (fSuperTypesList == null || fSuperTypesList.length == 0) {
 				return new IType[] { getInputType() };
 			} else {

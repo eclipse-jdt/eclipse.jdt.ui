@@ -136,9 +136,8 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 				buf.append(' '); buf.append(getterName);
 				buf.append("() {\n\t\treturn "); buf.append(fieldName); buf.append(";\n\t}\n"); //$NON-NLS-2$ //$NON-NLS-1$
 				
-				String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;					
-				
-				fCreatedAccessors.add(parentType.createMethod(buf.toString(), null, true, null));
+				String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
+				fCreatedAccessors.add(parentType.createMethod(formattedContent, null, true, null));
 			}
 			
 			monitor.worked(1);

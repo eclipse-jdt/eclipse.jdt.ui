@@ -107,9 +107,8 @@ public class CompletionEvaluator {
 	}
 	
 	private static int findClosingCharacter(IDocument doc, int pos, int end, char endChar) throws BadLocationException {
-		char ch;
 		int curr= pos;
-		while (curr < end && (ch= doc.getChar(curr)) != endChar) {
+		while (curr < end && (doc.getChar(curr) != endChar)) {
 			curr++;
 		}
 		if (curr < end) {
@@ -300,7 +299,6 @@ public class CompletionEvaluator {
 		} else if ("@serialData".equals(tag)) { //$NON-NLS-1$
 			IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
 			if (elem instanceof IField) {
-				JavaImageLabelProvider iprovider= new JavaImageLabelProvider(0);
 				String name= ((IField)elem).getElementName();
 				fResult.add(createCompletion(name, argument, name, fLabelProvider.getImage(elem), null));
 			}

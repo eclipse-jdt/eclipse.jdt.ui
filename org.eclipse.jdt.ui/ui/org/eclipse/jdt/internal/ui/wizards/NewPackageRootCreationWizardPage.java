@@ -213,40 +213,44 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 	private class RootFieldAdapter implements IStringButtonAdapter, IDialogFieldListener {
 
 		// -------- IStringButtonAdapter
-		
 		public void changeControlPressed(DialogField field) {
-			if (field == fRootDialogField) {
-				IFolder folder= chooseFolder();
-				if (folder != null) {
-					IPath path= folder.getFullPath().removeFirstSegments(1);
-					fRootDialogField.setText(path.toString());
-				}
-			} else if (field == fProjectField) {
-				IJavaProject jproject= chooseProject();
-				if (jproject != null) {
-					IPath path= jproject.getProject().getFullPath();
-					fProjectField.setText(path.toString());
-				}
-			}
-	
+			packRootChangeControlPressed(field);
 		}
 		
 		// -------- IDialogFieldListener
-		
 		public void dialogFieldChanged(DialogField field) {
-			if (field == fRootDialogField) {
-				updateRootStatus();
-			} else if (field == fProjectField) {
+			packRootDialogFieldChanged(field);
+		}
+	}
+	private void packRootChangeControlPressed(DialogField field) {
+		if (field == fRootDialogField) {
+			IFolder folder= chooseFolder();
+			if (folder != null) {
+				IPath path= folder.getFullPath().removeFirstSegments(1);
+				fRootDialogField.setText(path.toString());
+			}
+		} else if (field == fProjectField) {
+			IJavaProject jproject= chooseProject();
+			if (jproject != null) {
+				IPath path= jproject.getProject().getFullPath();
+				fProjectField.setText(path.toString());
+			}
+		}
+	}	
+	
+	private void packRootDialogFieldChanged(DialogField field) {
+		if (field == fRootDialogField) {
+			updateRootStatus();
+		} else if (field == fProjectField) {
+			updateProjectStatus();
+			updateRootStatus();
+		} else if (field == fEditClassPathField) {
+			if (showClassPathPropertyPage()) {
 				updateProjectStatus();
 				updateRootStatus();
-			} else if (field == fEditClassPathField) {
-				if (showClassPathPropertyPage()) {
-					updateProjectStatus();
-					updateRootStatus();
-				}
 			}
-			updateStatus(findMostSevereStatus());
 		}
+		updateStatus(findMostSevereStatus());
 	}
 	
 	

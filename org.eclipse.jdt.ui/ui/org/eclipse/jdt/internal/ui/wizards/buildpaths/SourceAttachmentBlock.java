@@ -268,49 +268,57 @@ public class SourceAttachmentBlock {
 	private class SourceAttachmentAdapter implements IStringButtonAdapter, IDialogFieldListener {
 		
 		// -------- IStringButtonAdapter --------
-		
 		public void changeControlPressed(DialogField field) {
-			if (field == fFileNameField) {
-				IPath jarFilePath= chooseExtJarFile();
-				if (jarFilePath != null) {
-					fFileName= jarFilePath;
-					fFileNameField.setText(fFileName.toString());
-				}
-			} else if (field == fPrefixField) {
-				IPath prefixPath= choosePrefix();
-				if (prefixPath != null) {
-					fPrefix= prefixPath;
-					fPrefixField.setText(fPrefix.toString());
-				}
-			} else if (field == fJavaDocField) {
-				URL jdocURL= chooseJavaDocLocation();
-				if (jdocURL != null) {
-					fJavaDocLocation= jdocURL;
-					fJavaDocField.setText(fJavaDocLocation.toExternalForm());
-				}
-			}			
+			attachmentChangeControlPressed(field);			
 		}
 		
 		// ---------- IDialogFieldListener --------
-	
 		public void dialogFieldChanged(DialogField field) {
-			if (field == fFileNameField) {
-				fNameStatus= updateFileNameStatus();
-			} else if (field == fInternalButtonField) {
-				IPath jarFilePath= chooseInternalJarFile(fFileNameField.getText());
-				if (jarFilePath != null) {
-					fFileName= jarFilePath;
-					fFileNameField.setText(fFileName.toString());
-				}
-				return;
-			} else if (field == fPrefixField) {
-				fPrefixStatus= updatePrefixStatus();
-			} else if (field == fJavaDocField) {
-				fJavaDocStatus= updateJavaDocLocationStatus();
-			}
-			doStatusLineUpdate();
+			attachmentDialogFieldChanged(field);
 		}
 	}
+	
+	private void attachmentChangeControlPressed(DialogField field) {
+		if (field == fFileNameField) {
+			IPath jarFilePath= chooseExtJarFile();
+			if (jarFilePath != null) {
+				fFileName= jarFilePath;
+				fFileNameField.setText(fFileName.toString());
+			}
+		} else if (field == fPrefixField) {
+			IPath prefixPath= choosePrefix();
+			if (prefixPath != null) {
+				fPrefix= prefixPath;
+				fPrefixField.setText(fPrefix.toString());
+			}
+		} else if (field == fJavaDocField) {
+			URL jdocURL= chooseJavaDocLocation();
+			if (jdocURL != null) {
+				fJavaDocLocation= jdocURL;
+				fJavaDocField.setText(fJavaDocLocation.toExternalForm());
+			}
+		}			
+	}
+	
+	// ---------- IDialogFieldListener --------
+
+	private void attachmentDialogFieldChanged(DialogField field) {
+		if (field == fFileNameField) {
+			fNameStatus= updateFileNameStatus();
+		} else if (field == fInternalButtonField) {
+			IPath jarFilePath= chooseInternalJarFile(fFileNameField.getText());
+			if (jarFilePath != null) {
+				fFileName= jarFilePath;
+				fFileNameField.setText(fFileName.toString());
+			}
+			return;
+		} else if (field == fPrefixField) {
+			fPrefixStatus= updatePrefixStatus();
+		} else if (field == fJavaDocField) {
+			fJavaDocStatus= updateJavaDocLocationStatus();
+		}
+		doStatusLineUpdate();
+	}	
 		
 	private void doStatusLineUpdate() {
 		fPrefixField.enableButton(canBrowsePrefix());

@@ -162,65 +162,71 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private class SourceContainerAdapter implements IListAdapter, IDialogFieldListener {
 	
 		// -------- IListAdapter --------
-			
 		public void customButtonPressed(DialogField field, int index) {
-			if (field == fFoldersList) {
-				List elementsToAdd= new ArrayList(10);
-				switch (index) {
-				case 0: /* add new */
-					CPListElement srcentry= createNewSourceContainer();
-					if (srcentry != null) {
-						elementsToAdd.add(srcentry);
-					}
-					break;
-				case 1: /* add existing */
-					CPListElement[] srcentries= chooseSourceContainers();
-					if (srcentries != null) {
-						for (int i= 0; i < srcentries.length; i++) {
-							elementsToAdd.add(srcentries[i]);
-						}
-					}
-					break;
-				}
-				if (!elementsToAdd.isEmpty()) {
-					fFoldersList.addElements(elementsToAdd);
-					fFoldersList.postSetSelection(new StructuredSelection(elementsToAdd));
-					// if no source folders up to now
-					if (fFoldersList.getSize() == elementsToAdd.size()) {
-						askForChangingBuildPathDialog();
-					}
-				}
-			}
+			sourcePageCustomButtonPressed(field, index);
 		}
 		
 		public void selectionChanged(DialogField field) {}
 		
 		// ---------- IDialogFieldListener --------
-	
 		public void dialogFieldChanged(DialogField field) {
-			if (fCurrJProject == null) {
-				// not initialized
-				return;
-			}
-			
-			if (field == fFolderRadioButton) {
-				if (fFolderRadioButton.isSelected()) {
-					fIsProjSelected= false;
-					updateClasspathList();
-					if (fFoldersList.getSize() > 0) {
-						askForChangingBuildPathDialog();
+			sourcePageDialogFieldChanged(field);
+		}
+	}
+	
+	private void sourcePageCustomButtonPressed(DialogField field, int index) {
+		if (field == fFoldersList) {
+			List elementsToAdd= new ArrayList(10);
+			switch (index) {
+			case 0: /* add new */
+				CPListElement srcentry= createNewSourceContainer();
+				if (srcentry != null) {
+					elementsToAdd.add(srcentry);
+				}
+				break;
+			case 1: /* add existing */
+				CPListElement[] srcentries= chooseSourceContainers();
+				if (srcentries != null) {
+					for (int i= 0; i < srcentries.length; i++) {
+						elementsToAdd.add(srcentries[i]);
 					}
 				}
-			} else if (field == fProjectRadioButton) {
-				if (fProjectRadioButton.isSelected()) {
-					fIsProjSelected= true;
-					updateClasspathList();
+				break;
+			}
+			if (!elementsToAdd.isEmpty()) {
+				fFoldersList.addElements(elementsToAdd);
+				fFoldersList.postSetSelection(new StructuredSelection(elementsToAdd));
+				// if no source folders up to now
+				if (fFoldersList.getSize() == elementsToAdd.size()) {
+					askForChangingBuildPathDialog();
 				}
-			} else if (field == fFoldersList) {
-				updateClasspathList();
 			}
 		}
 	}
+	
+	private void sourcePageDialogFieldChanged(DialogField field) {
+		if (fCurrJProject == null) {
+			// not initialized
+			return;
+		}
+		
+		if (field == fFolderRadioButton) {
+			if (fFolderRadioButton.isSelected()) {
+				fIsProjSelected= false;
+				updateClasspathList();
+				if (fFoldersList.getSize() > 0) {
+					askForChangingBuildPathDialog();
+				}
+			}
+		} else if (field == fProjectRadioButton) {
+			if (fProjectRadioButton.isSelected()) {
+				fIsProjSelected= true;
+				updateClasspathList();
+			}
+		} else if (field == fFoldersList) {
+			updateClasspathList();
+		}
+	}	
 	
 		
 	private void updateClasspathList() {

@@ -105,7 +105,6 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 			int indent= StubUtility.getIndentUsed(fType) + 1;
 			
 			ITypeHierarchy typeHierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
-			boolean overrideAllFinals= false;
 			
 			for (int i= 0; i < fMethods.length; i++) {
 				try {
