@@ -2618,7 +2618,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.1
 	 */
-	public static final String PROPERTIES_FILE_COLORING_KEY= "pf_coloring_key"; //$NON-NLS-1$
+	public static final String PROPERTIES_FILE_COLORING_KEY= IJavaColorConstants.PROPERTIES_FILE_COLORING_KEY;
 	
 	/**
 	 * A named preference that controls whether keys in a properties file are rendered in bold.
@@ -2651,7 +2651,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.1
 	 */
-	public static final String PROPERTIES_FILE_COLORING_COMMENT= "pf_coloring_comment"; //$NON-NLS-1$
+	public static final String PROPERTIES_FILE_COLORING_COMMENT= IJavaColorConstants.PROPERTIES_FILE_COLORING_COMMENT;
 
 	/**
 	 * A named preference that controls whether comments in a properties file are rendered in bold.
@@ -2684,7 +2684,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.1
 	 */
-	public static final String PROPERTIES_FILE_COLORING_VALUE= "pf_coloring_value"; //$NON-NLS-1$
+	public static final String PROPERTIES_FILE_COLORING_VALUE= IJavaColorConstants.PROPERTIES_FILE_COLORING_VALUE;
 
 	/**
 	 * A named preference that controls whether values in a properties file are rendered in bold.
@@ -2717,7 +2717,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.1
 	 */
-	public static final String PROPERTIES_FILE_COLORING_ASSIGNMENT= "pf_coloring_assignment"; //$NON-NLS-1$
+	public static final String PROPERTIES_FILE_COLORING_ASSIGNMENT= IJavaColorConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT;
 	
 	/**
 	 * A named preference that controls whether assignments in a properties file are rendered in bold.
@@ -2750,7 +2750,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.1
 	 */
-	public static final String PROPERTIES_FILE_COLORING_ARGUMENT= "pf_coloring_argument"; //$NON-NLS-1$
+	public static final String PROPERTIES_FILE_COLORING_ARGUMENT= IJavaColorConstants.PROPERTIES_FILE_COLORING_ARGUMENT;
 
 	/**
 	 * A named preference that controls whether arguments in a properties file are rendered in bold.
@@ -3041,10 +3041,28 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_METHODS, false);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_IMPORTS, true);
 		
+		// properties file editor
+		PreferenceConverter.setDefault(store, PreferenceConstants.PROPERTIES_FILE_COLORING_KEY, new RGB(0, 0, 0));
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_KEY_BOLD, false);
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_KEY_ITALIC, false);
+		PreferenceConverter.setDefault(store, PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE, new RGB(42, 0, 255));
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE_BOLD, false);
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE_ITALIC, false);
+		PreferenceConverter.setDefault(store, PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT, new RGB(0, 0, 0));
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT_BOLD, false);
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT_ITALIC, false);
+		PreferenceConverter.setDefault(store, PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT, new RGB(127, 0, 85));
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT_BOLD, true);
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT_ITALIC, false);
+		PreferenceConverter.setDefault(store, PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT,  new RGB(63, 127, 95));
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT_BOLD, false);
+		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT_ITALIC, false);
+		
+		
 		// override default extended text editor prefs
 		store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, true);
 		
-
+		// semantic highlighting
 		SemanticHighlightings.initDefaults(store);
 
 		// do more complicated stuff

@@ -118,4 +118,47 @@ public interface IJavaColorConstants {
 	 * (value <code>"java_doc_default"</code>).
 	 */
 	String JAVADOC_DEFAULT= "java_doc_default"; //$NON-NLS-1$
+	
+	//---------- Properties File Editor ----------
+	
+	/**
+	 * The color key for keys in a properties file
+	 * (value <code>"pf_coloring_key"</code>).
+	 * 
+	 * @since 3.1
+	 */
+	String PROPERTIES_FILE_COLORING_KEY= "pf_coloring_key"; //$NON-NLS-1$
+	
+	/**
+	 * The color key for comments in a properties file
+	 * (value <code>"pf_coloring_comment"</code>).
+	 * 
+	 * @since 3.1
+	 */
+	
+	String PROPERTIES_FILE_COLORING_COMMENT= "pf_coloring_comment"; //$NON-NLS-1$
+	
+	/**
+	 * The color key for values in a properties file
+	 * (value <code>"pf_coloring_value"</code>).
+	 * 
+	 * @since 3.1
+	 */
+	String PROPERTIES_FILE_COLORING_VALUE= "pf_coloring_value"; //$NON-NLS-1$
+	
+	/**
+	 * The color key for assignment in a properties file.
+	 * (value <code>"pf_coloring_assignment"</code>).
+	 * 
+	 * @since 3.1
+	 */
+	String PROPERTIES_FILE_COLORING_ASSIGNMENT= "pf_coloring_assignment"; //$NON-NLS-1$
+
+	/**
+	 * The color key for arguments in values in a properties file.
+	 * (value <code>"pf_coloring_argument"</code>).
+	 * 
+	 * @since 3.1
+	 */
+	String PROPERTIES_FILE_COLORING_ARGUMENT= "pf_coloring_argument"; //$NON-NLS-1$
 }
