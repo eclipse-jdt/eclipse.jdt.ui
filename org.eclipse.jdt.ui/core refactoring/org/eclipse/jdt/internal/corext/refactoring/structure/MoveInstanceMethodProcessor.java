@@ -96,6 +96,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -1356,6 +1357,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final CompilationUnitRewrite targetRewrite= fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()) ? fSourceRewrite : new CompilationUnitRewrite(getTargetType().getCompilationUnit());
 		final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
 		final boolean result= createMethodCopyChange(declaration, targetRewrite, monitor);
+		if (!fSourceRewrite.getCu().equals(targetRewrite.getCu()))
+			createMethodCopyImports(targetRewrite, monitor);
 		boolean removable= false;
 		if (fInline) {
 			removable= createMethodInlineDelegatorChanges(declaration, targetRewrite, result, status, monitor);
@@ -1593,6 +1596,27 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				targetRewrite.clearImportRewrites();
 		}
 		return result;
+	}
+
+	/**
+	 * Creates the necessary imports for the copied method in the target compilation unit.
+	 * 
+	 * @param targetRewrite the target compilation unit rewrite
+	 * @param monitor the progress monitor to use
+	 * @throws JavaModelException if the types referenced in the method could not be determined
+	 */
+	protected void createMethodCopyImports(final CompilationUnitRewrite targetRewrite, final IProgressMonitor monitor) throws JavaModelException {
+		Assert.isNotNull(targetRewrite);
+		Assert.isNotNull(monitor);
+		final IType[] references= ReferenceFinderUtil.getTypesReferencedIn(new IJavaElement[] { fMethod}, monitor);
+		final ImportRewrite rewrite= targetRewrite.getImportRewrite();
+		final ImportRemover remover= targetRewrite.getImportRemover();
+		String name= null;
+		for (int index= 0; index < references.length; index++) {
+			name= JavaModelUtil.getFullyQualifiedName(references[index]);
+			rewrite.addImport(name);
+			remover.registerAddedImport(name);
+		}
 	}
 
 	/**
