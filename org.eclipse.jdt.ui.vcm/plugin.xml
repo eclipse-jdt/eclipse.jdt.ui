@@ -44,13 +44,4 @@
 	</viewContribution> 
 </extension> 
    
-<!-- **************** PROPERTY PAGES ******************* -->
-	<extension
-		point="org.eclipse.ui.propertyPages">
-	   	<page name="%Managing"
-	  	   id="org.eclipse.jdt.ui.vcm.propertypages.managing"
-	           objectClass="org.eclipse.jdt.core.IJavaElement"
-	           class="org.eclipse.vcm.internal.ui.VCMPropertyPage">
-	   	</page>
-	</extension>
 </plugin>
