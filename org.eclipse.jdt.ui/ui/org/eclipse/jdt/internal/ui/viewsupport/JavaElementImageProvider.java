@@ -181,9 +181,12 @@ public class JavaElementImageProvider {
 				case IJavaElement.INITIALIZER:
 					return JavaPluginImages.DESC_MISC_PRIVATE; // 23479
 				case IJavaElement.METHOD: {
-					IMember member= (IMember) element;
-					IType declType= member.getDeclaringType();
-					return getMethodImageDescriptor(JavaModelUtil.isInterfaceOrAnnotation(declType), member.getFlags());				
+					IMethod method= (IMethod) element;
+					IType declType= method.getDeclaringType();
+					int flags= method.getFlags();
+					if (declType.isEnum() && isDefaultFlag(flags) && method.isConstructor())
+						return JavaPluginImages.DESC_MISC_PRIVATE;
+					return getMethodImageDescriptor(JavaModelUtil.isInterfaceOrAnnotation(declType), flags);				
 				}
 				case IJavaElement.FIELD: {
 					IMember member= (IMember) element;
@@ -282,6 +285,10 @@ public class JavaElementImageProvider {
 			JavaPlugin.log(e);
 			return JavaPluginImages.DESC_OBJS_GHOST;
 		}
+	}
+	
+	private static boolean isDefaultFlag(int flags) {
+		return !Flags.isPublic(flags) && !Flags.isProtected(flags) && !Flags.isPrivate(flags);
 	}
 	
 	protected ImageDescriptor getPackageFragmentIcon(IJavaElement element, int renderFlags) throws JavaModelException {
@@ -508,5 +515,5 @@ public class JavaElementImageProvider {
 			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PROTECTED;
 		else
 			return JavaPluginImages.DESC_OBJS_INTERFACE_DEFAULT;
-	}	
+	}
 }
