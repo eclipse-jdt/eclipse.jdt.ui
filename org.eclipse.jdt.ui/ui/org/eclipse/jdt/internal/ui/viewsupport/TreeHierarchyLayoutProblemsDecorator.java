@@ -118,14 +118,9 @@ public class TreeHierarchyLayoutProblemsDecorator implements ILabelDecorator {
 		}
 		int flag= NO_ADORNMENT;
 		try {
+			IMarker[] markers= resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 
-			IMarker[] markers= resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ONE);
-			if (markers.length != 0) {
-				//it's already been marked by a ProblemsLabelDecorator
-				return NO_ADORNMENT;
-			}
-			//find marker with highest severity
-			markers= resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+			// Find marker with highest severity
 			if (markers != null) {
 				for (int i= 0; i < markers.length && (flag != JavaElementImageDescriptor.ERROR); i++) {
 					IMarker curr= markers[i];
