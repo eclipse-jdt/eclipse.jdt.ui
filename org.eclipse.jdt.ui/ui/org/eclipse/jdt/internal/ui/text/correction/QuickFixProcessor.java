@@ -63,6 +63,8 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.OuterLocalMustBeFinal:
 			case IProblem.UninitializedLocalVariable:
 			case IProblem.UndefinedConstructorInDefaultConstructor:
+			case IProblem.UnhandledExceptionInDefaultConstructor:
+			case IProblem.NotVisibleConstructorInDefaultConstructor:
 				return true;
 			default:
 				return false;
@@ -178,8 +180,10 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UninitializedLocalVariable:
 				LocalCorrectionsSubProcessor.addUninitializedLocalVariableProposal(context, proposals);
 				break;
+			case IProblem.UnhandledExceptionInDefaultConstructor:
 			case IProblem.UndefinedConstructorInDefaultConstructor:
-				LocalCorrectionsSubProcessor.addUndefinedConstructorProposal(context, proposals);
+			case IProblem.NotVisibleConstructorInDefaultConstructor:
+				LocalCorrectionsSubProcessor.addConstructorFromSuperclassProposal(context, proposals);
 				break;			
 			default:
 		}

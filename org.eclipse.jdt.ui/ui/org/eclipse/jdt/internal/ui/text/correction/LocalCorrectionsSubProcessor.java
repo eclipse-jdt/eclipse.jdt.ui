@@ -447,7 +447,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addUndefinedConstructorProposal(ICorrectionContext context, List proposals) {
+	public static void addConstructorFromSuperclassProposal(ICorrectionContext context, List proposals) {
 		ASTNode selectedNode= context.getCoveringNode();
 		if (!(selectedNode instanceof Name && selectedNode.getParent() instanceof TypeDeclaration)) {
 			return;
@@ -461,10 +461,10 @@ public class LocalCorrectionsSubProcessor {
 		IMethodBinding[] methods= binding.getSuperclass().getDeclaredMethods();
 		for (int i= 0; i < methods.length; i++) {
 			IMethodBinding curr= methods[i];
-			if (curr.isConstructor()) {
-				proposals.add(new MissingConstructorCompletionProposal(cu, typeDeclaration, curr, 2));
+			if (curr.isConstructor() && !Modifier.isPrivate(curr.getModifiers())) {
+				proposals.add(new ConstructorFromSuperclassProposal(cu, typeDeclaration, curr, 2));
 			}
 		}
 	}
-
+	
 }

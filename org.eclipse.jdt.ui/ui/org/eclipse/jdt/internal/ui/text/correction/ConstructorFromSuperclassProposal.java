@@ -43,12 +43,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
-public class MissingConstructorCompletionProposal extends ASTRewriteCorrectionProposal {
+public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionProposal {
 
 	private TypeDeclaration fTypeNode;
 	private IMethodBinding fSuperConstructor;
 
-	public MissingConstructorCompletionProposal(ICompilationUnit cu, TypeDeclaration typeNode, IMethodBinding superConstructor, int relevance) {
+	public ConstructorFromSuperclassProposal(ICompilationUnit cu, TypeDeclaration typeNode, IMethodBinding superConstructor, int relevance) {
 		super(null, cu, null, relevance, null);
 		fTypeNode= typeNode;
 		fSuperConstructor= superConstructor;
@@ -80,7 +80,7 @@ public class MissingConstructorCompletionProposal extends ASTRewriteCorrectionPr
 			}			
 		}
 		buf.append(')');	
-		return CorrectionMessages.getFormattedString("MissingConstructorCompletionProposal.description", buf.toString());
+		return CorrectionMessages.getFormattedString("ConstructorFromSuperclassProposal.description", buf.toString());
 	}
 	
 	/* (non-Javadoc)
