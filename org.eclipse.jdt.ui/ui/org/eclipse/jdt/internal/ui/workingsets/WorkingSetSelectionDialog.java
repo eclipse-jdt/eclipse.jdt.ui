@@ -409,8 +409,7 @@ public class WorkingSetSelectionDialog extends SelectionDialog implements
     void editSelectedWorkingSet() {
         IWorkingSetManager manager = WorkbenchPlugin.getDefault()
                 .getWorkingSetManager();
-        IWorkingSet editWorkingSet = (IWorkingSet) getSelectedWorkingSets()
-                .get(0);
+        IWorkingSet editWorkingSet = (IWorkingSet)((IStructuredSelection)listViewer.getSelection()).getFirstElement();
         IWorkingSetEditWizard wizard = manager
                 .createWorkingSetEditWizard(editWorkingSet);
         WizardDialog dialog = new WizardDialog(getShell(), wizard);
@@ -453,7 +452,7 @@ public class WorkingSetSelectionDialog extends SelectionDialog implements
      * 
      * @return the selected working sets
      */
-    private List getSelectedWorkingSets() {
+    private List getResultWorkingSets() {
     	if (multiSelect) {
     		Object[] checked= ((CheckboxTableViewer)listViewer).getCheckedElements();
     		return new ArrayList(Arrays.asList(checked));
@@ -479,7 +478,7 @@ public class WorkingSetSelectionDialog extends SelectionDialog implements
      * @see org.eclipse.jface.dialogs.Dialog#okPressed()
      */
     protected void okPressed() {
-        List newResult = getSelectedWorkingSets();
+        List newResult = getResultWorkingSets();
 
         result = (IWorkingSet[]) newResult.toArray(new IWorkingSet[newResult
                 .size()]);
