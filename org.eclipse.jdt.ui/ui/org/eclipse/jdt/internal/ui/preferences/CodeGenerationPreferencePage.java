@@ -81,7 +81,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	
 
 	private static String[] unpackOrderList(String str) {
-		StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
+		StringTokenizer tok= new StringTokenizer(str, ", "); //$NON-NLS-1$
 		int nTokens= tok.countTokens();
 		String[] res= new String[nTokens];
 		for (int i= 0; i < nTokens; i++) {
@@ -96,7 +96,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	public static void initDefaults(IPreferenceStore prefs) {
 		prefs.setDefault(PREF_USE_GETTERSETTER_PREFIX, true);
 		prefs.setDefault(PREF_USE_GETTERSETTER_SUFFIX, false);
-		prefs.setDefault(PREF_GETTERSETTER_PREFIX, "f;fg;_;m_"); //$NON-NLS-1$
+		prefs.setDefault(PREF_GETTERSETTER_PREFIX, "f, fg, _, m_"); //$NON-NLS-1$
 		prefs.setDefault(PREF_GETTERSETTER_SUFFIX, "_"); //$NON-NLS-1$
 		prefs.setDefault(PREF_JAVADOC_STUBS, true);
 		prefs.setDefault(PREF_SEE_COMMENTS, true);
@@ -189,7 +189,16 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(layout);
 		
-		int horizontalIndent= convertWidthInCharsToPixels(3);
+		int horizontalIndent= convertWidthInCharsToPixels(4);
+
+		(new Separator()).doFillIntoGrid(composite, 2, 4);
+	
+		DialogField javaDocLabel= new DialogField();
+		javaDocLabel.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.comments.label")); //$NON-NLS-1$
+		javaDocLabel.doFillIntoGrid(composite, 2);
+		
+		fCreateJavaDocComments.doFillIntoGrid(composite, 2);
+		fCreateSeeComments.doFillIntoGrid(composite, 2);
 		
 		(new Separator()).doFillIntoGrid(composite, 2, 4);
 		
@@ -205,15 +214,6 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		fUseGetterSetterSuffix.doFillIntoGrid(composite, 2);
 		fGetterSetterSuffix.doFillIntoGrid(composite, 2);		
 		LayoutUtil.setHorizontalIndent(fGetterSetterSuffix.getLabelControl(null), horizontalIndent);
-
-		(new Separator()).doFillIntoGrid(composite, 2, 4);
-	
-		DialogField javaDocLabel= new DialogField();
-		javaDocLabel.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.comments.label")); //$NON-NLS-1$
-		javaDocLabel.doFillIntoGrid(composite, 2);
-		
-		fCreateJavaDocComments.doFillIntoGrid(composite, 2);
-		fCreateSeeComments.doFillIntoGrid(composite, 2);
 		
 		initFields();
 		
