@@ -101,7 +101,7 @@ public class QualifiedNameFinder {
 		TextSearchEngine engine= new TextSearchEngine();
 		engine.search(ResourcesPlugin.getWorkspace(), 
 			createScope(filePatterns, root), 
-			collector, new MatchLocator(pattern, "")); //$NON-NLS-1$
+			collector, new MatchLocator(pattern, true, false)); //$NON-NLS-1$
 	}
 	
 	private static TextSearchScope createScope(String filePatterns, IProject root) throws JavaModelException {

@@ -129,8 +129,9 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 		if (match.getElement() instanceof IJavaElement) {
 			IJavaElement je= (IJavaElement) match.getElement();
 			if (editorInput instanceof IFileEditorInput) {
+				IFile inputFile= ((IFileEditorInput)editorInput).getFile();
 				try {
-					return ((IFileEditorInput)editorInput).getFile().equals(je.getUnderlyingResource());
+					return inputFile.equals(je.getUnderlyingResource());
 				} catch (JavaModelException e) {
 					return false;
 				}

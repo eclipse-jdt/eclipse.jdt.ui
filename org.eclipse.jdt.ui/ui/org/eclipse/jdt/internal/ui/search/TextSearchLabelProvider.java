@@ -10,15 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 
 public abstract class TextSearchLabelProvider extends LabelProvider {
 
 	private AbstractTextSearchViewPage fPage;
+	private String fMatchCountFormat;
 
 	public TextSearchLabelProvider(AbstractTextSearchViewPage page) {
 		fPage= page;
+		fMatchCountFormat= SearchMessages.getString("TextSearchLabelProvider.matchCountFormat"); //$NON-NLS-1$
 	}
 	
 	public final String getText(Object element) {
@@ -26,8 +30,9 @@ public abstract class TextSearchLabelProvider extends LabelProvider {
 		String text= doGetText(element);
 		if (matchCount < 2)
 			return text;
-		else
-			return text + " (" + matchCount + " matches)";
+		else {
+			return MessageFormat.format(fMatchCountFormat, new Object[] { text, new Integer(matchCount) });
+		}
 	}
 
 	protected abstract String doGetText(Object element);
