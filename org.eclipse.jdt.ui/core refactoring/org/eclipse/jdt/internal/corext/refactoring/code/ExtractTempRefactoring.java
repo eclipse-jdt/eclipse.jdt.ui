@@ -559,6 +559,8 @@ public class ExtractTempRefactoring extends Refactoring {
     		if (node.equals(vdf.getName()))
     			return false;
     	}
+    	if (node.getParent() instanceof ExpressionStatement)
+    		return false;	
         return true;
     }
 		
