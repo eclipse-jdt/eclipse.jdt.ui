@@ -28,8 +28,12 @@ public class ImportEditManager {
 		fImportEdits= new HashMap();
 	}
 
-	private ImportEdit getImportEdit(ICompilationUnit cu) throws JavaModelException{
-		if (fImportEdits.containsKey(cu))
+	public boolean hasImportEditFor(ICompilationUnit cu) throws JavaModelException{
+		return fImportEdits.containsKey(cu);
+	}
+	
+	public ImportEdit getImportEdit(ICompilationUnit cu) throws JavaModelException{
+		if (hasImportEditFor(cu))
 			return (ImportEdit)fImportEdits.get(cu);
 		
 		ImportEdit edit= new ImportEdit(cu, fPreferenceSettings);	
