@@ -395,6 +395,14 @@ public class MoveMembersTests extends RefactoringTest {
 //							new String[]{"Inner"});
 	}
 	
+	public void test40() throws Exception{
+		fieldMethodTypeHelper_passing(new String[] {"f"}, new String[]{"m"}, new String[][]{new String[0]}, new String[0]);
+	}
+
+	public void test41() throws Exception{
+		methodHelper_passing(new String[] {"m"}, new String[][]{new String[0]});
+	}
+
 	//---
 	public void testFail0() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],

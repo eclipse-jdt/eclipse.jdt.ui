@@ -15,7 +15,9 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -27,6 +29,13 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
  * Accepts <code>BodyDeclaration</code>s.
  */
 /* package */ class MovedMemberAnalyzer extends MoveStaticMemberAnalyzer {
+/*
+ * cases:
+ * - access to moved member (or to member of moved member) -> do nothing.
+ * - (static) access to source -> change to source, import source.
+ * - (static) access to target -> change to target.
+ * - access to other type -> do nothing (import is done in MoveStaticMembersRefactoring#getUpdatedMemberSource())
+ */
 //TODO:
 //	- Reference to type inside moved type:
 //	  - if originally resolved by qualification -> no problem
@@ -57,30 +66,35 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 	
 	public boolean visit(QualifiedName node) {
 		IBinding binding= node.resolveBinding();
-		if (isMovedMember(binding))
-			return super.visit(node);
-		
 		if (isSourceAccess(binding)) {
-			rewrite(node, fSource);
-			return false;
-		}
-		if (isTargetAccess(binding)) {
+			if (isMovedMember(binding)) {
+				rewrite(node, fTarget);
+				return false;
+			} else {
+				rewrite(node, fSource);
+				return false;
+			}
+		} else if (isTargetAccess(binding)) {
+			// remove qualifier:
 			SimpleName replace= (SimpleName)fAst.rewriter.createCopy(node.getName());
 			fAst.rewriter.markAsReplaced(node, replace, null);
+			return false;
 		}
 		return super.visit(node);
 	}
 	
 	public boolean visit(FieldAccess node) {
 		IBinding binding= node.resolveFieldBinding();
-		if (isMovedMember(binding))
-			return super.visit(node);
+		if (isSourceAccess(binding)) {
+			if (isMovedMember(binding)) {
+				if (node.getExpression() != null)
+					rewrite(node, fTarget);
+			} else
+				rewrite(node, fSource);
 			
-		if (isSourceAccess(binding))
-			rewrite(node, fSource);
-		if (isTargetAccess(binding)) {
+		} else if (isTargetAccess(binding)) {
 			fAst.rewriter.markAsRemoved(node.getExpression(), null);
-		}
+		}	
 		return super.visit(node);
 	}
 	
@@ -88,17 +102,55 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 	
 	public boolean visit(MethodInvocation node) {
 		IBinding binding= node.resolveMethodBinding();
-		if (isMovedMember(binding))
-			return super.visit(node);
+		if (isSourceAccess(binding)) {
+			if (isMovedMember(binding)) {
+				if (node.getExpression() != null)
+					rewrite(node, fTarget);
+			} else
+				rewrite(node, fSource);
 			
-		if (isSourceAccess(binding))
-			rewrite(node, fSource);
-		if (isTargetAccess(binding)) {
+		} else if (isTargetAccess(binding)) {
 			fAst.rewriter.markAsRemoved(node.getExpression(), null);
 		}	
 		return super.visit(node);
 	}
 	
+	//---- javadoc references ----------------------------------
+	
+	public boolean visit(MemberRef node) {
+		IBinding binding= node.resolveBinding();
+		if (isSourceAccess(binding)) {
+			if (isMovedMember(binding)) {
+				if (node.getQualifier() != null)
+					rewrite(node, fTarget);
+			} else
+				rewrite(node, fSource);
+			
+		} else if (isTargetAccess(binding)) {
+			// remove qualifier:
+			SimpleName replace= (SimpleName)fAst.rewriter.createCopy(node.getName());
+			fAst.rewriter.markAsReplaced(node, replace, null);
+		}	
+		return super.visit(node);
+	}
+	
+	public boolean visit(MethodRef node) {
+		IBinding binding= node.resolveBinding();
+		if (isSourceAccess(binding)) {
+			if (isMovedMember(binding)) {
+				if (node.getQualifier() != null)
+					rewrite(node, fTarget);
+			} else
+				rewrite(node, fSource);
+			
+		} else if (isTargetAccess(binding)) {
+			// remove qualifier:
+			SimpleName replace= (SimpleName)fAst.rewriter.createCopy(node.getName());
+			fAst.rewriter.markAsReplaced(node, replace, null);
+		}	
+		return super.visit(node);
+	}
+
 	//---- helper methods --------------------------------------
 	
 	private boolean isSourceAccess(IBinding binding) {

@@ -908,6 +908,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			result[i]= (BodyDeclaration)ASTNodes.getParent(node, BodyDeclaration.class);
 
 			//Fix for bug 42383: exclude multiple VariableDeclarationFragments ("int a=1, b=2")
+			//ReferenceAnalyzer#visit(FieldDeclaration node) depends on fragments().size() != 1 !
 			if (result[i] instanceof FieldDeclaration 
 					&& ((FieldDeclaration) result[i]).fragments().size() != 1) {
 				status.addFatalError(RefactoringCoreMessages.getString("MoveMembersRefactoring.multi_var_fields")); //$NON-NLS-1$

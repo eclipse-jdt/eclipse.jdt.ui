@@ -21,7 +21,9 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -52,6 +54,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	protected static final String REFERENCE_UPDATE= RefactoringCoreMessages.getString("MoveMembersRefactoring.referenceUpdate"); //$NON-NLS-1$
 	
 	public MoveStaticMemberAnalyzer(MoveStaticMembersRefactoring.ASTData ast, IBinding[] members, ITypeBinding source, ITypeBinding target) {
+		super(true);
 		fStatus= new RefactoringStatus();
 		fAst= ast;
 		fMembers= members;
@@ -113,6 +116,32 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		fProcessed.add(node.getName());
 	}
 	
+	protected void rewrite(MemberRef node, ITypeBinding type) {
+		Name qualifier= node.getQualifier();
+		if (qualifier == null) {
+			qualifier= node.getAST().newSimpleName(type.getName());
+			fAst.rewriter.markAsInserted(qualifier, fAst.createGroupDescription(REFERENCE_UPDATE));
+			node.setQualifier(qualifier);
+			fNeedsImport= true;
+		} else {
+			rewriteName(qualifier, type);
+		}
+		fProcessed.add(node.getName());
+	}
+	
+	protected void rewrite(MethodRef node, ITypeBinding type) {
+		Name qualifier= node.getQualifier();
+		if (qualifier == null) {
+			qualifier= node.getAST().newSimpleName(type.getName());
+			fAst.rewriter.markAsInserted(qualifier, fAst.createGroupDescription(REFERENCE_UPDATE));
+			node.setQualifier(qualifier);
+			fNeedsImport= true;
+		} else {
+			rewriteName(qualifier, type);
+		}
+		fProcessed.add(node.getName());
+	}
+
 	private void rewriteName(Name name, ITypeBinding type) {
 		AST creator= name.getAST();
 		boolean fullyQualified= false;
