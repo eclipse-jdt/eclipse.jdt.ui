@@ -22,6 +22,7 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.ui.tests"/>
+      <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
    </requires>
 
 
