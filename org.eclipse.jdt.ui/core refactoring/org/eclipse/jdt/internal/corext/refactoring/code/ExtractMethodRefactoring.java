@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -421,7 +422,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 			IDocument document= bufferManager.getTextFileBuffer(path).getDocument();
 			
 			ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
-			ASTNodes.expandRange(selectedNodes, document, fSelectionStart, fSelectionLength);
+			fRewriter.setTargetSourceRangeComputer(new SelectionAwareSourceRangeComputer(
+				selectedNodes, document, fSelectionStart, fSelectionLength));
 			MethodDeclaration mm= createNewMethod(fMethodName, true, selectedNodes, document.getLineDelimiter(0));
 
 			TextEditGroup insertDesc= new TextEditGroup(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
@@ -785,7 +787,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			}
 		} else {
 			for (int i= 0; i < selectedNodes.length; i++) {
-				statements.insertLast(fRewriter.createCopyTarget(selectedNodes[i]), null);
+				statements.insertLast(fRewriter.createMoveTarget(selectedNodes[i]), null);
 			}
 			IVariableBinding returnValue= fAnalyzer.getReturnValue();
 			if (returnValue != null) {

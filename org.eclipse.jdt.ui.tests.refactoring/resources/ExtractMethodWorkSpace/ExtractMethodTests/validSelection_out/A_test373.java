@@ -1,13 +1,16 @@
 package validSelection_out;
 
-public class A_test366 {
+public class A_test373 {
 	protected void foo() {
-		// comment
 		extracted();
-		// comment
 	}
 
 	protected void extracted() {
-		/*[*/foo();/*]*/
+		/*[*/// comment
+		foo();
+		// comment
+		foo();
+		// comment
+		/*]*/
 	}
 }

@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
-	private static final boolean BUG_80839= true;
+	private static final boolean BUG_80839= false;
 
 	private static ExtractMethodTestSetup fgTestSetup;
 	
@@ -897,6 +897,30 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 			System.out.println("test 367 disabled due to bug 79760");
 			return;
 		}
+		validSelectionTestChecked();
+	}
+	
+	public void test368() throws Exception {
+		validSelectionTestChecked();
+	}
+	
+	public void test369() throws Exception {
+		validSelectionTestChecked();
+	}
+	
+	public void test370() throws Exception {
+		validSelectionTestChecked();
+	}
+	
+	public void test371() throws Exception {
+		validSelectionTestChecked();
+	}
+	
+	public void test372() throws Exception {
+		validSelectionTestChecked();
+	}
+	
+	public void test373() throws Exception {
 		validSelectionTestChecked();
 	}
 	

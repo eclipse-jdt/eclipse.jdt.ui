@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatch
 
 public class SurroundWithTests extends AbstractSelectionTestCase {
 
-	private static final boolean BUG_79760= true;
+	private static final boolean BUG_83481= true;
 	
 	private static SurroundWithTestSetup fgTestSetup;
 	
@@ -93,15 +93,10 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testOneLine() throws Exception {
-		System.out.println("test SurroundWithTests.testOneLine disabled for bug 55221");
-		//tryCatchTest();
+		tryCatchTest();
 	}	
 	
 	public void testMultiLine() throws Exception {
-		if (BUG_79760) {
-			System.out.println("Multi line test disabled due to bug 79760");
-			return;
-		}
 		tryCatchTest();
 	}
 	
@@ -114,10 +109,6 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testWrappedLocal2() throws Exception {
-		if (BUG_79760) {
-			System.out.println("Wrapped local test 2 disabled due to bug 79760");
-			return;
-		}
 		tryCatchTest();
 	}
 	
@@ -182,6 +173,9 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testThenStatement() throws Exception {
+		if (BUG_83481) {
+			System.out.print("Check test when bug 83481 is fixed");
+		}
 		 tryCatchTest();
 	}
 	

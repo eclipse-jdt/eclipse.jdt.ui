@@ -20,13 +20,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -67,9 +63,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -525,32 +518,6 @@ public class ASTNodes {
 		return null;
 	}
 
-	/**
-	 * Expands the range of the node passed in <code>nodes</code> to cover all comments
-	 * determined by <code>start</code> and <code>length</code> in the given text buffer. 
-	 */
-	public static void expandRange(ASTNode[] nodes, IDocument document, int start, int length) throws CoreException, BadLocationException {
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		scanner.setSource(document.get(start, length).toCharArray());
-		TokenScanner tokenizer= new TokenScanner(scanner);
-		ASTNode node= nodes[0]; 
-		int pos= tokenizer.getNextStartOffset(0, false);
-		int newStart= start + pos;
-		if (newStart < node.getStartPosition())
-			node.setSourceRange(newStart, node.getLength() + node.getStartPosition() - newStart);
-		
-		node= nodes[nodes.length - 1];
-		int scannerStart= node.getStartPosition() + node.getLength() - start;
-		pos= scannerStart;
-		try {
-			while (true) {
-				pos= tokenizer.getNextEndOffset(pos, false); 
-			}
-		} catch (CoreException e) {
-		}
-		node.setSourceRange(node.getStartPosition(), node.getLength() + pos - scannerStart);
-	}
-	
 	public static IProblem[] getProblems(ASTNode node, int scope, int severity) {
 		ASTNode root= node.getRoot();
 		if (!(root instanceof CompilationUnit))

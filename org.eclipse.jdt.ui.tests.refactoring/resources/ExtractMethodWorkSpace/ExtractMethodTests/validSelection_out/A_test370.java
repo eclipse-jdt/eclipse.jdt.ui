@@ -1,6 +1,6 @@
 package validSelection_out;
 
-public class A_test366 {
+public class A_test370 {
 	protected void foo() {
 		// comment
 		extracted();
@@ -8,6 +8,8 @@ public class A_test366 {
 	}
 
 	protected void extracted() {
-		/*[*/foo();/*]*/
+		/*[*/foo();
+		// comment
+		foo();/*]*/
 	}
 }

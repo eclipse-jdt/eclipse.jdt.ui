@@ -6,9 +6,9 @@ public class TestThenStatement {
    TestThenStatement bar= null;
    if (bar != null)
 	try {
-		/*]*/bar.run();/*[*/
+		bar.run();
 	} catch (InterruptedException e) {
-	}
+	}/*[*/
  }
  
  void run() throws InterruptedException{
