@@ -38,6 +38,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.window.Window;
 
@@ -93,6 +94,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -110,7 +112,7 @@ import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
-import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
+import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
 
 
@@ -118,7 +120,7 @@ import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
 /**
  * Java specific text editor.
  */
-public class CompilationUnitEditor extends JavaEditor implements IReconcilingParticipant {
+public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilingListener {
 
 	/** 
 	 * Text operation code for requesting correction assist to show correction
@@ -961,6 +963,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private CompositeActionGroup fContextMenuGroup;
 	
 	/**
+	 * Reconcile listeners.
+	 * @since 3.0
+	 */
+	private ListenerList fReconcileListeners= new ListenerList();
+
+	
+	
+	/**
 	 * Creates a new compilation unit editor.
 	 */
 	public CompilationUnitEditor() {
@@ -972,7 +982,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		// don't set help contextId, we install our own help context
 		fSavePolicy= null;
 			
-		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);		
+		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
 	/*
@@ -1485,9 +1495,29 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	/*
-	 * @see IReconcilingParticipant#reconciled()
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingParticipant#startReconciling()
+	 * @since 3.0
 	 */
-	public void reconciled() {
+	public void aboutToBeReconciled() {
+
+		// Notify listeners
+		Object[] listeners = fReconcileListeners.getListeners();
+		for (int i = 0, length= listeners.length; i < length; ++i)
+			((IJavaReconcilingListener)listeners[i]).aboutToBeReconciled();
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingParticipant#reconciled(org.eclipse.jdt.core.dom.CompilationUnit)
+	 * @since 3.0
+	 */
+	public void reconciled(CompilationUnit ast) {
+
+		// Notify listeners
+		Object[] listeners = fReconcileListeners.getListeners();
+		for (int i = 0, length= listeners.length; i < length; ++i)
+			((IJavaReconcilingListener)listeners[i]).reconciled(ast);
+		
+		// Update Java Outline page selection
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE)) {
 			Shell shell= getSite().getShell();
 			if (shell != null && !shell.isDisposed()) {
@@ -1498,6 +1528,28 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				});
 			}
 		}
+	}
+	
+	/**
+	 * Adds the given participant.
+	 * Has no effect if an identical participant was not already registered.
+	 * 
+	 * @param participant	The reconcile participant to be added
+	 * @since 3.0
+	 */
+	final void addReconcileParticipant(IJavaReconcilingListener participant) {
+		fReconcileListeners.add(participant);
+	}
+	
+	/**
+	 * Removes the given participant.
+	 * Has no effect if an identical participant was not already registered.
+	 * 
+	 * @param participant	the reconcile participant to be removed
+	 * @since 3.0
+	 */
+	final void removeReconcileParticipant(IJavaReconcilingListener participant) {
+		fReconcileListeners.remove(participant);
 	}
 		
 	protected void updateStateDependentActions() {

@@ -67,6 +67,7 @@ import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CustomBufferFactory;
@@ -96,6 +97,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public static final boolean USE_WORKING_COPY_OWNERS= true;
 	
 	private static JavaPlugin fgJavaPlugin;
+	
+	/** The template context type registry. */
+	private static ContextTypeRegistry fgContextTypeRegistry;
+
 
 	private IWorkingCopyManager fWorkingCopyManager;
 	private IBufferFactory fBufferFactory;
@@ -113,6 +118,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
 	private IPropertyChangeListener fFontPropertyChangeListener;
+	
 	/**
 	 * Property change listener on this plugin's preference store.
 	 * 
@@ -129,8 +135,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.0
 	 */
 	private MockupPreferenceStore fMockupPreferenceStore;
-	/** The template context type registry. */
-	private static ContextTypeRegistry fgContextTypeRegistry;
+	
+	/**
+	 * The AST provider.
+	 * @since 3.0
+	 */
+	private ASTProvider fASTProvider;
 
 	
 	public static JavaPlugin getDefault() {
@@ -367,11 +377,17 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fJavaTextTools= null;
 		}
 		
+		
 		JavaDocLocations.shutdownJavadocLocations();
 		
 		uninstallPreferenceStoreBackwardsCompatibility();
 		
 		RefactoringCore.getUndoManager().shutdown();
+		
+		if (fASTProvider != null) {
+			fASTProvider.dispose();
+			fASTProvider= null;
+		}
 	}
 		
 	private IWorkbenchPage internalGetActivePage() {
@@ -427,6 +443,18 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fJavaTextTools == null)
 			fJavaTextTools= new JavaTextTools(getPreferenceStore(), JavaCore.getPlugin().getPluginPreferences());
 		return fJavaTextTools;
+	}
+	
+	/**
+	 * Returns the AST provider.
+	 * 
+	 * @since 3.0
+	 */
+	public synchronized ASTProvider getASTProvider() {
+		if (fASTProvider == null)
+			fASTProvider= new ASTProvider();
+		
+		return fASTProvider;
 	}
 		
 	public synchronized MembersOrderPreferenceCache getMemberOrderPreferenceCache() {

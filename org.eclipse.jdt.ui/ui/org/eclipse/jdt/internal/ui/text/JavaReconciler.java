@@ -185,6 +185,7 @@ public class JavaReconciler extends MonoReconciler {
 	 * @since 3.0
 	 */
 	private IResourceChangeListener fResourceChangeListener;
+	private boolean fIninitalProcessDone= false;
 	
 	/**
 	 * Creates a new reconciler.
@@ -246,6 +247,9 @@ public class JavaReconciler extends MonoReconciler {
 	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#forceReconciling()
 	 */
 	protected void forceReconciling() {
+		if (!fIninitalProcessDone)
+			return;
+		
 		super.forceReconciling();
         JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
 		strategy.notifyParticipants(false);
@@ -258,6 +262,14 @@ public class JavaReconciler extends MonoReconciler {
 		super.reconcilerReset();
         JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
 		strategy.notifyParticipants(true);
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#initialProcess()
+	 */
+	protected void initialProcess() {
+		super.initialProcess();
+		fIninitalProcessDone= true;
 	}
 	
 	/**
