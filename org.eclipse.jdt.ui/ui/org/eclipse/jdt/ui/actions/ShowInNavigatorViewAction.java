@@ -40,6 +40,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
+ * Reveals the selected element in the resource navigator view. The action
+ * is applicable for structured selections containing Java element or
+ * <code>IResources</code>, or for text selections representing a 
+ * Java element.
+ * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
