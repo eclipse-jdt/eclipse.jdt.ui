@@ -18,30 +18,33 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
+/**
+ * Tells the type which declares the member.
+ */
 public class DeclaringTypeVariable extends ConstraintVariable{
 	
-	private final IBinding fBinding;
+	private final IBinding fMemberBinding;
 	
 	protected DeclaringTypeVariable(ITypeBinding memberTypeBinding) {
 		super(memberTypeBinding.getDeclaringClass());
-		fBinding= memberTypeBinding;
+		fMemberBinding= memberTypeBinding;
 	}
 
 	protected DeclaringTypeVariable(IVariableBinding fieldBinding) {
 		super(fieldBinding.getDeclaringClass());
 		Assert.isTrue(fieldBinding.isField());
-		fBinding= fieldBinding;
+		fMemberBinding= fieldBinding;
 	}
 
 	protected DeclaringTypeVariable(IMethodBinding methodBinding) {
 		super(methodBinding.getDeclaringClass());
-		fBinding= methodBinding;
+		fMemberBinding= methodBinding;
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return "Decl(" + Bindings.asString(fBinding) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Decl(" + Bindings.asString(fMemberBinding) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

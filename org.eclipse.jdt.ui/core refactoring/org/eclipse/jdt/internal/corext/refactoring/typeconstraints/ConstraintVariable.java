@@ -19,25 +19,25 @@ public abstract class ConstraintVariable {
 	/**
 	 * The type binding, or <code>null</code>.
 	 */
-	private final ITypeBinding fBinding;
+	private final ITypeBinding fTypeBinding;
 
 	/**
 	 * @param binding the type binding, or <code>null</code>
 	 */
 	protected ConstraintVariable(ITypeBinding binding) {
-		fBinding= binding;
+		fTypeBinding= binding;
 	}
 
 	public boolean canBeAssignedTo(ConstraintVariable targetVariable) {
-		if (fBinding == null || targetVariable.fBinding == null)
+		if (fTypeBinding == null || targetVariable.fTypeBinding == null)
 			return false;
-		return TypeRules.canAssign(fBinding, targetVariable.fBinding);
+		return TypeRules.canAssign(fTypeBinding, targetVariable.fTypeBinding);
 	}
 
 	public String toResolvedString() {
-		if (fBinding == null)
+		if (fTypeBinding == null)
 			return "<NULL BINDING>"; //$NON-NLS-1$
-		return Bindings.asString(fBinding);
+		return Bindings.asString(fTypeBinding);
 	}
 
 	/* (non-Javadoc)
@@ -50,8 +50,9 @@ public abstract class ConstraintVariable {
 	/**
 	 * @return the type binding or <code>null</code>
 	 */
+	//TODO: rename to getTypeBinding()
 	public ITypeBinding getBinding() {
-		return fBinding;
+		return fTypeBinding;
 	}
 
 	/**
