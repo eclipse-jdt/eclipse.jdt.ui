@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.IPath;
@@ -36,13 +38,14 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.internal.dialogs.ResourceSorter;
+import org.eclipse.ui.wizards.datatransfer.ZipFileStructureProvider;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -192,8 +195,8 @@ public class JavadocConfigurationBlock {
 			
 			fBrowseArchivePath.doFillIntoGrid(topComp, 1);
 			
-			//DialogField.createEmptySpace(topComp, 2);
-			//fValidateArchiveButton.doFillIntoGrid(topComp, 1);
+			DialogField.createEmptySpace(topComp, 2);
+			fValidateArchiveButton.doFillIntoGrid(topComp, 1);
 
 			int indent= converter.convertWidthInCharsToPixels(2);	
 			LayoutUtil.setHorizontalIndent(fArchiveField.getLabelControl(null), indent);
@@ -272,12 +275,10 @@ public class JavadocConfigurationBlock {
 
 			try {
 				String protocol = location.getProtocol();
-				if (protocol.equals("http")) { //$NON-NLS-1$
+				if (protocol.equals("http") || protocol.equals("jar")) { //$NON-NLS-1$ //$NON-NLS-2$
 					validateURL(location);
 				} else if (protocol.equals("file")) { //$NON-NLS-1$
 					validateFile(location);
-				} else if (protocol.equals("jar")) { //$NON-NLS-1$
-					validateArchive(location);				
 				} else {
 					MessageDialog.openInformation(fShell, fTitle, fUnable); //$NON-NLS-1$
 				}
@@ -308,37 +309,6 @@ public class JavadocConfigurationBlock {
 			MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
 		}
 		
-		private void validateArchive(URL location) throws MalformedURLException {
-//			String file= location.getFile();
-//			int idx= file.indexOf('!');
-//			if (idx != -1) {
-//				URL url= new URL(file.substring(0, idx));
-//				if (url.getProtocol())
-//				
-//				
-//				
-//				
-//			}
-//			
-//			
-//			
-//			
-//			File folder = new File(location.getFile());
-//			if (folder.isDirectory()) {
-//				File indexFile= new File(folder, "index.html"); //$NON-NLS-1$
-//				if (indexFile.isFile()) {				
-//					File packageList= new File(folder, "package-list"); //$NON-NLS-1$
-//					if (packageList.exists()) {
-//						if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage)) { //$NON-NLS-1$
-//							spawnInBrowser(indexFile.toURL());
-//						}
-//						return;					
-//					}
-//				}
-//			}
-			MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
-		}		
-
 		private void validateURL(URL location) throws MalformedURLException {
 			IPath path= new Path(location.toExternalForm());
 			IPath index = path.append("index.html"); //$NON-NLS-1$
@@ -437,36 +407,29 @@ public class JavadocConfigurationBlock {
 		ZipFile zipFile= null;
 		try {
 			zipFile= new ZipFile(fArchiveField.getText());
-
-			ILabelProvider lp= new ZipDialogLabelProvider();
-			ZipDialogContentProvider cp= new ZipDialogContentProvider(zipFile);
+			ZipFileStructureProvider provider= new ZipFileStructureProvider(zipFile);
 			
+			ILabelProvider lp= new ZipDialogLabelProvider(provider);
+			ZipDialogContentProvider cp= new ZipDialogContentProvider(provider);
+			ViewerSorter sorter= new ViewerSorter() {};
+						
 			ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, lp, cp);
+			dialog.setAllowMultiple(false);
 			dialog.setValidator(new ZipDialogValidator());
 			dialog.setTitle(PreferencesMessages.getString("JavadocConfigurationBlock.browse_jarorzip_path.title")); //$NON-NLS-1$
 			dialog.setMessage(PreferencesMessages.getString("JavadocConfigurationBlock.location_in_jarorzip.message")); //$NON-NLS-1$
-			//dialog.addFilter(filter);
-			dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+			dialog.setSorter(sorter);
 			
 			String init= fArchivePathField.getText();
-			if (init.length() > 0) {
-				ZipTreeNode initNode= cp.getSelectedNode(init);
-				if (initNode != null) {
-					dialog.setInitialSelection(initNode);
-				}
-			} else {
-				ZipTreeNode initNode= cp.getSelectedNode("docs/api"); //$NON-NLS-1$
-				if (initNode != null) {
-					dialog.setInitialSelection(initNode);
-				}
+			if (init.length() == 0) {
+				init= "docs/api"; //$NON-NLS-1$
 			}
+			dialog.setInitialSelection(cp.findElement(new Path(init)));
 			
-			dialog.setInput(zipFile);
+			dialog.setInput(this);
 			if (dialog.open() == Window.OK) {
-				Object element= dialog.getFirstResult();
-				if (element instanceof ZipTreeNode)  {
-					return ((ZipTreeNode) element).toString();
-				}
+				String name= provider.getFullPath(dialog.getFirstResult());
+				return new Path(name).removeTrailingSeparator().toString();
 			}
 		} catch (IOException e) {
 			JavaPlugin.log(e);
@@ -627,30 +590,53 @@ public class JavadocConfigurationBlock {
 	/**
 	 * An adapter for presenting a zip file in a tree viewer.
 	 */
-	private class ZipDialogContentProvider implements ITreeContentProvider {
+	private static class ZipDialogContentProvider implements ITreeContentProvider {
 	
-		private ZipTreeNode fTree;
+		private ZipFileStructureProvider fProvider;
 		
-		public ZipDialogContentProvider(ZipFile file) {
-			fTree= createTree(file);
+		public ZipDialogContentProvider(ZipFileStructureProvider provider) {
+			fProvider= provider;
 		}
-		
-	
-		public ZipTreeNode getSelectedNode(String initialSelection) {
-			ZipTreeNode node= null;
-			if (initialSelection != null) {
-				node= fTree.findNode(initialSelection);
+
+		public Object findElement(IPath path) {
+			String[] segments= path.segments();
+			
+			Object elem= fProvider.getRoot();
+			for (int i= 0; i < segments.length && elem != null; i++) {
+				List list= fProvider.getChildren(elem);
+				String name= segments[i];
+				elem= null;
+				for (int k= 0; k < list.size(); k++) {
+					Object curr= list.get(k);
+					if (fProvider.isFolder(curr) && name.equals(fProvider.getLabel(curr))) {
+						elem= curr;
+						break;
+					}
+				}
 			}
-			if (node == null) {
-				node= fTree.findNode(""); //$NON-NLS-1$
-			}
-			return node;
+			return elem;
 		}
 		
-		private ZipTreeNode createTree(ZipFile zipFile) {
-			return ZipTreeNode.newZipTree(zipFile);
+		private Object recursiveFind(Object element, String name) {
+			if (name.equals(fProvider.getLabel(element))) {
+				return element;
+			}
+			List list= fProvider.getChildren(element);
+			if (list != null) {
+				for (int k= 0; k < list.size(); k++) {
+					Object res= recursiveFind(list.get(k), name);
+					if (res != null) {
+						return res;
+					}
+				}				
+			}
+			return null;
 		}
-	
+		
+		public Object findFileByName(String name) {
+			return recursiveFind(fProvider.getRoot(), name);
+		}
+
 		/* non java-doc
 		 * @see ITreeContentProvider#inputChanged
 		 */
@@ -661,63 +647,88 @@ public class JavadocConfigurationBlock {
 		  * @see ITreeContentProvider#getParent
 		  */
 		public Object getParent(Object element) {
-			return ((ZipTreeNode) element).getParent();
+			if (element.equals(fProvider.getRoot())) {
+				return null;
+			}
+			IPath path= new Path(fProvider.getFullPath(element));
+			if (path.segmentCount() > 0) {
+				return findElement(path.removeLastSegments(1));
+			}
+			return fProvider.getRoot();
 		}
 	
 		/* non java-doc
 		 * @see ITreeContentProvider#hasChildren
 		 */
 		public boolean hasChildren(Object element) {
-			return ((ZipTreeNode) element).hasChildren();
+			List list= fProvider.getChildren(element);
+			if (list != null) {
+				for (int i= 0; i < list.size(); i++) {
+					if (fProvider.isFolder(list.get(i))) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 	
 		/* non java-doc
 		 * @see ITreeContentProvider#getChildren
 		 */
 		public Object[] getChildren(Object element) {
-			return ((ZipTreeNode) element).getChildren();
+			List list= fProvider.getChildren(element);
+			ArrayList res= new ArrayList();
+			if (list != null) {
+				for (int i= 0; i < list.size(); i++) {
+					Object curr= list.get(i);
+					if (fProvider.isFolder(curr)) {
+						res.add(curr);
+					}
+				}
+			}
+			return res.toArray();
 		}
 	
 		/* non java-doc
 		 * @see ITreeContentProvider#getElements
 		 */
-		public Object[] getElements(Object zipFile) {
-			if (fTree == null && zipFile instanceof ZipFile) {
-				fTree= createTree((ZipFile) zipFile);
-			}
-			return fTree.getChildren();
+		public Object[] getElements(Object element) {
+			return new Object[] {fProvider.getRoot() };
 		}
 	
 		/* non java-doc
 		 * @see IContentProvider#dispose
 		 */
 		public void dispose() {
-			fTree= null;
 		}
 	}
-	
-	private class ZipDialogLabelProvider extends LabelProvider {
+		
+	private static class ZipDialogLabelProvider extends LabelProvider {
 	
 		private final Image IMG_JAR=
-			JavaUI.getSharedImages().getImage(
-				org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_JAR);
+			JavaUI.getSharedImages().getImage(org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_JAR);
 		private final Image IMG_FOLDER=
-			PlatformUI.getWorkbench().getSharedImages().getImage(
-				ISharedImages.IMG_OBJ_FOLDER);
+			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
+	
+		private ZipFileStructureProvider fProvider;
+	
+		public ZipDialogLabelProvider(ZipFileStructureProvider provider) {
+			fProvider= provider;
+		}
 	
 		public Image getImage(Object element) {
-			if (element == null || !(element instanceof ZipTreeNode))
-				return super.getImage(element);
-			if (((ZipTreeNode) element).representsZipFile())
+			if (element == fProvider.getRoot()) {
 				return IMG_JAR;
-			else
+			} else {
 				return IMG_FOLDER;
+			}
 		}
 	
 		public String getText(Object element) {
-			if (element == null || !(element instanceof ZipTreeNode))
-				return super.getText(element);
-			return ((ZipTreeNode) element).getName();
+			if (element == fProvider.getRoot()) {
+				return fProvider.getZipFile().getName();
+			}
+			return fProvider.getLabel(element);
 		}
 	}
 	
