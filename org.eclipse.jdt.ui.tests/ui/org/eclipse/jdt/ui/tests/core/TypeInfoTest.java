@@ -155,8 +155,8 @@ public class TypeInfoTest extends TestCase {
 		
 		ArrayList result= new ArrayList();
 		
-		IResource[] resources= new IResource[] {fJProject1.getProject()};
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(resources);
+		IJavaProject[] elements= new IJavaProject[] {fJProject1};
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
 		SearchEngine engine= new SearchEngine();
 
@@ -172,7 +172,7 @@ public class TypeInfoTest extends TestCase {
 			IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, 
 			null); 
 
-	findTypeRef(result, "junit.extensions.TestDecorator");
+		findTypeRef(result, "junit.extensions.TestDecorator");
 		findTypeRef(result, "junit.framework.Test");
 		findTypeRef(result, "junit.framework.TestListener");
 		findTypeRef(result, "junit.tests.TestTest.TornDown");
