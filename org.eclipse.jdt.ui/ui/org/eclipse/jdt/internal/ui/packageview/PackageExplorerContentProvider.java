@@ -128,7 +128,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}  
 			return;
 		}
-		if (kind == IJavaElementDelta.ADDED) { 
+
+		if (kind == IJavaElementDelta.ADDED) { 
 			// when a working copy is added all we have to do
 			// is to refresh the compilation unit
 			if (isWorkingCopy(element)) {
@@ -282,7 +283,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 		});
 	 }
-	/**
+
+	/**
 	 * Process resource deltas
 	 */
 	private void processResourceDelta(IResourceDelta delta, Object parent) {
@@ -340,7 +342,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 		});
 	}
-	private void postRemove(final Object element) {
+
+	private void postRemove(final Object element) {
 		postRunnable(new Runnable() {
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
@@ -350,7 +353,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 		});
 	}
-	private void postRunnable(final Runnable r) {
+
+	private void postRunnable(final Runnable r) {
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
 			ctrl.getDisplay().asyncExec(r); 

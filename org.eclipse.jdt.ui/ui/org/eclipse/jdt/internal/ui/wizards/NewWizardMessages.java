@@ -3,11 +3,13 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.wizards;
-
+
+
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
+
+
 public class NewWizardMessages {
 
 	private static final String RESOURCE_BUNDLE= NewWizardMessages.class.getName();

@@ -9,7 +9,8 @@ import java.net.URL;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 public class CPListElement {

@@ -7,7 +7,10 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- ******************************************************************************/package org.eclipse.jdt.ui.wizards;import java.lang.reflect.InvocationTargetException;
+ ******************************************************************************/
+package org.eclipse.jdt.ui.wizards;
+
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;

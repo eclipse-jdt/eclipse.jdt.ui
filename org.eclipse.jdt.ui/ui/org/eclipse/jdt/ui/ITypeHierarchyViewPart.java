@@ -8,7 +8,6 @@ package org.eclipse.jdt.ui;
 import org.eclipse.ui.IViewPart;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 /**

@@ -1,7 +1,35 @@
-/* * Copyright (c) 2000, 2002 IBM Corp. and others.. * All rights reserved.   This program and the accompanying materials * are made available under the terms of the Common Public License v0.5 * which accompanies this distribution, and is available at * http://www.eclipse.org/legal/cpl-v05.html * * Contributors: *     IBM Corporation - initial API and implementation */package org.eclipse.jdt.internal.ui.filters;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.internal.ui.util.StringMatcher;
+/*
+ * Copyright (c) 2000, 2002 IBM Corp. and others..
+ * All rights reserved.   This program and the accompanying materials
+ * are made available under the terms of the Common Public License v0.5
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ */
+package org.eclipse.jdt.internal.ui.filters;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 /**
- * The NamePatternFilter selects the elements which * match the given string patterns. * <p> * The following characters have special meaning: *   ? => any character *   * => any string * </p> *  * @since 2.0
+ * The NamePatternFilter selects the elements which
+ * match the given string patterns.
+ * <p>
+ * The following characters have special meaning:
+ *   ? => any character
+ *   * => any string
+ * </p>
+ * 
+ * @since 2.0
  */
 public class NamePatternFilter extends ViewerFilter {
 	private String[] fPatterns;
@@ -47,7 +75,13 @@ public class NamePatternFilter extends ViewerFilter {
 	}
 	
 	/**
-	 * Sets the patterns to filter out for the receiver.	 * <p>	 * The following characters have special meaning:	 *   ? => any character	 *   * => any string	 * </p>	 */
+	 * Sets the patterns to filter out for the receiver.
+	 * <p>
+	 * The following characters have special meaning:
+	 *   ? => any character
+	 *   * => any string
+	 * </p>
+	 */
 	public void setPatterns(String[] newPatterns) {
 		fPatterns = newPatterns;
 		fMatchers = new StringMatcher[newPatterns.length];

@@ -4,7 +4,16 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import org.eclipse.core.runtime.IStatus;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.resource.JFaceResources;
 
 /**
  * Overrides <code>ErrorDialog</code> to provide a dialog with

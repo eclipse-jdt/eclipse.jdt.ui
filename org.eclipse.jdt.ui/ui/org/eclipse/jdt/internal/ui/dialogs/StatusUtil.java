@@ -1,5 +1,16 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.DialogPage;
-/** * A utility class to work with IStatus. */
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
+package org.eclipse.jdt.internal.ui.dialogs;
+
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.dialogs.DialogPage;
+
+/**
+ * A utility class to work with IStatus.
+ */
 public class StatusUtil {
 
 	/**
@@ -37,5 +48,28 @@ public class StatusUtil {
 	/**
 	 * Applies the status to the status line of a dialog page.
 	 */
-	public static void applyToStatusLine(DialogPage page, IStatus status) {		String message= status.getMessage();		switch (status.getSeverity()) {			case IStatus.OK:				page.setMessage(message, DialogPage.NONE);				page.setErrorMessage(null);				break;			case IStatus.WARNING:				page.setMessage(message, DialogPage.WARNING);				page.setErrorMessage(null);				break;							case IStatus.INFO:				page.setMessage(message, DialogPage.INFORMATION);				page.setErrorMessage(null);				break;						default:				if (message.length() == 0) {					message= null;				}				page.setMessage(null);				page.setErrorMessage(message);				break;				}	}
+	public static void applyToStatusLine(DialogPage page, IStatus status) {
+		String message= status.getMessage();
+		switch (status.getSeverity()) {
+			case IStatus.OK:
+				page.setMessage(message, DialogPage.NONE);
+				page.setErrorMessage(null);
+				break;
+			case IStatus.WARNING:
+				page.setMessage(message, DialogPage.WARNING);
+				page.setErrorMessage(null);
+				break;				
+			case IStatus.INFO:
+				page.setMessage(message, DialogPage.INFORMATION);
+				page.setErrorMessage(null);
+				break;			
+			default:
+				if (message.length() == 0) {
+					message= null;
+				}
+				page.setMessage(null);
+				page.setErrorMessage(message);
+				break;		
+		}
+	}
 }

@@ -4,7 +4,8 @@
  */
 
 package org.eclipse.jdt.internal.ui;
-import org.eclipse.debug.ui.IDebugUIConstants;
+
+import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;

@@ -27,7 +27,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;
 import org.eclipse.jdt.internal.corext.refactoring.base.IReorgExceptionHandler;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-/**
+
+/**
  * Class used to handle exceptions occurring during reorg actions.
  */
 class ReorgExceptionHandler implements IReorgExceptionHandler{

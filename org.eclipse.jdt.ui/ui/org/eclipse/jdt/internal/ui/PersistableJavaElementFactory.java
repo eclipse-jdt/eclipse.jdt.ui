@@ -2,8 +2,14 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;import org.eclipse.ui.IElementFactory;import org.eclipse.ui.IMemento;import org.eclipse.ui.IPersistableElement;
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.ui.IElementFactory;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableElement;
 
 /** 
  * The JavaElementFactory is used to save and recreate an IJavaElement object.

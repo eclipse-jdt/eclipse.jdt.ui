@@ -1,4 +1,28 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaUIMessages;import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.help.DialogPageContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;
 
 public class ClasspathVariablesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -14,12 +38,16 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 				updateStatus(status);
 			}
 		};
-		fVariableBlock= new VariableBlock(true, null);		setDescription(JavaUIMessages.getString("ClasspathVariablesPreferencePage.description")); //$NON-NLS-1$	}
+		fVariableBlock= new VariableBlock(true, null);
+		setDescription(JavaUIMessages.getString("ClasspathVariablesPreferencePage.description")); //$NON-NLS-1$
+	}
 
 	/**
 	 * @see PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
 	 */
-	protected Control createContents(Composite parent) {		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.CP_VARIABLES_PREFERENCE_PAGE);		return fVariableBlock.createContents(parent);
+	protected Control createContents(Composite parent) {
+		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.CP_VARIABLES_PREFERENCE_PAGE);
+		return fVariableBlock.createContents(parent);
 	}
 	
 	/**
@@ -32,13 +60,15 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		fVariableBlock.performDefaults();		super.performDefaults();
+		fVariableBlock.performDefaults();
+		super.performDefaults();
 	}
 
 	/**
 	 * @see PreferencePage#performOk()
 	 */
-	public boolean performOk() {		JavaPlugin.getDefault().savePluginPreferences();
+	public boolean performOk() {
+		JavaPlugin.getDefault().savePluginPreferences();
 		return fVariableBlock.performOk();
 	}
 	

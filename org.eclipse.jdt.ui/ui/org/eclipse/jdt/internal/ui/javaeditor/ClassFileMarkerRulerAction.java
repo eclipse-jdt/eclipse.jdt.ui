@@ -1,27 +1,35 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
-
+
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-
+
+
 import java.util.Map;
 import java.util.ResourceBundle;
-
+
+
 import org.eclipse.jface.text.source.IVerticalRuler;
-
+
+
 import org.eclipse.core.resources.IResource;
-
+
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.MarkerRulerAction;
-
+
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
+
+
 import org.eclipse.jdt.internal.ui.IResourceLocator;
-
+
+
 
 class ClassFileMarkerRulerAction extends MarkerRulerAction {
 	

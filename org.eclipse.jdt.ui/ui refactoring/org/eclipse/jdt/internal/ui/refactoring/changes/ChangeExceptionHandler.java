@@ -3,7 +3,18 @@
  * All Rights Reserved.
  */
 
-package org.eclipse.jdt.internal.ui.refactoring.changes;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.corext.refactoring.base.IChange;import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;import org.eclipse.jdt.internal.ui.JavaPlugin;
+package org.eclipse.jdt.internal.ui.refactoring.changes;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChangeExceptionHandler;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**

@@ -35,7 +35,8 @@ public class FocusOnTypeAction extends Action {
 		
 		fViewPart= part;
 		WorkbenchHelp.setHelp(this,	IJavaHelpContextIds.FOCUS_ON_TYPE_ACTION);
-	}
+	}
+
 	/*
 	 * @see Action#run
 	 */

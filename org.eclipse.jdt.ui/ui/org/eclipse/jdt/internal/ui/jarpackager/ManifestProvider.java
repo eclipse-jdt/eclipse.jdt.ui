@@ -1,8 +1,26 @@
-/* * (c) Copyright IBM Corp. 2000, 2002. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.IOException;
+/*
+ * (c) Copyright IBM Corp. 2000, 2002.
+ * All Rights Reserved.
+ */
+package org.eclipse.jdt.internal.ui.jarpackager;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.ui.jarpackager.IManifestProvider;import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.core.IPackageFragment;
+
+import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
 /**
  * A manifest provider creates manifest files.
  */
@@ -21,9 +39,15 @@ public class ManifestProvider implements IManifestProvider {
 		Assert.isNotNull(jarPackage);
 		if (jarPackage.isManifestGenerated())
 			return createGeneratedManifest(jarPackage);
-		try {
-			return createSuppliedManifest(jarPackage);		} catch (IOException ex) {			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);		}	}
-	/**
+
+		try {
+			return createSuppliedManifest(jarPackage);
+		} catch (IOException ex) {
+			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
+		}
+	}
+
+	/**
 	 * Creates a default manifest.
 	 * 
 	 * @param manifestVersion	the version of the manifest
@@ -33,7 +57,16 @@ public class ManifestProvider implements IManifestProvider {
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, manifestVersion);
 		return manifest;
 	}
-	/**	 * Hook for subclasses to add additional manifest entries.	 * 	 * @param	manifest	the manifest to which the entries should be added	 * @param	jarPackage	the JAR package specification	 */	protected void putAdditionalEntries(Manifest manifest, JarPackageData jarPackage) {	}
+
+	/**
+	 * Hook for subclasses to add additional manifest entries.
+	 * 
+	 * @param	manifest	the manifest to which the entries should be added
+	 * @param	jarPackage	the JAR package specification
+	 */
+	protected void putAdditionalEntries(Manifest manifest, JarPackageData jarPackage) {
+	}
+
 	private Manifest createGeneratedManifest(JarPackageData jarPackage) {
 		Manifest manifest= new Manifest();
 		putVersion(manifest, jarPackage);
@@ -80,7 +113,19 @@ public class ManifestProvider implements IManifestProvider {
 		return name.replace('.', '/') + '/';
 	}
 
-	private Manifest createSuppliedManifest(JarPackageData jarPackage) throws CoreException, IOException {		IFile manifestFile= jarPackage.getManifestFile();		if (manifestFile.isLocal(IResource.DEPTH_ZERO))			manifestFile.setLocal(true, IResource.DEPTH_ZERO, new NullProgressMonitor());		Manifest manifest;		// No need to use buffer here because Manifest(...) does		InputStream stream= jarPackage.getManifestFile().getContents(false);		try {			manifest= new Manifest(stream);		} finally {			if (stream != null)				stream.close();		}
+	private Manifest createSuppliedManifest(JarPackageData jarPackage) throws CoreException, IOException {
+		IFile manifestFile= jarPackage.getManifestFile();
+		if (manifestFile.isLocal(IResource.DEPTH_ZERO))
+			manifestFile.setLocal(true, IResource.DEPTH_ZERO, new NullProgressMonitor());
+		Manifest manifest;
+		// No need to use buffer here because Manifest(...) does
+		InputStream stream= jarPackage.getManifestFile().getContents(false);
+		try {
+			manifest= new Manifest(stream);
+		} finally {
+			if (stream != null)
+				stream.close();
+		}
 		return manifest;
 	}
 }

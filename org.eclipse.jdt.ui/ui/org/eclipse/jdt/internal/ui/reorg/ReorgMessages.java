@@ -9,9 +9,11 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 public class ReorgMessages {
-	private static final String RESOURCE_BUNDLE= ReorgMessages.class.getName();
+
+	private static final String RESOURCE_BUNDLE= ReorgMessages.class.getName();
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
-	//no instances
+
+	//no instances
 	private ReorgMessages() {
 	}
 

@@ -2,7 +2,9 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui;import org.eclipse.jdt.ui.JavaUI;
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 
 /**

@@ -76,7 +76,8 @@ public class JavadocOptionsManager {
 	private String fStylesheet;
 	private String fAdditionalParams;
 	private String fOverview;
-	private String fTitle;	private String fJDocCommand;
+	private String fTitle;
+	private String fJDocCommand;
 
 	private String fSourcepath;
 	private String fClasspath;
@@ -123,7 +124,8 @@ public class JavadocOptionsManager {
 	public final static String PACKAGENAMES= "packagenames"; //$NON-NLS-1$
 	public final static String EXTRAOPTIONS= "additionalparam"; //$NON-NLS-1$
 	public final static String JAVADOCCOMMAND= "javadoccommand"; //$NON-NLS-1$
-	public final static String TITLE= "doctitle"; //$NON-NLS-1$	public final String HREF="href"; //$NON-NLS-1$
+	public final static String TITLE= "doctitle"; //$NON-NLS-1$
+	public final String HREF="href"; //$NON-NLS-1$
 
 	public final String NAME= "name"; //$NON-NLS-1$
 	public final String PATH= "path"; //$NON-NLS-1$
@@ -190,7 +192,11 @@ public class JavadocOptionsManager {
 			fDocletname= ""; //$NON-NLS-1$
 		}
 
-		//load a destination even if a custom doclet is being used					fTitle= settings.get(TITLE);		if(fTitle==null)			fTitle="";	 //$NON-NLS-1$
+		//load a destination even if a custom doclet is being used			
+		fTitle= settings.get(TITLE);
+		if(fTitle==null)
+			fTitle="";	 //$NON-NLS-1$
+
 		fStylesheet= settings.get(STYLESHEETFILE);
 		if (fStylesheet == null)
 			fStylesheet= ""; //$NON-NLS-1$
@@ -299,7 +305,8 @@ public class JavadocOptionsManager {
 				
 		fDocletname=""; //$NON-NLS-1$
 		fDocletpath=""; //$NON-NLS-1$
-		fTitle= ""; //$NON-NLS-1$		fStylesheet= ""; //$NON-NLS-1$
+		fTitle= ""; //$NON-NLS-1$
+		fStylesheet= ""; //$NON-NLS-1$
 		fAdditionalParams= ""; //$NON-NLS-1$
 		fOverview= ""; //$NON-NLS-1$
 
@@ -430,7 +437,8 @@ public class JavadocOptionsManager {
 		}
 		
 		fStylesheet= element.getAttribute(STYLESHEETFILE);
-		fTitle= element.getAttribute(TITLE);		fAdditionalParams= element.getAttribute(EXTRAOPTIONS);
+		fTitle= element.getAttribute(TITLE);
+		fAdditionalParams= element.getAttribute(EXTRAOPTIONS);
 		fOverview= element.getAttribute(OVERVIEW);
 
 		fUse= loadbutton(element.getAttribute(USE));
@@ -514,7 +522,11 @@ public class JavadocOptionsManager {
 	public IJavaProject getJavaProject() {
 		return this.fProject;
 	}
-		public String getTitle() {		return fTitle;	}
+	
+	public String getTitle() {
+		return fTitle;
+	}
+
 	public String getLinks(IJavaProject project) {
 		ProjectData data= (ProjectData)fLinks.get(project);
 		if(data != null)
@@ -618,11 +630,23 @@ public class JavadocOptionsManager {
 			if (fSplitindex)
 				args.add("-splitindex"); //$NON-NLS-1$
 
-			if(!fTitle.equals("")) { //$NON-NLS-1$				args.add("-doctitle"); //$NON-NLS-1$				args.add(fTitle);			}			if (!fStylesheet.equals("")) { //$NON-NLS-1$
+			if(!fTitle.equals("")) { //$NON-NLS-1$
+				args.add("-doctitle"); //$NON-NLS-1$
+				args.add(fTitle);
+			}
+
+			if (!fStylesheet.equals("")) { //$NON-NLS-1$
 				args.add("-stylesheetfile"); //$NON-NLS-1$
 				args.add(fStylesheet);
 			}
-							if (!fAdditionalParams.equals("")) { //$NON-NLS-1$					ExecutionArguments tokens = new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$					String[] argsArray = tokens.getProgramArgumentsArray();					for (int i = 0; i < argsArray.length; i++) {						args.add(argsArray[i]);					}				}
+			
+				if (!fAdditionalParams.equals("")) { //$NON-NLS-1$
+					ExecutionArguments tokens = new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$
+					String[] argsArray = tokens.getProgramArgumentsArray();
+					for (int i = 0; i < argsArray.length; i++) {
+						args.add(argsArray[i]);
+					}
+				}
 				
 			String hrefs = (String) data.getlinks();
 			StringTokenizer tokenizer = new StringTokenizer(hrefs, ";"); //$NON-NLS-1$
@@ -706,7 +730,9 @@ public class JavadocOptionsManager {
 			settings.put(OVERVIEW, fOverview);
 		if (!fStylesheet.equals("")) //$NON-NLS-1$
 			settings.put(STYLESHEETFILE, fStylesheet);
-		if(!fTitle.equals("")) //$NON-NLS-1$			settings.put(TITLE, fTitle);		
+		if(!fTitle.equals("")) //$NON-NLS-1$
+			settings.put(TITLE, fTitle);
+		
 		
 		IDialogSettings links = new DialogSettings("projects"); //$NON-NLS-1$
 		
@@ -792,7 +818,11 @@ public class JavadocOptionsManager {
 
 	public void setFromStandard(boolean fromStandard) {
 		this.fFromStandard= fromStandard;
-	}		public void setTitle(String title) {		this.fTitle= title;	}
+	}
+	
+	public void setTitle(String title) {
+		this.fTitle= title;
+	}
 	
 	public void setLinks(IJavaProject project, String hrefs) {
 			ProjectData data= (ProjectData)fLinks.get(project);

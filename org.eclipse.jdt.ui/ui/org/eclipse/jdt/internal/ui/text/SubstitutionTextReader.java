@@ -1,15 +1,18 @@
 package org.eclipse.jdt.internal.ui.text;
-
+
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-
+
+
 import java.io.IOException;
 import java.io.Reader;
 
 import org.eclipse.jdt.internal.corext.javadoc.SingleCharReader;
-
+
+
 /**
  * Reads the text contents from a reader and computes for each character
  * a potential substitution. The substitution may eat more characters than 
@@ -26,7 +29,8 @@ public abstract class SubstitutionTextReader extends SingleCharReader {
 	private boolean fReadFromBuffer;
 	private StringBuffer fBuffer;
 	private int fIndex;
-
+
+
 	protected SubstitutionTextReader(Reader reader) {
 		fReader= reader;
 		fBuffer= new StringBuffer();

@@ -8,7 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.ui.util;import org.eclipse.core.runtime.CoreException;
+package org.eclipse.jdt.internal.ui.util;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 

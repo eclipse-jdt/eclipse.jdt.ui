@@ -3,7 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.dnd;
-import org.eclipse.swt.dnd.DND;
+
+import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.Transfer;
@@ -11,7 +12,8 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
-public class BasicSelectionTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
+
+public class BasicSelectionTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 	
 	private ISelectionProvider fProvider;
 	
@@ -48,7 +50,8 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 	protected boolean isDragable(ISelection selection) {
 		return true;
 	}
-
+
+
 	/* non Java-doc
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData
 	 */		
@@ -58,7 +61,8 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 		// to the drop target adapter.
 		event.data= LocalSelectionTransfer.getInstance().getSelection();
 	}
-
+
+
 	/* non Java-doc
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished
 	 */	

@@ -42,7 +42,8 @@ public class FocusOnSelectionAction extends Action {
 		}
 		return null;
 	}
-	
+	
+
 	/*
 	 * @see Action#run
 	 */

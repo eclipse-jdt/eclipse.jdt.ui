@@ -128,10 +128,12 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
         public void customButtonPressed(DialogField field, int index) {
         	doButtonPressed(index);
         }
-        public void selectionChanged(DialogField field) {
+
+        public void selectionChanged(DialogField field) {
         	doSelectionChanged();
         }
-        public void dialogFieldChanged(DialogField field) {
+
+        public void dialogFieldChanged(DialogField field) {
         	if (field == fThresholdField) {
         		doThresholdChanged();
         	}
@@ -396,7 +398,8 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		
 		super.performDefaults();	
     }
-
+
+
     /**
      * @see org.eclipse.jface.preference.IPreferencePage#performOk()
      */
@@ -408,7 +411,8 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
   		JavaPlugin.getDefault().savePluginPreferences();
         return true;
     }
-
+
+
 }
 
 

@@ -49,7 +49,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 /**
  * Presents the changes made by the refactoring.
  * Consists of a tree of changes and a compare viewer that shows the differences. 

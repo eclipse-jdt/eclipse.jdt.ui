@@ -10,12 +10,30 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.internal.ui.*;
-import org.eclipse.jdt.internal.ui.viewsupport.*;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceDelta;
+
+import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.jface.viewers.IBasicPropertyConstants;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IWorkingCopy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
  
 /**
  * A tree content provider for Java elements. It extends the 
@@ -127,7 +145,8 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			}  
 			return;
 		}
-		if (kind == IJavaElementDelta.ADDED) { 
+
+		if (kind == IJavaElementDelta.ADDED) { 
 			// when a working copy is added all we have to do
 			// is to refresh the compilation unit
 			if (isWorkingCopy(element)) {
@@ -247,7 +266,8 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			}
 		});
 	 }
-	/*
+
+	/*
 	 * Process resource deltas
 	 */
 	private void processResourceDelta(IResourceDelta delta, Object parent) {
@@ -305,7 +325,8 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			}
 		});
 	}
-	private void postRemove(final Object element) {
+
+	private void postRemove(final Object element) {
 		postRunnable(new Runnable() {
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
@@ -315,7 +336,8 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			}
 		});
 	}
-	private void postRunnable(final Runnable r) {
+
+	private void postRunnable(final Runnable r) {
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
 			ctrl.getDisplay().asyncExec(r); 

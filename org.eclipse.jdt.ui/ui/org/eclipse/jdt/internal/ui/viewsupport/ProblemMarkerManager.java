@@ -3,7 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.viewsupport;
-
+
+
 import java.util.HashSet;
 
 import org.eclipse.core.resources.IMarker;
@@ -39,7 +40,8 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 
 	/**
 	 * Visitors used to look if the element change delta containes a marker change.
-	 */	private static class ProjectErrorVisitor implements IResourceDeltaVisitor {
+	 */
+	private static class ProjectErrorVisitor implements IResourceDeltaVisitor {
 
 		private HashSet fChangedElements; 
 		

@@ -21,10 +21,12 @@ import org.eclipse.jdt.core.IJavaElement;
  * Items are mapped to their element's underlying resource.
  * Method <code>resourceChanged</code> updates all items that are affected from the changed
  * elements.
- */public class ResourceToItemMapper {
+ */
+public class ResourceToItemMapper {
 
 	private static final int NUMBER_LIST_REUSE= 10;
-	// map from resource to item
+
+	// map from resource to item
 	private HashMap fResourceToItem;
 	private Stack fReuseLists;
 	
