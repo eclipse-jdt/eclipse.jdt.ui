@@ -7,9 +7,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ASTUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAnalyzer;
 
 public class StructureSelectPreviousAction extends StructureSelectionAction{
 	
