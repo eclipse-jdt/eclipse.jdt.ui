@@ -13,8 +13,6 @@ package org.eclipse.jdt.ui.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.ui.tests.leaks.JavaLeakTest;
-
 
 /**
  * Test for leaks
@@ -33,8 +31,7 @@ public class LeakTestSuite extends TestSuite {
 	 * Construct the test suite.
 	 */
 	public LeakTestSuite() {
-		if (false)
-			addTest(JavaLeakTest.suite());
+		//addTest(JavaLeakTest.suite());
 	}
 	
 }
