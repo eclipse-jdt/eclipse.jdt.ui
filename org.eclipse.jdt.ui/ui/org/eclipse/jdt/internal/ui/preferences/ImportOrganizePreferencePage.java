@@ -44,8 +44,6 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 			}
 			
 			protected String getNewInputObject() {
-				String title= JavaUIMessages.getString("ImportOrganizePreferencePage.title"); //$NON-NLS-1$
-				String message= JavaUIMessages.getString("ImportOrganizePreferencePage.message"); //$NON-NLS-1$
 				final String errorMessage= JavaUIMessages.getString("ImportOrganizePreferencePage.errorMessage"); //$NON-NLS-1$
 				
 				IInputValidator validator= new IInputValidator() {
@@ -59,6 +57,8 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 						}
 					}
 				};
+				String title= JavaUIMessages.getString("ImportOrganizePreferencePage.title"); //$NON-NLS-1$
+				String message= JavaUIMessages.getString("ImportOrganizePreferencePage.message"); //$NON-NLS-1$			
 				StringInputDialog dialog= new StringInputDialog(getShell(), title, null, message, "", validator); //$NON-NLS-1$
 				if (dialog.open() == dialog.OK) {
 					return dialog.getValue();

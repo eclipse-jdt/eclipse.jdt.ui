@@ -171,8 +171,8 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private ArrayList fCheckBoxes;
 	private ArrayList fTextBoxes;
 	
-	private SelectionListener fSelectionListener;
-	private ModifyListener fModifyListener;
+	private SelectionListener fButtonSelectionListener;
+	private ModifyListener fTextModifyListener;
 	
 	private String fPreviewText;
 	private IDocument fPreviewDocument;
@@ -188,20 +188,20 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		fCheckBoxes= new ArrayList();
 		fTextBoxes= new ArrayList();
 		
-		fSelectionListener= new SelectionListener() {
+		fButtonSelectionListener= new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {}
 
 			public void widgetSelected(SelectionEvent e) {
 				if (!e.widget.isDisposed()) {
-					controlChanged(e.widget);
+					controlChanged((Button) e.widget);
 				}
 			}
 		};
 		
-		fModifyListener= new ModifyListener() {
+		fTextModifyListener= new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				if (!e.widget.isDisposed()) {
-					textChanged(e.widget);
+					textChanged((Text) e.widget);
 				}
 			}
 		};
@@ -210,13 +210,13 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		fPreviewText= loadPreviewFile("CodeFormatterPreviewCode.txt");	//$NON-NLS-1$	
 	}
 
-	/**
+	/*
 	 * @see IWorkbenchPreferencePage#init()
 	 */	
 	public void init(IWorkbench workbench) {
 	}
 
-	/**
+	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
@@ -224,7 +224,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE));
 	}	
 
-	/**
+	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
@@ -337,7 +337,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		
 		String currValue= (String)fWorkingValues.get(key);	
 		checkBox.setSelection(data.getSelection(currValue) == 0);
-		checkBox.addSelectionListener(fSelectionListener);
+		checkBox.addSelectionListener(fButtonSelectionListener);
 		
 		fCheckBoxes.add(checkBox);
 		return checkBox;
@@ -355,7 +355,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		String currValue= (String)fWorkingValues.get(key);	
 		textBox.setText(String.valueOf(getIntValue(currValue, 1)));
 		textBox.setTextLimit(3);
-		textBox.addModifyListener(fModifyListener);
+		textBox.addModifyListener(fTextModifyListener);
 
 		GridData gd= new GridData();
 		gd.widthHint= convertWidthInCharsToPixels(5);
@@ -365,9 +365,9 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		return textBox;
 	}	
 	
-	private void controlChanged(Widget widget) {
-		ControlData data= (ControlData) widget.getData();
-		boolean selection= ((Button)widget).getSelection();
+	private void controlChanged(Button button) {
+		ControlData data= (ControlData) button.getData();
+		boolean selection= button.getSelection();
 		String newValue= data.getValue(selection);	
 		fWorkingValues.put(data.getKey(), newValue);
 		updatePreview();
@@ -381,8 +381,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		}
 	}
 	
-	private void textChanged(Widget widget) {
-		Text textControl= (Text)widget;
+	private void textChanged(Text textControl) {
 		String key= (String) textControl.getData();
 		String number= textControl.getText();
 		IStatus status= validatePositiveNumber(number);
@@ -394,7 +393,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 		
 	
-	/**
+	/*
 	 * @see IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
@@ -408,7 +407,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		return super.performOk();
 	}	
 	
-	/**
+	/*
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
@@ -420,8 +419,9 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private String loadPreviewFile(String filename) {
 		String separator= System.getProperty("line.separator"); //$NON-NLS-1$
 		StringBuffer btxt= new StringBuffer(512);
+		BufferedReader rin= null;
 		try {
-			BufferedReader rin= new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(filename)));
+			rin= new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(filename)));
 			String line;
 			while ((line= rin.readLine()) != null) {
 				btxt.append(line);
@@ -429,6 +429,10 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			}
 		} catch (IOException io) {
 			JavaPlugin.log(io);
+		} finally {
+			if (rin != null) {
+				try { rin.close(); } catch (IOException e) {}
+			}
 		}
 		return btxt.toString();
 	}

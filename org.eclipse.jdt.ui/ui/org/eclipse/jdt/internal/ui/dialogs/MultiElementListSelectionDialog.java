@@ -286,7 +286,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	private void setPageData() {
 		setSelectionListElements(Arrays.asList(fElements[fCurrentPage]), false);
 		String initSelection= (String)getInitialSelections().get(fCurrentPage);
-		
+	
 		if (initSelection != null)
 			setFilter(initSelection, true);
 		else

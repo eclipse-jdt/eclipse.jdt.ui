@@ -10,6 +10,7 @@ public interface IStatusChangeListener {
 	
 	/**
 	 * Called to annonce that the given status has changed
+	 * Status must not be <code>null</code>
 	 */
 	void statusChanged(IStatus status);
 }
