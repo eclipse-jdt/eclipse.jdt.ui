@@ -181,7 +181,10 @@ public class StringMatcher {
 				tCurPos= tCurPos + segLength;
 			}
 		}
-
+		if ((fSegments.length == 1) && (!fHasLeadingStar) && (!fHasTrailingStar)) {
+			// only one segment to match, no wildcards specified
+			return tCurPos == end;
+		}
 		/* process middle segments */	
 		while (i < segCount) {
 			current= fSegments[i];
@@ -207,6 +210,7 @@ public class StringMatcher {
 		}
 		return i == segCount ;
 	}
+
 	/**
 	 * This method parses the given pattern into segments seperated by wildcard '*' characters.
 	 * Since wildcards are not being used in this case, the pattern consists of a single segment.
