@@ -39,7 +39,6 @@ public class NLSSubstitution {
 		Assert.isTrue(task == TRANSLATE || task == NEVER_TRANSLATE || task == SKIP);
 	}
 	
-	//util
 	public static int countItems(NLSSubstitution[] elems, int task){
 		Assert.isTrue(task == NLSSubstitution.TRANSLATE 
 				   || task == NLSSubstitution.NEVER_TRANSLATE 
@@ -51,5 +50,8 @@ public class NLSSubstitution {
 		}	
 		return result;   
 	}
-		
+  
+	public String getKeyWithPrefix(String prefix) {
+		return prefix + key;
+	}
 }

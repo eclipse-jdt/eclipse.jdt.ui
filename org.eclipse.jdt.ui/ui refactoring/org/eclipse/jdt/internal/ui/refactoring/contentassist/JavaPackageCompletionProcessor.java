@@ -28,6 +28,7 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension;
 import org.eclipse.jface.text.contentassist.IContentAssistSubject;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -39,9 +40,10 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class JavaPackageCompletionProcessor implements IContentAssistProcessor, IContentAssistProcessorExtension {
+	
 	private IPackageFragmentRoot fPackageFragmentRoot;
 	private JavaCompletionProposalComparator fComparator;
-	private JavaElementLabelProvider fImageProvider;
+	private ILabelProvider fLabelProvider;
 
 	private String fErrorMessage;
 	private char[] fProposalAutoActivationSet;
@@ -51,8 +53,18 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 	 * The completion context must be set via {@link #setPackageFragmentRoot(IPackageFragmentRoot)}.
 	 */
 	public JavaPackageCompletionProcessor() {
+	    this(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
+	}
+	
+    /**
+     * Creates a <code>JavaPackageCompletionProcessor</code>.
+     * The Processor uses the given <code>ILabelProvider</code> to show text and icons for the 
+     * possible completions.
+     * @param labelProvider Used for the popups.
+     */
+	public JavaPackageCompletionProcessor(ILabelProvider labelProvider) {
 		fComparator= new JavaCompletionProposalComparator();
-		fImageProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
+		fLabelProvider= labelProvider;
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getJavaTextTools().getPreferenceStore();
 		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
@@ -146,8 +158,8 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 				String packName= pack.getElementName();
 				if (packName.length() == 0 || ! packName.startsWith(prefix))
 					continue;
-				Image image= fImageProvider.getImage(pack);
-				JavaCompletionProposal proposal= new JavaCompletionProposal(packName, 0, input.length(), image, packName, 0);
+				Image image= fLabelProvider.getImage(pack);
+				JavaCompletionProposal proposal= new JavaCompletionProposal(packName, 0, input.length(), image, fLabelProvider.getText(pack), 0);
 				proposals.add(proposal);
 			}
 		} catch (JavaModelException e) {

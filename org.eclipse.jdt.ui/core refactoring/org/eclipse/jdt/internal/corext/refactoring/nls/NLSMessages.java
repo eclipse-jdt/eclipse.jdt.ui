@@ -14,7 +14,7 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-class NLSMessages {
+public class NLSMessages {
 
 	private static final String RESOURCE_BUNDLE= NLSMessages.class.getName();
 

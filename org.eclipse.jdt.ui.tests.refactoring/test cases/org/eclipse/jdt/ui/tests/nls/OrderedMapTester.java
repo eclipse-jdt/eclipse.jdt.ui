@@ -44,25 +44,25 @@ public class OrderedMapTester extends TestCase {
 	}
 	
 	public void test1(){
-		String key= "key";
+		String key= "key"; //$NON-NLS-1$
 		m.push(key, this);
 		assertTrue(m.peek() != null);
 	}
 	
 	public void test2(){
-		String key= "key";
+		String key= "key"; //$NON-NLS-1$
 		m.push(key, this);
 		m.remove(key);
 		assertTrue(m.peek() == null);
 	}
 	
 	public void test3(){
-		String key= "key";
+		String key= "key"; //$NON-NLS-1$
 		m.push(key, this);
 		m.push(key, key);
-		assertTrue("A", m.peek() != null);
+		assertTrue("A", m.peek() != null); //$NON-NLS-1$
 		m.remove(key);
-		assertTrue("B", m.peek() == null);
+		assertTrue("B", m.peek() == null); //$NON-NLS-1$
 	}
 	
 	public void test4(){
@@ -70,43 +70,43 @@ public class OrderedMapTester extends TestCase {
 	}
 	
 	public void test5(){
-		String key1= "key1";
-		String key2= "key2";
-		String v1= "v1";
-		String v2= "v2";
+		String key1= "key1"; //$NON-NLS-1$
+		String key2= "key2"; //$NON-NLS-1$
+		String v1= "v1"; //$NON-NLS-1$
+		String v2= "v2"; //$NON-NLS-1$
 		m.push(key1, v1);
 		m.push(key2, v2);
-		assertTrue("A", m.peek().equals(v2));
+		assertTrue("A", m.peek().equals(v2)); //$NON-NLS-1$
 		m.remove(key2);
-		assertTrue("B", m.peek().equals(v1));
+		assertTrue("B", m.peek().equals(v1)); //$NON-NLS-1$
 	}
 
 	public void test6(){
-		String key1= "key1";
-		String key2= "key2";
-		String v1= "v1";
-		String v2= "v2";
+		String key1= "key1"; //$NON-NLS-1$
+		String key2= "key2"; //$NON-NLS-1$
+		String v1= "v1"; //$NON-NLS-1$
+		String v2= "v2"; //$NON-NLS-1$
 		m.push(key1, v1);
 		m.push(key2, v2);
-		assertEquals("A", v2, m.peek());
+		assertEquals("A", v2, m.peek()); //$NON-NLS-1$
 		m.remove(key1);
-		assertEquals("B", v2, m.peek());
+		assertEquals("B", v2, m.peek()); //$NON-NLS-1$
 		m.remove(key2);
-		assertEquals("B", null, m.peek());
+		assertEquals("B", null, m.peek()); //$NON-NLS-1$
 	}
 	
 	public void test7(){
-		String key1= "key1";
-		String key2= "key2";
-		String v1= "v1";
-		String v2= "v2";
+		String key1= "key1"; //$NON-NLS-1$
+		String key2= "key2"; //$NON-NLS-1$
+		String v1= "v1"; //$NON-NLS-1$
+		String v2= "v2"; //$NON-NLS-1$
 		m.push(key1, v1);
 		m.push(key2, v2);
-		assertEquals("A", v2, m.peek());
+		assertEquals("A", v2, m.peek()); //$NON-NLS-1$
 		m.remove(key2);
-		assertEquals("B", v1, m.peek());
+		assertEquals("B", v1, m.peek()); //$NON-NLS-1$
 		m.remove(key1);
-		assertEquals("B", null, m.peek());
+		assertEquals("B", null, m.peek()); //$NON-NLS-1$
 	}
 	
 }

@@ -18,6 +18,9 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
@@ -42,6 +45,9 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -51,6 +57,7 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -58,23 +65,14 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.SourceViewer;
-
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
@@ -94,6 +92,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
 class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private static final String[] PROPERTIES;
@@ -103,7 +105,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private static final int VAL_PROP= 2; 
 	private static final int SIZE= 3; //column counter
 	private static final int ROW_COUNT= 5;
-	public static final String DEFAULT_KEY_PREFIX= ""; //$NON-NLS-1$
 	
 	public static final String PAGE_NAME= "NLSWizardPage1"; //$NON-NLS-1$
 	static {
@@ -204,33 +205,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return null;	
 		}
 	}
-	
-	private class KeyValuePair {
-		private String fKey;
-		private String fValue;
-		
-		public KeyValuePair(String key, String value) {
-			this.setKey(key);
-			this.setValue(value);
-		}
-
-		private void setKey(String key) {
-			fKey= key;
-		}
-
-		private String getKey() {
-			return fKey;
-		}
-
-		private void setValue(String value) {
-			fValue= value;
-		}
-
-		private String getValue() {
-			return fValue;
-		}
-	}
-		
+			
 	private class NLSInputDialog extends StatusDialog implements IDialogFieldListener {
 		private StringDialogField fKeyField;
 		private StringDialogField fValueField;
@@ -357,15 +332,19 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private Label fTranslateLabel, fNoTranslateLabel, fSkipLabel;
 	private CLabel fPreviewLabel;
 	private Button fEditButton;
+  
+    private final ICompilationUnit fCu;
+    private NLSSubstitution[] fSubstitutions;
+    private String fDefaultPrefix;
 	
-	public ExternalizeWizardPage() {
-		super(PAGE_NAME, false); //$NON-NLS-1$
+	public ExternalizeWizardPage(NLSRefactoring nlsRefactoring) {
+		super(PAGE_NAME, false);
+		fCu = nlsRefactoring.getCu();
+		fSubstitutions = nlsRefactoring.getSubstitutions();
+		fDefaultPrefix = nlsRefactoring.getPrefixHint();
 	}
 	
-	private ICompilationUnit getCu(){
-		return ((NLSRefactoring)getRefactoring()).getCu();
-	}
-	
+
 	/*
 	 * @see IDialogPage#createControl(Composite)
 	 */
@@ -377,12 +356,15 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		createKeyPrefixField(supercomposite);
 
 		SashForm composite= new SashForm(supercomposite, SWT.VERTICAL);
-		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		GridData data = new GridData(GridData.FILL_BOTH);
+		data.heightHint = 360;
+		composite.setLayoutData(data);
 				
 		createTableViewer(composite);
 		createSourceViewer(composite);
 				
-		composite.setWeights(new int[]{55, 45});
+		composite.setWeights(new int[]{65, 45});
 	 
 		createLabels(supercomposite);
 		
@@ -400,7 +382,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		 * The workaround is to register my own listener and force the desired 
 		 * behavior.
 		 */
-		fViewer= new TableViewer(fTable){
+		fViewer= new TableViewer(fTable) {
 				protected void hookControl(Control control) {
 					super.hookControl(control);
 					((Table) control).addMouseListener(new MouseAdapter() {
@@ -421,6 +403,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					});
 				}
 		};
+		
 		fViewer.setUseHashlookup(true);
 		
 		final CellEditor[] editors= createCellEditors();
@@ -429,10 +412,18 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fViewer.setColumnProperties(PROPERTIES);
 		fViewer.setCellModifier(new CellModifier());
 
-		fViewer.setContentProvider(new NLSSubstitutionContentProvider());
-		fViewer.setLabelProvider(new NLSSubstitutionLabelProvider());
+		fViewer.setContentProvider(new IStructuredContentProvider() {
+            public Object[] getElements(Object inputElement) {
+                return fSubstitutions;
+            }
+            public void dispose() {
+            }
+            public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+            }
+        });
 		
-		fViewer.setInput(getCu());
+		fViewer.setLabelProvider(new NLSSubstitutionLabelProvider());
+		fViewer.setInput(new Object());
 		
 		fViewer.addDoubleClickListener(new IDoubleClickListener(){
 			public void doubleClick(DoubleClickEvent event) {
@@ -444,11 +435,13 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					openEditButton(event.getSelection());
 			}
 		});
+		
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ExternalizeWizardPage.this.selectionChanged(event);
 			}
-		});		
+		});
+				
 		fViewer.getControl().addFocusListener(new FocusAdapter(){
 			public void focusLost(FocusEvent e) {
 				fPreviewLabel.setText(""); //$NON-NLS-1$
@@ -485,7 +478,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 		try {
 			
-			String contents= getCu().getBuffer().getContents();
+			String contents= fCu.getBuffer().getContents();
 			IDocument document= new Document(contents);
 			tools.setupJavaDocumentPartitioner(document);
 			
@@ -515,17 +508,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		
 		fPrefixField= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fPrefixField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fPrefixField.setText(guessPrefix());
+		fPrefixField.setText(fDefaultPrefix);
 		fPrefixField.selectAll();
 	}
 
-	private String guessPrefix() {
-		String cuName= getCu().getElementName();
-		if (cuName.endsWith(".java")) //$NON-NLS-1$
-			return cuName.substring(0, cuName.length() - ".java".length()) + "."; //$NON-NLS-2$ //$NON-NLS-1$
-		return DEFAULT_KEY_PREFIX;	
-	}
-	
 	private void createLabels(Composite parent){
 		Composite labelSuperComposite= new Composite(parent, SWT.NONE);
 		GridLayout gl= new GridLayout();
@@ -625,7 +611,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		
 		createButtonComposite(c);	
 	}
-	
+
 	private void createButtonComposite(Composite parent){
 		Composite buttonComp= new Composite(parent, SWT.NONE);
 		GridLayout gl= new GridLayout();
@@ -634,48 +620,65 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		buttonComp.setLayout(gl);
 		buttonComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
-		Button translateSelected= new Button(buttonComp, SWT.PUSH);
-		translateSelected.setText(NLSUIMessages.getString("wizardPage.Translate_Selected")); //$NON-NLS-1$
-		translateSelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		SWTUtil.setButtonDimensionHint(translateSelected);
-		translateSelected.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e) {
-				setSelectedTasks(NLSSubstitution.TRANSLATE);
-			}
+		createTaskButton(buttonComp, "wizardPage.Translate_Selected", new SelectionAdapter(){ //$NON-NLS-1$
+		  public void widgetSelected(SelectionEvent e) {
+		    setSelectedTasks(NLSSubstitution.TRANSLATE);
+		  }
 		});
-		
-		Button noTranslateSelected= new Button(buttonComp, SWT.PUSH);
-		noTranslateSelected.setText(NLSUIMessages.getString("wizardPage.Never_Translate_Selected")); //$NON-NLS-1$
-		noTranslateSelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		SWTUtil.setButtonDimensionHint(noTranslateSelected);
-		noTranslateSelected.addSelectionListener(new SelectionAdapter(){
+
+		createTaskButton(buttonComp, "wizardPage.Never_Translate_Selected", new SelectionAdapter(){ //$NON-NLS-1$
 			public void widgetSelected(SelectionEvent e) {
 				setSelectedTasks(NLSSubstitution.NEVER_TRANSLATE);
 			}
 		});
 		
-		Button skipSelected= new Button(buttonComp, SWT.PUSH);
-		skipSelected.setText(NLSUIMessages.getString("wizardPage.Skip_Selected")); //$NON-NLS-1$
-		skipSelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		SWTUtil.setButtonDimensionHint(skipSelected);
-		skipSelected.addSelectionListener(new SelectionAdapter(){
+		createTaskButton(buttonComp, "wizardPage.Skip_Selected", new SelectionAdapter(){ //$NON-NLS-1$
 			public void widgetSelected(SelectionEvent e) {
 				setSelectedTasks(NLSSubstitution.SKIP);
 			}
 		});
 		
-		fEditButton= new Button(buttonComp, SWT.PUSH);
-        fEditButton.setText(NLSUIMessages.getString("ExternalizeWizardPage.Edit_key_and_value")); //$NON-NLS-1$
-        fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        SWTUtil.setButtonDimensionHint(fEditButton);
-        fEditButton.setEnabled(false);
-        fEditButton.addSelectionListener(new SelectionAdapter(){
+		fEditButton= createTaskButton(buttonComp, "ExternalizeWizardPage.Edit_key_and_value", new SelectionAdapter(){ //$NON-NLS-1$
         	public void widgetSelected(SelectionEvent e) {
         		openEditButton(fViewer.getSelection());
         	}
         });
+        fEditButton.setEnabled(false);
+        
+        createTaskButton(buttonComp, "ExternalizeWizardPage.TranslateAll", new SelectionAdapter() { //$NON-NLS-1$
+		  public void widgetSelected(SelectionEvent e) {
+		    setAllTasks(NLSSubstitution.TRANSLATE);
+		  }
+		});
+        createTaskButton(buttonComp, "ExternalizeWizardPage.IgnoreAll", new SelectionAdapter() { //$NON-NLS-1$
+		  public void widgetSelected(SelectionEvent e) {
+		    setAllTasks(NLSSubstitution.NEVER_TRANSLATE);
+		  }
+		});
+        createTaskButton(buttonComp, "ExternalizeWizardPage.SkipAll", new SelectionAdapter() { //$NON-NLS-1$
+		  public void widgetSelected(SelectionEvent e) {
+		    setAllTasks(NLSSubstitution.SKIP);
+		  }
+		});
+        buttonComp.pack();
 	}
 	
+	private Button createTaskButton(Composite parent, String labelKey, SelectionAdapter adapter) {
+	  Button button= new Button(parent, SWT.PUSH);
+	  button.setText(NLSUIMessages.getString(labelKey)); //$NON-NLS-1$
+	  button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	  SWTUtil.setButtonDimensionHint(button);
+	  button.addSelectionListener(adapter);
+	  return button;
+	}
+
+  private void setAllTasks(int task) {
+	  for (int i = 0; i < fSubstitutions.length; i++) {
+	    NLSSubstitution subs = fSubstitutions[i];
+	    subs.task = task;
+	  }
+	  fViewer.refresh();
+	}
 	
 	private void openEditButton(ISelection selection){
 		try{
@@ -701,7 +704,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	
 	private Set getSelectedTableEntries() {
 		ISelection sel= fViewer.getSelection();
-		if (sel instanceof IStructuredSelection)
+		if (sel instanceof IStructuredSelection) 
 			return new HashSet(((IStructuredSelection)sel).toList());
 		else		
 			return new HashSet(0);
@@ -724,7 +727,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}	
 	
 	private void updateLabels(){
-		NLSSubstitution[] elems= getNlsSubstutions(); //calculate only once
+		NLSSubstitution[] elems= fSubstitutions;
 		fTranslateLabel.setText(NLSUIMessages.getString("wizardPage.translate") + NLSSubstitution.countItems(elems, NLSSubstitution.TRANSLATE)); //$NON-NLS-1$
 		fNoTranslateLabel.setText(NLSUIMessages.getString("wizardPage.never_translate") + NLSSubstitution.countItems(elems, NLSSubstitution.NEVER_TRANSLATE)); //$NON-NLS-1$
 		fSkipLabel.setText(NLSUIMessages.getString("wizardPage.skip") + NLSSubstitution.countItems(elems, NLSSubstitution.SKIP)); //$NON-NLS-1$
@@ -740,6 +743,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fPreviewLabel.setText("");//$NON-NLS-1$
 			return;
 		}
+		
 		NLSSubstitution first= (NLSSubstitution) ss.getFirstElement();
 		TextRegion region= first.value.getPosition();
 		fSourceViewer.setSelectedRange(region.getOffset(), region.getLength());
@@ -762,14 +766,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fEditButton.setEnabled(first.task == NLSSubstitution.TRANSLATE);
 	}
 	
-	private NLSSubstitutionContentProvider getContentProvider(){
-		return (NLSSubstitutionContentProvider)fViewer.getContentProvider();
-	}
 	
 	private void initializeRefactoring(){
 		NLSRefactoring ref= (NLSRefactoring) getRefactoring();
-		ref.setNlsSubstitutions(addKeyPrefix(getNlsSubstutions(), fPrefixField.getText()));
-		ref.setLines(getContentProvider().getLines());
+		ref.setSubstitutionPrefix(fPrefixField.getText());
 	}
 		
 	public boolean performFinish(){
@@ -799,24 +799,4 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		super.dispose();
 	}
 	
-	//creates a copy
-	private static NLSSubstitution[] addKeyPrefix(NLSSubstitution[] subs, String prefix){
-		NLSSubstitution[] result= new NLSSubstitution[subs.length];
-		for (int i= 0; i < result.length; i++){
-			result[i]= new NLSSubstitution(subs[i]);
-			result[i].key = prefix + subs[i].key;
-		}	
-		return result;	
-	}
-	
-	private NLSSubstitution[] getNlsSubstutions(){
-		Object[] input= getContentProvider().getElements(getCu());
-		if (input == null)
-			return new NLSSubstitution[0];
-		NLSSubstitution[] result= new NLSSubstitution[input.length];
-		for (int i= 0; i< input.length; i++){
-			result[i]= (NLSSubstitution)input[i];
-		}
-		return result;
-	}
 }

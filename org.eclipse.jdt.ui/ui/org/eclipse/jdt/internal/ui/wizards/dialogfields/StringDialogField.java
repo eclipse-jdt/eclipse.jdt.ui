@@ -19,6 +19,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+
 /**
  * Dialog field containing a label and a text control.
  */
@@ -27,12 +31,24 @@ public class StringDialogField extends DialogField {
 	private String fText;
 	private Text fTextControl;
 	private ModifyListener fModifyListener;
+    private IContentAssistProcessor fContentAssistProcessor;
 	
 	public StringDialogField() {
 		super();
 		fText= ""; //$NON-NLS-1$
 	}
 			
+	public void setContentAssistProcessor(IContentAssistProcessor processor) {
+	    fContentAssistProcessor= processor;
+	    if (fContentAssistProcessor != null && isOkToUse(fTextControl)) {
+	    	ControlContentAssistHelper.createTextContentAssistant(fTextControl, fContentAssistProcessor);
+	    }
+	}
+
+	public IContentAssistProcessor getContentAssistProcessor() {
+	    return fContentAssistProcessor;
+	}
+	
 	// ------- layout helpers
 		
 	/*
@@ -100,6 +116,9 @@ public class StringDialogField extends DialogField {
 			fTextControl.addModifyListener(fModifyListener);
 			
 			fTextControl.setEnabled(isEnabled());
+			if (fContentAssistProcessor != null) {
+			    ControlContentAssistHelper.createTextContentAssistant(fTextControl, fContentAssistProcessor);
+			}
 		}
 		return fTextControl;
 	}

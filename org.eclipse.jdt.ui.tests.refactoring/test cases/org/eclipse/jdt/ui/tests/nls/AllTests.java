@@ -18,12 +18,22 @@ import junit.framework.TestSuite;
 public class AllTests {
 	
 	public static Test suite ( ) {
-		TestSuite suite= new TestSuite("All NLS Tests");
-		suite.addTest(NLSElementTester.suite());
+        TestSuite suite = new TestSuite();
+        // old
+        suite.addTest(NLSElementTester.suite());
 		suite.addTest(NLSScannerTester.suite());
 		suite.addTest(CellEditorTester.suite());
 		suite.addTest(OrderedMapTester.suite());
-	    return suite;
+
+		// new
+        suite.addTest(NlsRefactoringCheckInitialConditionsTest.allTests());
+        suite.addTest(NlsRefactoringCheckFinalConditionsTest.allTests());
+        suite.addTest(NlsRefactoringCreateChangeTest.allTests());
+        suite.addTest(NLSHintTest.allTests());
+        suite.addTest(PropertyFileDocumentModellTest.suite());
+        suite.addTest(SimpleLineReaderTest.suite());
+
+        return suite;
 	}
 }
 
