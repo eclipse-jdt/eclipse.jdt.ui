@@ -289,7 +289,8 @@ public class ChangeParametersControl extends Composite {
 				if (e.keyCode != SWT.MOD1 	&& (e.stateMask & SWT.MOD1) 	!= 0) return;
 				if (e.keyCode != SWT.MOD2 	&& (e.stateMask & SWT.MOD2) 	!= 0) return;
 				if (table.getSelectionCount() != 1) return;
-				
+				if (fTableCursor == null) return;
+				 
 				TableItem[] selection = table.getSelection();
 				TableItem row = (selection.length == 0) ? table.getItem(table.getTopIndex()) : selection[0];
 				table.showItem(row);
@@ -407,18 +408,22 @@ public class ChangeParametersControl extends Composite {
 					ParameterEditDialog dialog= new ParameterEditDialog(getShell(), parameterInfo, fCanChangeTypesOfOldParameters);
 					if (dialog.open() == IDialogConstants.CANCEL_ID) {
 						fTableViewer.setSelection(selection);
+						adjustTableCursor(column, row);
 						return;
 					}
 					fListener.parameterChanged(parameterInfo);
 					fTableViewer.update(parameterInfo, PROPERTIES);
-					if (column >= 0 && row >= 0) {
-						showTableCursor(true);
-						setTableCursorSelection(row, column);
-					}
+					adjustTableCursor(column, row);
 				} finally {
 					fTableViewer.refresh();
-					fTableViewer.getControl().setFocus();
 					fTableViewer.setSelection(selection);
+				}
+			}
+
+			private void adjustTableCursor(int column, int row) {
+				if (column >= 0 && row >= 0) {
+					showTableCursor(true);
+					setTableCursorSelection(row, column);
 				}
 			}
 		});
