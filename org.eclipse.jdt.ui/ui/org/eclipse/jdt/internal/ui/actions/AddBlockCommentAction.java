@@ -24,7 +24,8 @@ import org.eclipse.jface.text.ITypedRegion;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 
 /**
  * Action that encloses the editor's current selection with Java block comment terminators

@@ -23,8 +23,9 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 

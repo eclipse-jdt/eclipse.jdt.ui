@@ -36,8 +36,9 @@ import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterPreferenceCo
 import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterConstants;
 import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 /**
  * Formatting strategy for general source code comments.

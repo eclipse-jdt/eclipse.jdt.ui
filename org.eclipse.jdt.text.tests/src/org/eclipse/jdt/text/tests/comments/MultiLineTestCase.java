@@ -14,8 +14,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 public class MultiLineTestCase extends CommentTestCase {
 

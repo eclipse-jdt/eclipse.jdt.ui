@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 public class SingleLineTestCase extends CommentTestCase {
 

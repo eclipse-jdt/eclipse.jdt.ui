@@ -17,6 +17,8 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 
 /**
  * This scanner recognizes the JavaDoc comments, Java multi line comments, Java single line comments,

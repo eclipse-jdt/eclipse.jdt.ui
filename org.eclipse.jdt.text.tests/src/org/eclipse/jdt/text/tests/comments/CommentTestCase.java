@@ -19,7 +19,8 @@ import junit.framework.TestCase;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.TextUtilities;
 
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 
 
 public abstract class CommentTestCase extends TestCase {

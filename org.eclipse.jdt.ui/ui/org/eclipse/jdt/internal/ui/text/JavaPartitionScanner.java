@@ -25,6 +25,8 @@ import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WordRule;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 
 /**
  * This scanner recognizes the JavaDoc comments and Java multi line comments.

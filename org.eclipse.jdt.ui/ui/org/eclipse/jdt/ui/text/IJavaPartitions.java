@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text;
+package org.eclipse.jdt.ui.text;
 
 public interface IJavaPartitions {
 	

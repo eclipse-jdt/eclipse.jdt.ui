@@ -20,6 +20,8 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 /**
  * Utility methods for heuristic based Java manipulations in an incomplete Java source file.
  * 
