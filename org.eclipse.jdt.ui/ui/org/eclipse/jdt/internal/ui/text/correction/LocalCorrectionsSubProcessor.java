@@ -176,8 +176,7 @@ public class LocalCorrectionsSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
 
-// diabled until moved to enhanced
-//            addImportToProposal(cu, uncaughtName, proposal);
+			addImportToProposal(cu, uncaughtName, proposal);
             
 			proposals.add(proposal);
 		}
