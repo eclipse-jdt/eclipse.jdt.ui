@@ -1135,7 +1135,8 @@ class InstanceMethodMover {
 			List parameters= new ArrayList();
 			for(Iterator it= fMethodNode.parameters().iterator(); it.hasNext();) {
 				IVariableBinding paramBinding= ((SingleVariableDeclaration) it.next()).resolveBinding();
-				Assert.isNotNull(paramBinding);
+				if (paramBinding == null)
+					return new Parameter[0]; //null bindings are not good
 
 				parameters.add(new Parameter(this, paramBinding));
 			}
