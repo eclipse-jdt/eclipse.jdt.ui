@@ -40,8 +40,8 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -514,10 +514,23 @@ public class ChangeParametersControl extends Composite {
 
 	private void addCellEditors() {
 		class UnfocusableTextCellEditor extends TextCellEditor {
+			private Object fOriginalValue;
 			SubjectControlContentAssistant fContentAssistant;
 			private boolean fSaveNextModification;
 			public UnfocusableTextCellEditor(Composite parent) {
 				super(parent);
+			}
+			public void activate() {
+				super.activate();
+				fOriginalValue= doGetValue();
+			}
+			public Object getOriginalValue() {
+				return fOriginalValue;
+			}
+			public void fireModifyEvent(Object newValue, final int property) {
+				fTableViewer.getCellModifier().modify(
+						((IStructuredSelection) fTableViewer.getSelection()).getFirstElement(),
+						PROPERTIES[property], newValue);
 			}
 			protected void focusLost() {
 				if (fContentAssistant != null && fContentAssistant.hasProposalPopupFocus())
@@ -554,7 +567,7 @@ public class ChangeParametersControl extends Composite {
 		
 		for (int i = 0; i < editors.length; i++) {
 			final int editorColumn= i;
-			final CellEditor editor = editors[i];
+			final UnfocusableTextCellEditor editor = editors[i];
 			// support tabbing between columns while editing:
 			editor.getControl().addTraverseListener(new TraverseListener() {
 				public void keyTraversed(TraverseEvent e) {
@@ -625,6 +638,22 @@ public class ChangeParametersControl extends Composite {
 					}
 				}
 			});
+			
+			editor.addListener(new ICellEditorListener() {
+				/* bug 58540: change signature refactoring interaction: validate as you type [refactoring] 
+				 * CellEditors validate on keystroke by updating model on editorValueChanged(..) */
+				public void applyEditorValue() {
+					//default behavior is OK
+				}
+				public void cancelEditor() {
+					//must reset model to original value:
+					editor.fireModifyEvent(editor.getOriginalValue(), editorColumn);
+				}
+				public void editorValueChanged(boolean oldValidState, boolean newValidState) {
+					editor.fireModifyEvent(editor.getValue(), editorColumn);
+				}
+			});
+
 		}
 		
 		fTableViewer.setCellEditors(editors);
