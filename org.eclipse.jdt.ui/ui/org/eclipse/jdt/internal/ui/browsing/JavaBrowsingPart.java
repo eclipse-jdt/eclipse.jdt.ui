@@ -384,7 +384,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		Object element= selection.getFirstElement();
 		IJavaElement jElement= element instanceof IJavaElement ? (IJavaElement)element : null;
 		
-		if (size == 1 && isNewTarget(jElement)) {
+		if (size == 0 || (size == 1 &&isNewTarget(jElement))) {
 			MenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
 			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
 			new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
@@ -106,8 +107,9 @@ public class ShowActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		if (!fIsPackageExplorer)
-			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowInPackagesViewAction);
+		if (!fIsPackageExplorer) {
+			appendToGroup(menu, fShowInPackagesViewAction);
+		}
 	}
 	
 	/*
@@ -124,5 +126,10 @@ public class ShowActionGroup extends ActionGroup {
 		if (!fIsPackageExplorer)
 			actionBar.setGlobalActionHandler(JdtActionConstants.SHOW_IN_PACKAGE_VIEW, fShowInPackagesViewAction);
 		actionBar.setGlobalActionHandler(JdtActionConstants.SHOW_IN_NAVIGATOR_VIEW, fShowInNavigatorViewAction);
-	}	
+	}
+	
+	private void appendToGroup(IMenuManager menu, IAction action) {
+		if (action.isEnabled())
+			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, action);
+	}		
 }

@@ -188,7 +188,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		Object element= selection.getFirstElement();
 		IJavaElement jElement= element instanceof IJavaElement ? (IJavaElement)element : null;
 		
-		if (size == 1 && isNewTarget(jElement)) {
+		if (size == 0 || (size == 1 &&isNewTarget(jElement))) {
 			IMenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
 			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
 			new NewWizardMenu(newMenu, fPart.getSite().getWorkbenchWindow(), false);
