@@ -615,8 +615,12 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     private Change createChange(ASTRewrite rewrite) throws CoreException{
         final TextChange result= new CompilationUnitChange("", fCu); //$NON-NLS-1$
         ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
-        TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
-        TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.editName"), resultingEdits); //$NON-NLS-1$
+        try {
+	        TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
+	        TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.editName"), resultingEdits); //$NON-NLS-1$
+        } finally {
+        	RefactoringFileBuffers.release(fCu);
+        }
         return result;
     }
 
