@@ -60,7 +60,10 @@ public class TomcatLaunchDelegate extends JavaLocalApplicationLaunchConfiguratio
 		
 		// set default stratum
 		IJavaDebugTarget target = (IJavaDebugTarget)launch.getDebugTarget();
-		target.setDefaultStratum("JSP"); //$NON-NLS-1$
+		if (target != null) {
+			// only available in debug mode
+			target.setDefaultStratum("JSP"); //$NON-NLS-1$	\
+		}
 	}
 
 	/**
