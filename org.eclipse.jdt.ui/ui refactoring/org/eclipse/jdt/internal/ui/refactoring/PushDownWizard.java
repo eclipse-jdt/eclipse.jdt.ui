@@ -53,6 +53,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -122,7 +123,7 @@ public class PushDownWizard extends RefactoringWizard {
 				if (! canModify(mac, property))
 					return;
 				mac.setAction(action);
-				PushDownInputPage.this.updateUIElements(null);
+				PushDownInputPage.this.updateUIElements(null, true);
 			}
 		}
 
@@ -291,7 +292,7 @@ public class PushDownWizard extends RefactoringWizard {
 						info.setAction(MemberActionInfo.PUSH_DOWN_ACTION);
 					else
 						info.setAction(MemberActionInfo.NO_ACTION);
-					updateUIElements(null);
+					updateUIElements(null, true);
 				}
 			});
 			fTableViewer.addDoubleClickListener(new IDoubleClickListener(){
@@ -302,7 +303,7 @@ public class PushDownWizard extends RefactoringWizard {
 
 		
 			fTableViewer.setInput(getPushDownRefactoring().getMemberActionInfos());
-			updateUIElements(null);
+			updateUIElements(null, false);
 			setupCellEditors(table);
 		}
 
@@ -376,7 +377,7 @@ public class PushDownWizard extends RefactoringWizard {
 					public void run(IProgressMonitor pm) throws InvocationTargetException {
 						try {
 							getPushDownRefactoring().computeAdditionalRequiredMembersToPushDown(pm);
-							updateUIElements(null);
+							updateUIElements(null, true);
 						} catch (JavaModelException e) {
 							throw new InvocationTargetException(e);
 						} finally {
@@ -405,12 +406,12 @@ public class PushDownWizard extends RefactoringWizard {
 				
 				ComboSelectionDialog dialog= new ComboSelectionDialog(getShell(), shellTitle, labelText, keys, initialSelectionIndex);
 				dialog.setBlockOnOpen(true);
-				if (dialog.open() == Dialog.CANCEL)
+				if (dialog.open() == Window.CANCEL)
 					return;
 				int action= ((Integer)stringMapping.get(dialog.getSelectedString())).intValue();
 				setInfoAction(getSelectedMemberActionInfos(), action);
 			} finally{
-				updateUIElements(preserved);
+				updateUIElements(preserved, true);
 			}
 		}
 
@@ -472,13 +473,13 @@ public class PushDownWizard extends RefactoringWizard {
 			return (IStructuredSelection)fTableViewer.getSelection();
 		}
 	
-		private void updateUIElements(ISelection preserved) {
+		private void updateUIElements(ISelection preserved, boolean displayErrorMessage) {
 			fTableViewer.refresh();
 			if (preserved != null){
 				fTableViewer.getControl().setFocus();
 				fTableViewer.setSelection(preserved);
 			}
-			checkPageCompletionStatus();
+			checkPageCompletionStatus(displayErrorMessage);
 			updateButtonEnablementState(getTableSelection());
 			updateStatusLine();
 		}
@@ -492,9 +493,10 @@ public class PushDownWizard extends RefactoringWizard {
 			fStatusLine.setText(msg);
 		}
 
-		private void checkPageCompletionStatus() {
+		private void checkPageCompletionStatus(boolean displayErrorMessage) {
 			if (areAllElementsMarkedAsNoAction()){
-				setErrorMessage(RefactoringMessages.getString("PushDownInputPage.Select_members_to_push_down")); //$NON-NLS-1$
+				if (displayErrorMessage)
+					setErrorMessage(RefactoringMessages.getString("PushDownInputPage.Select_members_to_push_down")); //$NON-NLS-1$
 				setPageComplete(false);
 			} else {
 				setErrorMessage(null);
