@@ -47,18 +47,18 @@ public abstract class DynamicBindingProperty extends ExceptionAttribute {
 		if (viewerElement != null) {
 			IBinding viewerBinding= viewerElement.getBinding();
 			try {
-				String queryResult= executeQuery(trayBinding, viewerBinding);
+				String queryResult= executeQuery(viewerBinding, trayBinding);
 				buf.append(queryResult);
 			} catch (RuntimeException e) {
 				fException= e;
 				buf.append(e.getClass().getName());
 				buf.append(" for \""); //$NON-NLS-1$
-				buf.append(trayBinding.getKey());
-				buf.append("\" and "); //$NON-NLS-1$
 				if (viewerBinding == null)
 					buf.append("null"); //$NON-NLS-1$
 				else
-					buf.append('"').append(viewerBinding.getKey()).append('"');
+					buf.append('"').append(viewerBinding.getKey());
+				buf.append("\" and "); //$NON-NLS-1$
+				buf.append(trayBinding.getKey()).append('"');
 			}
 		} else {
 			buf.append(N_A);
@@ -71,11 +71,11 @@ public abstract class DynamicBindingProperty extends ExceptionAttribute {
 	 * A {@link RuntimeException} thrown by this method is made available via
 	 * {@link #getException()}. 
 	 * 
-	 * @param trayBinding the binding of the element selected in the comparison tray, or <code>null</code> iff none
 	 * @param viewerBinding the binding of the element selected in the AST viewer, or <code>null</code> iff none
+	 * @param trayBinding the binding of the element selected in the comparison tray, or <code>null</code> iff none
 	 * @return this property's result
 	 */
-	protected abstract String executeQuery(IBinding trayBinding, IBinding viewerBinding);
+	protected abstract String executeQuery(IBinding viewerBinding, IBinding trayBinding);
 
 	/**
 	 * @return a description of the dynamic property

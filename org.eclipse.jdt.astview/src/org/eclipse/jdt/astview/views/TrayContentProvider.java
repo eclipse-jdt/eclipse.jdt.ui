@@ -54,10 +54,10 @@ public class TrayContentProvider implements ITreeContentProvider {
 				super(parent);
 			}
 			protected String getName() {
-				return " == *: "; //$NON-NLS-1$
+				return "* == this: "; //$NON-NLS-1$
 			}
-			protected String executeQuery(IBinding trayBinding, IBinding viewerBinding) {
-				return Boolean.toString(trayBinding == viewerBinding);
+			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
+				return Boolean.toString(viewerBinding == trayBinding);
 			}
 		} 
 		result.add(new IdentityProperty(trayElement));
@@ -67,10 +67,13 @@ public class TrayContentProvider implements ITreeContentProvider {
 				super(parent);
 			}
 			protected String getName() {
-				return ".equals(*): "; //$NON-NLS-1$
+				return "*.equals(this): "; //$NON-NLS-1$
 			}
-			protected String executeQuery(IBinding trayBinding, IBinding viewerBinding) {
-				return Boolean.toString(trayBinding.equals(viewerBinding));
+			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
+				if (viewerBinding != null)
+					return Boolean.toString(viewerBinding.equals(trayBinding));
+				else
+					return "* is null"; //$NON-NLS-1$
 			}
 		} 
 		result.add(new EqualsProperty(trayElement));
@@ -80,10 +83,13 @@ public class TrayContentProvider implements ITreeContentProvider {
 				super(parent);
 			}
 			protected String getName() {
-				return ".isEqualTo(*): "; //$NON-NLS-1$
+				return "*.isEqualTo(this): "; //$NON-NLS-1$
 			}
-			protected String executeQuery(IBinding trayBinding, IBinding viewerBinding) {
-				return Boolean.toString(trayBinding.isEqualTo(viewerBinding));
+			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
+				if (viewerBinding != null)
+					return Boolean.toString(viewerBinding.isEqualTo(trayBinding));
+				else
+					return "* is null"; //$NON-NLS-1$
 			}
 		} 
 		result.add(new IsEqualToProperty(trayElement));
@@ -93,17 +99,17 @@ public class TrayContentProvider implements ITreeContentProvider {
 				super(parent);
 			}
 			protected String getName() {
-				return ".getKey().equals(*.getKey()): "; //$NON-NLS-1$
+				return "*.getKey().equals(this.getKey()): "; //$NON-NLS-1$
 			}
-			protected String executeQuery(IBinding trayBinding, IBinding viewerBinding) {
-				if (trayBinding.getKey() == null)
-					return ".getKey() == null"; //$NON-NLS-1$
-				else if (viewerBinding == null)
-					return "* == null"; //$NON-NLS-1$
+			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
+				if (viewerBinding == null)
+					return "* is null"; //$NON-NLS-1$
 				else if (viewerBinding.getKey() == null)
-					return "*.getKey() == null"; //$NON-NLS-1$
+					return "*.getKey() is null"; //$NON-NLS-1$
+				else if (trayBinding.getKey() == null)
+					return "this.getKey() is null"; //$NON-NLS-1$
 				else
-					return Boolean.toString(trayBinding.getKey().equals(viewerBinding.getKey()));
+					return Boolean.toString(viewerBinding.getKey().equals(trayBinding.getKey()));
 			}
 		} 
 		result.add(new KeysEqualProperty(trayElement));
@@ -115,15 +121,15 @@ public class TrayContentProvider implements ITreeContentProvider {
 				super(parent);
 			}
 			protected String getName() {
-				return ".isSubTypeCompatible(*): "; //$NON-NLS-1$
+				return "*.isSubTypeCompatible(this): "; //$NON-NLS-1$
 			}
-			protected String executeQuery(IBinding trayBinding, IBinding viewerBinding) {
+			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding instanceof ITypeBinding) {
-					ITypeBinding trayTB= (ITypeBinding) trayBinding;
 					ITypeBinding viewerTB= (ITypeBinding) viewerBinding;
-					return Boolean.toString(trayTB.isSubTypeCompatible(viewerTB));
+					ITypeBinding trayTB= (ITypeBinding) trayBinding;
+					return Boolean.toString(viewerTB.isSubTypeCompatible(trayTB));
 				} else {
-					return "other not an ITypeBinding"; //$NON-NLS-1$
+					return "* not an ITypeBinding"; //$NON-NLS-1$
 				}
 			}
 		} 
@@ -134,15 +140,15 @@ public class TrayContentProvider implements ITreeContentProvider {
 				super(parent);
 			}
 			protected String getName() {
-				return ".isCastCompatible(*): "; //$NON-NLS-1$
+				return "*.isCastCompatible(this): "; //$NON-NLS-1$
 			}
-			protected String executeQuery(IBinding trayBinding, IBinding viewerBinding) {
+			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding instanceof ITypeBinding) {
-					ITypeBinding trayTB= (ITypeBinding) trayBinding;
 					ITypeBinding viewerTB= (ITypeBinding) viewerBinding;
-					return Boolean.toString(trayTB.isCastCompatible(viewerTB));
+					ITypeBinding trayTB= (ITypeBinding) trayBinding;
+					return Boolean.toString(viewerTB.isCastCompatible(trayTB));
 				} else {
-					return "other not an ITypeBinding"; //$NON-NLS-1$
+					return "* not an ITypeBinding"; //$NON-NLS-1$
 				}
 			}
 		} 
@@ -153,15 +159,15 @@ public class TrayContentProvider implements ITreeContentProvider {
 				super(parent);
 			}
 			protected String getName() {
-				return ".isAssignmentCompatible(*): "; //$NON-NLS-1$
+				return "*.isAssignmentCompatible(this): "; //$NON-NLS-1$
 			}
-			protected String executeQuery(IBinding trayBinding, IBinding viewerBinding) {
+			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding instanceof ITypeBinding) {
-					ITypeBinding trayTB= (ITypeBinding) trayBinding;
 					ITypeBinding viewerTB= (ITypeBinding) viewerBinding;
-					return Boolean.toString(trayTB.isAssignmentCompatible(viewerTB));
+					ITypeBinding trayTB= (ITypeBinding) trayBinding;
+					return Boolean.toString(viewerTB.isAssignmentCompatible(trayTB));
 				} else {
-					return "other not an ITypeBinding"; //$NON-NLS-1$
+					return "* not an ITypeBinding"; //$NON-NLS-1$
 				}
 			}
 		} 
@@ -174,15 +180,15 @@ public class TrayContentProvider implements ITreeContentProvider {
 				super(parent);
 			}
 			protected String getName() {
-				return ".overrides(*): "; //$NON-NLS-1$
+				return "*.overrides(this): "; //$NON-NLS-1$
 			}
-			protected String executeQuery(IBinding trayBinding, IBinding viewerBinding) {
+			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding instanceof IMethodBinding) {
-					IMethodBinding trayMB= (IMethodBinding) trayBinding;
 					IMethodBinding viewerMB= (IMethodBinding) viewerBinding;
-					return Boolean.toString(trayMB.overrides(viewerMB));
+					IMethodBinding trayMB= (IMethodBinding) trayBinding;
+					return Boolean.toString(viewerMB.overrides(trayMB));
 				} else {
-					return "other not an IMethodBinding"; //$NON-NLS-1$
+					return "* not an IMethodBinding"; //$NON-NLS-1$
 				}
 			}
 		} 
