@@ -460,12 +460,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	
 	private IStatus getValidation() {
 		StatusInfo status= new StatusInfo();
-		if (checkValue(PREF_COMPLIANCE, VERSION_1_4)) {
-			if (!checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
-				status.setError(JavaUIMessages.getString("CompilerPreferencePage.cpl14notsrc14.error"));
-				return status;
-			}
-		} else if (checkValue(PREF_COMPLIANCE, VERSION_1_3)) {
+		if (checkValue(PREF_COMPLIANCE, VERSION_1_3)) {
 			if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
 				status.setError(JavaUIMessages.getString("CompilerPreferencePage.cpl13src14.error"));
 				return status;
