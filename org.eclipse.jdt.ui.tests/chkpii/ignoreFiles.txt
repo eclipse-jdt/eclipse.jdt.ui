@@ -30,3 +30,7 @@ org.apache.ant/*
 org.eclipse.help.webapp/*
 org.eclipse.pde.ui/*
 org.eclipse.debug.core/*
+org.eclipse.jdt.debug/*
+org.eclipse.jdt.debug.ui/*
+org.eclipse.debug.ui/*
+org.eclipse.releng.tools/*
