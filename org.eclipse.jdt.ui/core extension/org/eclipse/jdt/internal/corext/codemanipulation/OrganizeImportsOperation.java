@@ -12,10 +12,11 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -50,16 +51,16 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
@@ -81,24 +82,36 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 	private static class TypeReferenceProcessor {
 		
+		private static class UnresolvedTypeData {
+			final SimpleName ref;
+			final int typeKinds;
+			final List foundInfos;
+
+			public UnresolvedTypeData(SimpleName ref) {
+				this.ref= ref;
+				this.typeKinds= ASTResolving.getPossibleTypeKinds(ref);
+				this.foundInfos= new ArrayList(3);
+			}
+		}
+		
 		private Set fOldSingleImports;
 		private Set fOldDemandImports;
 		
 		private Set fImplicitImports;
 		
-		private HashSet fImportsAdded;
-		
 		private ImportsStructure fImpStructure;
-		
-		private ArrayList fTypeRefsFound; // cached array list for reuse
 		
 		private boolean fDoIgnoreLowerCaseNames;
 		
-		private IJavaSearchScope fSearchScope;
 		private IPackageFragment fCurrPackage;
 		
 		private ScopeAnalyzer fAnalyzer;
 		private boolean fAllowDefaultPackageImports;
+		
+		private Map fUnresolvedTypes;
+		private Set fImportsAdded;
+		private TypeInfo[][] fOpenChoices;
+		private SourceRange[] fSourceRanges;
 		
 		
 		public TypeReferenceProcessor(Set oldSingleImports, Set oldDemandImports, CompilationUnit root, ImportsStructure impStructure, boolean ignoreLowerCaseNames) {
@@ -116,12 +129,12 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			
 			fAnalyzer= new ScopeAnalyzer(root);
 			
-			fSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { cu.getJavaProject() });
 			fCurrPackage= (IPackageFragment) cu.getParent();
 			
-			fTypeRefsFound= new ArrayList();  	// cached array list for reuse
-			fImportsAdded= new HashSet();		
 			fAllowDefaultPackageImports= cu.getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true).equals(JavaCore.VERSION_1_3);
+			
+			fImportsAdded= new HashSet();
+			fUnresolvedTypes= new HashMap();
 		}
 		
 		private boolean needsImport(ITypeBinding typeBinding, SimpleName ref) {
@@ -165,99 +178,125 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		
 		/**
 		 * Tries to find the given type name and add it to the import structure.
-		 * Returns array of coices if user needs to select a type.
 		 */
-		public TypeInfo[] process(SimpleName ref, IProgressMonitor monitor) throws CoreException {
+		public void add(SimpleName ref) throws CoreException {
 			String typeName= ref.getIdentifier();
 			
 			if (fImportsAdded.contains(typeName)) {
-				return null;
+				return;
 			}
 			
-			try {
-				IBinding binding= ref.resolveBinding();
-				if (binding != null) {
-					if (binding.getKind() == IBinding.TYPE) {
-						ITypeBinding typeBinding= (ITypeBinding) binding;
-						if (typeBinding.isArray()) {
-							typeBinding= typeBinding.getElementType();
-						}
-						typeBinding= typeBinding.getTypeDeclaration();
-						
-						if (needsImport(typeBinding, ref)) {
-							fImpStructure.addImport(typeBinding);
-							fImportsAdded.add(typeName);
-						}
-					}	
-					return null;
-				}
-				
-				fImportsAdded.add(typeName);
-				
-				ArrayList typeRefsFound= fTypeRefsFound; // reuse
-				
-				findTypeRefs(ref, typeRefsFound, monitor);				
-				int nFound= typeRefsFound.size();
-				if (nFound == 0) {
-					// nothing found
-					return null;
-				} else if (nFound == 1) {
-					TypeInfo typeRef= (TypeInfo) typeRefsFound.get(0);
-					fImpStructure.addImport(typeRef.getFullyQualifiedName());
-					return null;
-				} else {
-					String containerToImport= null;
-					boolean ambiguousImports= false;
-					
-					// multiple found, use old import structure to find an entry
-					for (int i= 0; i < nFound; i++) {
-						TypeInfo typeRef= (TypeInfo) typeRefsFound.get(i);
-						String fullName= typeRef.getFullyQualifiedName();
-						String containerName= typeRef.getTypeContainerName();
-						if (fOldSingleImports.contains(fullName)) {
-							// was single-imported
-							fImpStructure.addImport(fullName);
-							return null;
-						} else if (fOldDemandImports.contains(containerName) || fImplicitImports.contains(containerName)) {
-							if (containerToImport == null) {
-								containerToImport= containerName;
-							} else {  // more than one import-on-demand
-								ambiguousImports= true;
-							}
-						}
+			IBinding binding= ref.resolveBinding();
+			if (binding != null) {
+				if (binding.getKind() == IBinding.TYPE) {
+					ITypeBinding typeBinding= (ITypeBinding) binding;
+					if (typeBinding.isArray()) {
+						typeBinding= typeBinding.getElementType();
 					}
+					typeBinding= typeBinding.getTypeDeclaration();
 					
-					if (containerToImport != null && !ambiguousImports) {
-						fImpStructure.addImport(JavaModelUtil.concatenateName(containerToImport, typeName));
-					} else {
-						// return the open choices
-						return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[nFound]);
+					if (needsImport(typeBinding, ref)) {
+						fImpStructure.addImport(typeBinding);
+						fImportsAdded.add(typeName);
 					}
-				}
-			} finally {
-				fTypeRefsFound.clear();
+				}	
+				return;
 			}
-			return null;
-		}
-		
-		private void findTypeRefs(SimpleName ref, Collection typeRefsFound, IProgressMonitor monitor) throws JavaModelException {
-			String simpleTypeName= ref.getIdentifier();
-			if (fDoIgnoreLowerCaseNames && simpleTypeName.length() > 0) {
-				char ch= simpleTypeName.charAt(0);
+			
+			if (fDoIgnoreLowerCaseNames && typeName.length() > 0) {
+				char ch= typeName.charAt(0);
 				if (Strings.isLowerCase(ch) && Character.isLetter(ch)) {
 					return;
 				}
 			}
+			fImportsAdded.add(typeName);			
+			fUnresolvedTypes.put(typeName, new UnresolvedTypeData(ref));
+		}
 			
-			int typeKinds= ASTResolving.getPossibleTypeKinds(ref);
-			TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, fSearchScope, monitor);
-			for (int i= 0; i < infos.length; i++) {
-				TypeInfo curr= infos[i];
-				if (curr.getPackageName().length() > 0 || fAllowDefaultPackageImports) { // do not suggest imports from the default package
-					if (isOfKind(curr, typeKinds) && isVisible(curr)) {
-						typeRefsFound.add(curr);
+		public boolean process(IProgressMonitor monitor) throws JavaModelException {
+			try {
+				int nUnresolved= fUnresolvedTypes.size();
+				if (nUnresolved == 0) {
+					return false;
+				}
+				char[][] allTypes= new char[nUnresolved][];
+				int i= 0;
+				for (Iterator iter= fUnresolvedTypes.keySet().iterator(); iter.hasNext();) {
+					allTypes[i++]= ((String) iter.next()).toCharArray();
+				}
+				ArrayList typesFound= new ArrayList();
+				IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCurrPackage.getJavaProject() });
+				TypeInfoRequestor requestor= new TypeInfoRequestor(typesFound);
+				new SearchEngine().searchAllTypeNames(null, allTypes, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+
+				for (i= 0; i < typesFound.size(); i++) {
+					TypeInfo curr= (TypeInfo) typesFound.get(i);
+					UnresolvedTypeData data= (UnresolvedTypeData) fUnresolvedTypes.get(curr.getTypeName());
+					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds)) {
+						if (fAllowDefaultPackageImports || curr.getPackageName().length() > 0) {
+							data.foundInfos.add(curr);
+						}
 					}
 				}
+				
+				ArrayList openChoices= new ArrayList(nUnresolved);
+				ArrayList sourceRanges= new ArrayList(nUnresolved);
+				for (Iterator iter= fUnresolvedTypes.values().iterator(); iter.hasNext();) {
+					UnresolvedTypeData data= (UnresolvedTypeData) iter.next();
+					TypeInfo[] openChoice= processTypeInfo(data.foundInfos);
+					if (openChoice != null) {
+						openChoices.add(openChoice);
+						sourceRanges.add(new SourceRange(data.ref.getStartPosition(), data.ref.getLength()));
+					}
+				}
+				if (openChoices.isEmpty()) {
+					return false;
+				}
+				fOpenChoices= (TypeInfo[][]) openChoices.toArray(new TypeInfo[openChoices.size()][]);
+				fSourceRanges= (SourceRange[]) sourceRanges.toArray(new SourceRange[sourceRanges.size()]);
+				return true;
+			} finally {
+				monitor.done();
+			}
+		}
+		
+		private TypeInfo[] processTypeInfo(List typeRefsFound) {
+			int nFound= typeRefsFound.size();
+			if (nFound == 0) {
+				// nothing found
+				return null;
+			} else if (nFound == 1) {
+				TypeInfo typeRef= (TypeInfo) typeRefsFound.get(0);
+				fImpStructure.addImport(typeRef.getFullyQualifiedName());
+				return null;
+			} else {
+				String typeToImport= null;
+				boolean ambiguousImports= false;
+				
+				// multiple found, use old imports to find an entry
+				for (int i= 0; i < nFound; i++) {
+					TypeInfo typeRef= (TypeInfo) typeRefsFound.get(i);
+					String fullName= typeRef.getFullyQualifiedName();
+					String containerName= typeRef.getTypeContainerName();
+					if (fOldSingleImports.contains(fullName)) {
+						// was single-imported
+						fImpStructure.addImport(fullName);
+						return null;
+					} else if (fOldDemandImports.contains(containerName) || fImplicitImports.contains(containerName)) {
+						if (typeToImport == null) {
+							typeToImport= fullName;
+						} else {  // more than one import-on-demand
+							ambiguousImports= true;
+						}
+					}
+				}
+				
+				if (typeToImport != null && !ambiguousImports) {
+					fImpStructure.addImport(typeToImport);
+					return null;
+				}
+				// return the open choices
+				return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[nFound]);
 			}
 		}
 		
@@ -275,7 +314,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			return (typeKinds & SimilarElementsRequestor.CLASSES) != 0;
 		}
 
-		
 		private boolean isVisible(TypeInfo curr) {
 			int flags= curr.getModifiers();
 			if (Flags.isPrivate(flags)) {
@@ -285,6 +323,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return true;
 			}
 			return curr.getPackageName().equals(fCurrPackage.getElementName());
+		}
+
+		public TypeInfo[][] getChoices() {
+			return fOpenChoices;
+		}
+
+		public ISourceRange[] getChoicesSourceRanges() {
+			return fSourceRanges;
 		}
 	}	
 
@@ -353,32 +399,19 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			monitor.worked(1);
 		
 			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, fASTRoot, fImportsStructure, fIgnoreLowerCaseNames);
-			ArrayList openChoices= new ArrayList();
-			ArrayList sourceRanges= new ArrayList();
 			
-			SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 2);
-			try {
-				subMonitor.beginTask("", typeReferences.size()); //$NON-NLS-1$
-				
-				Iterator refIterator= typeReferences.iterator();
-				while (refIterator.hasNext()) {
-					SimpleName typeRef= (SimpleName) refIterator.next();
-					TypeInfo[] openChoice= processor.process(typeRef, new SubProgressMonitor(subMonitor, 1));
-					if (openChoice != null) {
-						openChoices.add(openChoice);
-						sourceRanges.add(new SourceRange(typeRef.getStartPosition(), typeRef.getLength()));
-					}	
-				}
-			} finally {
-				subMonitor.done();
+			Iterator refIterator= typeReferences.iterator();
+			while (refIterator.hasNext()) {
+				SimpleName typeRef= (SimpleName) refIterator.next();
+				processor.add(typeRef);
 			}
 			
-			
+			boolean hasOpenChoices= processor.process(new SubProgressMonitor(monitor, 3));
 			addStaticImports(staticReferences, fImportsStructure);
 			
-			if (!openChoices.isEmpty() && fChooseImportQuery != null) {
-				TypeInfo[][] choices= (TypeInfo[][]) openChoices.toArray(new TypeInfo[openChoices.size()][]);
-				ISourceRange[] ranges= (ISourceRange[]) sourceRanges.toArray(new ISourceRange[sourceRanges.size()]);
+			if (hasOpenChoices && fChooseImportQuery != null) {
+				TypeInfo[][] choices= processor.getChoices();
+				ISourceRange[] ranges= processor.getChoicesSourceRanges();
 				TypeInfo[] chosen= fChooseImportQuery.chooseImports(choices, ranges);
 				if (chosen == null) {
 					// cancel pressed by the user
