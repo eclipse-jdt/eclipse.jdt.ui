@@ -158,7 +158,8 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 		
 		PixelConverter pixelConverter= new PixelConverter(parent);
 
-		Composite contentAssistComposite= new Composite(parent, SWT.NULL);
+		Composite contentAssistComposite= new Composite(parent, SWT.NONE);
+		contentAssistComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		GridLayout layout= new GridLayout(); 
 		layout.numColumns= 2;
 		contentAssistComposite.setLayout(layout);

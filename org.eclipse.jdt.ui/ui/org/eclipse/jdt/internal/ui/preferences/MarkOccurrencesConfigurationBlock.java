@@ -100,7 +100,9 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 	public Control createControl(Composite parent) {
 	
 		Composite composite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout(); layout.numColumns= 1;
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 1;
 		composite.setLayout(layout);
 
 		String label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markOccurrences"); //$NON-NLS-1$
