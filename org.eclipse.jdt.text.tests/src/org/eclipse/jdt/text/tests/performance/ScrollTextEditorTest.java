@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.ui.PartInitException;
 
 public class ScrollTextEditorTest extends ScrollEditorTest {
@@ -23,6 +25,8 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 
 	private static final int N_OF_RUNS= 10;
 
+	private IFile fFile;
+
 	protected void setUp() throws Exception {
 		ResourceTestHelper.copy(ORIG_FILE, FILE);
 		super.setUp();
@@ -34,10 +38,16 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	}
 	
 	public void testScrollTextEditor1() throws PartInitException {
-		measureScrolling(ResourceTestHelper.findFile(FILE), N_OF_RUNS);
+		measureScrolling(N_OF_RUNS);
 	}
 
 	public void testScrollTextEditor2() throws PartInitException {
-		measureScrolling(ResourceTestHelper.findFile(FILE), N_OF_RUNS);
+		measureScrolling(N_OF_RUNS);
+	}
+
+	protected IFile getFile() {
+		if (fFile == null)
+			fFile= ResourceTestHelper.findFile(FILE);
+		return fFile;
 	}
 }

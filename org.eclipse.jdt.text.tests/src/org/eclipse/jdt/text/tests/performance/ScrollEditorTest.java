@@ -20,6 +20,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 
 public abstract class ScrollEditorTest extends TestCase {
@@ -28,19 +29,25 @@ public abstract class ScrollEditorTest extends TestCase {
 	
 	private PerformanceMeter fPerformanceMeter;
 
+	private IEditorPart fEditor;
+
 	protected void setUp() throws Exception {
 		fPerformanceMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this);
-		EditorTestHelper.runEventQueue();
+		EditorTestHelper.bringToTop();
+		fEditor= EditorTestHelper.openInEditor(getFile(), true);
+		EditorTestHelper.calmDown(1000, 10000, 100);
 	}
+
+	protected abstract IFile getFile();
 
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
 	}
 
-	protected void measureScrolling(IFile file, int nOfRuns) throws PartInitException {
+	protected void measureScrolling(int nOfRuns) throws PartInitException {
 		Display display= SWTEventHelper.getActiveDisplay();
 		
-		StyledText text= (StyledText) EditorTestHelper.openInEditor(file, true).getAdapter(Control.class);
+		StyledText text= (StyledText) fEditor.getAdapter(Control.class);
 		int numberOfLines= text.getLineCount();
 		int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
 		int m= numberOfLines / visibleLinesInViewport;

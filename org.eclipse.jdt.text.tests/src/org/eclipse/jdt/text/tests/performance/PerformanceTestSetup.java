@@ -64,8 +64,10 @@ public class PerformanceTestSetup extends TestSetup {
 		boolean wasAutobuilding= ResourceTestHelper.disableAutoBuilding();
 		setUpProject();
 		ResourceTestHelper.fullBuild();
-		if (wasAutobuilding)
+		if (wasAutobuilding) {
 			ResourceTestHelper.enableAutoBuilding();
+			EditorTestHelper.calmDown(2000, 30000, 1000);
+		}
 	}
 	
 	/*

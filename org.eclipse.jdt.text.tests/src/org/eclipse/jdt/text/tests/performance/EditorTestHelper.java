@@ -71,7 +71,7 @@ public class EditorTestHelper {
 	}
 	
 	public static void runEventQueue() {
-		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchWindow window= getActiveWorkbenchWindow();
 		if (window != null)
 			runEventQueue(window.getShell());
 	}
@@ -84,21 +84,36 @@ public class EditorTestHelper {
 		while (shell.getDisplay().readAndDispatch());
 	}
 	
+	public static void runEventQueue(long minTime) {
+		long nextCheck= System.currentTimeMillis() + minTime;
+		while (System.currentTimeMillis() < nextCheck) {
+			runEventQueue();
+			sleep(1);
+		}
+	}
+
 	public static IWorkbenchPage getActivePage() {
-		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchWindow window= getActiveWorkbenchWindow();
 		if (window != null)
 			return window.getActivePage();
 		else
 			return null;
 	}
 	
-	public static boolean calmDown(int maxTime, int intervalTime) {
-		long endTime= maxTime > 0 ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
+	public static IWorkbenchWindow getActiveWorkbenchWindow() {
+		return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+	}
+
+	public static boolean calmDown(long minTime, long maxTime, long intervalTime) {
+		long startTime= System.currentTimeMillis() + minTime;
 		runEventQueue();
+		while (System.currentTimeMillis() < startTime)
+			runEventQueue(intervalTime);
+		
+		long endTime= maxTime > 0 ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
 		boolean calm= isCalm();
 		while (!calm && System.currentTimeMillis() < endTime) {
-			sleep(intervalTime);
-			runEventQueue();
+			runEventQueue(intervalTime);
 			calm= isCalm();
 		}
 //		System.out.println("--------------------------------------------------");
@@ -155,5 +170,9 @@ public class EditorTestHelper {
 		if (shown)
 			activePage.hideView(view);
 		return shown;
+	}
+
+	public static void bringToTop() {
+		getActiveWorkbenchWindow().getShell().forceActive();
 	}
 }

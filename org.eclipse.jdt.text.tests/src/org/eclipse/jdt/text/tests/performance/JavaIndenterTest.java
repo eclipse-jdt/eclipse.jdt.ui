@@ -20,7 +20,6 @@ import org.eclipse.jface.action.IAction;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
@@ -43,22 +42,20 @@ public class JavaIndenterTest extends TestCase {
 
 	private IEvaluator fEvaluator;
 
-	protected void setUp() throws PartInitException {
+	protected void setUp() throws Exception {
 		EditorTestHelper.runEventQueue();
 		fPerformanceMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this);
-
+		
+		EditorTestHelper.bringToTop();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
-		
 		fEvaluator= Evaluator.getDefaultEvaluator();
-		
 		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
 		runAction(fEditor.getAction("ToggleComment"));
-		sleep(2000);
-		EditorTestHelper.runEventQueue();
 		SWTEventHelper.pressKeyCodeCombination(SWTEventHelper.getActiveDisplay(), CTRL_END);
+		EditorTestHelper.calmDown(2000, 5000, 100);
 	}
 
-	protected void tearDown() {
+	protected void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
 	}
 	
