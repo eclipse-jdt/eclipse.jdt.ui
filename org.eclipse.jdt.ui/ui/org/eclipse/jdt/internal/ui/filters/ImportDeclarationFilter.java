@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.filters;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.IImportDeclaration;
 
 
 /**
@@ -26,6 +26,6 @@ public class ImportDeclarationFilter extends AbstractFilter {
 	 * @see ViewerFilter
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
-		return !((element instanceof IImportContainer) || (element instanceof ImportDeclaration));
+		return !((element instanceof IImportContainer) || (element instanceof IImportDeclaration));
 	}
 }
