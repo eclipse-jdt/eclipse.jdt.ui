@@ -1230,11 +1230,15 @@
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
-      <objectContribution
+       <objectContribution
+	        adaptable="true"
             objectClass="org.eclipse.core.resources.IFile"
             nameFilter="*.xml"
             id="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard">
-         <action
+         <visibility>
+            <objectState name="xmlFirstTag" value="project"/>
+         </visibility>
+          <action
                label="%CreateJavadocAction.label"
                tooltip="%CreateJavadocAction.tooltip"
                class="org.eclipse.jdt.internal.ui.javadocexport.CreateJavadocActionDelegate"
@@ -1242,8 +1246,8 @@
                id="LaunchJavadocWizard">
          </action>
       </objectContribution>
-   </extension> 
-      <extension
+   </extension>
+   <extension
          point="org.eclipse.debug.ui.consoleLineTrackers">
       <consoleLineTracker
             class="org.eclipse.jdt.internal.ui.javadocexport.JavadocConsoleLineTracker"
