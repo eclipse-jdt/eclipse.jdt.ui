@@ -29,12 +29,10 @@ class SealPackagesFilter  extends ViewerFilter {
 	public SealPackagesFilter(List packages) {
 		fAllowedPackages= packages;
 	}
-	/**
-	 * Returns the result of this filter, when applied to the
-	 * given inputs.
-	 *
-	 * @param inputs the set of elements to 
-	 * @return Returns true if element should be included in filtered set
+
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IJavaElement) {

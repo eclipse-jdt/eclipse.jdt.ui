@@ -151,7 +151,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * Adds a new info to the list with the passed information.
 	 * Normally the export operation continues after a warning.
 	 * @param	message		the message
-	 * @param	exception	the throwable that caused the warning, or <code>null</code>
+	 * @param	error 	the throwable that caused the warning, or <code>null</code>
 	 */
 	protected void addInfo(String message, Throwable error) {
 		fStatus.add(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, error));
@@ -161,7 +161,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * Adds a new warning to the list with the passed information.
 	 * Normally the export operation continues after a warning.
 	 * @param	message		the message
-	 * @param	exception	the throwable that caused the warning, or <code>null</code>
+	 * @param	error	the throwable that caused the warning, or <code>null</code>
 	 */
 	protected void addWarning(String message, Throwable error) {
 		fStatus.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, error));
@@ -171,7 +171,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * Adds a new error to the list with the passed information.
 	 * Normally an error terminates the export operation.
 	 * @param	message		the message
-	 * @param	exception	the throwable that caused the error, or <code>null</code>
+	 * @param	error 	the throwable that caused the error, or <code>null</code>
 	 */
 	protected void addError(String message, Throwable error) {
 		fStatus.add(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, error));
@@ -1181,7 +1181,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * 
 	 * @param resource the resource to check for errors
 	 * @return <code>true</code> if the resource (and its children) are error free
-	 * @throws import org.eclipse.core.runtime.CoreException if there's a marker problem
+	 * @throws CoreException import org.eclipse.core.runtime.CoreException if there's a marker problem
 	 */
 	private boolean hasCompileErrors(IResource resource) throws CoreException {
 		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
@@ -1198,7 +1198,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * 
 	 * @param resource the resource to check for errors
 	 * @return <code>true</code> if the resource (and its children) are error free
-	 * @throws import org.eclipse.core.runtime.CoreException if there's a marker problem
+	 * @throws CoreException import org.eclipse.core.runtime.CoreException if there's a marker problem
 	 */
 	private boolean hasCompileWarnings(IResource resource) throws CoreException {
 		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
