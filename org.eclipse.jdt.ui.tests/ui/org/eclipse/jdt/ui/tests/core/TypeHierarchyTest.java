@@ -130,7 +130,7 @@ public class TypeHierarchyTest extends TestCase {
 			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			String superType= "pack1.A";
 			
-			int offset= document.search(0, superType, true, true, false);
+			int offset= document.get().indexOf(superType);
 			
 			document.replace(offset, superType.length(), "Object");
 			
@@ -201,7 +201,7 @@ public class TypeHierarchyTest extends TestCase {
 			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			String superType= "pack1.A";
 			
-			int offset= document.search(0, superType, true, true, false);
+			int offset= document.get().indexOf(superType);
 			
 			document.replace(offset, superType.length(), "Object");
 			
@@ -271,7 +271,7 @@ public class TypeHierarchyTest extends TestCase {
 			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			String superType= "pack1.A";
 			
-			int offset= document.search(0, superType, true, true, false);
+			int offset= document.get().indexOf(superType);
 			// modify source
 			document.replace(offset, superType.length(), "Object");
 			
