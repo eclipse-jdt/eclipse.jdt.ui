@@ -9,13 +9,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
-
-import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
@@ -24,56 +18,13 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.actions.UnifiedSite;
 
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.actions.GroupContext;
-import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.NewMoveWrapper;
-
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 
-public class ReorgGroup extends ContextMenuGroup {
+public class ReorgGroup {
 	private static final String GROUP_NAME= IContextMenuConstants.GROUP_REORGANIZE;
-	
-	private IAction[] fBasicActions; //always added - just grayed out if disabled
-	
-	private UnifiedSite fSite;
 
-	public ReorgGroup(UnifiedSite site){
-		Assert.isNotNull(site);
-		fSite= site;
-	}	
-	
-	public void fill(IMenuManager manager, GroupContext context) {
-		createActions(context.getSelectionProvider());
-		
-		for (int i= 0; i < fBasicActions.length; i++) {
-			if (fBasicActions[i] instanceof IUpdate)
-				((IUpdate)fBasicActions[i]).update();
-			manager.appendToGroup(GROUP_NAME, fBasicActions[i]);
-		}
+	private ReorgGroup(){
 	}
-	
-	private void createActions(ISelectionProvider p) {
-		if (fBasicActions != null)
-			return;
-			
-		fBasicActions= new IAction[] {	
-			createCutAction(fSite, p),
-			createCopyAction(fSite, p),
-			createPasteAction(fSite, p),
-			createDeleteAction(fSite, p),
-		};
-	}	
-	
-	public static void addGlobalReorgActions(UnifiedSite site, IActionBars actionBars, ISelectionProvider provider) {
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, createCopyAction(site, provider));
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.CUT, createCutAction(site, provider));
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PASTE, createPasteAction(site, provider));
-	}
-
 	public static SelectionDispatchAction createCutAction(UnifiedSite site, ISelectionProvider p){
 		SelectionDispatchAction a1= new CutSourceReferencesToClipboardAction(site);
 		p.addSelectionChangedListener(a1);
