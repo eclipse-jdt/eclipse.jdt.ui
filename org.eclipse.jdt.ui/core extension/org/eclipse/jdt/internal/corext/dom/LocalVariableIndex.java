@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -23,7 +24,13 @@ public class LocalVariableIndex extends ASTVisitor {
 	private int fTopIndex;
 	
 	public static int perform(MethodDeclaration method) {
-		return doPerform(method);
+		// we have to find the outermost method declaratio since a local or anonymous
+		// type can reference final variables from the outer scope.
+		MethodDeclaration target= method;
+		while (ASTNodes.getParent(target, ASTNode.METHOD_DECLARATION) != null) {
+			target= (MethodDeclaration)ASTNodes.getParent(target, ASTNode.METHOD_DECLARATION);
+		}
+		return doPerform(target);
 	}
 
 	public static int perform(Initializer initializer) {
