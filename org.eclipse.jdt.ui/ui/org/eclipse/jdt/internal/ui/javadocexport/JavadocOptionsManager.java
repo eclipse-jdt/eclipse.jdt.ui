@@ -434,7 +434,7 @@ public class JavadocOptionsManager {
 	
 	private IContainer[] getSourceContainers(Element element) {
 		String sourcePaths= element.getAttribute(SOURCEPATH);
-		StringTokenizer tokenizer= new StringTokenizer(sourcePaths, ","); //$NON-NLS-1$
+		StringTokenizer tokenizer= new StringTokenizer(sourcePaths, String.valueOf(File.pathSeparatorChar));
 		ArrayList res= new ArrayList();
 		
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
