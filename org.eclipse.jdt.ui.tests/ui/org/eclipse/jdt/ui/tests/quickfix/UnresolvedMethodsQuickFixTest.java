@@ -1945,7 +1945,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("       int j= 0;\n");		
 		buf.append("    }\n");
 		buf.append("\n");		
-		buf.append("    public void xoo(Set set, int i, int j) {\n");
+		buf.append("    public void xoo(Set empty_set, int i, int j) {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
 		String expected3= buf.toString();
