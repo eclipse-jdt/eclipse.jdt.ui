@@ -10,11 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
@@ -22,8 +17,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
@@ -41,7 +34,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
  */
 public class PropertiesFileEditorActionContributor extends BasicTextEditorActionContributor {
 	
-	private List fPartListeners= new ArrayList();
 	protected RetargetTextEditorAction fCorrectionAssist;
 	
 	
@@ -49,17 +41,6 @@ public class PropertiesFileEditorActionContributor extends BasicTextEditorAction
 	public PropertiesFileEditorActionContributor() {
 		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
 		fCorrectionAssist.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
-	}
-	
-	/*
-	 * @see IEditorActionBarContributor#init(IActionBars, IWorkbenchPage)
-	 */
-	public void init(IActionBars bars, IWorkbenchPage page) {
-		Iterator e= fPartListeners.iterator();
-		while (e.hasNext()) 
-			page.addPartListener((RetargetAction) e.next());
-			
-		super.init(bars, page);
 	}
 	
 	/*
@@ -96,26 +77,15 @@ public class PropertiesFileEditorActionContributor extends BasicTextEditorAction
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor)part;
 		
-		IAction openAction= null;
-		if (textEditor != null) {
-			openAction= textEditor.getAction(JdtActionConstants.OPEN);
-			fCorrectionAssist.setAction(getAction(textEditor, "CorrectionAssistProposal")); //$NON-NLS-1$
-		}
-		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN, openAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN, getAction(textEditor, JdtActionConstants.OPEN));
+		fCorrectionAssist.setAction(getAction(textEditor, "CorrectionAssistProposal")); //$NON-NLS-1$
 	}
 	
 	/*
 	 * @see IEditorActionBarContributor#dispose()
 	 */
 	public void dispose() {
-		
-		Iterator e= fPartListeners.iterator();
-		while (e.hasNext()) 
-			getPage().removePartListener((RetargetAction) e.next());
-		fPartListeners.clear();
-		
 		setActiveEditor(null);
-		
 		super.dispose();
 	}
 }
