@@ -9,15 +9,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 
 /**
@@ -32,7 +32,7 @@ public class RippleMethodFinder {
 	}
 	
 	//assert(method is defined in the most abstract type that declares it )
-	public static IMethod[] getRelatedMethods(IMethod method, IProgressMonitor pm) throws JavaModelException {
+	public static IMethod[] getRelatedMethods(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws JavaModelException {
 		try{
 			if (JdtFlags.isPrivate(method))
 				return new IMethod[]{method};
@@ -41,9 +41,9 @@ public class RippleMethodFinder {
 				return new IMethod[]{method};
 		
 			if (method.getDeclaringType().isInterface())
-				return getAllRippleMethods(method, pm);
+				return getAllRippleMethods(method, pm, workingCopies);
 
-			return getVirtualMethodsInHierarchy(method, pm);
+			return getVirtualMethodsInHierarchy(method, pm, workingCopies);
 		} finally{
 			pm.done();
 		}	
@@ -80,7 +80,7 @@ public class RippleMethodFinder {
 					e. ! q.contains(x)
 		}
 	 */
-	private static IMethod[] getAllRippleMethods(IMethod method, IProgressMonitor pm) throws JavaModelException {
+	private static IMethod[] getAllRippleMethods(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws JavaModelException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 		Set result= new HashSet();
 		Set visitedTypes= new HashSet();
@@ -100,7 +100,7 @@ public class RippleMethodFinder {
 			visitedTypes.add(type);
 			result.add(m);
 			
-			IType[] subTypes= type.newTypeHierarchy(new SubProgressMonitor(pm, 1)).getAllSubtypes(type);
+			IType[] subTypes= type.newTypeHierarchy(workingCopies, new SubProgressMonitor(pm, 1)).getAllSubtypes(type);
 			for (int i= 0; i < subTypes.length; i++){
 				if (!visitedTypes.contains(subTypes[i]) && declares(subTypes[i], method)){
 					result.add(Checks.findMethod(m, subTypes[i]));
@@ -108,7 +108,7 @@ public class RippleMethodFinder {
 			}
 			
 			for (int i= 0; i < subTypes.length; i++){
-				IMethod toAdd= findAppropriateMethod(visitedTypes, methodQueue, subTypes[i], method, new NullProgressMonitor());
+				IMethod toAdd= findAppropriateMethod(workingCopies, visitedTypes, methodQueue, subTypes[i], method, new NullProgressMonitor());
 				if (toAdd != null)
 					methodQueue.add(toAdd);
 			}
@@ -117,9 +117,9 @@ public class RippleMethodFinder {
 	}
 	 
 		
-	private static IMethod findAppropriateMethod(Set visitedTypes, List methodQueue, IType type, IMethod method, IProgressMonitor pm)throws JavaModelException{
+	private static IMethod findAppropriateMethod(IWorkingCopy[] workingCopies, Set visitedTypes, List methodQueue, IType type, IMethod method, IProgressMonitor pm)throws JavaModelException{
 		pm.beginTask(RefactoringCoreMessages.getString("RippleMethodFinder.analizing_hierarchy"), 1); //$NON-NLS-1$
-		IType[] superTypes= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
+		IType[] superTypes= type.newSupertypeHierarchy(workingCopies, new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
 		for (int i= 0; i< superTypes.length; i++){
 			IType x= superTypes[i];
 			if (visitedTypes.contains(x))
@@ -131,15 +131,15 @@ public class RippleMethodFinder {
 				continue;	
 			if (methodQueue.contains(found))	
 				continue;
-			return getTopMostMethod(visitedTypes, methodQueue, method, x, new NullProgressMonitor());	
+			return getTopMostMethod(workingCopies, visitedTypes, methodQueue, method, x, new NullProgressMonitor());	
 		}
 		return null;
 	}
 	
-	private static IMethod getTopMostMethod(Set visitedTypes, List methodQueue, IMethod method, IType type, IProgressMonitor pm)throws JavaModelException{
+	private static IMethod getTopMostMethod(IWorkingCopy[] workingCopies, Set visitedTypes, List methodQueue, IMethod method, IType type, IProgressMonitor pm)throws JavaModelException{
 		pm.beginTask("", 1); //$NON-NLS-1$
 		Assert.isTrue(Checks.findMethod(method, type) != null);
-		IType[] superTypes= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
+		IType[] superTypes= type.newSupertypeHierarchy(workingCopies, new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
 		for (int i= 0; i < superTypes.length; i++){
 			IType t= superTypes[i];
 			if (visitedTypes.contains(t))
@@ -151,7 +151,7 @@ public class RippleMethodFinder {
 				continue;
 			if (methodQueue.contains(found))	
 				continue;
-			return getTopMostMethod(visitedTypes, methodQueue, method, t, new NullProgressMonitor());
+			return getTopMostMethod(workingCopies, visitedTypes, methodQueue, method, t, new NullProgressMonitor());
 		}
 		return Checks.findMethod(method, type);
 	}
@@ -172,13 +172,13 @@ public class RippleMethodFinder {
 	}
 	
 	//---
-	private static IMethod[] getVirtualMethodsInHierarchy(IMethod method, IProgressMonitor pm) throws JavaModelException{
+	private static IMethod[] getVirtualMethodsInHierarchy(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws JavaModelException{
 		List methods= new ArrayList();
 		//
 		methods.add(method);
 		//
 		IType type= method.getDeclaringType();
-		ITypeHierarchy hier= type.newTypeHierarchy(pm);
+		ITypeHierarchy hier= type.newTypeHierarchy(workingCopies, pm);
 		IType[] subtypes= hier.getAllSubtypes(type);
 		for (int i= 0; i < subtypes.length; i++){
 			IMethod subMethod= Checks.findMethod(method, subtypes[i]);

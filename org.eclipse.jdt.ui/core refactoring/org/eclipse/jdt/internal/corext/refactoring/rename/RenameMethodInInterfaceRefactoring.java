@@ -130,7 +130,7 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 	}
 	
 	private Set getRelatedTypes(IProgressMonitor pm) throws JavaModelException {
-		Set methods= getMethodsToRename(getMethod(), pm);
+		Set methods= getMethodsToRename(getMethod(), pm, null);
 		Set result= new HashSet(methods.size());
 		for (Iterator iter= methods.iterator(); iter.hasNext(); ){
 			result.add(((IMethod)iter.next()).getDeclaringType());

@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -242,12 +243,12 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 	
 	ISearchPattern createSearchPattern(IProgressMonitor pm) throws JavaModelException{
-		return createSearchPattern(pm, fMethod);
+		return createSearchPattern(pm, fMethod, null);
 	}
 	
-	private static ISearchPattern createSearchPattern(IProgressMonitor pm, IMethod method) throws JavaModelException{
+	private static ISearchPattern createSearchPattern(IProgressMonitor pm, IMethod method, IWorkingCopy[] workingCopies) throws JavaModelException{
 		pm.beginTask("", 4); //$NON-NLS-1$
-		Set methods= methodsToRename(method, new SubProgressMonitor(pm, 3));
+		Set methods= methodsToRename(method, new SubProgressMonitor(pm, 3), workingCopies);
 		Iterator iter= methods.iterator();
 		ISearchPattern pattern= SearchEngine.createSearchPattern((IMethod)iter.next(), IJavaSearchConstants.ALL_OCCURRENCES);
 		
@@ -259,15 +260,15 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return pattern;
 	}
 	
-	static Set getMethodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException{
-		return new HashSet(Arrays.asList(RippleMethodFinder.getRelatedMethods(method, pm)));
+	static Set getMethodsToRename(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws JavaModelException{
+		return new HashSet(Arrays.asList(RippleMethodFinder.getRelatedMethods(method, pm, workingCopies)));
 	}
 	
-	private static Set methodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException{
+	private static Set methodsToRename(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws JavaModelException{
 		HashSet methods= new HashSet();
 		pm.beginTask("", 1); //$NON-NLS-1$
 		methods.add(method);
-		methods.addAll(getMethodsToRename(method, new SubProgressMonitor(pm, 1)));
+		methods.addAll(getMethodsToRename(method, new SubProgressMonitor(pm, 1), workingCopies));
 		pm.done();
 		return methods;
 	}
@@ -301,7 +302,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	
 	private RefactoringStatus checkRelatedMethods(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		for (Iterator iter= getMethodsToRename(fMethod, pm).iterator(); iter.hasNext(); ){
+		for (Iterator iter= getMethodsToRename(fMethod, pm, null).iterator(); iter.hasNext(); ){
 			IMethod method= (IMethod)iter.next();
 			
 			result.merge(checkIfConstructorName(method, fNewName));
@@ -383,7 +384,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			if (method == null || ! method.exists())
 				return new SearchResultGroup[0];
 			
-			ISearchPattern newPattern= createSearchPattern(new SubProgressMonitor(pm, 1), method);
+			ISearchPattern newPattern= createSearchPattern(new SubProgressMonitor(pm, 1), method, fNewWorkingCopies);
 			return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), newPattern, fNewWorkingCopies);
 		} finally{
 			pm.done();
