@@ -1627,17 +1627,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 						continue;
 					if (! (tag.fragments().size() > 0 && tag.fragments().get(0) instanceof Name))
 						continue;
+					boolean tagDeleted= false;
 					Name name= (Name) tag.fragments().get(0);
 					for (int j= 0; j < fExceptionInfos.size(); j++) {
 						ExceptionInfo info= (ExceptionInfo) fExceptionInfos.get(j);
 						if (info.isDeleted() && Bindings.equals(info.getTypeBinding(), name.resolveTypeBinding())) {
 							getASTRewrite().remove(tag, fDescription);
 							getImportRemover().registerRemovedNode(tag);
+							tagDeleted= true;
 							break;
 						}
-						exceptionTags.add(tag);
-						break;
 					}
+					if (! tagDeleted)
+						exceptionTags.add(tag);
 				}
 				// reshuffle:
 				tags= tagsRewrite.getRewrittenList();

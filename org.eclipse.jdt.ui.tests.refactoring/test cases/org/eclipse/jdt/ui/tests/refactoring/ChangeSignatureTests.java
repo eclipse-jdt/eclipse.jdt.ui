@@ -1336,6 +1336,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String[] add= new String[] {"java.io.IOException", "java.lang.ClassNotFoundException"};
 		helperException(new String[0], new String[0], add);
 	}
+	
+	public void testException05() throws Exception { //bug 56132
+		String[] remove= new String[] {"java.lang.IllegalArgumentException", "java.io.IOException"};
+		helperException(new String[0], remove, new String[0]);
+	}
 
 	public void testInStatic01() throws Exception { //bug 47062
 		String[] signature= {"QString;", "QString;"};
