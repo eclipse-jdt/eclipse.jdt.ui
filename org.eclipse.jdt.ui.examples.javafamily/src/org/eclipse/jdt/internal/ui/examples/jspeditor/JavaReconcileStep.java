@@ -276,7 +276,6 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 		try {
 			synchronized (cu) {
 				fProblemRequestor.setIsActive(true);
-				cu.makeConsistent(getProgressMonitor());
 				cu.reconcile(true, getProgressMonitor());
 			}
 		} catch (JavaModelException ex) {
