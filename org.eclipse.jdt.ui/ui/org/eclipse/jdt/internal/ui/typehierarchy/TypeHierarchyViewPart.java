@@ -1009,6 +1009,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				ISelection currSelection= getCurrentViewer().getSelection();
 				if (currSelection == null || currSelection.isEmpty()) {
 					internalSelectType(getSelectableType(fInputElement), false);
+					currSelection= getCurrentViewer().getSelection();
 				}
 				if (!fIsEnableMemberFilter) {
 					typeSelectionChanged(currSelection);
