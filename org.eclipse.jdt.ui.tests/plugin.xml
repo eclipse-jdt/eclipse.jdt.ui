@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin
+   name="Java Test Plugin"
+   id="org.eclipse.jdt.testplugin"
+   version="1.0"
+   vendor-name="IBM"
+   class="org.eclipse.jdt.testplugin.JavaTestPlugin">
+   
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.apache.xerces"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+   </requires>
+
+<runtime>
+  <library name="javauitests.jar" >
+     <export name = "*"/>
+  </library> 
+</runtime>
+
+<extension id="test" point="org.eclipse.core.runtime.applications">
+  <application> 
+     <run class="org.eclipse.jdt.testplugin.ui.JavaTestUIApplication">
+     </run>
+  </application>
+</extension>
+
+
+</plugin>

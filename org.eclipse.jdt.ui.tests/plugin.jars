@@ -1,0 +1,4 @@
+javacoretests.jar=\
+	Test Plugin,\
+	JUnit,\
+	Refactoring Tests

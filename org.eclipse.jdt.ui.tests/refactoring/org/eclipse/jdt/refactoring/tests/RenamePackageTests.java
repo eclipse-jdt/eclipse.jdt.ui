@@ -1,0 +1,185 @@
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 1999, 2000
+ */
+package org.eclipse.jdt.refactoring.tests;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.refactoring.IRefactoring;
+import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.refactoring.packages.RenamePackageRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
+
+import org.eclipse.jdt.testplugin.JavaTestSetup;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
+
+public class RenamePackageTests extends RefactoringTest {
+	
+	private static final String REFACTORING_PATH= "RenamePackage/";
+
+	public RenamePackageTests(String name) {
+		super(name);
+	}
+
+	public static void main(String[] args) {
+		args= new String[] {RenamePackageTests.class.getName()};
+		TestPluginLauncher.runUI(TestPluginLauncher.getLocationFromProperties(), args);
+	}
+
+	public static Test suite() {
+		TestSuite suite= new TestSuite();
+		suite.addTest(noSetupSuite());
+		return new JavaTestSetup(suite);
+	}
+
+	public static Test noSetupSuite() {
+		return new TestSuite(RenamePackageTests.class);
+	}
+
+	protected String getRefactoringPath() {
+		return REFACTORING_PATH;
+	}
+
+	// -------------
+	private RenamePackageRefactoring createRefactoring(IPackageFragment pack, String newName) {
+		return new RenamePackageRefactoring(fgChangeCreator, pack, newName);
+	}
+
+	/* non java-doc
+	 * the 0th one is the one to rename
+	 */
+	private void helper1(String packageNames[], String[][] packageFiles, String newPackageName) throws Exception{
+		IPackageFragment[] packages= new IPackageFragment[packageNames.length];
+		for (int i= 0; i < packageFiles.length; i++){
+			packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
+			for (int j= 0; j < packageFiles[i].length; j++){
+				createCUfromTestFile(packages[i], packageFiles[i][j], packageNames[i].replace('.', '/') + "/");
+				//DebugUtils.dump(cu.getElementName() + "\n" + cu.getSource());
+			}	
+		}
+		IPackageFragment thisPackage= packages[0];
+		IRefactoring ref= createRefactoring(thisPackage, newPackageName);
+		RefactoringStatus result= performRefactoring(ref);
+		assertNotNull("precondition was supposed to fail", result);
+		if (fgIsVerbose)
+			DebugUtils.dump("" + result);
+	}
+	
+	/* non java-doc
+	 * the 0th one is the one to rename
+	 */
+	private void helper1(String[] packageNames, String newPackageName) throws Exception{
+		IPackageFragment[] packages= new IPackageFragment[packageNames.length];
+		for (int i= 0; i < packageNames.length; i++){
+			packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
+		}
+		IPackageFragment thisPackage= packages[0];
+		IRefactoring ref= createRefactoring(thisPackage, newPackageName);
+		RefactoringStatus result= performRefactoring(ref);
+		assertNotNull("precondition was supposed to fail", result);
+		if (fgIsVerbose)
+			DebugUtils.dump("" + result);
+	}
+	
+	private void helper1() throws Exception{
+		helper1(new String[]{"p"}, new String[][]{{"A"}}, "p1");
+	}
+	
+	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName) throws Exception{
+		IPackageFragment[] packages= new IPackageFragment[packageNames.length];
+		ICompilationUnit[][] cus= new ICompilationUnit[packageFileNames.length][packageFileNames[0].length];
+		for (int i= 0; i < packageNames.length; i++){
+			packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
+			for (int j= 0; j < packageFileNames[i].length; j++){
+				cus[i][j]= createCUfromTestFile(packages[i], packageFileNames[i][j], packageNames[i].replace('.', '/') + "/");
+			}
+		}
+		IPackageFragment thisPackage= packages[0];
+		RefactoringStatus result= performRefactoring(createRefactoring(thisPackage, newPackageName));
+		assertEquals("preconditions were supposed to pass", null, result);
+		
+		//---
+		
+		assert("package not renamed", ! getRoot().getPackageFragment(packageNames[0]).exists());
+		IPackageFragment newPackage= getRoot().getPackageFragment(newPackageName);
+		assert("new package does not exist", newPackage.exists());
+		
+		for (int i= 0; i < packageFileNames.length; i++){
+			String packageName= (i == 0) 
+							? newPackageName.replace('.', '/') + "/"
+							: packageNames[i].replace('.', '/') + "/";
+			for (int j= 0; j < packageFileNames[i].length; j++){
+				String s1= getFileContents(getOutputTestFileName(packageFileNames[i][j], packageName));
+				ICompilationUnit cu= 
+					(i == 0) 
+						? newPackage.getCompilationUnit(packageFileNames[i][j] + ".java")
+						: cus[i][j];
+				//DebugUtils.dump("cu:" + cu.getElementName());		
+				String s2= cu.getSource();
+				
+				//DebugUtils.dump("expected:" + s1);
+				//DebugUtils.dump("was:" + s2);
+				assertEquals("invalid update in file " + cu.getElementName(), s1,	s2);
+			}
+		}
+	}
+	
+	// ---------- tests -------------	
+	public void testFail0() throws Exception{
+		helper1(new String[]{"p"}, new String[][]{{"A"}}, "9");
+	}
+	
+	public void testFail1() throws Exception{
+		helper1(new String[]{"p.p1"}, new String[][]{{"A"}}, "p");
+	}
+	
+	public void testFail2() throws Exception{
+		helper1(new String[]{"p.p1", "fred"}, "fred");
+	}	
+	
+	public void testFail3() throws Exception{
+		helper1(new String[]{"p"}, new String[][]{{"A"}}, "fred");
+	}
+	
+	public void testFail4() throws Exception{
+		helper1();
+	}
+	
+	public void testFail5() throws Exception{
+		helper1();
+	}
+	
+	public void testFail6() throws Exception{
+		helper1();
+	}
+	
+	public void testFail7() throws Exception{
+		helper1(new String[]{"p", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+	}
+	
+	public void testFail8() throws Exception{
+		helper1(new String[]{"p", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+	}
+	
+	public void testFail9() throws Exception{
+		helper1(new String[]{"p", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+	}
+	
+	//-------
+	public void test0() throws Exception{
+		helper2(new String[]{"p"}, new String[][]{{"A"}}, "p1");
+	}
+	
+	public void test1() throws Exception{
+		helper2(new String[]{"p"}, new String[][]{{"A"}}, "p1");
+	}
+	
+	public void test2() throws Exception{
+		helper2(new String[]{"p", "fred"}, new String[][]{{"A"}, {"A"}}, "p1");
+	}
+}
