@@ -1074,11 +1074,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll51()throws Exception{
-		if (true) {
-			printTestDisabledMessage("disabled testAll51() until bug 53477 has been fixed");
-			return;
-		}
-		
 		if (! RUN_CONSTRUCTOR_TEST){
 			printTestDisabledMessage("disabled for constructors for now");
 			return;
