@@ -35,7 +35,6 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 
 import org.eclipse.jdt.core.IClassFile;
