@@ -163,7 +163,14 @@ public class AllTypesCache {
 				}
 				
 				fRestart= false;
-				Collection searchResult= doSearchTypes();
+				
+				Collection searchResult= null;
+				try {
+					searchResult= doSearchTypes();
+				} catch (RuntimeException e) {
+					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=73254
+					JavaPlugin.log(e);
+				}
 				if (searchResult != null) {
 					if (!fAbort && !fRestart) {
 						TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
