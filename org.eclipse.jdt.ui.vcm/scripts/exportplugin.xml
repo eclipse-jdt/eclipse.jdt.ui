@@ -19,7 +19,7 @@
 			jarfile="${dest}/jdtvcm.jar"
 			basedir="bin"
 		/>
-		<copy file="plugin.xml" todir="${dest}"/>
+		<copy file="plugin.xml.off" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
 		<zip zipfile="${dest}/jdtvcmsrc.zip">
 		    <fileset dir="vcm" />
