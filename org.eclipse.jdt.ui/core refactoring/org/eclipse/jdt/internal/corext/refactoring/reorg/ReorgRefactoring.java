@@ -147,7 +147,11 @@ public abstract class ReorgRefactoring extends Refactoring {
 	}
 
 	abstract boolean isValidDestinationForCusAndFiles(Object dest) throws JavaModelException;
-	public boolean isValidDestination(Object dest) throws JavaModelException{
+
+	public final boolean isValidDestination(Object dest) throws JavaModelException{
+		if (hasLinkedResources())
+			return (dest instanceof IJavaProject) || (dest instanceof IProject);
+		
 		if (dest instanceof IJavaProject){
 			IJavaProject jp= (IJavaProject)dest;
 			IPackageFragmentRoot root=getPackageFragmentRoot(jp); 
@@ -366,6 +370,17 @@ public abstract class ReorgRefactoring extends Refactoring {
 		}
 		return false;
 	}
+
+	private boolean hasLinkedResources() {
+		for (Iterator iter= getElements().iterator(); iter.hasNext();) {
+			Object each= iter.next();
+			IResource resource= ResourceUtil.getResource(each);
+			if (resource != null && resource.isLinked())
+				return true;
+		}
+		return false;
+	}
+
 	
 	//-------
 	//put here because they're used by both copy and move
