@@ -41,6 +41,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, false);
 		store.setDefault(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, "");
+		store.setDefault(PREF_OVERRIDE_INDICATOR, true);
 	}
 	
 	/*
