@@ -381,7 +381,7 @@ public class JavaModelUtil {
 	}
 	
 	/**
-	 * Checks whether the given type has a main method or not.
+	 * Checks whether the given type has a valid main method or not.
 	 */
 	public static boolean hasMainMethod(IType type) throws JavaModelException {
 		String[] paramSignature=  { Signature.createArraySignature(Signature.createTypeSignature("String", false), 1) };

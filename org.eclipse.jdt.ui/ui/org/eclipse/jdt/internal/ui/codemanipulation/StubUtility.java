@@ -337,8 +337,8 @@ public class StubUtility {
 	 * Examines a string and returns the first line delimiter found.
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) throws JavaModelException {
-		ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
-		if (cu != null) {
+		ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
+		if (cu != null && cu.exists()) {
 			IBuffer buf= cu.getBuffer();
 			int length= buf.getLength();
 			for (int i= 0; i < length; i++) {

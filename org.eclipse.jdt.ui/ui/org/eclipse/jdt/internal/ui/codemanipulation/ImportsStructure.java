@@ -315,7 +315,7 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		
 		try {
-			if (!container.exists()) {
+			if (!container.exists() && created.size() > 0) {
 				buf.append(lineDelim);	// nl after import (<nl+>)
 				if (importsStart > 0) { // package statement
 					buf.insert(0, lineDelim);
