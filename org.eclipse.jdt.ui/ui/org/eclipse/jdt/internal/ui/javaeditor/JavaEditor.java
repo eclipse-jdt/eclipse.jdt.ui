@@ -3424,7 +3424,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		private Position[] fPositions;
 		
 		public OccurrencesFinderJob(IDocument document, Position[] positions, ISelection selection) {
-			super("Occurrences Marker"); //$NON-NLS-1$
+			super(JavaEditorMessages.getString("JavaEditor.markOccurrences.job.name")); //$NON-NLS-1$
 			fDocument= document;
 			fSelection= selection;
 			fPositions= positions;
