@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Base class for content providers for type hierarchy viewers.

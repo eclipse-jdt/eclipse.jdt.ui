@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.codemanipulation;
+package org.eclipse.jdt.internal.corext.codegeneration;
 
 import java.util.ArrayList;
 
@@ -19,9 +19,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
-import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Add method stubs to a type (the parent type)
@@ -41,7 +39,9 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 	private boolean fOverrideAll;
 	private boolean fReplaceAll;
 	
-	public AddMethodStubOperation(IType type, IMethod[] methods, IRequestQuery overrideQuery, IRequestQuery replaceQuery, boolean save) {
+	private CodeGenerationSettings fSettings;
+	
+	public AddMethodStubOperation(IType type, IMethod[] methods, CodeGenerationSettings settings, IRequestQuery overrideQuery, IRequestQuery replaceQuery, boolean save) {
 		super();
 		fType= type;
 		fMethods= methods;
@@ -49,6 +49,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 		fDoSave= save;
 		fOverrideQuery= overrideQuery;
 		fReplaceQuery= replaceQuery;
+		fSettings= settings;
 	}
 	
 	private boolean queryOverrideFinalMethods(IMethod inheritedMethod) throws OperationCanceledException {
@@ -89,7 +90,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 				monitor= new NullProgressMonitor();
 			}			
 			
-			monitor.beginTask(CodeManipulationMessages.getString("AddMethodStubOperation.description"), fMethods.length + 2); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getString("AddMethodStubOperation.description"), fMethods.length + 2); //$NON-NLS-1$
 
 			fOverrideAll= (fOverrideQuery == null);
 			fReplaceAll= (fReplaceQuery == null);
@@ -98,16 +99,12 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 			
 			ArrayList createdMethods= new ArrayList();
 			
-			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
-			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), prefOrder, threshold, true);
+			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
 			
 			String lineDelim= StubUtility.getLineDelimiterUsed(fType);
 			int indent= StubUtility.getIndentUsed(fType) + 1;
-			int options= CodeGenerationPreferencePage.getGenStubOptions();
-			if (fType.isClass() && !Flags.isAbstract(fType.getFlags())) {
-				options |= StubUtility.GENSTUB_CREATEBODY;
-			}
+			
+			StubUtility.GenStubSettings genStubSetting= new StubUtility.GenStubSettings(fSettings);
 			
 			ITypeHierarchy typeHierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			
@@ -125,8 +122,10 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 					
 					IMethod overwrittenMethod= JavaModelUtil.findMethodImplementationInHierarchy(typeHierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
 					if (overwrittenMethod == null) {
-						// create method without super call
-						content= StubUtility.genStub(fType.getElementName(), curr, options, imports);
+						// create method without super call, no overwrite
+						genStubSetting.callSuper= false;
+						genStubSetting.methodOverwrites= false;
+						content= StubUtility.genStub(fType.getElementName(), curr, genStubSetting, imports);
 					} else {
 						int flags= overwrittenMethod.getFlags();
 						if (Flags.isFinal(flags) || Flags.isPrivate(flags)) {
@@ -135,11 +134,12 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 								continue;
 							}
 						}
-						boolean callSuper= overwrittenMethod.getDeclaringType().isClass() && !Flags.isAbstract(overwrittenMethod.getFlags());	
-						int newOptions= options | StubUtility.GENSTUB_OVERWRITES | (callSuper ? StubUtility.GENSTUB_CALLSUPER : 0);
-						
+						boolean callSuper= 
+						genStubSetting.callSuper= overwrittenMethod.getDeclaringType().isClass() && !Flags.isAbstract(overwrittenMethod.getFlags());
+						genStubSetting.methodOverwrites= true;
+					
 						IMethod declaration= JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-						content= StubUtility.genStub(fType.getElementName(), declaration, newOptions, imports);	
+						content= StubUtility.genStub(fType.getElementName(), declaration, genStubSetting, imports);	
 					}
 					IJavaElement sibling= null;
 					IMethod existing= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), existingMethods);

@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Used by the JavaElementLabelProvider to evaluate the error tick state of

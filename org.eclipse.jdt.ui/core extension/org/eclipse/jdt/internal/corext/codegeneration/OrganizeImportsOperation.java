@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.codemanipulation;
+package org.eclipse.jdt.internal.corext.codegeneration;
 
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
@@ -287,7 +287,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}			
 			fParsingError= null;
 			
-			monitor.beginTask(CodeManipulationMessages.getString("OrganizeImportsOperation.description"), 3); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getString("OrganizeImportsOperation.description"), 3); //$NON-NLS-1$
 			
 			HashMap references;
 			try {

@@ -23,7 +23,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codegeneration.StubUtility;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -66,20 +66,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 			}
 		}
 		return new String[0];
-	}
-	
-	public static int getGenStubOptions() {
-		int flags= 0;
-		if (doCreateComments()) {
-			flags |= StubUtility.GENSTUB_COMMENTS;
-		}
-		if (doNonJavaDocSeeComments()) {
-			flags |= StubUtility.GENSTUB_NONJAVADOC_COMMENTS;
-		}		
-		return flags;
-	}
-	
-	
+	}	
 	
 	public static boolean doCreateComments() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();

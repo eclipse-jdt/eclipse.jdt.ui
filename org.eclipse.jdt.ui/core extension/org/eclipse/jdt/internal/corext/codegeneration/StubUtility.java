@@ -2,17 +2,12 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.codemanipulation;
+package org.eclipse.jdt.internal.corext.codegeneration;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -21,8 +16,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
@@ -31,52 +24,30 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.util.TypeInfo;
-import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class StubUtility {
 	
 	
-	/**
-	 * If set a method body will be created
-	 */	
-	public static final int GENSTUB_CREATEBODY= 1 << 0;
+	public static class GenStubSettings extends CodeGenerationSettings {
 	
-	/**
-	 * If set, a super call is added to the body
-	 */
-	public static final int GENSTUB_CALLSUPER= 1 << 1;
+		public boolean callSuper;
+		public boolean methodOverwrites;
+		public boolean noBody;
+		
+		public GenStubSettings(CodeGenerationSettings settings) {
+			this.createComments= settings.createComments;
+			this.createNonJavadocComments= settings.createNonJavadocComments;		
+		}
+		
+		public GenStubSettings() {
+		}
+			
+	}
 	
-	/**
-	 * If set, the new method overwrites the given method (the comment contains this info)
-	 */	
-	public static final int GENSTUB_OVERWRITES= 1 << 2;
-	
-	/**
-	 * If set, JavaDoc comments are generated
-	 */		
-	public static final int GENSTUB_COMMENTS = 1 << 3;
-	
-	/**
-	 * If set, overwriten methods get a non-JavaDoc comment
-	 */			
-	public static final int GENSTUB_NONJAVADOC_COMMENTS = 1 << 4;
-	
-
-	/**
-	 *  Options dealing with comments
-	 */	
-	public static final int COMMENTS_OPTIONS = GENSTUB_COMMENTS | GENSTUB_NONJAVADOC_COMMENTS;
-
 
 	/**
 	 * Generates a stub. Given a template method, a stub with the same signature
@@ -87,7 +58,7 @@ public class StubUtility {
 	 * @param imports Imports required by the sub are added to the imports structure
 	 * @throws JavaModelException
 	 */
-	public static String genStub(String destTypeName, IMethod method, int options, IImportsStructure imports) throws JavaModelException {
+	public static String genStub(String destTypeName, IMethod method, GenStubSettings settings, IImportsStructure imports) throws JavaModelException {
 		IType declaringtype= method.getDeclaringType();	
 		StringBuffer buf= new StringBuffer();
 		String[] paramTypes= method.getParameterTypes();
@@ -97,14 +68,14 @@ public class StubUtility {
 		
 		int lastParam= paramTypes.length -1;		
 		
-		if (isSet(options, GENSTUB_COMMENTS)) {
+		if (settings.createComments) {
 			if (method.isConstructor()) {
 				String desc= "Constructor for " + destTypeName; //$NON-NLS-1$
 				genJavaDocStub(desc, paramNames, Signature.SIG_VOID, excTypes, buf);
 			} else {			
 				// java doc
-				if (isSet(options, GENSTUB_OVERWRITES)) {
-					genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, isSet(options, GENSTUB_NONJAVADOC_COMMENTS),  buf);
+				if (settings.methodOverwrites) {
+					genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, settings.createNonJavadocComments, buf);
 				} else {
 					// generate a default java doc comment
 					String desc= "Method " + method.getElementName(); //$NON-NLS-1$
@@ -113,7 +84,7 @@ public class StubUtility {
 			}
 		}
 		int flags= method.getFlags();
-		if (Flags.isPublic(flags) || (declaringtype.isInterface() && isSet(options, GENSTUB_CREATEBODY))) {
+		if (Flags.isPublic(flags) || (declaringtype.isInterface() && !settings.noBody)) {
 			buf.append("public "); //$NON-NLS-1$
 		} else if (Flags.isProtected(flags)) {
 			buf.append("protected "); //$NON-NLS-1$
@@ -173,11 +144,11 @@ public class StubUtility {
 				}
 			}
 		}
-		if (!isSet(options, GENSTUB_CREATEBODY)) {
+		if (settings.noBody) {
 			buf.append(";\n\n"); //$NON-NLS-1$
 		} else {
 			buf.append(" {\n\t"); //$NON-NLS-1$
-			if (!isSet(options, GENSTUB_CALLSUPER)) {
+			if (!settings.callSuper) {
 				if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
 					buf.append('\t');
 					if (!isBuiltInType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
@@ -299,13 +270,14 @@ public class StubUtility {
 	 * @param newMethods The resulting source for the created constructors (List of String)
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
 	 */
-	public static void evalConstructors(IType type, IType supertype, int commentOptions, List newMethods, IImportsStructure imports) throws JavaModelException {
+	public static void evalConstructors(IType type, IType supertype, CodeGenerationSettings settings, List newMethods, IImportsStructure imports) throws JavaModelException {
 		IMethod[] methods= supertype.getMethods();
-		int options= commentOptions | GENSTUB_CALLSUPER | GENSTUB_CREATEBODY;
+		GenStubSettings genStubSettings= new GenStubSettings(settings);
+		genStubSettings.callSuper= true;
 		for (int i= 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
 			if (curr.isConstructor() && JavaModelUtil.isVisible(curr, type.getPackageFragment())) {
-				String newStub= genStub(type.getElementName(), methods[i], options, imports);
+				String newStub= genStub(type.getElementName(), methods[i], genStubSettings, imports);
 				newMethods.add(newStub);
 			}
 		}
@@ -320,7 +292,7 @@ public class StubUtility {
 	 * @param newMethods The source for the created methods (List of String)
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
 	 */
-	public static void evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, int commentOptions, List newMethods, IImportsStructure imports) throws JavaModelException {
+	public static void evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, CodeGenerationSettings settings, List newMethods, IImportsStructure imports) throws JavaModelException {
 		List allMethods= new ArrayList();
 
 		IMethod[] typeMethods= type.getMethods();
@@ -344,6 +316,9 @@ public class StubUtility {
 			}
 		}
 
+		GenStubSettings genStubSettings= new GenStubSettings(settings);
+		genStubSettings.methodOverwrites= true;
+		// do not call super
 		for (int i= 0; i < allMethods.size(); i++) {
 			IMethod curr= (IMethod) allMethods.get(i);
 			if ((Flags.isAbstract(curr.getFlags()) || curr.getDeclaringType().isInterface()) && (isSubType || !type.equals(curr.getDeclaringType()))) {
@@ -352,8 +327,8 @@ public class StubUtility {
 				if (desc == null) {
 					desc= curr;
 				}
-				int options= (commentOptions & COMMENTS_OPTIONS) | GENSTUB_OVERWRITES | GENSTUB_CREATEBODY;
-				String newStub= genStub(type.getElementName(), desc, options, imports);
+				
+				String newStub= genStub(type.getElementName(), desc, genStubSettings, imports);
 				newMethods.add(newStub);
 			}
 		}
@@ -371,8 +346,7 @@ public class StubUtility {
 					if (impl == null || curr.getExceptionTypes().length < impl.getExceptionTypes().length) {
 						// implement an interface method when it does not exist in the hierarchy
 						// or when it throws less exceptions that the implemented
-						int options= (commentOptions & COMMENTS_OPTIONS) | GENSTUB_OVERWRITES | GENSTUB_CREATEBODY;
-						String newStub= genStub(type.getElementName(), curr, options, imports);
+						String newStub= genStub(type.getElementName(), curr, genStubSettings, imports);
 						newMethods.add(newStub);
 						allMethods.add(curr);
 					}
@@ -380,7 +354,6 @@ public class StubUtility {
 			}
 		}
 	}
-
 
 	/**
 	 * Examines a string and returns the first line delimiter found.
@@ -440,7 +413,6 @@ public class StubUtility {
 	 */	
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof ISourceReference) {
-			int tabWidth= CodeFormatterPreferencePage.getTabSize();
 			ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
 				IBuffer buf= cu.getBuffer();
@@ -450,6 +422,15 @@ public class StubUtility {
 				while (i > 0 && "\n\r".indexOf(buf.getChar(i - 1)) == -1) {
 					i--;
 				}
+				int tabWidth= 4;
+				String tabWidthString= (String) JavaCore.getOptions().get("org.eclipse.jdt.core.formatter.tabulation.size");
+				if (tabWidthString != null) {
+					try {
+						tabWidth= Integer.parseInt(tabWidthString);
+					} catch (NumberFormatException e) {
+					}
+				}
+				
 				return TextUtilities.getIndent(buf.getText(i, offset - i), tabWidth);
 			}
 		}

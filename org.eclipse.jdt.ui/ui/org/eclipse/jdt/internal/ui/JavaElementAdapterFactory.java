@@ -17,7 +17,7 @@ import org.eclipse.search.ui.ISearchPageScoreComputer;
 import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IWorkingCopy;import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Implements basic UI support for Java elements.

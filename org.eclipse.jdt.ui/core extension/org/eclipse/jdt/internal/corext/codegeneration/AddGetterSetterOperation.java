@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.codemanipulation;
+package org.eclipse.jdt.internal.corext.codegeneration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +23,12 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * For given fields, method stubs for getters and setters are created.
  */
 public class AddGetterSetterOperation implements IWorkspaceRunnable {
-
 	private IField[] fFields;
 	private List fCreatedAccessors;
 	
@@ -42,6 +40,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	
 	private String[] fNamePrefixes;
 	private String[] fNameSuffixes;
+	private CodeGenerationSettings fSettings;
 	
 	
 	/**
@@ -52,13 +51,14 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 * @param skipExistingQuery Callback to ask if setter / getters that already exist can be skipped.
 	 *        Argument of the query is the existing method. <code>null</code> is a valid input and stands for skip all.
 	 */
-	public AddGetterSetterOperation(IField[] fields, String[] prefixes, String[] suffixes, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
+	public AddGetterSetterOperation(IField[] fields, String[] prefixes, String[] suffixes, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
 		super();
 		fFields= fields;
 		fSkipExistingQuery= skipExistingQuery;
 		fSkipFinalSettersQuery= skipFinalSettersQuery;
 		fNamePrefixes= prefixes;
 		fNameSuffixes= suffixes;
+		fSettings= settings;
 		
 		fCreatedAccessors= new ArrayList();
 	}
@@ -128,7 +128,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		}
 		try {			
 			int nFields= fFields.length;			
-			monitor.beginTask(CodeManipulationMessages.getString("AddGetterSetterOperation.description"), nFields); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getString("AddGetterSetterOperation.description"), nFields); //$NON-NLS-1$
 			
 			for (int i= 0; i < nFields; i++) {
 				generateStubs(fFields[i], new SubProgressMonitor(monitor, 1));
@@ -174,7 +174,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 */
 	private void generateStubs(IField field, IProgressMonitor monitor) throws JavaModelException, OperationCanceledException {
 		try {
-			monitor.beginTask(CodeManipulationMessages.getFormattedString("AddGetterSetterOperation.processField", field.getElementName()), 2); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getFormattedString("AddGetterSetterOperation.processField", field.getElementName()), 2); //$NON-NLS-1$
 	
 			fSkipAllFinalSetters= (fSkipFinalSettersQuery == null);
 			fSkipAllExisting= (fSkipExistingQuery == null);
@@ -190,7 +190,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			
 			IType parentType= field.getDeclaringType();
 			
-			boolean addComments= CodeGenerationPreferencePage.doCreateComments();
+			boolean addComments= fSettings.createComments;
 			
 			// test if the getter already exists
 			String getterName= "get" + accessorName; //$NON-NLS-1$
@@ -235,7 +235,6 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			
 			monitor.worked(1);
 									
-
 			if (doCreateSetter) {
 				// create the setter stub
 				StringBuffer buf= new StringBuffer();
@@ -276,11 +275,10 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		}
 	}
 	
-
 	/**
 	 * Returns the created accessors. To be called after a sucessful run.
 	 */
 	public IMethod[] getCreatedAccessors() {
 		return (IMethod[]) fCreatedAccessors.toArray(new IMethod[fCreatedAccessors.size()]);
-	}
+	}
 }

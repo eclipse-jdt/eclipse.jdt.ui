@@ -6,9 +6,9 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -28,8 +28,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOperation;
+import org.eclipse.jdt.internal.corext.codegeneration.AddUnimplementedMethodsOperation;
+import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
 /**
@@ -66,7 +68,8 @@ public class AddUnimplementedMethodsAction extends Action {
 				return;
 			}
 			
-			AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, false);
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+			AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, false);
 			try {
 				ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 				dialog.run(false, true, new WorkbenchRunnableWrapper(op));

@@ -7,9 +7,9 @@ package org.eclipse.jdt.internal.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -31,9 +31,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.codemanipulation.AddMethodStubOperation;
-import org.eclipse.jdt.internal.ui.codemanipulation.IRequestQuery;
+import org.eclipse.jdt.internal.corext.codegeneration.AddMethodStubOperation;
+import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codegeneration.IRequestQuery;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 
@@ -88,9 +90,11 @@ public class AddMethodStubAction extends Action {
 				return;
 			}
 			
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+
 			List list= ((IStructuredSelection)fSelection).toList();	
 			IMethod[] methods= (IMethod[]) list.toArray(new IMethod[list.size()]); 
-			AddMethodStubOperation op= new AddMethodStubOperation(usedType, methods, createOverrideQuery(), createReplaceQuery(), false);
+			AddMethodStubOperation op= new AddMethodStubOperation(usedType, methods, settings, createOverrideQuery(), createReplaceQuery(), false);
 		
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 			dialog.run(false, true, new WorkbenchRunnableWrapper(op));

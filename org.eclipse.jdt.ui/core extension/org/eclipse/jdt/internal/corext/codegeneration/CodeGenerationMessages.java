@@ -2,18 +2,18 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.codemanipulation;
+package org.eclipse.jdt.internal.corext.codegeneration;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class CodeManipulationMessages {
+public class CodeGenerationMessages {
 
-	private static final String RESOURCE_BUNDLE= CodeManipulationMessages.class.getName();
+	private static final String RESOURCE_BUNDLE= CodeGenerationMessages.class.getName();
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
 
-	private CodeManipulationMessages() {
+	private CodeGenerationMessages() {
 	}
 
 	public static String getString(String key) {

@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.text.java.ExperimentalProposal;
 import org.eclipse.jdt.internal.ui.text.template.Template;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
 import org.eclipse.jdt.internal.ui.text.template.TemplateProposal;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.

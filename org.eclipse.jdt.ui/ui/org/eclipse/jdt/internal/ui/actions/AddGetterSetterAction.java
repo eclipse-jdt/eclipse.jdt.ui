@@ -7,9 +7,9 @@ package org.eclipse.jdt.internal.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -31,11 +31,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.codemanipulation.AddGetterSetterOperation;
-import org.eclipse.jdt.internal.ui.codemanipulation.IRequestQuery;
+import org.eclipse.jdt.internal.corext.codegeneration.AddGetterSetterOperation;
+import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codegeneration.IRequestQuery;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
@@ -95,8 +97,9 @@ public class AddGetterSetterAction extends Action {
 			IRequestQuery skipReplaceQuery= skipReplaceQuery();
 			String[] prefixes= CodeGenerationPreferencePage.getGetterStetterPrefixes();
 			String[] suffixes= CodeGenerationPreferencePage.getGetterStetterSuffixes();
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		
-			AddGetterSetterOperation op= new AddGetterSetterOperation(workingCopyFields, prefixes, suffixes, skipSetterForFinalQuery, skipReplaceQuery);
+			AddGetterSetterOperation op= new AddGetterSetterOperation(workingCopyFields, prefixes, suffixes, settings, skipSetterForFinalQuery, skipReplaceQuery);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
 			dialog.run(false, true, new WorkbenchRunnableWrapper(op));
 		

@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.codemanipulation;
+package org.eclipse.jdt.internal.corext.codegeneration;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
@@ -15,8 +15,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Add imports to a compilation unit.
@@ -30,16 +29,19 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	private IJavaElement[] fImports;
 	private boolean fDoSave;
 	
+	private CodeGenerationSettings fSettings;
+	
 	/**
 	 * Generate import statements for the passed java elements
 	 * Elements must be of type IType (-> single import) or IPackageFragment
 	 * (on-demand-import). Other JavaElements are ignored
 	 */
-	public AddImportsOperation(ICompilationUnit cu, IJavaElement[] imports, boolean save) {
+	public AddImportsOperation(ICompilationUnit cu, IJavaElement[] imports, CodeGenerationSettings settings, boolean save) {
 		super();
 		fImports= imports;
 		fCompilationUnit= cu;
 		fDoSave= save;
+		fSettings= settings;
 	}
 
 	/**
@@ -53,11 +55,9 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			}			
 			
 			int nImports= fImports.length;
-			monitor.beginTask(CodeManipulationMessages.getString("AddImportsOperation.description"), 2); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getString("AddImportsOperation.description"), 2); //$NON-NLS-1$
 		
-			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
-			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
+			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, fSettings.importOrder, fSettings.importThreshold, true);
 			
 			for (int i= 0; i < nImports; i++) {
 				IJavaElement imp= fImports[i];

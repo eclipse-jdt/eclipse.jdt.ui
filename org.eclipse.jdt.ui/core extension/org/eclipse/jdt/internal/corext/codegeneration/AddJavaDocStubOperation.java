@@ -2,10 +2,12 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.codemanipulation;
-import java.util.Arrays;
+package org.eclipse.jdt.internal.corext.codegeneration;
+
+import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -13,7 +15,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -24,10 +25,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
-import org.eclipse.jdt.internal.ui.util.DocumentManager;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Add javadoc stubs to members. All members must belong to the same compilation unit.
@@ -39,9 +41,12 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	
 	private ITypeHierarchy fLastTypeHierarchy;
 	
-	public AddJavaDocStubOperation(IMember[] members) {
+	private CodeGenerationSettings fSettings;
+	
+	public AddJavaDocStubOperation(IMember[] members, CodeGenerationSettings settings) {
 		super();
 		fMembers= members;
+		fSettings= settings;
 	}
 
 
@@ -58,7 +63,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		StringBuffer buf= new StringBuffer();
 		IMethod inheritedMethod= JavaModelUtil.findMethodDeclarationInHierarchy(fLastTypeHierarchy, meth.getElementName(), meth.getParameterTypes(), meth.isConstructor());
 		if (inheritedMethod != null) {
-			boolean nonJavaDocComments= CodeGenerationPreferencePage.doNonJavaDocSeeComments();
+			boolean nonJavaDocComments= fSettings.createNonJavadocComments;
 			StubUtility.genJavaDocSeeTag(inheritedMethod.getDeclaringType().getElementName(), inheritedMethod.getElementName(), inheritedMethod.getParameterTypes(), nonJavaDocComments, buf);
 		} else {
 			String desc= "Method " + meth.getElementName();
@@ -90,68 +95,62 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
 	 */	
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		TextBuffer buffer= null;
 		try {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
 			}			
 			
-			monitor.beginTask(CodeManipulationMessages.getString("AddJavaDocStubOperation.description"), fMembers.length); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getString("AddJavaDocStubOperation.description"), fMembers.length); //$NON-NLS-1$
 			if (fMembers.length == 0) {
 				return;
 			}
 			ICompilationUnit cu= fMembers[0].getCompilationUnit();
+			if (cu.isWorkingCopy()) {
+				cu= (ICompilationUnit) cu.getOriginalElement();
+			}
+						
+			IFile file= (IFile) cu.getUnderlyingResource();
+			buffer= TextBuffer.acquire(file);				
 			
-			DocumentManager docManager= new DocumentManager(cu);
-			docManager.connect();				
-			try {
-				sortEntries(); // sort botton to top, so changing the document does not invalidate positions
-				
-				IDocument doc= docManager.getDocument();
-				String lineDelim= StubUtility.getLineDelimiterFor(doc);
-				
-				for (int i= 0; i < fMembers.length; i++) {
-					IMember curr= fMembers[i];
-					String comment= null;
-					switch (curr.getElementType()) {
-						case IJavaElement.TYPE:
-							comment= createTypeComment((IType) curr);
-							break;
-						case IJavaElement.FIELD:
-							comment= createFieldComment((IField) curr);	
-							break;
-						case IJavaElement.METHOD:
-							comment= createMethodComment((IMethod) curr);
-							break;
+			sortEntries(); // sort botton to top, so changing the document does not invalidate positions
+			
+			String lineDelim= buffer.getLineDelimiter();
+			
+			for (int i= 0; i < fMembers.length; i++) {
+				IMember curr= fMembers[i];
+				String comment= null;
+				switch (curr.getElementType()) {
+					case IJavaElement.TYPE:
+						comment= createTypeComment((IType) curr);
+						break;
+					case IJavaElement.FIELD:
+						comment= createFieldComment((IField) curr);	
+						break;
+					case IJavaElement.METHOD:
+						comment= createMethodComment((IMethod) curr);
+						break;
+				}
+				if (comment != null) {
+					int indent= StubUtility.getIndentUsed(curr);
+					String formattedComment= StubUtility.codeFormat(comment, indent, lineDelim);
+					TextRegion region= buffer.getLineInformationOfOffset(curr.getSourceRange().getOffset());
+					if (region != null) {
+						TextPosition position= new TextPosition(region.getOffset(), 0);
+						buffer.replace(position, formattedComment);
 					}
-					if (comment != null) {
-						int indent= StubUtility.getIndentUsed(curr);
-						String formattedComment= StubUtility.codeFormat(comment, indent, lineDelim);
-						int insertPosition= findInsertPosition(doc, curr.getSourceRange().getOffset());
-						doc.replace(insertPosition, 0, formattedComment);
-					}
-					monitor.worked(1);
-				}				
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
-			} finally {
-				docManager.disconnect();
-				fLastTypeHierarchy= null;
-			}			
+				}
+				monitor.worked(1);
+			}				
+
 		} finally {
+			if (buffer != null) {
+				TextBuffer.release(buffer);
+			}
+			fLastTypeHierarchy= null;			
+			
 			monitor.done();
 		}
 	}
-	
-	private int findInsertPosition(IDocument doc, int memberOffset) throws BadLocationException {
-		int i= memberOffset;
-		if (i > 0) {
-			char ch;
-			do {
-				i--;
-				ch= doc.getChar(i);
-			} while (Character.isWhitespace(ch) && ch != '\n' && ch != '\r');
-		}
-		return i + 1;
-	}
-	
+		
 }

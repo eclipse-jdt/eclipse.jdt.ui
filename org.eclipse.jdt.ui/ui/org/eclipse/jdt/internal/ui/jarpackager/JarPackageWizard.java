@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Standard workbench wizard for exporting resources from the workspace

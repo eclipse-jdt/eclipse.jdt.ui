@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.dnd.BasicSelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class SelectionTransferDragAdapter extends BasicSelectionTransferDragAdapter {
 		

@@ -46,16 +46,17 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.compiler.env.IConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.codemanipulation.IImportsStructure;
-import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codegeneration.IImportsStructure;
+import org.eclipse.jdt.internal.corext.codegeneration.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codegeneration.StubUtility;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -387,6 +388,7 @@ public abstract class TypePage extends ContainerPage {
 			gd.heightHint= convertHeightInCharsToPixels(6);
 		}
 		gd.grabExcessVerticalSpace= false;
+		gd.widthHint= getMaxFieldWidth();
 	}
 
 	
@@ -1281,15 +1283,16 @@ public abstract class TypePage extends ContainerPage {
 	protected String[] constructInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		List newMethods= new ArrayList();
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(monitor);
-		int codeGenOptions= CodeGenerationPreferencePage.getGenStubOptions();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+
 		if (doConstructors) {
 			IType superclass= hierarchy.getSuperclass(type);
 			if (superclass != null) {
-				StubUtility.evalConstructors(type, superclass, codeGenOptions, newMethods, imports);
+				StubUtility.evalConstructors(type, superclass, settings, newMethods, imports);
 			}
 		}
 		if (doUnimplementedMethods) {
-			StubUtility.evalUnimplementedMethods(type, hierarchy, false, codeGenOptions, newMethods, imports);
+			StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, newMethods, imports);
 		}
 		return (String[]) newMethods.toArray(new String[newMethods.size()]);		
 		

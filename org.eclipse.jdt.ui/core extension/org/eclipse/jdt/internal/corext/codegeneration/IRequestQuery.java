@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.codemanipulation;
+package org.eclipse.jdt.internal.corext.codegeneration;
 
 import org.eclipse.jdt.core.IMember;
 

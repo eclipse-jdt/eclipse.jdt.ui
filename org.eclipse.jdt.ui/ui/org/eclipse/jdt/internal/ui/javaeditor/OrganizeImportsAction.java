@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
@@ -26,11 +25,11 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.compiler.IProblem;
+import org.eclipse.jdt.internal.corext.codegeneration.OrganizeImportsOperation;
+import org.eclipse.jdt.internal.corext.codegeneration.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableWrapper;
-import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation;
-import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;

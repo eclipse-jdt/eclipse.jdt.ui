@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.codemanipulation;
+package org.eclipse.jdt.internal.corext.codegeneration;
 
 import java.util.ArrayList;
 
@@ -29,12 +29,14 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 	private IType fType;
 	private IMethod[] fCreatedMethods;
 	private boolean fDoSave;
+	private CodeGenerationSettings fSettings;
 	
-	public AddUnimplementedMethodsOperation(IType type, boolean save) {
+	public AddUnimplementedMethodsOperation(IType type, CodeGenerationSettings settings, boolean save) {
 		super();
 		fType= type;
 		fDoSave= save;
 		fCreatedMethods= null;
+		fSettings= settings;
 	}
 
 	/**
@@ -47,18 +49,16 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 				monitor= new NullProgressMonitor();
 			}			
 			
-			monitor.beginTask(CodeManipulationMessages.getString("AddUnimplementedMethodsOperation.description"), 3); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description"), 3); //$NON-NLS-1$
 			
 			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			monitor.worked(1);
 			
 			ArrayList toImplement= new ArrayList();
+				
+			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
 			
-			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
-			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), prefOrder, threshold, true);
-			
-			StubUtility.evalUnimplementedMethods(fType, hierarchy, false, CodeGenerationPreferencePage.getGenStubOptions(), toImplement, imports);
+			StubUtility.evalUnimplementedMethods(fType, hierarchy, false, fSettings, toImplement, imports);
 			
 			int nToImplement= toImplement.size();
 			ArrayList createdMethods= new ArrayList(nToImplement);

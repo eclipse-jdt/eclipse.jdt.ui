@@ -7,11 +7,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -40,8 +39,10 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableWrapper;
-import org.eclipse.jdt.internal.ui.codemanipulation.AddImportsOperation;
+import org.eclipse.jdt.internal.corext.codegeneration.AddImportsOperation;
+import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
@@ -120,7 +121,9 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 						return;
 					}
 					removeQualification(doc, nameStart, chosen);
-					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { type }, false);
+					
+					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { type }, settings, false);
 					ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 					try {
 						dialog.run(false, true, new WorkbenchRunnableWrapper(op));

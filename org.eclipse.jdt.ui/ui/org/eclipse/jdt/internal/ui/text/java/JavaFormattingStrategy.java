@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codegeneration.StubUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage; 
 
 

@@ -6,9 +6,9 @@ package org.eclipse.jdt.internal.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -24,9 +24,11 @@ import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.codemanipulation.AddJavaDocStubOperation;
+import org.eclipse.jdt.internal.corext.codegeneration.AddJavaDocStubOperation;
+import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Create Java Doc Stubs for selected members
@@ -79,7 +81,9 @@ public class AddJavaDocStubAction extends Action {
 				}
 			}
 			
-			AddJavaDocStubOperation op= new AddJavaDocStubOperation(workingCopyMembers);
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+
+			AddJavaDocStubOperation op= new AddJavaDocStubOperation(workingCopyMembers, settings);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
 			dialog.run(false, true, new WorkbenchRunnableWrapper(op));
 					

@@ -20,12 +20,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codegeneration.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codegeneration.StubUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 	
@@ -120,9 +122,11 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 		if (fDeclaringType == null) {
 			return;
 		}
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+
 		ArrayList res= new ArrayList();
 		ITypeHierarchy hierarchy= fDeclaringType.newSupertypeHierarchy(null);
-		StubUtility.evalUnimplementedMethods(fDeclaringType, hierarchy, true, CodeGenerationPreferencePage.getGenStubOptions(), res, imports);
+		StubUtility.evalUnimplementedMethods(fDeclaringType, hierarchy, true, settings, res, imports);
 		
 		for (int i= 0; i < res.size(); i++) {
 			buf.append((String) res.get(i));
