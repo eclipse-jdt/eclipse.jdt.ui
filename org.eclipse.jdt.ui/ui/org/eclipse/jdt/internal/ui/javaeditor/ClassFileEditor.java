@@ -289,8 +289,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					new ProgressMonitorDialog(shell).run(true, true, runnable);
 	
 				} catch (InvocationTargetException e) {
-					String title= NewWizardMessages.getString("SourceAttachmentForm.attach.error.title"); //$NON-NLS-1$
-					String message= NewWizardMessages.getString("SourceAttachmentForm.attach.error.message"); //$NON-NLS-1$
+					String title= JavaEditorMessages.getString("SourceAttachmentForm.attach.error.title"); //$NON-NLS-1$
+					String message= JavaEditorMessages.getString("SourceAttachmentForm.attach.error.message"); //$NON-NLS-1$
 					ExceptionHandler.handle(e, shell, title, message);
 	
 				} catch (InterruptedException e) {

@@ -77,8 +77,8 @@ public class DialogsTest extends TestCase {
 		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(getShell(), new ProgressMonitorDialog(getShell()), 
 			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
 	
-		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
-		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
+		dialog.setTitle("Open Type"); 
+		dialog.setMessage("&Choose a type (? = any character, * = any string):"); 
 
 		DialogCheck.assertDialog(dialog);
 		
@@ -133,8 +133,8 @@ public class DialogsTest extends TestCase {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT); 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setSorter(new JavaElementSorter());
-		dialog.setTitle(NewWizardMessages.getString("ContainerPage.ChooseSourceContainerDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("ContainerPage.ChooseSourceContainerDialog.description")); //$NON-NLS-1$
+		dialog.setTitle("Title"); 
+		dialog.setMessage("Message"); 
 		
 		dialog.setInput(jproject.getJavaModel());
 		dialog.setInitialSelection(initSelection);
@@ -153,9 +153,9 @@ public class DialogsTest extends TestCase {
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(NewWizardMessages.getString("TypePage.ChoosePackageDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.description")); //$NON-NLS-1$
-		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$		
+		dialog.setTitle("Title"); 
+		dialog.setMessage("Message"); 
+		dialog.setEmptyListMessage("empty list"); 		
 		dialog.setElements(elements);
 		
 		DialogCheck.assertDialog(dialog);
@@ -187,9 +187,9 @@ public class DialogsTest extends TestCase {
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new TestLabelProvider());
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(NewWizardMessages.getString("TypePage.ChoosePackageDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.description")); //$NON-NLS-1$
-		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$		
+		dialog.setTitle("Title"); 
+		dialog.setMessage("Message"); 
+		dialog.setEmptyListMessage("empty messgae"); 		
 		dialog.setElements(elements);
 		dialog.setInitialSelections(new Object[] {new Integer(7)});
 		
