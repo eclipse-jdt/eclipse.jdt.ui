@@ -2720,7 +2720,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				continue;
 				
 			Position p= model.getPosition((Annotation) a);
-			if (!p.includes(offset)) {
+			if (!(p.includes(offset) || (p.getLength() == 0 && offset == p.offset))) {
 				
 				int currentDistance= 0;
 				
