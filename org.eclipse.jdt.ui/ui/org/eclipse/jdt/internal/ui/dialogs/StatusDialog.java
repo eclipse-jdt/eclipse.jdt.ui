@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -22,12 +25,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.ui.internal.MessageLine;
 
 /**
  * An abstract base class for dialogs with a status bar and ok/cancel buttons.
  * The status message must be passed over as StatusInfo object and can be
- * an error, warning or ok. The OK button is enabled or disabled depending
+ * an error, warning, info or ok. The OK button is enabled or disabled depending
  * on the status.
  */ 
 public abstract class StatusDialog extends Dialog {
@@ -40,11 +43,11 @@ public abstract class StatusDialog extends Dialog {
     private boolean fStatusLineAboveButtons= true;
 	
 	/**
-	 * Creates an instane of a status dialog.
+	 * Creates an instance of a status dialog.
 	 */
 	public StatusDialog(Shell parent) {
 		super(parent);
-		fLastStatus= new StatusInfo();
+		fLastStatus= Status.OK_STATUS;
 	}
 	
 	/**
@@ -104,9 +107,8 @@ public abstract class StatusDialog extends Dialog {
 		if (fLastStatus != null) {
 			// policy: dialogs are not allowed to come up with an error message
 			if (fLastStatus.matches(IStatus.ERROR)) {
-				StatusInfo status= new StatusInfo();
-				status.setError(""); //$NON-NLS-1$
-				fLastStatus= status;
+				// remove the message
+				fLastStatus= new Status(IStatus.ERROR, fLastStatus.getPlugin(), fLastStatus.getCode(), "", fLastStatus.getException()); //$NON-NLS-1$
 			}
 			updateStatus(fLastStatus);
 		}
