@@ -42,6 +42,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	private Table fTable;
 	private TestRunnerViewPart fRunnerViewPart;
 	private final Clipboard fClipboard;	
+	private boolean fMoveSelection= false;
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
@@ -106,36 +107,25 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	}
 	
 	public String getAllFailedTestNames() {
-		StringBuffer trace = new StringBuffer();
+		StringBuffer trace= new StringBuffer();
 		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$
-		for (int i=0; i<fTable.getItemCount(); i++) {
+		for (int i= 0; i < fTable.getItemCount(); i++) 
 			trace.append(getTestInfo(fTable.getItem(i)).getTestName()).append(lineDelim);
-		}
 		return trace.toString();
 	}
 	
 	private String getClassName() {
-		return cutFromTo(getSelectedText(), '(', ')');
+		TableItem item= getSelectedItem();
+		TestRunInfo info= getTestInfo(item);
+		return info.getClassName();
 	}
 	
 	private String getMethodName() {
-		return cutTo(getSelectedText(), '(');
+		TableItem item= getSelectedItem();
+		TestRunInfo info= getTestInfo(item);
+		return info.getTestMethodName();
 	}
 	
-	private static String cutFromTo(String string, char from, char to){
-		String modified= string;
-		modified= modified.substring(modified.indexOf(from) + 1);
-		return cutTo(modified, to);
-	}
-	
-	private static String cutTo(String string, char to){
-		int toIndex= string.indexOf(to);
-		if (toIndex == -1)
-			return string;
-		else	
-			return string.substring(0, toIndex);
-	}
-
 	public void menuAboutToShow(IMenuManager manager){
 		if (fTable.getSelectionCount() > 0) {
 			String className= getClassName();
@@ -148,11 +138,11 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		}
 	}		
 	
-	private String getSelectedText() {
+	private TableItem getSelectedItem() {
 		int index= fTable.getSelectionIndex();
 		if (index == -1)
 			return null;
-		return fTable.getItem(index).getText();
+		return fTable.getItem(index);
 	}
 	
 	public void setSelectedTest(String testId){
@@ -187,7 +177,8 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	}
 
 	private void updateTableItem(TestRunInfo testInfo, TableItem tableItem) {
-		tableItem.setText(testInfo.getTestName());
+		String label= JUnitMessages.getFormattedString("FailureRunView.labelfmt", new String[] { testInfo.getTestMethodName(), testInfo.getClassName() }); //$NON-NLS-1$
+		tableItem.setText(label);
 		if (testInfo.getStatus() == ITestRunListener.STATUS_FAILURE)
 			tableItem.setImage(fFailureIcon);
 		else
@@ -206,10 +197,12 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	}
 
 	public void activate() {
+		fMoveSelection= false;
 		testSelected();
 	}
 
 	public void aboutToStart() {
+		fMoveSelection= false;
 		fTable.removeAll();
 	}
 
@@ -278,5 +271,49 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	 * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#startTest(java.lang.String)
 	 */
 	public void startTest(String testId) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#selectNext()
+	 */
+	public void selectNext() {
+		if (fTable.getItemCount() == 0)
+			return;
+			
+		int index= fTable.getSelectionIndex();
+		if (index == -1)
+			index= 0;
+		
+		if (fMoveSelection)
+			index= Math.min(fTable.getItemCount()-1, index+1);
+		else
+			fMoveSelection= true;
+			
+		selectTest(index);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#selectPrevious()
+	 */
+	public void selectPrevious() {
+		if (fTable.getItemCount() == 0)
+			return;
+			
+		int index= fTable.getSelectionIndex();
+		if (index == -1)
+			index= fTable.getItemCount()-1;
+			
+		if (fMoveSelection)
+			index= Math.max(0, index-1);
+		else
+			fMoveSelection= true;
+			
+		selectTest(index);
+	}
+
+	private void selectTest(int index) {
+		TableItem item= fTable.getItem(index);
+		TestRunInfo info= getTestInfo(item);
+		fRunnerViewPart.showTest(info);
 	}
 }

@@ -64,7 +64,15 @@ interface ITestRunView {
 	/**
 	 * A new tree entry got posted.
 	 */
-	public void newTreeEntry(String treeEntry);
-
-
+	public void newTreeEntry(String treeEntry);	
+	
+	/**
+	 * Select next test failure.
+	 */
+	public void selectNext();	
+	
+	/**
+	 * Select previous test failure.
+	 */
+	public void selectPrevious();	
 }

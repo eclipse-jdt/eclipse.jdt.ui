@@ -11,19 +11,14 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.OpenStrategy;
-
-import org.eclipse.ui.texteditor.ITextEditor;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * Abstract Action for opening a Java editor.
@@ -52,9 +47,8 @@ public abstract class OpenEditorAction extends Action {
 				MessageDialog.openError(fTestRunner.getSite().getShell(), 
 					JUnitMessages.getString("OpenEditorAction.error.cannotopen.title"), JUnitMessages.getString("OpenEditorAction.error.cannotopen.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
-			}
-			// use of internal API for backward compatibility with 1.0
-			textEditor= (ITextEditor)EditorUtility.openInEditor(element, OpenStrategy.activateOnOpen());			
+			} 
+			textEditor= (ITextEditor)EditorUtility.openInEditor(element, false);			
 		} catch (CoreException e) {
 			ErrorDialog.openError(fTestRunner.getSite().getShell(), JUnitMessages.getString("OpenEditorAction.error.dialog.title"), JUnitMessages.getString("OpenEditorAction.error.dialog.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;

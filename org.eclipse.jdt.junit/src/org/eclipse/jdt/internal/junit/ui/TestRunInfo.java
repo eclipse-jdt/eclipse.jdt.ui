@@ -46,6 +46,30 @@ public class TestRunInfo extends Object {
 		return fTestName;
 	}
 
+	public String getClassName() {
+		return extractClassName(getTestName());
+	}
+	
+	public String getTestMethodName() {
+		int index= fTestName.indexOf('(');
+		if (index > 0)
+			return fTestName.substring(0, index);
+		index= fTestName.indexOf('@');
+		if(index > 0)
+			return fTestName.substring(0, index);
+		return fTestName;
+	}
+	
+	private String extractClassName(String testNameString) {
+		if (testNameString == null) 
+			return null;
+		int index= testNameString.indexOf('(');
+		if (index < 0) 
+			return testNameString;
+		testNameString= testNameString.substring(index + 1);
+		return testNameString.substring(0, testNameString.indexOf(')'));
+	}		
+
 	public void setTrace(String trace) {
 		fTrace= trace;
 	}

@@ -50,6 +50,8 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	private TreeItem fCachedParent;
 	private TreeItem[] fCachedItems;
 	
+	private boolean fMoveSelection= false;
+	
 	/**
 	 * Helper used to resurrect test hierarchy
 	 */
@@ -102,7 +104,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		hierarchyTab.setControl(testTreePanel);
 		hierarchyTab.setToolTipText(JUnitMessages.getString("HierarchyRunView.tab.tooltip")); //$NON-NLS-1$
 		
-		fTree= new Tree(testTreePanel, SWT.V_SCROLL);
+		fTree= new Tree(testTreePanel, SWT.V_SCROLL | SWT.SINGLE);
 		gridData= new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
 		fTree.setLayoutData(gridData);
 		
@@ -130,11 +132,8 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		fTree.setMenu(menu);	
 	}
 
-	private String getTestLabel() {
-		TreeItem treeItem= fTree.getSelection()[0];
-		if(treeItem == null) 
-			return ""; //$NON-NLS-1$
-		return treeItem.getText();
+	private String getTestMethod() {
+		return getTestInfo().getTestMethodName();
 	}
 
 	private TestRunInfo getTestInfo() {
@@ -152,10 +151,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	}	
 	
 	private String getClassName() {
-		TestRunInfo testInfo= getTestInfo();
-		if (testInfo == null) 
-			return null;
-		return extractClassName(testInfo.getTestName());
+		return getTestInfo().getClassName();
 	}
 	
 	public String getSelectedTestId() {
@@ -163,16 +159,6 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		if (testInfo == null) 
 			return null;
 		return testInfo.getTestId();
-	}
-		
-	private String extractClassName(String testNameString) {
-		if (testNameString == null) 
-			return null;
-		int index= testNameString.indexOf('(');
-		if (index < 0) 
-			return testNameString;
-		testNameString= testNameString.substring(index + 1);
-		return testNameString.substring(0, testNameString.indexOf(')'));
 	}		
 
 	public String getName() {
@@ -232,7 +218,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			if (isLast(treeItem, items)) {
 				boolean ok= true;
 				for (int i= 0; i < items.length; i++) {
-					if (!(getTestRunInfo(items[i]).getStatus() == ITestRunListener.STATUS_OK)) {
+					if (isFailure(items[i])) {
 						ok= false;
 						break;
 					}
@@ -290,6 +276,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	}
 
 	public void activate() {
+		fMoveSelection= false;
 		testSelected();
 	}
 	
@@ -303,6 +290,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		fTreeItemMap= new HashMap();
 		fCachedParent= null;
 		fCachedItems= null;
+		fMoveSelection= false;
 	}
 	
 	private void testSelected() {
@@ -340,7 +328,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		if (isSuiteSelected()) 	
 			action= new OpenTestAction(fTestRunnerPart, testLabel);
 		else 
-			action= new OpenTestAction(fTestRunnerPart, getClassName(), getTestLabel());
+			action= new OpenTestAction(fTestRunnerPart, getClassName(), getTestMethod());
 
 		if (action != null && action.isEnabled())
 			action.run();													
@@ -354,8 +342,8 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			if (isSuiteSelected()) {	
 				manager.add(new OpenTestAction(fTestRunnerPart, testLabel));
 			} else {
-				manager.add(new OpenTestAction(fTestRunnerPart, getClassName(), getTestLabel()));
-				manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), getTestLabel()));
+				manager.add(new OpenTestAction(fTestRunnerPart, getClassName(), getTestMethod()));
+				manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), getTestMethod()));
 			}
 		}
 	}	
@@ -363,17 +351,12 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	public void newTreeEntry(String treeEntry) {
 		// format: testId","testName","isSuite","testcount
 		int index0= treeEntry.indexOf(',');
-		StringBuffer testName= new StringBuffer(100);
-		int index1= scanTestName(treeEntry, index0+1, testName);
+		StringBuffer testStringBuffer= new StringBuffer(100);
+		int index1= scanTestName(treeEntry, index0+1, testStringBuffer);
 		int index2= treeEntry.indexOf(',', index1+1);
-		String label= testName.toString().trim();
+		String testString= testStringBuffer.toString().trim();
 		String id= treeEntry.substring(0, index0);
-		TestRunInfo testInfo= new TestRunInfo(id, label);
-		int index3;
-		if((index3= label.indexOf('(')) > 0)
-			label= label.substring(0, index3);
-		if((index3= label.indexOf('@')) > 0)
-			label= label.substring(0, index3);
+		TestRunInfo testInfo= new TestRunInfo(id, testString);
 		
 		String isSuite= treeEntry.substring(index1+1, index2);
 		int testCount= Integer.parseInt(treeEntry.substring(index2+1));
@@ -398,7 +381,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			((SuiteInfo)fSuiteInfos.lastElement()).fTestCount -= 1;
 			mapTest(testInfo, treeItem);
 		}
-		treeItem.setText(label);
+		treeItem.setText(testInfo.getTestMethodName());
 		treeItem.setData(testInfo);
 	}
 	
@@ -442,5 +425,137 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			updateItem((TreeItem)o, newInfo);
 			return;
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#selectNext()
+	 */
+	public void selectNext() {
+		TreeItem selection= getInitialSearchSelection();
+		if (!moveSelection(selection))
+			return;
+			
+		TreeItem failure= findFailure(selection, true, !isLeafFailure(selection));
+		if (failure != null)
+			selectTest(failure);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#selectPrevious()
+	 */
+	public void selectPrevious() {
+		TreeItem selection= getInitialSearchSelection();		
+		if (!moveSelection(selection))
+			return;
+		
+		TreeItem failure= findFailure(selection, false, !isLeafFailure(selection));
+		if (failure != null)
+			selectTest(failure);
+	}
+
+	private boolean moveSelection(TreeItem selection) {
+		if (!fMoveSelection) {
+			fMoveSelection= true;
+			if (isLeafFailure(selection)) {
+				selectTest(selection);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private TreeItem getInitialSearchSelection() {
+		TreeItem[] treeItems= fTree.getSelection();	
+		TreeItem selection= null;
+		
+		if (treeItems.length == 0)	
+			selection= fTree.getItems()[0];
+		else
+			selection= treeItems[0];
+		return selection;
+	}
+
+	private boolean isFailure(TreeItem selection) {
+		return !(getTestRunInfo(selection).getStatus() == ITestRunListener.STATUS_OK);
+	}
+
+	private boolean isLeafFailure(TreeItem selection) {
+		boolean isLeaf= selection.getItemCount() == 0;
+		return isLeaf && isFailure(selection);
+	}
+
+	private void selectTest(TreeItem selection) {
+		fTestRunnerPart.showTest(getTestRunInfo(selection));
+	}
+
+	private TreeItem findFailure(TreeItem start, boolean next, boolean includeNode) {
+		TreeItem[] sib= findSiblings(start, next, includeNode);
+		if (next) {
+			for (int i= 0; i < sib.length; i++) {
+				TreeItem failure= findFailureInTree(sib[i]);
+				if (failure != null)
+					return failure;
+			}
+		} else {
+			for (int i= sib.length-1; i >= 0; i--) {
+				TreeItem failure= findFailureInTree(sib[i]);
+				if (failure != null)
+					return failure;
+			}
+		}
+		TreeItem parent= start.getParentItem();
+		if (parent == null)
+			return null;
+		return findFailure(parent, next, false);
+	}
+
+	private TreeItem[] findSiblings(TreeItem item, boolean next, boolean includeNode) {
+		TreeItem parent= item.getParentItem();
+		TreeItem[] children= null;
+		if (parent == null) 
+			children= item.getParent().getItems();
+		else	
+			children= parent.getItems();
+		
+		for (int i= 0; i < children.length; i++) {
+			TreeItem item2= children[i];
+			if (item2 == item) {
+				TreeItem[] result= null;
+				if (next) {
+					if (!includeNode) {
+						result= new TreeItem[children.length-i-1];
+						System.arraycopy(children, i+1, result, 0, children.length-i-1);
+					} else {
+						result= new TreeItem[children.length-i];
+						System.arraycopy(children, i, result, 0, children.length-i);
+						
+					}
+				} else {
+					if (!includeNode) {
+						result= new TreeItem[i];
+						System.arraycopy(children, 0, result, 0, i);
+					} else {
+						result= new TreeItem[i+1];
+						System.arraycopy(children, 0, result, 0, i+1);
+					}
+				}
+				return result;
+			}	
+		}
+		return new TreeItem[0];
+	}
+
+	private TreeItem findFailureInTree(TreeItem item) {
+		if (item.getItemCount() == 0) {
+			if (isFailure(item))
+				return item;			
+		}
+		TreeItem[] children= item.getItems();
+		for (int i= 0; i < children.length; i++) {
+			TreeItem item2= findFailureInTree(children[i]);
+			if (item2 != null)
+				return item2;
+		}
+		return null;
 	}
 }

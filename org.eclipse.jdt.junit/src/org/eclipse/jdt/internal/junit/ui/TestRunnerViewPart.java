@@ -14,8 +14,10 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.net.MalformedURLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -25,7 +27,26 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
-
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
@@ -40,18 +61,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
@@ -67,18 +76,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
-import org.eclipse.jdt.junit.ITestRunListener;
-
 /**
  * A ViewPart that shows the results of a test run.
  */
@@ -92,11 +89,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	/**
 	 * Number of errors during this test run
 	 */
-	protected int fErrors;
+	protected int fErrorCount;
 	/**
 	 * Number of failures during this test run
 	 */
-	protected int fFailures;
+	protected int fFailureCount;
 	/**
 	 * Number of tests run
 	 */
@@ -115,7 +112,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	 * The first failure of a test run. Used to reveal the
 	 * first failed tests at the end of a run.
 	 */
-	private TestRunInfo fFirstFailure;
+	private List fFailures= new ArrayList();
 
 	private JUnitProgressBar fProgressBar;
 	private ProgressImages fProgressImages;
@@ -180,6 +177,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	
 	private CTabFolder fTabFolder;
 	private SashForm fSashForm;
+	
+	private Action fNextAction;
+	private Action fPreviousAction;
 	
 	private class StopAction extends Action{
 		public StopAction() {
@@ -271,9 +271,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 
 	private void restoreLayoutState(IMemento memento) {
 		Integer page= memento.getInteger(TAG_PAGE);
-		if (page != null)
-			fTabFolder.setSelection(page.intValue());
-		
+		if (page != null) {
+			int p= page.intValue();
+			fTabFolder.setSelection(p);
+			fActiveRunView= (ITestRunView)fTestRunViews.get(p);
+		}
 		Integer ratio= memento.getInteger(TAG_RATIO);
 		if (ratio != null) 
 			fSashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue()} );
@@ -320,6 +322,21 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fExecutedTests++;
 	}
 	
+	public void selectNextFailure() {
+		fActiveRunView.selectNext();
+	}
+	
+	public void selectPreviousFailure() {
+		fActiveRunView.selectPrevious();
+	}
+
+	public void showTest(TestRunInfo test) {
+		fActiveRunView.setSelectedTest(test.getTestId());
+		handleTestSelected(test.getTestId());
+		new OpenTestAction(this, test.getClassName(), test.getTestMethodName()).run();
+	}
+
+	
 	public void reset(){
 		reset(0);
 		setViewPartTitle(null);
@@ -332,19 +349,19 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	 */
 	public void testRunEnded(long elapsedTime){
 		fExecutedTests--;
-		String[] keys= {elapsedTimeAsString(elapsedTime), String.valueOf(fErrors), String.valueOf(fFailures)};
+		String[] keys= {elapsedTimeAsString(elapsedTime), String.valueOf(fErrorCount), String.valueOf(fFailureCount)};
 		String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.finish", keys); //$NON-NLS-1$
 		if (hasErrorsOrFailures())
 			postError(msg);
 		else
 			postInfo(msg);
+			
 		postSyncRunnable(new Runnable() {				
 			public void run() {
 				if(isDisposed()) 
 					return;	
-				if (fFirstFailure != null && fAutoScroll) {
-					fActiveRunView.setSelectedTest(fFirstFailure.getTestId());
-					handleTestSelected(fFirstFailure.getTestId());
+				if (fFailures.size() > 0) {
+					selectFirstFailure();
 				}
 				updateViewIcon();
 				if (fDirtyListener == null) {
@@ -353,6 +370,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 				}
 			}
 		});	
+	}
+
+	protected void selectFirstFailure() {
+		TestRunInfo firstFailure= (TestRunInfo)fFailures.get(0);
+		if (firstFailure != null && fAutoScroll) {
+			fActiveRunView.setSelectedTest(firstFailure.getTestId());
+			handleTestSelected(firstFailure.getTestId());
+		}
 	}
 
 	private void updateViewIcon() {
@@ -364,7 +389,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	}
 
 	private boolean hasErrorsOrFailures() {
-		return fErrors+fFailures > 0;
+		return fErrorCount+fFailureCount > 0;
 	}
 
 	private String elapsedTimeAsString(long runTime) {
@@ -440,13 +465,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		testInfo.setTrace(trace);
 		testInfo.setStatus(status);
 		if (status == ITestRunListener.STATUS_ERROR)
-			fErrors++;
+			fErrorCount++;
 		else
-			fFailures++;
-		if (fFirstFailure == null)
-			fFirstFailure= testInfo;
+			fFailureCount++;
+		fFailures.add(testInfo);
 		// show the view on the first error only
-		if (fShowOnErrorOnly && (fErrors + fFailures == 1)) 
+		if (fShowOnErrorOnly && (fErrorCount + fFailureCount == 1)) 
 			postShowTestResultsView();
 	}
 
@@ -477,22 +501,22 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 			return;
 		if (info.getStatus() == ITestRunListener.STATUS_OK) {
 			if (status == ITestRunListener.STATUS_FAILURE) 
-				fFailures++;
+				fFailureCount++;
 			else if (status == ITestRunListener.STATUS_ERROR)
-				fErrors++;
+				fErrorCount++;
 		} else if (info.getStatus() == ITestRunListener.STATUS_ERROR) {
 			if (status == ITestRunListener.STATUS_OK) 
-				fErrors--;
+				fErrorCount--;
 			else if (status == ITestRunListener.STATUS_FAILURE) {
-				fErrors--;
-				fFailures++;
+				fErrorCount--;
+				fFailureCount++;
 			}
 		} else if (info.getStatus() == ITestRunListener.STATUS_FAILURE) {
 			if (status == ITestRunListener.STATUS_OK) 
-				fFailures--;
+				fFailureCount--;
 			else if (status == ITestRunListener.STATUS_ERROR) {
-				fFailures--;
-				fErrors++;
+				fFailureCount--;
+				fErrorCount++;
 			}
 		}			
 		info.setStatus(status);	
@@ -608,6 +632,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 						ITestRunView v= (ITestRunView) e.nextElement();
 						v.aboutToStart();
 					}
+					fNextAction.setEnabled(false);
+					fPreviousAction.setEnabled(false);
 				}
 			}
 		});
@@ -622,6 +648,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
 					ITestRunView v= (ITestRunView) e.nextElement();
 					v.endTest(testId);
+				}
+				
+				if (fFailureCount > 0) {
+					fNextAction.setEnabled(true);
+					fPreviousAction.setEnabled(true);
 				}
 			}
 		});	
@@ -642,9 +673,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 
 	private void handleEndTest() {
 		refreshCounters();
-		fProgressBar.step(fFailures+fErrors);
+		fProgressBar.step(fFailureCount+fErrorCount);
 		if (fShowOnErrorOnly) {
-			Image progress= fProgressImages.getImage(fExecutedTests, fTestCount, fErrors, fFailures);
+			Image progress= fProgressImages.getImage(fExecutedTests, fTestCount, fErrorCount, fFailureCount);
 			if (progress != fViewImage) {
 				fViewImage= progress;
 				firePropertyChange(IWorkbenchPart.PROP_TITLE);
@@ -653,10 +684,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	}
 
 	private void refreshCounters() {
-		fCounterPanel.setErrorValue(fErrors);
-		fCounterPanel.setFailureValue(fFailures);
+		fCounterPanel.setErrorValue(fErrorCount);
+		fCounterPanel.setFailureValue(fFailureCount);
 		fCounterPanel.setRunValue(fExecutedTests);
-		fProgressBar.refresh(fErrors+fFailures> 0);
+		fProgressBar.refresh(fErrorCount+fFailureCount> 0);
 	}
 
 	protected void postShowTestResultsView() {
@@ -794,12 +825,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 			}
 		});
 		fExecutedTests= 0;
-		fFailures= 0;
-		fErrors= 0;
+		fFailureCount= 0;
+		fErrorCount= 0;
 		fTestCount= testCount;
 		aboutToStart();
 		fTestInfos.clear();
-		fFirstFailure= null;
+		fFailures= new ArrayList();
 	}
 
 	private void clearStatus() {
@@ -825,10 +856,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		counterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		SashForm sashForm= createSashForm(parent);
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
-		getViewSite().getActionBars().setGlobalActionHandler(
+		IActionBars actionBars= getViewSite().getActionBars();
+		actionBars.setGlobalActionHandler(
 			IWorkbenchActionConstants.COPY,
 			new CopyTraceAction(fFailureView, fClipboard));
-
+		
 		JUnitPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
@@ -860,6 +892,15 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		fRerunLastTestAction= new RerunLastAction();
 		fScrollLockAction= new ScrollLockAction(this);
+		fNextAction= new ShowNextFailureAction(this);
+		fPreviousAction= new ShowPreviousFailureAction(this);
+		fNextAction.setEnabled(false);
+		fPreviousAction.setEnabled(false);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.NEXT, fNextAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PREVIOUS, fPreviousAction);
+		
+		toolBar.add(fNextAction);
+		toolBar.add(fPreviousAction);
 		toolBar.add(new StopAction());
 		toolBar.add(new Separator());
 		toolBar.add(fRerunLastTestAction);
