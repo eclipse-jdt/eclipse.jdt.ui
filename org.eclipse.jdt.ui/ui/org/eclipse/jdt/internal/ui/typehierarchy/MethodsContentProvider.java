@@ -92,7 +92,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 					// sort in from last to first: elements with same name
 					// will show up in hierarchy order 
 					for (int i= allSupertypes.length - 1; i >= 0; i--) {
-						IType superType= providesWorkingCopies() ? JavaModelUtil.toWorkingCopy(allSupertypes[i]) : allSupertypes[i];
+						IType superType= providesWorkingCopies() ? (IType) JavaModelUtil.toWorkingCopy(allSupertypes[i]) : allSupertypes[i];
 						if (superType.exists()) {
 							addAll(superType.getMethods(), res);
 							addAll(superType.getInitializers(), res);
@@ -100,7 +100,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 						}
 					}
 				}
-				type= providesWorkingCopies() ? JavaModelUtil.toWorkingCopy(type) : type;
+				type= providesWorkingCopies() ? (IType) JavaModelUtil.toWorkingCopy(type) : type;
 				if (type.exists()) {
 					addAll(type.getMethods(), res);
 					addAll(type.getInitializers(), res);

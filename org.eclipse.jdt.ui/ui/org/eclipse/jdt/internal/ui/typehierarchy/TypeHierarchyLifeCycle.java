@@ -269,7 +269,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	}
 	
 	private void processTypeDelta(IType type, ArrayList changedTypes) {
-		type= JavaModelUtil.toOriginal(type);
+		type= (IType) JavaModelUtil.toOriginal(type);
 		if (getHierarchy().contains(type)) {
 			changedTypes.add(type);
 		}

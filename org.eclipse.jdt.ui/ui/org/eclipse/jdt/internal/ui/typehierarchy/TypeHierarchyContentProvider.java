@@ -154,7 +154,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	
 	private void addFilteredMembers(IType origType, List children) {
 		try {
-			IType parent= providesWorkingCopies() ? JavaModelUtil.toWorkingCopy(origType) : origType;
+			IType parent= providesWorkingCopies() ? (IType) JavaModelUtil.toWorkingCopy(origType) : origType;
 			
 			IMethod[] methods= parent.getMethods();
 			for (int i= 0; i < fMemberFilter.length; i++) {
@@ -192,7 +192,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		if (fShowAllTypes) {
 			return true;
 		}
-		IType type= providesWorkingCopies() ? JavaModelUtil.toWorkingCopy(origType) : origType;
+		IType type= providesWorkingCopies() ? (IType) JavaModelUtil.toWorkingCopy(origType) : origType;
 		
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < fMemberFilter.length; i++) {
