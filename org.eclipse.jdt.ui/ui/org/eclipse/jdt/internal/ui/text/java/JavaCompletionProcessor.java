@@ -88,7 +88,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	};
 	
 	
-	private final static String VISIBILITY= "org.eclipse.jdt.core.codeComplete.visibilityCheck"; //$NON-NLS-1$
+	private final static String VISIBILITY= JavaCore.CODEASSIST_VISIBILITY_CHECK;
 	private final static String ENABLED= "enabled"; //$NON-NLS-1$
 	private final static String DISABLED= "disabled"; //$NON-NLS-1$
 	

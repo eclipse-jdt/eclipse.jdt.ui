@@ -384,9 +384,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	
 	/* Preference key for code formatter tab size */
-	private final static String CODE_FORMATTER_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";	 //$NON-NLS-1$
+	private final static String CODE_FORMATTER_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
 	/* Preference key for code formatter tab character */
-	private final static String CODE_FORMATTER_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char";	 //$NON-NLS-1$
+	private final static String CODE_FORMATTER_TAB_CHAR= JavaCore.FORMATTER_TAB_CHAR;
 	/** Preference key for matching brackets */
 	public final static String MATCHING_BRACKETS=  "matchingBrackets"; //$NON-NLS-1$
 	/** Preference key for matching brackets color */

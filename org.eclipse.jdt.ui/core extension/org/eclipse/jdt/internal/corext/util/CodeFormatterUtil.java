@@ -68,7 +68,7 @@ public class CodeFormatterUtil {
 	
 	public static int getTabWidth() {
 		Hashtable options= JavaCore.getOptions();
-		String result= (String)options.get("org.eclipse.jdt.core.formatter.tabulation.size"); //$NON-NLS-1$
+		String result= (String)options.get(JavaCore.FORMATTER_TAB_SIZE);
 		return Integer.parseInt(result);
 	}	
 }

@@ -491,7 +491,7 @@ public class StubUtility {
 					i--;
 				}
 				int tabWidth= 4;
-				String tabWidthString= (String) JavaCore.getOptions().get("org.eclipse.jdt.core.formatter.tabulation.size"); //$NON-NLS-1$
+				String tabWidthString= (String) JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE);
 				if (tabWidthString != null) {
 					try {
 						tabWidth= Integer.parseInt(tabWidthString);
