@@ -25,6 +25,7 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
+import org.eclipse.jdt.internal.ui.actions.FindExceptionOccurrences;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
@@ -54,6 +55,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	private ImplementorsSearchGroup fImplementorsGroup;
 	
 	private FindOccurrencesInFileAction fOccurrencesInFileAction;
+	private FindExceptionOccurrences fExceptionOriginatorsAction;
 	
 	/**
 	 * Creates a new <code>JavaSearchActionGroup</code>. The group 
@@ -95,6 +97,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fDeclarationsGroup= new DeclarationsSearchGroup(fEditor);
 		fImplementorsGroup= new ImplementorsSearchGroup(fEditor);
 		fOccurrencesInFileAction= new FindOccurrencesInFileAction(fEditor);
+		fExceptionOriginatorsAction= new FindExceptionOccurrences(fEditor);
 	}
 
 	private JavaSearchActionGroup(IWorkbenchSite site) {
@@ -128,6 +131,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fReadAccessGroup.fillActionBars(actionBar);
 		fWriteAccessGroup.fillActionBars(actionBar);
 		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_OCCURRENCES_IN_FILE, fOccurrencesInFileAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_EXCEPTION_OCCURRENCES, fExceptionOriginatorsAction);
 	}
 	
 	/* 

@@ -11,11 +11,21 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -29,9 +39,24 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.ui.texteditor.MarkerUtilities;
+
+import org.eclipse.search.ui.ISearchResultView;
+import org.eclipse.search.ui.SearchUI;
+
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
-public class OccurrencesFinder extends ASTVisitor {
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
+	
+	public static final String IS_WRITEACCESS= "writeAccess"; //$NON-NLS-1$
+	public static final String IS_VARIABLE= "variable"; //$NON-NLS-1$
 	
 	private IBinding fTarget;
 	private List fUsages= new ArrayList();
@@ -40,6 +65,79 @@ public class OccurrencesFinder extends ASTVisitor {
 	public OccurrencesFinder(IBinding target) {
 		super();
 		fTarget= target;
+	}
+	
+	public OccurrencesFinder() {
+		
+	}
+	
+	public List perform(CompilationUnit root, Name name) {
+		fTarget= name.resolveBinding();
+		if (fTarget == null)
+			return new ArrayList();
+		root.accept(this);
+		return fUsages;
+	}
+	
+	public IMarker[] createMarkers(IResource file, IDocument document) throws CoreException {
+		List result= new ArrayList();
+		boolean isVariable= fTarget instanceof IVariableBinding;
+		for (Iterator each= fUsages.iterator(); each.hasNext();) {
+			ASTNode node= (ASTNode) each.next();
+			result.add(createMarker(file, document, node, fWriteUsages.contains(node), isVariable));
+		}
+		return (IMarker[]) result.toArray(new IMarker[result.size()]);
+	}
+	
+	private static IMarker createMarker(IResource file, IDocument document, ASTNode node, boolean writeAccess, boolean isVariable) throws CoreException {
+		Map attributes= new HashMap(10);
+		IMarker marker= file.createMarker(SearchUI.SEARCH_MARKER);
+
+		int startPosition= node.getStartPosition();
+		MarkerUtilities.setCharStart(attributes, startPosition);
+		MarkerUtilities.setCharEnd(attributes, startPosition + node.getLength());
+		
+		if(writeAccess)
+			attributes.put(IS_WRITEACCESS, new Boolean(true));
+
+		if(isVariable)
+			attributes.put(IS_VARIABLE, new Boolean(true));
+			
+		try {
+			int line= document.getLineOfOffset(startPosition);
+			MarkerUtilities.setLineNumber(attributes, line);
+			IRegion region= document.getLineInformation(line);
+			String lineContents= document.get(region.getOffset(), region.getLength());
+			MarkerUtilities.setMessage(attributes, lineContents.trim());
+		} catch (BadLocationException e) {
+		}
+		marker.setAttributes(attributes);
+		return marker;
+	}
+	
+	public void searchStarted(ISearchResultView view, String inputName, Name name) {
+		String elementName= ASTNodes.asString(name);
+		view.searchStarted(
+			null,
+			getSingularLabel(elementName, inputName),
+			getPluralLabel(elementName, inputName),
+			JavaPluginImages.DESC_OBJS_SEARCH_REF,
+			"org.eclipse.jdt.ui.JavaFileSearch", //$NON-NLS-1$
+			new OccurrencesInFileLabelProvider(),
+			new GotoMarkerAction(), 
+			new SearchGroupByKeyComputer(),
+			null
+		);
+	}
+
+	private String getPluralLabel(String nodeContents, String elementName) {
+		String[] args= new String[] {nodeContents, "{0}", elementName}; //$NON-NLS-1$
+		return SearchMessages.getFormattedString("JavaSearchInFile.pluralPostfix", args); //$NON-NLS-1$
+	}
+	
+	private String getSingularLabel(String nodeContents, String elementName) {
+		String[] args= new String[] {nodeContents, elementName}; //$NON-NLS-1$
+		return SearchMessages.getFormattedString("JavaSearchInFile.singularPostfix", args); //$NON-NLS-1$
 	}
 
 	public List getUsages() {

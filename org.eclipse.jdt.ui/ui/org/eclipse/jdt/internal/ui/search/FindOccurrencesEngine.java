@@ -10,30 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.swt.custom.BusyIndicator;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.texteditor.MarkerUtilities;
-
-import org.eclipse.search.ui.IGroupByKeyComputer;
-import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -43,37 +27,36 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
 
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.swt.custom.BusyIndicator;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.IWorkbenchPage;
+
+import org.eclipse.search.ui.ISearchResultView;
+import org.eclipse.search.ui.SearchUI;
+
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 public abstract class FindOccurrencesEngine {
 	
-	public static final String IS_WRITEACCESS= "writeAccess"; //$NON-NLS-1$
-	public static final String IS_VARIABLE= "variable"; //$NON-NLS-1$
-	private CompilationUnit fRoot;
-	
-	private static class SearchGroupByKeyComputer implements IGroupByKeyComputer {
-		public Object computeGroupByKey(IMarker marker) {
-			return marker; 
-		}
-	}
+	private IOccurrencesFinder fFinder;
 	
 	private static class FindOccurencesClassFileEngine extends FindOccurrencesEngine {
 		private IClassFile fClassFile;
 		
-		public FindOccurencesClassFileEngine(IClassFile file) {
+		public FindOccurencesClassFileEngine(IClassFile file, IOccurrencesFinder finder) {
+			super(finder);
 			fClassFile= file;
 		}
 		protected CompilationUnit createAST() {
@@ -98,7 +81,8 @@ public abstract class FindOccurrencesEngine {
 	private static class FindOccurencesCUEngine extends FindOccurrencesEngine {
 		private ICompilationUnit fCUnit;
 		
-		public FindOccurencesCUEngine(ICompilationUnit unit) {
+		public FindOccurencesCUEngine(ICompilationUnit unit, IOccurrencesFinder finder) {
+			super(finder);
 			fCUnit= unit;
 		}
 		protected CompilationUnit createAST() {
@@ -119,16 +103,20 @@ public abstract class FindOccurrencesEngine {
 		}
 	}
 	
-	public static FindOccurrencesEngine create(IJavaElement root) {
-		if (root == null)
+	protected FindOccurrencesEngine(IOccurrencesFinder finder) {
+		fFinder= finder;
+	}
+	
+	public static FindOccurrencesEngine create(IJavaElement root, IOccurrencesFinder finder) {
+		if (root == null || finder == null)
 			return null;
 		
 		ICompilationUnit unit= (ICompilationUnit)root.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (unit != null)
-			return new FindOccurencesCUEngine(unit);
+			return new FindOccurencesCUEngine(unit, finder);
 		IClassFile cf= (IClassFile)root.getAncestor(IJavaElement.CLASS_FILE);
 		if (cf != null)
-			return new FindOccurencesClassFileEngine(cf);
+			return new FindOccurencesClassFileEngine(cf, finder);
 		return null;
 	}
 
@@ -141,57 +129,7 @@ public abstract class FindOccurrencesEngine {
 	protected abstract IResource getMarkerOwner() throws JavaModelException;
 	
 	protected abstract void addSpecialAttributes(Map attributes) throws JavaModelException;
-
-	/**
-	 * Resolves the target in this engines input.
-	 * 
-	 * @param offset the offset of the current selection
-	 * @param length the length of the current selection
-	 * 
-	 * @return the binding for the target
-	 * @throws JavaModelException
-	 */
-	public IBinding resolveTarget(int offset, int length) throws JavaModelException {
-		ISourceReference sr= getSourceReference();
-		if (sr.getSourceRange() == null) {
-			return null; 
-		}
 		
-		fRoot= createAST();
-		if (fRoot == null) {
-			return null;
-		}
-		final Name name= getNameNode(fRoot, offset, length);
-		if (name == null) 
-			return null;
-		
-		if (name.getParent() instanceof ClassInstanceCreation)
-			return ((ClassInstanceCreation)name.getParent()).resolveConstructorBinding();
-		else
-			return name.resolveBinding();
-	}
-	
-	/**
-	 * Finds occurrences in this engines input for the
-	 * given binding.
-	 * 
-	 * @param target the binding for which to find its occurrences
-	 * @param length the length of the current selection
-	 * 
-	 * @return the matches as ASTNode list or <code>null</code> if there was an error
-	 * @throws JavaModelException
-	 */
-	public List findOccurrences(IBinding target) throws JavaModelException {
-		if (target == null)
-			return null;
-		
-		OccurrencesFinder finder= new OccurrencesFinder(target);
-		fRoot.accept(finder);
-		List result= finder.getUsages();
-		fRoot= null;
-		return result;
-	}
-	
 	public String run(int offset, int length) throws JavaModelException {
 		ISourceReference sr= getSourceReference();
 		if (sr.getSourceRange() == null) {
@@ -214,20 +152,14 @@ public abstract class FindOccurrencesEngine {
 		
 		final IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
-				IJavaElement element= getInput();
-				ISearchResultView view= startSearch(element.getElementName(), name);
-				OccurrencesFinder finder= new OccurrencesFinder(target);
-				root.accept(finder);
-				List matches= finder.getUsages();
-				List writeMatches= finder.getWriteUsages();
+				ISearchResultView view= startSearch(name);
+				fFinder.perform(root, name);
 				IResource file= getMarkerOwner();				
-				for (Iterator each= matches.iterator(); each.hasNext();) {
-					ASTNode node= (ASTNode) each.next();
-					addMatch(
-						view, 
-						file, 
-						createMarker(file, document, node, writeMatches.contains(node), target instanceof IVariableBinding)
-					);
+				IMarker[] markers= fFinder.createMarkers(file, document);
+				for (int i = 0; i < markers.length; i++) {
+					IMarker marker= markers[i];
+					addSpecialAttributes(marker.getAttributes());
+					addMatch(view, file, marker);
 				}
 				searchFinished(view);
 			}
@@ -243,23 +175,13 @@ public abstract class FindOccurrencesEngine {
 		return null;
 	}
 	
-	private ISearchResultView startSearch(String fileName, final Name name) {
+	private ISearchResultView startSearch(final Name name) {
 		SearchUI.activateSearchResultView();
 		ISearchResultView view= SearchUI.getSearchResultView();
-		String elementName= ASTNodes.asString(name);
-		
-		if (view != null) 
-			view.searchStarted(
-				null,
-				getSingularLabel(elementName, fileName),
-				getPluralLabel(elementName, fileName),
-				JavaPluginImages.DESC_OBJS_SEARCH_REF,
-				"org.eclipse.jdt.ui.JavaFileSearch", //$NON-NLS-1$
-				new OccurrencesInFileLabelProvider(),
-				new GotoMarkerAction(), 
-				new SearchGroupByKeyComputer(),
-				null
-			);	
+		IJavaElement element= getInput();
+		if (view != null) {
+			fFinder.searchStarted(view, element.getElementName(), name);
+		}
 		return view;
 	}
 	
@@ -281,43 +203,6 @@ public abstract class FindOccurrencesEngine {
 		return marker;
 	}
 	
-	private IMarker createMarker(IResource file, IDocument document, ASTNode element, boolean writeAccess, boolean isVariable) throws CoreException {
-		Map attributes= new HashMap(10);
-		IMarker marker= file.createMarker(SearchUI.SEARCH_MARKER);
-
-		int startPosition= element.getStartPosition();
-		MarkerUtilities.setCharStart(attributes, startPosition);
-		MarkerUtilities.setCharEnd(attributes, startPosition + element.getLength());
-		addSpecialAttributes(attributes);
-		
-		if(writeAccess)
-			attributes.put(IS_WRITEACCESS, new Boolean(true));
-
-		if(isVariable)
-			attributes.put(IS_VARIABLE, new Boolean(true));
-			
-		try {
-			int line= document.getLineOfOffset(startPosition);
-			MarkerUtilities.setLineNumber(attributes, line);
-			IRegion region= document.getLineInformation(line);
-			String lineContents= document.get(region.getOffset(), region.getLength());
-			MarkerUtilities.setMessage(attributes, lineContents.trim());
-		} catch (BadLocationException e) {
-		}
-		marker.setAttributes(attributes);
-		return marker;
-	}
-
-	private String getPluralLabel(String nodeContents, String elementName) {
-		String[] args= new String[] {nodeContents, "{0}", elementName}; //$NON-NLS-1$
-		return SearchMessages.getFormattedString("JavaSearchInFile.pluralPostfix", args); //$NON-NLS-1$
-	}
-	
-	private String getSingularLabel(String nodeContents, String elementName) {
-		String[] args= new String[] {nodeContents, elementName}; //$NON-NLS-1$
-		return SearchMessages.getFormattedString("JavaSearchInFile.singularPostfix", args); //$NON-NLS-1$
-	}
-
 	private void run(final IWorkspaceRunnable runnable) {
 		BusyIndicator.showWhile(null,
 			new Runnable() {
@@ -330,12 +215,5 @@ public abstract class FindOccurrencesEngine {
 				}
 			}
 		);
-	}
-
-	/**
-	 * Clears this engine's target.
-	 */
-	public void clearTarget() {
-		fRoot= null;
 	}
 }

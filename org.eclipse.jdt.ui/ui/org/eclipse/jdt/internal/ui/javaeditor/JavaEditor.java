@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -33,6 +32,26 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+
+import org.eclipse.core.resources.IMarker;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICodeAssist;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
@@ -70,16 +89,6 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
@@ -113,10 +122,15 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.IEncodingSupport;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.IPostSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
@@ -129,6 +143,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -148,35 +165,6 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICodeAssist;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ILocalVariable;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.Name;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -191,6 +179,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNe
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
+import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
@@ -199,6 +188,17 @@ import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 /**
@@ -2793,11 +2793,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		
 		if (fOccurrencesFinderJob != null)
 			fOccurrencesFinderJob.cancel();
-
-		// Find the matches && extract positions so we can forget the AST
-		OccurrencesFinder finder = new OccurrencesFinder(binding);
-		astRoot.accept(finder);
-		List matches= finder.getUsages();
+		
+		List matches= ExceptionOccurrencesFinder.perform((Name)node);
+		if (matches.size() == 0) {
+			// Find the matches && extract positions so we can forget the AST
+			OccurrencesFinder finder = new OccurrencesFinder(binding);
+			astRoot.accept(finder);
+			matches= finder.getUsages();
+		}
 		
 		Position[] positions= new Position[matches.size()];
 		int i= 0;

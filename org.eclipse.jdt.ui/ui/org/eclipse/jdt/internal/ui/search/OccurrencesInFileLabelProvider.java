@@ -50,7 +50,7 @@ class OccurrencesInFileLabelProvider extends JavaSearchResultLabelProvider {
 		Boolean write= null;
 		boolean writeValue= false;
 		try {
-			write= (Boolean)marker.getAttribute(FindOccurrencesEngine.IS_WRITEACCESS);
+			write= (Boolean)marker.getAttribute(OccurrencesFinder.IS_WRITEACCESS);
 			writeValue= write != null && write.booleanValue();
 		} catch (CoreException e) {
 		}
@@ -61,7 +61,7 @@ class OccurrencesInFileLabelProvider extends JavaSearchResultLabelProvider {
 		Boolean variable= null;
 		boolean variableValue= false;
 		try {
-			variable= (Boolean)marker.getAttribute(FindOccurrencesEngine.IS_VARIABLE);
+			variable= (Boolean)marker.getAttribute(OccurrencesFinder.IS_VARIABLE);
 			variableValue= variable != null && variable.booleanValue();
 		} catch (CoreException e) {
 		}

@@ -709,6 +709,14 @@ public class ASTNodes {
 		return result[0];
 	}
 	
+	public static Name getTopMostName(Name name) {
+		Name result= name;
+		while(result.getParent() instanceof Name) {
+			result= (Name)result.getParent();
+		}
+		return result;
+	}
+	
 	public static int changeVisibility(int modifiers, int visibility) {
 		return (modifiers & CLEAR_VISIBILITY) | visibility;
 	}
