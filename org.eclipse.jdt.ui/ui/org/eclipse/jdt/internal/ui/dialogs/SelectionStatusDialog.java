@@ -31,7 +31,6 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	private MessageLine fStatusLine;
 	private IStatus fLastStatus;
 	private Image fImage;
-	private boolean fInitialSelectionSet;
 	private boolean fStatusLineAboveButtons= false;	
 
 	/**
@@ -39,7 +38,6 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	 */	
 	public SelectionStatusDialog(Shell parent) {
 		super(parent);
-		fInitialSelectionSet= false;
 	}
 	
 	/**
@@ -84,46 +82,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 		result[position]= element;
 		setResult(Arrays.asList(result));
 	}
-	 	 
-	/**
-	 * Sets the initial selection to the given element.
-	 */
-	public void setInitialSelection(Object element) {
-		// Allow clients to use set their own initial selection(s)
-		// XXX : MA: Looks buggy...
-		if (fInitialSelectionSet && element != null && element.equals("A")) //$NON-NLS-1$
-			return;
 
-		if (element != null) {
-			setInitialSelections(new Object[] { element });
-		} else {
-			setInitialSelections(new Object[0]);
-		}
-	} 
-	
-	/**
-	 * Returns the first element of the initial selection or <code>null<code>
-	 * if there isn't any initial selection.
-	 * @return the first element of the initial selection.
-	 */
-	protected Object getPrimaryInitialSelection() {
-		List result= getInitialSelections();
-		if (result == null || result.size() == 0)
-			return null;
-		return result.get(0);	
-	}
-	
-	protected void setInitialSelection(int position, Object element) {
-		List l= getInitialSelections();
-		l.set(position, element);
-		fInitialSelectionSet= true;
-	}
-	
-	public void setInitialSelections(Object[] selectedElements) {
-		super.setInitialSelections(selectedElements);
-		fInitialSelectionSet= true;
-	}
-	
 	/**
 	 * Compute the result and return it.
 	 */

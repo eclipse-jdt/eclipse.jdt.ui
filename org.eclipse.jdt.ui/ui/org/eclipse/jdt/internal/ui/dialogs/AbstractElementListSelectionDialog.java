@@ -14,12 +14,16 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 /**
@@ -30,17 +34,23 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	private ILabelProvider fRenderer;
 	private boolean fIgnoreCase= true;
 	private boolean fIsMultipleSelection= false;
+	private boolean fMatchEmptyString= true;
+	private boolean fAllowDuplicates= true;
 	
 	private Label fMessage;
-	private SelectionList fSelectionList;
+
+	protected FilteredList fFilteredList;
+	private Text fFilterText;
+	
 	private ISelectionValidator fValidator;	
+	private String fFilter= ""; //$NON-NLS-1$
 	
 	private String fEmptyListMessage= ""; //$NON-NLS-1$
 	private String fNothingSelectedMessage= ""; //$NON-NLS-1$
 		
 	private int fWidth= 60;
 	private int fHeight= 18;
-
+	
 	/**
 	 * Constructs a list selection dialog.
 	 * @param renderer The label renderer used
@@ -66,8 +76,20 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		fIgnoreCase= ignoreCase;
 	}
 	
+	public boolean isCaseIgnored() {
+		return fIgnoreCase;
+	}
+	
+	public void setMatchEmptyString(boolean matchEmptyString) {
+		fMatchEmptyString= matchEmptyString;
+	}
+	
 	public void setMultipleSelection(boolean multipleSelection) {
 		fIsMultipleSelection= multipleSelection;
+	}
+
+	public void setAllowDuplicates(boolean allowDuplicates) {
+		fAllowDuplicates= allowDuplicates;
 	}
 	
 	/**
@@ -97,41 +119,38 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * Initializes the selection list widget with the given list of
 	 * elements. To be called within open().
 	 */
-	protected void setSelectionListElements(List elements, boolean refilter) {
-		fSelectionList.setElements(elements, refilter);
+	protected void setSelectionListElements(List elements) {
+		Assert.isNotNull(fFilteredList);
+		fFilteredList.setElements(elements);
 	}
 
 	/**
 	 * Sets the filter text to the given value.
-	 * To be called within open().
 	 */
-	protected void setFilter(String text, boolean refilter) {
-		fSelectionList.setFilter(text, refilter);
+	protected void setFilter(String text) {
+		if (fFilterText == null)
+			fFilter= text;
+		else
+			fFilterText.setText(text);
 	} 
 	
 	/**
 	 * Returns the currently used filter text.
-	 * To be called within or after open().
 	 */
 	protected String getFilter() {
-		return fSelectionList.getFilter();
+		if (fFilteredList == null)
+			return fFilter;
+		else
+			return fFilteredList.getFilter();
 	}
-	
-	/**
-	 * Refilters the current list according to the filter entered into the
-	 * text edit field.
-	 * To be called within open().
-	 */
-	protected void refilter() {
-		fSelectionList.filter(true);
-	}
-	 
+
 	/**
 	 * Returns the selection indices.
 	 * To be called within or after open().
 	 */
 	protected int[] getSelectionIndices() {
-		return fSelectionList.getSelectionIndices();
+		Assert.isNotNull(fFilteredList);
+		return fFilteredList.getSelectionIndices();
 	}
 	
 	/**
@@ -140,7 +159,8 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * To be called within open().
 	 */
 	protected void setSelection(int[] selection) {
-		fSelectionList.setSelection(selection);
+		Assert.isNotNull(fFilteredList);
+		fFilteredList.setSelection(selection);
 	} 
 	 	
 	/**
@@ -149,9 +169,9 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * To be called within or after open().
 	 */
 	protected List getWidgetSelection() {
-		if (fSelectionList == null || fSelectionList.isDisposed())
+		if (fFilteredList == null || fFilteredList.isDisposed())
 			return new ArrayList(0);
-		return fSelectionList.getSelection();	
+		return fFilteredList.getSelectionAsList();	
 	}
 	
 	/*
@@ -186,44 +206,21 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		data.verticalAlignment= GridData.BEGINNING;
 		label.setLayoutData(data);
 		
+		fMessage= label;
+		
 		return label;
 	}	
-
-	/**
-	 * Creates the selection list.
-	 */
-	private SelectionList createSelectionList(Composite parent) {		
-		int flags= SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL |
-			(fIsMultipleSelection ? SWT.MULTI : SWT.SINGLE);
-			
-		SelectionList list= new SelectionList(parent, flags, fRenderer, fIgnoreCase);		
-		list.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				handleDefaultSelected();
-			}
-			public void widgetSelected(SelectionEvent e) {
-				verifyCurrentSelection();
-			}
-		});
-
-		GridData data= new GridData();
-		data.widthHint= convertWidthInCharsToPixels(fWidth);
-		data.heightHint= convertHeightInCharsToPixels(fHeight);
-		data.grabExcessVerticalSpace= true;
-		data.grabExcessHorizontalSpace= true;
-		data.horizontalAlignment= GridData.FILL;
-		data.verticalAlignment= GridData.FILL;
-		list.setLayoutData(data);
-
-		return list;
-	}			
-		
+	
 	/**
 	 * Returns <code>true</code> if the list of elements is empty,
 	 * <code>false</code> otherwise.
 	 */
 	protected boolean isEmptyList() {
-		return (fSelectionList == null) || fSelectionList.isEmptyList();
+		return (fFilteredList == null) || fFilteredList.isEmpty();
+	}
+	
+	protected void handleSelectionChanged() {
+		verifyCurrentSelection();
 	}
 	
 	/**
@@ -262,19 +259,66 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 		super.cancelPressed();
 	}	
 
-	/*
-	 * @private
-	 * @see Window#createDialogArea(Composite)
-	 */
-	protected Control createDialogArea(Composite parent) {
-		Composite contents= (Composite) super.createDialogArea(parent);
+	protected FilteredList createFilteredList(Composite parent) {
+		int flags= SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL |
+			(fIsMultipleSelection ? SWT.MULTI : SWT.SINGLE);
+			
+		FilteredList list= new FilteredList(parent, flags, fRenderer,
+			fIgnoreCase, fAllowDuplicates, fMatchEmptyString);
+
+		GridData data= new GridData();
+		data.widthHint= convertWidthInCharsToPixels(fWidth);
+		data.heightHint= convertHeightInCharsToPixels(fHeight);
+		data.grabExcessVerticalSpace= true;
+		data.grabExcessHorizontalSpace= true;
+		data.horizontalAlignment= GridData.FILL;
+		data.verticalAlignment= GridData.FILL;
+		list.setLayoutData(data);
+
+		list.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				handleDefaultSelected();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				handleSelectionChanged();
+			}
+		});
+
+		fFilteredList= list;		
+
+		return list;		
+	}
+	
+	protected void initFilteredList() {
+		fFilteredList.setFilter(fFilter);				
+	}
+	
+	protected Text createFilterText(Composite parent) {
+		Text text= new Text(parent, SWT.BORDER);
+
+		GridData data= new GridData();
+		data.grabExcessVerticalSpace= false;
+		data.grabExcessHorizontalSpace= true;
+		data.horizontalAlignment= GridData.FILL;
+		data.verticalAlignment= GridData.BEGINNING;
+		text.setLayoutData(data);
 		
-		fMessage= createMessageArea(contents);
-		fSelectionList= createSelectionList(contents);
-		
-		return contents;
+		Listener listener= new Listener() {
+			public void handleEvent(Event e) {
+				fFilteredList.setFilter(fFilterText.getText());
+			}
+		};		
+		text.addListener(SWT.Modify, listener);
+
+		fFilterText= text;
+				
+		return text;
 	}
 
+	protected void initFilterText() {
+		fFilterText.setText(fFilter);
+	}
+	
 	/*
 	 * @private
 	 * @see Window#create(Shell)
@@ -282,13 +326,16 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	public void create() {
 		super.create();
 
+		Assert.isNotNull(fFilteredList);
+
     	if (isEmptyList()) {
      		fMessage.setEnabled(false);
-     		fSelectionList.setEnabled(false);
+     		fFilterText.setEnabled(false);
+     		fFilteredList.setEnabled(false);
      	} else {
 	     	verifyCurrentSelection();		
-			fSelectionList.selectFilterText();
-			fSelectionList.setFocus();
+			fFilterText.selectAll();
+			fFilterText.setFocus();
      	}	
 	}
 	

@@ -59,7 +59,8 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 			return CANCEL;
 		
 		setElements(typesFound);
-		setInitialSelection("A"); //$NON-NLS-1$
+		setFilter("A"); //$NON-NLS-1$
+		
 		return super.open();
 	}
 	

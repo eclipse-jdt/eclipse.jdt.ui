@@ -38,13 +38,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		fOldContent= fList.getElements(); 
 	}
 	
-	/**
-	 * @see TwoPaneElementSelector#getDefaultButtonID
-	 */ 
-	protected int getDefaultButtonID() {
-		return ADD_ID;
-	}
-	
+
 	/**
 	 * @see Dialog#createButtonsForButtonBar
 	 */
@@ -80,7 +74,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	}
 		
 	private void addSelectedInterface(){
-		TypeInfo ref= (TypeInfo)getWidgetSelection();
+		TypeInfo ref= (TypeInfo)getWidgetSelection2();
 		if (ref != null)
 			fList.addElement(ref.getFullyQualifiedName());
 	}
@@ -91,4 +85,12 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		scope.setIncludesClasspaths(true);
 		return scope;
 	}
+	/**
+	 * @see AbstractElementListSelectionDialog#handleDefaultSelected()
+	 */
+	protected void handleDefaultSelected() {
+		if (verifyCurrentSelection())
+			buttonPressed(ADD_ID);
+	}
+
 }

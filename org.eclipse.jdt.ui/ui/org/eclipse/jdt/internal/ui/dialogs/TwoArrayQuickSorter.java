@@ -17,7 +17,7 @@ public class TwoArrayQuickSorter {
 	/**
 	 * Default comparator
 	 */
-	final class StringComparator implements Comparator {
+	public static final class StringComparator implements Comparator {
 	
 		private boolean fIgnoreCase;
 	
@@ -44,7 +44,7 @@ public class TwoArrayQuickSorter {
 	/**
 	 * Sorts keys and values in parallel.
 	 */
-	public void sort(String[] keys, Object[] values) {
+	public void sort(Object[] keys, Object[] values) {
 		if ((keys == null) || (values == null)) {
 			Assert.isTrue(false, "Either keys or values in null"); //$NON-NLS-1$
 			return;
@@ -56,11 +56,11 @@ public class TwoArrayQuickSorter {
 		internalSort(keys, values, 0, keys.length - 1);	
 	}
 
-	private void internalSort(String[] keys, Object[] values, int left, int right) {
+	private void internalSort(Object[] keys, Object[] values, int left, int right) {
 		int original_left= left;
 		int original_right= right;
 		
-		String mid= keys[(left + right) / 2]; 
+		Object mid= keys[(left + right) / 2]; 
 		do { 
 			while (fComparator.compare(keys[left], mid) < 0)
 				left++; 
@@ -68,11 +68,13 @@ public class TwoArrayQuickSorter {
 			while (fComparator.compare(mid, keys[right]) < 0)
 				right--; 
 
-			if (left <= right) { 
-				String tmp= keys[left]; 
+			if (left <= right) {
+				// swap(keys, left, right);
+				Object tmp= keys[left]; 
 				keys[left]= keys[right]; 
 				keys[right]= tmp;
-				
+
+				// swap(values, left, right);				
 				Object tmp2= values[left]; 
 				values[left]= values[right]; 
 				values[right]= tmp2;
@@ -89,4 +91,13 @@ public class TwoArrayQuickSorter {
 			internalSort(keys, values, left, original_right); 
 	}
 
+
+   /**
+     * Swaps x[a] with x[b].
+     */
+    private static final void swap(Object x[], int a, int b) {
+		Object t = x[a];
+		x[a] = x[b];
+		x[b] = t;
+    }
 }

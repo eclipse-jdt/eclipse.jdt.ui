@@ -55,30 +55,26 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 		setResult(getWidgetSelection());
 	}
 
-	/*
-	 * @private
-	 */	
-	protected Control createDialogArea(Composite parent) {
-		Control result= super.createDialogArea(parent);
-		
-		setSelectionListElements(fElements, false);
-      	//a little trick to make the window come up faster
-      	String initialFilter= null;
-      	if (getPrimaryInitialSelection() instanceof String)
-			initialFilter= (String)getPrimaryInitialSelection();
-      	if (initialFilter != null)
-      		setFilter(initialFilter, true);
-      	else
-      		refilter();
-      				
-		return result;
-	}
-	
 	public Object[] getSelectedElements() {
 		return getResult();
 	}
 	
 	public Object getSelectedElement() {
 		return getPrimaryResult();
-	}	
+	}
+	
+	protected Control createDialogArea(Composite parent) {
+		Composite contents= (Composite) super.createDialogArea(parent);
+		
+		createMessageArea(contents);
+		createFilterText(contents);
+		createFilteredList(contents);
+
+		initFilteredList();
+		initFilterText();
+		setSelectionListElements(fElements);
+						
+		return contents;
+	}
+
 }

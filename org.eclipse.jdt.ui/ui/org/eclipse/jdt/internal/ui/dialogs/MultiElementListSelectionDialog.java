@@ -4,27 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.ILabelProvider;
-
+import java.text.MessageFormat;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.dialogs.AbstractElementListSelectionDialog;
 
 public class MultiElementListSelectionDialog extends AbstractElementListSelectionDialog {
 		
@@ -43,7 +24,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	
 	private Label fPageInfoLabel;
 	
-	private String fPageInfoMessage;
+	private String fPageInfoMessage= JavaUIMessages.getString("MultiElementListSelectionDialog.pageInfoMessage"); //$NON-NLS-1$;
 	
 	/**
 	 * Constructs a list selection dialog.
@@ -53,7 +34,6 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 */
 	public MultiElementListSelectionDialog(Shell parent, ILabelProvider renderer) {
 		super(parent, renderer);
-		fPageInfoMessage= JavaUIMessages.getString("MultiElementListSelectionDialog.pageInfoMessage"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -138,10 +118,19 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 * @private
 	 */	
 	protected Control createDialogArea(Composite parent) {
-		Control result= super.createDialogArea(parent);
+		Composite contents= (Composite) super.createDialogArea(parent);
+
+		createMessageArea(contents);
+		createFilterText(contents);
+		createFilteredList(contents);
+
+		initFilteredList();
+		initFilterText();		
+				
 		fCurrentPage= 0;
-		setPageData();		
-		return result;
+		setPageData();
+		
+		return contents;
 	}
 
 	/**
@@ -236,6 +225,11 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		
 		fFinishButton.setEnabled(isAllOK);
 	}
+
+	protected void setInitialSelection(int position, Object element) {
+		List list= getInitialSelections();
+		list.set(position, element);
+	}
 	
 	private void turnPage(boolean toNextPage) {
 		setResult(fCurrentPage, getWidgetSelection());
@@ -267,13 +261,13 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	//---- Private Helpers ------------------------------------------------------------
 	
 	private void setPageData() {
-		setSelectionListElements(Arrays.asList(fElements[fCurrentPage]), false);
-		String initSelection= (String)getInitialSelections().get(fCurrentPage);
-	
-		if (initSelection != null)
-			setFilter(initSelection, true);
+		setSelectionListElements(Arrays.asList(fElements[fCurrentPage]));
+
+		String initSelection= (String) getInitialSelections().get(fCurrentPage);
+		if (initSelection == null)
+			setFilter(""); //$NON-NLS-1$
 		else
-			refilter();
+			setFilter(initSelection);
 			
 		int[] selectedIndex= fSelectedIndices[fCurrentPage];
 		if (selectedIndex != null)

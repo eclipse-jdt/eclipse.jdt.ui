@@ -69,6 +69,13 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 		setResult(new ArrayList(0));
 		setStatusLineAboveButtons(true);
 	}	
+
+	/**
+	 * Convenicence.
+	 */
+	public void setInitialSelection(Object selection) {
+		setInitialSelections(new Object[] {selection});
+	}
 	
 	/**
 	 * This message is shown when the tree has no entries at all

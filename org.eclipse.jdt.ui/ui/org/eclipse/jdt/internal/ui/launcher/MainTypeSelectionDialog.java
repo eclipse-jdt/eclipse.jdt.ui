@@ -92,7 +92,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		}
 		
 		setElements(types);
-		setInitialSelection("A"); //$NON-NLS-1$
+		setFilter("A"); //$NON-NLS-1$
 		return super.open();
 	}
 	

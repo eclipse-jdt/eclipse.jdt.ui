@@ -422,7 +422,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		if (mainClass != null)
 			dialog.setInitialSelections(new String[] {mainClass.getElementName()});
 		else
-			dialog.setInitialSelection(null);
+			dialog.setInitialSelections(null);
 		if (dialog.open() == dialog.OK) {
 			fJarPackage.setMainClass((IType)dialog.getResult()[0]);
 			fMainClassText.setText(fJarPackage.getMainClassName());

@@ -69,7 +69,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			
 		TypeInfo[] typeRefs= (TypeInfo[])typeList.toArray(new TypeInfo[typeList.size()]);
 		setElements(typeRefs);
-		setInitialSelection("A"); //$NON-NLS-1$
+		setFilter("A"); //$NON-NLS-1$
 		return super.open();
 	}
 	
@@ -77,7 +77,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	 * @private
 	 */
 	protected void computeResult() {
-		TypeInfo ref= (TypeInfo) getWidgetSelection();
+		TypeInfo ref= (TypeInfo) getWidgetSelection2();
 
 		if (ref == null)
 			return;
