@@ -100,7 +100,7 @@
             extensions="jsp"
             icon="icons/full/obj16/jsp_obj.gif"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            class="org.eclipse.jdt.internal.ui.examples.jspeditor.JSPEditor"
+            class="org.eclipse.jdt.internal.ui.examples.jspeditor.JspEditor"
             default="true">
       </editor>
    </extension>

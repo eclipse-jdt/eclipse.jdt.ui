@@ -9,25 +9,15 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.examples.jspeditor;
-
-import org.eclipse.ui.editors.text.FileDocumentProvider;
-import org.eclipse.ui.editors.text.TextEditor;
-
+package org.eclipse.text.reconcilerpipe;
 
 /**
- * A simple JSP Editor.
+ * Tagging interface for results reported by the
+ * reconcile pipe participants.
  * 
+ * @see org.eclipse.text.reconcilerpipe.IReconcilePipeParticipant
  * @since 3.0
  */
-public class JSPEditor extends TextEditor {
+public interface IReconcileResult {
 
-	public JSPEditor() {
-		super();
-		setSourceViewerConfiguration(new JSPSourceViewerConfiguration());
-		setDocumentProvider(new FileDocumentProvider());
-	}
-	public void dispose() {
-		super.dispose();
-	}
 }

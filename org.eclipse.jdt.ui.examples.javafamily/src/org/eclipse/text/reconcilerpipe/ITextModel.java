@@ -9,23 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.examples.jspeditor;
-
-import org.eclipse.jface.text.source.SourceViewerConfiguration;
+package org.eclipse.text.reconcilerpipe;
 
 /**
- * Configuration information for a simple JSP source viewer.
+ * Tagging interface for a text model.
  * 
  * @since 3.0
  */
-public class JSPSourceViewerConfiguration extends SourceViewerConfiguration {
+public interface ITextModel {
 
-	/**
-	 * Creates a new JSP source viewer configuration that behaves
-	 * according to the specification of this class' methods.
-	 */
-	public JSPSourceViewerConfiguration() {
-		super();
-		// XXX Auto-generated constructor stub
-	}
 }

@@ -13,8 +13,6 @@ package org.eclipse.jsp;
 import java.io.IOException;
 import java.io.Reader;
 
-import org.eclipse.jdt.internal.core.index.IIndexerOutput;
-
 /**
  * @author weinand
  */
@@ -29,11 +27,9 @@ public class JspTranslator extends AbstractJspParser {
 	boolean fInUseBean;
 	String fId;
 	String fClass;
-	IIndexerOutput fOutput;
 	
 	
-	JspTranslator(IIndexerOutput output) {
-		fOutput= output;
+	public JspTranslator() {
 	}
 		
 	protected void startTag(boolean endTag, String name, int startName) {
@@ -64,7 +60,6 @@ public class JspTranslator extends AbstractJspParser {
 			if (fId != null && fClass != null) {
 				fLocalDeclarations.append(fClass + " " + fId + "= new " + fClass + "();\n");
 
-				fOutput.addRef("jsp_typeRef/" + fClass);				
 				System.out.println("  jsp_typeRef/" + fClass);
 
 				fId= fClass= null;
@@ -105,11 +100,18 @@ public class JspTranslator extends AbstractJspParser {
 		if (out.length() > 0)
 			fContent.append("    System.out.print(\"" + out.toString() + "\");\n");
 	}
+	
+	private void resetTranslator() {
+		fDeclarations.setLength(0);
+		fContent.setLength(0);
+		fLocalDeclarations.setLength(0);
+	}
 
-	String createJava(Reader reader, String name) throws IOException {
-		
+	public String createJava(Reader reader, String name) throws IOException {
+
 		StringBuffer buffer= new StringBuffer();
 		
+		resetTranslator();
 		parse(reader);
 
 		buffer.append("public class " + name + " {\n\n");
