@@ -627,19 +627,20 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.enable_multiple_outputlocations.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, enableDisableValues, 0);
-		
-		description= new Label(othersComposite, SWT.WRAP);
-		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.resource_filter.description")); //$NON-NLS-1$
-		gd= new GridData(GridData.FILL);
-		gd.horizontalSpan= nColumns;
-		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
-		description.setLayoutData(gd);
-		
+				
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.resource_filter.label"); //$NON-NLS-1$
 		Text text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER, 0, 0);
 		gd= (GridData) text.getLayoutData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(10);
+
+		description= new Label(othersComposite, SWT.WRAP);
+		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.resource_filter.description")); //$NON-NLS-1$
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= nColumns;
+		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
+		description.setLayoutData(gd);
+
 		
 		return othersComposite;
 	}
