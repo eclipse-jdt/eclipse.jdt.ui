@@ -161,7 +161,7 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 				fReplacementLength += delta;
 			
 			if (trigger == (char) 0) {
-				document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
+				replace(document, fReplacementOffset, fReplacementLength, fReplacementString);
 			} else {
 				StringBuffer buffer= new StringBuffer(fReplacementString);
 
@@ -171,7 +171,7 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 					++fCursorPosition;
 				}
 				
-				document.replace(fReplacementOffset, fReplacementLength, buffer.toString());
+				replace(document, fReplacementOffset, fReplacementLength, buffer.toString());
 			}
 			
 			int oldLen= document.getLength();
@@ -183,6 +183,12 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 		}	
 	}
 	
+	// #6410 - File unchanged but dirtied by code assist
+	private void replace(IDocument document, int offset, int length, String string) throws BadLocationException {
+		if (!document.get(offset, length).equals(string))
+			document.replace(offset, length, string);
+	}
+
 	/*
 	 * @see ICompletionProposal#apply
 	 */
