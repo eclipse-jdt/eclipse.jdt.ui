@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -68,6 +67,8 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -78,9 +79,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -133,8 +132,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private static final String CONST_CLASS_DECL = "class A{";//$NON-NLS-1$
 	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
 	private static final String CONST_CLOSE = ";}";			//$NON-NLS-1$
-//	private static final String DEFAULT_NEW_PARAM_TYPE= "int";//$NON-NLS-1$
-//	private static final String DEFAULT_NEW_PARAM_VALUE= "0"; //$NON-NLS-1$
 
 	private ChangeSignatureRefactoring(IMethod method) throws JavaModelException{
 		Assert.isNotNull(method);
@@ -955,11 +952,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				cuNode= fCU;
 			else
 				cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, true);
-			OldASTRewrite rewrite= new OldASTRewrite(cuNode);
+			ASTRewrite rewrite= ASTRewrite.create(cuNode.getAST());
 			ImportRewrite importRewrite= new ImportRewrite(cu);
 			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuNode);
 			for (int j= 0; j < nodes.length; j++) {
-				//TODO: collect removed type references (SimpleNames) -> do it in ASTData
+				//TODO: collect removed type references (SimpleNames) -> do it in CompilationUnitRewrite
 				createOccurrenceUpdate(nodes[j], rewrite, importRewrite, result).updateNode();
 			}
 			//TODO: create ImportRemover which looks for other occurrences of removed type references
@@ -999,7 +996,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private void modifyImplicitCallsToNoArgConstructor(TypeDeclaration subclass, OldASTRewrite rewrite) {
+	private void modifyImplicitCallsToNoArgConstructor(TypeDeclaration subclass, ASTRewrite rewrite) {
 		MethodDeclaration[] constructors= getAllConstructors(subclass);
 		if (constructors.length == 0){
 			addNewConstructorToSubclass(subclass, rewrite);
@@ -1007,20 +1004,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			for (int i= 0; i < constructors.length; i++) {
 				if (! containsImplicitCallToSuperConstructor(constructors[i]))
 					continue;
-				SuperConstructorInvocation superCall= addExplicitSuperConstructorCall(constructors[i], rewrite);
-				rewrite.markAsInserted(superCall);
+				addExplicitSuperConstructorCall(constructors[i], rewrite);
 			}
 		}
 	}
 	
-	private SuperConstructorInvocation addExplicitSuperConstructorCall(MethodDeclaration constructor, OldASTRewrite rewrite) {
+	private void addExplicitSuperConstructorCall(MethodDeclaration constructor, ASTRewrite rewrite) {
 		SuperConstructorInvocation superCall= constructor.getAST().newSuperConstructorInvocation();
 		addArgumentsToNewSuperConstructorCall(superCall, rewrite);
-		constructor.getBody().statements().add(0, superCall);
-		return superCall;
+		rewrite.getListRewrite(constructor.getBody(), Block.STATEMENTS_PROPERTY).insertFirst(superCall, null);
 	}
 	
-	private void addArgumentsToNewSuperConstructorCall(SuperConstructorInvocation superCall, OldASTRewrite rewrite) {
+	private void addArgumentsToNewSuperConstructorCall(SuperConstructorInvocation superCall, ASTRewrite rewrite) {
 		int i= 0;
 		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();
@@ -1042,20 +1037,21 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return true;
 	}
 	
-	private void addNewConstructorToSubclass(TypeDeclaration subclass, OldASTRewrite rewrite) {
+	private void addNewConstructorToSubclass(TypeDeclaration subclass, ASTRewrite rewrite) {
 		AST ast= subclass.getAST();
 		MethodDeclaration newConstructor= ast.newMethodDeclaration();
 		newConstructor.setName(ast.newSimpleName(subclass.getName().getIdentifier()));
 		newConstructor.setConstructor(true);
-		newConstructor.setBody(ast.newBlock());
 		newConstructor.setExtraDimensions(0);
 		newConstructor.setJavadoc(null);
 		newConstructor.setModifiers(getAccessModifier(subclass));
 		newConstructor.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
-		
-		addExplicitSuperConstructorCall(newConstructor, rewrite);
-		subclass.bodyDeclarations().add(0, newConstructor); // ok to add as first ???
-		rewrite.markAsInserted(newConstructor);
+		Block body= ast.newBlock();
+		newConstructor.setBody(body);
+		SuperConstructorInvocation superCall= ast.newSuperConstructorInvocation();
+		addArgumentsToNewSuperConstructorCall(superCall, rewrite);
+		body.statements().add(superCall);
+		rewrite.getListRewrite(subclass, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertFirst(newConstructor, null);
 	}
 	
 	private static int getAccessModifier(TypeDeclaration subclass) {
@@ -1088,16 +1084,14 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0;
 	}
 	
-	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, OldASTRewrite rewrite) throws CoreException {
+	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
-		TextEdit resultingEdits= new MultiTextEdit();
-		rewrite.rewriteNode(textBuffer, resultingEdits);
+		TextEdit resultingEdits= rewrite.rewriteAST(textBuffer.getDocument(), null);
 
-		if (resultingEdits.hasChildren()) {
+		if (resultingEdits.hasChildren()) { //TODO: is this cool?
 		    TextChange textChange= manager.get(cu);
 		    TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
 		}
-		rewrite.removeModifications();
 	}
 	
 	private void addImportEdit(TextChangeManager manager, ICompilationUnit cu, ImportRewrite importRewrite) throws CoreException {
@@ -1109,7 +1103,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 	
-	private static Expression createNewExpression(OldASTRewrite rewrite, ParameterInfo info) {
+	private static Expression createNewExpression(ASTRewrite rewrite, ParameterInfo info) {
 		return (Expression) rewrite.createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
 	}
 
@@ -1135,7 +1129,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return info.getNewTypeName() + " " + info.getNewName(); //$NON-NLS-1$
 	}
 
-	private OccurrenceUpdate createOccurrenceUpdate(ASTNode node, OldASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
+	private OccurrenceUpdate createOccurrenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
 		if (isReferenceNode(node))
 			return new ReferenceUpdate(node, rewrite, importRewrite, result);
 		
@@ -1165,9 +1159,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	abstract class OccurrenceUpdate {
-		protected OldASTRewrite fRewrite;
+		protected /*Old*/ASTRewrite fRewrite;
 		protected ImportRewrite fImportRewrite;
-		protected OccurrenceUpdate(OldASTRewrite rewrite, ImportRewrite importRewrite) {
+		protected OccurrenceUpdate(ASTRewrite rewrite, ImportRewrite importRewrite) {
 			fRewrite= rewrite;
 			fImportRewrite= importRewrite;
 		}
@@ -1179,55 +1173,42 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		public abstract void updateNode() throws JavaModelException;
 		
 		protected final void reshuffleElements() {
-			List paramguments= getParamguments();
-			ASTNode[] nodes= (ASTNode[]) paramguments.toArray(new ASTNode[paramguments.size()]);
+			if (isOrderSameAsInitial())
+				return;
 			
-			// remove surplus nodes in rewrite (from end):
-			deleteExcessiveElements(nodes);
-			
-			List nonDeletedInfos= getNotDeletedInfos();
-			ASTNode[] newPermutation= new ASTNode[nonDeletedInfos.size()];
-			
-			// fill newPermutation with new / copied nodes:
-			for (int i=0; i < newPermutation.length; i++) {
-				ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
-				
+			ListRewrite listRewrite= getParamgumentsRewrite();
+			List nodes= listRewrite.getRewrittenList();
+			List newNodes= new ArrayList();
+			for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+				ParameterInfo info= (ParameterInfo) iter.next();
+				if (info.isDeleted())
+					continue;
 				if (info.isAdded()) {
-					newPermutation[i]= createNewParamgument(info);
-				} else if (info.getOldIndex() != i) {
-					if (fRewrite.isReplaced(nodes[info.getOldIndex()])) // if actual argument already changed ...
-						newPermutation[i]= fRewrite.getReplacingNode(nodes[info.getOldIndex()]);
-				 	else
-						newPermutation[i]= fRewrite.createCopyTarget(nodes[info.getOldIndex()]);
+					newNodes.add(createNewParamgument(info));
 				} else {
-					newPermutation[i]= nodes[i];
+					ASTNode oldNode= (ASTNode) nodes.get(info.getOldIndex());
+					ASTNode movedNode= fRewrite.createMoveTarget(oldNode); //node must be one of ast
+					newNodes.add(movedNode);
 				}
 			}
 			
-			// replace changing nodes with the ones from newPermutation:
-			for (int i= 0; i < Math.min(nodes.length, newPermutation.length); i++) {
-				if (nodes[i] != newPermutation[i])
-					fRewrite.replace(nodes[i], newPermutation[i], null);
+			Iterator nodesIter= nodes.iterator();
+			Iterator newIter= newNodes.iterator();
+			while (nodesIter.hasNext() && newIter.hasNext()) {
+				ASTNode node= (ASTNode) nodesIter.next();
+				ASTNode newNode= (ASTNode) newIter.next();
+				listRewrite.replace(node, newNode, null);
 			}
-			
-			// add fresh nodes at end:
-			for (int i= nodes.length; i < newPermutation.length; i++) {
-				ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
-				if (info.isAdded()){
-					//TODO: Bug 54362: m() -> m(int) adds parameter twice!
-					ASTNode newElement= createNewParamgument(info);
-					paramguments.add(i, newElement);
-					fRewrite.markAsInserted(newElement);
-				} else {
-					paramguments.add(i, newPermutation[i]);
-					fRewrite.markAsInserted(newPermutation[i]);
-				}	
+			while (nodesIter.hasNext()) {
+				listRewrite.remove((ASTNode) nodesIter.next(), null);
+			}
+			while (newIter.hasNext()) {
+				listRewrite.insertLast((ASTNode) newIter.next(), null);
 			}
 		}
 		
-		/** @return List of parameters or arguments */
-		protected abstract List getParamguments();
-
+		protected abstract ListRewrite getParamgumentsRewrite();
+		
 		protected final void changeParamguments() {
 			for (Iterator iter= getParameterInfos().iterator(); iter.hasNext();) {
 				ParameterInfo info= (ParameterInfo) iter.next();
@@ -1298,7 +1279,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		/** isReferenceNode(fNode) */
 		private ASTNode fNode;
 
-		protected ReferenceUpdate(ASTNode node, OldASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
+		protected ReferenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
 			super(rewrite, importRewrite);
 			fNode= node; //holds: Assert.isTrue(isReferenceNode(node));
 		}
@@ -1326,6 +1307,25 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				return ((SuperConstructorInvocation) fNode).arguments();
 				
 			return new ArrayList(0);
+		}
+		
+		protected ListRewrite getParamgumentsRewrite() {
+			if (fNode instanceof MethodInvocation)	
+				return fRewrite.getListRewrite(fNode, MethodInvocation.ARGUMENTS_PROPERTY);
+				
+			if (fNode instanceof SuperMethodInvocation)	
+				return fRewrite.getListRewrite(fNode, SuperMethodInvocation.ARGUMENTS_PROPERTY);
+				
+			if (fNode instanceof ClassInstanceCreation)	
+				return fRewrite.getListRewrite(fNode, ClassInstanceCreation.ARGUMENTS_PROPERTY);
+				
+			if (fNode instanceof ConstructorInvocation)	
+				return fRewrite.getListRewrite(fNode, ConstructorInvocation.ARGUMENTS_PROPERTY);
+				
+			if (fNode instanceof SuperConstructorInvocation)	
+				return fRewrite.getListRewrite(fNode, SuperConstructorInvocation.ARGUMENTS_PROPERTY);
+			
+			return null;
 		}
 		
 		protected ASTNode createNewParamgument(ParameterInfo info) {
@@ -1400,7 +1400,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private MethodDeclaration fMethDecl;
 		private RefactoringStatus fResult;
 
-		protected DeclarationUpdate(MethodDeclaration decl, OldASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
+		protected DeclarationUpdate(MethodDeclaration decl, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
 			super(rewrite, importRewrite);
 			fMethDecl= decl;
 			fResult= result;
@@ -1428,6 +1428,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		protected List getParamguments() {
 			return fMethDecl.parameters();
 		}
+		
+		protected ListRewrite getParamgumentsRewrite() {
+			return fRewrite.getListRewrite(fMethDecl, MethodDeclaration.PARAMETERS_PROPERTY);
+		}
 
 		protected void changeParamgumentName(ParameterInfo info) {
 			SingleVariableDeclaration param= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
@@ -1439,8 +1443,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			SimpleName[] paramOccurrences= analyzer.getReferenceAndDeclarationNodes(); // @param tags are updated in changeJavaDocTags()
 			for (int j= 0; j < paramOccurrences.length; j++) {
 				SimpleName occurence= paramOccurrences[j];
-				SimpleName newName= occurence.getAST().newSimpleName(info.getNewName());
-				fRewrite.replace(occurence, newName, null);
+				fRewrite.set(occurence, SimpleName.IDENTIFIER_PROPERTY, info.getNewName(), null);
 			}
 		}
 		
@@ -1489,7 +1492,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (info.isDeleted())
 					removeExceptionFromNodeList(info, fMethDecl.thrownExceptions());
 				else
-					addExceptionToNodeList(info, fMethDecl.thrownExceptions());
+					addExceptionToNodeList(info, fRewrite.getListRewrite(fMethDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY));
 			}
 		}
 		
@@ -1513,9 +1516,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			}
 		}
 	
-		private void addExceptionToNodeList(ExceptionInfo exceptionInfo, List exceptionsNodeList) {
+		private void addExceptionToNodeList(ExceptionInfo exceptionInfo, ListRewrite exceptionListRewrite) {
 			String fullyQualified= JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType());
-			for (Iterator iter= exceptionsNodeList.iterator(); iter.hasNext(); ) {
+			for (Iterator iter= exceptionListRewrite.getOriginalList().iterator(); iter.hasNext(); ) {
 				Name exName= (Name) iter.next();
 				//XXX: existing superclasses of the added exception are redundant and could be removed
 				ITypeBinding typeBinding= exName.resolveTypeBinding();
@@ -1526,8 +1529,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			}
 			String simple= fImportRewrite.addImport(JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType()));
 			ASTNode exNode= fRewrite.createStringPlaceholder(simple, ASTNode.SIMPLE_NAME);
-			exceptionsNodeList.add(exNode);
-			fRewrite.markAsInserted(exNode);
+			exceptionListRewrite.insertLast(exNode, null);
 		}
 		
 		private void changeJavadocTags() throws JavaModelException {
@@ -1822,7 +1824,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		/** instanceof MemberRef || MethodRef */
 		private ASTNode fNode;
 
-		protected DocReferenceUpdate(ASTNode node, OldASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
+		protected DocReferenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
 			super(rewrite, importRewrite);
 			fNode= node;
 		}
@@ -1844,7 +1846,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			MethodRefParameter newP= fRewrite.getAST().newMethodRefParameter();
 			
 			// only add name iff first parameter already has a name:
-			List parameters= getParamguments();
+			List parameters= getParamgumentsRewrite().getOriginalList();
 			if (parameters.size() > 0)
 				if (((MethodRefParameter) parameters.get(0)).getName() != null)
 					newP.setName(fRewrite.getAST().newSimpleName(info.getNewName()));
@@ -1863,25 +1865,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return null;	
 		}
 		
-		/** @return {@inheritDoc} (element type: MethodRefParameter) */
-		protected List getParamguments() {
-			if (fNode instanceof MethodRef)
-				return ((MethodRef) fNode).parameters();
-			
-			return new ArrayList(0); // (fNode instanceof MemberRef) or error
+		protected ListRewrite getParamgumentsRewrite() {
+			return fRewrite.getListRewrite(fNode, MethodRef.PARAMETERS_PROPERTY);
 		}
-		
+
 		protected void changeParamgumentName(ParameterInfo info) {
 			if (! (fNode instanceof MethodRef))
 				return;
 
 			MethodRefParameter oldParam= (MethodRefParameter) ((MethodRef) fNode).parameters().get(info.getOldIndex());
 			SimpleName oldParamName= oldParam.getName();
-			if (oldParamName == null)
-				return;
-			
-			SimpleName newName= oldParamName.getAST().newSimpleName(info.getNewName());
-			fRewrite.replace(oldParamName, newName, null);
+			if (oldParamName != null)
+				fRewrite.set(oldParamName, SimpleName.IDENTIFIER_PROPERTY, info.getNewName(), null);
 		}
 		
 		protected void changeParamgumentType(ParameterInfo info) {
@@ -1896,7 +1891,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	class NullOccurrenceUpdate extends OccurrenceUpdate {
 		private ASTNode fNode;
 		private RefactoringStatus fResult;
-		protected NullOccurrenceUpdate(ASTNode node, OldASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
+		protected NullOccurrenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
 			super(rewrite, importRewrite);
 			fNode= node;
 			fResult= result;
@@ -1911,6 +1906,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 		protected List getParamguments() {
 			return new ArrayList(0);
+		}
+		protected ListRewrite getParamgumentsRewrite() {
+			return null;
 		}
 		protected ASTNode createNewParamgument(ParameterInfo info) {
 			return null;
