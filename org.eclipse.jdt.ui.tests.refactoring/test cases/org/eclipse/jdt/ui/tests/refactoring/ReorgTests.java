@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 
@@ -458,7 +458,7 @@ public class ReorgTests extends RefactoringTest {
 		}
 	}
 	
-	private static class MockCopyQueries implements ICopyQueries{
+	private static class MockCopyQueries implements INewNameQueries{
 		public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu) {
 			return null;
 		}
