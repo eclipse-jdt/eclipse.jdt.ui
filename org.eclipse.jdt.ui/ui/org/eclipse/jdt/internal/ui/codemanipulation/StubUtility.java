@@ -406,7 +406,8 @@ public class StubUtility {
 		for (int i= allMethods.size() - 1; i >= 0; i--) {
 			IMethod curr= (IMethod) allMethods.get(i);
 			if (Flags.isAbstract(curr.getFlags()) && !type.equals(curr.getDeclaringType())) {
-				String newStub= genStub(type, curr, imports);
+				// implement all abstract methods
+				String newStub= genStub(type, curr, false, true, imports);
 				newMethods.add(newStub);
 			}
 		}
@@ -420,8 +421,11 @@ public class StubUtility {
 				// binary interfaces can contain static initializers (variable intializations)
 				// 1G4CKUS
 				if (!Flags.isStatic(curr.getFlags())) {
-					if (findMethod(curr, allMethods) == null) {
-						String newStub= genStub(type, curr, imports);
+					IMethod impl= findMethod(curr, allMethods);
+					if (impl == null || curr.getExceptionTypes().length < impl.getExceptionTypes().length) {
+						// implement an interface method when it does not exist in the hierarchy
+						// or when it throws less exceptions that the implemented
+						String newStub= genStub(type, curr, false, true, imports);
 						newMethods.add(newStub);
 						allMethods.add(curr);
 					}
@@ -429,7 +433,6 @@ public class StubUtility {
 			}
 		}
 	}
-
 
 	/**
 	 * Resolves a type name in the context of the declaring type.
@@ -564,7 +567,7 @@ public class StubUtility {
 							result++;
 							blanks= 0;
 							break;
-						case	' ':
+						case ' ':
 							blanks++;
 							if (blanks == tabWidth) {
 								result++;
