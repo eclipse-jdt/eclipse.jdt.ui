@@ -268,8 +268,6 @@ public class ASTNodes {
 			return ((AbstractTypeDeclaration)node).bodyDeclarations();
 		} else if (node instanceof AnonymousClassDeclaration) {
 			return ((AnonymousClassDeclaration)node).bodyDeclarations();
-		} else if (node instanceof EnumConstantDeclaration) {
-			return ((EnumConstantDeclaration)node).bodyDeclarations();
 		}
 		// should not happen.
 		Assert.isTrue(false); 
@@ -281,8 +279,6 @@ public class ASTNodes {
 			return ((AbstractTypeDeclaration)node).getBodyDeclarationsProperty();
 		} else if (node instanceof AnonymousClassDeclaration) {
 			return AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
-		} else if (node instanceof EnumConstantDeclaration) {
-			return EnumConstantDeclaration.BODY_DECLARATIONS_PROPERTY;
 		}
 		// should not happen.
 		Assert.isTrue(false); 
