@@ -21,7 +21,8 @@
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.core.boot"/>
+	  <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
+	  <import plugin="org.eclipse.core.boot"/>
       <import plugin="org.eclipse.debug.core"/>
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
