@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.SWT;
@@ -19,6 +21,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
@@ -33,7 +37,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IMember;
@@ -44,14 +47,14 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
-
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
 public class PullUpInputPage extends UserInputWizardPage {
 	
@@ -198,6 +201,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 		composite.setLayout(layout);
 		
 		createHierarchyTreeComposite(composite);
+		
 		createSourceViewer(composite);
 		
 		composite.setWeights(new int[]{50, 50});
@@ -251,8 +255,23 @@ public class PullUpInputPage extends UserInputWizardPage {
 		fSourceViewer.setEditable(false);
 		fSourceViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));			
 	}
+
+	private void createHierarchyTreeComposite(final SashForm composite) {
+		try {
+			IRunnableWithProgress op= new IRunnableWithProgress() {
+				public void run(IProgressMonitor pm) throws InvocationTargetException {
+					createHierarchyTreeComposite0(composite, pm);
+				}
+			};
+			new ProgressMonitorDialog(getShell()).run(false, false, op);
+		} catch(InvocationTargetException e) {
+			ExceptionHandler.handle(e, getShell(), "Pull Up", "Unexpected exception. See log for details.");
+		} catch(InterruptedException e) {
+			Assert.isTrue(false);//not cancellable
+		}
+	}
 	
-	private void createHierarchyTreeComposite(Composite parent) {
+	private void createHierarchyTreeComposite0(Composite parent, IProgressMonitor pm) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		GridLayout layout= new GridLayout();
@@ -266,10 +285,10 @@ public class PullUpInputPage extends UserInputWizardPage {
 		label.setText("Type hierarchy");
 		label.setLayoutData(new GridData());
 		
-		fTreeViewerViewer= createTreeViewer(composite);
+		fTreeViewerViewer= createTreeViewer(composite, pm);
 	}
 
-	private CheckboxTreeViewer createTreeViewer(Composite composite) {
+	private CheckboxTreeViewer createTreeViewer(Composite composite, IProgressMonitor pm) {
 		Tree tree= new Tree(composite, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 		final CheckboxTreeViewer treeViever= new PullUpTreeViewer(tree);
@@ -280,7 +299,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 		//XXX pm
 		try{
 			fMarkedMethods.addAll(Arrays.asList(getPullUpMethodsRefactoring().getElementsToPullUp()));
-			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements(new NullProgressMonitor());
+			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements(pm);
 			ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getSuperTypeHierarchy(new NullProgressMonitor());
 			treeViever.addFilter(new PullUpFilter(hierarchy, matchingMethods));	
 			treeViever.setContentProvider(new PullUpHierarchyContentProvider(matchingMethods));
