@@ -25,7 +25,9 @@ import org.eclipse.jdt.core.Signature;
  * Java elements.
  */
 public class Binding2JavaModel {
-
+	
+	private Binding2JavaModel(){}
+	
 	/**
 	 * Converts the given <code>ReferenceBinding</code> into a <code>IType</code>
 	 * using the classpath defined by the given Java project. Returns <code>null</code>
@@ -51,7 +53,7 @@ public class Binding2JavaModel {
 
 	/**
 	 * Finds the given <code>MethodBinding</code> in the given <code>IType</code>. Returns
-	 * <code>null</code> if the type doesn't contains a corresponding method.
+	 * <code>null</code> if the type doesn't contain a corresponding method.
 	 */
 	public static IMethod find(IMethodBinding method, IType type) throws JavaModelException {
 		IMethod[] candidates= type.getMethods();
