@@ -9,7 +9,7 @@ package org.eclipse.jdt.internal.ui;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdapterFactory;
 
-import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.ui.IPersistableElement;import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import org.eclipse.search.ui.ISearchPageScoreComputer;
@@ -30,13 +30,13 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 		IResource.class,
 		ISearchPageScoreComputer.class,
 		IWorkbenchAdapter.class,
-		IResourceLocator.class
+		IResourceLocator.class,
+		IPersistableElement.class
 	};
 	
 	private ISearchPageScoreComputer fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
 	private static IResourceLocator fgResourceLocator= new ResourceLocator();
 	private static JavaWorkbenchAdapter fgJavaWorkbenchAdapter= new JavaWorkbenchAdapter();
- 
 	
 	public Class[] getAdapterList() {
 		return PROPERTIES;
@@ -56,8 +56,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 			return fgJavaWorkbenchAdapter;
 		} else if (IResourceLocator.class.equals(key)) {
 			return fgResourceLocator;
-		}
-		
+		} else if (IPersistableElement.class.equals(key)) 
+			return new PersistableJavaElementFactory(java);
 		return null;
 	}
 	

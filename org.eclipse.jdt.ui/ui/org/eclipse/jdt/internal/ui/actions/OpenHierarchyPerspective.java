@@ -1,10 +1,9 @@
-package org.eclipse.jdt.internal.ui.actions;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jface.action.Action;import org.eclipse.ui.IPerspectiveDescriptor;import org.eclipse.ui.IPerspectiveRegistry;import org.eclipse.ui.PlatformUI;
-public class OpenHierarchyPerspective extends Action {	private IType fType;	private static IPerspectiveRegistry fgRegistry;	
-	public OpenHierarchyPerspective(IType type) {		super("Open Hierarchy Perspective");		fType= type;	}	
+package org.eclipse.jdt.internal.ui.actions;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jface.action.Action;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IPerspectiveDescriptor;import org.eclipse.ui.IPerspectiveRegistry;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.WorkbenchException;
+public class OpenHierarchyPerspective extends Action {	private IType[] fTypes;	private IWorkbenchWindow fWindow;	private static IPerspectiveRegistry fgRegistry;	private static String fgMessage= "Select the element to be used as input";
+	public OpenHierarchyPerspective(IWorkbenchWindow window, IType[] types) {		super("Open Hierarchy Perspective");		fTypes= types;		fWindow= window;	}	
 	/**
 	 * @see Action#run()
 	 */
 	public void run() {		if (fgRegistry == null)			fgRegistry = PlatformUI.getWorkbench().getPerspectiveRegistry();
-		IPerspectiveDescriptor pd= fgRegistry.findPerspectiveWithId(JavaUI.ID_HIERARCHYPERSPECTIVE);		if (pd == null)			System.out.println("perspective not found");			}
-
+		IPerspectiveDescriptor pd= fgRegistry.findPerspectiveWithId(JavaUI.ID_HIERARCHYPERSPECTIVE);		if (pd == null)			System.out.println("perspective not found");		IType input= null;		if (fTypes.length > 1) {			input= selectType(fTypes, fWindow.getShell(), "Select Type", fgMessage);		} else {			input= fTypes[0];		}		try {			fWindow.getWorkbench().openWorkbenchWindow(pd.getId(), input);		} catch (WorkbenchException e) {			/*MessageDialog.openError(getWindow().getShell(),				WINDOW_PROBLEMS_TITLE,				e.getMessage());			*/		}	}		/**	 * Shows a dialog to selecting an ambigous source reference.	 * Utility method that can be called by subclassers.	 */	protected IType selectType(IType[] types, Shell shell, String title, String message) {				int flags= (JavaElementLabelProvider.SHOW_DEFAULT);								ElementListSelectionDialog d= new ElementListSelectionDialog(shell, title, null, new JavaElementLabelProvider(flags), true, false);		d.setMessage(message);		if (d.open(types, null) == d.OK) {			Object[] elements= d.getResult();			if (elements != null && elements.length == 1) {				return ((IType)elements[0]);			}		}		return null;	}
 }
