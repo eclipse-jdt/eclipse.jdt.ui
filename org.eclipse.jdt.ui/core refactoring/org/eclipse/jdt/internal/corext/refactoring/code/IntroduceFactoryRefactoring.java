@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
@@ -195,10 +196,15 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	private CompilationUnit fFactoryCU;
 
+	/**
+	 * 
+	 */
+	private int fConstructorVisibility= Modifier.PRIVATE;
+
 	public static boolean isAvailable(IMethod method) throws JavaModelException {
 		return Checks.isAvailable(method) && method.isConstructor();
 	}
-	
+
 	public static IntroduceFactoryRefactoring create(ICompilationUnit cu,
 													 int selectionStart, int selectionLength,
 													 CodeGenerationSettings settings) {
@@ -328,7 +334,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.checkingActivation"), 1); //$NON-NLS-1$
 
 			if (!fCUHandle.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.syntax_error")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.syntaxError")); //$NON-NLS-1$
 
 			return checkSelection(new SubProgressMonitor(pm, 1));
 		} catch (CoreException e) {
@@ -347,13 +353,18 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	private ICompilationUnit[] collectAffectedUnits(SearchResultGroup[] searchHits) {
 		Collection	result= new ArrayList();
+		boolean hitInFactoryClass= false;
 
 		for(int i=0; i < searchHits.length; i++) {
 			SearchResultGroup	rg=  searchHits[i];
 			ICompilationUnit	icu= rg.getCompilationUnit();
 
 			result.add(icu);
+			if (icu.equals(fFactoryUnitHandle))
+				hitInFactoryClass= true;
 		}
+		if (!hitInFactoryClass)
+			result.add(fFactoryUnitHandle);
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
@@ -621,6 +632,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			ASTNode		movedArg= unitRewriter.createMove(actualCtorArg);
 
 			actualFactoryArgs.add(movedArg);
+//			unitRewriter.createMove(actualCtorArg);
+//			ASTNode		rewrittenArg= rewriteArgument(actualCtorArg);
+//			actualFactoryArgs.add(rewrittenArg);
 		}
 
 		unitRewriter.markAsReplaced(ctorCall, factoryMethodCall, gd);
@@ -647,6 +661,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		return fProtectConstructor && fCtorOwningClass != null;
 	}
 
+	static final int VISIBILITY_MASK= (Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE);
+
 	/**
 	 * Creates and adds the necessary change to make the constructor method protected.
 	 * Returns false iff the constructor didn't exist (i.e. was implicit)
@@ -658,11 +674,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	private boolean protectConstructor(CompilationUnit unitAST, ASTRewrite unitRewriter, GroupDescription declGD) {
 		MethodDeclaration constructor= (MethodDeclaration) unitAST.findDeclaringNode(fCtorBinding.getKey());
 
-		if (constructor == null)
+		// No need to rewrite the modifiers if the visibility is what we already want it to be.
+		if (constructor == null || (constructor.getModifiers() & VISIBILITY_MASK) == fConstructorVisibility)
 			return false;
 		unitRewriter.markAsReplaced(
 			constructor, ASTNodeConstants.MODIFIERS,
-			new Integer(ASTNodes.changeVisibility(constructor.getModifiers(), Modifier.PRIVATE)),
+			new Integer(ASTNodes.changeVisibility(constructor.getModifiers(), fConstructorVisibility)),
 			declGD);
 		return true;
 	}
@@ -675,12 +692,14 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param unitChange the CompilationUnitChange object for the compilation unit in question
 	 * @throws CoreException
 	 */
-	private void addAllChangesFor(SearchResultGroup rg, CompilationUnitChange unitChange) throws CoreException {
-		ICompilationUnit	unitHandle= rg.getCompilationUnit();
+	private boolean addAllChangesFor(SearchResultGroup rg, ICompilationUnit	unitHandle, CompilationUnitChange unitChange) throws CoreException {
+//		ICompilationUnit	unitHandle= rg.getCompilationUnit();
+		Assert.isTrue(rg == null || rg.getCompilationUnit() == unitHandle);
 		CompilationUnit		unit= getASTFor(unitHandle);
 		ASTRewrite			unitRewriter= new ASTRewrite(unit);
 		TextBuffer			buffer= null;
 		MultiTextEdit		root= new MultiTextEdit();
+		boolean				someChange= false;
 
 		try {
 			unitChange.setEdit(root);
@@ -693,20 +712,26 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 				createFactoryChange(unitRewriter, unit, factoryGD);
 				unitChange.addGroupDescription(factoryGD);
+				someChange= true;
 			}
 
 			// Now rewrite all the constructor calls to use the factory method
-			replaceConstructorCalls(rg, unit, unitRewriter, unitChange);
+			if (rg != null)
+				if (replaceConstructorCalls(rg, unit, unitRewriter, unitChange))
+					someChange= true;
 
 			// Finally, make the constructor private, if requested.
 			if (shouldProtectConstructor() && isConstructorUnit(unitHandle)) {
 				GroupDescription	declGD= new GroupDescription(RefactoringCoreMessages.getString("IntroduceFactory.protectConstructor")); //$NON-NLS-1$
 
-				if (protectConstructor(unit, unitRewriter, declGD))
+				if (protectConstructor(unit, unitRewriter, declGD)) {
 					unitChange.addGroupDescription(declGD);
+					someChange= true;
+				}
 			}
 
-			unitRewriter.rewriteNode(buffer, root);
+			if (someChange)
+				unitRewriter.rewriteNode(buffer, root);
 			// N.B.: Since the factory method always currently goes on the same
 			// class as the original constructor, no additional imports need to
 			// be created, so we don't need to call fImportRewriter.rewrite().
@@ -716,6 +741,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (buffer != null)
 				TextBuffer.release(buffer);
 		}
+		return someChange;
 	}
 
 	/**
@@ -748,13 +774,15 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param unitRewriter
 	 * @param gd the <code>GroupDescription</code> to associate with the changes
 	 * @throws JavaModelException
+	 * @return true iff at least one constructor call site was rewritten.
 	 */
-	private void replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit,
-										 ASTRewrite unitRewriter, CompilationUnitChange unitChange)
+	private boolean replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit,
+											ASTRewrite unitRewriter, CompilationUnitChange unitChange)
 	throws JavaModelException {
 		Assert.isTrue(ASTCreator.getCu(unit).equals(rg.getCompilationUnit()));
 		SearchResult[]	hits= rg.getSearchResults();
 		AST	ctorCallAST= unit.getAST();
+		boolean someCallPatched= false;
 
 		for(int i=0; i < hits.length; i++) {
 			ClassInstanceCreation	creation= getCtorCallAt(hits[i].getStart(), hits[i].getEnd(), unit);
@@ -764,8 +792,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 				createFactoryMethodCall(ctorCallAST, creation, unitRewriter, gd);
 				unitChange.addGroupDescription(gd);
+				someCallPatched= true;
 			}
 		}
+		return someCallPatched;
 	}
 
 	/**
@@ -817,11 +847,16 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
 					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
 						new Object[] { expr.toString(), unitHandle.getElementName() })));
+		} else if (node instanceof SimpleName && node.getParent() instanceof MethodDeclaration) {
+			// We seem to have been given a hit for an implicit call to the base-class constructor.
+			// Do nothing with this (implicit) call, but have to make sure we make the derived class
+			// doesn't lose access to the base-class constructor (so make it 'protected', not 'private').
+			fConstructorVisibility= Modifier.PROTECTED;
+			return null;
 		} else
 			throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
 				RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
-					new Object[] {	node.getClass().getName() + "('" + node.toString() + "')",
-									unitHandle.getElementName() }))); //$NON-NLS-1$ //$NON-NLS-2$
+					new Object[] {	node.getClass().getName() + "('" + node.toString() + "')", unitHandle.getElementName() }))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -845,6 +880,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		int	idx= ASTNodes.getInsertionIndex(fFactoryMethod, methodDeclList);
 
+		if (idx < 0) idx= 0; // Guard against bug in getInsertionIndex()
 		methodDeclList.add(idx, fFactoryMethod);
 		unitRewriter.markAsInserted(fFactoryMethod, gd);
 	}
@@ -857,14 +893,32 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		CompositeChange	topLevelChange= new CompositeChange(RefactoringCoreMessages.getString("IntroduceFactory.topLevelChangeLabel") + fCtorBinding.getName()); //$NON-NLS-1$
 
 		try {
+			boolean hitInFactoryClass= false;
+			boolean hitInCtorClass= false;
 			for(int i=0; i < fAllCallsTo.length; i++) {
 				SearchResultGroup		rg= fAllCallsTo[i];
 				ICompilationUnit		unitHandle= rg.getCompilationUnit();
 				CompilationUnitChange	cuChange= new CompilationUnitChange(getName(), unitHandle);
 
-				addAllChangesFor(rg, cuChange);
-				topLevelChange.add(cuChange);
+				if (addAllChangesFor(rg, unitHandle, cuChange))
+					topLevelChange.add(cuChange);
+
+				if (unitHandle.equals(fFactoryUnitHandle))
+					hitInFactoryClass= true;
+				if (unitHandle.equals(ASTCreator.getCu(fCtorOwningClass)))
+					hitInCtorClass= true;
+
 				pm.worked(1);
+			}
+			if (!hitInFactoryClass) { // Handle factory class if no search hits there
+				CompilationUnitChange cuChange= new CompilationUnitChange(getName(), fFactoryUnitHandle);
+				addAllChangesFor(null, fFactoryUnitHandle, cuChange);
+				topLevelChange.add(cuChange);
+			}
+			if (!hitInCtorClass && !fFactoryUnitHandle.equals(ASTCreator.getCu(fCtorOwningClass))) { // Handle constructor-owning class if no search hits there
+				CompilationUnitChange cuChange= new CompilationUnitChange(getName(), ASTCreator.getCu(fCtorOwningClass));
+				addAllChangesFor(null, ASTCreator.getCu(fCtorOwningClass), cuChange);
+				topLevelChange.add(cuChange);
 			}
 			return topLevelChange;
 		} catch (JavaModelException e) {
@@ -955,5 +1009,61 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	public void setProtectConstructor(boolean protectConstructor) {
 		fProtectConstructor = protectConstructor;
+	}
+
+	/**
+	 * Returns the project on behalf of which this refactoring was invoked.
+	 */
+	public IJavaProject getProject() {
+		return fCUHandle.getJavaProject();
+	}
+
+	/**
+	 * Sets the class on which the generated factory method is to be placed.
+	 * @param type an <code>IType</code> referring to an existing class
+	 */
+	public RefactoringStatus setFactoryClass(String fullyQualifiedTypeName) {
+		IType factoryType;
+
+		try {
+			factoryType= getProject().findType(fullyQualifiedTypeName);
+
+			if (factoryType == null)
+				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("IntroduceFactory.noSuchClass", fullyQualifiedTypeName)); //$NON-NLS-1$
+
+			if (factoryType.isInterface())
+				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.cantPutFactoryMethodOnInterface")); //$NON-NLS-1$
+		} catch (JavaModelException e1) {
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.cantCheckForInterface")); //$NON-NLS-1$
+		}
+
+		ICompilationUnit	factoryUnitHandle= factoryType.getCompilationUnit();
+
+		if (factoryType.isBinary())
+			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.cantPutFactoryInBinaryClass")); //$NON-NLS-1$
+		else {
+			try {
+				if (!fFactoryUnitHandle.equals(factoryUnitHandle)) {
+					fFactoryCU= getASTFor(factoryUnitHandle);
+					fFactoryUnitHandle= factoryUnitHandle;
+				}
+				fFactoryOwningClass= ASTNodeSearchUtil.getTypeDeclarationNode(factoryType, fFactoryCU);
+
+				if (fFactoryOwningClass != fCtorOwningClass)
+					fConstructorVisibility= 0; // No such thing as Modifier.PACKAGE...
+
+			} catch (JavaModelException e) {
+				e.printStackTrace();
+			}
+			return new RefactoringStatus();
+		}
+	}
+
+	/**
+	 * Returns the name of the class on which the generated factory method is
+	 * to be placed.
+	 */
+	public String getFactoryClassName() {
+		return fFactoryOwningClass.resolveBinding().getQualifiedName();
 	}
 }

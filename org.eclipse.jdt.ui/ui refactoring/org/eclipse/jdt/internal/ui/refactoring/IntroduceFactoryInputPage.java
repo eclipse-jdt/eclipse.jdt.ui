@@ -10,10 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -46,11 +55,8 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 	}
 
 	private Text createTextInputField(Composite result) {
-		final Text	textField = new Text(result, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-		
+		final Text textField = new Text(result, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
 		textField.selectAll();
-		textField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
 		return textField;
 	}
 
@@ -63,36 +69,47 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		setControl(result);
 
 		GridLayout layout= new GridLayout();
-
-		layout.numColumns=      1;
-		layout.verticalSpacing= 8;
+		layout.numColumns= 2;
 		result.setLayout(layout);
 
-		Composite	topHalf= new Composite(result, SWT.NONE);
-		GridLayout	topLayout= new GridLayout();
-
-		topHalf.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		topLayout.numColumns=      2;
-		topLayout.verticalSpacing= 8;
-		topHalf.setLayout(topLayout);
-
-		Label		methNameLabel= new Label(topHalf, SWT.NONE);
-
-		fMethodName = createTextInputField(topHalf);
-
+		Label methNameLabel= new Label(result, SWT.NONE);
 		methNameLabel.setText(RefactoringMessages.getString("IntroduceFactoryInputPage.method_name")); //$NON-NLS-1$
+		
+		fMethodName= createTextInputField(result);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		fMethodName.setLayoutData(gd);
 		fMethodName.setText(getUseFactoryRefactoring().getNewMethodName());
 
-		final Button	protectCtorCB= new Button(result, SWT.CHECK);
+		final Label	factoryTypeLabel= new Label(result, SWT.NONE);
+		factoryTypeLabel.setText(RefactoringMessages.getString("IntroduceFactoryInputPage.factoryClassLabel")); //$NON-NLS-1$
+		
+		Composite inner= new Composite(result, SWT.NONE);
+		GridLayout innerLayout= new GridLayout();
+		innerLayout.marginHeight= 0; innerLayout.marginWidth= 0;
+		innerLayout.numColumns= 2;
+		inner.setLayout(innerLayout);
+		inner.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		final Text factoryTypeName= createTextInputField(inner);
+		factoryTypeName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		final Button browseTypes= new Button(inner, SWT.PUSH);
+		browseTypes.setText(RefactoringMessages.getString("IntroduceFactoryInputPage.browseLabel")); //$NON-NLS-1$
+		gd= new GridData();
+		gd.horizontalAlignment= GridData.END;
+		gd.heightHint = SWTUtil.getButtonHeightHint(browseTypes);
+		gd.widthHint = SWTUtil.getButtonWidthHint(browseTypes);		
+		browseTypes.setLayoutData(gd);
 
+		final Button protectCtorCB= new Button(result, SWT.CHECK);
 		protectCtorCB.setText(RefactoringMessages.getString("IntroduceFactoryInputPage.protectConstructorLabel")); //$NON-NLS-1$
-		protectCtorCB.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		protectCtorCB.setLayoutData(gd);
 
 		fMethodName.addModifyListener(new ModifyListener()
 			{
-				public void modifyText(ModifyEvent e)
-				{
+				public void modifyText(ModifyEvent e) {
 					RefactoringStatus	status= getUseFactoryRefactoring().setNewMethodName(fMethodName.getText());
 					boolean				nameOk= status.isOK();
 
@@ -111,6 +128,36 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 				}
 			});
 
+		factoryTypeName.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				RefactoringStatus	status;
+
+				status= getUseFactoryRefactoring().setFactoryClass(factoryTypeName.getText());
+
+				boolean	nameOk= status.isOK();
+
+				IntroduceFactoryInputPage.this.setPageComplete(nameOk);
+				IntroduceFactoryInputPage.this.setErrorMessage(nameOk ? "" : //$NON-NLS-1$
+															   status.getFirstMessage(RefactoringStatus.ERROR));
+			}
+		});
+		browseTypes.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				IType factoryType= chooseFactoryClass();
+
+				if (factoryType == null)
+					return;
+
+				RefactoringStatus status= getUseFactoryRefactoring().setFactoryClass(factoryType.getFullyQualifiedName());
+				boolean nameOk= status.isOK();
+
+				factoryTypeName.setText(factoryType.getFullyQualifiedName());
+				IntroduceFactoryInputPage.this.setPageComplete(nameOk);
+				IntroduceFactoryInputPage.this.setErrorMessage(nameOk ? "" : //$NON-NLS-1$
+															   status.getFirstMessage(RefactoringStatus.ERROR));
+			}
+		});
+
 		// Set up the initial state of the various dialog options.
 		if (getUseFactoryRefactoring().canProtectConstructor())
 			protectCtorCB.setSelection(true);
@@ -119,8 +166,29 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 			protectCtorCB.setEnabled(false);
 			getUseFactoryRefactoring().setProtectConstructor(false);
 		}
+		factoryTypeName.setText(getUseFactoryRefactoring().getFactoryClassName());
 
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_FACTORY_WIZARD_PAGE);		
+	}
+
+	private IType chooseFactoryClass() {
+		IJavaProject	proj= getUseFactoryRefactoring().getProject();
+
+		if (proj == null)
+			return null;
+
+		IJavaElement[] elements= new IJavaElement[] { proj };
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
+
+		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.CLASS, scope);
+
+		dialog.setTitle(RefactoringMessages.getString("IntroduceFactoryInputPage.chooseFactoryClass.title")); //$NON-NLS-1$
+		dialog.setMessage(RefactoringMessages.getString("IntroduceFactoryInputPage.chooseFactoryClass.message")); //$NON-NLS-1$
+
+		if (dialog.open() == Window.OK) {
+			return (IType) dialog.getFirstResult();
+		}
+		return null;
 	}
 
 	private IntroduceFactoryRefactoring getUseFactoryRefactoring() {
