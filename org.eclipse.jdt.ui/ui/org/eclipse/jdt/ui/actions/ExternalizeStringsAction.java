@@ -71,10 +71,6 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		setEnabled(checkEnabledEditor());
 	}
 	
-	/* package */ void editorStateChanged() {
-		setEnabled(checkEnabledEditor());
-	}
-	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -82,7 +78,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	}
 	
 	private boolean checkEnabledEditor() {
-		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
+		return fEditor != null && SelectionConverter.canOperateOn(fEditor);
 	}
 
 	/* (non-Javadoc)

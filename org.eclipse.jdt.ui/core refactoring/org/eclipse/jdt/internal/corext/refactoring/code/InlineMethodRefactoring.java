@@ -10,10 +10,16 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -33,6 +39,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -160,6 +167,9 @@ public class InlineMethodRefactoring extends Refactoring {
 		fSourceProvider.initialize();
 		fTargetProvider.initialize();
 		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(new SubProgressMonitor(pm, 1));
+		result.merge(Checks.validateModifiesFiles(getFilesToBeModified(units)));
+		if (result.hasFatalError())
+			return result;
 		IProgressMonitor sub= new SubProgressMonitor(pm, 1);
 		sub.beginTask("", units.length * 3);
 		for (int c= 0; c < units.length; c++) {
@@ -273,5 +283,28 @@ public class InlineMethodRefactoring extends Refactoring {
 			return node;
 		}
 		return null;
-	}		
+	}
+	
+	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {
+		List result= new ArrayList(units.length + 1);
+		IFile file;
+		for (int i= 0; i < units.length; i++) {
+			file= getFile(units[i]);
+			if (file != null)
+				result.add(file);
+		}
+		file= getFile(fSourceProvider.getCompilationUnit());
+		if (file != null && !result.contains(file))
+			result.add(file);
+		return (IFile[])result.toArray(new IFile[result.size()]);
+	}
+	
+	private IFile getFile(ICompilationUnit unit) {
+		if (unit.isWorkingCopy())
+			unit= (ICompilationUnit)unit.getOriginalElement();
+		IResource resource= unit.getResource();
+		if (resource != null && resource.getType() == IResource.FILE)
+			return (IFile)resource;
+		return null;
+	}	
 }

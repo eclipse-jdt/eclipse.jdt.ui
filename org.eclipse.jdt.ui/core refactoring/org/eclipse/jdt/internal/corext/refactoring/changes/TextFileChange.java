@@ -4,17 +4,20 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
 
@@ -51,6 +54,9 @@ public class TextFileChange extends TextChange  {
 		}
 		protected IChange createReverseChange(UndoMemento undo, int changeKind) {
 			return new UndoTextFileChange(getName(), fFile, changeKind, undo);
+		}
+		public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
+			return Checks.validateModifiesFiles(new IFile[] {fFile});
 		}
 		public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
 			if (!isActive()) {
@@ -163,6 +169,16 @@ public class TextFileChange extends TextChange  {
 	 */
 	public Object getModifiedLanguageElement(){
 		return fFile;
+	}
+	
+	/* non java-doc
+	 * Method declared in TextChange
+	 */
+	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
+		if (fSave) {
+			return Checks.validateModifiesFiles(new IFile[] {fFile});
+		}
+		return new RefactoringStatus();
 	}
 	
 	/* non java-doc

@@ -178,9 +178,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			return false;
 		if (type.getCompilationUnit() == null)
 			return false;
-		if (JavaModelUtil.isEditable(type.getCompilationUnit()))
-			return true;
-		return false;	
+		return true;
 	}
 	
 	private static boolean canEnableOn(IField[] fields) throws JavaModelException {

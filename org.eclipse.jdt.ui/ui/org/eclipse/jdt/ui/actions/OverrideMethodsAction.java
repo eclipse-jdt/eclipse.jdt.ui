@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -99,8 +100,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	protected void selectionChanged(IStructuredSelection selection) {
 		boolean enabled= false;
 		try {
-			IType selected= getSelectedType(selection);
-			enabled= (selected != null) && JavaModelUtil.isEditable(selected.getCompilationUnit());
+			enabled= getSelectedType(selection) != null;
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
@@ -116,7 +116,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		try {
 			IType type= getSelectedType(selection);
-			if (type == null) {
+			if (type == null || !ElementValidator.check(type, getShell(), getDialogTitle(), false)) {
 				return;
 			}
 			
@@ -137,10 +137,6 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 
 	//---- Java Editior --------------------------------------------------------------
 	
-	/* package */ void editorStateChanged() {
-		setEnabled(checkEnabledEditor());
-	}
-	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -148,7 +144,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	}
 	
 	private boolean checkEnabledEditor() {
-		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
+		return fEditor != null && SelectionConverter.canOperateOn(fEditor);
 	}
 
 	/* (non-Javadoc)
@@ -158,7 +154,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		try {
 			IType type= SelectionConverter.getTypeAtOffset(fEditor);
-			if (type != null)
+			if (type != null && ElementValidator.check(type, getShell(), getDialogTitle(), true))
 				run(shell, type, fEditor);
 			else
 				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$

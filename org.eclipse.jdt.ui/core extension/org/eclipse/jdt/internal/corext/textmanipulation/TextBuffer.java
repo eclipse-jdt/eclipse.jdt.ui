@@ -15,16 +15,17 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.TextManipulationMessages;
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * An implementation of a <code>TextBuffer</code> that is based on <code>ITextSelection</code>
@@ -315,6 +316,30 @@ public class TextBuffer {
 		replace(range.getOffset(), range.getLength(), text);
 	}
 
+	//---- Method to validate edit support
+	
+	/**
+	 * Verifies that the changes applied to this text buffer can be committed to
+	 * the underlying file system. For buffers allocated via the create methods
+	 * this method always succeeds. For buffer allocated via the
+	 * <code>acquire</code> method the <code>validateEdit</code> method provided
+	 * by <tt>IWorkspace</tt> is used to ensure that the content can be
+	 * committed to the disk.
+	 * 
+ 	 * @param context the <code>org.eclipse.swt.widgets.Shell</code> that is to
+ 	 *  be  used to    parent any dialogs with the user, or <code>null</code> if
+ 	 *  there  is no UI context (declared   as an <code>Object</code> to avoid
+ 	 *  any  direct references on the SWT component)
+ 	 * @return if <code>status.isOK()</code> returns <code>true</code> then the
+ 	 *  buffer  can be committed to the underlying file system. Otherwise it is
+ 	 *  not commitable
+ 	 * 
+	 * @see org.eclipse.core.resources.IWorkspace#validateEdit(org.eclipse.core.resorces.IFile[], java.lang.Object)
+	 */
+	public IStatus makeCommittable(Object context) {
+		return fgFactory.makeCommittable(this, context);
+	}
+	
 	//---- Special methods used by the <code>TextBufferEditor</code>
 	
 	/**

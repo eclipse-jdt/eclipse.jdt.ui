@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -95,7 +96,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
 		IMember[] members= getSelectedMembers(selection);
-		setEnabled(members != null && members.length > 0 && JavaModelUtil.isEditable(members[0].getCompilationUnit()));
+		setEnabled(members != null && members.length > 0);
 	}
 	
 	/* (non-Javadoc)
@@ -140,7 +141,8 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 				}
 			}
 			
-			run(workingCopyMembers);
+			if (ElementValidator.check(workingCopyMembers, getShell(), getDialogTitle(), false))
+				run(workingCopyMembers);
 			synchronized (workingCopyCU) {
 				workingCopyCU.reconcile();
 			}					
@@ -153,10 +155,6 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	
 	//---- Java Editior --------------------------------------------------------------
 	
-	/* package */ void editorStateChanged() {
-		setEnabled(checkEnabledEditor());
-	}
-	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
@@ -164,7 +162,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	}
 
 	private boolean checkEnabledEditor() {
-		return fEditor != null && !fEditor.isEditorInputReadOnly() && SelectionConverter.canOperateOn(fEditor);
+		return fEditor != null && SelectionConverter.canOperateOn(fEditor);
 	}	
 	
 	/* (non-Javadoc)
@@ -182,7 +180,9 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 					return;
 		 		}
 			}
-			run(new IMember[] { (IMember)element });
+			IMember[] members= new IMember[] { (IMember)element };
+			if (ElementValidator.checkValidateEdit(members, getShell(), getDialogTitle()))
+				run(members);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
 		}

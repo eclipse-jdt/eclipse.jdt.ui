@@ -97,7 +97,6 @@ public class GenerateActionGroup extends ActionGroup {
 	
 		fOverrideMethods= new OverrideMethodsAction(editor);
 		fOverrideMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.OVERRIDE_METHODS);
-		fOverrideMethods.editorStateChanged();
 		editor.setAction("OverrideMethods", fOverrideMethods); //$NON-NLS-1$
 		
 		fAddGetterSetter= new AddGetterSetterAction(editor);
@@ -106,11 +105,9 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(editor);
 		fAddUnimplementedConstructors.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_UNIMPLEMENTED_CONTRUCTORS);
-		fAddUnimplementedConstructors.editorStateChanged();
 		editor.setAction("AddUnimplementedConstructors", fAddUnimplementedConstructors); //$NON-NLS-1$		
 		
 		fAddJavaDocStub= new AddJavaDocStubAction(editor);
-		fAddJavaDocStub.editorStateChanged();
 		
 		fSurroundWithTryCatch= new SurroundWithTryCatchAction(editor);
 		fSurroundWithTryCatch.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);
@@ -120,7 +117,6 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fExternalizeStrings= new ExternalizeStringsAction(editor);
 		fExternalizeStrings.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTERNALIZE_STRINGS);
-		fExternalizeStrings.editorStateChanged();
 		editor.setAction("ExternalizeStrings", fExternalizeStrings); //$NON-NLS-1$		
 		
 		fConvertToWindows= new ConvertLineDelimitersAction(editor, "\r\n"); //$NON-NLS-1$
@@ -218,10 +214,6 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void editorStateChanged() {
 		Assert.isTrue(isEditorOwner());
-		fExternalizeStrings.editorStateChanged();
-		fOverrideMethods.editorStateChanged();
-		fAddUnimplementedConstructors.editorStateChanged();
-		fAddJavaDocStub.editorStateChanged();
 		
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=17709
 		fConvertToMac.update();

@@ -206,9 +206,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					IJavaElement elem= (IJavaElement) selected[i];
 					switch (elem.getElementType()) {
 						case IJavaElement.COMPILATION_UNIT:
-							return JavaModelUtil.isEditable((ICompilationUnit) elem);
+							return true;
 						case IJavaElement.IMPORT_CONTAINER:
-							return JavaModelUtil.isEditable((ICompilationUnit) elem.getParent());
+							return true;
 						case IJavaElement.PACKAGE_FRAGMENT:
 							IPackageFragment pack= (IPackageFragment) elem;
 							return pack.getCompilationUnits().length > 0;

@@ -6,9 +6,13 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -16,10 +20,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Resources;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -553,29 +554,14 @@ public class Checks {
 		return map;
 	}
 
-	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify) throws CoreException {
+	public static RefactoringStatus validateModifiesFiles(IFile[] filesToModify) {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < filesToModify.length; i++) {
-			IFile file= filesToModify[i];
-			if (!file.isSynchronized(IResource.DEPTH_INFINITE))
-				result.addFatalError(
-					RefactoringCoreMessages.getFormattedString(
-						"Checks.outOfSync", //$NON-NLS-1$
-						file.getFullPath().toString()));
-		}
-		if (result.hasFatalError())
-			return result;
-		IFile[] readOnlyFiles= getReadOnly(filesToModify);
-		Map oldMap= createModificationStampMap(readOnlyFiles);
-		IStatus status= ResourcesPlugin.getWorkspace().validateEdit(readOnlyFiles, null);
-		if (! status.isOK())
-			return RefactoringStatus.create(status);
-		Map newMap= createModificationStampMap(readOnlyFiles);
-		for (Iterator iter= oldMap.keySet().iterator(); iter.hasNext();) {
-			IFile file= (IFile) iter.next();
-			if (! oldMap.get(file).equals(newMap.get(file)))
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.validateModifiedFiles", file.getFullPath().toString())); //$NON-NLS-1$
-		}
+		IStatus status= Resources.checkInSync(filesToModify);
+		if (!status.isOK())
+			result.merge(RefactoringStatus.create(status));
+		status= Resources.makeCommittable(filesToModify, null);
+		if (!status.isOK())
+			result.merge(RefactoringStatus.create(status));
 		return result;
 	}
 

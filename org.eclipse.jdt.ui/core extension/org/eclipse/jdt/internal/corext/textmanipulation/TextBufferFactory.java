@@ -35,6 +35,8 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.util.IOCloser;
+import org.eclipse.jdt.internal.corext.util.Resources;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
@@ -106,7 +108,7 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 		}
 	}
 	
-	public void commitChanges(TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
+	public void commitChanges(final TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
 		final Value value= (Value)fBufferValueMap.get(buffer);
 		if (value == null)
 			return;
@@ -115,21 +117,9 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 		if (save) {
 			IWorkspaceRunnable action= new IWorkspaceRunnable() {
 				public void run(IProgressMonitor pm) throws CoreException {
-					IFile file= value.input.getFile();
-					if (file.isReadOnly()) {
-						long oldTimeStamp= file.getModificationStamp();
-						IStatus status= ResourcesPlugin.getWorkspace().validateEdit(new IFile[] {file}, null);
-						if (!status.isOK())
-							throw new ValidateEditException(status);
-						if (oldTimeStamp != file.getModificationStamp())
-							throw new ValidateEditException(
-								new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
-									IJavaStatusConstants.VALIDATE_EDIT_CHANGED_CONTENT,
-									TextManipulationMessages.getFormattedString(
-										"TextBufferFactory.fileModified", 
-										file.getFullPath().toString()), 
-									null));
-					}
+					IStatus status= makeCommittable(value, null);
+					if (!status.isOK())
+						throw new ValidateEditException(status);
 					fDocumentProvider.aboutToChange(value.input);
 					fDocumentProvider.saveDocument(pm, value.input, value.document, true);
 				}
@@ -206,6 +196,20 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 		IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
 			IJavaStatusConstants.INTERNAL_ERROR, TextManipulationMessages.getString("TextBufferFactory.bufferNotManaged"), null); //$NON-NLS-1$
 		throw new CoreException(s);
+	}
+	
+	public IStatus makeCommittable(TextBuffer buffer, Object context) {
+		Value value= (Value)fBufferValueMap.get(buffer);
+		if (value == null) {
+			// The buffer is not managed. So it can be modified
+			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$;
+		}
+		return makeCommittable(value, context);
+	}
+
+	private IStatus makeCommittable(Value value, Object context) {
+		IFile file= value.input.getFile();
+		return Resources.makeCommittable(file, context);
 	}
 }
 
