@@ -84,7 +84,7 @@ public class HistoryListAction extends Action {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			
 			Composite inner= new Composite(composite, SWT.NONE);
-			inner.setLayoutData(new GridData(GridData.FILL));
+			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 			LayoutUtil.doDefaultLayout(inner, new DialogField[] { fHistoryList }, true, 0, 0);
 			LayoutUtil.setHeigthHint(fHistoryList.getListControl(null), convertHeightInCharsToPixels(12));
@@ -137,6 +137,14 @@ public class HistoryListAction extends Action {
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
 			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.HISTORY_LIST_DIALOG);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.window.Window#create()
+		 */
+		public void create() {
+			setShellStyle(getShellStyle() | SWT.RESIZE);
+			super.create();
 		}
 
 	}
