@@ -128,23 +128,25 @@ public class LocalCorrectionsSubProcessor {
 		while (selectedNode != null && !(selectedNode instanceof Statement)) {
 			selectedNode= selectedNode.getParent();
 		}
-		if (selectedNode != null) {
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(cu, selectedNode.getStartPosition(), selectedNode.getLength(), settings, null);
-			refactoring.setSaveChanges(false);
-			if (refactoring.checkActivationBasics(astRoot, null).isOK()) {
-				String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.surroundwith.description"); //$NON-NLS-1$
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-				CUCorrectionProposal proposal= new CUCorrectionProposal(label, (CompilationUnitChange) refactoring.createChange(null), 4, image);
-				proposals.add(proposal);
-			}
+		if (selectedNode == null) {
+			return;
+		}
+			
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(cu, selectedNode.getStartPosition(), selectedNode.getLength(), settings, null);
+		refactoring.setSaveChanges(false);
+		if (refactoring.checkActivationBasics(astRoot, null).isOK()) {
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.surroundwith.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+			CUCorrectionProposal proposal= new CUCorrectionProposal(label, (CompilationUnitChange) refactoring.createChange(null), 4, image);
+			proposals.add(proposal);
 		}
 		
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 		if (decl == null) {
 			return;
 		}
-		ITypeBinding[] uncaughtExceptions= ExceptionAnalyzer.perform(decl, Selection.createFromStartLength(context.getOffset(), context.getLength()));
+		ITypeBinding[] uncaughtExceptions= ExceptionAnalyzer.perform(decl, Selection.createFromStartLength(selectedNode.getStartPosition(), selectedNode.getLength()));
 		
 		TryStatement surroundingTry= (TryStatement) ASTNodes.getParent(selectedNode, ASTNode.TRY_STATEMENT);
 		if (surroundingTry != null) {
