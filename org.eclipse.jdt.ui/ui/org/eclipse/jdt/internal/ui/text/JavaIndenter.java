@@ -1198,7 +1198,7 @@ public class JavaIndenter {
 	 * @since 3.1
 	 */
 	private String getCoreFormatterOption(String key) {
-		if (fProject == null || JavaCore.getJavaCore() == null)
+		if (fProject == null)
 			return JavaCore.getOption(key);
 		return fProject.getOption(key, true);
 	}
@@ -1412,7 +1412,7 @@ public class JavaIndenter {
 	private int prefBlockIndent() {
 		if (!isStandalone()) {
 			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BLOCK);
-			if (option.equals(DefaultCodeFormatterConstants.FALSE))
+			if (DefaultCodeFormatterConstants.FALSE.equals(option))
 				return 0;
 		}
 		
@@ -1431,7 +1431,7 @@ public class JavaIndenter {
 	private int prefTypeIndent() {
 		if (!isStandalone()) {
 			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER);
-			if (option.equals(DefaultCodeFormatterConstants.FALSE))
+			if (DefaultCodeFormatterConstants.FALSE.equals(option))
 				return 0;
 		}
 		
