@@ -206,6 +206,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_NLS_NEVER_TRANSLATE= createManaged(T_OBJ, IMG_OBJS_NLS_NEVER_TRANSLATE);
 	public static final ImageDescriptor DESC_OBJS_NLS_SKIP= createManaged(T_OBJ, IMG_OBJS_NLS_SKIP);
 	
+	public static final ImageDescriptor DESC_OBJS_LOCAL_VARIABLE= create(T_OBJ, "localvariable_obj.gif"); //$NON-NLS-1$
+	
 	public static final ImageDescriptor DESC_OVR_STATIC= create(T_OVR, "static_co.gif"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_FINAL= create(T_OVR, "final_co.gif"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ABSTRACT= create(T_OVR, "abstract_co.gif"); 					//$NON-NLS-1$

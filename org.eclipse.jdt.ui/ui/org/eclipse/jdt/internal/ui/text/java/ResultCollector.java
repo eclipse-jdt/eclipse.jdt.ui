@@ -159,7 +159,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 			buf.append("    "); //$NON-NLS-1$
 			buf.append(typeName);
 		}
-		JavaCompletionProposal proposal= createCompletion(start, end, new String(name), null, buf.toString(), relevance);
+		JavaCompletionProposal proposal= createCompletion(start, end, new String(name), JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE, buf.toString(), relevance);
 		proposal.setTriggerCharacters(VAR_TRIGGER);
 		fVariables.add(proposal);
 	}
