@@ -167,11 +167,14 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {		
 		try{
-			pm.beginTask("Preparing preview", 1);	
+			pm.beginTask("Preparing preview", 3);	
 			TextChange change= new CompilationUnitChange("Extract Temp", fCu);
 			addTempDeclaration(change);
+			pm.worked(1);
 			addImportIfNeeded(change);
+			pm.worked(1);
 			addReplaceExpressionWithTemp(change);
+			pm.worked(1);
 			return change;
 		} catch (CoreException e){
 			throw new JavaModelException(e);	
