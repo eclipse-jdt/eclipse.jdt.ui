@@ -23,9 +23,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.search.ui.IContextMenuConstants;
 import org.eclipse.search.ui.ISearchResultViewPart;
@@ -37,6 +37,18 @@ import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.search.ui.IContextMenuConstants;
+import org.eclipse.search.ui.ISearchResultViewPart;
+import org.eclipse.search.ui.SearchUI;
+import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+import org.eclipse.search.ui.text.Match;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	private NewSearchViewActionGroup fActionGroup;
@@ -79,8 +91,9 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		fActionGroup= new NewSearchViewActionGroup(part);
 	}
 	
-	public void showMatch(Object element, int offset, int length) throws PartInitException {
+	public void showMatch(Match match, int offset, int length) throws PartInitException {
 		IEditorPart editor= null;
+		Object element= match.getElement();
 		if (element instanceof IJavaElement) {
 			IJavaElement javaElement= (IJavaElement) element;
 			try {
@@ -145,7 +158,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		if (!isFlatLayout())
 			addGroupActions(tbm);
 	}
-	
+		
 	private void addGroupActions(IToolBarManager mgr) {
 		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fGroupProjectAction);
 		mgr.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fGroupPackageAction);
@@ -163,6 +176,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		fGroupTypeAction.setChecked(fCurrentGrouping == LevelTreeContentProvider.LEVEL_TYPE);
 	}
 
+
 	public void dispose() {
 		fActionGroup.dispose();
 		super.dispose();
@@ -178,20 +192,20 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 			fContentProvider.clear();
 	}
 
-	protected void configureViewer(StructuredViewer viewer) {
-		if (viewer instanceof TreeViewer) {
-			viewer.setSorter(new ViewerSorter());
-			viewer.setLabelProvider(new PostfixLabelProvider(this));
-			fContentProvider= new LevelTreeContentProvider((TreeViewer) viewer, fCurrentGrouping);
-			viewer.setContentProvider(fContentProvider);
-		} else {
-			viewer.setLabelProvider(new DelegatingLabelProvider(this, new JavaSearchResultLabelProvider()));
-			fContentProvider=new JavaSearchTableContentProvider((TableViewer) viewer);
-			viewer.setContentProvider(fContentProvider);
-			setSortOrder(fCurrentSortOrder);
-		}
+	protected void configureTableViewer(TableViewer viewer) {
+		viewer.setLabelProvider(new DelegatingLabelProvider(this, new JavaSearchResultLabelProvider()));
+		fContentProvider=new JavaSearchTableContentProvider(viewer);
+		viewer.setContentProvider(fContentProvider);
+		setSortOrder(fCurrentSortOrder);
 	}
 
+	protected void configureTreeViewer(AbstractTreeViewer viewer) {
+		viewer.setSorter(new ViewerSorter());
+		viewer.setLabelProvider(new PostfixLabelProvider(this));
+		fContentProvider= new LevelTreeContentProvider(viewer, fCurrentGrouping);
+		viewer.setContentProvider(fContentProvider);
+	}
+	
 	void setSortOrder(int order) {
 		fCurrentSortOrder= order;
 		StructuredViewer viewer= getViewer();

@@ -16,7 +16,8 @@ import junit.framework.TestSuite;
 public class SearchTest {
 	public static Test suite() {
 		TestSuite suite= new TestSuite("Java Search Tests"); //$NON-NLS-1$
-		suite.addTestSuite(WorkspaceScopeTest.class);
+		//suite.addTestSuite(WorkspaceScopeTest.class);
+		suite.addTest(WorkspaceReferenceTest.allTests());
 		return suite;
 	}
 }

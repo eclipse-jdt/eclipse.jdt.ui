@@ -46,6 +46,7 @@ public class JavaSearchQuery implements ISearchQuery {
 	private String fPattern;
 	private boolean fIsCaseSensitive;
 	private int fSearchFor;
+	private ISearchResult fResult;
 	
 	private JavaSearchQuery(IJavaSearchScope scope, String scopeDescription) {
 		fName= "Java Search Job";
@@ -84,8 +85,8 @@ public class JavaSearchQuery implements ISearchQuery {
 		fLimitTo= limitTo;
 	}
 
-	public IStatus run(IProgressMonitor monitor, ISearchResult result) {
-		JavaSearchResult textResult= (JavaSearchResult) result;
+	public IStatus run(IProgressMonitor monitor) {
+		JavaSearchResult textResult= (JavaSearchResult) getSearchResult();
 		textResult.removeAll();
 		// Also search working copies
 		SearchEngine engine= new SearchEngine(JavaUI.getSharedWorkingCopiesOnClasspath());
@@ -110,7 +111,7 @@ public class JavaSearchQuery implements ISearchQuery {
 	}
 
 
-	public String getName() {
+	public String getLabel() {
 		return fName;
 	}
 
@@ -187,5 +188,19 @@ public class JavaSearchQuery implements ISearchQuery {
 			return JavaPluginImages.DESC_OBJS_SEARCH_DECL;
 		else
 			return JavaPluginImages.DESC_OBJS_SEARCH_REF;
+	}
+
+	public boolean canRerun() {
+		return true;
+	}
+
+	public boolean canRunInBackground() {
+		return true;
+	}
+
+	public ISearchResult getSearchResult() {
+		if (fResult == null)
+			fResult= new JavaSearchResult(this);
+		return fResult;
 	}
 }

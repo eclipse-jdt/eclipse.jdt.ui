@@ -51,7 +51,7 @@ public class JavaSearchResult extends AbstractTextSearchResult {
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.ISearchCategory#getText(org.eclipse.search.core.basic.ITextSearchResult)
 	 */
-	public String getText() {
+	public String getLabel() {
 		int matchCount= getMatchCount();
 		String format= null;
 		if (matchCount == 1)
@@ -62,7 +62,7 @@ public class JavaSearchResult extends AbstractTextSearchResult {
 	}
 
 	public String getTooltip() {
-		return getText();
+		return getLabel();
 	}
 
 	public Match[] findContainedMatches(IEditorPart editor) {

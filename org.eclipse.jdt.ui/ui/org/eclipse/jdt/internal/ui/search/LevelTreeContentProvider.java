@@ -12,8 +12,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
  *  
  */
 public class LevelTreeContentProvider extends JavaSearchContentProvider implements ITreeContentProvider {
-	private TreeViewer fTreeViewer;
+	private AbstractTreeViewer fTreeViewer;
 	private Map fChildrenMap;
 	private StandardJavaElementContentProvider fContentProvider;
 	
@@ -50,7 +50,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 			return internalGetParent(element);
 		}
 	}
-	LevelTreeContentProvider(TreeViewer viewer, int level) {
+	LevelTreeContentProvider(AbstractTreeViewer viewer, int level) {
 		fTreeViewer= viewer;
 		fCurrentLevel= level;
 		fContentProvider= new FastJavaElementProvider();
@@ -169,9 +169,9 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	
 	public void setLevel(int level) {
 		fCurrentLevel= level;
-		fTreeViewer.getTree().setRedraw(false);
+		fTreeViewer.getControl().setRedraw(false);
 		initialize(fResult);
 		fTreeViewer.refresh();
-		fTreeViewer.getTree().setRedraw(true);
+		fTreeViewer.getControl().setRedraw(true);
 	}
 }

@@ -17,8 +17,8 @@ import java.util.Set;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.ISearchResultManagerListener;
+import org.eclipse.search.ui.IQueryListener;
+import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.Match;
 
@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.JavaCore;
  * @author Thomas Mäder
  *
  */
-public class SearchResultUpdater implements IElementChangedListener, ISearchResultManagerListener {
+public class SearchResultUpdater implements IElementChangedListener, IQueryListener {
 
 	JavaSearchResult fResult;
 	private static final int REMOVED_FLAGS= IJavaElementDelta.F_MOVED_TO | 
@@ -42,7 +42,7 @@ public class SearchResultUpdater implements IElementChangedListener, ISearchResu
 	
 	public SearchResultUpdater(JavaSearchResult result) {
 		fResult= result;
-		NewSearchUI.getSearchManager().addSearchResultListener(this);
+		NewSearchUI.addQueryListener(this);
 		JavaCore.addElementChangedListener(this);
 		// TODO make this work with resources
 	}
@@ -136,14 +136,14 @@ public class SearchResultUpdater implements IElementChangedListener, ISearchResu
 		}
 	}
 
-	public void searchResultAdded(ISearchResult search) {
+	public void queryAdded(ISearchQuery query) {
 		// don't care
 	}
 
-	public void searchResultRemoved(ISearchResult search) {
-		if (search.equals(fResult)) {
+	public void queryRemoved(ISearchQuery query) {
+		if (fResult.equals(query.getSearchResult())) {
 			JavaCore.removeElementChangedListener(this);
-			NewSearchUI.getSearchManager().removeSearchResultListener(this);
+			NewSearchUI.removeQueryListener(this);
 		}		
 	}
 

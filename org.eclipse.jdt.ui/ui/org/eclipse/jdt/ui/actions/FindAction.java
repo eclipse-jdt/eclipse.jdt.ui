@@ -56,7 +56,6 @@ import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchDescription;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
-import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResultCollector;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -327,9 +326,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 
 	private void performNewSearch(IJavaElement element) throws JavaModelException {
 		JavaSearchQuery job= createJob(element);
-		JavaSearchResult result= new JavaSearchResult(job);
 		NewSearchUI.activateSearchResultView();
-		NewSearchUI.runSearchInBackground(job, result);
+		NewSearchUI.runQuery(job);
 	}
 
 	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
