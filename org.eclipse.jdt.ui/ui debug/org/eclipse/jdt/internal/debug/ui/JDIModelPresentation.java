@@ -365,10 +365,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 				}
 				if (item instanceof IDisconnect) {
 					if (((IDisconnect) item).isDisconnected()) {
-						if (!(item instanceof ITerminate) || !((ITerminate) item).isTerminated()) {
-							label= DebugUIUtils.getResourceString(DISCONNECTED) + " " + label;
-							return label;
-						}
+						label= DebugUIUtils.getResourceString(DISCONNECTED) + " " + label;
+						return label;
 					}
 				}
 				return label;
