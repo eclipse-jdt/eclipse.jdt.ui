@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.IPageSite;
@@ -196,7 +197,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 
 	protected void configureTableViewer(TableViewer viewer) {
-		viewer.setLabelProvider(new DecoratingLabelProvider(new SortingLabelProvider(this), null));
+		viewer.setLabelProvider(new DecoratingLabelProvider(new SortingLabelProvider(this), PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider=new JavaSearchTableContentProvider(viewer);
 		viewer.setContentProvider(fContentProvider);
 		setSortOrder(fCurrentSortOrder);
@@ -204,7 +205,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 
 	protected void configureTreeViewer(TreeViewer viewer) {
 		viewer.setSorter(new ViewerSorter());
-		viewer.setLabelProvider(new DecoratingLabelProvider(new PostfixLabelProvider(this), null));
+		viewer.setLabelProvider(new DecoratingLabelProvider(new PostfixLabelProvider(this), PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider= new LevelTreeContentProvider(viewer, fCurrentGrouping);
 		viewer.setContentProvider(fContentProvider);
 	}
