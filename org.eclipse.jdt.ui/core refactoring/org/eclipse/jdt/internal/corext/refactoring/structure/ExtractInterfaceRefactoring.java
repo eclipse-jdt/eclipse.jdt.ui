@@ -17,11 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,6 +24,14 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -53,8 +56,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -78,9 +80,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -475,15 +474,26 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}
 	}
 
-	private String createExtractedInterfaceCUSource(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
-		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(getInputTypeCU(), true);			
-		String typeComment= CodeGeneration.getTypeComment(newCu, fNewInterfaceName, getLineSeperator());//$NON-NLS-1$
-		String compilationUnitContent = CodeGeneration.getCompilationUnitContent(newCu, typeComment, createInterfaceSource(cuNode), getLineSeperator());
-		if (compilationUnitContent == null)
-			compilationUnitContent= ""; //$NON-NLS-1$
-		newCu.getBuffer().setContents(compilationUnitContent);
-		addImportsToNewCu(newCu, pm, cuNode);
-		return formatCuSource(newCu.getSource());
+	private String createExtractedInterfaceCUSource(final ICompilationUnit unit, final IProgressMonitor monitor) throws CoreException {
+		Assert.isNotNull(unit);
+		Assert.isNotNull(monitor);
+		final String separator= getLineSeperator();
+		final CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(getInputTypeCU(), true);
+		final String typeComment= CodeGeneration.getTypeComment(unit, fNewInterfaceName, separator);//$NON-NLS-1$
+		final String block= createInterfaceSource(cuNode);
+		String content= CodeGeneration.getCompilationUnitContent(unit, typeComment, block, getLineSeperator());
+		if (content == null) {
+			final StringBuffer buffer= new StringBuffer();
+			if (!fInputType.getPackageFragment().isDefaultPackage()) {
+				buffer.append("package ").append(fInputType.getPackageFragment().getElementName()).append(';'); //$NON-NLS-1$
+			}
+			buffer.append(separator).append(separator);
+			buffer.append(block);
+			content= buffer.toString();
+		}
+		unit.getBuffer().setContents(content);
+		addImportsToNewCu(unit, monitor, cuNode);
+		return formatCuSource(unit.getSource());
 	}
 
 	private void addImportsToNewCu(ICompilationUnit newCu, IProgressMonitor pm, CompilationUnit cuNode) throws CoreException {
