@@ -13,7 +13,7 @@
    <element name="enablement">
       <annotation>
          <documentation>
-            A generic root element. The element can be used inside an extension point to define its enablement state.
+            A generic root element. The element can be used inside an extension point to define its enablement expression.
          </documentation>
       </annotation>
       <complexType>
@@ -27,6 +27,7 @@
             <element ref="adapt"/>
             <element ref="count"/>
             <element ref="iterate"/>
+            <element ref="equals"/>
          </sequence>
       </complexType>
    </element>
@@ -48,6 +49,7 @@
             <element ref="adapt"/>
             <element ref="count"/>
             <element ref="iterate"/>
+            <element ref="equals"/>
          </choice>
       </complexType>
    </element>
@@ -69,6 +71,7 @@
             <element ref="adapt"/>
             <element ref="count"/>
             <element ref="iterate"/>
+            <element ref="equals"/>
          </sequence>
       </complexType>
    </element>
@@ -90,6 +93,7 @@
             <element ref="adapt"/>
             <element ref="count"/>
             <element ref="iterate"/>
+            <element ref="equals"/>
          </sequence>
       </complexType>
    </element>
@@ -143,8 +147,44 @@
             <annotation>
                <documentation>
                   the expected value of the property. The test expression is supposed to return 
-                  EvaluationResult.TRUE if the property matches the value and EvaluationResult.FALSE
-                  otherwise.
+EvaluationResult.TRUE if the property matches the value and EvaluationResult.FALSE
+otherwise. The value sttribute is converted into a Java base type using the following
+rules:
+&lt;ul&gt;
+	&lt;li&gt;the string &amp;quot;true&amp;quot; is converted into Boolean.TRUE&lt;/li&gt;
+	&lt;li&gt;the string &amp;quot;false&amp;quot; is converted into Boolean.FALSE&lt;/li&gt;
+	&lt;li&gt;if the string contains a dot then the interpreter tries to convert
+	the value into a Float object. If this fails the string is treated as a
+	java.lang.String&lt;/li&gt;
+	&lt;li&gt;if the string only consists of numbers then the interpreter
+	converts the value in an Integer object.&lt;/li&gt;
+	&lt;li&gt;in all other cases the string is treated as a java.lang.String&lt;/li&gt;
+	&lt;li&gt;the conversion of the string into a Boolean, Float, or Integer can
+	be suppressed by surrounding the string with single quotes. For
+	example, the attribute value=&amp;quot;&apos;true&apos;&amp;quot; is converted into the
+	string &amp;quot;true&amp;quot;&lt;/li&gt;
+&lt;/ul&gt;
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="arg">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="value"/>
+         </appInfo>
+         <documentation>
+            This element is used to define additional arguments for the test expression
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="value" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the value of the argument. The value is converted into a Java base type using the 
+same rules as for the value attribute of the test expression.
                </documentation>
             </annotation>
          </attribute>
@@ -282,6 +322,29 @@
                   </enumeration>
                </restriction>
             </simpleType>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="equals">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="value"/>
+         </appInfo>
+         <documentation>
+            This element is used to perform an equals check of the object in focus. The expression returns
+            EvaluationResult.TRUE if the object is equal to the value provided by the attribute value. Otherwise
+            EvaluationResult.FALSE is returned.
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="value" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the operatand of the equals tests. The value provided as a string is converted into
+a Java base type using the same rules as for the value attribute of the test expression.
+               </documentation>
+            </annotation>
          </attribute>
       </complexType>
    </element>
