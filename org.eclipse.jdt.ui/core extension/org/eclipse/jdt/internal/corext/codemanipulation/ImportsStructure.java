@@ -413,7 +413,17 @@ public class ImportsStructure implements IImportsStructure {
 		IImportContainer container= fCompilationUnit.getImportContainer();
 		if (container.exists()) {
 			ISourceRange importSourceRange= container.getSourceRange();
-			return new TextRange(importSourceRange.getOffset(), importSourceRange.getLength());
+			int startPos= importSourceRange.getOffset();
+			int endPos= startPos + importSourceRange.getLength();
+			int nextLine= textBuffer.getLineOfOffset(endPos) + 1;
+			if (nextLine < textBuffer.getNumberOfLines()) {
+				int stopPos= textBuffer.getLineInformation(nextLine).getOffset();
+				// read to beginning of next character or beginning of next line
+				while (endPos < stopPos && Character.isWhitespace(textBuffer.getChar(endPos))) {
+					endPos++;
+				}
+			}
+			return new TextRange(startPos, endPos - startPos);
 		} else {
 			int start= getPackageStatementEndPos(textBuffer);
 			return new TextRange(start, 0);
@@ -488,12 +498,12 @@ public class ImportsStructure implements IImportsStructure {
 					buf.append(lineDelim);
 				}
 			}
-		} else {
-			// remove the line delimiter added in the end
-			int pos= buf.length() - lineDelim.length();
-			if (pos >= 0 && lineDelim.equals(buf.substring(pos))) {
-				buf.setLength(pos);
-			}
+//		} else {
+//			// remove the line delimiter added in the end
+//			int pos= buf.length() - lineDelim.length();
+//			if (pos >= 0 && lineDelim.equals(buf.substring(pos))) {
+//				buf.setLength(pos);
+//			}
 		}
 		fNumberOfImportsCreated= nCreated;
 		
