@@ -183,7 +183,7 @@ public class MethodStubsSelectionButtonGroup {
 					main.append("textui"); //$NON-NLS-1$
 					break;
 			}
-			main.append(".TestRunner.run(" + typeName + ".class);"); //$NON-NLS-1$ //$NON-NLS-2$
+			main.append(".TestRunner.run(" + typeName + ".suite());"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		main.append("}\n\n"); //$NON-NLS-1$
 		return main.toString();
