@@ -3661,6 +3661,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
 				if (message == null)
 					matches= finder.perform();
+			} else if (!fMarkMethodExitPoints) {
+				if (!fStickyOccurrenceAnnotations)
+					removeOccurrenceAnnotations();
+				return;
 			}
 		} else if (!fMarkExceptionOccurrences) {
 			if (!fStickyOccurrenceAnnotations)
