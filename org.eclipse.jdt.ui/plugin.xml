@@ -87,7 +87,6 @@
 	<wizard
 		id="org.eclipse.jdt.ui.wizards.NewPackageCreationWizard"
 		name="Java Package"
-		availableAsShortcut="false"
 		class="org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newpack_wiz.gif">
@@ -96,7 +95,6 @@
 	<wizard
 		id="org.eclipse.jdt.ui.wizards.NewClassCreationWizard"
 		name="Java Class"
-		availableAsShortcut="false"
 		class="org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newclass_wiz.gif">
@@ -105,7 +103,6 @@
 	<wizard 
 		id="org.eclipse.jdt.ui.wizards.NewInterfaceCreationWizard"
 		name="Java Interface"
-		availableAsShortcut="false"
 		class="org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newint_wiz.gif">
@@ -114,7 +111,6 @@
 	<wizard
 		id="org.eclipse.jdt.ui.wizards.NewSnippetCreationWizard"
 		name="Java Scrapbook Page"
-		availableAsShortcut="false"
 		class="org.eclipse.jdt.internal.ui.wizards.NewSnippetCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newsbook_wiz.gif">
