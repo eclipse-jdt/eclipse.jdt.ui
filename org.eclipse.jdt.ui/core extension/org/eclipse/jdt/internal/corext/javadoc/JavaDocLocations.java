@@ -104,22 +104,23 @@ public class JavaDocLocations {
 		return externalPath;
 	}
 
-	private static void setJavadocBaseLocation(IPath path, URL url, boolean save) {
-		boolean needsSave;
+	private static boolean setJavadocBaseLocation(IPath path, URL url, boolean save) {
+		boolean isModified;
 		if (url == null) {
 			Object old= getJavaDocLocations().remove(path);
-			needsSave= save && (old != null);
+			isModified= (old != null);
 		} else {
 			URL old= (URL) getJavaDocLocations().put(path, url);
-			needsSave= save && (old == null || !url.toExternalForm().equals(old.toExternalForm()));
+			isModified= (old == null || !url.toExternalForm().equals(old.toExternalForm()));
 		}
-		if (needsSave) {
+		if (save || isModified) {
 			try {
 				storeLocations();
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
 		}
+		return isModified;
 	}
 	
 	/**
@@ -140,8 +141,18 @@ public class JavaDocLocations {
 	 * Sets the Javadocs locations for archives with given paths.
 	 */
 	public static void setLibraryJavadocLocations(IPath[] archivePaths, URL[] urls) {
+		boolean needsSave= false;
 		for (int i= urls.length - 1; i >= 0 ; i--) {
-			setJavadocBaseLocation(canonicalizedPath(archivePaths[i]), urls[i], i == 0);
+			if (setJavadocBaseLocation(canonicalizedPath(archivePaths[i]), urls[i], false)) {
+				needsSave= true;
+			}
+		}
+		if (needsSave) {
+			try {
+				storeLocations();
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
 		}
 	}
 	
