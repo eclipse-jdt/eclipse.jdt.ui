@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.core.refactoring.cus;import org.eclipse.core.
 import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.*;
+import org.eclipse.jdt.internal.core.refactoring.changes.*;
+
 
 public class RenameCompilationUnitChange extends AbstractRenameChange {
 
@@ -29,7 +31,7 @@ public class RenameCompilationUnitChange extends AbstractRenameChange {
 		return RefactoringCoreMessages.getFormattedString("RenameCompilationUnitChange.name", new String[]{getOldName(), getNewName()}); //$NON-NLS-1$
 	}
 	
-	/**	 * @see AbstractRenameChange#createUndoChange()	 */	protected IChange createUndoChange() throws JavaModelException{		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName());	}
+	/* non java-doc	 * @see AbstractRenameChange#createUndoChange()	 */	protected IChange createUndoChange() throws JavaModelException{		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName());	}
 	
 	protected void doRename(IProgressMonitor pm) throws JavaModelException {
 		((ICompilationUnit)getCorrespondingJavaElement()).rename(getNewName(), false, pm);
