@@ -340,9 +340,13 @@ class ReorgPolicyFactory {
 				if (root.isExternal())
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.external")); //$NON-NLS-1$
 			}
-	
-			if (ReorgUtils.isInsideCompilationUnit(javaElement))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.subCu")); //$NON-NLS-1$
+			
+			if (ReorgUtils.isInsideCompilationUnit(javaElement)) {
+				ICompilationUnit cu= ReorgUtils.getCompilationUnit(javaElement);
+				if (cu != null)
+					return verifyDestination(cu);
+				return "The selected element is not located in a compilation unit and cannot be the destination of this operation.";
+			}
 	
 			if (containsLinkedResources() && !ReorgUtils.canBeDestinationForLinkedResources(javaElement))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.linked")); //$NON-NLS-1$
@@ -383,7 +387,7 @@ class ReorgPolicyFactory {
 			return null;				
 		}
 				
-		protected IContainer getDestinationAsContainer(){
+		protected final IContainer getDestinationAsContainer(){
 			IResource resDest= getResourceDestination();
 			if (resDest != null)
 				return getAsContainer(resDest);
@@ -392,7 +396,7 @@ class ReorgPolicyFactory {
 			return getAsContainer(ReorgUtils.getResource(jelDest));
 		}
 		
-		protected IJavaElement getDestinationContainerAsJavaElement() {
+		protected final IJavaElement getDestinationContainerAsJavaElement() {
 			if (getJavaElementDestination() != null)
 				return getJavaElementDestination();
 			IContainer destinationAsContainer= getDestinationAsContainer();
@@ -404,7 +408,7 @@ class ReorgPolicyFactory {
 			return null;
 		}
 		
-		protected IPackageFragment getDestinationAsPackageFragment() {
+		protected final IPackageFragment getDestinationAsPackageFragment() {
 			IPackageFragment javaAsPackage= getJavaDestinationAsPackageFragment(getJavaElementDestination());
 			if (javaAsPackage != null)
 				return javaAsPackage;
@@ -418,9 +422,7 @@ class ReorgPolicyFactory {
 				return (IPackageFragment) javaDest;
 			if (javaDest instanceof IPackageFragmentRoot)
 				return ((IPackageFragmentRoot) javaDest).getPackageFragment(""); //$NON-NLS-1$
-			if (javaDest instanceof ICompilationUnit)
-				return (IPackageFragment)javaDest.getParent();				
-			return null;
+			return (IPackageFragment) javaDest.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		}
 				
 		private static IPackageFragment getResourceDestinationAsPackageFragment(IResource resource){
