@@ -323,7 +323,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			}
 		});
 
-		// 1GF90TL: ITPJUI:ALL - Search dialog is missing a width hint
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(30);
 		fPattern.setLayoutData(gd);
@@ -527,7 +526,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				break;
 			case IJavaElement.COMPILATION_UNIT:
 				ICompilationUnit cu= (ICompilationUnit)element;
-				//fix 1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
 				String mainTypeName= element.getElementName().substring(0, element.getElementName().indexOf(".")); //$NON-NLS-1$
 				IType mainType= cu.getType(mainTypeName);
 				mainTypeName= JavaModelUtil.getTypeQualifiedName(mainType);
