@@ -44,8 +44,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	
 	private static final int INSERT= 1;
 	private static final int REPLACE= 2;
-	private static final int MODIFY= 3;
-
 
 	public static void markAsInserted(ASTNode node) {
 		node.setProperty(KEY, new ASTRewriteInfo(INSERT, null));
@@ -53,10 +51,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	
 	public static void markAsReplaced(ASTNode node, ASTNode modifiedNode) {
 		node.setProperty(KEY, new ASTRewriteInfo(REPLACE, modifiedNode));
-	}
-	
-	public static void markAsModified(ASTNode node, ASTNode modifiedNode) {
-		node.setProperty(KEY, new ASTRewriteInfo(MODIFY, modifiedNode));
 	}
 	
 	public static boolean isInserted(ASTNode node) {
@@ -69,10 +63,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return info != null && info.operation == REPLACE;
 	}
 	
-	public static boolean isModified(ASTNode node) {
+	public static boolean isInsertOrReplace(ASTNode node) {
 		ASTRewriteInfo info= (ASTRewriteInfo) node.getProperty(KEY);
-		return info != null && info.operation == MODIFY;
-	}
+		return info != null && (info.operation == REPLACE || info.operation == INSERT);
+	}	
 		
 	public static ASTNode getChangedNode(ASTNode node) {
 		ASTRewriteInfo info= (ASTRewriteInfo) node.getProperty(KEY);
@@ -128,8 +122,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			ASTResolving.overreadToken(scanner, prevTokens);
 		
 			int pos= scanner.getCurrentTokenStartPosition();
+			String str= generateSource(inserted, 0);
+			if (Character.isLetterOrDigit(fTextBuffer.getChar(pos))) {
+				str= str + " ";
+			}
+			if (pos > 0 && Character.isLetterOrDigit(fTextBuffer.getChar(pos - 1))) {
+				str= " " + str;
+			}			
 			
-			String str= " " + generateSource(inserted, 0);
 			fChange.addTextEdit("Add Node", SimpleTextEdit.createInsert(pos, str));
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
@@ -207,7 +207,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					rewriteList(scanner.getCurrentTokenEndPosition() + 1, "", parameters);
 				}
 				if (changedExc) {
-					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameLPAREN);
+					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameRPAREN);
 					rewriteList(scanner.getCurrentTokenEndPosition() + 1, " throws ", exceptions);
 				}
 				
@@ -220,7 +220,32 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 
 		Block body= methodDecl.getBody();
 		if (body != null) {
-			body.accept(this);
+			if (isInsertOrReplace(body)) {
+				try {
+					IScanner scanner= ASTResolving.createScanner(fChange.getCompilationUnit(), methodDecl.getStartPosition());
+					if (isInserted(body)) {
+						ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameSEMICOLON);
+						int startPos= scanner.getCurrentTokenStartPosition();
+						int endPos= methodDecl.getStartPosition() + methodDecl.getLength();					
+						String str= " " + Strings.trimLeadingTabsAndSpaces(generateSource(body, getIndent(methodDecl)));
+						fChange.addTextEdit("Insert body", SimpleTextEdit.createReplace(startPos, endPos - startPos, str));
+					} else if (isReplaced(body)) {
+						ASTNode changed= getChangedNode(body);
+						if (changed == null) {
+							fChange.addTextEdit("Remove body", SimpleTextEdit.createReplace(body.getStartPosition(), body.getLength(), ";"));
+						} else {
+							String str= Strings.trimLeadingTabsAndSpaces(generateSource(changed, getIndent(body)));
+							fChange.addTextEdit("Replace body", SimpleTextEdit.createReplace(body.getStartPosition(), body.getLength(), str));
+						}
+					}
+				} catch (InvalidInputException e) {
+					// ignore
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}					
+			} else {
+				body.accept(this);
+			}
 		}				
 		return false;
 	}
@@ -238,7 +263,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	private boolean hasChanges(List list) {
 		for (int i= 0; i < list.size(); i++) {
 			ASTNode elem= (ASTNode) list.get(i);
-			if (isInserted(elem) || isReplaced(elem)) {
+			if (isInsertOrReplace(elem)) {
 				return true;
 			}
 		}
