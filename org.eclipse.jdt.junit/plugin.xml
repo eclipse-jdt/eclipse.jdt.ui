@@ -5,8 +5,8 @@
    id="org.eclipse.jdt.junit"
    name="org.eclipse.jdt.junit"
    version="1.0.0"
-   class="org.eclipse.jdt.junit.internal.JUnitPlugin">
-	<requires>
+   class="org.eclipse.jdt.internal.junit.ui.JUnitPlugin">
+   <requires>
 	   <import plugin="org.eclipse.ui"/>
 	   <import plugin="org.eclipse.core.resources"/>
 	   <import plugin="org.eclipse.core.boot"/>
@@ -18,7 +18,6 @@
 	   <import plugin="org.eclipse.swt"/>
 	   <import plugin="org.eclipse.core.runtime"/>
 	   <import plugin="org.eclipse.jdt.launching"/>
-	   <import plugin="org.apache.xerces"/>	
 	   <import plugin="org.junit"/>     
 	</requires>
 	
@@ -29,16 +28,12 @@
 	</runtime>
 
 	<extension
-	      point="org.eclipse.ui.views">
-		   <category
-		         name="%Section.label"
-		         id="org.eclipse.jdt.junit">
-		   </category>
+	   point="org.eclipse.ui.views">
 	   <view
 	         name="%JUnit.label"
 	         icon="icons/smalllogo.gif"
-	         category="org.eclipse.jdt.junit"
-	         class="org.eclipse.jdt.junit.internal.TestRunnerUI"
+	         category="org.eclipse.jdt.ui.java"
+	         class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
 	         id="org.eclipse.jdt.junit.viewpart">
 	   </view>
 	</extension>
@@ -47,21 +42,19 @@
       point = "org.eclipse.debug.core.launchers"> 
          <launcher 
              id = "org.eclipse.jdt.junit.launcher"
-             class = "org.eclipse.jdt.junit.internal.Launcher" 
+             class = "org.eclipse.jdt.internal.junit.ui.Launcher" 
              modes = "run, debug"
   	     	 label = "%LocalLauncher.label"
-	     	 wizard = "org.eclipse.jdt.junit.internal.ApplicationWizard"     
+	     	 wizard = "org.eclipse.jdt.internal.junit.ui.ApplicationWizard"     
 	     	 public = "true"
-	     	 description = "Launches JUnit Test(s)"/>
+	     	 description = "%LocalLauncher.description"/>
    	</extension> 
-
-	
+   	
 	<extension
 		point="org.eclipse.ui.preferencePages">
 		<page name="%JUnitPageName"
 			id="org.eclipse.jdt.junit.preferences"
-			class="org.eclipse.jdt.junit.internal.PreferencePage">
+			class="org.eclipse.jdt.internal.junit.ui.JUnitPreferencePage">
 		</page>
    	</extension>
-
 </plugin>
