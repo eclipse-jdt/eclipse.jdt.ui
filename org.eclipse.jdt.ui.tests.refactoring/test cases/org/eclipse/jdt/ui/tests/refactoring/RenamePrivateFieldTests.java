@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.Hashtable;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -11,6 +13,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
@@ -25,6 +28,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private static final Class clazz= RenamePrivateFieldTests.class;
 	private static final String REFACTORING_PATH= "RenamePrivateField/";
 
+	private Object fPrefixPref;
 	public RenamePrivateFieldTests(String name) {
 		super(name);
 	}
@@ -36,6 +40,21 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+		Hashtable options= JavaCore.getOptions();
+		fPrefixPref= options.get(JavaCore.CODEASSIST_FIELD_PREFIXES);
+		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, getPrefixes());
+		JavaCore.setOptions(options);
+	}
+	
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, fPrefixPref);
+		JavaCore.setOptions(options);	
+	}
 
 	private CodeGenerationSettings getSettings(){
 		CodeGenerationSettings settings= new CodeGenerationSettings();
@@ -46,18 +65,14 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		return settings;
 	}
 	
-	private String[] getPrefixes(){
-		return new String[]{"f", "fg", "_", "m_"};
-	}
-	
-	private String[] getSuffixes(){
-		return new String[0];
+	private String getPrefixes(){
+		return "f";
 	}
 	
 	private void helper1_0(String fieldName, String newFieldName, String typeName,
 							boolean renameGetter, boolean renameSetter) throws Exception{
 		IType declaringType= getType(createCUfromTestFile(getPackageP(), "A"), typeName);
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(declaringType.getField(fieldName), getPrefixes(), getSuffixes());
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(declaringType.getField(fieldName));
 		ref.setNewName(newFieldName);
 		ref.setRenameGetter(renameGetter);
 		ref.setRenameSetter(renameSetter);
@@ -81,7 +96,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 											boolean expectedGetterRenameEnabled, boolean expectedSetterRenameEnabled) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName), getPrefixes(), getSuffixes());
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName));
 		ref.setUpdateReferences(updateReferences);
 		ref.setUpdateJavaDoc(updateJavaDoc);
 		ref.setUpdateComments(updateComments);

@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.Hashtable;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -11,6 +13,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
@@ -25,6 +28,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	private static final Class clazz= RenameNonPrivateFieldTests.class;
 	private static final String REFACTORING_PATH= "RenameNonPrivateField/";
 
+	private Object fPrefixPref;
 	public RenameNonPrivateFieldTests(String name) {
 		super(name);
 	}
@@ -40,18 +44,29 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	private CodeGenerationSettings getSettings(){
 		return new CodeGenerationSettings();
 	}
-	
-	private String[] getPrefixes(){
-		return new String[0];
+
+	protected void setUp() throws Exception {
+		super.setUp();
+		Hashtable options= JavaCore.getOptions();
+		fPrefixPref= options.get(JavaCore.CODEASSIST_FIELD_PREFIXES);
+		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, getPrefixes());
+		JavaCore.setOptions(options);
 	}
 	
-	private String[] getSuffixes(){
-		return new String[0];
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, fPrefixPref);
+		JavaCore.setOptions(options);	
+	}
+	
+	private String getPrefixes(){
+		return "";
 	}
 	
 	private void helper1_0(String fieldName, String newFieldName) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName), getPrefixes(), getSuffixes());
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName));
 		ref.setNewName(newFieldName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
@@ -64,7 +79,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	private void helper2(String fieldName, String newFieldName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName), getPrefixes(), getSuffixes());
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName));
 		ref.setNewName(newFieldName);
 		ref.setUpdateReferences(updateReferences);
 		RefactoringStatus result= performRefactoring(ref);

@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -15,10 +18,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IViewReference;
@@ -36,7 +35,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitRefactoring;
@@ -48,13 +52,6 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceRefactor
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
-import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
 
 public class RefactoringSupport {
 	/* package */ abstract static class AbstractRenameSupport implements IRefactoringRenameSupport {
@@ -280,7 +277,7 @@ public class RefactoringSupport {
 	
 	public static class Field extends AbstractRenameSupport {
 		public Field(IField element) {
-			super(createRefactoring(element));
+			super(new RenameFieldRefactoring(element));
 		}
 		public RenameFieldRefactoring getSpecificRefactoring() {
 			return (RenameFieldRefactoring)fRefactoring;
@@ -298,12 +295,6 @@ public class RefactoringSupport {
 			RenameFieldWizard w= new RenameFieldWizard(refactoring, title, message, wizardPageHelp, errorPageHelp);
 			w.setInputPageImageDescriptor(imageDesc);
 			return w;
-		}
-		private static IRenameRefactoring createRefactoring(IField element) {
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			String[] prefixes= settings.fieldPrefixes;
-			String[] suffixes= settings.fieldSuffixes;
-			return new RenameFieldRefactoring((IField)element, prefixes, suffixes);
 		}
 	}
 	
