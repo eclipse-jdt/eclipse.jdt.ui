@@ -91,7 +91,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private ToggleLinkingAction fToggleLinkingAction;
 
 	private NavigateActionGroup fNavigateActionGroup;
-	private BuildActionGroup fBuildActionGroup;
 	private CCPActionGroup fCCPActionGroup;
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
 	
@@ -124,7 +123,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			new GenerateActionGroup(fPart), 
 			new RefactorActionGroup(fPart),
 			new ImportActionGroup(fPart),
-			fBuildActionGroup= new BuildActionGroup(fPart),
+			new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart),
 			new ProjectActionGroup(fPart), 
 			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(JavaUI.ID_PACKAGES, shell, workingSetListener),
@@ -187,8 +186,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			}
 		} else {
 			if (fLastElement != REST) {
-				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.RENAME, null);
-				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.MOVE, null);
+				actionBars.setGlobalActionHandler(ActionFactory.RENAME.getId(), null);
+				actionBars.setGlobalActionHandler(ActionFactory.MOVE.getId(), null);
 				actionBars.updateActionBars();
 				fLastElement= REST;
 			}
