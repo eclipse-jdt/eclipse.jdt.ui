@@ -46,11 +46,13 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -71,6 +73,23 @@ public abstract class FindOccurrencesEngine {
 	private static class SearchGroupByKeyComputer implements IGroupByKeyComputer {
 		public Object computeGroupByKey(IMarker marker) {
 			return marker; 
+		}
+	}
+	
+	private static class NameNodeFinder extends ASTVisitor {
+		Name result;
+		public static Name perform(ASTNode root) {
+			NameNodeFinder finder= new NameNodeFinder();
+			root.accept(finder);
+			return finder.result;
+		}
+		public boolean visit(SimpleName node) {
+			result= node;
+			return false;
+		}
+		public boolean visit(QualifiedName node) {
+			result= node;
+			return false;
 		}
 	}
 	
@@ -153,14 +172,10 @@ public abstract class FindOccurrencesEngine {
 		if (root == null) {
 			return SearchMessages.getString("FindOccurrencesEngine.cannotParse.text"); //$NON-NLS-1$
 		}
-		ASTNode node= NodeFinder.perform(root, offset, length);
-		if (node instanceof VariableDeclarationFragment)
-			node= ((VariableDeclarationFragment)node).getName();
-		
-		if (!(node instanceof Name)) {
+		final Name name= getNameNode(root, offset, length);
+		if (name == null) 
 			return SearchMessages.getString("FindOccurrencesEngine.noJavaElement.text"); //$NON-NLS-1$
-		}
-		final Name name= (Name)node;		
+		
 		final IBinding target= name.resolveBinding();
 		final IDocument document= new Document(getSourceReference().getSource());
 		
@@ -189,6 +204,17 @@ public abstract class FindOccurrencesEngine {
 		};
 		run(runnable);
 		return null;
+	}
+
+	public Name getNameNode(CompilationUnit root, int offset, int length) {
+		ASTNode node= NodeFinder.perform(root, offset, length);
+		if (node instanceof Name)
+			return (Name)node;
+		
+		Name name= NameNodeFinder.perform(node);
+		if (name == null || name.getStartPosition() != node.getStartPosition() || name.getLength() != node.getLength())
+			return null;
+		return name;
 	}
 	
 	private ISearchResultView startSearch(String fileName, final Name name) {
