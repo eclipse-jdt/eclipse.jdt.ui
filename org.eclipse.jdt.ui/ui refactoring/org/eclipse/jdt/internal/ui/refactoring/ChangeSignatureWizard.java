@@ -149,7 +149,8 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			combo.setText(getAccessModifierString(currentVisibility));
 			combo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 			
-			// ensure that "Access modifier:" and "Return type:" Labels are not too close: 
+			// ensure that "Access modifier:" and "Return type:" Labels are not too close:
+			Dialog.applyDialogFont(access);
 			access.pack();
 			int minLabelWidth= label.getSize().x + 3 * layout.horizontalSpacing;
 			if (minLabelWidth > combo.getSize().x)
