@@ -27,8 +27,12 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 	 */
 	public void initialize(String variable) {
 		Plugin plugin= Platform.getPlugin("org.junit"); //$NON-NLS-1$
+		
+		if (plugin == null) {
+			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
+		}
 		URL installLocation= plugin.getDescriptor().getInstallURL();
-		URL local = null;
+		URL local= null;
 		try {
 			try {
 				local= Platform.resolve(installLocation);
