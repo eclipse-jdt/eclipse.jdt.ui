@@ -343,7 +343,7 @@ public class RenameSupport {
 	private void ensureChecked() throws CoreException {
 		if (fPreCheckStatus == null) {
 			if (!fRefactoring.isAvailable()) {
-				fPreCheckStatus= RefactoringStatus.createFatalErrorStatus("This refactoring is not enabled.");
+				fPreCheckStatus= RefactoringStatus.createFatalErrorStatus("The refactoring is not enabled.");
 			} else {
 				fPreCheckStatus= new RefactoringStatus();
 			}
