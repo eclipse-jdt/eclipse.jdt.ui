@@ -27,9 +27,11 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.BadLocationException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -82,8 +84,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
@@ -91,7 +95,7 @@ public class CallInliner {
 
 	private ICompilationUnit fCUnit;
 	private ImportRewrite fImportEdit;
-	private TextBuffer fBuffer;
+	private ITextFileBuffer fBuffer;
 	private SourceProvider fSourceProvider;
 	
 	private BodyDeclaration fBodyDeclaration;
@@ -211,17 +215,21 @@ public class CallInliner {
 	public CallInliner(ICompilationUnit unit, SourceProvider provider, CodeGenerationSettings settings) throws CoreException {
 		super();
 		fCUnit= unit;
-		fBuffer= TextBuffer.acquire(getFile(fCUnit));
+		fBuffer= RefactoringFileBuffers.connect(fCUnit);
 		fSourceProvider= provider;
 		fImportEdit= new ImportRewrite(fCUnit);
 		fLocals= new ArrayList(3);
 	}
 
 	public void dispose() {
-		TextBuffer.release(fBuffer);
+		try {
+			RefactoringFileBuffers.disconnect(fCUnit);
+		} catch (CoreException exception) {
+			JavaPlugin.log(exception);
+		}
 	}
 	
-	/* package */ TextBuffer getBuffer() {
+	/* package */ ITextFileBuffer getBuffer() {
 		return fBuffer;
 	}
 	
@@ -260,9 +268,12 @@ public class CallInliner {
 		
 		fContext= new CallContext(fInvocation, fInvocationScope, fTargetNode.getNodeType(), fImportEdit);
 		
-		computeRealArguments();
-		computeReceiver();
-		
+		try {
+			computeRealArguments();
+			computeReceiver();
+		} catch (BadLocationException exception) {
+			JavaPlugin.log(exception);
+		}
 		checkInvocationContext(result, severity);
 		if (result.getSeverity() >= severity)
 			return result;		
@@ -452,7 +463,7 @@ public class CallInliner {
 		return fRewrite.rewriteAST(fBuffer.getDocument(), fCUnit.getJavaProject().getOptions(true));
 	}
 
-	private void computeRealArguments() {
+	private void computeRealArguments() throws BadLocationException {
 		List arguments= Invocations.getArguments(fInvocation);
 		String[] realArguments= new String[arguments.size()];
 		for (int i= 0; i < arguments.size(); i++) {
@@ -475,7 +486,7 @@ public class CallInliner {
 		fContext.arguments= realArguments;
 	}
 	
-	private void computeReceiver() {
+	private void computeReceiver() throws BadLocationException {
 		Expression receiver= Invocations.getExpression(fInvocation);
 		if (receiver == null)
 			return;
@@ -483,7 +494,7 @@ public class CallInliner {
 		if (isName)
 			fContext.receiverIsStatic= ((Name)receiver).resolveBinding() instanceof ITypeBinding;
 		if (ASTNodes.isLiteral(receiver) || isName) {
-			fContext.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
+			fContext.receiver= fBuffer.getDocument().get(receiver.getStartPosition(), receiver.getLength());
 			return;
 		}
 		switch(fSourceProvider.getReceiversToBeUpdated()) {
@@ -496,7 +507,7 @@ public class CallInliner {
 					(Expression)fRewrite.createCopyTarget(receiver)));
 				return;
 			case 1:
-				fContext.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
+				fContext.receiver= fBuffer.getDocument().get(receiver.getStartPosition(), receiver.getLength());
 				return;
 			default:
 				String local= fInvocationScope.createName("r", true); //$NON-NLS-1$
@@ -710,14 +721,10 @@ public class CallInliner {
 		// So there is no need to have an insertion index.
 	}
 
-	private String getContent(ASTNode node) {
-		return fBuffer.getContent(node.getStartPosition(), node.getLength());
+	private String getContent(ASTNode node) throws BadLocationException {
+		return fBuffer.getDocument().get(node.getStartPosition(), node.getLength());
 	}
 
-	private static IFile getFile(ICompilationUnit cu) {
-		return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
-	}
-	
 	private boolean isControlStatement(ASTNode node) {
 		int type= node.getNodeType();
 		return type == ASTNode.IF_STATEMENT || type == ASTNode.FOR_STATEMENT ||
