@@ -37,7 +37,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
- *
+ * Infrastructure to share an AST for editor post selection listeners.
  */
 public class SelectionListenerWithASTManager {
 	
@@ -83,7 +83,7 @@ public class SelectionListenerWithASTManager {
 				fCurrentJob= null;
 			}
 			
-			fCurrentJob= new Job(JavaUIMessages.getString("QuickAssistLightBulbUpdater.job.title")) { //$NON-NLS-1$
+			fCurrentJob= new Job(JavaUIMessages.getString("SelectionListenerWithASTManager.job.title")) { //$NON-NLS-1$
 				public IStatus run(IProgressMonitor monitor) {
 					synchronized (PartListenerGroup.this) {
 						if (this != fCurrentJob) {
@@ -112,7 +112,6 @@ public class SelectionListenerWithASTManager {
 			return null;
 		}
 		
-
 		protected void calculateASTandInform(ITextSelection selection) {
 			CompilationUnit astRoot= computeAST();
 			if (astRoot != null) {
@@ -122,11 +121,10 @@ public class SelectionListenerWithASTManager {
 				}
 			}
 		}
-		
 	}
 	
 	
-	private class WorkbenchWindowListener implements ISelectionListener {
+	private static class WorkbenchWindowListener implements ISelectionListener {
 		private ISelectionService fSelectionService;
 		private Map fPartListeners; // key: IEditorPart, value: PartListenerGroup
 		
@@ -177,11 +175,8 @@ public class SelectionListenerWithASTManager {
 					listenerGroup.fireSelectionChanged((ITextSelection) selection);
 				}
 			}
-		}
-		
+		}		
 	}
-	
-
 	
 	private Map fListenerGroups;
 	

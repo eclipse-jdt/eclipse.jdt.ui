@@ -69,4 +69,11 @@ public class AssistContext implements IInvocationContext {
 	}
 
 		
+	/**
+	 * @param root The ASTRoot to set.
+	 */
+	public void setASTRoot(CompilationUnit root) {
+		fASTRoot= root;
+	}
+
 }
