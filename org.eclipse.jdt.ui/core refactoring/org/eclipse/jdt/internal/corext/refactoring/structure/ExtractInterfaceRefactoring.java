@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -55,7 +57,9 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
@@ -144,6 +148,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			result.addFatalError("Cannot perform Extract Interface on anonymous types.");
 		if (result.hasFatalError())
 			return result;
+
+		//XXX for now
+		if (! Checks.isTopLevel(fInputClass))
+			result.addFatalError("Cannot perform Extract Interface on member classes.");
+		if (result.hasFatalError())
+			return result;
 			
 		return result;	
 	}
@@ -181,7 +191,17 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		pm.beginTask("", 1);//$NON-NLS-1$
 		try{
 			RefactoringStatus result= new RefactoringStatus();		
+			
+			if (getInputClassPackage().getCompilationUnit(getCuNameForNewInterface()).exists()){
+				String pattern= "Compilation Unit named ''{0}'' already exists in package ''{1}''";
+				String message= MessageFormat.format(pattern, new String[]{getCuNameForNewInterface(), getInputClassPackage().getElementName()});
+				result.addFatalError(message);
+			}	
+				
 			result.merge(checkNewInterfaceName(fNewInterfaceName));
+			
+			result.merge(checkInterfaceTypeName());
+			
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;
@@ -191,9 +211,24 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			pm.done();
 		}	
 	}
+
+	private RefactoringStatus checkInterfaceTypeName() throws JavaModelException {
+		ICompilationUnit[] cus= getInputClassPackage().getCompilationUnits();
+		for (int i= 0; i < cus.length; i++) {
+			if (cus[i].getType(fNewInterfaceName).exists()){
+				String pattern= "Type named ''{0}'' already exists in package ''{1}''";
+				String message= MessageFormat.format(pattern, new String[]{fNewInterfaceName, getInputClassPackage().getElementName()});
+				return RefactoringStatus.createFatalErrorStatus(message);
+			}	
+		}
+		return null;
+	}
 	
 	public RefactoringStatus checkNewInterfaceName(String newName){
 		RefactoringStatus result= Checks.checkTypeName(newName);
+		if (result.hasFatalError())
+			return result;
+		result.merge(Checks.checkCompilationUnitName(newName + ".java"));
 		return result;
 	}
 
@@ -240,11 +275,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		ISearchPattern pattern= SearchEngine.createSearchPattern(fInputClass, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fInputClass);
 		SearchResultGroup[] referenceGroups= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
-		addReferenceUpdates(manager, new SubProgressMonitor(pm, 1), referenceGroups);
+		addReferenceUpdatesAndImports(manager, new SubProgressMonitor(pm, 1), referenceGroups);
 		pm.done();
 	}
 	
-	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm, SearchResultGroup[] resultGroups) throws CoreException {
+	private void addReferenceUpdatesAndImports(TextChangeManager manager, IProgressMonitor pm, SearchResultGroup[] resultGroups) throws CoreException {
 		pm.beginTask("", resultGroups.length);
 		for (int i= 0; i < resultGroups.length; i++){
 			IJavaElement element= JavaCore.create(resultGroups[i].getResource());
@@ -252,22 +287,40 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				continue;
 			SearchResult[] results= resultGroups[i].getSearchResults();
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
-			addReferenceUpdatesForCU(manager, new SubProgressMonitor(pm, 1), results, cu);
+			boolean referencesUpdated= addReferenceUpdatesForCU(manager, new SubProgressMonitor(pm, 1), results, cu);
+			if (referencesUpdated && ! getInputClassPackage().equals((cu.getParent())))
+				addInterfaceImport(manager, cu);
 		}
 		pm.done();
 	}
-	private void addReferenceUpdatesForCU(TextChangeManager manager, IProgressMonitor pm, SearchResult[] results, ICompilationUnit cu) throws CoreException {
+	private void addInterfaceImport(TextChangeManager manager, ICompilationUnit cu) throws CoreException {
+		ImportEdit importEdit= new ImportEdit(cu, fCodeGenerationSettings);
+		importEdit.addImport(getFullyQualifiedInterfaceName());
+		String pattern= "Adding import to ''{0}''";
+		String editName= MessageFormat.format(pattern, new String[]{getFullyQualifiedInterfaceName()});
+		manager.get(cu).addTextEdit(editName, importEdit);
+	}
+
+	private String getFullyQualifiedInterfaceName() {
+		return getInputClassPackage().getElementName() + "." + fNewInterfaceName;
+	}
+
+	private boolean addReferenceUpdatesForCU(TextChangeManager manager, IProgressMonitor pm, SearchResult[] results, ICompilationUnit cu) throws CoreException {
 		pm.beginTask("", results.length);
+		boolean added= false;
 		for (int j= 0; j < results.length; j++){
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			CompilationUnit cuNode= AST.parseCompilationUnit(cu, false);
+			CompilationUnit cuNode= AST.parseCompilationUnit(cu, true);
 			SearchResult searchResult= results[j];
 			String editName= "Change reference to interface";		
-			if (canReplace(searchResult, cuNode, new SubProgressMonitor(pm, 1)))
+			if (canReplace(searchResult, cuNode, new SubProgressMonitor(pm, 1))){
 				manager.get(cu).addTextEdit(editName, createTypeUpdateEdit(searchResult));	
+				added= true;
+			}	
 		}
 		pm.done();
+		return added;
 	}
 
 	private boolean canReplace(SearchResult searchResult, CompilationUnit cuNode, IProgressMonitor pm) {
@@ -282,14 +335,13 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			
 		if (selectedNode.getParent().getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT){
 			VariableDeclarationStatement vds= (VariableDeclarationStatement)selectedNode.getParent();
-			if (vds.getType() == selectedNode)
-				return true; //XXX	
-			else	
+			if (vds.getType() != selectedNode)
 				return false; 
+			return canReplaceTypeInVariableDeclarationStatement(cuNode, vds, pm);
 		}	
 		return false;	
 	}
-	
+		
 	private TextEdit createTypeUpdateEdit(SearchResult searchResult) {
 		int offset= searchResult.getStart();
 		int length= searchResult.getEnd() - searchResult.getStart();
@@ -355,13 +407,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 //		}
 		
 		return new CreateTextFileChange(interfaceCuPath, formattedSource, true);	
-		
 	}
 	
 	private String getCuNameForNewInterface() {
 		return fNewInterfaceName + ".java";
 	}
-
+	
 	private IPackageFragment getInputClassPackage() {
 		return (IPackageFragment)fInputClass.getCompilationUnit().getParent();
 	}
@@ -434,12 +485,20 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private String createInterfaceSource() throws JavaModelException {
 		StringBuffer buff= new StringBuffer();
-		buff.append("interface ")
+		buff.append(createInterfaceModifierString())
+			 .append("interface ")
 			 .append(fNewInterfaceName)
 			 .append(" {")
 			 .append(createInterfaceMemberDeclarationsSource())
 			 .append("}");
 		return buff.toString();
+	}
+
+	private String createInterfaceModifierString() throws JavaModelException {
+		if (JdtFlags.isPublic(fInputClass))
+			return "public ";
+		else
+			return "";	
 	}
 
 	private String createInterfaceMemberDeclarationsSource() throws JavaModelException {
@@ -561,5 +620,16 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (template == null)
 			return ""; //$NON-NLS-1$
 		return template;
+	}
+	
+	//--- 'can replace*' related methods 
+	private boolean canReplaceTypeInVariableDeclarationStatement(CompilationUnit cuNode, VariableDeclarationStatement vds, IProgressMonitor pm) {
+		VariableDeclarationFragment[] fragments= (VariableDeclarationFragment[]) vds.fragments().toArray(new VariableDeclarationFragment[vds.fragments().size()]);
+		for (int i= 0; i < fragments.length; i++) {
+			ASTNode[] tempReferences= TempOccurrenceFinder.findTempOccurrenceNodes(cuNode, fragments[i], true, false);			
+			if (tempReferences.length == 0)
+				return true;
+		}
+		return false;
 	}
 }
