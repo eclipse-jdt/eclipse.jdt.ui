@@ -33,12 +33,15 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -392,54 +395,53 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					boolean doUpdateParent= false;
 										
 					Vector deletions= new Vector();
-					Vector additions= new Vector();				
-
-					for (int i= 0; i < affected.length; i++) {
-					    IJavaElementDelta affectedDelta= affected[i];
-						IJavaElement affectedElement= affectedDelta.getElement();
-						int status= affected[i].getKind();
-
-						// find tree item with affected element
-						int j;
-						for (j= 0; j < children.length; j++)
-						    if (children[j].getData().equals(affectedElement))
-						    	break;
-						
-						if (j == children.length) {
-							// addition
-							if ((status & IJavaElementDelta.CHANGED) != 0 &&							
-								(affectedDelta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0 &&
-								!filtered(parent, affectedElement))
-							{
-								additions.addElement(affectedDelta);
-							}
-							continue;
-						}
-
-						item= children[j];
-
-						// removed						    
-						if ((status & IJavaElementDelta.REMOVED) != 0) {
-							deletions.addElement(item);
-							doUpdateParent= doUpdateParent || mustUpdateParent(affectedDelta, affectedElement);
-
-						// changed						    
-						} else if ((status & IJavaElementDelta.CHANGED) != 0) {
-							int change= affectedDelta.getFlags();
-							doUpdateParent= doUpdateParent || mustUpdateParent(affectedDelta, affectedElement);
+					Vector additions= new Vector();
+					
+					go1: for (int i= 0; i < children.length; i++) {
+						item= children[i];
+						element= item.getData();
+						for (int j= 0; j < affected.length; j++) {
 							
-							if ((change & IJavaElementDelta.F_MODIFIERS) != 0) {
-								if (filtered(parent, affectedElement))
-									deletions.addElement(item);
-								else
-									updateItem(item, affectedElement);
-							}
+							IJavaElement affectedElement= affected[j].getElement();
+							int status= affected[j].getKind();
 							
-							if ((change & IJavaElementDelta.F_CONTENT) != 0)
-								updateItem(item, affectedElement);
+							if (affectedElement.equals(element)) {
 								
-							if ((change & IJavaElementDelta.F_CHILDREN) != 0)
-								update(item, affectedDelta);															    
+								// removed
+								if ((status & IJavaElementDelta.REMOVED) != 0) {
+									deletions.addElement(item);
+									doUpdateParent= doUpdateParent || mustUpdateParent(affected[j], affectedElement);
+									continue go1;
+								}
+								
+								// changed
+								if ((status & IJavaElementDelta.CHANGED) != 0) {
+									int change= affected[j].getFlags();
+									doUpdateParent= doUpdateParent || mustUpdateParent(affected[j], affectedElement);
+									
+									if ((change & IJavaElementDelta.F_MODIFIERS) != 0) {
+										if (filtered(parent, affectedElement))
+											deletions.addElement(item);
+										else
+											updateItem(item, affectedElement);
+									}
+									
+									if ((change & IJavaElementDelta.F_CONTENT) != 0)
+										updateItem(item, affectedElement);
+										
+									if ((change & IJavaElementDelta.F_CHILDREN) != 0)
+										update(item, affected[j]);
+									
+									continue go1;							
+								}
+								
+							} else {
+								// changed
+								if ((status & IJavaElementDelta.CHANGED) != 0 &&
+										(affected[j].getFlags() & IJavaElementDelta.F_MODIFIERS) != 0 &&
+										!filtered(parent, affectedElement))
+									additions.addElement(affected[j]);
+							}
 						}
 					}
 					
