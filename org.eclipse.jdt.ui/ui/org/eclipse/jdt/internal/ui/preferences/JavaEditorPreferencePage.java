@@ -307,6 +307,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
     private Control fAutoInsertDelayText;
     private Control fAutoInsertJavaTriggerText;
     private Control fAutoInsertJavaDocTriggerText;
+	private Label fAutoInsertDelayLabel;
+	private Label fAutoInsertJavaTriggerLabel;
+	private Label fAutoInsertJavaDocTriggerLabel;
 	private Button fShowInTextCheckBox;
 	private Button fShowInOverviewRulerCheckBox;
 	private Text fBrowserLikeLinksKeyModifierText;
@@ -928,16 +931,22 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
             }
 		});		
 		
+		Control[] labelledTextField;
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
-		fAutoInsertDelayText= addTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 4, 0, true);
+		labelledTextField= addLabelledTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 4, 0, true);
+		fAutoInsertDelayLabel= getLabelControl(labelledTextField);
+		fAutoInsertDelayText= getTextControl(labelledTextField);
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
-		fAutoInsertJavaTriggerText= addTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
+		labelledTextField= addLabelledTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
+		fAutoInsertJavaTriggerLabel= getLabelControl(labelledTextField);
+		fAutoInsertJavaTriggerText= getTextControl(labelledTextField);
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
-		fAutoInsertJavaDocTriggerText= addTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
-
-							
+		labelledTextField= addLabelledTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
+		fAutoInsertJavaDocTriggerLabel= getLabelControl(labelledTextField);
+		fAutoInsertJavaDocTriggerText= getTextControl(labelledTextField);
+		
 
 		Label l= new Label(contentAssistComposite, SWT.LEFT);
 		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.codeAssist.colorOptions")); //$NON-NLS-1$
@@ -1272,8 +1281,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
     private void updateAutoactivationControls() {
         boolean autoactivation= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_AUTOACTIVATION);
         fAutoInsertDelayText.setEnabled(autoactivation);
+		fAutoInsertDelayLabel.setEnabled(autoactivation);
+
         fAutoInsertJavaTriggerText.setEnabled(autoactivation);
+		fAutoInsertJavaTriggerLabel.setEnabled(autoactivation);
+
         fAutoInsertJavaDocTriggerText.setEnabled(autoactivation);
+		fAutoInsertJavaDocTriggerLabel.setEnabled(autoactivation);
     }
 	
 	/*
@@ -1343,7 +1357,24 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	}
 	
 	private Text addTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
-		
+		return getTextControl(addLabelledTextField(composite, label, key, textLimit, indentation, isNumber));
+	}
+	
+	private static Label getLabelControl(Control[] labelledTextField){
+		return (Label)labelledTextField[0];
+	}
+
+	private static Text getTextControl(Control[] labelledTextField){
+		return (Text)labelledTextField[1];
+	}
+	
+	/**
+	 * Returns an array of size 2:
+	 *  - first element is of type <code>Label</code>
+	 *  - second element is of type <code>Text</code>
+	 * Use <code>getLabelControl</code> and <code>getTextControl</code> to get the 2 controls.
+	 */
+	private Control[] addLabelledTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
 		Label labelControl= new Label(composite, SWT.NONE);
 		labelControl.setText(label);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -1363,7 +1394,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			textControl.addModifyListener(fTextFieldListener);
 		}
 			
-		return textControl;
+		return new Control[]{labelControl, textControl};
 	}
 	
 	private String loadPreviewContentFromFile(String filename) {
