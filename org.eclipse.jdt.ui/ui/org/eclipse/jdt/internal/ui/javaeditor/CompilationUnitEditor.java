@@ -473,6 +473,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private SelectionHistory fSelectionHistory;
 	/** The preference property change listener for java core. */
 	private IPropertyChangeListener fPropertyChangeListener= new PropertyChangeListener();
+	/** The remembered java element */
+	private IJavaElement fRememberedElement;
+	/** The remembered selection */
+	private ITextSelection fRememberedSelection;
+	/** The remembered java element offset */
+	private int fRememberedElementOffset;
 	
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
@@ -1339,5 +1345,85 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	protected void updateStateDependentActions() {
 		super.updateStateDependentActions();
 		fGenerateActionGroup.editorStateChanged();
+	}
+	
+	/**
+	 * Returns the updated java element for the old java element.
+	 */
+	private IJavaElement findElement(IJavaElement element) {
+		
+		if (element == null)
+			return null;
+		
+		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
+		
+		if (unit != null) {
+			try {
+				
+				synchronized (unit) {
+					unit.reconcile();
+				}
+				IJavaElement[] findings= unit.findElements(element);
+				if (findings != null && findings.length > 0)
+					return findings[0];
+			
+			} catch (JavaModelException x) {
+				JavaPlugin.getDefault().log(x.getStatus());
+				// nothing found, be tolerant and go on
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Returns the offset of the given Java element.
+	 */
+	private int getOffset(IJavaElement element) {
+		if (element instanceof ISourceReference) {
+			ISourceReference sr= (ISourceReference) element;
+			try {
+				ISourceRange srcRange= sr.getSourceRange();
+				if (srcRange != null)
+					return srcRange.getOffset();
+			} catch (JavaModelException e) {
+			}
+		}
+		return -1;	
+	}
+	
+	/*
+	 * @see AbstractTextEditor#rememberSelection()
+	 */
+	protected void rememberSelection() {
+		ISelectionProvider sp= getSelectionProvider();
+		fRememberedSelection= (sp == null ? null : (ITextSelection) sp.getSelection());
+		if (fRememberedSelection != null) {
+			fRememberedElement= getElementAt(fRememberedSelection.getOffset(), true);
+			fRememberedElementOffset= getOffset(fRememberedElement); 
+		}
+	}
+	
+	/*
+	 * @see AbstractTextEditor#restoreSelection()
+	 */
+	protected void restoreSelection() {
+		
+		try {
+			
+			if (getSourceViewer() == null || fRememberedSelection == null)
+				return;
+				
+			IJavaElement newElement= findElement(fRememberedElement);
+			int newOffset= getOffset(newElement);
+			int offset= (newOffset > -1 && fRememberedElementOffset > -1) ? newOffset - fRememberedElementOffset : 0;
+			selectAndReveal(offset + fRememberedSelection.getOffset(), fRememberedSelection.getLength());			
+			
+		} finally {
+			fRememberedSelection= null;
+			fRememberedElement= null;
+			fRememberedElementOffset= -1;
+		}
 	}
 }
