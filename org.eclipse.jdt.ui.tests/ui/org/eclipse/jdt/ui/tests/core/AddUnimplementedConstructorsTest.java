@@ -130,7 +130,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(false);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -177,7 +177,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(false);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -233,7 +233,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(true);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -294,7 +294,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(false);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -341,7 +341,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(false);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] existingMethods= testClass.getMethods();
@@ -379,7 +379,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(false);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] existingMethods= testClass.getMethods();
@@ -423,7 +423,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		fSettings.createComments= false;
 		op.setOmitSuper(true);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -504,7 +504,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(true);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -612,7 +612,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(true);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -720,7 +720,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(true);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -766,7 +766,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(true);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] existingMethods= testClass.getMethods();
@@ -815,7 +815,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		
 		fSettings.createComments= false;
 		op.setOmitSuper(false);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -875,7 +875,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(true);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -952,7 +952,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(true);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
@@ -1003,7 +1003,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(testClass, fSettings, constructorMethods, true, null);
 		
 		op.setOmitSuper(true);
-		op.setVisbility(Modifier.PUBLIC);
+		op.setVisibility(Modifier.PUBLIC);
 		op.run(new NullProgressMonitor());
 		
 		IMethod[] createdMethods= testClass.getMethods();
