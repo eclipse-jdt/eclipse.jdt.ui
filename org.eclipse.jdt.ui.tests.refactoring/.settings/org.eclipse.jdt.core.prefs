@@ -1,4 +1,4 @@
-#Thu Feb 03 11:47:02 CET 2005
+#Fri Feb 25 12:28:39 CET 2005
 eclipse.preferences.version=1
 org.eclipse.jdt.core.builder.cleanOutputFolder=clean
 org.eclipse.jdt.core.builder.duplicateResourceTask=warning
@@ -24,6 +24,7 @@ org.eclipse.jdt.core.compiler.problem.emptyStatement=warning
 org.eclipse.jdt.core.compiler.problem.fieldHiding=warning
 org.eclipse.jdt.core.compiler.problem.finalParameterBound=ignore
 org.eclipse.jdt.core.compiler.problem.finallyBlockNotCompletingNormally=warning
+org.eclipse.jdt.core.compiler.problem.forbiddenReference=warning
 org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock=error
 org.eclipse.jdt.core.compiler.problem.incompatibleNonInheritedInterfaceMethod=error
 org.eclipse.jdt.core.compiler.problem.indirectStaticAccess=warning
