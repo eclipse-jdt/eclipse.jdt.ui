@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.core.dom.*;
 
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -184,7 +183,7 @@ public class Bindings {
 		ITypeBinding declaring= null;
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
-				return ((ITypeBinding) binding).getQualifiedName();
+				return getRawQualifiedName((ITypeBinding) binding);
 			case IBinding.PACKAGE:
 				return binding.getName() + ".*"; //$NON-NLS-1$
 			case IBinding.METHOD:
@@ -910,6 +909,63 @@ public class Bindings {
 			return false;
 		}
 		
+	}
+	
+	public static String getRawName(ITypeBinding binding) {
+		String name= binding.getName();
+		if (binding.isParameterizedType() || binding.isGenericType()) {
+			int idx= name.indexOf('<');
+			if (idx != -1) {
+				return name.substring(0, idx);
+			}
+		}
+		return name;
+	}
+	
+
+	public static String getRawQualifiedName(ITypeBinding binding) {
+		final String EMPTY= ""; //$NON-NLS-1$
+		
+		if (binding.isAnonymous() || binding.isLocal()) {
+			return EMPTY; //$NON-NLS-1$
+		}
+		
+		if (binding.isPrimitive() || binding.isNullType() || binding.isTypeVariable()) {
+			return binding.getName();
+		}
+		
+		if (binding.isArray()) {
+			String elementTypeQualifiedName = getRawQualifiedName(binding.getElementType());
+			if (elementTypeQualifiedName.length() != 0) {
+				StringBuffer stringBuffer= new StringBuffer(elementTypeQualifiedName);
+				stringBuffer.append('[').append(']');
+				return stringBuffer.toString();
+			} else {
+				return EMPTY;
+			}
+		}
+		if (binding.isMember()) {
+			String outerName= getRawQualifiedName(binding.getDeclaringClass());
+			if (outerName.length() > 0) {
+				StringBuffer buffer= new StringBuffer();
+				buffer.append(outerName);
+				buffer.append('.');
+				buffer.append(getRawName(binding));
+				return buffer.toString();
+			} else {
+				return EMPTY;
+			}
+
+		} else if (binding.isTopLevel()) {
+			IPackageBinding packageBinding= binding.getPackage();
+			StringBuffer buffer= new StringBuffer();
+			if (packageBinding != null && packageBinding.getName().length() > 0) {
+				buffer.append(packageBinding.getName()).append('.');
+			}
+			buffer.append(getRawName(binding));
+			return buffer.toString();
+		}
+		return EMPTY;
 	}
 	
 

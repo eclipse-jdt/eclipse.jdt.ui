@@ -471,7 +471,7 @@ public final class ImportsStructure implements IImportsStructure {
 			return paramType;
 		}
 		
-		String qualifiedName= normalizedBinding.getQualifiedName();
+		String qualifiedName= Bindings.getRawQualifiedName(binding);
 		if (qualifiedName.length() > 0) {
 			String res= internalAddImport(qualifiedName);
 			return ast.newSimpleType(ast.newSimpleName(res));
@@ -535,7 +535,7 @@ public final class ImportsStructure implements IImportsStructure {
 			return res.toString();
 		}
 		
-		String qualifiedName= normalizedBinding.getQualifiedName();
+		String qualifiedName= Bindings.getRawQualifiedName(binding);
 		if (qualifiedName.length() > 0) {
 			return internalAddImport(qualifiedName);
 		}
@@ -703,7 +703,7 @@ public final class ImportsStructure implements IImportsStructure {
 		if (binding == null) {
 			return false;
 		}		
-		String qualifiedName= binding.getQualifiedName();
+		String qualifiedName= Bindings.getRawQualifiedName(binding);
 		if (qualifiedName.length() > 0) {
 			return removeImport(qualifiedName, isStaticImport);
 		}
