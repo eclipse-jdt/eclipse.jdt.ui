@@ -98,24 +98,32 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
-		Object o= event.getElement();
+		Object[] source= event.getElements();
+		if (source == null) {
+			super.handleLabelProviderChanged(event);
+			return;
+		}
+		
 		// map the event to the Java elements if possible
 		// this does not handle the ambiguity of default packages
-		
-		// needs to handle the case of:
-		// default package
-		// package fragment root on project
-		if (o instanceof IResource) {
-			IResource r= (IResource)o;
-			IJavaElement element= JavaCore.create(r);
-			if (element != null) {
-				LabelProviderChangedEvent e= new LabelProviderChangedEvent((IBaseLabelProvider)event.getSource(), element);
-				super.handleLabelProviderChanged(e);
-				return;
+		Object[] mapped= new Object[source.length];
+		for (int i= 0; i < source.length; i++) {
+			Object o= source[i];
+			// needs to handle the case of:
+			// default package
+			// package fragment root on project
+			if (o instanceof IResource) {
+				IResource r= (IResource)o;
+				IJavaElement element= JavaCore.create(r);
+				if (element != null) 
+					mapped[i]= element;
+				else
+					mapped[i]= o;
+			} else {
+				mapped[i]= o;
 			}
 		}
-		super.handleLabelProviderChanged(event);
+		LabelProviderChangedEvent e= new LabelProviderChangedEvent((IBaseLabelProvider)event.getSource(), mapped);
 	}
-
 }
 
