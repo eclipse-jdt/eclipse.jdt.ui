@@ -581,7 +581,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
 			layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 			composite.setLayout(layout);
-			composite.setFont(parent.getFont());
 
 			Composite classConstructorComposite= addSuperClassConstructorChoices(composite);
 			gd= new GridData(GridData.FILL_BOTH);
@@ -593,7 +592,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			innerLayout.marginHeight= 0;
 			innerLayout.marginWidth= 0;
 			inner.setLayout(innerLayout);
-			inner.setFont(parent.getFont());
 
 			Label messageLabel= createMessageArea(inner);
 			if (messageLabel != null) {
@@ -628,6 +626,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 			gd= new GridData(GridData.FILL_BOTH);
 			composite.setLayoutData(gd);
+			
+			applyDialogFont(composite);
 
 			return composite;
 		}
@@ -638,7 +638,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
 			omitSuperComposite.setLayout(layout);
-			omitSuperComposite.setFont(composite.getFont());
 
 			fOmitSuperButton= new Button(omitSuperComposite, SWT.CHECK);
 			fOmitSuperButton.setText(ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.omit.super")); //$NON-NLS-1$

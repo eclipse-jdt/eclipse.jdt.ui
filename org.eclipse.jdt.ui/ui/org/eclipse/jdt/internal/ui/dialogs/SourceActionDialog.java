@@ -234,7 +234,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		layout.verticalSpacing=	convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
 		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);			
 		composite.setLayout(layout);
-		composite.setFont(parent.getFont());	
 						
 		Label messageLabel = createMessageArea(composite);			
 		if (messageLabel != null) {
@@ -272,7 +271,9 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 
 		gd= new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(gd);
-			
+		
+		applyDialogFont(composite);
+					
 		return composite;
 	}				
 	

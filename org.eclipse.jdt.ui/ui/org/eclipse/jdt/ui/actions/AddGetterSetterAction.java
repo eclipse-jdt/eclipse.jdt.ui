@@ -967,7 +967,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		 */
 		protected Control createDialogArea(Composite parent) {	
 			Control control= super.createDialogArea(parent);
-
+			applyDialogFont(control);
 			try {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
 				getTreeViewer().setExpandedElements(fType.getFields());
