@@ -60,7 +60,16 @@
     
   </target>
 
-  
+  <!-- performance test target -->
+  <target name="performance-suite" if="performance">
+    <property name="jdt-ui-performance-folder" value="${eclipse-home}/jdt_ui_performance_folder"/>
+    <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
+    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="data-dir" value="${jdt-ui-performance-folder}"/>
+      <property name="plugin-name" value="${plugin-name}"/>
+      <property name="classname" value="org.eclipse.jdt.ui.tests.performance.PerformanceTestSuite"/>
+    </ant>
+  </target>
   
   <target name="checkOS">
    	<condition property="os.isWindows">
@@ -77,7 +86,7 @@
 
   <!-- This target runs the test suite. Any actions that need to happen -->
   <!-- after all the tests have been run should go here. -->
-  <target name="run" depends="init,leaksuite,suite,cleanup">
+  <target name="run" depends="init,leaksuite,suite,performance-suite,cleanup">
     <ant target="collect" antfile="${library-file}" dir="${eclipse-home}">
       <property name="includes" value="org*.xml"/>
       <property name="output-file" value="${plugin-name}.xml"/>
