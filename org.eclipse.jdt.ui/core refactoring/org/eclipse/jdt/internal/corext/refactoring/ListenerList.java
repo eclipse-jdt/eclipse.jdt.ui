@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import org.eclipse.jdt.internal.corext.*;
+
 /**
  * Local copy of org.eclipse.jface.ListenerList
  */

@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.Assert;
 
 
 /**

@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * An immutable tuple (message, severity) representing an entry in the list in 

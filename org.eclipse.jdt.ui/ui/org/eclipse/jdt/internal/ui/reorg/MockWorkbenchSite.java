@@ -10,7 +10,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.Assert;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class MockWorkbenchSite implements IWorkbenchSite {

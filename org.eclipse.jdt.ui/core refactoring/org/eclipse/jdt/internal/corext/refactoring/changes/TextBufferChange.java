@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;

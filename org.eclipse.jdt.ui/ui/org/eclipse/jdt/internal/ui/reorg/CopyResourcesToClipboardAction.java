@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.Assert;
 
 public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 

@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**

@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 

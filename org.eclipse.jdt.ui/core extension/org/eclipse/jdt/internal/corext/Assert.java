@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.corext;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 /**
  * <code>Assert</code> is useful for for embedding runtime sanity checks
  * in code. The static predicate methods all test a condition and throw some
@@ -92,9 +94,9 @@ public final class Assert {
 	 * @param object the value to test
 	 * @param message the message to include in the exception
 	 */
-	public static void isNotNull(Object object, String message) {
+	public static void isNotNull(Object object, String message)  {
 		if (object == null)
-			throw new AssertionFailedException(CorextMessages.getString("Assertnull_argument") + message); //$NON-NLS-1$
+			throw new AssertionFailedException(RefactoringCoreMessages.getString("Assert.null_argument") + message); //$NON-NLS-1$
 	}
 
 	/**
@@ -125,7 +127,7 @@ public final class Assert {
 	 */
 	public static boolean isTrue(boolean expression, String message) {
 		if (!expression)
-			throw new AssertionFailedException(CorextMessages.getString("Assertassertion_failed") + message); //$NON-NLS-1$
+			throw new AssertionFailedException(RefactoringCoreMessages.getString("Assert.assertion_failed") + message); //$NON-NLS-1$
 		return expression;
 	}
 

@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.*;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 /**
