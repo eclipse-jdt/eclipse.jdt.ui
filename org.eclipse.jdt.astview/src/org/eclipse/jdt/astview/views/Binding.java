@@ -99,10 +99,14 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isArray()) kinds.append(" isArray"); //$NON-NLS-1$
 					if (typeBinding.isClass()) kinds.append(" isClass"); //$NON-NLS-1$
 					if (typeBinding.isEnum()) kinds.append(" isEnum"); //$NON-NLS-1$
+					if (typeBinding.isGenericType()) kinds.append(" isGenericType"); //$NON-NLS-1$
 					if (typeBinding.isInterface()) kinds.append(" isInterface"); //$NON-NLS-1$
 					if (typeBinding.isNullType()) kinds.append(" isNullType"); //$NON-NLS-1$
+					if (typeBinding.isParameterizedType()) kinds.append(" isParameterizedType"); //$NON-NLS-1$
 					if (typeBinding.isPrimitive()) kinds.append(" isPrimitive"); //$NON-NLS-1$
+					if (typeBinding.isRawType()) kinds.append(" isRawType"); //$NON-NLS-1$
 					if (typeBinding.isTypeVariable()) kinds.append(" isTypeVariable"); //$NON-NLS-1$
+					if (typeBinding.isWildcardType()) kinds.append(" isWildcardType"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, kinds.toString())); //$NON-NLS-1$
 
 					res.add(new Binding(this, "ELEMENT TYPE", typeBinding.getElementType(), typeBinding.isArray())); //$NON-NLS-1$
@@ -122,13 +126,6 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "BINARY NAME", typeBinding.getBinaryName())); //$NON-NLS-1$
 
-					StringBuffer generics= new StringBuffer("GENERICS:"); //$NON-NLS-1$
-					if (typeBinding.isRawType()) generics.append(" isRawType"); //$NON-NLS-1$
-					if (typeBinding.isGenericType()) generics.append(" isGenericType"); //$NON-NLS-1$
-					if (typeBinding.isParameterizedType()) generics.append(" isParameterizedType"); //$NON-NLS-1$
-					if (typeBinding.isWildcardType()) generics.append(" isWildcardType"); //$NON-NLS-1$
-					res.add(new BindingProperty(this, generics.toString()));
-					
 					res.add(new Binding(this, "ERASURE", typeBinding.getErasure(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", typeBinding.getTypeParameters())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", typeBinding.getTypeArguments())); //$NON-NLS-1$
