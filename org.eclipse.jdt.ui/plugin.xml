@@ -251,7 +251,7 @@
       contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor">     
     </editor>
 
-   <editor id ="org.eclipse.jdt.ui.DefaultTextEditor"
+   <editor id ="org.eclipse.jdt.ui.JARDescEditor"
       icon="icons/full/obj16/jar_desc_obj.gif"
       name="%jarDescEditorName"
       extensions="jardesc"
@@ -341,6 +341,21 @@
 			icon="icons/full/ctool16/newjprj_wiz.gif"
 			class="org.eclipse.jdt.internal.ui.wizards.OpenProjectWizardAction"/>
      </actionSet>
+</extension>
+
+<extension point="org.eclipse.ui.popupMenus">
+	<viewerContribution
+		id="org.eclipse.jdt.ui.actions.CopyNamesToClipboardActionContrib"
+		targetID="org.eclipse.jdt.ui.PackageExplorer">
+		<action
+			id="org.eclipse.jdt.ui.actions.CopyNamesToClipboardAction1"
+			label="%CopyNamesToClipboardAction.label"
+			tooltip="%CopyNamesToClipboardAction.tooltip"
+			menubarPath="group.reorganize"
+			class="org.eclipse.jdt.internal.ui.actions.CopyNamesToClipboardAction"
+			enablesFor="+">
+		</action>
+	</viewerContribution>
 </extension>
 
 <!-- =========================================================================== -->

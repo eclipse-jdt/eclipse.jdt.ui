@@ -4,196 +4,132 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.io.BufferedReader;import java.io.IOException;import java.io.InputStreamReader;import java.util.ArrayList;import java.util.Enumeration;import java.util.Hashtable;import java.util.Locale;import org.eclipse.swt.SWT;import org.eclipse.swt.events.ModifyEvent;import org.eclipse.swt.events.ModifyListener;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Group;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.swt.widgets.Widget;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.PreferencePage;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.jface.text.Document;import org.eclipse.jface.text.source.SourceViewer;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Locale;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.source.SourceViewer;
+
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.help.DialogPageContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.compiler.ConfigurableOption;
+import org.eclipse.jdt.internal.formatter.CodeFormatter;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-
-	private final static int CLEAR_ALL_NEWLINES_OPTION= 3;
-	private final static int COMPACT_ASSIGNMENT_OPTION= 7;
-	private final static int TABSIZE_OPTION= 10;
+	private final static int OPTION_CLEAR_ALL_NEWLINES= 3;
+	private final static int OPTION_COMPACT_ASSIGNMENT= 7;
+	private final static int OPTION_USETABS= 9;
+	private final static int OPTION_TABSIZE= 10;
 
 	private static ConfigurableOption[] fgCurrentOptions;
-	private static IPreferenceStore fgPreferenceStore;
-	private static final int INDENTATION_LEVEL= 0;
-	private static final int TEXT_LIMIT= 3;
-	private static final int TAB_CHECK_OPTION_ID= 9;
-	private static final int TAB_TEXT_OPTION_ID= 10;
+	
 	private static final String PREVIEW_FILE= "CodeFormatterPreviewCode.txt"; //$NON-NLS-1$
-	private static final String ERROR_MESSAGE_EMPTY= JavaUIMessages.getString("CodeFormatterPreferencePage.empty_input"); //$NON-NLS-1$
-	private static final String ERROR_MESSAGE_INVALID= JavaUIMessages.getString("CodeFormatterPreferencePage.invalid_input"); //$NON-NLS-1$
 	private static final String PREFERENCE_NAME= "CodeFormatterPreferencePage"; //$NON-NLS-1$
 	private static final String WIDGET_DATA_KEY= "OPTION"; //$NON-NLS-1$
 
 	private String fPreviewText;
 	private Document fPreviewDocument;
-	private Composite fMainPanel;
 	private Button[] fCheckOptions;
 	private Text[] fTextOptions;
-	private Button fApplyButton;
-	private Button fDefaultButton;
 	private SourceViewer fPreviewViewer;
-	private boolean fEraseStatusMessage;
-	private String fErrorMessage;
 	private ConfigurableOption[] fNewOptions;
 
-	private ModifyListener fTextListener= new ModifyListener() {
-		public void modifyText(ModifyEvent e) {
-			if (fTextOptions == null)
-				return;
-			Text source= (Text) e.widget;
-			if (checkAllTextInputs(source)) {
-				ConfigurableOption option= retrieveOption(source);
-				option.setValueIndex(parseTextInput(source.getText()));
-				updatePreview(fNewOptions);
-			}
-		}
-	};
-
-	private boolean checkAllTextInputs(Text source) {
-		boolean valueOK= false;
-		fErrorMessage= null;
-		for (int i= 0; i < fTextOptions.length; i++) {
-			int val= 0;
-			Text next= fTextOptions[i];
-			String text= next.getText();
-			try {
-				val= parseTextInput(text);
-				if (next == source)
-					valueOK= true;
-			} catch (NumberFormatException nx) {
-				if (text.equals("")) //$NON-NLS-1$
-					fErrorMessage= new String(ERROR_MESSAGE_EMPTY);
-				else
-					fErrorMessage= new String(text + ERROR_MESSAGE_INVALID);
-			}
-		}
-		setErrorMessage(fErrorMessage);
-		return valueOK;
-	}
-
-	private SelectionListener fButtonListener= new SelectionAdapter() {
-
-		public void widgetSelected(SelectionEvent e) {
-			Button src= (Button) e.widget;
-			if (src == fApplyButton)
-				performApply();
-			else if (src == fDefaultButton)
-				performDefaults();
-		}
-	};
-
-	private static ConfigurableOption[] getDefaultOptions() {
-		return CodeFormatter.getDefaultOptions(Locale.getDefault());
-	}
 
 	public static ConfigurableOption[] getCurrentOptions() {
 		return fgCurrentOptions;
 	}
 	
-	private static ConfigurableOption findOption(int option) {
-		for (int i= 0; i < fgCurrentOptions.length; i++) {
-			if (fgCurrentOptions[i].getID() == option) {
-				return fgCurrentOptions[i];
-			}
-		}
-		return null;
-	}	
-	
-	
+	/**
+	 * Gets the currently configured tab size
+	 */
 	public static int getTabSize() {
-		ConfigurableOption option= findOption(TABSIZE_OPTION);
+		ConfigurableOption option= findOption(OPTION_TABSIZE, fgCurrentOptions);
 		if (option != null) {
 			return option.getCurrentValueIndex();
 		}
 		return 4;
 	}
-		
+
+	/**
+	 * Gets the current compating assignement configuration
+	 */	
 	public static boolean isCompactingAssignment() {
-		ConfigurableOption option= findOption(COMPACT_ASSIGNMENT_OPTION);
+		ConfigurableOption option= findOption(OPTION_COMPACT_ASSIGNMENT, fgCurrentOptions);
 		if (option != null) {
 			return option.getCurrentValueIndex() == 0;
 		}
 		return false;
 	}
 		
-	
+	/**
+	 * Gets the current is clearing all black lines configuration
+	 */		
 	public static boolean isClearingAllBlankLines() {
-		ConfigurableOption option= findOption(CLEAR_ALL_NEWLINES_OPTION);
+		ConfigurableOption option= findOption(OPTION_CLEAR_ALL_NEWLINES, fgCurrentOptions);
 		if (option != null) {
 			return option.getCurrentValueIndex() == 0;
 		}
 		return false;
 	}
 	
-
-	private ConfigurableOption[] getNewOptions() {
-		return fNewOptions;
-	}
-
-	private void savePreferences() throws IOException {
-		for (int i= 0; i < fgCurrentOptions.length; i++) {
-			String preferenceID= PREFERENCE_NAME + "." + fgCurrentOptions[i].getID(); //$NON-NLS-1$
-			fgPreferenceStore.setValue(preferenceID, String.valueOf(fgCurrentOptions[i].getCurrentValueIndex()));
-		}
-	}
-
-	private static Hashtable findCategories(ConfigurableOption[] options) {
-
-		Hashtable OptionCategories= new Hashtable(options.length);
+	private static ConfigurableOption findOption(int option, ConfigurableOption[] options) {
 		for (int i= 0; i < options.length; i++) {
-			String category= options[i].getCategory();
-			if (!OptionCategories.containsKey(category))
-				OptionCategories.put(category, new ArrayList());
-			((ArrayList) OptionCategories.get(category)).add(options[i]);
-		}
-		Enumeration categories= OptionCategories.keys();
-		while (categories.hasMoreElements()) {
-			String category= (String) categories.nextElement();
-			OptionCategories.put(category, ((ArrayList) OptionCategories.get(category)).toArray(new ConfigurableOption[1]));
-		}
-		return OptionCategories;
-	}
-
-	private static String[] sortCategories(Hashtable OptionCategories) {
-		ArrayList SortedOptionCategories= new ArrayList(OptionCategories.size());
-		Enumeration categories= OptionCategories.keys();
-		while (categories.hasMoreElements()) {
-			String category= (String) categories.nextElement();
-			int pos;
-			for (pos= 0; pos < SortedOptionCategories.size(); pos++)
-				if (((ConfigurableOption[]) OptionCategories.get(category)).length > ((ConfigurableOption[]) OptionCategories.get((String) SortedOptionCategories.get(pos))).length)
-					break;
-			SortedOptionCategories.add(pos, category);
-		}
-		return (String[]) SortedOptionCategories.toArray(new String[1]);
-	}
-
-	private static int findCategoryCenter(String[] SortedOptionCategories, Hashtable OptionCategories) {
-		int middle= SortedOptionCategories.length;
-		int sizeLeft= 0;
-		int sizeRight= 0;
-		do {
-			sizeLeft= sizeRight= 0;
-			for (int i= SortedOptionCategories.length - 1; i >= 0; i--) {
-				if (i < middle)
-					sizeLeft += ((ConfigurableOption[]) OptionCategories.get(SortedOptionCategories[i])).length;
-				else
-					sizeRight += ((ConfigurableOption[]) OptionCategories.get(SortedOptionCategories[i])).length;
+			if (options[i].getID() == option) {
+				return options[i];
 			}
-			middle--;
-		} while ((sizeLeft > sizeRight) && middle > 1);
-		return middle;
-	}
+		}
+		return null;
+	}	
+	
+	/**
+	 * Initializes the current options (read from preference store)
+	 */
+	public static void initDefaults(IPreferenceStore store) {
+		fgCurrentOptions= getDefaultOptions();
+		for (int i= 0; i < fgCurrentOptions.length; i++) {
+			String preferenceID= getPreferenceID(fgCurrentOptions[i].getID());
+			if (store.contains(preferenceID))
+				fgCurrentOptions[i].setValueIndex(store.getInt(preferenceID));
 
-	private static void updateOptions(ConfigurableOption[] current, ConfigurableOption[] update) {
-		for (int i= 0; i < current.length; i++) {
-			current[i].setValueIndex(update[i].getCurrentValueIndex());
 		}
 	}
-	public void init(IWorkbench workbench) {
 
+	private static ConfigurableOption[] getDefaultOptions() {
+		return CodeFormatter.getDefaultOptions(Locale.getDefault());
 	}
 
 	public CodeFormatterPreferencePage() {
@@ -203,49 +139,58 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		fPreviewDocument= new Document();
 		fPreviewText= loadPreviewFile(PREVIEW_FILE);
 	}
-
-	public static void initDefaults(IPreferenceStore store) {
-		fgPreferenceStore= store;
-		fgCurrentOptions= CodeFormatter.getDefaultOptions(Locale.getDefault());
-		for (int i= 0; i < fgCurrentOptions.length; i++) {
-			String preferenceID= PREFERENCE_NAME + "." + fgCurrentOptions[i].getID(); //$NON-NLS-1$
-			if (fgPreferenceStore.contains(preferenceID))
-				fgCurrentOptions[i].setValueIndex(fgPreferenceStore.getInt(preferenceID));
-
-		}
+	
+	public void init(IWorkbench workbench) {
 	}
+		
+	private static String getPreferenceID(int id) {
+		return PREFERENCE_NAME + '.' + id;
+	}	
+
+	private void savePreferences(IPreferenceStore store) throws IOException {
+		for (int i= 0; i < fgCurrentOptions.length; i++) {
+			String preferenceID= getPreferenceID(fgCurrentOptions[i].getID());
+			store.setValue(preferenceID, String.valueOf(fgCurrentOptions[i].getCurrentValueIndex()));
+		}
+	}	
 
 	private String loadPreviewFile(String fn) {
 		String separator= System.getProperty("line.separator"); //$NON-NLS-1$
 		StringBuffer btxt= new StringBuffer(512);
 		try {
 			BufferedReader rin= new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(fn)));
-
-			String l;
-			while ((l= rin.readLine()) != null) {
-				btxt.append(l);
+			String line;
+			while ((line= rin.readLine()) != null) {
+				btxt.append(line);
 				btxt.append(separator);
 			}
 		} catch (IOException io) {
-			io.printStackTrace();
+			JavaPlugin.log(io);
 		}
 		return btxt.toString();
 	}
 
-	public Control createContents(Composite parent) {
-		fMainPanel= new Composite(parent, SWT.NONE);
+	/**
+	 * @see PreferencePage#createContents
+	 */
+	protected Control createContents(Composite parent) {
+		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
-		fMainPanel.setLayout(layout);
-		createOptimizedCategoryLayout(fMainPanel);
-		createPreview(fMainPanel);
+		composite.setLayout(layout);
+		createOptimizedCategoryLayout(composite);
+		createPreview(composite);
 		updateTabWidgetDependency();
 		WorkbenchHelp.setHelp(parent, new DialogPageContextComputer(this, IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE));
-		return (Control) fMainPanel;
+		return composite;
 	}
 
+
+	/**
+	 * @see PreferencePage#performDefaults
+	 */
 	public void performDefaults() {
 		super.performDefaults();
 		updateOptions(fNewOptions, getDefaultOptions());
@@ -271,22 +216,25 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	public boolean performOk() {
 		updateOptions(getCurrentOptions(), fNewOptions);
 		try {
-			savePreferences();
+			savePreferences(getPreferenceStore());
 		} catch (IOException io) {
-			io.printStackTrace();
+			JavaPlugin.log(io);
 		}
 		return true;
 	}
 
+	/**
+	 * @see PreferencePage#performApply
+	 */
 	public void performApply() {
 		performOk();
 		updatePreview(fNewOptions);
 	}
 
 	private void createOptimizedCategoryLayout(Composite parent) {
-		Hashtable OptionCategories= findCategories(fNewOptions);
-		String[] SortedOptionCategories= sortCategories(OptionCategories);
-		int categoryMiddle= findCategoryCenter(SortedOptionCategories, OptionCategories);
+		Hashtable optionCategories= findCategories(fNewOptions);
+		String[] sortedOptionCategories= sortCategories(optionCategories);
+		int categoryMiddle= findCategoryCenter(sortedOptionCategories, optionCategories);
 		ArrayList checkOptions= new ArrayList();
 		ArrayList textOptions= new ArrayList();
 		Composite panel= new Composite(parent, SWT.NONE);
@@ -313,7 +261,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		panel1.setLayoutData(gd1);
 		panel1.setLayout(gl1);
 		for (int i= 0; i < categoryMiddle; i++)
-			createSingleCategory(panel1, (ConfigurableOption[]) OptionCategories.get(SortedOptionCategories[i]), textOptions, checkOptions, SortedOptionCategories[i]);
+			createSingleCategory(panel1, (ConfigurableOption[]) optionCategories.get(sortedOptionCategories[i]), textOptions, checkOptions, sortedOptionCategories[i]);
 
 		Composite panel2= new Composite(panel, SWT.NONE);
 		GridLayout gl2= new GridLayout();
@@ -326,8 +274,8 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		gd2.verticalAlignment= GridData.FILL;
 		panel2.setLayoutData(gd2);
 		panel2.setLayout(gl2);
-		for (int i= categoryMiddle; i < SortedOptionCategories.length; i++)
-			createSingleCategory(panel2, (ConfigurableOption[]) OptionCategories.get(SortedOptionCategories[i]), textOptions, checkOptions, SortedOptionCategories[i]);
+		for (int i= categoryMiddle; i < sortedOptionCategories.length; i++)
+			createSingleCategory(panel2, (ConfigurableOption[]) optionCategories.get(sortedOptionCategories[i]), textOptions, checkOptions, sortedOptionCategories[i]);
 		fCheckOptions= (Button[]) checkOptions.toArray(new Button[checkOptions.size()]);
 		fTextOptions= (Text[]) textOptions.toArray(new Text[textOptions.size()]);
 
@@ -345,12 +293,39 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		gd2.verticalAlignment= GridData.FILL;
 		group.setLayoutData(gd2);
 		group.setLayout(gl2);
+		
+		ModifyListener textListener= new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				if (fTextOptions == null)
+					return;
+				Text source= (Text) e.widget;
+				if (checkAllTextInputs(source)) {
+					ConfigurableOption option= retrieveOption(source);
+					option.setValueIndex(parseTextInput(source.getText()));
+					updatePreview(fNewOptions);
+				}
+			}
+		};
+		
+		SelectionListener checkboxListener= new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Button src= (Button) e.widget;
+				ConfigurableOption option= retrieveOption(src);
+				int value= (src.getSelection() == true) ? 0 : 1; // See CodeFormatter logic
+				option.setValueIndex(value);
+				if (option.getID() == OPTION_USETABS) {
+					updateTabWidgetDependency();
+				}
+				updatePreview(fNewOptions);
+			}
+		};	
+		
 		for (int i= 0; i < options.length; i++) {
 			ConfigurableOption opt= options[i];
 			if (opt.getPossibleValues() == ConfigurableOption.NoDiscreteValue)
-				textOptions.add(createTextOption(opt.getName(), opt.getDescription(), opt, group, fTextListener));
+				textOptions.add(createTextOption(opt.getName(), opt.getDescription(), opt, group, textListener));
 			else if (opt.getPossibleValues().length == 2)
-				checkOptions.add(createCheckOption(opt.getName(), opt.getDescription(), opt, group, fCheckboxListener));
+				checkOptions.add(createCheckOption(opt.getName(), opt.getDescription(), opt, group, checkboxListener));
 		}
 
 	}
@@ -378,7 +353,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		flabel.setText(name);
 		flabel.setToolTipText(description);
 		Text text= new Text(pan, SWT.BORDER | SWT.SINGLE);
-		text.setTextLimit(TEXT_LIMIT);
+		text.setTextLimit(3); // limit to 3 digits
 		text.setToolTipText(description);
 		text.setData(WIDGET_DATA_KEY, option);
 		GridData gd= new GridData();
@@ -391,13 +366,13 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 
 	private void createPreview(Composite parent) {
-		fPreviewViewer= new SourceViewer(parent, null, SWT.H_SCROLL | SWT.V_SCROLL);
+		SourceViewer previewViewer= new SourceViewer(parent, null, SWT.H_SCROLL | SWT.V_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		fPreviewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
-		fPreviewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
-		fPreviewViewer.setEditable(false);
-		fPreviewViewer.setDocument(fPreviewDocument);
-		Control control= fPreviewViewer.getControl();
+		previewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
+		previewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
+		previewViewer.setEditable(false);
+		previewViewer.setDocument(fPreviewDocument);
+		Control control= previewViewer.getControl();
 		GridData gd= new GridData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.horizontalAlignment= GridData.FILL;
@@ -409,7 +384,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 
 	public void updatePreview(final ConfigurableOption[] options) {
-		fPreviewDocument.set(CodeFormatter.format(fPreviewText, INDENTATION_LEVEL, options));
+		fPreviewDocument.set(CodeFormatter.format(fPreviewText, 0, options));
 	}
 
 	private ConfigurableOption retrieveOption(Widget widget) {
@@ -423,39 +398,96 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		if (val < 0)
 			throw new NumberFormatException();
 		return val;
-
 	}
+	
+	private boolean checkAllTextInputs(Text source) {
+		boolean valueOK= false;
+		String errorMessage= null;
+		for (int i= 0; i < fTextOptions.length; i++) {
+			int val= 0;
+			Text next= fTextOptions[i];
+			String text= next.getText();
+			try {
+				val= parseTextInput(text);
+				if (next == source)
+					valueOK= true;
+			} catch (NumberFormatException nx) {
+				if (text.length() == 0)
+					errorMessage= JavaUIMessages.getString("CodeFormatterPreferencePage.empty_input"); //$NON-NLS-1$
+				else
+					errorMessage= JavaUIMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", text); //$NON-NLS-1$
+			}
+		}
+		setErrorMessage(errorMessage);
+		setValid(errorMessage == null);
+		return valueOK;
+	}	
 
 	private void updateTabWidgetDependency() {
-		boolean value= false;
-		for (int i= 0; i < fCheckOptions.length; i++) {
-			ConfigurableOption option= retrieveOption(fCheckOptions[i]);
-			if (option.getID() == TAB_CHECK_OPTION_ID) {
-				value= (option.getCurrentValueIndex() == 0) ? true : false;
-				break;
-			}
-		}
-
-		for (int i= 0; i < fTextOptions.length; i++) {
-			if (retrieveOption(fTextOptions[i]).getID() == TAB_TEXT_OPTION_ID) {
-				fTextOptions[i].setEnabled(!value);
-				break;
+		ConfigurableOption option= findOption(OPTION_USETABS, fNewOptions);
+		if (option != null) {
+			boolean tabSizeEnabled= option.getCurrentValueIndex() != 0;
+			for (int i= 0; i < fTextOptions.length; i++) {
+				if (retrieveOption(fTextOptions[i]).getID() == OPTION_TABSIZE) {
+					fTextOptions[i].setEnabled(tabSizeEnabled);
+					break;
+				}
 			}
 		}
 	}
 
-	private SelectionListener fCheckboxListener= new SelectionAdapter() {
-		public void widgetSelected(SelectionEvent e) {
-			Button src= (Button) e.widget;
-			ConfigurableOption option= retrieveOption(src);
-			int value= (src.getSelection() == true) ? 0 : 1; // See CodeFormatter logic
-			option.setValueIndex(value);
-			if (option.getID() == TAB_CHECK_OPTION_ID) {
-				updateTabWidgetDependency();
-			}
-			updatePreview(fNewOptions);
+	private static Hashtable findCategories(ConfigurableOption[] options) {
+		Hashtable optionCategories= new Hashtable(options.length);
+		for (int i= 0; i < options.length; i++) {
+			String category= options[i].getCategory();
+			if (!optionCategories.containsKey(category))
+				optionCategories.put(category, new ArrayList());
+			((ArrayList) optionCategories.get(category)).add(options[i]);
 		}
-	};
+		Enumeration categories= optionCategories.keys();
+		while (categories.hasMoreElements()) {
+			String category= (String) categories.nextElement();
+			optionCategories.put(category, ((ArrayList) optionCategories.get(category)).toArray(new ConfigurableOption[1]));
+		}
+		return optionCategories;
+	}
+
+	private static String[] sortCategories(Hashtable optionCategories) {
+		ArrayList sortedOptionCategories= new ArrayList(optionCategories.size());
+		Enumeration categories= optionCategories.keys();
+		while (categories.hasMoreElements()) {
+			String category= (String) categories.nextElement();
+			int pos;
+			for (pos= 0; pos < sortedOptionCategories.size(); pos++)
+				if (((ConfigurableOption[]) optionCategories.get(category)).length > ((ConfigurableOption[]) optionCategories.get((String) sortedOptionCategories.get(pos))).length)
+					break;
+			sortedOptionCategories.add(pos, category);
+		}
+		return (String[]) sortedOptionCategories.toArray(new String[1]);
+	}
+
+	private static int findCategoryCenter(String[] sortedOptionCategories, Hashtable optionCategories) {
+		int middle= sortedOptionCategories.length;
+		int sizeLeft= 0;
+		int sizeRight= 0;
+		do {
+			sizeLeft= sizeRight= 0;
+			for (int i= sortedOptionCategories.length - 1; i >= 0; i--) {
+				if (i < middle)
+					sizeLeft += ((ConfigurableOption[]) optionCategories.get(sortedOptionCategories[i])).length;
+				else
+					sizeRight += ((ConfigurableOption[]) optionCategories.get(sortedOptionCategories[i])).length;
+			}
+			middle--;
+		} while ((sizeLeft > sizeRight) && middle > 1);
+		return middle;
+	}
+
+	private static void updateOptions(ConfigurableOption[] current, ConfigurableOption[] update) {
+		for (int i= 0; i < current.length; i++) {
+			current[i].setValueIndex(update[i].getCurrentValueIndex());
+		}
+	}	
 
 }
 
