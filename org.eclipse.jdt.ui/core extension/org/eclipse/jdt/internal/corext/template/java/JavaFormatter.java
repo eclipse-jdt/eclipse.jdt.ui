@@ -24,9 +24,6 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICodeFormatter;
-import org.eclipse.jdt.core.ToolFactory;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -40,7 +37,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
@@ -156,9 +152,8 @@ public class JavaFormatter implements ITemplateEditor {
 
 		int[] offsets= variablesToOffsets(variables);
 		
-		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
-		string= formatter.format(string, fInitialIndentLevel, offsets, fLineDelimiter);
-		
+		string= CodeFormatterUtil.format(CodeFormatterUtil.K_UNKNOWN, string, fInitialIndentLevel, offsets, fLineDelimiter, null);
+				
 		offsetsToVariables(offsets, variables);
 
 		templateBuffer.setContent(string, variables);	    
