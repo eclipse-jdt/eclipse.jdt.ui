@@ -97,7 +97,7 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 	public Object[] getDerivedElements() {
 		if (fRenameTypeProcessor == null)
 			return new Object[0];
-		return new Object[] {fRenameTypeProcessor.getElements()};
+		return fRenameTypeProcessor.getElements();
 	}
 	
 	public IResourceModifications getResourceModifications() {
