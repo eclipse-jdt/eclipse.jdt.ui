@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -233,7 +232,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		if (node instanceof TypeDeclaration) {
 			return ((TypeDeclaration)node).getName().getIdentifier();
 		} else {
-			ClassInstanceCreation creation= (ClassInstanceCreation)ASTNodes.getParent((AnonymousClassDeclaration)node, ClassInstanceCreation.class);
+			ClassInstanceCreation creation= (ClassInstanceCreation)ASTNodes.getParent(node, ClassInstanceCreation.class);
 			return RefactoringMessages.getFormattedString(
 				"ExtractMethodInputPage.anonymous_type_label",  //$NON-NLS-1$
 				creation.getName().getFullyQualifiedName()); 
