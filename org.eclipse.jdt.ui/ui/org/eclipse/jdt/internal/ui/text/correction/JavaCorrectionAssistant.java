@@ -108,6 +108,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	 */
 	public void install(ITextViewer textViewer) {
 		super.install(textViewer);
+		fViewer= textViewer;
 		
 		fLightBulbUpdater= new QuickAssistLightBulbUpdater(fEditor, textViewer);
 		fLightBulbUpdater.install();
