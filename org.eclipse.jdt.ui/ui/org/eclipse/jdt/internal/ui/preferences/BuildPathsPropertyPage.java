@@ -164,7 +164,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 					} 
 				}
 			};
-			IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
+			IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable, getProject());
 			try {
 				new ProgressMonitorDialog(shell).run(true, true, op);
 			} catch (InvocationTargetException e) {

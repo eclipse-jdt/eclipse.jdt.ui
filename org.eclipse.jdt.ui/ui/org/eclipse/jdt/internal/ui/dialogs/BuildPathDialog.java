@@ -86,7 +86,7 @@ public class BuildPathDialog extends StatusDialog {
 				} 
 			}
 		};
-		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
+		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable, fProject.getProject());
 		try {
 			new ProgressMonitorDialog(shell).run(true, true, op);
 		} catch (InvocationTargetException e) {

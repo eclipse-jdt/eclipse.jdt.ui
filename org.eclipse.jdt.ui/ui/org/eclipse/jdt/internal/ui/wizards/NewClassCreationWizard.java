@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -57,6 +58,13 @@ public class NewClassCreationWizard extends NewElementWizard {
 			openResource((IFile) resource);
 		}	
 	}
+	
+    /*(non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getSchedulingRule()
+     */
+    protected ISchedulingRule getSchedulingRule() {
+    	return fPage.getCreatedType().getResource();
+    }
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()

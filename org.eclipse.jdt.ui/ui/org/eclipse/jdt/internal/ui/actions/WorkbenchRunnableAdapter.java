@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
@@ -29,9 +30,15 @@ import org.eclipse.jdt.core.JavaCore;
 public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 	
 	private IWorkspaceRunnable fWorkspaceRunnable;
+	private ISchedulingRule fRule;
 	
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable) {
 		fWorkspaceRunnable= runnable;
+	}
+	
+	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable, ISchedulingRule rule) {
+		fWorkspaceRunnable= runnable;
+		fRule= rule;
 	}
 
 	/*
@@ -39,7 +46,11 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		try {
-			JavaCore.run(fWorkspaceRunnable, monitor);
+			if (fRule == null) {
+				JavaCore.run(fWorkspaceRunnable, monitor);
+			} else {
+				JavaCore.run(fWorkspaceRunnable, monitor); // to be changed
+			}
 		} catch (OperationCanceledException e) {
 			throw new InterruptedException(e.getMessage());
 		} catch (CoreException e) {

@@ -217,7 +217,6 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			settings.createComments= dialog.getGenerateComment();
 	
 			IEditorPart editor= EditorUtility.openInEditor(type.getCompilationUnit());
-			type= (IType) JavaModelUtil.toWorkingCopy(type);
 
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null) {
@@ -225,8 +224,6 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			}
 			try {
 				IJavaElement elementPosition= dialog.getElementPosition();
-				if (elementPosition != null)
-					elementPosition= JavaModelUtil.toWorkingCopy(elementPosition);
 				
 				AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selected, false, elementPosition);
 			
@@ -234,7 +231,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 				if (context == null) {
 					context= new BusyIndicatorRunnableContext();
 				}
-				context.run(false, true, new WorkbenchRunnableAdapter(op));
+				context.run(false, true, new WorkbenchRunnableAdapter(op, type.getResource()));
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
 					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.nothing_found")); //$NON-NLS-1$

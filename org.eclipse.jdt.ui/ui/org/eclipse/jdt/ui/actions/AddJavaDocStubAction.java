@@ -114,39 +114,9 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			// open the editor, forces the creation of a working copy
 			IEditorPart editor= EditorUtility.openInEditor(cu);
 			
-			ICompilationUnit workingCopyCU;
-			IMember[] workingCopyMembers;
-			if (cu.isWorkingCopy()) {
-				workingCopyCU= cu;
-				workingCopyMembers= members;
-				synchronized (workingCopyCU) {
-					workingCopyCU.reconcile();
-				}
-			
-			} else {
-				// get the corresponding elements from the working copy
-				workingCopyCU= EditorUtility.getWorkingCopy(cu);
-				if (workingCopyCU == null) {
-					showError(ActionMessages.getString("AddJavaDocStubsAction.error.noWorkingCopy")); //$NON-NLS-1$
-					return;
-				}
-				workingCopyMembers= new IMember[members.length];
-				for (int i= 0; i < members.length; i++) {
-					IMember member= members[i];
-					IMember workingCopyMember= JavaModelUtil.findMemberInCompilationUnit(workingCopyCU, member);
-					if (workingCopyMember == null) {
-						showError(ActionMessages.getFormattedString("AddJavaDocStubsAction.error.memberNotExisting", member.getElementName())); //$NON-NLS-1$
-						return;
-					}
-					workingCopyMembers[i]= workingCopyMember;
-				}
-			}
-			
-			if (ElementValidator.check(workingCopyMembers, getShell(), getDialogTitle(), false))
-				run(workingCopyMembers);
-			synchronized (workingCopyCU) {
-				workingCopyCU.reconcile();
-			}					
+			if (ElementValidator.check(members, getShell(), getDialogTitle(), false))
+				run(cu, members);
+			JavaModelUtil.reconcile(cu);
 			EditorUtility.revealInEditor(editor, members[0]);
 			
 		} catch (CoreException e) {
@@ -185,7 +155,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 			}
 			IMember[] members= new IMember[] { (IMember)element };
 			if (ElementValidator.checkValidateEdit(members, getShell(), getDialogTitle()))
-				run(members);
+				run(members[0].getCompilationUnit(), members);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
 		}
@@ -193,20 +163,16 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 
 	//---- Helpers -------------------------------------------------------------------
 	
-	public void run(IMember[] members) {
+	public void run(ICompilationUnit cu, IMember[] members) {
 		try {
 			AddJavaDocStubOperation op= new AddJavaDocStubOperation(members);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
-			dialog.run(false, true, new WorkbenchRunnableAdapter(op));					
+			dialog.run(false, true, new WorkbenchRunnableAdapter(op, cu.getResource()));					
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("AddJavaDocStubsAction.error.actionFailed")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// operation cancelled
 		}
-	}
-	
-	private void showError(String message) {
-		MessageDialog.openError(getShell(), getDialogTitle(), message);
 	}
 	
 	private IMember[] getSelectedMembers(IStructuredSelection selection) {

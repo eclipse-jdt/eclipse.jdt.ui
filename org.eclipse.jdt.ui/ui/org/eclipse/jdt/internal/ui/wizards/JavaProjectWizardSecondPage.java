@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -93,7 +95,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		};
 	
 		try {
-			getContainer().run(false, true, op);
+			getContainer().run(false, true, new WorkspaceModifyDelegatingOperation(op, newProjectHandle));
 		} catch (InvocationTargetException e) {
 			final String title= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.title"); //$NON-NLS-1$
 			final String message= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.message"); //$NON-NLS-1$
@@ -208,7 +210,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		};
 	
 		try {
-			getContainer().run(false, true, op);
+			getContainer().run(false, true, new WorkspaceModifyDelegatingOperation(op, fCurrProject));
 		} catch (InvocationTargetException e) {
 			final String title= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.remove.title"); //$NON-NLS-1$
 			final String message= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.remove.message"); //$NON-NLS-1$

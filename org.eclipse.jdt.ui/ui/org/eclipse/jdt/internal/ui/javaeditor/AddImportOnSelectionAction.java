@@ -151,7 +151,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { type }, settings, false);
 					ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 					try {
-						dialog.run(false, true, new WorkbenchRunnableAdapter(op));
+						dialog.run(false, true, new WorkbenchRunnableAdapter(op, cu.getResource()));
 					} catch (InvocationTargetException e) {
 						ExceptionHandler.handle(e, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null); //$NON-NLS-1$
 					} catch (InterruptedException e) {

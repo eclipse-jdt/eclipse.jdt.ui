@@ -100,20 +100,15 @@ public class AddMethodStubAction extends Action {
 		try {		
 			// open an editor and work on a working copy
 			IEditorPart editor= EditorUtility.openInEditor(fParentType);
-			IType usedType= (IType)EditorUtility.getWorkingCopy(fParentType);
-			if (usedType == null) {
-				MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.error.title"), JavaUIMessages.getString("AddMethodStubAction.error.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
-				return;
-			}
 			
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 
 			List list= ((IStructuredSelection)fSelection).toList();	
 			IMethod[] methods= (IMethod[]) list.toArray(new IMethod[list.size()]); 
-			AddMethodStubOperation op= new AddMethodStubOperation(usedType, methods, settings, createOverrideQuery(), createReplaceQuery(), false);
+			AddMethodStubOperation op= new AddMethodStubOperation(fParentType, methods, settings, createOverrideQuery(), createReplaceQuery(), false);
 		
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
-			dialog.run(false, true, new WorkbenchRunnableAdapter(op));
+			dialog.run(false, true, new WorkbenchRunnableAdapter(op, fParentType.getResource()));
 			IMethod[] res= op.getCreatedMethods();
 			if (res != null && res.length > 0 && editor != null) {
 				EditorUtility.revealInEditor(editor, res[0]);

@@ -60,7 +60,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -337,8 +336,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				ICompilationUnit cu= cus[i];
 				if (testOnBuildPath(cu, status)) {
 					String cuLocation= cu.getPath().makeRelative().toString();
-					cu= JavaModelUtil.toWorkingCopy(cu);
-				
+					
 					monitor.subTask(cuLocation);
 
 					try {
@@ -414,19 +412,18 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);
 			boolean ignoreLowerCaseNames= store.getBoolean(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
 			
-			if (!cu.isWorkingCopy()) {
+			if (fEditor == null && EditorUtility.isOpenInEditor(cu) == null) {
 				IEditorPart editor= EditorUtility.openInEditor(cu);
 				if (editor instanceof JavaEditor) {
 					fEditor= (JavaEditor) editor;
-				}
-				
-				cu= JavaModelUtil.toWorkingCopy(cu);
-			}			
+				}			
+			}
+
 			
 			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), true, createChooseImportQuery());
 		
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-			context.run(false, true, new WorkbenchRunnableAdapter(op));
+			context.run(false, true, new WorkbenchRunnableAdapter(op, cu.getResource()));
 			IProblem parseError= op.getParseError();
 			if (parseError != null) {
 				String message= ActionMessages.getFormattedString("OrganizeImportsAction.single.error.parse", parseError.getMessage()); //$NON-NLS-1$

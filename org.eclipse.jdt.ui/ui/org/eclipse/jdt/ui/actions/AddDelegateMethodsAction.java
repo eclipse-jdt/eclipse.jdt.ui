@@ -377,7 +377,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 
 				IEditorPart part = EditorUtility.openInEditor(type);
-				type = (IType) JavaModelUtil.toWorkingCopy(type);
 				
 				IRewriteTarget target= (IRewriteTarget) part.getAdapter(IRewriteTarget.class);
 				IMethod[] createdMethods= null;
@@ -387,9 +386,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					}
 					// pass dialog based information to the operation 
 					IJavaElement elementPosition= dialog.getElementPosition();
-					if (elementPosition != null)
-						elementPosition= JavaModelUtil.toWorkingCopy(elementPosition);
-							
+						
 					CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();
 					settings.createComments= dialog.getGenerateComment();										
 					createdMethods= processResults(methods, type, elementPosition, settings);
@@ -400,9 +397,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 				
 				if (createdMethods != null && createdMethods.length > 0) {
-					synchronized (type.getCompilationUnit()) {
-						type.getCompilationUnit().reconcile();
-					}
+					JavaModelUtil.reconcile(type.getCompilationUnit());
 					EditorUtility.revealInEditor(part, createdMethods[0]);
 				}
 			}
@@ -425,7 +420,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			context= new BusyIndicatorRunnableContext();
 		}
 		try {
-			context.run(false, true, new WorkbenchRunnableAdapter(op));
+			context.run(false, true, new WorkbenchRunnableAdapter(op, type.getResource()));
 		} catch (InterruptedException e) {
 			// cancel pressed
 			return null;

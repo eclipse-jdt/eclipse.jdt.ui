@@ -898,4 +898,14 @@ public final class JavaModelUtil {
 		System.arraycopy(args, 0, args = new String[count], 0, count);
 		return args;
 	}
+
+	/**
+	 * Force a reconcile of a compilation unit.
+	 * @param unit
+	 */
+	public static void reconcile(ICompilationUnit unit) throws JavaModelException {
+		synchronized(unit)  {
+			unit.reconcile();
+		}
+	}
 }

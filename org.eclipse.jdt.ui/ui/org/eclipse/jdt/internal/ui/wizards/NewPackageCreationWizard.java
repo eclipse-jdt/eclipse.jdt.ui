@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.jdt.ui.wizards.NewPackageWizardPage;
 
@@ -46,4 +47,12 @@ public class NewPackageCreationWizard extends NewElementWizard {
 		fPage.createPackage(monitor); // use the full progress monitor
 		selectAndReveal(fPage.getNewPackageFragment().getResource());
 	}
+	
+	
+    /*(non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getSchedulingRule()
+     */
+    protected ISchedulingRule getSchedulingRule() {
+    	return fPage.getNewPackageFragment().getResource();
+    }
 }

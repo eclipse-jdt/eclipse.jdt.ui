@@ -253,11 +253,8 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			settings.createComments= dialog.getGenerateComment();
 	
 			IEditorPart editor= EditorUtility.openInEditor(type);
-			type = (IType) JavaModelUtil.toWorkingCopy(type);
 
 			IJavaElement elementPosition= dialog.getElementPosition();
-			if (elementPosition != null)
-				elementPosition= JavaModelUtil.toWorkingCopy(elementPosition);
 						
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null) {
@@ -272,16 +269,12 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				if (context == null) {
 					context= new BusyIndicatorRunnableContext();
 				}				
-				context.run(false, true, new WorkbenchRunnableAdapter(op));
+				context.run(false, true, new WorkbenchRunnableAdapter(op, type.getResource()));
 				IMethod[] res= op.getCreatedMethods();
 				if (res == null || res.length == 0) {
 					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.error.nothing_found")); //$NON-NLS-1$
 				} else if (editor != null) {
-					if (res[0].getCompilationUnit().isWorkingCopy())  {
-						synchronized(res[0].getCompilationUnit())  {
-							res[0].getCompilationUnit().reconcile();
-						}
-					}
+					JavaModelUtil.reconcile(res[0].getCompilationUnit());
 					EditorUtility.revealInEditor(editor, res[0]);
 				}
 			} catch (InvocationTargetException e) {

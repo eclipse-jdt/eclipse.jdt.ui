@@ -352,7 +352,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		dialog.setMessage(ActionMessages.getString("GenerateConstructorUsingFieldsAction.dialog.label")); //$NON-NLS-1$
 		dialog.setValidator(createValidator(constructorFieldsList.size(), dialog, type));
 
-		IField[] selected= null;
 		int dialogResult= dialog.open();
 		if (dialogResult == Window.OK) {
 			Object[] checkedElements= dialog.getResult();
@@ -366,17 +365,13 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				}
 			}
 			IEditorPart editor= EditorUtility.openInEditor(type.getCompilationUnit());
-			type = (IType) JavaModelUtil.toWorkingCopy(type);
 					
-			selected= (IField[]) result.toArray(new IField[result.size()]);
-			IField[] workingCopyFields= getWorkingCopyFields(selected);
+			IField[] workingCopyFields= (IField[]) result.toArray(new IField[result.size()]);
 
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			settings.createComments= dialog.getGenerateComment();
 
 			IJavaElement elementPosition= dialog.getElementPosition();
-			if (elementPosition != null)
-				elementPosition= JavaModelUtil.toWorkingCopy(elementPosition);
 			
 			IMethod selectedConstructor= dialog.getSuperConstructorChoice();
 
@@ -396,14 +391,9 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				if (context == null) {
 					context= new BusyIndicatorRunnableContext();
 				}
-				context.run(false, true, new WorkbenchRunnableAdapter(op));
+				context.run(false, true, new WorkbenchRunnableAdapter(op, type.getResource()));
 				IMethod res= op.getCreatedConstructor();
-
-				if (res.getCompilationUnit().isWorkingCopy()) {
-					synchronized (res.getCompilationUnit()) {
-						res.getCompilationUnit().reconcile();
-					}
-				}
+				JavaModelUtil.reconcile(res.getCompilationUnit());
 				EditorUtility.revealInEditor(editor, res);
 
 			} catch (InvocationTargetException e) {
@@ -450,40 +440,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	private static ISelectionStatusValidator createValidator(int entries, GenerateConstructorUsingFieldsSelectionDialog dialog, IType type) {
 		GenerateConstructorUsingFieldsValidator validator= new GenerateConstructorUsingFieldsValidator(entries, dialog, type);
 		return validator;
-	}
-
-	private void showError(String title, String message) {
-		MessageDialog.openError(getShell(), title, message);
-	}
-
-	private IField[] getWorkingCopyFields(IField[] fields) {
-		if (fields.length == 0)
-			return new IField[0];
-		ICompilationUnit cu= fields[0].getCompilationUnit();
-		
-		ICompilationUnit workingCopyCU;
-		IField[] workingCopyFields;
-		if (cu.isWorkingCopy()) {
-			workingCopyCU= cu;
-			workingCopyFields= fields;
-		} else {
-			workingCopyCU= EditorUtility.getWorkingCopy(cu);
-			if (workingCopyCU == null) {
-				showError(ActionMessages.getString("JavaSourceAction.error.actionfailed"), DIALOG_TITLE); //$NON-NLS-1$
-				return null;
-			}
-			workingCopyFields= new IField[fields.length];
-			for (int i= 0; i < fields.length; i++) {
-				IField field= fields[i];
-				IField workingCopyField= (IField) JavaModelUtil.findMemberInCompilationUnit(workingCopyCU, field);
-				if (workingCopyField == null) {
-					showError(ActionMessages.getFormattedString("JavaSourceAction.error.fieldNotExisting", field.getElementName()), DIALOG_TITLE); //$NON-NLS-1$
-					return null;
-				}
-				workingCopyFields[i]= workingCopyField;
-			}
-		}
-		return workingCopyFields;	
 	}
 
 	private static class GenerateConstructorUsingFieldsValidator implements ISelectionStatusValidator {

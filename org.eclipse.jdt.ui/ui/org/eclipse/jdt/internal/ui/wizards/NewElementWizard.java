@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -77,6 +78,12 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	 */
 	protected abstract void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException;
 	
+	/**
+	 * Returns the scheduling rule for creating the element.
+	 */
+	protected abstract ISchedulingRule getSchedulingRule();
+	
+	
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {
 		String title= NewWizardMessages.getString("NewElementWizard.op_error.title"); //$NON-NLS-1$
 		String message= NewWizardMessages.getString("NewElementWizard.op_error.message"); //$NON-NLS-1$
@@ -97,7 +104,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 			}
 		};
 		try {
-			getContainer().run(false, true, new WorkbenchRunnableAdapter(op));
+			getContainer().run(false, true, new WorkbenchRunnableAdapter(op, getSchedulingRule()));
 		} catch (InvocationTargetException e) {
 			handleFinishException(getShell(), e);
 			return false;

@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -53,10 +54,19 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
      * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
      */
     protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
-        fSecondPage.performFinish(monitor); // use the full progress monitor
+    	fSecondPage.performFinish(monitor); // use the full progress monitor
         BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-        selectAndReveal(fSecondPage.getJavaProject().getProject());
+       
+		selectAndReveal(fSecondPage.getJavaProject().getProject());
     }
+    
+    /*(non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getSchedulingRule()
+     */
+    protected ISchedulingRule getSchedulingRule() {
+    	return fSecondPage.getJavaProject().getProject();
+    }
+    
     
     protected void handleFinishException(Shell shell, InvocationTargetException e) {
         String title= NewWizardMessages.getString("JavaProjectWizard.op_error.title"); //$NON-NLS-1$

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
@@ -35,13 +36,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Action to add a JAR to the classpath of its parent project.
@@ -103,7 +103,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 			return null;
 		
 		IJavaProject project= JavaCore.create(resource.getProject());
-		if (project != null && project.exists() && (null == project.findPackageFragmentRoot(resource.getFullPath())))
+		if (project != null && project.exists() && (project.findPackageFragmentRoot(resource.getFullPath()) == null))
 			return (IFile) resource;
 		return null;
 	}
@@ -111,38 +111,54 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
-	public void run(final IStructuredSelection selection) {
-		IWorkspaceRunnable operation= new IWorkspaceRunnable() {
-			public void run(IProgressMonitor monitor) throws CoreException {
-				IFile[] files= getJARFiles(selection);
-				monitor.beginTask(ActionMessages.getString("AddToClasspathAction.progressMessage"), files.length); //$NON-NLS-1$
-				for (int i= 0; i < files.length; i++) {
-					monitor.subTask(files[i].getFullPath().toString());
-					IJavaProject project= JavaCore.create(files[i].getProject());
-					addToClassPath(project, files[i].getFullPath(), new SubProgressMonitor(monitor, 1));
+	public void run(IStructuredSelection selection) {
+		try {
+			final IFile[] files= getJARFiles(selection);
+			IResource rule= null;
+			for (int i= 0; i < files.length; i++) {
+				IProject curr= files[i].getProject();
+				if (rule == null) {
+					rule= curr;
+				} else if (!rule.equals(curr)) {
+					rule= curr.getParent();
 				}
 			}
 			
-			private void addToClassPath(IJavaProject project, IPath jarPath, IProgressMonitor monitor) throws JavaModelException {
-				if (monitor.isCanceled())
-					throw new OperationCanceledException();
-				IClasspathEntry[] entries= project.getRawClasspath();
-				IClasspathEntry[] newEntries= new IClasspathEntry[entries.length + 1];
-				System.arraycopy(entries, 0, newEntries, 0, entries.length);
-				newEntries[entries.length]= JavaCore.newLibraryEntry(jarPath, null, null, false);
-				project.setRawClasspath(newEntries, monitor);
-			}
-		};
-		
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(operation));
+			
+			IWorkspaceRunnable operation= new IWorkspaceRunnable() {
+				public void run(IProgressMonitor monitor) throws CoreException {
+					monitor.beginTask(ActionMessages.getString("AddToClasspathAction.progressMessage"), files.length); //$NON-NLS-1$
+					for (int i= 0; i < files.length; i++) {
+						monitor.subTask(files[i].getFullPath().toString());
+						IJavaProject project= JavaCore.create(files[i].getProject());
+						addToClassPath(project, files[i].getFullPath(), new SubProgressMonitor(monitor, 1));
+					}
+				}
+				
+				private void addToClassPath(IJavaProject project, IPath jarPath, IProgressMonitor monitor) throws JavaModelException {
+					if (monitor.isCanceled())
+						throw new OperationCanceledException();
+					IClasspathEntry[] entries= project.getRawClasspath();
+					IClasspathEntry[] newEntries= new IClasspathEntry[entries.length + 1];
+					System.arraycopy(entries, 0, newEntries, 0, entries.length);
+					newEntries[entries.length]= JavaCore.newLibraryEntry(jarPath, null, null, false);
+					project.setRawClasspath(newEntries, monitor);
+				}
+			};	
+			
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(operation, rule));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), 
 				ActionMessages.getString("AddToClasspathAction.error.title"),  //$NON-NLS-1$
 				ActionMessages.getString("AddToClasspathAction.error.message")); //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, getShell(), 
+					ActionMessages.getString("AddToClasspathAction.error.title"),  //$NON-NLS-1$
+					ActionMessages.getString("AddToClasspathAction.error.message")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// canceled
 		}
+
 	}
 	
 	private static IFile[] getJARFiles(IStructuredSelection selection) throws JavaModelException {

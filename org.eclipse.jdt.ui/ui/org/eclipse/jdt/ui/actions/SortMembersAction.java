@@ -35,7 +35,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.SortMembersOperation;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -134,7 +133,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 			// open an editor and work on a working copy
 			IEditorPart editor= EditorUtility.openInEditor(cu);
 			if (editor != null) {
-				run(shell, JavaModelUtil.toWorkingCopy(cu), editor);
+				run(shell, cu, editor);
 			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
@@ -201,7 +200,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 		SortMembersOperation op= new SortMembersOperation(cu, null);
 		try {
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-			context.run(false, true, new WorkbenchRunnableAdapter(op));
+			context.run(false, true, new WorkbenchRunnableAdapter(op, cu.getResource()));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
 		} catch (InterruptedException e) {
