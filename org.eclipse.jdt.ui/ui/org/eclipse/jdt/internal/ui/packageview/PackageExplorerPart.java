@@ -20,8 +20,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -708,7 +710,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				Object input= getElementOfInput(editor.getEditorInput());					
 				if (input != null && input.equals(element)) {
 					page.bringToTop(editor);
-					if (obj instanceof ISourceReference) 
+					if (obj instanceof ISourceReference && !(obj instanceof IOpenable)) 
 						EditorUtility.revealInEditor(editor, (ISourceReference)obj);
 					return;
 				}
@@ -718,6 +720,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 	private IResource getResourceFor(Object element) {
 		if (element instanceof IJavaElement) {
+			if (element instanceof IWorkingCopy) {
+				IWorkingCopy wc= (IWorkingCopy)element;
+				IJavaElement original= wc.getOriginalElement();
+				if (original != null)
+					element= original;
+			}
 			try {
 				element= ((IJavaElement)element).getUnderlyingResource();
 			} catch (JavaModelException e) {
