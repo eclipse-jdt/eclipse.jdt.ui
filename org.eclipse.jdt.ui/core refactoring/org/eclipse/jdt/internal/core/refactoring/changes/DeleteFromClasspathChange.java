@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.internal.core.refactoring.changes;
 
 import org.eclipse.core.runtime.IPath;
@@ -13,8 +17,10 @@ import org.eclipse.jdt.internal.core.refactoring.base.Change;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.*;
+import org.eclipse.jdt.internal.core.refactoring.*;
 
-class DeleteFromClasspathChange extends Change {
+public class DeleteFromClasspathChange extends Change {
 
 	private String fProjectHandle;
 	private IPath fPathToDelete;
@@ -34,7 +40,7 @@ class DeleteFromClasspathChange extends Change {
 		fProjectHandle= project.getHandleIdentifier();
 	}
 	
-	/**
+	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
 	 */
 	public void perform(ChangeContext context, IProgressMonitor pm)	throws JavaModelException, ChangeAbortException {
@@ -93,10 +99,16 @@ class DeleteFromClasspathChange extends Change {
 										fPath, fSourceAttachmentPath, fSourceAttachmentRootPath);
 	}
 
+	/* non java-doc
+	 * @see IChange#getName()
+	 */
 	public String getName() {
 		return "Remove entry from classpath";
 	}
 
+	/* non java-doc
+	 * @see IChange#getCorrespondingJavaElement()
+	 */
 	public IJavaElement getCorrespondingJavaElement() {
 		return getJavaProject();
 	}
