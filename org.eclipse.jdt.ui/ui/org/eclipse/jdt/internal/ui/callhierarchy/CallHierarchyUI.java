@@ -253,6 +253,9 @@ public class CallHierarchyUI {
                     }
                 } else if (element instanceof IMember) {
                     javaElements.add(element);
+                } else if (element instanceof CallLocation) {
+                    IMember member = ((CallLocation) element).getMember();
+                    javaElements.add(member);
                 }
             }
             return new StructuredSelection(javaElements);
