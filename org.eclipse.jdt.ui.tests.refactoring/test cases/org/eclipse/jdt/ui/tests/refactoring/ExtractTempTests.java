@@ -339,4 +339,9 @@ public class ExtractTempTests extends RefactoringTest {
 //		failHelper1(6, 16, 6, 18, false, false, "temp");
 	}	
 
+	public void testFail20() throws Exception{
+		printTestDisabledMessage("regression test for bug#13249");
+//		failHelper1(3, 9, 3, 41, false, false, "temp");
+	}	
+
 }
