@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.eclipse.jface.text.BadLocationException;
 
 import org.eclipse.ui.PartInitException;
@@ -19,12 +22,18 @@ import org.eclipse.ui.PartInitException;
  * @since 3.1
  */
 public class RevertTextEditorTest extends RevertEditorTest {
+	
+	private static final Class THIS= RevertTextEditorTest.class;
 
 	private static final String PREFIX= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout";
 	
 	private static final String ORIG_FILE= PREFIX + ".java";
 	
 	private static final String FILE= PREFIX + ".txt";
+
+	public static Test suite() {
+		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
 	
 	protected void setUp() throws Exception {
 		ResourceTestHelper.copy(ORIG_FILE, FILE);
