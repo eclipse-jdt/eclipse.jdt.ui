@@ -155,6 +155,38 @@ public class AddImportTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
+	
+	public void testAddImports3() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Set; // comment\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "java", "java.util", "com", "pack" };
+
+		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
+		imports.addImport("java.util.Vector");
+
+		imports.create(true, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Set; // comment\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
 	public void testRemoveImports1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -188,6 +220,37 @@ public class AddImportTest extends CoreTests {
 		buf.append("import java.util.Map;\n");
 		buf.append("\n");
 		buf.append("import pack.List2;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testRemoveImports2() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("import java.util.Vector; // comment\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		String[] order= new String[] { "java", "com", "pack" };
+		
+		ImportsStructure imports= new ImportsStructure(cu, order, 2, true);
+		imports.removeImport("java.util.Vector");
+		
+		imports.create(true, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Set;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
