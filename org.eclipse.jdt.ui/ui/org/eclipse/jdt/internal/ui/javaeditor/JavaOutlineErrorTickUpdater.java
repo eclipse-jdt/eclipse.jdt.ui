@@ -10,8 +10,8 @@ import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IWorkingCopy;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
@@ -81,8 +81,13 @@ public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
 	}
 	
 	private void doUpdateErrorTicks() {
+		// running async, have to check all
+		if (fLabelProvider == null || fAnnotationModel == null) {
+			return;
+		}
+		
 		// do not look at class files
-		if (!(fViewer.getInput() instanceof IWorkingCopy)) {
+		if (!(fViewer.getInput() instanceof ICompilationUnit)) {
 			return;
 		}
 		

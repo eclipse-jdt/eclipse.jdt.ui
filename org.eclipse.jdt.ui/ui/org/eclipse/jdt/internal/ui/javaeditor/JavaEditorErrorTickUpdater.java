@@ -5,6 +5,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 
+import org.eclipse.jface.util.Assert;
 import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -24,6 +25,7 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 
 	public JavaEditorErrorTickUpdater(JavaEditor editor) {
 		fJavaEditor= editor;
+		Assert.isNotNull(editor);
 	}
 
 	/**
@@ -71,9 +73,11 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 	
 	private void doUpdateErrorTicks() {
 		IEditorInput input= fJavaEditor.getEditorInput();
-		IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);
-		if (jelement != null) {
-			fJavaEditor.updatedTitleImage(fLabelProvider.getImage(jelement));
+		if (fLabelProvider != null && input != null) { // running async, tests needed
+			IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);
+			if (jelement != null) {
+				fJavaEditor.updatedTitleImage(fLabelProvider.getImage(jelement));
+			}
 		}
 	}	
 
