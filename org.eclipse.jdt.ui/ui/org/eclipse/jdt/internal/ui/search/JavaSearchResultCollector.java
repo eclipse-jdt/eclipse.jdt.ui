@@ -127,7 +127,8 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			attributes.put(IWorkbenchPage.EDITOR_ID_ATTR, JavaUI.ID_CU_EDITOR);
 		marker.setAttributes(attributes);
 
-		fView.addMatch(enclosingElement.getElementName(), groupKey, resource, marker);
+		if (fView != null)
+			fView.addMatch(enclosingElement.getElementName(), groupKey, resource, marker);
 		fMatchCount++;
 		if (!getProgressMonitor().isCanceled() && System.currentTimeMillis() - fLastUpdateTime > 1000) {
 			getProgressMonitor().subTask(getFormattedMatchesString(fMatchCount));
