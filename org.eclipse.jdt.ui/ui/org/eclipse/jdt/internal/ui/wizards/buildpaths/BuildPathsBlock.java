@@ -51,7 +51,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -206,12 +205,10 @@ public class BuildPathsBlock {
 		folder.setLayout(new TabFolderLayout());	
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		ImageRegistry imageRegistry= JavaPlugin.getDefault().getImageRegistry();
-		
 		TabItem item;
         item= new TabItem(folder, SWT.NONE);
         item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.source")); //$NON-NLS-1$
-        item.setImage(imageRegistry.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
+        item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
 		
         if (newPageEnabled()) {
             fNewSourceContainerPage= new NewSourceContainerWorkbookPage(fClassPathList, fBuildPathDialogField, fRunnableContext);
@@ -237,7 +234,7 @@ public class BuildPathsBlock {
 		fLibrariesPage= new LibrariesWorkbookPage(fWorkspaceRoot, fClassPathList);		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.libraries")); //$NON-NLS-1$
-		item.setImage(imageRegistry.get(JavaPluginImages.IMG_OBJS_LIBRARY));
+		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_LIBRARY));
 		item.setData(fLibrariesPage);
 		item.setControl(fLibrariesPage.getControl(folder));
 		
