@@ -27,6 +27,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -296,9 +298,13 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+		IDocument document= new Document();
+		IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
+		document.setDocumentPartitioner(partitioner);
+		partitioner.connect(document);		
 		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		viewer.setEditable(false);
-		viewer.setDocument(new Document());
+		viewer.setDocument(document);
 		viewer.getTextWidget().setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 	
 		Font font= JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT);

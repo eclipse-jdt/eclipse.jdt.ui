@@ -50,6 +50,7 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewer;
@@ -330,9 +331,13 @@ public class EditTemplateDialog extends StatusDialog {
 	private SourceViewer createEditor(Composite parent) {
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+		IDocument document= new Document(fTemplate.getPattern());
+		IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
+		document.setDocumentPartitioner(partitioner);
+		partitioner.connect(document);		
 		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null, fProcessor));
 		viewer.setEditable(true);
-		viewer.setDocument(new Document(fTemplate.getPattern()));
+		viewer.setDocument(document);
 		
 		Font font= JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
