@@ -27,6 +27,8 @@ import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.ui.IPluginContribution;
+import org.eclipse.ui.activities.WorkbenchActivityHelper;
 
 /**
  * Represents a custom filter which is provided by the
@@ -34,7 +36,7 @@ import org.eclipse.jdt.ui.JavaUI;
  * 
  * since 2.0
  */
-public class FilterDescriptor implements Comparable {
+public class FilterDescriptor implements Comparable, IPluginContribution {
 
 	private static String PATTERN_FILTER_ID_PREFIX= "_patternFilterId_"; //$NON-NLS-1$
 
@@ -84,6 +86,8 @@ public class FilterDescriptor implements Comparable {
 		List result= new ArrayList(filterDescs.length);
 		for (int i= 0; i < filterDescs.length; i++) {
 			String tid= filterDescs[i].getTargetId();
+			if (WorkbenchActivityHelper.filterItem(filterDescs[i]))
+				continue;
 			if (tid == null || tid.equals(targetId))
 				result.add(filterDescs[i]);
 		}
@@ -263,4 +267,13 @@ public class FilterDescriptor implements Comparable {
 		Collections.sort(result);
 		return (FilterDescriptor[])result.toArray(new FilterDescriptor[result.size()]);
 	}
+	
+	public String getLocalId() {
+		return fElement.getAttribute(ID_ATTRIBUTE);
+	}
+
+    public String getPluginId() {
+        return fElement.getDeclaringExtension().getNamespace();
+    }
+
 }
