@@ -364,7 +364,10 @@ public class PullUpRefactoring extends Refactoring {
 
 		if (declaringType.isReadOnly())
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in read-only types.");	
-		
+	
+		if (getSuperType(new NullProgressMonitor()) == null)	
+			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in this type.");	
+			
 		if (getSuperType(new NullProgressMonitor()).isBinary())
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subclasses of binary types.");	
 
