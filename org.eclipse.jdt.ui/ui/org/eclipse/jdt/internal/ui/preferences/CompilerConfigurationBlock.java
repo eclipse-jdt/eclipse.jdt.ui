@@ -549,6 +549,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
 	protected void validateSettings(String changedKey, String newValue) {
+		
 		if (changedKey != null) {
 			if (INTR_DEFAULT_COMPLIANCE.equals(changedKey)) {
 				updateComplianceEnableState();
@@ -569,10 +570,15 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				fMaxNumberProblemsStatus= validateMaxNumberProblems();
 			} else if (PREF_RESOURCE_FILTER.equals(changedKey)) {
 				fResourceFilterStatus= validateResourceFilters();
+			} else if (PREF_PB_UNUSED_PARAMETER.equals(changedKey) ||
+					PREF_PB_DEPRECATION.equals(changedKey) ||
+					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey)) {				
+				updateEnableStates();
 			} else {
 				return;
 			}
 		} else {
+			updateEnableStates();
 			updateComplianceEnableState();
 			fComplianceStatus= validateCompliance();
 			fMaxNumberProblemsStatus= validateMaxNumberProblems();
@@ -582,6 +588,18 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		fContext.statusChanged(status);
 	}
 	
+	private void updateEnableStates() {
+		boolean enableUnusedParams= !checkValue(PREF_PB_UNUSED_PARAMETER, IGNORE);
+		getCheckBox(PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING).setEnabled(enableUnusedParams);
+		getCheckBox(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT).setEnabled(enableUnusedParams);
+		
+		boolean enableDeprecation= !checkValue(PREF_PB_DEPRECATION, IGNORE);
+		getCheckBox(PREF_PB_DEPRECATION_IN_DEPRECATED_CODE).setEnabled(enableDeprecation);
+		
+		boolean enableHiding= !checkValue(PREF_PB_LOCAL_VARIABLE_HIDING, IGNORE);
+		getCheckBox(PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD).setEnabled(enableHiding);
+	}
+
 	private IStatus validateCompliance() {
 		StatusInfo status= new StatusInfo();
 		if (checkValue(PREF_COMPLIANCE, VERSION_1_3)) {

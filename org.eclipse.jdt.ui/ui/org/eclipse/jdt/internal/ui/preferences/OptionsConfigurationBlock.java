@@ -400,5 +400,17 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 	
+	protected Button getCheckBox(String key) {
+		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
+			Button curr= (Button) fCheckBoxes.get(i);
+			ControlData data= (ControlData) curr.getData();
+			if (key.equals(data.getKey())) {
+				return curr;
+			}
+		}
+		return null;		
+	}
+	
+	
 	
 }
