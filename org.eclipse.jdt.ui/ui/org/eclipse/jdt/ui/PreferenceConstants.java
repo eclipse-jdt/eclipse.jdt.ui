@@ -2556,8 +2556,10 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_STICKY_OCCURRENCES, true);
 		store.setDefault(PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES, true);
 		store.setDefault(PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES, true);
+		store.setDefault(PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES, true);
 		store.setDefault(PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES, true);
 		store.setDefault(PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES, true);
+		store.setDefault(PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, true);
 		
 		// spell checking
 		store.setDefault(PreferenceConstants.SPELLING_CHECK_SPELLING, false);
