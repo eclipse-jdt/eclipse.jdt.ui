@@ -883,25 +883,6 @@ public class PackageExplorerPart extends ViewPart
 			element= input;
 				
 		if (element != null) {
-			// if the current selection is a child of the new
-			// selection then ignore it.
-			IStructuredSelection oldSelection= (IStructuredSelection)getSelection();
-			if (oldSelection.size() == 1) {
-				Object o= oldSelection.getFirstElement();
-				if (o instanceof IJavaElement) {
-					ICompilationUnit cu= (ICompilationUnit)((IJavaElement)o).getAncestor(IJavaElement.COMPILATION_UNIT);
-					if (cu != null) {
-						if (cu.isWorkingCopy())
-							cu= (ICompilationUnit)cu.getOriginalElement();
-						if ( element.equals(cu))
-							return false;
-					}
-	
-					IClassFile cf= (IClassFile)((IJavaElement)o).getAncestor(IJavaElement.CLASS_FILE);
-					if (cf != null && element.equals(cf))
-						return false;
-				}
-			}
 			ISelection newSelection= new StructuredSelection(element);
 			if (!fViewer.getSelection().equals(newSelection)) {
 				try {
