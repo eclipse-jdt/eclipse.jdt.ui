@@ -211,10 +211,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		private Color fColor;
 
 		public void deactivate() {
+			deactivate(false);
+		}
+
+		public void deactivate(boolean redrawAll) {
 			if (!fActive)
 				return;
 
-			repairRepresentation();			
+			repairRepresentation(redrawAll);			
 			fActive= false;
 		}
 
@@ -326,9 +330,13 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 			
 			return null;
-		}		
-	
-		private void repairRepresentation() {			
+		}
+
+		private void repairRepresentation() {
+			repairRepresentation(false);
+		}
+		
+		private void repairRepresentation(boolean redrawAll) {			
 
 			if (fActiveRegion == null)
 				return;
@@ -341,7 +349,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				int length= fActiveRegion.getLength();
 
 				// remove style
-				if (viewer instanceof ITextViewerExtension2)
+				if (!redrawAll && viewer instanceof ITextViewerExtension2)
 					((ITextViewerExtension2) viewer).invalidateTextPresentation(offset, length);
 				else
 					viewer.invalidateTextPresentation();
@@ -360,7 +368,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 			fActiveRegion= null;
 		}
-
+		
 		private IJavaElement getInput(JavaEditor editor) {
 			if (editor == null)
 				return null;
@@ -450,7 +458,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				} else {
 					return widgetOffset + viewer.getVisibleRegion().getOffset();
 				}
-				
+
 			} catch (IllegalArgumentException e) {
 				return -1;
 			}			
@@ -675,7 +683,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
 		 */
 		public void documentChanged(DocumentEvent event) {
-			deactivate();
+			deactivate(true);
 		}
 
 		/*
@@ -728,14 +736,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				
 			} else {
 				
-				IRegion region= viewer.getVisibleRegion();
-				if (!includes(region, fActiveRegion))
-					return;
-					
+			IRegion region= viewer.getVisibleRegion();			
+			if (!includes(region, fActiveRegion))
+			 	return;		    
+
 				offset= fActiveRegion.getOffset() - region.getOffset();
 				length= fActiveRegion.getLength();
 			}
-						
+			
 			// support for bidi
 			Point minLocation= getMinimumLocation(text, offset, length);
 			Point maxLocation= getMaximumLocation(text, offset, length);
@@ -1089,7 +1097,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
 			caret= extension.widgetOffset2ModelOffset(styledText.getCaretOffset());
 		} else {
-			int offset= sourceViewer.getVisibleRegion().getOffset();
+		int offset= sourceViewer.getVisibleRegion().getOffset();
 			caret= offset + styledText.getCaretOffset();
 		}
 		
