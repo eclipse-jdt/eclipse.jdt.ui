@@ -103,7 +103,6 @@ public class PrimaryWorkingCopyTest extends TestCase {
 		
 		// empty array when USE_WORKING_COPY_OWNERS is true
 		IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
-			
 		List result= doSearchForReferences("A", JavaUI.getSharedWorkingCopiesOnClasspath());
 		assertTrue("Should contain 1 references, contains: " + result.size(), result.size() == 1);
 
@@ -117,12 +116,14 @@ public class PrimaryWorkingCopyTest extends TestCase {
 			
 			document.replace(offset, replacedString.length(), "A a;");
 			
+			workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
 			result= doSearchForReferences("A", workingCopies);
 			assertTrue("Should contain 2 references, contains: " + result.size(), result.size() == 2);
 
 			//save
 			part.doSave(null);
 
+			workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
 			result= doSearchForReferences("A", workingCopies);
 			assertTrue("Should contain 2 references, contains: " + result.size(), result.size() == 2);
 
@@ -131,6 +132,7 @@ public class PrimaryWorkingCopyTest extends TestCase {
 			JavaPlugin.getActivePage().closeAllEditors(false);
 		}
 		
+		workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
 		result= doSearchForReferences("A", workingCopies);
 		assertTrue("Should contain 2 references, contains: " + result.size(), result.size() == 2);
 	}
@@ -178,6 +180,7 @@ public class PrimaryWorkingCopyTest extends TestCase {
 			
 			document.replace(offset, replacedString.length(), "A a;");
 			
+			workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
 			result= doSearchForReferences("A", workingCopies);
 			assertTrue("Should contain 2 references, contains: " + result.size(), result.size() == 2);
 			
@@ -189,6 +192,7 @@ public class PrimaryWorkingCopyTest extends TestCase {
 				source= source.substring(0, offset) + source.substring(offset + replacedString.length()); // remove reference
 				wcopy.getBuffer().setContents(source);
 	
+				workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
 				IWorkingCopy[] newWorkingCopies= new IWorkingCopy[workingCopies.length + 1];
 				System.arraycopy(workingCopies, 0, newWorkingCopies, 0, workingCopies.length);
 				newWorkingCopies[workingCopies.length]= wcopy;
@@ -204,6 +208,7 @@ public class PrimaryWorkingCopyTest extends TestCase {
 			JavaPlugin.getActivePage().closeAllEditors(false);
 		}
 		
+		workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
 		result= doSearchForReferences("A", workingCopies);
 		assertTrue("Should contain 1 references, contains: " + result.size(), result.size() == 1);
 	}
