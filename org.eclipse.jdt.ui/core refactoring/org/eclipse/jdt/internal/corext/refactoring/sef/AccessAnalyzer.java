@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -150,6 +151,8 @@ class AccessAnalyzer extends ASTVisitor {
 			return ((SimpleName)expression).resolveBinding();
 		else if (expression instanceof QualifiedName)
 			return ((QualifiedName)expression).resolveBinding();
+		else if (expression instanceof FieldAccess)
+			return ((FieldAccess)expression).getName().resolveBinding();
 		return null;
 	}	
 }

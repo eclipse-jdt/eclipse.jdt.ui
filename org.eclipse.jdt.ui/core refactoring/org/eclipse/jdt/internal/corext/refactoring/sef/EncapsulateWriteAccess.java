@@ -4,9 +4,12 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ThisExpression;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
@@ -31,11 +34,20 @@ final class EncapsulateWriteAccess extends MultiTextEdit {
 	
 	private static int getOffset(Assignment assignment) {
 		Expression lhs= assignment.getLeftHandSide();
-		if (lhs instanceof QualifiedName) {
-			return ((QualifiedName)lhs).getName().getStartPosition();
-		} else {
-			return lhs.getStartPosition();
+		ASTNode result= lhs;
+		if (lhs instanceof FieldAccess) {
+			FieldAccess fieldAccess= (FieldAccess)lhs;
+			result= fieldAccess.getName();
+			if (fieldAccess.getExpression() instanceof ThisExpression) {
+				ThisExpression thisExpression= (ThisExpression)fieldAccess.getExpression();
+				if (thisExpression.getQualifier() == null) {
+					result= fieldAccess;
+				}
+			}
+		} else if (lhs instanceof QualifiedName) {
+			result= ((QualifiedName)lhs).getName();
 		}
+		return result.getStartPosition();
 	}
 	
 	private static int getLength(Assignment assignment, int offset) {

@@ -1,9 +1,11 @@
 public class A {
-	static String value;
+	static int sField;
+	int field;
 	
-	List l;
-	
-	void foo() {
-		value= "d";
+	public void foo() {
+		field= 10;
+		this.field= 10;
+		A.sField= 10;
+		new A().field= 30;
 	}
 }

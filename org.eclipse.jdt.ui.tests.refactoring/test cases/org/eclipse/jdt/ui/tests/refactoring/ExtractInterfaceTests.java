@@ -2,6 +2,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;

@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.util.*;
 import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
