@@ -153,8 +153,20 @@ public abstract class ReorgRefactoring extends Refactoring {
 	abstract boolean isValidDestinationForCusAndFiles(Object dest) throws JavaModelException;
 
 	public final boolean isValidDestination(Object dest) throws JavaModelException{
-		if (hasLinkedResources())
-			return (dest instanceof IJavaProject) || (dest instanceof IProject);
+		if (hasLinkedResources()){
+			if (dest instanceof IPackageFragmentRoot){
+				if (! isProjectPackageFragmentRoot((IPackageFragmentRoot)dest))
+					return false;
+			} else {
+				if ((!(dest instanceof IJavaProject)) && (! (dest instanceof IProject)))
+					return false;
+				for (Iterator iter= getLinkedResources().iterator(); iter.hasNext();) {
+					IResource linkedResource= (IResource) iter.next();
+					if (dest.equals(linkedResource.getParent()))
+						return false;
+				}
+			}
+		}
 		
 		if (dest instanceof IJavaProject){
 			IJavaProject jp= (IJavaProject)dest;
@@ -383,6 +395,17 @@ public abstract class ReorgRefactoring extends Refactoring {
 				return true;
 		}
 		return false;
+	}
+
+	private List getLinkedResources() {
+		List result= new ArrayList(3);
+		for (Iterator iter= getElements().iterator(); iter.hasNext();) {
+			Object each= iter.next();
+			IResource resource= ResourceUtil.getResource(each);
+			if (resource != null && resource.isLinked())
+				result.add(resource);;
+		}
+		return result;
 	}
 
 	
