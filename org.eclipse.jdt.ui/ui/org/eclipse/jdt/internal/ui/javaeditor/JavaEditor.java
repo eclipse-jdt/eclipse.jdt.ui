@@ -137,6 +137,7 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusTextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
+import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.tasklist.TaskList;
 
@@ -251,9 +252,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 
 		public void selectionChanged() {
-			if (isEditingScriptRunning())
-				return;
-			
 			ISourceReference element= computeHighlightRangeSourceReference();
 			synchronizeOutlinePage(element);
 			setSelection(element, false);
@@ -1204,8 +1202,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected AbstractSelectionChangedListener fOutlineSelectionChangedListener= new OutlineSelectionChangedListener();
 	/** The editor's bracket matcher */
 	protected JavaPairMatcher fBracketMatcher= new JavaPairMatcher(BRACKETS);
-	/** Indicates whether this editor should react on outline page selection changes */
-	private int fIgnoreOutlinePageSelection;
 	/** The line number ruler column */
 	private LineNumberRulerColumn fLineNumberRulerColumn;
 	/**
@@ -1374,7 +1370,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * @param element the java element to select
 	 */
 	protected void synchronizeOutlinePage(ISourceReference element) {
-		if (fOutlinePage != null && element != null) {
+		if (fOutlinePage != null && element != null && !isJavaOutlinePageActive()) {
 			fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 			fOutlinePage.select(element);
 			fOutlineSelectionChangedListener.install(fOutlinePage);
@@ -1386,10 +1382,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * position in the editor.
 	 */
 	public void synchronizeOutlinePageSelection() {
-
-		if (isEditingScriptRunning())
-			return;
-
 		synchronizeOutlinePage(computeHighlightRangeSourceReference());
 	}
 	
@@ -1545,18 +1537,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 	}
 	
-	public synchronized void editingScriptStarted() {
-		++ fIgnoreOutlinePageSelection;
-	}
-	
-	public synchronized void editingScriptEnded() {
-		-- fIgnoreOutlinePageSelection;
-	}
-	
-	public synchronized boolean isEditingScriptRunning() {
-		return (fIgnoreOutlinePageSelection > 0);
-	}
-	
 	protected void doSelectionChanged(SelectionChangedEvent event) {
 				
 		ISourceReference reference= null;
@@ -1573,12 +1553,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		if (!isActivePart() && JavaPlugin.getActivePage() != null)
 			JavaPlugin.getActivePage().bringToTop(this);
 			
-		try {
-			editingScriptStarted();
-			setSelection(reference, !isActivePart());
-		} finally {
-			editingScriptEnded();
-		}
+		setSelection(reference, !isActivePart());
 	}
 	
 	/*
@@ -1611,10 +1586,20 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	}
 			
 	protected boolean isActivePart() {
+		IWorkbenchPart part= getActivePart();
+		return part != null && part.equals(this);
+	}
+
+	private boolean isJavaOutlinePageActive() {
+		IWorkbenchPart part= getActivePart();
+		return part instanceof ContentOutline && ((ContentOutline)part).getCurrentPage() == fOutlinePage;
+	}
+
+	private IWorkbenchPart getActivePart() {
 		IWorkbenchWindow window= getSite().getWorkbenchWindow();
 		IPartService service= window.getPartService();
 		IWorkbenchPart part= service.getActivePart();
-		return part != null && part.equals(this);
+		return part;
 	}
 	
 	/*
