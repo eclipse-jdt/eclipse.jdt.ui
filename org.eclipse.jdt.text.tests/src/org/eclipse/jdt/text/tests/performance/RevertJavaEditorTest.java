@@ -26,6 +26,7 @@ public class RevertJavaEditorTest extends RevertEditorTest {
 	private static final String FILE_SUFFIX= ".java";
 	
 	protected void setUp() {
+		super.setUp();
 		EditorTestHelper.runEventQueue();
 	}
 

@@ -26,22 +26,29 @@ public abstract class RevertEditorTest extends TestCase {
 	
 	private PerformanceMeterFactory fPerformanceMeterFactory= Performance.createPerformanceMeterFactory();
 
+	private PerformanceMeter fPerformanceMeter;
+	
+	
+	protected void setUp() {
+		fPerformanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
+	}
+
 	protected void measureRevert(IFile[] files) throws PartInitException, BadLocationException {
-		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
-		try {
-			for (int i= 0, n= files.length; i < n; i++) {
-				ITextEditor part= (ITextEditor) EditorTestHelper.openInEditor(files[i], true);
-				dirtyEditor(part);
-				performanceMeter.start();
-				EditorTestHelper.revertEditor(part, true);
-				performanceMeter.stop();
-				sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
-				EditorTestHelper.runEventQueue(part);
-			}
-		} finally {
-			EditorTestHelper.closeAllEditors();
-			performanceMeter.commit();
+		for (int i= 0, n= files.length; i < n; i++) {
+			ITextEditor part= (ITextEditor) EditorTestHelper.openInEditor(files[i], true);
+			dirtyEditor(part);
+			fPerformanceMeter.start();
+			EditorTestHelper.revertEditor(part, true);
+			fPerformanceMeter.stop();
+			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
+			EditorTestHelper.runEventQueue(part);
 		}
+	}
+	
+	
+	protected void tearDown() throws Exception {
+		EditorTestHelper.closeAllEditors();
+		fPerformanceMeter.commit();
 	}
 
 	private synchronized void sleep(int time) {
