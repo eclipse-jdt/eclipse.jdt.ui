@@ -35,6 +35,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
@@ -323,12 +324,30 @@ public class FormatAllAction extends SelectionDispatchAction {
 			formatter.setSlaveStrategy(new CommentFormattingStrategy(null), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 			formatter.setSlaveStrategy(new CommentFormattingStrategy(null), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);		
 
-			formatter.format(document, context);
+			try {
+				startSequentialRewriteMode(document);
+				formatter.format(document, context);
+			} finally {
+				stopSequentialRewriteMode(document);
+			}
 		} finally {
 		    context.dispose();
 		}
     }
+
+	private void startSequentialRewriteMode(IDocument document) {
+		if (document instanceof IDocumentExtension) {
+			IDocumentExtension extension= (IDocumentExtension)document;
+			extension.startSequentialRewrite(false);
+		}
+	}
 	
+	private void stopSequentialRewriteMode(IDocument document) {
+		if (document instanceof IDocumentExtension) {
+			IDocumentExtension extension= (IDocumentExtension)document;
+			extension.stopSequentialRewrite();
+		}
+	}
 	
 	private void doRunOnMultiple(ICompilationUnit[] cus, MultiStatus status, IProgressMonitor monitor) throws OperationCanceledException {
 		if (monitor == null) {
