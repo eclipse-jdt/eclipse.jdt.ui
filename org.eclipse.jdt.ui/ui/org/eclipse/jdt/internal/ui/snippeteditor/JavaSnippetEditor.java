@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.snippeteditor;
  */
 
 
-import java.io.ByteArrayOutputStream;import java.io.PrintStream;import java.lang.reflect.InvocationTargetException;import java.util.*;import org.eclipse.core.resources.*;import org.eclipse.core.runtime.*;import org.eclipse.debug.core.*;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.jdt.core.*;import org.eclipse.jdt.core.eval.IEvaluationContext;import org.eclipse.jdt.debug.core.*;import org.eclipse.jdt.internal.ui.IJavaUIStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.java.ResultCollector;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.*;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.text.*;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.util.Assert;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.*;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.*;import org.omg.CORBA.UNKNOWN;import com.sun.jdi.InvocationException;import com.sun.jdi.ObjectReference;
+import java.io.ByteArrayOutputStream;import java.io.PrintStream;import java.lang.reflect.InvocationTargetException;import java.util.*;import org.eclipse.core.resources.*;import org.eclipse.core.runtime.*;import org.eclipse.debug.core.*;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.jdt.core.*;import org.eclipse.jdt.core.eval.IEvaluationContext;import org.eclipse.jdt.debug.core.*;import org.eclipse.jdt.internal.ui.IJavaUIStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.java.ResultCollector;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.*;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.text.*;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.util.Assert;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.*;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.*;import com.sun.jdi.InvocationException;import com.sun.jdi.ObjectReference;
 
 /**
  * An editor for Java snippets.
@@ -155,45 +155,40 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	
 	
 	protected void buildAndLaunch() {
-		final boolean build = !getJavaProject().getProject().getWorkspace().isAutoBuilding()
+		boolean build = !getJavaProject().getProject().getWorkspace().isAutoBuilding()
 			|| !getJavaProject().hasBuildState();
-		final boolean cpChange = classPathHasChanged();
-		final boolean launch = fVM == null || cpChange;
-		if (!build && !cpChange && !launch) {
-			// no need to build or launch VM or restart
-			return;
-		}
 		
-		IRunnableWithProgress r= new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) throws InvocationTargetException {
-				if (build) {
+		if (build) {
+			IRunnableWithProgress r= new IRunnableWithProgress() {
+				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					try {
-						pm.beginTask("Building", IProgressMonitor.UNKNOWN);
 						getJavaProject().getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, pm);
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
 					}
 				}
-				
-				if (cpChange) {
-					shutDownVM();
-				};
-			
-				if (launch) {
-					pm.beginTask("Launching VM", IProgressMonitor.UNKNOWN);
-					launchVM();
-					fVM = ScrapbookLauncher.getDefault().getDebugTarget(getPage());
-				}
+			};
+			try {
+				new ProgressMonitorDialog(getShell()).run(true, false, r);		
+			} catch (InterruptedException e) {
+				evaluationEnds();
+				return;
+			} catch (InvocationTargetException e) {
+				evaluationEnds();
+				return;
 			}
+		}
+
+		boolean cpChange = classPathHasChanged();
+		boolean launch = fVM == null || cpChange;
+				
+		if (cpChange) {
+			shutDownVM();
 		};
-		try {
-			new ProgressMonitorDialog(getShell()).run(true, false, r);		
-		} catch (InterruptedException e) {
-			evaluationEnds();
-			return;
-		} catch (InvocationTargetException e) {
-			evaluationEnds();
-			return;
+	
+		if (launch) {
+			launchVM();
+			fVM = ScrapbookLauncher.getDefault().getDebugTarget(getPage());
 		}
 	}
 	
@@ -319,7 +314,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			try {
 				fThread.resume();
 				int count= 0;
-				while (!fThread.isSuspended() && count < 20) {
+				while (fThread != null && !fThread.isSuspended() && count < 20) {
 					try {
 						count++;
 						Thread.sleep(100);
@@ -591,8 +586,13 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	protected void launchVM() {
 		DebugPlugin.getDefault().addDebugEventListener(JavaSnippetEditor.this);
 		fLaunchedClassPath = getClassPath(getJavaProject());
-		ILauncher launcher = ScrapbookLauncher.getLauncher();
-		launcher.launch(new Object[] {getPage()}, ILaunchManager.DEBUG_MODE);
+		final ILauncher launcher = ScrapbookLauncher.getLauncher();
+		Runnable r = new Runnable() {
+			public void run() {
+				launcher.launch(new Object[] {getPage()}, ILaunchManager.DEBUG_MODE);
+			}
+		};
+		BusyIndicator.showWhile(getShell().getDisplay(), r);
 	}
 	
 	protected IFile getPage() {
