@@ -65,7 +65,7 @@ public class AddVMDialog extends StatusDialog {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[1]= validateJDKLocation();
 				updateStatusLine();
-				if ((fStati[1] == null || fStati[1].isOK()) && !isCustomLibraryUsed()) {
+				if (!isCustomLibraryUsed()) {
 					updateLibraryFieldDefaults();
 				}
 			}
@@ -221,6 +221,20 @@ public class AddVMDialog extends StatusDialog {
 		fSystemLibrarySource.setText(description.getSystemLibrarySource().getAbsolutePath());
 	}
 	
+	protected void setSystemLibraryDefaults(LibraryLocation description) {
+		File systemLibrary= description.getSystemLibrary();
+		if (systemLibrary.isFile())
+			fSystemLibrary.setText(systemLibrary.getAbsolutePath());
+		else 
+			fSystemLibrary.setText("");
+			
+		File librarySource= description.getSystemLibrarySource();
+		if (librarySource.isFile())
+			fSystemLibrarySource.setText(librarySource.getAbsolutePath());
+		else 
+			fSystemLibrarySource.setText("");
+	}
+	
 	
 	protected IStatus validateJDKLocation() {
 		String locationName= fJDKRoot.getText();
@@ -278,7 +292,7 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	protected void updateLibraryFieldDefaults() {
-		setSystemLibraryFields(fSelectedVMType.getDefaultLibraryLocation(getInstallLocation()));
+		setSystemLibraryDefaults(fSelectedVMType.getDefaultLibraryLocation(getInstallLocation()));
 	}
 	
 	protected IStatus validateSystemLibrary() {
@@ -318,7 +332,7 @@ public class AddVMDialog extends StatusDialog {
 	protected IStatus validateSystemLibrarySource() {
 		String locationName= fSystemLibrarySource.getText();
 		if (locationName == null || "".equals(locationName))
-			return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, "", null);
+			return null;
 			
 		File f= new File(locationName);
 		if (!f.isFile())

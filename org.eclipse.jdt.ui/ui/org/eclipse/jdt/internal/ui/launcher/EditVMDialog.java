@@ -14,5 +14,5 @@ public class EditVMDialog extends AddVMDialog {
 		if (fVM.getName().equals(fVMName.getText()))
 			return null;
 		return super.validateVMName();
-	}		protected void initializeFields() {		fVMTypeCombo.setEnabled(false);		fVMName.setText(fVM.getName());		fJDKRoot.setText(fVM.getInstallLocation().getAbsolutePath());		fDebuggerTimeout.setText(String.valueOf(fVM.getDebuggerTimeout()));		LibraryLocation desc= fVM.getLibraryLocation();		fUseDefaultLibrary.setSelection(desc == null);		if (desc == null) {			desc= getVMType().getDefaultLibraryLocation(fVM.getInstallLocation());			useDefaultSystemLibrary();		} else {			useCustomSystemLibrary();		}			setSystemLibraryFields(desc);		}	
+	}		protected void initializeFields() {		fVMTypeCombo.setEnabled(false);		fVMName.setText(fVM.getName());		fJDKRoot.setText(fVM.getInstallLocation().getAbsolutePath());		fDebuggerTimeout.setText(String.valueOf(fVM.getDebuggerTimeout()));		LibraryLocation desc= fVM.getLibraryLocation();		fUseDefaultLibrary.setSelection(desc == null);		if (desc == null) {			desc= getVMType().getDefaultLibraryLocation(fVM.getInstallLocation());			useDefaultSystemLibrary();		} else {			useCustomSystemLibrary();			setSystemLibraryFields(desc);		}					}	
 	protected void doOkPressed() {		setFieldValuesToVM(fVM);	}}
