@@ -136,28 +136,25 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		Expression placeholder= (Expression) rewrite.createMove(assignment.getRightHandSide());
 		
-		VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
-		newFrag.setName(ast.newSimpleName(fragment.getName().getIdentifier()));
-		newFrag.setExtraDimensions(fragment.getExtraDimensions());
-		newFrag.setInitializer(placeholder);
+		fragment.setInitializer(placeholder);
+		rewrite.markAsInserted(placeholder);
 		
-		Type newType= (Type) ASTNode.copySubtree(ast, statement.getType());
 		
 		if (assignParent instanceof ExpressionStatement) {
-			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
-			newVarDec.setType(newType);
-			newVarDec.setModifiers(statement.getModifiers());
-			rewrite.markAsReplaced(assignParent, newVarDec);
+			int statementParent= assignParent.getParent().getNodeType();
+			if (statementParent == ASTNode.IF_STATEMENT || statementParent == ASTNode.WHILE_STATEMENT || statementParent == ASTNode.DO_STATEMENT
+				|| statementParent == ASTNode.FOR_STATEMENT) {
+				
+				Block block= ast.newBlock();
+				rewrite.markAsReplaced(assignParent, block);
+			} else {
+				rewrite.markAsRemoved(assignParent);	
+			}	
 		} else {
-			VariableDeclarationExpression newVarDec= ast.newVariableDeclarationExpression(newFrag);
-			newVarDec.setType(newType);
-			newVarDec.setModifiers(statement.getModifiers());
-			rewrite.markAsReplaced(assignment, newVarDec);
-		}
+			rewrite.markAsRemoved(assignment);
+		}		
 		
-		rewrite.markAsRemoved(statement);
-		
-		proposal.markAsSelection(rewrite, newFrag.getName());
+		proposal.markAsSelection(rewrite, fragment.getName());
 		
 		proposal.ensureNoModifications();
 		resultingCollections.add(proposal);
