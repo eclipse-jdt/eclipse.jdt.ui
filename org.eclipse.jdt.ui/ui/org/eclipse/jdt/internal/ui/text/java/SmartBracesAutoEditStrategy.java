@@ -546,7 +546,7 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 				DoStatement doStatement= (DoStatement) node;
 				Statement body= doStatement.getBody();
 				Expression expression= doStatement.getExpression();
-				Statement nextStatement= getNextStatement((Statement) node);
+				//Statement nextStatement= getNextStatement((Statement) node);
 
 				if (expression == null || body == null || body.getNodeType() == ASTNode.BLOCK)
 					return;
@@ -554,7 +554,7 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 				IRegion doRegion= createRegion(doStatement, delta);
 				IRegion bodyRegion= createRegion(body, delta);
 				IRegion expressionRegion= createRegion(expression, delta);
-				IRegion nextRegion= createRegion(nextStatement, delta);
+				//IRegion nextRegion= createRegion(nextStatement, delta);
 
 				int sourceOffset= bodyRegion.getOffset() + bodyRegion.getLength();
 				int sourceLength= expressionRegion.getOffset() - sourceOffset;
