@@ -1,52 +1,43 @@
 --------------------------------
 	Refactoring:
- 	   0.   delete all projects from your workspace except for JUnit
+ 	   0.  import junit into you workspace
+ 	   1. turn autobuild on
 
     RenameType
         1. open junit.framework.Test in the editor
-        2. go to the outliner, rightclick and select 'Refactoring >> Rename'
-        3. a wizard shows up, enter 'Fred' as a new name for the interface
-        4. press 'next>' - verify that a progress monitor is shown
+        2. go to the outliner, rightclick and select 'Refactor >> Rename'
+        3. a wizard shows up, enter A as a new name for the interface
+        4. press 'Next>' - verify that a progress monitor is shown
         5. a page with proposed changes shows up
         6. verify that all checkboxes are checked and not-grayed
         6a. verify that the 'next>' button is the only disabled button on the page
-         7. select the second element: verify that the compare viewer is fed with the 'junit.textui.TestRunner.java' file contents
-              there should be exactly 12 differences
-        8. press 'finish>' - verify progress notification
-        9. verify that there are no compiler errors (if you have the autobuild off, then it on before verifying)
+        7. select the 4th element: verify that the compare viewer is fed with the 'junit.tests.TestListenerTest.java' file contents
+        8. press 'Finish>' - verify progress notification
+        9. verify that there are no compiler errors
     
     Undo
         10. rightclick in the outliner
-        10a. verify that '"Refactoring>>Redo"' is not in the menu
-        10b. select "Refactoring>>Undo"
+        10a. verify that '"Refactor>>Redo"' is not in the menu
+        10b. select "Refactor>>Undo"
         11. verify that there are no compiler errors 
 
-   Redo
-        12. verify that 'Undo' is not available in the Refactoring menu and 'Redo' is
-        13. select 'Refactoring>>Redo'
-        14. verify that there are no compiler errors
-    
     RenameMethod
         1. open junit.framework.Test in the editor
         2. select the run(TestResult) method
         3. rightclick and select Refactoring>>Rename
         4. enter basicRun as the new name
-        5. press next>
+        5. press 'Next>'
         6. a page with errors should come up - 1 error saying that the method exists in types related to Test
-        6a. verify that only '<back' and cancel buttons are enabled
-       7. press <back
-        8. enter 'bogus' as the new name
-        9. press next>
-        10. you should see a page with proposed changes: there should be exactly 13 entries (top level nodes)
-        11. press finish    - verify that there are no compiler errors
-
-   Undo
-        11. rightclick in the outliner and select "Refactoring>>Undo"
-        12. verify that there are no compiler errors
+       7. press '<Back'
+        8. enter x as the new name
+        9. press 'Next>'
+        10. you should see a page with proposed changes
+        11. press 'finish'  - verify that there are no compiler errors
+		12. undo and verify that there are no compiler errors
         
 	 RenamePackage:
 		1. select junit.framework in the package viewer
-		2. choose 'refactoring/rename' from the popup menu
+		2. choose 'rename' from the popup menu
 		3. enter new name 
 			- verify that empty string is not a valid name
 		4. 'finish'
@@ -56,16 +47,17 @@
 
 	Move a CompilationUnit
 		1. select junit.framework.Test in the package view
-		2. choose 'refactoring/move'
-		3. enter junit.ui as a new package name
+		2. choose 'refactor/Move to Another Package'
+		3. enter junit.ui as a new package name or select it from the dialog (press 'Browse')
 		4. 'finish' and verify that there are no compiler errors
 		5. undo and verify that there are no compiler errors
 		
-		6. in a similar manner - verify that it is not possible to move "junit.ui.TestRunner.java" to junit.textui
+		6. using the same procedure, verify that it is not possible to move "junit.ui.TestRunner.java" to junit.textui
     
    	Rename Parameters
    		1. open junit.ui.TestRunner
    		2. select appendFailure(String, Test, Throwable)
-   		3. verify that you're not allowed to rename the  first parameter to fExceptions
+   		3. verify that you're not allowed to rename the  first parameter (kind) to fExceptions
    		4.rename it to x and 'finish'     
    		5. verify that there're no compiler errors
+   		6. undo and verify that there are no compiler errors
