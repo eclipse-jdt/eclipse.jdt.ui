@@ -50,7 +50,7 @@ public class TwoArrayQuickSorter {
 			return;
 		}
 
-		if (keys.length == 1)
+		if (keys.length <= 1)
 			return;
 			
 		internalSort(keys, values, 0, keys.length - 1);	
