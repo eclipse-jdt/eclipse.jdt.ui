@@ -97,11 +97,10 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	
 	/* package */ void updateTextRange(int delta, List executedEdits) {
 		if (fMode == DELETE) {
-			predecessorExecuted(getSuccessorIterator(), delta);
+			predecessorExecuted(executedEdits, fTarget, delta);
 			adjustLength(delta);
 			updateParents(delta);
 		} else if (fMode == INSERT) {
-			predecessorExecuted(fTarget.getSuccessorIterator(), delta);
 			fTarget.adjustLength(delta);
 			fTarget.updateParents(delta);
 			

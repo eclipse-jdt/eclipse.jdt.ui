@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,24 +49,18 @@ import org.eclipse.jdt.internal.corext.Assert;
 		fRange= range;
 	}
 	
-	/* package */ void predecessorExecuted(Iterator iter, int delta) {
-		while(iter.hasNext()) {
-			TextEdit edit= (TextEdit)iter.next();
+	/* package */ void predecessorExecuted(List executedEdits, TextEdit last, int delta) {
+		// The first element in the list of executed edits is the one that got
+		// executed first. So we have to iterate from the back. Additionally we
+		// have to ignore the child edits of this edit, which are the last edits
+		// in the list of executed edits.
+		for (int i= executedEdits.size() - 1 - getNumberOfChildren(); i >= 0; i--) {
+			TextEdit edit= (TextEdit)executedEdits.get(i);
 			edit.predecessorExecuted(delta);
-			List children= edit.getChildren();
-			if (children != null) {
-				predecessorExecuted(children.iterator(), delta);
-			}
+			if (edit == last)
+				return;
+			
 		}
-	}
-	
-	/* package */ Iterator getSuccessorIterator() {
-		TextEdit parent= getParent();
-		if (parent == null)
-			return new ArrayList(0).iterator();
-		Iterator result= parent.getChildren().iterator();
-		while (result.next() != this) {};
-		return result;
 	}
 	
 	/* package */ void move(List children, int delta) {

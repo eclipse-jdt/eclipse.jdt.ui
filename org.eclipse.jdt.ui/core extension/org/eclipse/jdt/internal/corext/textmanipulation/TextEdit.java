@@ -360,6 +360,19 @@ public abstract class TextEdit {
 		}
 	}
 	
+	/* package */ int getNumberOfChildren() {
+		List children= getChildren();
+		if (children == null)
+			return 0;
+		int result= children.size();
+		for (Iterator iter= children.iterator(); iter.hasNext();) {
+			TextEdit edit= (TextEdit)iter.next();
+			result+= edit.getNumberOfChildren();
+		}
+		return result;
+	}	
+
+	
 	//---- Setter and Getters -------------------------------------------------------------------------------
 	
 	/* package */ void setParent(TextEdit parent) {
