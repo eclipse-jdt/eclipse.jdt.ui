@@ -132,6 +132,18 @@ public class DeleteSourceReferenceEditTests extends RefactoringTest {
 	public void test4() throws Exception{
 		methodHelper(new String[]{"m"}, new String[][]{new String[0]});
 	}	
+
+	public void test5() throws Exception{
+		methodHelper(new String[]{"m"}, new String[][]{new String[0]});
+	}
+	
+	public void test6() throws Exception{
+		methodHelper(new String[]{"m"}, new String[][]{new String[0]});
+	}
+
+	public void test7() throws Exception{
+		methodHelper(new String[]{"m"}, new String[][]{new String[0]});
+	}
 	
 	public void testField0() throws Exception{
 		fieldHelper(new String[]{"f"});

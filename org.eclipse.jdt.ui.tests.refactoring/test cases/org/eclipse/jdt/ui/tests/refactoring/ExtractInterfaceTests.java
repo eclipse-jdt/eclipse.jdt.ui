@@ -558,9 +558,74 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
-	public void testFail0() throws Exception{
-		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
+	public void testConstant86() throws Exception{
+		String[] names= null;
+		String[][] signatures= null;
+		String[] fieldNames= {"X", "Y"};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
+
+	public void testConstant87() throws Exception{
+		String[] names= null;
+		String[][] signatures= null;
+		String[] fieldNames= {"X", "Y"};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void testConstant88() throws Exception{
+		String[] names= null;
+		String[][] signatures= null;
+		String[] fieldNames= {"X", "Y"};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void testInterface0() throws Exception{
+		String[] names= {"m"};
+		String[][] signatures= {new String[0]};
+		String[] fieldNames= null;
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void testInterface1() throws Exception{
+		String[] names= {"m"};
+		String[][] signatures= {new String[0]};
+		String[] fieldNames= null;
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void testInterface2() throws Exception{
+		String[] names= {"m"};
+		String[][] signatures= {new String[0]};
+		String[] fieldNames= {"i", "j"};
+		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
+	}
+
+	public void testInterface3() throws Exception{
+		String[] methodNames= {"m", "m1", "m2", "m4", "m5"};
+		String[][] signatures= {new String[0], new String[0], new String[0], new String[0], new String[0]};
+		String[] fieldNames= {"I", "I1", "I2", "I4", "I5"};
+		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
+	}
+
+	public void testInterface4() throws Exception{
+		printTestDisabledMessage("cannot yet update refs (in methods) to itself if it's an interface");
+//		String[] methodNames= {"a"};
+//		String[][] signatures= {{"QA;", "QA;"}};
+//		String[] fieldNames= null;
+//		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
+	}
+
+	public void testInterface5() throws Exception{
+		String[] methodNames= {"a"};
+		String[][] signatures= {new String[0]};
+		String[] fieldNames= null;
+		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
+	}
+
+//disabled - can extract interface from interface
+//	public void testFail0() throws Exception{
+//		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
+//	}
 
 	public void testFail1() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
