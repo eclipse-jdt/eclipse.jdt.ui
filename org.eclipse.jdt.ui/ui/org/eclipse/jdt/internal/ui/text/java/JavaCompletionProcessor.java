@@ -353,7 +353,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 				String keyword= keyWordResults[i].getReplacementString();
 				for (int k= 0; k < templateResults.length; k++) {
 					TemplateProposal curr= templateResults[k];
-					if (keyword.equals(curr.getTemplateName())) {
+					if (keyword.equals(curr.getTemplate().getName())) {
 						curr.setRelevance(keyWordResults[i].getRelevance());
 					}
 				}

@@ -48,8 +48,8 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	private final IRegion fRegion;
 	private int fRelevance;
 
-	private TemplateBuffer fTemplateBuffer;
 	private IRegion fSelectedRegion; // initialized by apply()
+	private String fDisplayString;
 		
 	/**
 	 * Creates a template proposal with a template and its context.
@@ -68,6 +68,8 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		fViewer= viewer;
 		fImage= image;
 		fRegion= region;
+		
+		fDisplayString= null;
 		
 		if (context instanceof JavaContext) {
 			switch (((JavaContext) context).getCharacterBeforeStart()) {
@@ -100,7 +102,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 			document.addPosition(position);
 
 		    fContext.setReadOnly(false);
-			fTemplateBuffer= fContext.evaluate(fTemplate);
+			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
 			
 			document.removePosition(position);
 			document.removePositionUpdater(updater);
@@ -110,12 +112,12 @@ public class TemplateProposal implements IJavaCompletionProposal {
 			int end= position.getOffset() + position.getLength();
 
 			// insert template string
-			String templateString= fTemplateBuffer.getString();	
+			String templateString= templateBuffer.getString();	
 			document.replace(start, end - start, templateString);	
 
 			// translate positions
 			LinkedPositionManager manager= new LinkedPositionManager(document);
-			TemplatePosition[] variables= fTemplateBuffer.getVariables();
+			TemplatePosition[] variables= templateBuffer.getVariables();
 			for (int i= 0; i != variables.length; i++) {
 				TemplatePosition variable= variables[i];
 
@@ -130,7 +132,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 			}
 			
 			LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
-			editor.setFinalCaretOffset(getCaretOffset(fTemplateBuffer) + start);
+			editor.setFinalCaretOffset(getCaretOffset(templateBuffer) + start);
 			editor.enter();
 
 			fSelectedRegion= editor.getSelectedRegion();
@@ -176,9 +178,9 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	public String getAdditionalProposalInfo() {
 	    try {
 		    fContext.setReadOnly(true);
-			fTemplateBuffer= fContext.evaluate(fTemplate);
+			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
 
-			return textToHTML(fTemplateBuffer.getString());
+			return textToHTML(templateBuffer.getString());
 
 	    } catch (CoreException e) {
 			handleException(e);		    
@@ -190,8 +192,15 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return fTemplate.getName() + TemplateMessages.getString("TemplateProposal.delimiter") + fTemplate.getDescription(); // $NON-NLS-1$ //$NON-NLS-1$
+		if (fDisplayString == null) {
+			fDisplayString= fTemplate.getName() + TemplateMessages.getString("TemplateProposal.delimiter") + fTemplate.getDescription(); //$NON-NLS-1$
+		}
+		return fDisplayString;
 	}
+	
+	public void setDisplayString(String displayString) {
+		fDisplayString= displayString;
+	}	
 
 	/*
 	 * @see ICompletionProposal#getImage()
@@ -266,8 +275,8 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		fRelevance= relevance;
 	}
 	
-	public String getTemplateName() {
-		return fTemplate.getName();
-	}	
+	public Template getTemplate() {
+		return fTemplate;
+	}
 
 }
