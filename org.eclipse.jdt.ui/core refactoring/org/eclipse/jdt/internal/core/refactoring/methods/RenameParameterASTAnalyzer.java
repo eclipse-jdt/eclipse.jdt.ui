@@ -10,6 +10,7 @@ import java.util.List;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
@@ -135,6 +136,12 @@ class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 	}	
 	
 	// ----- visit methods -------
+	
+	public void acceptProblem(IProblem problem) {
+		if (problem.isError())
+			addFatalError("Compilation error in line " + problem.getSourceLineNumber() 
+					+ " " + problem.getMessage());
+	}
 	
 	public boolean visit(SingleNameReference singleNameReference, BlockScope blockScope){
 		if (! withinMethod(singleNameReference))
