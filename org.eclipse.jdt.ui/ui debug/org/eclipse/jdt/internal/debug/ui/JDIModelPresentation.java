@@ -57,6 +57,7 @@ import org.eclipse.jdt.debug.core.IJavaExceptionBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaMethodEntryBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaModifiers;
+import org.eclipse.jdt.debug.core.IJavaObject;
 import org.eclipse.jdt.debug.core.IJavaRunToLineBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.debug.core.IJavaThread;
@@ -263,11 +264,13 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	 * @exception DebugException if thrown by a model element
 	 */
 	protected synchronized String evaluateToString(final IJavaValue value, final IJavaThread thread) throws DebugException {
-		String sig = value.getJavaType().getSignature();
-		if (sig == null) {
-			return "null";
+		final IJavaObject object;
+		if (value instanceof IJavaObject) {
+			object = (IJavaObject)value;
+		} else {
+			object = null;
 		}
-		if (sig.length() == 1 || !thread.isSuspended()) {
+		if (object == null || !thread.isSuspended()) {
 			// primitive or thread is no longer suspended
 			return value.getValueString();
 		}
@@ -277,7 +280,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		Runnable eval= new Runnable() {
 			public void run() {
 				try {
-					toString[0] = value.sendMessage(JDIModelPresentation.fgToString, JDIModelPresentation.fgToStringSignature, null, thread, false);
+					toString[0] = object.sendMessage(JDIModelPresentation.fgToString, JDIModelPresentation.fgToStringSignature, null, thread, false);
 				} catch (DebugException e) {
 					ex[0]= e;
 				}					
