@@ -309,11 +309,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				string.equals(cuBuff.substring(selected.getStartPosition(), ASTNodes.getExclusiveEnd(selected)));
 	}
 
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkAvailability(fMethod));
-		return result;
-	}
+		public RefactoringStatus checkPreactivation() throws JavaModelException{
+			RefactoringStatus result= new RefactoringStatus();
+			result.merge(Checks.checkAvailability(fMethod));
+			if (result.hasFatalError())
+				return result;
+				
+			//XXX disable for constructors  - broken. see bug 23585
+			if (fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0)
+				return RefactoringStatus.createFatalErrorStatus("This refactoring is not implemented for no-arg constructors");
+	
+			return result;
+		}
 	
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
