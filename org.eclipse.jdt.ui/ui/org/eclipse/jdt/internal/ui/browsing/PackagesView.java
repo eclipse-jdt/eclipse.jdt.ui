@@ -440,10 +440,10 @@ public class PackagesView extends JavaBrowsingPart{
 		public void fillActionBars(IActionBars actionBars) {
 			//create new layout group
 			IMenuManager manager= actionBars.getMenuManager();
-			IContributionItem groupMarker= new GroupMarker("Layout"); //$NON-NLS-1$
+			final IContributionItem groupMarker= new GroupMarker("layout"); //$NON-NLS-1$
 			manager.add(groupMarker);
 			IMenuManager newManager= new MenuManager(JavaBrowsingMessages.getString("PackagesView.LayoutActionGroup.layout.label")); //$NON-NLS-1$
-			manager.appendToGroup("Layout", newManager); //$NON-NLS-1$
+			manager.appendToGroup("layout", newManager); //$NON-NLS-1$
 			super.addActions(newManager);
 		}
 	}

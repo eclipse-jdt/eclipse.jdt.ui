@@ -45,16 +45,14 @@ class LayoutActionGroup extends MultiActionGroup {
 		viewMenu.add(new Separator());
 
 		// Create layout sub menu
-		IMenuManager layoutSubMenu= new MenuManager("Layout"); //$NON-NLS-1$
-		String layoutGroupName= PackagesMessages.getString("LayoutActionGroup.label"); //$NON-NLS-1$
-//		GroupMarker marker= new GroupMarker(layoutGroupName);
+		
+		IMenuManager layoutSubMenu= new MenuManager(PackagesMessages.getString("LayoutActionGroup.label")); //$NON-NLS-1$
+		final String layoutGroupName= "layout"; //$NON-NLS-1$
 		Separator marker= new Separator(layoutGroupName);
 
 		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-
-
 		viewMenu.add(marker);
-		viewMenu.appendToGroup(layoutGroupName,layoutSubMenu);
+		viewMenu.appendToGroup(layoutGroupName, layoutSubMenu);
 		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$		
 		addActions(layoutSubMenu);
 	}
