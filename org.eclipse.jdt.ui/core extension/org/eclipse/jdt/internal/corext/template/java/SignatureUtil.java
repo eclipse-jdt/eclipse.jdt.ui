@@ -273,6 +273,12 @@ public final class SignatureUtil {
 			if (pos == -1)
 				pos= sig.indexOf("+-"); //$NON-NLS-1$
 			if (pos == -1)
+				pos= sig.indexOf("-+"); //$NON-NLS-1$
+			if (pos == -1)
+				pos= sig.indexOf("--"); //$NON-NLS-1$
+			if (pos == -1)
+				pos= sig.indexOf("-*"); //$NON-NLS-1$
+			if (pos == -1)
 				break;
 			sig.deleteCharAt(pos);
 		} while (true);
