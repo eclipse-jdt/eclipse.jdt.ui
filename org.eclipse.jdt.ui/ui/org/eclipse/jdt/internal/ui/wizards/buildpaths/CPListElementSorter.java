@@ -30,7 +30,7 @@ public class CPListElementSorter extends ViewerSorter {
 			
 		if ((e1 instanceof CPListElement) && (e2 instanceof CPListElement)) {
 			IPath p1= ((CPListElement)e1).getPath();
-			IPath p2= ((CPListElement)e1).getPath();
+			IPath p2= ((CPListElement)e2).getPath();
 			
 			return p1.toString().compareTo(p2.toString());
 		}

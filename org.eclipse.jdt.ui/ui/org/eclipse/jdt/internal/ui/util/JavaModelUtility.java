@@ -5,23 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.util;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
+import java.util.ArrayList;import java.util.Arrays;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IProjectDescription;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;
 
 
 /**
@@ -179,7 +163,36 @@ public class JavaModelUtility {
 		
 		return (ourpack != null && ourpack.equals(otherpack));
 	}
+	
+	
+	// --------- project dependencies -----------
+		
+	public static void updateRequiredProjects(IJavaProject jproject, String[] prevRequiredProjects, IProgressMonitor monitor) throws CoreException {
+		String[] newRequiredProjects= jproject.getRequiredProjectNames();
 
+		ArrayList prevEntries= new ArrayList(Arrays.asList(prevRequiredProjects));
+		ArrayList newEntries= new ArrayList(Arrays.asList(newRequiredProjects));
+		
+		IProject proj= jproject.getProject();
+		IProjectDescription projDesc= proj.getDescription();  
+		
+		ArrayList newRefs= new ArrayList();
+		IProject[] referencedProjects= projDesc.getReferencedProjects();
+		for (int i= 0; i < referencedProjects.length; i++) {
+			String curr= referencedProjects[i].getName();
+			if (newEntries.remove(curr) || !prevEntries.contains(curr)) {
+				newRefs.add(referencedProjects[i]);
+			}
+		}
+		IWorkspaceRoot root= proj.getWorkspace().getRoot();
+		for (int i= 0; i < newEntries.size(); i++) {
+			String curr= (String) newEntries.get(i);
+			newRefs.add(root.getProject(curr));
+		}		
+		projDesc.setReferencedProjects((IProject[]) newRefs.toArray(new IProject[newRefs.size()]));
+		proj.setDescription(projDesc, monitor);
+	}	
+	
 	/**
 	 * Convert an import declaration into the java element the import declaration
 	 * stands for. An on demand import declaration is converted into a package

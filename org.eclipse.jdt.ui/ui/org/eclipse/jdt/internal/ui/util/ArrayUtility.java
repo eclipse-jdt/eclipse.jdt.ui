@@ -1,5 +1,4 @@
-package org.eclipse.jdt.internal.ui.util;
-
+package org.eclipse.jdt.internal.ui.util;import java.util.Collection;
 
 public class ArrayUtility {
 	
@@ -17,5 +16,14 @@ public class ArrayUtility {
 		System.arraycopy(a1, 0, res, 0, a1Len);
 		System.arraycopy(a2, 0, res, a1Len, a2Len); 
 		return res;
+	}
+	
+	/**
+	 * Fills the contents of an array to a list
+	 */	
+	public static void addAll(Object[] objs, Collection dest) {
+		for (int i= 0; i < objs.length; i++) {
+			dest.add(objs[i]);
+		}
 	}
 }

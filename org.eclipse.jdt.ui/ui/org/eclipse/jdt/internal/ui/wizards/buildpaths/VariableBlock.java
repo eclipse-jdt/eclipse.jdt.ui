@@ -116,7 +116,7 @@ public class VariableBlock {
 		Composite composite= new Composite(parent, SWT.NONE);
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList, fReservedList }, true, 420, 0);	
 		MGridData data= (MGridData)fReservedList.getListControl(null).getLayoutData();
-		data.heightHint= 0;
+		data.heightHint= 50;
 		return composite;
 	}
 	
@@ -163,15 +163,16 @@ public class VariableBlock {
 	}
 	
 	private void doSelectionChanged(DialogField field) {
-		if (fRemovingSelection) {
-			return;
-		}
-		
 		List selected= ((ListDialogField)field).getSelectedElements();
 		boolean isSingleSelected= (selected.size() == 1);
 		if (field == fVariablesList) {
 			fVariablesList.enableCustomButton(1, isSingleSelected);
 		}
+		
+		if (fRemovingSelection) {
+			return;
+		}
+		
 		fSelectedVariable= null;
 		if (fUseAsSelectionDialog) {
 			if (isSingleSelected) {
@@ -181,15 +182,16 @@ public class VariableBlock {
 				fSelectionStatus.setError("");
 			}
 			fContext.statusChanged(fSelectionStatus);
-			fRemovingSelection= true;
-			ISelection emptySelection= new StructuredSelection();
-			if (field == fVariablesList) {
-				fReservedList.selectElements(emptySelection);
-			} else {
-				fVariablesList.selectElements(emptySelection);
-			}
-			fRemovingSelection= false;
 		}	
+		
+		fRemovingSelection= true;
+		ISelection emptySelection= new StructuredSelection();
+		if (field == fVariablesList) {
+			fReservedList.selectElements(emptySelection);
+		} else {
+			fVariablesList.selectElements(emptySelection);
+		}
+		fRemovingSelection= false;		
 	}
 	
 	private void editEntries(CPVariableElement entry) {
