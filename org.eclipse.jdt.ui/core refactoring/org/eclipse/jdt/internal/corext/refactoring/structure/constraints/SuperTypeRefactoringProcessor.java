@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
@@ -569,7 +570,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @throws JavaModelException if an error occurs
 	 */
 	protected final void solveSuperTypeConstraints(final ICompilationUnit subUnit, final CompilationUnit subNode, final IType type, final ITypeBinding subType, final ITypeBinding superType, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
+		boolean covariance= true;
 		final SuperTypeConstraintsModel model= new SuperTypeConstraintsModel(subType, superType);
+		model.setUseCovariance(true);
 		final SuperTypeConstraintsCreator creator= new SuperTypeConstraintsCreator(model);
 		fSuperType= model.getSuperType();
 		try {
@@ -584,6 +587,10 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			final Map groups= new HashMap();
 			for (final Iterator outer= firstPass.keySet().iterator(); outer.hasNext();) {
 				project= (IJavaProject) outer.next();
+				if (covariance && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true))) {
+					covariance= false;
+					model.setUseCovariance(false);
+				}
 				collection= (Collection) firstPass.get(project);
 				if (collection != null) {
 					for (final Iterator inner= collection.iterator(); inner.hasNext();) {
@@ -618,6 +625,10 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			performFirstPass(creator, secondPass, groups, subUnit, subNode);
 			for (final Iterator iterator= secondPass.keySet().iterator(); iterator.hasNext();) {
 				project= (IJavaProject) iterator.next();
+				if (covariance && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true))) {
+					covariance= false;
+					model.setUseCovariance(false);
+				}
 				collection= (Collection) secondPass.get(project);
 				if (collection != null && !collection.isEmpty()) {
 					parser.setWorkingCopyOwner(fOwner);
