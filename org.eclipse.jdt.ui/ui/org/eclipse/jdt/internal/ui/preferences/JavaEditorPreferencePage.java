@@ -153,12 +153,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.PROPOSALS_FOREGROUND),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.PARAMETERS_BACKGROUND),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.PARAMETERS_FOREGROUND),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.COMPLETION_REPLACEMENT_BACKGROUND),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.COMPLETION_REPLACEMENT_FOREGROUND),		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.SHOW_VISIBLE_PROPOSALS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ORDER_PROPOSALS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.CASE_SENSITIVITY),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ADD_IMPORT),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.INSERT_COMPLETION),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.FILL_METHOD_ARGUMENTS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.GUESS_METHOD_ARGUMENTS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_STRINGS),
@@ -351,12 +354,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PROPOSALS_FOREGROUND, new RGB(0, 0, 0));
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_BACKGROUND, new RGB(254, 241, 233));
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_FOREGROUND, new RGB(0, 0, 0));
+		PreferenceConverter.setDefault(store, ContentAssistPreference.COMPLETION_REPLACEMENT_BACKGROUND, new RGB(255, 255, 0));
+		PreferenceConverter.setDefault(store, ContentAssistPreference.COMPLETION_REPLACEMENT_FOREGROUND, new RGB(255, 0, 0));
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, "."); //$NON-NLS-1$
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, "@"); //$NON-NLS-1$
 		store.setDefault(ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, true);
 		store.setDefault(ContentAssistPreference.CASE_SENSITIVITY, false);
 		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
 		store.setDefault(ContentAssistPreference.ADD_IMPORT, true);
+		store.setDefault(ContentAssistPreference.INSERT_COMPLETION, true);
 		store.setDefault(ContentAssistPreference.FILL_METHOD_ARGUMENTS, false);
 		store.setDefault(ContentAssistPreference.GUESS_METHOD_ARGUMENTS, true);
 
@@ -812,6 +818,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ADD_IMPORT, 0);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertCompletion"); //$NON-NLS-1$
+		addCheckBox(contentAssistComposite, label, ContentAssistPreference.INSERT_COMPLETION, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
 		Button button= addCheckBox(contentAssistComposite, label, ContentAssistPreference.FILL_METHOD_ARGUMENTS, 0);
@@ -843,6 +852,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForMethodParameters"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PARAMETERS_FOREGROUND, 0);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForCompletionReplacement"); //$NON-NLS-1$
+		addColorButton(contentAssistComposite, label, ContentAssistPreference.COMPLETION_REPLACEMENT_BACKGROUND, 0);
+		
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForCompletionReplacement"); //$NON-NLS-1$
+		addColorButton(contentAssistComposite, label, ContentAssistPreference.COMPLETION_REPLACEMENT_FOREGROUND, 0);
 		
 		autoactivation.addSelectionListener(new SelectionAdapter(){
             public void widgetSelected(SelectionEvent e) {
@@ -1152,6 +1167,5 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	static public boolean synchronizeOutlineOnCursorMove() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE);
 	}
+
 }
-
-

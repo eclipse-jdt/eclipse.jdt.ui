@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.Flags;
@@ -41,6 +42,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	protected ICompilationUnit fCompilationUnit; // set when imports can be added
 	protected int fCodeAssistOffset;
 	protected int fContextOffset;
+	protected ITextViewer fTextViewer;
 	
 	private ArrayList fFields=
 		new ArrayList(),
@@ -487,6 +489,12 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	}
 	
 	/**
+	 * Sets the text viewer.	 */
+	public void setViewer(ITextViewer viewer) {
+		fTextViewer= viewer;
+	}
+	
+	/**
 	 * If the replacement length is set, it overrides the length returned from
 	 * the content assist infrastructure.
 	 * Use this setting if code assist is called with a none empty selection.
@@ -494,7 +502,6 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	public void setReplacementLength(int length) {
 		fUserReplacementLength= length;
 	}
-
 
 	/**
 	 * If set, proposals created will not remove characters after the code assist position

@@ -5,17 +5,32 @@ package org.eclipse.jdt.internal.ui.text.java;
  * All Rights Reserved.
  */
  
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
-public class JavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension {
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+
+
+public class JavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2 {
 
 	private String fDisplayString;
 	private String fReplacementString;
@@ -121,7 +136,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			}
 		} catch (BadLocationException x) {
 			// ignore
-		}	
+		}		
 	}
 	
 	// #6410 - File unchanged but dirtied by code assist
@@ -295,4 +310,96 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		
 		return false;	
 	}	
+
+	private static boolean insertCompletion() {
+		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
+		return preference.getBoolean(ContentAssistPreference.INSERT_COMPLETION);
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension1#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
+	 */
+	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+
+		IDocument document= viewer.getDocument();
+
+		boolean toggleEating= stateMask == SWT.CTRL;
+		if (insertCompletion() ^ toggleEating)
+			fReplacementLength= offset - fReplacementOffset;
+		
+		apply(document, trigger, offset);
+	}
+
+	private static Color getForegroundColor(StyledText text) {
+
+		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
+		RGB rgb= PreferenceConverter.getColor(preference, ContentAssistPreference.COMPLETION_REPLACEMENT_FOREGROUND);
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		return textTools.getColorManager().getColor(rgb);
+	}
+
+	private static Color getBackgroundColor(StyledText text) {
+
+		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
+		RGB rgb= PreferenceConverter.getColor(preference, ContentAssistPreference.COMPLETION_REPLACEMENT_BACKGROUND);
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		return textTools.getColorManager().getColor(rgb);		
+	
+//		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
+//		if (preference.getBoolean(CompilationUnitEditor.CURRENT_LINE)) {
+//			RGB rgb= PreferenceConverter.getColor(preference, CompilationUnitEditor.CURRENT_LINE_COLOR);
+//			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+//			return textTools.getColorManager().getColor(rgb);
+//
+//		} else {
+//			return text.getBackground();
+//		}
+	}
+
+	private void updateStyle(ITextViewer viewer) {
+
+		StyledText text= viewer.getTextWidget();
+		if (text == null || text.isDisposed())
+			return;
+
+		IRegion visibleRegion= viewer.getVisibleRegion();			
+		int caretOffset= text.getCaretOffset() + visibleRegion.getOffset();
+
+		// patch
+		int delta= caretOffset - (fReplacementOffset + fReplacementLength);
+		if (delta > 0)
+			fReplacementLength += delta;
+
+		if (caretOffset >= fReplacementOffset + fReplacementLength) {
+			viewer.invalidateTextPresentation(); // XXX flickers
+			return;
+		}
+			
+		int offset= caretOffset - visibleRegion.getOffset();
+		int length= fReplacementOffset + fReplacementLength - caretOffset;
+	
+		Color foreground= getForegroundColor(text);
+		Color background= getBackgroundColor(text);
+
+		viewer.invalidateTextPresentation(); // XXX flickers
+		StyleRange styleRange= new StyleRange(offset, length, foreground, background);
+		text.setStyleRange(styleRange);		
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(ITextViewer)
+	 */
+	public void selected(ITextViewer viewer) {
+		if (!insertCompletion())
+			updateStyle(viewer);
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(ITextViewer)
+	 */
+	public void unselected(ITextViewer viewer) {
+		if (!insertCompletion())
+			viewer.invalidateTextPresentation();			
+	}
+
 }

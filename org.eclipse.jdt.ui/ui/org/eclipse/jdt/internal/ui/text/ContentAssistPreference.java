@@ -36,6 +36,10 @@ public class ContentAssistPreference {
 	public final static String PARAMETERS_FOREGROUND=  "content_assist_parameters_foreground"; //$NON-NLS-1$
 	/** Preference key for content assist parameters color */
 	public final static String PARAMETERS_BACKGROUND=  "content_assist_parameters_background"; //$NON-NLS-1$
+	/** Preference key for content assist completion replacement color */
+	public final static String COMPLETION_REPLACEMENT_FOREGROUND=  "content_assist_completion_replacement_foreground"; //$NON-NLS-1$
+	/** Preference key for content assist completion replacement color */
+	public final static String COMPLETION_REPLACEMENT_BACKGROUND=  "content_assist_completion_replacement_background"; //$NON-NLS-1$
 	/** Preference key for content assist auto insert */
 	public final static String AUTOINSERT=  "content_assist_autoinsert"; //$NON-NLS-1$
 	
@@ -52,6 +56,8 @@ public class ContentAssistPreference {
 	public final static String CASE_SENSITIVITY= "content_assist_case_sensitivity"; //$NON-NLS-1$
 	/** Preference key for adding imports on code assist */
 	public final static String ADD_IMPORT= "content_assist_add_import";	 //$NON-NLS-1$
+	/** Preference key for inserting content assist */
+	public static final String INSERT_COMPLETION= "content_assist_insert_completion"; //$NON-NLS-1$
 	/** Preference key for filling argument names on method completion */
 	public static final String FILL_METHOD_ARGUMENTS= "content_assist_fill_method_arguments"; //$NON-NLS-1$
 	/** Preference key for guessing argument names on method completion */
