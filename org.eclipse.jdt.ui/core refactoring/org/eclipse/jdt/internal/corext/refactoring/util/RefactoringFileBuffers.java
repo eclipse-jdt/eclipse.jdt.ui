@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -18,16 +21,59 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 /**
  * Helper methods to deal with file buffer in the refactoring area.
  */
 public class RefactoringFileBuffers {
-	
-	public static ITextFileBuffer getTextFileBuffer(ICompilationUnit unit) {
-		IResource resource= unit.getResource();
+
+	/**
+	 * Acquires a text file buffer for the specified compilation unit.
+	 * 
+	 * @param unit the compilation unit to acquire a text file buffer for
+	 * @return the text file buffer, or <code>if</code> no buffer could be acquired
+	 * @throws CoreException if no buffer could be acquired
+	 */
+	public static ITextFileBuffer connect(final ICompilationUnit unit) throws CoreException {
+		Assert.isNotNull(unit);
+		final IResource resource= unit.getResource();
+		if (resource != null && resource.getType() == IResource.FILE) {
+			final IPath path= resource.getFullPath();
+			FileBuffers.getTextFileBufferManager().connect(path, new NullProgressMonitor());
+			return FileBuffers.getTextFileBufferManager().getTextFileBuffer(path);
+		}
+		return null;
+	}
+
+	/**
+	 * Releases the text file buffer associated with the compilation unit.
+	 * 
+	 * @param unit the compilation unit whose text file buffer has to be released
+	 * @throws CoreException if the buffer could not be successfully released
+	 */
+	public static void disconnect(final ICompilationUnit unit) throws CoreException {
+		Assert.isNotNull(unit);
+		final IResource resource= unit.getResource();
+		if (resource != null && resource.getType() == IResource.FILE)
+			FileBuffers.getTextFileBufferManager().disconnect(resource.getFullPath(), new NullProgressMonitor());
+	}
+
+	/**
+	 * Returns the text file buffer for the specified compilation unit.
+	 * 
+	 * @param unit the compilation unit whose text file buffer to retrieve
+	 * @return the associated text file buffer, or <code>null</code> if no text file buffer exists for the compilation unit
+	 */
+	public static ITextFileBuffer getTextFileBuffer(final ICompilationUnit unit) {
+		Assert.isNotNull(unit);
+		final IResource resource= unit.getResource();
 		if (resource == null || resource.getType() != IResource.FILE)
 			return null;
-		IFile file= (IFile)resource;
-		return FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath());
+		return FileBuffers.getTextFileBufferManager().getTextFileBuffer(resource.getFullPath());
+	}
+
+	private RefactoringFileBuffers() {
+		// Not for instantiation
 	}
 }
