@@ -1199,7 +1199,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IPackageFragmentRoot froot= getPackageFragmentRoot();
 		IJavaElement[] packages= null;
 		try {
-			if (froot != null) {
+			if (froot != null && froot.exists()) {
 				packages= froot.getChildren();
 			}
 		} catch (JavaModelException e) {
@@ -1233,7 +1233,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { root });
-			
+	
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.TYPE, scope);
 		dialog.setTitle(NewWizardMessages.getString("NewTypeWizardPage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
