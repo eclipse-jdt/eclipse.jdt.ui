@@ -16,14 +16,13 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.core.ClasspathEntry;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -155,7 +154,7 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	private static void delete(IJavaProject project){
 		try {
 			if (project != null && project.exists()){
-				project.setRawClasspath(new ClasspathEntry[0], project.getProject().getFullPath(), null);
+				project.setRawClasspath(new IClasspathEntry[0], project.getProject().getFullPath(), null);
 				project.getProject().delete(true, true, null);
 			}	
 		} catch(CoreException e) {
