@@ -279,6 +279,12 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 //		helper1("i", true, 7, 12, 7, 13);
 	}
 	
+	public void test39() throws Exception{
+		printTestDisabledMessage("regression test for Bug#11440");
+//		helper1("j", true, 7, 16, 7, 18);
+	}
+	
+	
 // -----
 	public void testFail0() throws Exception{
 		helper2("j");
