@@ -179,6 +179,9 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 				final IBinding name= node.getName().resolveBinding();
 				if (name != null && name.getKind() == IBinding.METHOD) {
 					final ITypeBinding type= ((IMethodBinding) name).getDeclaringClass();
+					
+					// TODO replace by comparison type.getJavaElement().equals(super_reference_type) (see 78087)
+					
 					if (type != null && !fQualifiedName.equals(Bindings.getFullyQualifiedName(type)))
 						return true;
 				}
