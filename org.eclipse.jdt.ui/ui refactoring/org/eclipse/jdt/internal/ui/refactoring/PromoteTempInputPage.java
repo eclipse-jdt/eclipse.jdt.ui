@@ -186,6 +186,9 @@ class PromoteTempInputPage extends UserInputWizardPage {
         	public void visibilityChanged(int newVisibility) {
         		getPromoteTempRefactoring().setVisibility(newVisibility);
             }
+
+			public void modifierChanged(int modifier, boolean isChecked) {
+			}
         };
         Composite visibilityComposite= VisibilityControlUtil.createVisibilityControl(result, visibilityChangeListener, availableVisibilities, currectVisibility);
         GridData gd= new GridData(GridData.FILL_HORIZONTAL);

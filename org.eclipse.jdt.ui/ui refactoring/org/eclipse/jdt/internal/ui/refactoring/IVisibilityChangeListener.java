@@ -11,4 +11,5 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 public interface IVisibilityChangeListener{
 	void visibilityChanged(int newVisibility);
+	void modifierChanged(int modifier, boolean isChecked);
 }

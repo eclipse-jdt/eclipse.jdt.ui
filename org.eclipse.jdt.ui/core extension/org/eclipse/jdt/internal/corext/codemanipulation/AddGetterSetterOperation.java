@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,20 +26,27 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.ui.CodeGeneration;
 
 /**
  * For given fields, method stubs for getters and setters are created.
  */
 public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	
+	private IJavaElement fInsertPosition;
+	private int fVisibility;
+	private boolean fSort;
+	private boolean fSynchronized;
+	private boolean fNative;
+	private boolean fFinal;
+
 	private final String[] EMPTY= new String[0];
 	
 	private IField[] fGetterFields;
 	private IField[] fSetterFields;
+	private IField[] fGetterSetterFields;
 	private List fCreatedAccessors;
 	
 	private IRequestQuery fSkipExistingQuery;
@@ -59,18 +65,20 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 * @param skipExistingQuery Callback to ask if setter / getters that already exist can be skipped.
 	 *        Argument of the query is the existing method. <code>null</code> is a valid input and stands for skip all.
 	 */
-	public AddGetterSetterOperation(IField[] fields, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
-		this(fields, fields, settings, skipFinalSettersQuery, skipExistingQuery);
+	public AddGetterSetterOperation(IField[] fields, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery, IJavaElement elementPosition) {
+		this(fields, fields, fields, settings, skipFinalSettersQuery, skipExistingQuery, elementPosition);
 	}
 	
-	public AddGetterSetterOperation(IField[] getterFields, IField[] setterFields, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
+	public AddGetterSetterOperation(IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery, IJavaElement elementPosition) {
 		super();
 		fGetterFields= getterFields;
 		fSetterFields= setterFields;
+		fGetterSetterFields= getterSetterFields;
 		fSkipExistingQuery= skipExistingQuery;
 		fSkipFinalSettersQuery= skipFinalSettersQuery;
 		fSettings= settings;
 		fCreatedAccessors= new ArrayList();
+		fInsertPosition= elementPosition;
 	}
 	
 	/**
@@ -88,6 +96,17 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			fSkipAllFinalSetters= (fSkipFinalSettersQuery == null);
 			fSkipAllExisting= (fSkipExistingQuery == null);
 			
+			// create pairs first: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
+			if (!fSort) {
+				for (int i= 0; i < fGetterSetterFields.length; i++) {
+					generateGetter(fGetterSetterFields[i]);
+					generateSetter(fGetterSetterFields[i]);
+					monitor.worked(1);
+					if (monitor.isCanceled()){
+						throw new OperationCanceledException();
+					}	
+				}	
+			}
 			for (int i= 0; i < fGetterFields.length; i++) {
 				generateGetter(fGetterFields[i]);
 				monitor.worked(1);
@@ -101,13 +120,24 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				if (monitor.isCanceled()){
 					throw new OperationCanceledException();
 				}	
-			}
-			
+			}			
 		} finally {
 			monitor.done();
 		}
 	}
 	
+	private IField[] getValidElementForSort() {
+		if (fGetterSetterFields.length > 0)
+			return fGetterSetterFields;
+		if (fGetterFields.length > 0)
+			return fGetterFields;
+		if (fSetterFields.length > 0)
+			return fSetterFields;
+		else
+			return null;
+		
+	}
+
 	private boolean querySkipFinalSetters(IField field) throws OperationCanceledException {
 		if (!fSkipAllFinalSetters) {
 			switch (fSkipFinalSettersQuery.doQuery(field)) {
@@ -163,10 +193,19 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 					buf.append('\n');
 				}					
 			}
-			buf.append("public "); //$NON-NLS-1$
+
+			buf.append(JdtFlags.getVisibilityString(fVisibility));
+			buf.append(' ');			
 			if (isStatic) {
 				buf.append("static "); //$NON-NLS-1$
 			}
+			if (fSynchronized)
+				buf.append("synchronized "); //$NON-NLS-1$
+			if (fFinal)
+				buf.append("final "); //$NON-NLS-1$
+			if (fNative)
+				buf.append("native "); //$NON-NLS-1$
+				
 			buf.append(typeName);
 			buf.append(' '); buf.append(getterName);
 			buf.append("() {\nreturn "); buf.append(fieldName); buf.append(";\n}\n"); //$NON-NLS-2$ //$NON-NLS-1$
@@ -175,13 +214,15 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			if (existingGetter != null) {
 				sibling= StubUtility.findNextSibling(existingGetter);
 				existingGetter.delete(false, null);
-			}				
-			
+			}
+			else
+				sibling= getInsertPosition();
+				
 			String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}
-	
+
 	private void generateSetter(IField field) throws CoreException, OperationCanceledException {
 		String fieldName= field.getElementName();
 		IJavaProject project= field.getJavaProject();
@@ -197,7 +238,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		}		
 
 		String argname= NamingConventions.suggestArgumentNames(project, "", accessorName, Signature.getArrayCount(returnSig), EMPTY)[0]; //$NON-NLS-1$
-		
+	
 		boolean isStatic= Flags.isStatic(field.getFlags());
 		boolean isFinal= Flags.isFinal(field.getFlags());
 
@@ -225,10 +266,18 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 					buf.append('\n');
 				}
 			}
-			buf.append("public "); //$NON-NLS-1$
+			buf.append(JdtFlags.getVisibilityString(fVisibility));
+			buf.append(' ');	
 			if (isStatic) {
 				buf.append("static "); //$NON-NLS-1$
 			}
+			if (fSynchronized)
+				buf.append("synchronized "); //$NON-NLS-1$
+			if (fFinal)
+				buf.append("final "); //$NON-NLS-1$				
+			if (fNative)
+				buf.append("native "); //$NON-NLS-1$
+				
 			buf.append("void "); buf.append(setterName); //$NON-NLS-1$
 			buf.append('('); buf.append(typeName); buf.append(' '); 
 			buf.append(argname); buf.append(") {\n"); //$NON-NLS-1$
@@ -247,6 +296,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				sibling= StubUtility.findNextSibling(existingSetter);
 				existingSetter.delete(false, null);
 			}
+			else
+				sibling= getInsertPosition();			
 			
 			String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
@@ -259,4 +310,46 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	public IMethod[] getCreatedAccessors() {
 		return (IMethod[]) fCreatedAccessors.toArray(new IMethod[fCreatedAccessors.size()]);
 	}
+
+	/**
+	 * @param fSort
+	 */
+	public void setSort(boolean sort) {
+		fSort = sort;
+	}
+
+	/**
+	 * @param fVisibility
+	 */
+	public void setVisibility(int visibility) {
+		fVisibility = visibility;
+	}
+	
+	/**
+	 * @param syncSet
+	 */
+	public void setSynchronized(boolean syncSet) {
+		fSynchronized = syncSet;
+	}
+	
+	/**
+	 * @param finalSet
+	 */
+	public void setFinal(boolean finalSet) {
+		fFinal = finalSet;
+	}			
+	/**
+	 * @return
+	 */
+	public IJavaElement getInsertPosition() {
+		return fInsertPosition;
+	}
+
+	/**
+	 * @param nativeSet
+	 */
+	public void setNative(boolean nativeSet) {
+		fNative= nativeSet;
+	}
+
 }

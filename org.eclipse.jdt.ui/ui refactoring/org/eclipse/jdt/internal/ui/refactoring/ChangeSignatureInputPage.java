@@ -57,6 +57,9 @@ class ChangeSignatureInputPage extends UserInputWizardPage {
             		getChangeMethodSignatureRefactoring().setVisibility(newVisibility);
             		update(true);
                 }
+
+				public void modifierChanged(int modifier, boolean isChecked) {
+				}
             };
             Composite visibilityComposite= VisibilityControlUtil.createVisibilityControl(composite, visibilityChangeListener, availableVisibilities, currectVisibility);
             if (visibilityComposite != null)

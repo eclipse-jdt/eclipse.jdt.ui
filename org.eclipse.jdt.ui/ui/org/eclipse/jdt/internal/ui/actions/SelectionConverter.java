@@ -217,7 +217,7 @@ public class SelectionConverter {
 			return EMPTY_RESULT;
 	}
 	
-	private static IJavaElement getElementAtOffset(IJavaElement input, ITextSelection selection) throws JavaModelException {
+	public static IJavaElement getElementAtOffset(IJavaElement input, ITextSelection selection) throws JavaModelException {
 		if (input instanceof ICompilationUnit) {
 			ICompilationUnit cunit= (ICompilationUnit)input;
 			if (cunit.isWorkingCopy()) {
