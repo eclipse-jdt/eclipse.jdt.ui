@@ -716,8 +716,7 @@ public class BuildPathsBlock {
 	public static void removeOldClassfiles(IResource resource) throws CoreException {
 		if (resource.isDerived()) {
 			resource.delete(false, null);
-		}
-		if (resource instanceof IContainer) {
+		} else if (resource instanceof IContainer) {
 			IResource[] members= ((IContainer) resource).members();
 			for (int i= 0; i < members.length; i++) {
 				removeOldClassfiles(members[i]);
