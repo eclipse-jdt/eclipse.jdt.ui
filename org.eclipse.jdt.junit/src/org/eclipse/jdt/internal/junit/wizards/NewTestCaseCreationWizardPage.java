@@ -16,9 +16,46 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.JUnitStatus;
+import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
+import org.eclipse.jdt.internal.junit.util.LayoutUtil;
+import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+import org.eclipse.jdt.internal.junit.util.JUnitStubUtility.GenStubSettings;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -30,47 +67,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
-
-import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.util.JUnitStatus;
-import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
-import org.eclipse.jdt.internal.junit.util.LayoutUtil;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
-import org.eclipse.jdt.internal.junit.util.JUnitStubUtility.GenStubSettings;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * The first page of the TestCase creation wizard. 
@@ -671,12 +669,44 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				return;
 		} catch (JavaModelException e) {
 		}
+		if (MessageDialog.openQuestion(getShell(), WizardMessages.getString("NewTestClassWizPage.not_on_buildpath.title"), WizardMessages.getString("NewTestClassWizPage.not_on_buildpath.message"))) { //$NON-NLS-1$ //$NON-NLS-2$
+			try {
+				addJUnitToBuildPath(jp);
+				return;
+			} catch(JavaModelException e) {
+				ErrorDialog.openError(getShell(), WizardMessages.getString("NewTestClassWizPage.cannot_add.title"), WizardMessages.getString("NewTestClassWizPage.cannot_add.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
+			}	
+		}
 		JUnitStatus status= new JUnitStatus();
-		/* TODO: is this a warning or error? */				
 		status.setWarning(WizardMessages.getString("NewTestClassWizPage.error.junitNotOnbuildpath")); //$NON-NLS-1$		
 		fContainerStatus= status;
 	}
 	
+	private void addJUnitToBuildPath(IJavaProject project) throws JavaModelException {
+		IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME);
+		IClasspathEntry entry= JavaCore.newVariableEntry(
+			junitHome.append("junit.jar"),  //$NON-NLS-1$
+			junitHome.append("junitsrc.zip"),  //$NON-NLS-1$
+			null
+		);
+		addToClasspath(project, entry);
+	}	
+	
+	private static void addToClasspath(IJavaProject project, IClasspathEntry entry) throws JavaModelException {
+		IClasspathEntry[] oldEntries= project.getRawClasspath();
+		for (int i= 0; i < oldEntries.length; i++) {
+			if (oldEntries[i].equals(entry)) {
+				return;
+			}
+		}
+		int nEntries= oldEntries.length;
+		IClasspathEntry[] newEntries= new IClasspathEntry[nEntries + 1];
+		System.arraycopy(oldEntries, 0, newEntries, 0, nEntries);
+		newEntries[nEntries]= entry;
+		project.setRawClasspath(newEntries, null);
+	}
+
+
 	/**
 	 * Returns the index of the first method that is a test method, i.e. excluding main, setUp() and tearDown().
 	 * If none of the aforementioned method stubs is created, then 0 is returned. As such method stubs are created,

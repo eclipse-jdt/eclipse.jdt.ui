@@ -515,9 +515,9 @@ public class RemoteTestRunner implements TestListener {
 		for (int i= 0; i < s.length(); i++) {
 			char c= s.charAt(i);
 			if (c == ',') 
-				sb.append("\\,");
+				sb.append("\\,"); //$NON-NLS-1$
 			else if (c == '\\')
-				sb.append("\\\\");
+				sb.append("\\\\"); //$NON-NLS-1$
 			else
 				sb.append(c);
 		}

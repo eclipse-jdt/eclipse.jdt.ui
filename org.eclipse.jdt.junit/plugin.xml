@@ -110,8 +110,8 @@
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
             type="org.eclipse.jdt.junit.launchconfig"
-            class="org.eclipse.jdt.internal.junit.launcher.JUnitTabGroup"
             helpContextId="org.eclipse.jdt.junit.junit_tab_group"
+            class="org.eclipse.jdt.internal.junit.launcher.JUnitTabGroup"
             id="org.eclipse.jdt.junit.launchConfigurationTabGroup.junit">
       </launchConfigurationTabGroup>
    </extension>
@@ -167,10 +167,10 @@
             id="org.eclipse.jdt.junit.JUnitActionSet">
          <action
                label="%GotoTestAction.label"
+               helpContextId="org.eclipse.jdt.junit.goto_referenced_test_action_context"
                tooltip="%GotoTestAction.tooltip"
                class="org.eclipse.jdt.internal.junit.ui.GotoReferencedTestAction"
                menubarPath="navigate/goTo/"
-               helpContextId="org.eclipse.jdt.junit.goto_referenced_test_action_context"
                id="junit.actions.GotoTestAction">
          </action>
       </actionSet>
@@ -191,7 +191,7 @@
       <shortcut
             label="%JUnitShortcut.label"
             icon="icons/full/obj16/julaunch.gif"
-			helpContextId="org.eclipse.jdt.junit.launch_shortcut"
+            helpContextId="org.eclipse.jdt.junit.launch_shortcut"
             modes="run, debug"
             class="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchShortcut"
             id="org.eclipse.jdt.junit.junitShortcut">
@@ -208,5 +208,14 @@
                id="org.eclipse.debug.ui.DebugPerspective">
          </perspective>
       </shortcut>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.core.classpathVariableInitializer">
+		<classpathVariableInitializer
+			variable="JUNIT_HOME"
+			class="org.eclipse.jdt.internal.junit.ui.JUnitHomeInitializer">
+		</classpathVariableInitializer>
    </extension>
+   
+
 </plugin>

@@ -77,6 +77,11 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 
 	public final static String TEST_SUPERCLASS_NAME= "junit.framework.TestCase"; //$NON-NLS-1$
 	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$
+	
+	/**
+	 * The class path variable referring to the junit home location
+	 */
+	public final static String JUNIT_HOME= "JUNIT_HOME"; //$NON-NLS-1$
 
 	private static URL fgIconBaseURL;
 
