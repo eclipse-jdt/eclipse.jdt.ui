@@ -511,15 +511,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private String getIndent(ASTNode insertBefore) throws CoreException {
-		TextBuffer buffer= null;
-		try{
-			buffer= TextBuffer.acquire(getFile());
-			int startLine= buffer.getLineOfOffset(insertBefore.getStartPosition());
-			return CodeFormatterUtil.createIndentString(buffer.getLineIndent(startLine, CodeFormatterUtil.getTabWidth()));	
-		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
-		}
+		return CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(insertBefore, getFile()));
 	}
 	
 	private String getLineDelimiter() throws CoreException {
@@ -601,9 +593,6 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private IFile getFile() throws JavaModelException {
-		if (fCu.isWorkingCopy())
-			return (IFile)fCu.getOriginalElement().getCorrespondingResource();
-		else
-			return (IFile)fCu.getCorrespondingResource();
+		return ResourceUtil.getFile(fCu);
 	}
 }
