@@ -48,3 +48,4 @@ org.eclipse.ui.console/*
 org.eclipse.sdk.tests-feature/*
 org.eclipse.sdk-feature/*
 org.eclipse.perfmsr.core/*
+org.eclipse.ui.intro/*
