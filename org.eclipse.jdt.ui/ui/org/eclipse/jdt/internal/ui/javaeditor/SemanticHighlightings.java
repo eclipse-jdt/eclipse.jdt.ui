@@ -17,6 +17,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -733,7 +734,13 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
 		public boolean consumes(SemanticToken token) {
-			IBinding binding= token.getBinding();
+			IBinding binding;
+			// work around: https://bugs.eclipse.org/bugs/show_bug.cgi?id=62605
+			ASTNode parent= token.getNode().getParent();
+			if (parent != null && parent.getLocationInParent() ==  ClassInstanceCreation.TYPE_PROPERTY)
+				binding= ((ClassInstanceCreation) parent.getParent()).resolveConstructorBinding();
+			else
+				binding= token.getBinding();
 			return binding != null ? binding.isDeprecated() : false;
 		}
 	}
