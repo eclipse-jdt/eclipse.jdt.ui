@@ -95,6 +95,7 @@ public class DeleteTest extends RefactoringTest{
 			if (! deleteCu)
 				assertEquals("incorrect content of A.java", getFileContents(getOutputTestFileName(CU_NAME)), newCuA.getSource());
 		} finally {
+			performDummySearch();
 			if (newCuA != null && newCuA.exists())
 				newCuA.delete(true, null);	
 			if (fCuA != null && fCuA.exists()){

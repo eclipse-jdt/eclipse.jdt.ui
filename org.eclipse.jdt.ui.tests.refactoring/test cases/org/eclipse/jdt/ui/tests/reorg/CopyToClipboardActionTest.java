@@ -111,6 +111,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	
 	protected void tearDown() throws Exception {
 		super.tearDown();
+		performDummySearch();
 		fClipboard.dispose();
 		fLabelProvider.dispose();
 		delete(fCuA);
