@@ -28,13 +28,17 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.OpenAction;
 
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
 class OpenDeclarationAction extends OpenAction {
     public OpenDeclarationAction(IWorkbenchSite site) {
         super(site);
     }
 
     public boolean canActionBeAdded() {
-        Object element = Utility.getSingleElement(getSelection());
+        Object element = SelectionUtil.getSingleElement(getSelection());
 
         IMethod method = null;
         

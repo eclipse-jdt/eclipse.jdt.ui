@@ -12,10 +12,6 @@
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 public interface ICallHierarchyPreferencesConstants {
-    public static final String PREF_USE_FILTERS = "PREF_USE_FILTERS";
-    public static final String PREF_INACTIVE_FILTERS_LIST = "PREF_INACTIVE_FILTERS_LIST";
-    public static final String PREF_ACTIVE_FILTERS_LIST = "PREF_ACTIVE_FILTERS_LIST";
-    public static final String PREF_MAX_CALL_DEPTH = "PREF_MAX_CALL_DEPTH";
     public static final String PREF_USE_IMPLEMENTORS_FOR_CALLER_SEARCH = "PREF_USE_IMPLEMENTORS_FOR_CALLER_SEARCH";
     public static final String PREF_USE_IMPLEMENTORS_FOR_CALLEE_SEARCH = "PREF_USE_IMPLEMENTORS_FOR_CALLEE_SEARCH";
 }

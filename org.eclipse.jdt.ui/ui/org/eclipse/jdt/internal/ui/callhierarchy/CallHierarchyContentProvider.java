@@ -17,6 +17,8 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
 class CallHierarchyContentProvider implements ITreeContentProvider {
     private final static Object[] EMPTY_ARRAY = new Object[0];
     private TreeViewer fViewer;
@@ -59,7 +61,7 @@ class CallHierarchyContentProvider implements ITreeContentProvider {
     }
 
     private boolean isMaxCallDepthExceeded(MethodWrapper methodWrapper) {
-        return methodWrapper.getLevel() > CallHierarchy.getDefault().getMaxCallDepth();
+        return methodWrapper.getLevel() > CallHierarchyUI.getDefault().getMaxCallDepth();
     }
 
     /**

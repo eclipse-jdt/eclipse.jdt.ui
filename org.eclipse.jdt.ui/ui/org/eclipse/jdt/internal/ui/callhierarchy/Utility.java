@@ -14,34 +14,9 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class Utility {
-    /**
-     * Returns the selected element if the selection
-     * consists of a single element only.
-     *
-     * @param selection the selection
-     * @return the selected first element or null
-     *
-     */
-    public static Object getSingleElement(ISelection s) {
-        if (!(s instanceof IStructuredSelection)) {
-            return null;
-        }
-
-        IStructuredSelection selection = (IStructuredSelection) s;
-
-        if (selection.size() != 1) {
-            return null;
-        }
-
-        return selection.getFirstElement();
-    }
-
     static void logDebug(String message) {
         if (JavaPlugin.getDefault().isDebugging()) {
             JavaPlugin.getDefault().getLog().log(new Status(IStatus.INFO,

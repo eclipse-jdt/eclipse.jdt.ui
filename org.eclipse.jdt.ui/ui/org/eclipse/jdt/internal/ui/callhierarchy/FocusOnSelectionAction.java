@@ -21,6 +21,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
 class FocusOnSelectionAction extends Action {
     private CallHierarchyViewPart fPart;
 
@@ -32,7 +36,7 @@ class FocusOnSelectionAction extends Action {
     }
 
     public boolean canActionBeAdded() {
-        Object element = Utility.getSingleElement(getSelection());
+        Object element = SelectionUtil.getSingleElement(getSelection());
 
         IMethod method = null;
         
@@ -55,7 +59,7 @@ class FocusOnSelectionAction extends Action {
      * @see Action#run
      */
     public void run() {
-        Object element = Utility.getSingleElement(getSelection());
+        Object element = SelectionUtil.getSingleElement(getSelection());
 
         if (element instanceof MethodWrapper) {
             IMember member= ((MethodWrapper) element).getMember();

@@ -19,6 +19,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
 class CallHierarchyLabelProvider extends LabelProvider {
     private JavaElementLabelProvider fJavaElementLabelProvider = new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS);
 

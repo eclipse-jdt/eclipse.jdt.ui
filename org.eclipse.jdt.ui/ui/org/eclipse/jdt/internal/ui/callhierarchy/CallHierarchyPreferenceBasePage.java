@@ -14,7 +14,6 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.IntegerFieldEditor;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -43,18 +42,13 @@ public class CallHierarchyPreferenceBasePage extends FieldEditorPreferencePage
      * Set the default preferences for this page.
      */
     public static void initDefaults(IPreferenceStore store) {
-        CallHierarchy.getDefault().initializeDefaultBasePreferences(store);
+        CallHierarchyUI.getDefault().initializeDefaultBasePreferences(store);
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.jface.preference.FieldEditorPreferencePage#createFieldEditors()
      */
     protected void createFieldEditors() {
-        IntegerFieldEditor maxCallDepth = new IntegerFieldEditor(ICallHierarchyPreferencesConstants.PREF_MAX_CALL_DEPTH,
-                "&Max call depth", getFieldEditorParent());
-        maxCallDepth.setValidRange(1, 99);
-        addField(maxCallDepth);
-
         BooleanFieldEditor useImplementorsForCallerSearch = new BooleanFieldEditor(ICallHierarchyPreferencesConstants.PREF_USE_IMPLEMENTORS_FOR_CALLER_SEARCH,
                 "Search for &callers using the Implementors plugin",
                 getFieldEditorParent());
@@ -64,10 +58,5 @@ public class CallHierarchyPreferenceBasePage extends FieldEditorPreferencePage
                 "Sea&rch for callees using the Implementors plugin",
                 getFieldEditorParent());
         addField(useImplementorsForCalleeSearch);
-
-        // This should be reenabled when the openInEditor(Object, boolean) method is made API.
-        //        BooleanFieldEditor activateEditorOnSelect = new BooleanFieldEditor(ICallersConstants.PREF_ACTIVATE_EDITOR_ON_SELECT,
-        //                "&Activate editor on select", getFieldEditorParent());
-        //        addField(activateEditorOnSelect);
     }
 }

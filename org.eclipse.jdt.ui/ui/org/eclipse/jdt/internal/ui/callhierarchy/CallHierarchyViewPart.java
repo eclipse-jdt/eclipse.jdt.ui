@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2003 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
+ * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
- * 
+ *
  * Contributors:
- *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
- * 			(report 36180: Callers/Callees view)
+ *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
+ *             (report 36180: Callers/Callees view)
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -63,7 +63,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
@@ -71,6 +70,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 /**
  * This is the main view for the callers plugin. It builds a tree of callers/callees
@@ -109,21 +112,21 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     private int fCurrentOrientation;
     private int fCurrentCallMode;
     private int fCurrentJavaLabelFormat;
-    private CalleeMethodWrapper fCalleeRoot;
-    private CallerMethodWrapper fCallerRoot;
+    private MethodWrapper fCalleeRoot;
+    private MethodWrapper fCallerRoot;
     private IMemento fMemento;
     private IMethod fShownMethod;
     private SelectionProviderMediator fSelectionProviderMediator;
     private List fMethodHistory;
     private ListViewer fLocationViewer;
-    private Menu fListContextMenu;
+    private Menu fLocationContextMenu;
     private Menu fTreeContextMenu;
     private SashForm fHierarchyLocationSplitter;
     private SearchScopeActionGroup fSearchScopeActions;
     private ToggleOrientationAction[] fToggleOrientationActions;
     private ToggleCallModeAction[] fToggleCallModeActions;
     private ToggleJavaLabelFormatAction[] fToggleJavaLabelFormatActions;
-    private CustomFiltersActionGroup fCustomFiltersActionGroup;
+    private CallHierarchyFiltersActionGroup fFiltersActionGroup;
     private HistoryDropDownAction fHistoryDropDownAction;
     private RefreshAction fRefreshAction;
     private OpenDeclarationAction fOpenDeclarationAction;
@@ -175,7 +178,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
      */
     public void setMethod(IMethod method) {
         if (method == null) {
-            fPagebook.showPage(fNoHierarchyShownLabel);
+            showPage(PAGE_EMPTY);
 
             return;
         }
@@ -285,10 +288,13 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
         showPage(PAGE_EMPTY);
 
-        fSelectionProviderMediator= new SelectionProviderMediator(new Viewer[] { fCallHierarchyViewer, fLocationViewer });
+        fSelectionProviderMediator = new SelectionProviderMediator(new Viewer[] {
+                    fCallHierarchyViewer, fLocationViewer
+                });
 
-        IStatusLineManager slManager= getViewSite().getActionBars().getStatusLineManager();
-        fSelectionProviderMediator.addSelectionChangedListener(new StatusBarUpdater(slManager));
+        IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
+        fSelectionProviderMediator.addSelectionChangedListener(new StatusBarUpdater(
+                slManager));
         getSite().setSelectionProvider(fSelectionProviderMediator);
 
         makeActions();
@@ -321,6 +327,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
      * @param b
      */
     private void enableActions(boolean enabled) {
+        fLocationContextMenu.setEnabled(enabled);
+
         // TODO: Is it possible to disable the actions on the toolbar and on the view menu? 
     }
 
@@ -442,7 +450,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
      */
     public void dispose() {
         disposeMenu(fTreeContextMenu);
-        disposeMenu(fListContextMenu);
+        disposeMenu(fLocationContextMenu);
 
         super.dispose();
     }
@@ -483,13 +491,13 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
             Object structuredSelection = ((IStructuredSelection) selection).getFirstElement();
 
             if (structuredSelection instanceof IMember) {
-                CallHierarchy.jumpToMember((IMember) structuredSelection);
+                CallHierarchyUI.jumpToMember((IMember) structuredSelection);
             } else if (structuredSelection instanceof MethodWrapper) {
                 MethodWrapper methodWrapper = (MethodWrapper) structuredSelection;
 
-                CallHierarchy.jumpToMember(methodWrapper.getMember());
+                CallHierarchyUI.jumpToMember(methodWrapper.getMember());
             } else if (structuredSelection instanceof CallLocation) {
-                CallHierarchy.jumpToMember(((CallLocation) structuredSelection).getCalledMember());
+                CallHierarchyUI.jumpToMember(((CallLocation) structuredSelection).getCalledMember());
             }
         }
     }
@@ -506,7 +514,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
                 if (firstCall != null) {
                     jumpToLocation(firstCall);
                 } else {
-                    CallHierarchy.jumpToMember(methodWrapper.getMember());
+                    CallHierarchyUI.jumpToMember(methodWrapper.getMember());
                 }
             } else if (structuredSelection instanceof CallLocation) {
                 jumpToLocation((CallLocation) structuredSelection);
@@ -557,8 +565,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     /**
      * @param selection
      */
-    private void locationSelectionChanged(ISelection selection) {
-    }
+    private void locationSelectionChanged(ISelection selection) {}
 
     /**
      * @param selection
@@ -569,8 +576,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
             if (selectedElement instanceof MethodWrapper) {
                 MethodWrapper methodWrapper = (MethodWrapper) selectedElement;
-                
-                revealElementInEditor(methodWrapper, fCallHierarchyViewer);                
+
+                revealElementInEditor(methodWrapper, fCallHierarchyViewer);
                 updateLocationsView(methodWrapper);
             } else {
                 updateLocationsView(null);
@@ -581,21 +588,23 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     private void revealElementInEditor(Object elem, Viewer originViewer) {
         // only allow revealing when the type hierarchy is the active pagae
         // no revealing after selection events due to model changes
-        
         if (getSite().getPage().getActivePart() != this) {
             return;
         }
-        
+
         if (fSelectionProviderMediator.getViewerInFocus() != originViewer) {
             return;
         }
-        
+
         if (elem instanceof MethodWrapper) {
-            CallLocation callLocation= CallHierarchy.getCallLocation(elem);
+            CallLocation callLocation = CallHierarchy.getCallLocation(elem);
+
             if (callLocation != null) {
-                IEditorPart editorPart= CallHierarchy.isOpenInEditor(callLocation);
+                IEditorPart editorPart = CallHierarchyUI.isOpenInEditor(callLocation);
+
                 if (editorPart != null) {
                     getSite().getPage().bringToTop(editorPart);
+
                     if (editorPart instanceof ITextEditor) {
                         ITextEditor editor = (ITextEditor) editorPart;
                         editor.selectAndReveal(callLocation.getStart(),
@@ -603,17 +612,20 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
                     }
                 }
             } else {
-                IEditorPart editorPart= CallHierarchy.isOpenInEditor(elem);
+                IEditorPart editorPart = CallHierarchyUI.isOpenInEditor(elem);
                 getSite().getPage().bringToTop(editorPart);
-                EditorUtility.revealInEditor(editorPart, ((MethodWrapper) elem).getMember());
+                EditorUtility.revealInEditor(editorPart,
+                    ((MethodWrapper) elem).getMember());
             }
         } else if (elem instanceof IJavaElement) {
-            IEditorPart editorPart= EditorUtility.isOpenInEditor(elem);
+            IEditorPart editorPart = EditorUtility.isOpenInEditor(elem);
+
             if (editorPart != null) {
-    //            getSite().getPage().removePartListener(fPartListener);
+                //            getSite().getPage().removePartListener(fPartListener);
                 getSite().getPage().bringToTop(editorPart);
                 EditorUtility.revealInEditor(editorPart, (IJavaElement) elem);
-    //            getSite().getPage().addPartListener(fPartListener);
+
+                //            getSite().getPage().addPartListener(fPartListener);
             }
         }
     }
@@ -637,21 +649,20 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
     protected void handleKeyEvent(KeyEvent event) {
         if (event.stateMask == 0) {
-//            if (event.keyCode == SWT.F3) {
-//                if ((fOpenDeclarationAction != null) &&
-//                            fOpenDeclarationAction.isEnabled()) {
-//                    fOpenDeclarationAction.run();
+            //            if (event.keyCode == SWT.F3) {
+            //                if ((fOpenDeclarationAction != null) &&
+            //                            fOpenDeclarationAction.isEnabled()) {
+            //                    fOpenDeclarationAction.run();
+            //                    return;
+            //                }
+            //            } else 
+            if (event.keyCode == SWT.F5) {
+                if ((fRefreshAction != null) && fRefreshAction.isEnabled()) {
+                    fRefreshAction.run();
 
-//                    return;
-//                }
-//            } else 
-                if (event.keyCode == SWT.F5) {
-                    if ((fRefreshAction != null) && fRefreshAction.isEnabled()) {
-                        fRefreshAction.run();
-    
-                        return;
-                    }
+                    return;
                 }
+            }
         }
     }
 
@@ -659,25 +670,25 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         return getViewSite().getActionBars();
     }
 
-    private void setCalleeRoot(CalleeMethodWrapper calleeRoot) {
+    private void setCalleeRoot(MethodWrapper calleeRoot) {
         this.fCalleeRoot = calleeRoot;
     }
 
     private MethodWrapper getCalleeRoot() {
         if (fCalleeRoot == null) {
-            fCalleeRoot = (CalleeMethodWrapper) CallHierarchy.getDefault().getCalleeRoot(fShownMethod);
+            fCalleeRoot = (MethodWrapper) CallHierarchy.getDefault().getCalleeRoot(fShownMethod);
         }
 
         return fCalleeRoot;
     }
 
-    private void setCallerRoot(CallerMethodWrapper callerRoot) {
+    private void setCallerRoot(MethodWrapper callerRoot) {
         this.fCallerRoot = callerRoot;
     }
 
     private MethodWrapper getCallerRoot() {
         if (fCallerRoot == null) {
-            fCallerRoot = (CallerMethodWrapper) CallHierarchy.getDefault().getCallerRoot(fShownMethod);
+            fCallerRoot = (MethodWrapper) CallHierarchy.getDefault().getCallerRoot(fShownMethod);
         }
 
         return fCallerRoot;
@@ -705,16 +716,15 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         fLocationViewer.setLabelProvider(new LocationLabelProvider());
         fLocationViewer.setInput(new ArrayList());
         fLocationViewer.getControl().addKeyListener(createKeyListener());
-        
-        fOpenLocationAction= new OpenLocationAction(getSite());
-        fLocationViewer.addOpenListener(new IOpenListener() {
-            public void open(OpenEvent event) {
-                fOpenLocationAction.run();
-            }
-        });
-        
-//        fListViewer.addDoubleClickListener(this);
 
+        fOpenLocationAction = new OpenLocationAction(getSite());
+        fLocationViewer.addOpenListener(new IOpenListener() {
+                public void open(OpenEvent event) {
+                    fOpenLocationAction.run();
+                }
+            });
+
+        //        fListViewer.addDoubleClickListener(this);
         MenuManager menuMgr = new MenuManager(); //$NON-NLS-1$
         menuMgr.setRemoveAllWhenShown(true);
         menuMgr.addMenuListener(new IMenuListener() {
@@ -726,8 +736,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
                 }
             });
 
-        fListContextMenu = menuMgr.createContextMenu(fLocationViewer.getControl());
-        fLocationViewer.getControl().setMenu(fListContextMenu);
+        fLocationContextMenu = menuMgr.createContextMenu(fLocationViewer.getControl());
+        fLocationViewer.getControl().setMenu(fLocationContextMenu);
 
         // Register viewer with site. This must be done before making the actions.
         getSite().registerContextMenu(menuMgr, fLocationViewer);
@@ -829,7 +839,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         fOpenDeclarationAction = new OpenDeclarationAction(this.getSite());
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
         fSearchScopeActions = new SearchScopeActionGroup(this);
-        fCustomFiltersActionGroup = new CustomFiltersActionGroup(this,
+        fFiltersActionGroup = new CallHierarchyFiltersActionGroup(this,
                 fCallHierarchyViewer);
         fHistoryDropDownAction = new HistoryDropDownAction(this);
         fHistoryDropDownAction.setEnabled(false);
@@ -850,7 +860,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
         fActionGroups = new CompositeActionGroup(new ActionGroup[] {
                     new OpenViewActionGroup(this), new RefactorActionGroup(this),
-                    fSearchScopeActions, fCustomFiltersActionGroup
+                    fSearchScopeActions, fFiltersActionGroup
                 });
     }
 
@@ -904,8 +914,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     }
 
     static CallHierarchyViewPart findAndShowCallersView(IWorkbenchPartSite site) {
-        IWorkbenchPage workbenchPage= site.getPage();
-        CallHierarchyViewPart callersView= null;
+        IWorkbenchPage workbenchPage = site.getPage();
+        CallHierarchyViewPart callersView = null;
 
         try {
             callersView = (CallHierarchyViewPart) workbenchPage.showView(CallHierarchyViewPart.CALLERS_VIEW_ID);

@@ -19,6 +19,9 @@ import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
 class OpenLocationAction extends SelectionDispatchAction {
     public OpenLocationAction(IWorkbenchSite site) {
         super(site);
@@ -56,7 +59,7 @@ class OpenLocationAction extends SelectionDispatchAction {
     }
 
     private void run(Object element) {
-        CallHierarchy.openInEditor(element, getShell(), getDialogTitle());
+        CallHierarchyUI.openInEditor(element, getShell(), getDialogTitle());
     }
 
     private String getDialogTitle() {

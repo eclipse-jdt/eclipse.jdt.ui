@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
+import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
+
 class LocationLabelProvider extends LabelProvider {
     /* (non-Javadoc)
      * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
