@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
-public class ExclusionPatternEntryDialog extends StatusDialog {
+public class ExclusionInclusionEntryDialog extends StatusDialog {
 	
 	private StringButtonDialogField fExclusionPatternDialog;
 	private StatusInfo fExclusionPatternStatus;
@@ -60,16 +60,33 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 	private IContainer fCurrSourceFolder;
 	private String fExclusionPattern;
 	private List fExistingPatterns;
+	private boolean fIsExclusion;
 		
-	public ExclusionPatternEntryDialog(Shell parent, String patternToEdit, List existingPatterns, CPListElement entryToEdit) {
+	public ExclusionInclusionEntryDialog(Shell parent, boolean isExclusion, String patternToEdit, List existingPatterns, CPListElement entryToEdit) {
 		super(parent);
+		fIsExclusion= isExclusion;
 		fExistingPatterns= existingPatterns;
-		if (patternToEdit == null) {
-			setTitle(NewWizardMessages.getString("ExclusionPatternEntryDialog.add.title")); //$NON-NLS-1$
+		String title, message;
+		if (isExclusion) {
+			if (patternToEdit == null) {
+				title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.exclude.add.title"); //$NON-NLS-1$
+			} else {
+				title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.exclude.edit.title"); //$NON-NLS-1$
+			}
+			message= NewWizardMessages.getFormattedString("ExclusionInclusionEntryDialog.exclude.pattern.label", entryToEdit.getPath().makeRelative().toString());  //$NON-NLS-1$
 		} else {
-			setTitle(NewWizardMessages.getString("ExclusionPatternEntryDialog.edit.title")); //$NON-NLS-1$
+			if (patternToEdit == null) {
+				title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.include.add.title"); //$NON-NLS-1$
+			} else {
+				title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.include.edit.title"); //$NON-NLS-1$
+			}
+			message= NewWizardMessages.getFormattedString("ExclusionInclusionEntryDialog.include.pattern.label", entryToEdit.getPath().makeRelative().toString());  //$NON-NLS-1$
+		}
+		setTitle(title);
+		if (patternToEdit != null) {
 			fExistingPatterns.remove(patternToEdit);
 		}
+		
 		
 		IWorkspaceRoot root= entryToEdit.getJavaProject().getProject().getWorkspace().getRoot();
 		IResource res= root.findMember(entryToEdit.getPath());
@@ -79,12 +96,10 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 		
 		fExclusionPatternStatus= new StatusInfo();
 		
-		String label= NewWizardMessages.getFormattedString("ExclusionPatternEntryDialog.pattern.label", entryToEdit.getPath().makeRelative().toString()); //$NON-NLS-1$
-		
 		ExclusionPatternAdapter adapter= new ExclusionPatternAdapter();
 		fExclusionPatternDialog= new StringButtonDialogField(adapter);
-		fExclusionPatternDialog.setLabelText(label);
-		fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("ExclusionPatternEntryDialog.pattern.button")); //$NON-NLS-1$
+		fExclusionPatternDialog.setLabelText(message);
+		fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("ExclusionInclusionEntryDialog.pattern.button")); //$NON-NLS-1$
 		fExclusionPatternDialog.setDialogFieldListener(adapter);
 		fExclusionPatternDialog.enableButton(fCurrSourceFolder != null);
 		
@@ -109,7 +124,12 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 		inner.setLayout(layout);
 		
 		Label description= new Label(inner, SWT.WRAP);
-		description.setText(NewWizardMessages.getString("ExclusionPatternEntryDialog.description")); //$NON-NLS-1$
+		
+		if (fIsExclusion) {
+			description.setText(NewWizardMessages.getString("ExclusionInclusionEntryDialog.exclude.description")); //$NON-NLS-1$
+		} else {
+			description.setText(NewWizardMessages.getString("ExclusionInclusionEntryDialog.include.description")); //$NON-NLS-1$
+		}
 		GridData gd= new GridData();
 		gd.horizontalSpan= 2;
 		gd.widthHint= convertWidthInCharsToPixels(80);
@@ -159,16 +179,16 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 	protected void checkIfPatternValid() {
 		String pattern= fExclusionPatternDialog.getText().trim();
 		if (pattern.length() == 0) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.empty")); //$NON-NLS-1$
+			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionInclusionEntryDialog.error.empty")); //$NON-NLS-1$
 			return;
 		}
 		IPath path= new Path(pattern);
 		if (path.isAbsolute() || path.getDevice() != null) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.notrelative")); //$NON-NLS-1$
+			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionInclusionEntryDialog.error.notrelative")); //$NON-NLS-1$
 			return;
 		}
 		if (fExistingPatterns.contains(pattern)) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.exists")); //$NON-NLS-1$
+			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionInclusionEntryDialog.error.exists")); //$NON-NLS-1$
 			return;
 		}
 		
@@ -214,11 +234,19 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 				break;
 			}
 		}			
-
+		String title, message;
+		if (fIsExclusion) {
+			title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.ChooseExclusionPattern.title"); //$NON-NLS-1$
+			message= NewWizardMessages.getString("ExclusionInclusionEntryDialog.ChooseExclusionPattern.description"); //$NON-NLS-1$
+		} else {
+			title= NewWizardMessages.getString("ExclusionInclusionEntryDialog.ChooseInclusionPattern.title"); //$NON-NLS-1$
+			message= NewWizardMessages.getString("ExclusionInclusionEntryDialog.ChooseInclusionPattern.description"); //$NON-NLS-1$
+		}
+		
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
-		dialog.setTitle(NewWizardMessages.getString("ExclusionPatternEntryDialog.ChooseExclusionPattern.title")); //$NON-NLS-1$
+		dialog.setTitle(title);
 		dialog.setValidator(validator);
-		dialog.setMessage(NewWizardMessages.getString("ExclusionPatternEntryDialog.ChooseExclusionPattern.description")); //$NON-NLS-1$
+		dialog.setMessage(message);
 		dialog.addFilter(filter);
 		dialog.setInput(fCurrSourceFolder);
 		dialog.setInitialSelection(initialElement);

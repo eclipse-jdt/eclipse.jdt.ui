@@ -156,6 +156,19 @@ public class CPListLabelProvider extends LabelProvider {
 			} else {
 				buf.append(notAvailable);
 			}
+		} else if (key.equals(CPListElement.INCLUSION)) {
+			buf.append(NewWizardMessages.getString("CPListLabelProvider.inclusion_filter.label")); //$NON-NLS-1$
+			IPath[] patterns= (IPath[]) attrib.getValue();
+			if (patterns != null && patterns.length > 0) {
+				for (int i= 0; i < patterns.length; i++) {
+					if (i > 0) {
+						buf.append(NewWizardMessages.getString("CPListLabelProvider.inclusion_filter_separator")); //$NON-NLS-1$
+					}
+					buf.append(patterns[i].toString());
+				}
+			} else {
+				buf.append(notAvailable);
+			}
 		}
 		return buf.toString();
 	}
@@ -301,6 +314,8 @@ public class CPListLabelProvider extends LabelProvider {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB);
 			} else if (key.equals(CPListElement.EXCLUSION)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB);
+			} else if (key.equals(CPListElement.INCLUSION)) {
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB);
 			}
 			return  fRegistry.get(fVariableImage);
 		} else if (element instanceof CPUserLibraryElement) {

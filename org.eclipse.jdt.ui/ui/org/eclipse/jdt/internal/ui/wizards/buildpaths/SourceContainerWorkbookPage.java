@@ -164,9 +164,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		List elements= fFoldersList.getElements();
 		for (int i= 0; i < elements.size(); i++) {
 			CPListElement elem= (CPListElement) elements.get(i);
-			IPath[] patterns= (IPath[]) elem.getAttribute(CPListElement.EXCLUSION);
+			IPath[] exclusionPatterns= (IPath[]) elem.getAttribute(CPListElement.EXCLUSION);
+			IPath[] inclusionPatterns= (IPath[]) elem.getAttribute(CPListElement.INCLUSION);
 			IPath output= (IPath) elem.getAttribute(CPListElement.OUTPUT);
-			if (patterns.length > 0 || output != null) {
+			if (exclusionPatterns.length > 0 || inclusionPatterns.length > 0 || output != null) {
 				fFoldersList.expandElement(elem, 3);
 			}
 		}
@@ -352,9 +353,17 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			}
 		} else if (key.equals(CPListElement.EXCLUSION)) {
 			CPListElement selElement= elem.getParent();
-			ExclusionPatternDialog dialog= new ExclusionPatternDialog(getShell(), selElement);
+			ExclusionInclusionDialog dialog= new ExclusionInclusionDialog(getShell(), selElement, true);
 			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.EXCLUSION, dialog.getExclusionPattern());
+				fFoldersList.refresh();
+				fClassPathList.dialogFieldChanged(); // validate
+			}		
+		} else if (key.equals(CPListElement.INCLUSION)) {
+			CPListElement selElement= elem.getParent();
+			ExclusionInclusionDialog dialog= new ExclusionInclusionDialog(getShell(), selElement, false);
+			if (dialog.open() == Window.OK) {
+				selElement.setAttribute(CPListElement.INCLUSION, dialog.getExclusionPattern());
 				fFoldersList.refresh();
 				fClassPathList.dialogFieldChanged(); // validate
 			}		
@@ -376,7 +385,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				String key= attrib.getKey();
-				Object value= key.equals(CPListElement.EXCLUSION) ? new Path[0] : null;
+				Object value= null;
+				if (key.equals(CPListElement.EXCLUSION) || key.equals(CPListElement.INCLUSION)) {
+					value= new Path[0];
+				}
 				attrib.getParent().setAttribute(key, value);
 				selElements.remove(i);
 			}
@@ -397,7 +409,12 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				if (attrib.getKey().equals(CPListElement.EXCLUSION)) {
+				String key= attrib.getKey();
+				if (CPListElement.INCLUSION.equals(key)) {
+					if (((IPath[]) attrib.getValue()).length == 0) {
+						return false;
+					}
+				} else if (CPListElement.EXCLUSION.equals(key)) {
 					if (((IPath[]) attrib.getValue()).length == 0) {
 						return false;
 					}

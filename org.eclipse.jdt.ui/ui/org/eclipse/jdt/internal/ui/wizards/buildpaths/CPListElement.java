@@ -33,6 +33,7 @@ public class CPListElement {
 	public static final String JAVADOC= "javadoc"; //$NON-NLS-1$
 	public static final String OUTPUT= "output"; //$NON-NLS-1$
 	public static final String EXCLUSION= "exclusion"; //$NON-NLS-1$
+	public static final String INCLUSION= "inclusion"; //$NON-NLS-1$
 	
 	private IJavaProject fProject;
 	
@@ -69,6 +70,7 @@ public class CPListElement {
 			case IClasspathEntry.CPE_SOURCE:
 				createAttributeElement(OUTPUT, null);
 				createAttributeElement(EXCLUSION, new Path[0]);
+				createAttributeElement(INCLUSION, new Path[0]);
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
 			case IClasspathEntry.CPE_VARIABLE:
@@ -107,8 +109,9 @@ public class CPListElement {
 		switch (fEntryKind) {
 			case IClasspathEntry.CPE_SOURCE:
 				IPath outputLocation= (IPath) getAttribute(OUTPUT);
+				IPath[] inclusionPattern= (IPath[]) getAttribute(INCLUSION);
 				IPath[] exclusionPattern= (IPath[]) getAttribute(EXCLUSION);
-				return JavaCore.newSourceEntry(fPath, exclusionPattern, outputLocation);
+				return JavaCore.newSourceEntry(fPath, inclusionPattern, exclusionPattern, outputLocation);
 			case IClasspathEntry.CPE_LIBRARY:
 				IPath attach= (IPath) getAttribute(SOURCEATTACHMENT);
 				return JavaCore.newLibraryEntry(fPath, attach, null, isExported());
@@ -125,7 +128,7 @@ public class CPListElement {
 	}
 	
 	/**
-	 * Gets the classpath entry path.
+	 * Gets the class path entry path.
 	 * @see IClasspathEntry#getPath()
 	 */
 	public IPath getPath() {
@@ -133,7 +136,7 @@ public class CPListElement {
 	}
 
 	/**
-	 * Gets the classpath entry kind.
+	 * Gets the class path entry kind.
 	 * @see IClasspathEntry#getEntryKind()
 	 */	
 	public int getEntryKind() {
@@ -186,7 +189,7 @@ public class CPListElement {
 	
 	public Object[] getChildren(boolean hideOutputFolder) {
 		if (hideOutputFolder && fEntryKind == IClasspathEntry.CPE_SOURCE) {
-			return new Object[] { findAttributeElement(EXCLUSION) };
+			return new Object[] { findAttributeElement(EXCLUSION), findAttributeElement(INCLUSION) };
 		}
 		return fChildren.toArray();
 	}
@@ -328,7 +331,8 @@ public class CPListElement {
 		elem.setAttribute(SOURCEATTACHMENT, curr.getSourceAttachmentPath());
 		elem.setAttribute(JAVADOC, javaDocLocation);
 		elem.setAttribute(OUTPUT, curr.getOutputLocation());
-		elem.setAttribute(EXCLUSION, curr.getExclusionPatterns()); 
+		elem.setAttribute(EXCLUSION, curr.getExclusionPatterns());
+		elem.setAttribute(INCLUSION, curr.getInclusionPatterns()); 
 
 		if (project.exists()) {
 			elem.setIsMissing(isMissing);
@@ -371,6 +375,11 @@ public class CPListElement {
 				buf.append('[').append(exclusion.length).append(']');
 				for (int i= 0; i < exclusion.length; i++) {
 					appendEncodePath(exclusion[i], buf).append(';');
+				}
+				IPath[] inclusion= (IPath[]) getAttribute(INCLUSION);
+				buf.append('[').append(inclusion.length).append(']');
+				for (int i= 0; i < inclusion.length; i++) {
+					appendEncodePath(inclusion[i], buf).append(';');
 				}
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
