@@ -3782,7 +3782,104 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 	
-	
+	public void testUnqualifiedFieldAccess_bug88313() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
+		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+				
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    protected Object someObject;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        new Object() {\n");
+		buf.append("            public String toString() {\n");
+		buf.append("                return someObject.getClass().getName();\n");
+		buf.append("            }\n");
+		buf.append("         };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        new Object() {\n");
+		buf.append("            public String toString() {\n");
+		buf.append("                return E.this.someObject.getClass().getName();\n");
+		buf.append("            }\n");
+		buf.append("         };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testUnqualifiedFieldAccessWithGenerics() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
+		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+				
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F<T> {\n");
+		buf.append("    protected T someObject;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> extends F<String> {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        class X {\n");
+		buf.append("            public String toString() {\n");
+		buf.append("                return someObject.getClass().getName();\n");
+		buf.append("            }\n");
+		buf.append("         };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> extends F<String> {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        class X {\n");
+		buf.append("            public String toString() {\n");
+		buf.append("                return E.this.someObject.getClass().getName();\n");
+		buf.append("            }\n");
+		buf.append("         };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
 	
 	public void testHidingVariable1() throws Exception {
 		Hashtable hashtable= JavaCore.getOptions();

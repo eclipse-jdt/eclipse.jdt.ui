@@ -622,12 +622,16 @@ public class LocalCorrectionsSubProcessor {
 		if (Modifier.isStatic(binding.getModifiers())) {
 			qualifier= imports.addImport(declaringClass);
 		} else {
-			ITypeBinding currType= Bindings.getBindingOfParentType(name);
-			if (Bindings.isSuperType(declaringClass, currType)) {
-				qualifier= "this"; //$NON-NLS-1$
-			} else {
-				String outer= imports.addImport(declaringClass);
+			ITypeBinding parentType= Bindings.getBindingOfParentType(name);
+			ITypeBinding currType= parentType;
+			while (currType != null && !Bindings.isSuperType(declaringClass, currType)) {
+				currType= currType.getDeclaringClass();
+			}
+			if (currType != parentType) {
+				String outer= imports.addImport(currType);
 				qualifier= outer + ".this"; //$NON-NLS-1$
+			} else {
+				qualifier= "this"; //$NON-NLS-1$
 			}
 		}
 		
