@@ -16,13 +16,14 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class ModifyParametersAction extends OpenRefactoringWizardAction {
 	
 	private static final String TITLE= RefactoringMessages.getString("RefactoringGroup.modify_Parameters_label"); //$NON-NLS-1$
+	private static final String UNAVAILABLE= "To activate this refactoring, plase select the name of a method with one or more parameters";
 	
 	public ModifyParametersAction(CompilationUnitEditor editor) {
-		super(TITLE, editor, IMethod.class);
+		super(TITLE, UNAVAILABLE, editor, IMethod.class, false);
 	}
 
 	public ModifyParametersAction(IWorkbenchSite site) {
-		super(TITLE, site, IMethod.class);
+		super(TITLE, UNAVAILABLE, site, IMethod.class, false);
 	}
 
 	protected Refactoring createNewRefactoringInstance(Object obj){
