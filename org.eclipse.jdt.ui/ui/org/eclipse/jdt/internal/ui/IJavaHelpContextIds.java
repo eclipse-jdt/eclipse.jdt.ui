@@ -19,6 +19,7 @@ public interface IJavaHelpContextIds {
 	// Actions
 	public static final String GETTERSETTER_ACTION= PREFIX + "getter_setter_action_context"; //$NON-NLS-1$
 	public static final String ADD_METHODBREAKPOINT_ACTION= PREFIX + "add_methodbreakpoint_action_context"; //$NON-NLS-1$
+	public static final String ADD_WATCHPOINT_ACTION= PREFIX + "add_watchpoint_action_context"; //$NON-NLS-1$
 	public static final String ADD_METHODSTUB_ACTION= PREFIX + "add_methodstub_action_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_METHODS_ACTION= PREFIX + "add_unimplemented_methods_action_context"; //$NON-NLS-1$
 	public static final String SHOW_IN_PACKAGEVIEW_ACTION= PREFIX + "show_in_packageview_action_context"; //$NON-NLS-1$
