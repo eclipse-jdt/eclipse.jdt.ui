@@ -25,7 +25,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
-import org.eclipse.jdt.ui.text.java.*;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -85,37 +86,36 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(castProposal);
 		}
 		
-		if ("void".equals(args[1])) { //$NON-NLS-1$
+		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
+		
+		if (currBinding == null || "void".equals(currBinding.getName())) { //$NON-NLS-1$
 			return;
 		}
 		
 		// change method return statement to actual type
 		if (parentNodeType == ASTNode.RETURN_STATEMENT) {
-			ITypeBinding binding= nodeToCast.resolveTypeBinding();
-			
-			
 			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-			if (binding != null && decl instanceof MethodDeclaration) {
+			if (decl instanceof MethodDeclaration) {
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
 	
-				binding= Bindings.normalizeTypeBinding(binding);
-				if (binding == null) {
-					binding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				currBinding= Bindings.normalizeTypeBinding(currBinding);
+				if (currBinding == null) {
+					currBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 				}
 	
 				ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
 	
-				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changereturntype.description", binding.getName()); //$NON-NLS-1$
+				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changereturntype.description", currBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
-				String returnTypeName= proposal.addImport(binding);
+				String returnTypeName= proposal.addImport(currBinding);
 				
 				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
 				rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
 				
 				String returnKey= "return"; //$NON-NLS-1$
 				proposal.markAsLinked(rewrite, newReturnType, true, returnKey);
-				ITypeBinding[] typeSuggestions= ASTResolving.getRelaxingTypes(astRoot.getAST(), binding);
+				ITypeBinding[] typeSuggestions= ASTResolving.getRelaxingTypes(astRoot.getAST(), currBinding);
 				for (int i= 0; i < typeSuggestions.length; i++) {
 					proposal.addLinkedModeProposal(returnKey, typeSuggestions[i]);
 				}
@@ -141,9 +141,15 @@ public class LocalCorrectionsSubProcessor {
 					typeNode= decl.getType();
 				}
 			}
+			
 			if (typeNode != null) {
+				currBinding= Bindings.normalizeTypeBinding(currBinding);
+				if (currBinding == null) {
+					currBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				}
+				
 				ImportEdit edit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
-				String typeName= edit.addImport(args[0]);
+				String typeName= edit.addImport(currBinding);
 
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changevartype.description", typeName); //$NON-NLS-1$
 				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, typeNode.getStartPosition(), typeNode.getLength(), typeName, 5);
@@ -616,12 +622,24 @@ public class LocalCorrectionsSubProcessor {
 	
 	public static void addUnnecessaryCastProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) throws CoreException {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode instanceof CastExpression) {
+		
+		ASTNode curr= selectedNode;
+		while (curr instanceof ParenthesizedExpression) {
+			curr= ((ParenthesizedExpression) curr).getExpression();
+		}
+		
+		if (curr instanceof CastExpression) {
 			ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
 			
-			CastExpression cast= (CastExpression) selectedNode;
-			ASTNode placeholder= rewrite.createCopy(cast.getExpression());
-			rewrite.markAsReplaced(selectedNode, placeholder);
+			CastExpression cast= (CastExpression) curr;
+			Expression expression= cast.getExpression();
+			ASTNode placeholder= rewrite.createCopy(expression);
+			
+			if (ASTNodes.needsParentheses(expression)) {
+				rewrite.markAsReplaced(curr, placeholder);
+			} else {
+				rewrite.markAsReplaced(selectedNode, placeholder);
+			}
 			
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.unnecessarycast.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
