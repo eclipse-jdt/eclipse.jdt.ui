@@ -10,9 +10,11 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.ui.IEditorInput;
@@ -43,4 +45,8 @@ public class TextStatusContextViewer extends SourceContextViewer {
 		IDocument document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);
 		setInput(document, fc.getSourceRange());
 	}
+	
+	protected SourceViewer createSourceViewer(Composite parent) {
+	    return new SourceViewer(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
+	}    
 }

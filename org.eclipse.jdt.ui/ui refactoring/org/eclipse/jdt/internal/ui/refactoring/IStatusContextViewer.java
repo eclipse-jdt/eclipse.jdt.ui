@@ -18,12 +18,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 /**
  * A special viewer to present a context for a <code>RefactoringStatusEntry</code>.
  */
-public interface  IStatusContextViewer {
+public interface IStatusContextViewer {
 	
 	/**
 	 * Creates the status viewer's widget hierarchy. This method 
 	 * should only be called once. Method <code>getControl()</code>
-	 * should be use retrieve the widget hierarchy.
+	 * should be used to retrieve the widget hierarchy.
 	 * 
 	 * @param parent the parent for the widget hierarchy
 	 * 

@@ -10,18 +10,20 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -29,6 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -42,6 +45,10 @@ public class JavaStatusContextViewer extends SourceContextViewer {
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		getSourceViewer().configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools(), null));
+	}
+	
+	protected SourceViewer createSourceViewer(Composite parent) {
+	    return new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
 	}
 	
 	/* (non-Javadoc)

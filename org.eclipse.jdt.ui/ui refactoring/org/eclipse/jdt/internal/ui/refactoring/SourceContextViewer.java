@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.swt.SWT;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.core.ISourceRange;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -18,12 +21,8 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-
-import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -42,7 +41,7 @@ public abstract class SourceContextViewer  implements IStatusContextViewer {
 	 * @see org.eclipse.jdt.internal.ui.refactoring.IStatusContextViewer#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		fSourceViewer= new SourceViewer(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
+		fSourceViewer= createSourceViewer(parent);
 		fSourceViewer.setEditable(false);
 		fSourceViewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 	}
@@ -53,6 +52,16 @@ public abstract class SourceContextViewer  implements IStatusContextViewer {
 	public Control getControl() {
 		return fSourceViewer.getControl();
 	}
+	
+	/**
+	 * Hook to create the source viewer to be used to present the textual context
+	 * information.
+	 * 
+	 * @param parent the composite to be used as the source viewer's
+	 *  parent.
+	 * @return the source viewer to be used
+	 */
+	protected abstract SourceViewer createSourceViewer(Composite parent);
 
 	//---- Helper methods to populate viewer -------------------------------
 
