@@ -262,7 +262,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			}
 			try {
 				AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(type, settings, selected, false, elementPosition);
-				op.setVisbility(dialog.getVisibilityModifier());
+				op.setVisibility(dialog.getVisibilityModifier());
 				op.setOmitSuper(dialog.isOmitSuper());
 
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();

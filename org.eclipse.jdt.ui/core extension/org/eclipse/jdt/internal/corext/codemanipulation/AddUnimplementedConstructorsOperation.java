@@ -139,12 +139,12 @@ public class AddUnimplementedConstructorsOperation implements IWorkspaceRunnable
 		return fCreatedMethods;
 	}
 	
-	public int getVisbility() {
+	public int getVisibility() {
 		return fVisibility;
 	}
 		
-	public void setVisbility(int visbility) {
-		fVisibility= visbility;
+	public void setVisibility(int visibility) {
+		fVisibility= visibility;
 	}
 	
 	/**
