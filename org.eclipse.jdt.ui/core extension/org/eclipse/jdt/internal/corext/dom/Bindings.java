@@ -1298,7 +1298,9 @@ public class Bindings {
 		ITypeBinding[] overridableTypes= overridable.getParameterTypes();
 		Assert.isTrue(overriddenTypes.length == overridableTypes.length);
 		for (int index= 0; index < overriddenTypes.length; index++) {
-			if (!overridableTypes[index].getErasure().isSubTypeCompatible(overriddenTypes[index].getErasure()))
+			final ITypeBinding overridableErasure= overridableTypes[index].getErasure();
+			final ITypeBinding overriddenErasure= overriddenTypes[index].getErasure();
+			if (!overridableErasure.isSubTypeCompatible(overriddenErasure) || !overridableErasure.getKey().equals(overriddenErasure.getKey()))
 				return false;
 		}
 		ITypeBinding[] overriddenExceptions= overridden.getExceptionTypes();
