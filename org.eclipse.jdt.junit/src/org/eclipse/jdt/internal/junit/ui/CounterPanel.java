@@ -13,14 +13,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 /**
  * A panel with counters for the number of Runs, Errors and Failures.
  */
 public class CounterPanel extends Composite {
-	private Label fNumberOfErrors;
-	private Label fNumberOfFailures;
-	private Label fNumberOfRuns;
+	private Text fNumberOfErrors;
+	private Text fNumberOfFailures;
+	private Text fNumberOfRuns;
 	private int fTotal;
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("ovr16/error_ovr.gif"); //$NON-NLS-1$
@@ -50,7 +51,7 @@ public class CounterPanel extends Composite {
 		fFailureIcon.dispose();
 	}
 
-	private Label createLabel(String name, Image image, String init) {
+	private Text createLabel(String name, Image image, String init) {
 		Label label= new Label(this, SWT.NONE);
 		if (image != null) {
 			image.setBackground(label.getBackground());
@@ -61,11 +62,11 @@ public class CounterPanel extends Composite {
 		label= new Label(this, SWT.NONE);
 		label.setText(name);
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
-
-		label= new Label(this, SWT.NONE);
-		label.setText(init);
-		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_BEGINNING));
-		return label;
+	
+		Text value= new Text(this, SWT.READ_ONLY);
+		value.setText(init);
+		value.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_BEGINNING));
+		return value;
 	}
 
 	public void reset() {
