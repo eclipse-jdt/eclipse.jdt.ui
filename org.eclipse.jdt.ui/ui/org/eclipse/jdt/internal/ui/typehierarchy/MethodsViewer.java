@@ -169,20 +169,6 @@ public class MethodsViewer extends TableViewer {
 		
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);	
 		ContextMenuGroup.add(menu, fStandardGroups, this);
-		
-		// Viewer setup stuff.
-		String label= JavaPlugin.getResourceString(PREFIX_VISIBILITY_MENU + "label");
-		MenuManager submenu= new MenuManager(label);	
-		submenu.add(fShowFields);
-		submenu.add(fShowStatic);
-		submenu.add(new Separator());	
-		submenu.add(fShowPublic);
-		submenu.add(fShowProtected);
-		submenu.add(fShowPrivate);
-		submenu.add(fShowDefault);
-		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, submenu);
-		
-		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fShowInheritedMembersAction);
 	}
 
 	/**

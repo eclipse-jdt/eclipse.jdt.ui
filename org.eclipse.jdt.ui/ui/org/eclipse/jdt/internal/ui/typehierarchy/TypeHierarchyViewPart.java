@@ -365,11 +365,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		JavaPlugin.createStandardGroups(menu);
 		// viewer entries
 		viewer.contributeToContextMenu(menu);
-		// hierarchy view entries
-		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fSwitchSuperViewAction);
-		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fSwitchSubViewAction);
-		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fSwitchVAJViewAction);
-		
 		addOpenWithMenu(menu, (IStructuredSelection)viewer.getSelection());
 	}
 
@@ -380,8 +375,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		JavaPlugin.createStandardGroups(menu);
 		// viewer entries
 		fMethodsViewer.contributeToContextMenu(menu);
-		// hierarchy view entries
-		menu.appendToGroup(IContextMenuConstants.GROUP_VIEWER_SETUP, fEnableMemberFilterAction);
 		if (fAddStubAction != null) {
 			fAddStubAction.setParentType(fInput);
 			if (fAddStubAction.canActionBeAdded()) {
