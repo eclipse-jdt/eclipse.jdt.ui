@@ -24,6 +24,8 @@ public class CopySourceReferencesToClipboardAction extends SourceReferenceAction
 	 * @see Action#run
 	 */
 	public void run() {
+		if (! canOperateOn(getStructuredSelection()))
+			return;
 		new BusyIndicator().showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
 			public void run() {
 				try {

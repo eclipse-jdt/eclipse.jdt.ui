@@ -12,9 +12,9 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
+public class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
 
-	protected CutSourceReferencesToClipboardAction(ISelectionProvider provider) {
+	public CutSourceReferencesToClipboardAction(ISelectionProvider provider) {
 		super("Cu&t", provider);
 	}
 
@@ -22,6 +22,9 @@ class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
 	 * @see Action#run
 	 */
 	public void run() {
+		if (! canOperateOn(getStructuredSelection()))
+			return;
+		
 		new BusyIndicator().showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
 			public void run() {
 				try {
