@@ -66,7 +66,7 @@ public class TextBufferEditor extends TextEditProcessor {
 	
 	public boolean canPerformEdits() {
 		if (fUndoMemento != null)
-			return fUndoMemento.canApply(getDocument());
+			return fUndoMemento.canBeApplied(getDocument());
 		else 
 			return super.canPerformEdits();
 	}

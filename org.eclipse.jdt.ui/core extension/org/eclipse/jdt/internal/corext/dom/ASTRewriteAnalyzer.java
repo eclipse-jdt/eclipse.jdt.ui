@@ -273,7 +273,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	private final void addEdit(TextEdit edit) {
-		fCurrentEdit.add(edit);
+		fCurrentEdit.addChild(edit);
 	}
 	
 	final void doTextInsert(int offset, String insertString, GroupDescription description) {

@@ -135,7 +135,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 				MultiTextEdit edit= new MultiTextEdit();
 				rewriter.rewriteNode(buffer, edit);
 				if (!imports.isEmpty())
-					edit.add(imports.createEdit(buffer));
+					edit.addChild(imports.createEdit(buffer));
 				result.setEdit(edit);
 				result.addGroupDescriptions((GroupDescription[])groups.toArray(new GroupDescription[groups.size()]));
 			} finally {

@@ -19,11 +19,13 @@ import java.util.Map;
 import org.eclipse.jface.text.Assert;
 
 /**
- * Copies a tree of text edits.
+ * Copies a tree of text edits. A text edit copier keeps a map
+ * between original and new text edits. It can be used to map
+ * a copy back to its original edit.
  * 
  * @since 3.0
  */
-public class TextEditCopier {
+public final class TextEditCopier {
 	
 	private TextEdit fEdit;
 	private Map fCopies;
@@ -45,11 +47,9 @@ public class TextEditCopier {
 	}
 
 	/**
-	 * Performs the actual copy. This method returns <code>null
-	 * </code> if all edits in the tree are excluded from copying.
+	 * Performs the actual copying.
 	 * 
-	 * @return the copy or <code>null</code> if all edits are
-	 *  excluded from copying
+	 * @return the copy
 	 */
 	public TextEdit perform() {
 		TextEdit result= doCopy(fEdit);
@@ -84,7 +84,7 @@ public class TextEditCopier {
 			List newChildren= new ArrayList(children.size());
 			for (Iterator iter= children.iterator(); iter.hasNext();) {
 				TextEdit childCopy= doCopy((TextEdit)iter.next());
-				childCopy.setParent(result);
+				childCopy.internalSetParent(result);
 				newChildren.add(childCopy);
 			}
 			result.internalSetChildren(newChildren);

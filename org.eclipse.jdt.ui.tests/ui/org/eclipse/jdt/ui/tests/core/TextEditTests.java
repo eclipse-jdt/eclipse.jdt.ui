@@ -75,10 +75,10 @@ public class TextEditTests extends TestCase {
 	
 	public void testOverlap1() throws Exception {
 		// [ [ ] ]
-		fRoot.add(new ReplaceEdit(0, 2, "01"));
+		fRoot.addChild(new ReplaceEdit(0, 2, "01"));
 		boolean exception= false;
 		try {
-			fRoot.add(new ReplaceEdit(1, 2, "12"));
+			fRoot.addChild(new ReplaceEdit(1, 2, "12"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -87,10 +87,10 @@ public class TextEditTests extends TestCase {
 	
 	public void testOverlap2() throws Exception {
 		// [[ ] ]
-		fRoot.add(new ReplaceEdit(0, 2, "01"));
+		fRoot.addChild(new ReplaceEdit(0, 2, "01"));
 		boolean exception= false;
 		try {
-			fRoot.add(new ReplaceEdit(0, 1, "0"));
+			fRoot.addChild(new ReplaceEdit(0, 1, "0"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -99,10 +99,10 @@ public class TextEditTests extends TestCase {
 	
 	public void testOverlap3() throws Exception {
 		// [ [ ]]
-		fRoot.add(new ReplaceEdit(0, 2, "01"));
+		fRoot.addChild(new ReplaceEdit(0, 2, "01"));
 		boolean exception= false;
 		try {
-			fRoot.add(new ReplaceEdit(1, 1, "1"));
+			fRoot.addChild(new ReplaceEdit(1, 1, "1"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -111,10 +111,10 @@ public class TextEditTests extends TestCase {
 	
 	public void testOverlap4() throws Exception {
 		// [ [ ] ]
-		fRoot.add(new ReplaceEdit(0, 3, "012"));
+		fRoot.addChild(new ReplaceEdit(0, 3, "012"));
 		boolean exception= false;
 		try {
-			fRoot.add(new ReplaceEdit(1, 1, "1"));
+			fRoot.addChild(new ReplaceEdit(1, 1, "1"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -123,10 +123,10 @@ public class TextEditTests extends TestCase {
 	
 	public void testOverlap5() throws Exception {
 		// [ []  ]
-		fRoot.add(new ReplaceEdit(0, 3, "012"));
+		fRoot.addChild(new ReplaceEdit(0, 3, "012"));
 		boolean exception= false;
 		try {
-			fRoot.add(new InsertEdit(1, "xx"));
+			fRoot.addChild(new InsertEdit(1, "xx"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -135,10 +135,10 @@ public class TextEditTests extends TestCase {
 	
 	public void testOverlap6() throws Exception {
 		// [  [] ]
-		fRoot.add(new ReplaceEdit(0, 3, "012"));
+		fRoot.addChild(new ReplaceEdit(0, 3, "012"));
 		boolean exception= false;
 		try {
-			fRoot.add(new InsertEdit(2, "xx"));
+			fRoot.addChild(new InsertEdit(2, "xx"));
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -148,10 +148,10 @@ public class TextEditTests extends TestCase {
 	public void testOverlap7() throws Exception {
 		MoveSourceEdit source= new MoveSourceEdit(2, 5);
 		MoveTargetEdit target= new MoveTargetEdit(3, source);
-		fRoot.add(source);
+		fRoot.addChild(source);
 		boolean exception= false;
 		try {
-			fRoot.add(target);
+			fRoot.addChild(target);
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -161,10 +161,10 @@ public class TextEditTests extends TestCase {
 	public void testOverlap8() throws Exception {
 		MoveSourceEdit source= new MoveSourceEdit(2, 5);
 		MoveTargetEdit target= new MoveTargetEdit(6, source);
-		fRoot.add(source);
+		fRoot.addChild(source);
 		boolean exception= false;
 		try {
-			fRoot.add(target);
+			fRoot.addChild(target);
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -176,12 +176,12 @@ public class TextEditTests extends TestCase {
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
 		MoveSourceEdit s2= new MoveSourceEdit(2, 3);
 		MoveTargetEdit t2= new MoveTargetEdit(8, s2);
-		fRoot.add(s1);
-		fRoot.add(t1);
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
 		boolean exception= false;
 		try {
-			fRoot.add(s2);
-			fRoot.add(t2);
+			fRoot.addChild(s2);
+			fRoot.addChild(t2);
 		} catch (MalformedTreeException e) {
 			exception= true;
 		}
@@ -192,7 +192,7 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(3, 1);
 		boolean exception= false;
 		try {
-			fRoot.add(s1);
+			fRoot.addChild(s1);
 			fRoot.apply(fDocument);
 		} catch (MalformedTreeException e) {
 			exception= true;
@@ -204,8 +204,8 @@ public class TextEditTests extends TestCase {
 		MultiTextEdit root= new MultiTextEdit();
 		TextEdit e1= new InsertEdit(2, "yy");
 		TextEdit e2= new ReplaceEdit(2, 3, "3456");
-		root.add(e1);
-		root.add(e2);
+		root.addChild(e1);
+		root.addChild(e2);
 		List org= flatten(root);
 		TextEditCopier copier= new TextEditCopier(root);
 		List copy= flatten(copier.perform());
@@ -218,10 +218,10 @@ public class TextEditTests extends TestCase {
 		CopyTargetEdit t1= new CopyTargetEdit(8, s1);
 		CopySourceEdit s2= new CopySourceEdit(5, 2);
 		CopyTargetEdit t2= new CopyTargetEdit(2, s2);
-		s1.add(s2);
-		root.add(s1);
-		root.add(t1);
-		root.add(t2);
+		s1.addChild(s2);
+		root.addChild(s1);
+		root.addChild(t1);
+		root.addChild(t2);
 		List org= flatten(root);
 		TextEditCopier copier= new TextEditCopier(root);
 		List copy= flatten(copier.perform());
@@ -271,9 +271,9 @@ public class TextEditTests extends TestCase {
 		// [][  ]
 		TextEdit e1= new InsertEdit(2, "yy");
 		TextEdit e2= new ReplaceEdit(2, 3, "3456");
-		fRoot.add(e1);
-		fRoot.add(e2);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(e1);
+		fRoot.addChild(e2);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(e1, 2, 2);
 		assertEquals(e2, 4, 4);
@@ -285,9 +285,9 @@ public class TextEditTests extends TestCase {
 		// [][]
 		TextEdit e1= new InsertEdit(2, "yy");
 		TextEdit e2= new InsertEdit(2, "xx");
-		fRoot.add(e1);
-		fRoot.add(e2);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(e1);
+		fRoot.addChild(e2);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(e1, 2, 2);
 		assertEquals(e2, 4, 2);
@@ -300,10 +300,10 @@ public class TextEditTests extends TestCase {
 		TextEdit e1= new ReplaceEdit(0, 2, "011");
 		TextEdit e2= new InsertEdit(2, "xx");
 		TextEdit e3= new ReplaceEdit(2, 2, "2");
-		fRoot.add(e1);
-		fRoot.add(e2);
-		fRoot.add(e3);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(e1);
+		fRoot.addChild(e2);
+		fRoot.addChild(e3);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(e1, 0, 3);
 		assertEquals(e2, 3, 2);
@@ -314,8 +314,8 @@ public class TextEditTests extends TestCase {
 	
 	public void testInsert4() throws Exception {
 		TextEdit e1= new InsertEdit(0, "xx");
-		fRoot.add(e1);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(e1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer length", 12, fDocument.getLength());
 		assertEquals(e1, 0, 2);
@@ -325,8 +325,8 @@ public class TextEditTests extends TestCase {
 	
 	public void testInsert5() throws Exception {
 		TextEdit e1= new InsertEdit(10, "xx");
-		fRoot.add(e1);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(e1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer length", 12, fDocument.getLength());
 		assertEquals(e1, 10, 2);
@@ -337,9 +337,9 @@ public class TextEditTests extends TestCase {
 	public void testInsertReplace1() throws Exception {
 		TextEdit e1= new ReplaceEdit(2, 1, "y");
 		TextEdit e2= new InsertEdit(2, "xx");
-		fRoot.add(e1);
-		fRoot.add(e2);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(e1);
+		fRoot.addChild(e2);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(e1, 4, 1);
 		assertEquals(e2, 2, 2);
@@ -349,8 +349,8 @@ public class TextEditTests extends TestCase {
 	
 	public void testDelete1() throws Exception {
 		TextEdit e1= new DeleteEdit(3, 1);
-		fRoot.add(e1);
-		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		fRoot.addChild(e1);
+		assertTrue("Can perform edits", fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(e1, 3, 0);
 		assertEquals("Buffer content", "012456789", fDocument.get());
@@ -361,10 +361,10 @@ public class TextEditTests extends TestCase {
 		TextEdit e1= new DeleteEdit(4, 1);
 		TextEdit e2= new DeleteEdit(3, 1);
 		TextEdit e3= new DeleteEdit(5, 1);
-		fRoot.add(e1);
-		fRoot.add(e2);
-		fRoot.add(e3);
-		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		fRoot.addChild(e1);
+		fRoot.addChild(e2);
+		fRoot.addChild(e3);
+		assertTrue("Can perform edits", fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(e1, 3, 0);
 		assertEquals(e2, 3, 0);
@@ -376,9 +376,9 @@ public class TextEditTests extends TestCase {
 	public void testDelete3() throws Exception {
 		TextEdit e1= new InsertEdit(3, "x");
 		TextEdit e2= new DeleteEdit(3, 1);
-		fRoot.add(e1);
-		fRoot.add(e2);
-		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		fRoot.addChild(e1);
+		fRoot.addChild(e2);
+		assertTrue("Can perform edits", fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(e1, 3, 1);
 		assertEquals(e2, 4, 0);
@@ -389,13 +389,13 @@ public class TextEditTests extends TestCase {
 	public void testDeleteWithChildren() throws Exception {
 		TextEdit e1= new DeleteEdit(2, 6);
 		MultiTextEdit e2= new MultiTextEdit(3, 3);
-		e1.add(e2);
+		e1.addChild(e2);
 		TextEdit e3= new ReplaceEdit(3, 1, "xx");
 		TextEdit e4= new ReplaceEdit(5, 1, "yy");
-		e2.add(e3);
-		e2.add(e4);
-		fRoot.add(e1);
-		assertTrue(fRoot.canApply(fDocument));
+		e2.addChild(e3);
+		e2.addChild(e4);
+		fRoot.addChild(e1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0189", fDocument.get());
 		assertTrue(e2.isDeleted());
@@ -407,9 +407,9 @@ public class TextEditTests extends TestCase {
 	public void testMove1() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(5, s1);
-		fRoot.add(s1);
-		fRoot.add(t1);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0142356789", fDocument.get());
 		assertEquals(s1, 2, 0);
@@ -420,9 +420,9 @@ public class TextEditTests extends TestCase {
 	public void testMove2() throws Exception {
 		MoveSourceEdit s1= new MoveSourceEdit(5, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
-		fRoot.add(s1);
-		fRoot.add(t1);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0156234789", fDocument.get());
 		assertEquals(s1, 7, 0);
@@ -434,10 +434,10 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
 		TextEdit e2= new ReplaceEdit(4, 1, "x");
-		fRoot.add(s1);
-		fRoot.add(t1);
-		fRoot.add(e2);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		fRoot.addChild(e2);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "01x5623789", fDocument.get());
 		assertEquals(s1, 2, 0);
@@ -450,10 +450,10 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(7, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
 		TextEdit e2= new ReplaceEdit(5, 1, "x");
-		fRoot.add(s1);
-		fRoot.add(t1);
-		fRoot.add(e2);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		fRoot.addChild(e2);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0178234x69", fDocument.get());
 		assertEquals(s1, 9, 0);
@@ -467,10 +467,10 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 1);
 		MoveTargetEdit t1= new MoveTargetEdit(3, s1);
 		TextEdit e2= new ReplaceEdit(2, 1, "x");
-		s1.add(e2);
-		fRoot.add(s1);
-		fRoot.add(t1);
-		assertTrue(fRoot.canApply(fDocument));
+		s1.addChild(e2);
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(s1, 2, 0);
 		assertEquals(t1, 2, 1);
@@ -484,10 +484,10 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 1);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
 		TextEdit e2= new ReplaceEdit(2, 1, "x");
-		s1.add(e2);
-		fRoot.add(s1);
-		fRoot.add(t1);
-		assertTrue(fRoot.canApply(fDocument));
+		s1.addChild(e2);
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(s1, 3, 0);
 		assertEquals(t1, 2, 1);
@@ -500,10 +500,10 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 3);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
 		TextEdit e2= new ReplaceEdit(3, 1, "x");
-		s1.add(e2);
-		fRoot.add(s1);
-		fRoot.add(t1);
-		assertTrue(fRoot.canApply(fDocument));
+		s1.addChild(e2);
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "01562x4789", fDocument.get());
 		assertEquals(s1, 2, 0);
@@ -516,10 +516,10 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(5, 3);
 		MoveTargetEdit t1= new MoveTargetEdit(1, s1);
 		TextEdit e2= new ReplaceEdit(6, 1, "x");
-		s1.add(e2);
-		fRoot.add(s1);
-		fRoot.add(t1);
-		assertTrue(fRoot.canApply(fDocument));
+		s1.addChild(e2);
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "05x7123489", fDocument.get());
 		assertEquals(s1, 8, 0);
@@ -534,12 +534,12 @@ public class TextEditTests extends TestCase {
 		
 		MoveSourceEdit s2= new MoveSourceEdit(1, 1);
 		MoveTargetEdit t2= new MoveTargetEdit(3, s2);
-		s1.add(s2);
-		s1.add(t2);
+		s1.addChild(s2);
+		s1.addChild(t2);
 		
-		fRoot.add(s1);
-		fRoot.add(t1);
-		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		assertTrue("Can perform edits", fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(s1, 1, 0);
 		assertEquals(t1, 2, 3);
@@ -556,12 +556,12 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s2= new MoveSourceEdit(5, 2);
 		MoveTargetEdit t2= new MoveTargetEdit(1, s2);
 		
-		fRoot.add(s1);
-		fRoot.add(t1);
-		fRoot.add(s2);
-		fRoot.add(t2);
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		fRoot.addChild(s2);
+		fRoot.addChild(t2);
 		
-		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		assertTrue("Can perform edits", fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(s1, 4, 0);
 		assertEquals(t1, 6, 2);		
@@ -576,12 +576,12 @@ public class TextEditTests extends TestCase {
 		MoveTargetEdit t1= new MoveTargetEdit(5, s1);
 		
 		RangeMarker marker= new RangeMarker(2, 2);
-		s1.add(marker);		
+		s1.addChild(marker);		
 		
-		fRoot.add(s1);
-		fRoot.add(t1);
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
 		
-		assertTrue(fRoot.canApply(fDocument));
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0142356789", fDocument.get());
 		assertEquals(s1, 2, 0);
@@ -594,10 +594,10 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 3);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
 		TextEdit e2= new DeleteEdit(6, 2);
-		e2.add(t1);
-		fRoot.add(s1);
-		fRoot.add(e2);
-		assertTrue(fRoot.canApply(fDocument));
+		e2.addChild(t1);
+		fRoot.addChild(s1);
+		fRoot.addChild(e2);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "01589", fDocument.get());
 		assertEquals(s1, 2, 0);
@@ -611,15 +611,15 @@ public class TextEditTests extends TestCase {
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
 		
 		TextEdit d1= new DeleteEdit(5, 2);
-		d1.add(s1);
+		d1.addChild(s1);
 		
 		RangeMarker marker= new RangeMarker(5, 2);
-		s1.add(marker);		
+		s1.addChild(marker);		
 		
-		fRoot.add(d1);
-		fRoot.add(t1);
+		fRoot.addChild(d1);
+		fRoot.addChild(t1);
 		
-		assertTrue(fRoot.canApply(fDocument));
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0156234789", fDocument.get());
 		assertEquals(t1, 2, 2);
@@ -636,14 +636,14 @@ public class TextEditTests extends TestCase {
 		TextEdit d1= new DeleteEdit(9, 1);
 	
 		RangeMarker m1= new RangeMarker(2, 2);
-		s1.add(m1);
+		s1.addChild(m1);
 		
-		fRoot.add(s1);
-		fRoot.add(i1);
-		fRoot.add(t1);
-		fRoot.add(d1);
+		fRoot.addChild(s1);
+		fRoot.addChild(i1);
+		fRoot.addChild(t1);
+		fRoot.addChild(d1);
 		
-		assertTrue(fRoot.canApply(fDocument));
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "014x562378", fDocument.get());
 		assertEquals(s1, 2, 0);
@@ -661,14 +661,14 @@ public class TextEditTests extends TestCase {
 		TextEdit d1= new DeleteEdit(9, 1);
 	
 		RangeMarker m1= new RangeMarker(7, 2);
-		s1.add(m1);
+		s1.addChild(m1);
 		
-		fRoot.add(s1);
-		fRoot.add(i1);
-		fRoot.add(t1);
-		fRoot.add(d1);
+		fRoot.addChild(s1);
+		fRoot.addChild(i1);
+		fRoot.addChild(t1);
+		fRoot.addChild(d1);
 		
-		assertTrue(fRoot.canApply(fDocument));
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0178234x56", fDocument.get());
 		assertEquals(s1, 10, 0);
@@ -684,15 +684,15 @@ public class TextEditTests extends TestCase {
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
 	
 		TextEdit d1= new DeleteEdit(2, 2);
-		d1.add(s1);
+		d1.addChild(s1);
 		
 		RangeMarker m1= new RangeMarker(2, 2);
-		s1.add(m1);
+		s1.addChild(m1);
 		
-		fRoot.add(t1);
-		fRoot.add(d1);
+		fRoot.addChild(t1);
+		fRoot.addChild(d1);
 		
-		assertTrue(fRoot.canApply(fDocument));
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0145623789", fDocument.get());
 		assertEquals(d1, 2, 0);
@@ -706,10 +706,10 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(7, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(2, s1);
 		TextEdit m= new ReplaceEdit(4, 1, "yy");
-		fRoot.add(t1);
-		fRoot.add(m);
-		fRoot.add(s1);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(t1);
+		fRoot.addChild(m);
+		fRoot.addChild(s1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "017823yy569", fDocument.get());
 		assertEquals(s1, 10, 0);
@@ -722,10 +722,10 @@ public class TextEditTests extends TestCase {
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(7, s1);
 		TextEdit m= new ReplaceEdit(4, 1, "yy");
-		fRoot.add(t1);
-		fRoot.add(m);
-		fRoot.add(s1);
-		assertTrue(fRoot.canApply(fDocument));
+		fRoot.addChild(t1);
+		fRoot.addChild(m);
+		fRoot.addChild(s1);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "01yy5623789", fDocument.get());
 		assertEquals(s1, 2, 0);
@@ -738,10 +738,10 @@ public class TextEditTests extends TestCase {
 		RangeMarker m= new RangeMarker(2, 6);
 		MoveSourceEdit s1= new MoveSourceEdit(4, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(3, s1);
-		m.add(s1);
-		m.add(t1);
-		fRoot.add(m);
-		assertTrue(fRoot.canApply(fDocument));
+		m.addChild(s1);
+		m.addChild(t1);
+		fRoot.addChild(m);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0124536789", fDocument.get());
 		assertEquals(m, 2, 6);
@@ -754,10 +754,10 @@ public class TextEditTests extends TestCase {
 		RangeMarker m= new RangeMarker(2, 6);
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(5, s1);
-		m.add(s1);
-		m.add(t1);
-		fRoot.add(m);
-		assertTrue(fRoot.canApply(fDocument));
+		m.addChild(s1);
+		m.addChild(t1);
+		fRoot.addChild(m);
+		assertTrue(fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals("Buffer content", "0142356789", fDocument.get());
 		assertEquals(m, 2, 6);
@@ -770,9 +770,9 @@ public class TextEditTests extends TestCase {
 		CopySourceEdit s1= new CopySourceEdit(2, 3);
 		CopyTargetEdit t1= new CopyTargetEdit(8, s1);
 		
-		fRoot.add(s1);
-		fRoot.add(t1);
-		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		assertTrue("Can perform edits", fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(s1, 2, 3);
 		assertEquals(t1, 8, 3);
@@ -785,9 +785,9 @@ public class TextEditTests extends TestCase {
 		CopySourceEdit s1= new CopySourceEdit(7, 2);
 		CopyTargetEdit t1= new CopyTargetEdit(3, s1);
 		
-		fRoot.add(s1);
-		fRoot.add(t1);
-		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		assertTrue("Can perform edits", fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(s1, 9, 2);
 		assertEquals(t1, 3, 2);
@@ -801,12 +801,12 @@ public class TextEditTests extends TestCase {
 		CopyTargetEdit t1= new CopyTargetEdit(8, s1);
 		CopySourceEdit s2= new CopySourceEdit(5, 2);
 		CopyTargetEdit t2= new CopyTargetEdit(2, s2);
-		s1.add(s2);
+		s1.addChild(s2);
 		
-		fRoot.add(s1);
-		fRoot.add(t1);
-		fRoot.add(t2);
-		assertTrue("Can perform edits", fRoot.canApply(fDocument));
+		fRoot.addChild(s1);
+		fRoot.addChild(t1);
+		fRoot.addChild(t2);
+		assertTrue("Can perform edits", fRoot.canBeApplied(fDocument));
 		UndoMemento undo= fRoot.apply(fDocument);
 		assertEquals(s1, 7, 2);
 		assertEquals(t1, 10, 2);
@@ -825,21 +825,21 @@ public class TextEditTests extends TestCase {
 			CopySourceEdit innerRoot= new CopySourceEdit(0, 9);
 			
 			TextEdit e1= new ReplaceEdit(0, 9, "");
-			e1.add(innerRoot);
+			e1.addChild(innerRoot);
 			CopyTargetEdit t1= new CopyTargetEdit(11, innerRoot);
 			
 			TextEdit e2= new ReplaceEdit(11, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(11, 1);
-			e2.add(s2);
+			e2.addChild(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(0, s2);
 
-			root.add(e1);
-			root.add(t2);
-			root.add(e2);				
-			root.add(t1);
+			root.addChild(e1);
+			root.addChild(t2);
+			root.addChild(e2);				
+			root.addChild(t1);
 		}
 		
-		assertTrue("Can perform edits", root.canApply(document));
+		assertTrue("Can perform edits", root.canBeApplied(document));
 		root.apply(document);
 
 		String result= "3, foo(1, 2)";
@@ -853,21 +853,21 @@ public class TextEditTests extends TestCase {
 		{
 			TextEdit e1= new ReplaceEdit(4, 1, "");
 			CopySourceEdit s1= new CopySourceEdit(4, 1);
-			e1.add(s1);
+			e1.addChild(s1);
 			CopyTargetEdit t1= new CopyTargetEdit(7, s1);
 			
 			TextEdit e2= new ReplaceEdit(7, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(7, 1);
-			e2.add(s2);
+			e2.addChild(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(4, s2);
 			
-			root.add(e1);
-			root.add(t2);
-			root.add(e2);				
-			root.add(t1);
+			root.addChild(e1);
+			root.addChild(t2);
+			root.addChild(e2);				
+			root.addChild(t1);
 		}
 		
-		assertTrue("Can perform edits", root.canApply(document));
+		assertTrue("Can perform edits", root.canBeApplied(document));
 		root.apply(document);
 
 		String result= "foo(2, 1), 3";
@@ -881,37 +881,37 @@ public class TextEditTests extends TestCase {
 		{
 			TextEdit e1= new ReplaceEdit(4, 1, "");
 			CopySourceEdit s1= new CopySourceEdit(4, 1);
-			e1.add(s1);
+			e1.addChild(s1);
 			CopyTargetEdit t1= new CopyTargetEdit(7, s1);
 			
 			TextEdit e2= new ReplaceEdit(7, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(7, 1);
-			e2.add(s2);
+			e2.addChild(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(4, s2);
 			
-			innerRoot.add(e1);
-			innerRoot.add(t2);
-			innerRoot.add(e2);				
-			innerRoot.add(t1);
+			innerRoot.addChild(e1);
+			innerRoot.addChild(t2);
+			innerRoot.addChild(e2);				
+			innerRoot.addChild(t1);
 		}
 		MultiTextEdit root= new MultiTextEdit();
 		{
 			TextEdit e1= new ReplaceEdit(0, 9, "");
-			e1.add(innerRoot);
+			e1.addChild(innerRoot);
 			CopyTargetEdit t1= new CopyTargetEdit(11, innerRoot);
 			
 			TextEdit e2= new ReplaceEdit(11, 1, "");
 			CopySourceEdit s2= new CopySourceEdit(11, 1);
-			e2.add(s2);
+			e2.addChild(s2);
 			CopyTargetEdit t2= new CopyTargetEdit(0, s2);
 
-			root.add(e1);
-			root.add(t2);
-			root.add(e2);				
-			root.add(t1);
+			root.addChild(e1);
+			root.addChild(t2);
+			root.addChild(e2);				
+			root.addChild(t1);
 		}
 
-		assertTrue("Can perform edits", root.canApply(document));
+		assertTrue("Can perform edits", root.canBeApplied(document));
 		root.apply(document);
 
 		String result= "3, foo(2, 1)";

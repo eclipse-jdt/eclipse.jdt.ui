@@ -17,6 +17,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -1635,9 +1636,12 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		
 		IRegion range= new Region(start, end - start);
 		String content= buffer.getContent(range.getOffset(), range.getLength());
-		SourceModifier modifier= SourceModifier.createMoveModifier(2, "    ", 4);
+		SourceModifier modifier= new SourceModifier(2, "    ", 4);
 		MultiTextEdit edit= new MultiTextEdit(0, content.length());
-		modifier.addEdits(content, edit);
+		ReplaceEdit[] replaces= modifier.getModifications(content);
+		for (int i= 0; i < replaces.length; i++) {
+			edit.addChild(replaces[i]);
+		}
 		
 		TextBuffer innerBuffer= TextBuffer.create(content);
 		TextBufferEditor innerEditor= new TextBufferEditor(innerBuffer);
@@ -1687,9 +1691,12 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		
 		IRegion range= new Region(start, end - start);
 		String content= buffer.getContent(range.getOffset(), range.getLength());
-		SourceModifier modifier= SourceModifier.createMoveModifier(2, "            ", 4);
+		SourceModifier modifier= new SourceModifier(2, "            ", 4);
 		MultiTextEdit edit= new MultiTextEdit(0, content.length());
-		modifier.addEdits(content, edit);
+		ReplaceEdit[] replaces= modifier.getModifications(content);
+		for (int i= 0; i < replaces.length; i++) {
+			edit.addChild(replaces[i]);
+		}
 		
 		TextBuffer innerBuffer= TextBuffer.create(content);
 		TextBufferEditor innerEditor= new TextBufferEditor(innerBuffer);

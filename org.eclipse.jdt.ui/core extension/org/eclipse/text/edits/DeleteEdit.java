@@ -16,6 +16,9 @@ import org.eclipse.jface.text.IDocument;
 
 /**
  * Text edit to delete a range in a document.
+ * <p>
+ * A delete edit is equivalent to <code>ReplaceEdit(
+ * offset, length, "")</code>.
  * 
  * @since 3.0
  */

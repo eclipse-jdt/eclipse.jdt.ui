@@ -90,7 +90,7 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 			TextEdit parent= getParent();
 			while (parent != null) {
 				if (parent == fSource)
-					throw new MalformedTreeException(parent, this, "Source edit must not be the parent of the target.");
+					throw new MalformedTreeException(parent, this, TextEditMessages.getString("MoveTargetEdit.wrong_parent")); //$NON-NLS-1$
 				parent= parent.getParent();
 			}
 		}

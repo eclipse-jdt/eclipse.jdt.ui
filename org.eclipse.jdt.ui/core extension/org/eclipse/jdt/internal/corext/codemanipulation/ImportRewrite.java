@@ -51,7 +51,7 @@ public final class ImportRewrite {
 		IRegion region= fImportsStructure.getReplaceRange(buffer);
 		String text= fImportsStructure.getReplaceString(buffer, region);
 		if (text != null) {
-			rootEdit.add(new ReplaceEdit(region.getOffset(), region.getLength(), text));
+			rootEdit.addChild(new ReplaceEdit(region.getOffset(), region.getLength(), text));
 		}
 	}
 	

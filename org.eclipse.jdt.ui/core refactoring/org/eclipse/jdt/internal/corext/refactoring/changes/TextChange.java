@@ -424,7 +424,7 @@ public abstract class TextChange extends AbstractTextChange {
 				return null;
 			copies[i]= copy;
 		}
-		return TextEdit.getTextRange(copies);
+		return TextEdit.getCoverage(copies);
 	}	
 	
 	/**
@@ -529,7 +529,7 @@ public abstract class TextChange extends AbstractTextChange {
 
 	private static void insert(TextEdit parent, TextEdit edit) {
 		if (!parent.hasChildren()) {
-			parent.add(edit);
+			parent.addChild(edit);
 			return;
 		}
 		TextEdit[] children= parent.getChildren();
@@ -546,11 +546,11 @@ public abstract class TextChange extends AbstractTextChange {
 		for (int i= children.length - 1; i >= 0; i--) {
 			TextEdit child= children[i];
 			if (covers(edit, child)) {
-				parent.remove(i);
-				edit.add(child);
+				parent.removeChild(i);
+				edit.addChild(child);
 			}
 		}
-		parent.add(edit);
+		parent.addChild(edit);
 	}
 	
 	private static boolean covers(TextEdit thisEdit, TextEdit otherEdit) {

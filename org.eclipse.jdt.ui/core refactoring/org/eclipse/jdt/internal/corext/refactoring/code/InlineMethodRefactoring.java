@@ -219,7 +219,7 @@ public class InlineMethodRefactoring extends Refactoring {
 							TextEdit edit= inliner.perform();
 							change.addGroupDescription( 
 								new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"), new TextEdit[] { edit })); //$NON-NLS-1$
-							root.add(edit);
+							root.addChild(edit);
 						} else {
 							fDeleteSource= false;
 						}
@@ -231,7 +231,7 @@ public class InlineMethodRefactoring extends Refactoring {
 					ImportRewrite rewrite= inliner.getImportEdit();
 					if (!rewrite.isEmpty()) {
 						TextEdit edit= rewrite.createEdit(inliner.getBuffer());
-						root.add(edit);
+						root.addChild(edit);
 						change.addGroupDescription(
 							new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {edit})); //$NON-NLS-1$
 					}
@@ -260,7 +260,7 @@ public class InlineMethodRefactoring extends Refactoring {
 					RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.delete"), new TextEdit[] { delete }); //$NON-NLS-1$
 				TextEdit root= change.getEdit();
 				if (root != null) {
-					root.add(delete);
+					root.addChild(delete);
 				} else {
 					change.setEdit(delete);
 				}

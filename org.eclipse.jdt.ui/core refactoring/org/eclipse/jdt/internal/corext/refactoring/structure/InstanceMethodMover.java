@@ -866,13 +866,14 @@ class InstanceMethodMover {
 				
 				MultiTextEdit dummy= getEdits(cuBuffer);
 				
-				RangeMarker rangeMarker= new RangeMarker(fMethod.createTextRange());
-				TextEdit[] edits= dummy.removeAll();
+				IRegion range= fMethod.createTextRange();
+				RangeMarker rangeMarker= new RangeMarker(range.getOffset(), range.getLength());
+				TextEdit[] edits= dummy.removeChildren();
 				for (int i= 0; i < edits.length; i++)
-					rangeMarker.add(edits[i]);
+					rangeMarker.addChild(edits[i]);
 				
 				MultiTextEdit allEdits= new MultiTextEdit();
-				allEdits.add(rangeMarker);
+				allEdits.addChild(rangeMarker);
 				
 				TextBufferEditor editor= new TextBufferEditor(cuBuffer);
 				editor.add(allEdits);

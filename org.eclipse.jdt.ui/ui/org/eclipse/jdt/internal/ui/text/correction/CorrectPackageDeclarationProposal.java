@@ -54,18 +54,18 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		if (parentPack.isDefaultPackage() && decls.length > 0) {
 			for (int i= 0; i < decls.length; i++) {
 				ISourceRange range= decls[i].getSourceRange();
-				root.add(new DeleteEdit(range.getOffset(), range.getLength()));
+				root.addChild(new DeleteEdit(range.getOffset(), range.getLength()));
 			}
 			return change;
 		}
 		if (!parentPack.isDefaultPackage() && decls.length == 0) {
 			String lineDelim= StubUtility.getLineDelimiterUsed(cu);
 			String str= "package " + parentPack.getElementName() + ";" + lineDelim + lineDelim; //$NON-NLS-1$ //$NON-NLS-2$
-			root.add(new InsertEdit(0, str));
+			root.addChild(new InsertEdit(0, str));
 			return change;
 		}
 		
-		root.add(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), parentPack.getElementName()));
+		root.addChild(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), parentPack.getElementName()));
 		return change;
 	}
 	

@@ -16,19 +16,21 @@ package org.eclipse.text.edits;
  * position. This is useful if the text to be  copied has to 
  * be modified before it is inserted without changing the 
  * original source.
+ * 
+ * @since 3.0
  */
 public interface ISourceModifier {
 	/**
-	 * Implementors of this interface can add additional edits
-	 * to the passed root edit. 
+	 * Returns the modification to be done to the passed
+	 * string in form of replace edits. The caller of this
+	 * method is responsible to apply the returned edits
+	 * to the passed source.
 	 * 
 	 * @param source the source to be copied or moved
-	 * @param root the root edit containing the edits specified
-	 *  for the source text to be copied or moved. Implementors
-	 *  are allowed to add additional edits to the edit tree. They
-	 *  must not remove any edits from the tree.
+	 * @return an array of <code>ReplaceEdits</code>
+	 *  describing the modifications
 	 */
-	public void addEdits(String source, TextEdit root);
+	public ReplaceEdit[] getModifications(String source);
 	
 	/**
 	 * Creates a copy of this source modifier object. The copy will

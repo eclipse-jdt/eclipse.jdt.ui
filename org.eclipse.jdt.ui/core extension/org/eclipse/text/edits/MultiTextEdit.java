@@ -14,6 +14,18 @@ import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
+/**
+ * A multi text edit can be used to aggregate several edits into
+ * one edit. The edit itself doesn't modify a document.
+ * <p>
+ * Clients are allowed to implement subclasses of a multi text 
+ * edit.Subclasses must implement <code>doCopy()</code> to ensure
+ * the a copy of the right type is created. Not implementing 
+ * <code>doCopy()</code> in subclasses will result in an assertion
+ * failure during copying. 
+ * 
+ * @since 3.0
+ */
 public class MultiTextEdit extends TextEdit {
 
 	private boolean fDefined;
@@ -71,12 +83,12 @@ public class MultiTextEdit extends TextEdit {
 	/* package */ void aboutToBeAdded(TextEdit parent) {
 		if (!fDefined) {
 			if (hasChildren()) {
-				IRegion region= getTextRange(getChildren());
-				setOffset(region.getOffset());
-				setLength(region.getLength());
+				IRegion region= getCoverage(getChildren());
+				internalSetOffset(region.getOffset());
+				internalSetLength(region.getLength());
 			} else {
-				setOffset(parent.getOffset());
-				setLength(0);
+				internalSetOffset(parent.getOffset());
+				internalSetLength(0);
 			}
 		}
 	}	

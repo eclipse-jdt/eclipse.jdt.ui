@@ -13,7 +13,6 @@ package org.eclipse.text.edits;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.eclipse.text.edits.TreeIterationInfo.Visitor;
 
@@ -60,22 +59,11 @@ import org.eclipse.jface.text.Region;
  * are only allowed to subclass <code>MultiTextEdit</code>.
  * 
  * @see TextBufferEditor
+ * 
+ * @since 3.0
  */
 public abstract class TextEdit {
 
-	private static class EmptyIterator implements Iterator {
-		public boolean hasNext() {
-			return false;
-		}
-		public Object next() {
-			throw new NoSuchElementException();
-		}
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
-	
-	private static final Iterator EMPTY_ITERATOR= new EmptyIterator();
 	private static final TextEdit[] EMPTY_ARRAY= new TextEdit[0];
 	
 	private static final int DELETED_VALUE= -1;
@@ -220,10 +208,8 @@ public abstract class TextEdit {
 	 *  edit can't be added to this edit. This is the case if the child 
 	 *  overlaps with one of its siblings or if the child edit's region
 	 *  isn't fully covered by this edit.
-	 * 
-	 * TODO check if addChild is better name
 	 */
-	public final void add(TextEdit child) throws MalformedTreeException {
+	public final void addChild(TextEdit child) throws MalformedTreeException {
 		internalAdd(child);
 	}
 	
@@ -234,11 +220,9 @@ public abstract class TextEdit {
 	 * @exception <code>MalformedTreeException</code> is thrown if one of 
 	 *  the given edits can't be added to this edit.
 	 * 
-	 * @see #add(TextEdit)
-	 * 
-	 * TODO check if addChildren is better name
+	 * @see #addChild(TextEdit)
 	 */
-	public final void addAll(TextEdit[] edits) throws MalformedTreeException {
+	public final void addChildren(TextEdit[] edits) throws MalformedTreeException {
 		for (int i= 0; i < edits.length; i++) {
 			internalAdd(edits[i]);
 		}
@@ -255,31 +239,51 @@ public abstract class TextEdit {
 	 * @exception <code>IndexOutOfBoundsException</code> if the index 
 	 *  is out of range
 	 */
-	public final TextEdit remove(int index) {
+	public final TextEdit removeChild(int index) {
 		if (fChildren == null)
 			throw new IndexOutOfBoundsException("Index: " + index + " Size: 0");  //$NON-NLS-1$//$NON-NLS-2$
 		TextEdit result= (TextEdit)fChildren.remove(index);
-		result.setParent(null);
+		result.internalSetParent(null);
 		if (fChildren.isEmpty())
 			fChildren= null;
 		return result;
 	}
 	
 	/**
-	 * Removes all edits from the list of child edits. Returns the 
-	 * removed child edits. The parent of the removed edits is set
-	 * to <code>null</code>.
+	 * Removes the first occurrence of the given child from the list 
+	 * of children.
+	 * 
+	 * @param child the child to be removed
+	 * @return <code>true</code> if the edit contained the given
+	 *  child; otherwise <code>false</code> is returned
+	 */
+	public final boolean removeChild(TextEdit child) {
+		Assert.isNotNull(child);
+		if (fChildren == null)
+			return false;
+		boolean result= fChildren.remove(child);
+		if (result) {
+			child.internalSetParent(null);
+			if (fChildren.isEmpty())
+				fChildren= null;
+		}
+		return result;
+	}
+	
+	/**
+	 * Removes all child edits from and returns them. The parent 
+	 * of the removed edits is set to <code>null</code>.
 	 * 
 	 * @return an array of the removed edits
 	 */
-	public final TextEdit[] removeAll() {
+	public final TextEdit[] removeChildren() {
 		if (fChildren == null)
 			return new TextEdit[0];
 		int size= fChildren.size();
 		TextEdit[] result= new TextEdit[size];
 		for (int i= 0; i < size; i++) {
 			result[i]= (TextEdit)fChildren.get(i);
-			result[i].setParent(null);
+			result[i].internalSetParent(null);
 		}
 		fChildren= null;
 		return result;
@@ -309,30 +313,16 @@ public abstract class TextEdit {
 	}
 	
 	/**
-	 * Returns an iterator over the children.
-	 * 
-	 * @return an iterator over the children
-	 * TODO rename to getChildrenIterator
-	 */
-	public final Iterator iterator() {
-		if (fChildren == null)
-			return EMPTY_ITERATOR;
-		return fChildren.iterator();
-	}
-	
-	/**
 	 * Returns the text range spawned by the given array of text edits.
-	 * The method requires that the given array contains at least of
+	 * The method requires that the given array contains at least one
 	 * edit. If all edits passed are deleted the method returns <code>
 	 * null</code>.
 	 * 
 	 * @param edits an array of edits
 	 * @return the text range spawned by the given array of edits or
 	 *  <code>null</code> if all edits are marked as deleted
-	 * 
-	 * TODO rename to getCoverage
 	 */
-	public static IRegion getTextRange(TextEdit[] edits) {
+	public static IRegion getCoverage(TextEdit[] edits) {
 		Assert.isTrue(edits != null && edits.length > 0);
 			
 		int offset= Integer.MAX_VALUE;
@@ -354,6 +344,13 @@ public abstract class TextEdit {
 		}
 	}
 		
+	/*
+	 * Hook called before this edit gets added to the passed 
+	 * parent.
+	 */	
+	/* package */ void aboutToBeAdded(TextEdit parent) {
+	}	
+	
 	//---- Object methods ------------------------------------------------------
 
 	/**
@@ -466,10 +463,8 @@ public abstract class TextEdit {
 	 * @return <code>true</code> if the edit tree can be
 	 *  applied to the given document. Otherwise <code>false
 	 *  </code> is returned.
-	 * 
-	 * TODO rename to canBeApplied 
 	 */
-	public boolean canApply(IDocument document) {
+	public boolean canBeApplied(IDocument document) {
 		try {
 			TextEditProcessor processor= new TextEditProcessor(document);
 			processor.add(this);
@@ -489,11 +484,7 @@ public abstract class TextEdit {
 	 *  is executed. So the document is still in its original state.
 	 * @exception BadLocationException is thrown if one of the edits
 	 *  in the tree can't be executed. The state of the document is
-	 *  undefined if this exception is thrown. This exception only
-	 *  occurs if the document is manipulated by some other clients 
-	 *  during execution of the edit tree. Otherwise it is guaranteed
-	 *  that the tree can be executed without causing any <code>
-	 *  BadLocationException</code>. 
+	 *  undefined if this exception is thrown.
 	 * @see #checkIntegrity()
 	 * @see #perform(IDocument)
 	 */
@@ -538,23 +529,20 @@ public abstract class TextEdit {
 	/* package */ abstract void perform(IDocument document) throws BadLocationException;
 	
 	
-	//---- Helpers -------------------------------------------------------------------------------------------
+	//---- internal state accessors ----------------------------------------------------------
 	
-	/* package */ void aboutToBeAdded(TextEdit parent) {
-	}	
-	
-	/* package */ void setParent(TextEdit parent) {
+	/* package */ void internalSetParent(TextEdit parent) {
 		if (parent != null)
 			Assert.isTrue(fParent == null);
 		fParent= parent;
 	}
 	
-	/* package */ void setOffset(int offset) {
+	/* package */ void internalSetOffset(int offset) {
 		Assert.isTrue(offset >= 0);
 		fOffset= offset;
 	}
 	
-	/* package */ void setLength(int length) {
+	/* package */ void internalSetLength(int length) {
 		Assert.isTrue(length >= 0);
 		fLength= length;
 	}
@@ -570,7 +558,7 @@ public abstract class TextEdit {
 	/* package */ void internalAdd(TextEdit child) throws MalformedTreeException {
 		child.aboutToBeAdded(this);
 		if (child.isDeleted())
-			throw new MalformedTreeException(this, child, "Can't add deleted edit");
+			throw new MalformedTreeException(this, child, TextEditMessages.getString("TextEdit.deleted_edit")); //$NON-NLS-1$
 		if (!covers(child))
 			throw new MalformedTreeException(this, child, TextEditMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
 		if (fChildren == null) {
@@ -578,7 +566,7 @@ public abstract class TextEdit {
 		}
 		int index= computeInsertionIndex(child);
 		fChildren.add(index, child);
-		child.setParent(this);
+		child.internalSetParent(this);
 	}
 	
 	private int computeInsertionIndex(TextEdit edit) {

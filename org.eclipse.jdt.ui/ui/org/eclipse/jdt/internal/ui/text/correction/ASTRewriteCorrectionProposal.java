@@ -54,7 +54,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 				rewrite.removeModifications();
 			}
 			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
-				rootEdit.add(fImportRewrite.createEdit(buffer));
+				rootEdit.addChild(fImportRewrite.createEdit(buffer));
 			}
 		} finally {
 			if (buffer != null) {

@@ -198,12 +198,12 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			
 			if (!fImportRewrite.isEmpty()) {
 				TextEdit edit= fImportRewrite.createEdit(buffer);
-				root.add(edit);
+				root.addChild(edit);
 				result.addGroupDescription(new GroupDescription(NN, new TextEdit[] {edit} ));
 			}
 			MultiTextEdit change= new MultiTextEdit();
 			fRewriter.rewriteNode(buffer, change);
-			root.add(change);
+			root.addChild(change);
 			result.addGroupDescription(new GroupDescription(NN, new TextEdit[] {change} ));
 			return result;
 		} catch (JavaModelException e) {

@@ -26,8 +26,9 @@ import org.eclipse.jface.text.IRegion;
  * MalformedTreeException</code> when executing the edit tree.
  * <p>
  * A copy source edit can manange an optional source modifier. A
- * source modifier gets access to the text before it is actually 
- * inserted at the target position.
+ * source modifier can provide a set of replace edits which will
+ * to applied to the source before it gets inserted at the target
+ * position.
  * 
  * @see org.eclipse.text.edits.CopyTargetEdit
  *  
@@ -160,10 +161,15 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 		if (fModifier != null) {
 			IDocument newDocument= new Document(result);
 			TextEdit newEdit= new MultiTextEdit(0, getLength());
-			fModifier.addEdits(result, newEdit);
-			TextEditProcessor processor= new TextEditProcessor(newDocument);
-			processor.add(newEdit);
-			processor.performEdits();
+			ReplaceEdit[] replaces= fModifier.getModifications(result);
+			try {
+				for (int i= 0; i < replaces.length; i++) {
+					newEdit.addChild(replaces[i]);
+				}
+				newEdit.apply(newDocument);
+			} catch (MalformedTreeException e) {
+				throw new BadLocationException();
+			}
 			result= newDocument.get();
 		}
 		return result;

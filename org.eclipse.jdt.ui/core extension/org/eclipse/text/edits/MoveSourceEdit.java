@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.text.edits;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +23,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
 /**
  * A move source edit denotes the source of a move operation. Move
@@ -31,8 +34,9 @@ import org.eclipse.jface.text.IRegion;
  * MalformedTreeException</code> when executing the edit tree.
  * <p>
  * A move source edit can manange an optional source modifier. A
- * source modifier gets access to the text before it is actually 
- * inserted at the target position.
+ * source modifier can provide a set of replace edits which will
+ * to applied to the source before it gets inserted at the target
+ * position.
  * 
  * @see org.eclipse.text.edits.MoveTargetEdit
  * @see org.eclipse.text.edits.CopySourceEdit
@@ -224,7 +228,7 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		}
 	}	
 	
-	//---- content management ------------------------------------------
+	//---- content management --------------------------------------------------
 	
 	private String getContent(IDocument document) throws BadLocationException {
 		String result= document.get(getOffset(), getLength());
@@ -232,14 +236,17 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 			IDocument newDocument= new Document(result);
 			Map editMap= new HashMap();
 			TextEdit newEdit= createEdit(editMap);
-			fModifier.addEdits(result, newEdit);
-			TextEditProcessor processor= new TextEditProcessor(newDocument);
-			processor.add(newEdit);
-			processor.performEdits();
+			List replaces= new ArrayList(Arrays.asList(fModifier.getModifications(result)));
+			try {
+				insertEdits(newEdit, replaces);
+				newEdit.apply(newDocument);
+			} catch (MalformedTreeException e) {
+				throw new BadLocationException();
+			}
 			restorePositions(editMap, getOffset());
 			result= newDocument.get();
 		}
-		return result;
+		return result;		
 	}
 	
 	private TextEdit createEdit(Map editMap) {
@@ -256,12 +263,94 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		for (int i= 0; i < children.length; i++) {
 			TextEdit child= children[i];
 			RangeMarker marker= new RangeMarker(child.getOffset() - delta, child.getLength());
-			target.add(marker);
+			target.addChild(marker);
 			editMap.put(marker, child);
 			createEdit(child, marker, editMap, delta);
 		}
 	}
 	
+	private void insertEdits(TextEdit root, List edits) {
+		while(edits.size() > 0) {
+			ReplaceEdit edit= (ReplaceEdit)edits.remove(0);
+			insert(root, edit, edits);
+		}
+	}
+	private static void insert(TextEdit parent, ReplaceEdit edit, List edits) {
+		if (!parent.hasChildren()) {
+			parent.addChild(edit);
+			return;
+		}
+		TextEdit[] children= parent.getChildren();
+		// First dive down to find the right parent.
+		for (int i= 0; i < children.length; i++) {
+			TextEdit child= children[i];
+			if (child.covers(edit)) {
+				insert(child, edit, edits);
+				return;
+			} else if (edit.covers(child)) {
+				parent.removeChild(i);
+				edit.addChild(child);
+			} else {
+				IRegion intersect= intersect(edit, child);
+				if (intersect != null) {
+					ReplaceEdit[] splits= splitEdit(edit, intersect);
+					insert(child, splits[0], edits);
+					edits.add(splits[1]);
+				}
+			}
+		}
+		parent.addChild(edit);
+	}
+		
+	public static IRegion intersect(TextEdit op1, TextEdit op2) {
+		int offset1= op1.getOffset();
+		int length1= op1.getLength();
+		int end1= offset1 + length1 - 1;
+		int offset2= op2.getOffset();
+		if (end1 < offset2)
+			return null;
+		int length2= op2.getLength();
+		int end2= offset2 + length2 - 1;
+		if (end2 < offset1)
+			return null;
+		if (offset1 < offset2) {
+			int end= Math.max(end1, end2);
+			return new Region(offset2, end - offset2 + 1);
+		} else {
+			int end= Math.max(end1, end2);
+			return new Region(offset1, end - offset1 + 1); 
+		}
+	}
+		
+	private static ReplaceEdit[] splitEdit(ReplaceEdit edit, IRegion intersect) {
+		if (edit.getOffset() != intersect.getOffset()) {
+			return splitIntersectRight(edit, intersect);
+		} else {
+			return splitIntersectLeft(edit, intersect);
+		}
+	}
+		
+	private static ReplaceEdit[] splitIntersectRight(ReplaceEdit edit, IRegion intersect) {
+		ReplaceEdit[] result= new ReplaceEdit[2];
+		// this is the actual delete. We use replace to only deal with one type
+		result[0]= new ReplaceEdit(intersect.getOffset(), intersect.getLength(), ""); //$NON-NLS-1$
+		result[1]= new ReplaceEdit(
+							edit.getOffset(), 
+							intersect.getOffset() - edit.getOffset(), 
+							edit.getText());
+		return result;
+	}
+		
+	private static ReplaceEdit[] splitIntersectLeft(ReplaceEdit edit, IRegion intersect) {
+		ReplaceEdit[] result= new ReplaceEdit[2];
+		result[0]= new ReplaceEdit(intersect.getOffset(), intersect.getLength(), edit.getText());
+		result[1]= new ReplaceEdit(	// this is the actual delete. We use replace to only deal with one type
+							intersect.getOffset() + intersect.getLength(), 
+							edit.getLength() - intersect.getLength(),
+							""); //$NON-NLS-1$
+		return result;
+	}
+		
 	private static void restorePositions(Map editMap, int delta) {
 		for (Iterator iter= editMap.keySet().iterator(); iter.hasNext();) {
 			TextEdit marker= (TextEdit)iter.next();

@@ -392,7 +392,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			
 				if (!fImportRewriter.isEmpty()) {
 					TextEdit edit= fImportRewriter.createEdit(buffer);
-					root.add(edit);
+					root.addChild(edit);
 					result.addGroupDescription(new GroupDescription(
 						RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), //$NON-NLS-1$
 						new TextEdit[] {edit}
@@ -402,7 +402,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				List groups= new ArrayList(2);
 				MultiTextEdit changes= new MultiTextEdit();
 				fRewriter.rewriteNode(buffer, changes, groups);
-				root.add(changes);
+				root.addChild(changes);
 				result.addGroupDescriptions((GroupDescription[])groups.toArray(new GroupDescription[groups.size()]));
 				
 				fRewriter.removeModifications();

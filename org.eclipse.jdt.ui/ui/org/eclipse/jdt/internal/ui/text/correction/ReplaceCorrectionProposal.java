@@ -39,7 +39,7 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit root) throws CoreException {
 		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, root);
 		TextEdit edit= new ReplaceEdit(fOffset, fLength, fReplacementString);
-		root.add(edit);
+		root.addChild(edit);
 		return change;
 	}
 	

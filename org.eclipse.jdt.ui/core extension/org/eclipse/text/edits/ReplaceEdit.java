@@ -16,7 +16,9 @@ import org.eclipse.jface.text.IDocument;
 
 /**
  * Text edit to replace a range in a document with a different
- * string
+ * string.
+ * 
+ * @since 3.0
  */
 public final class ReplaceEdit extends TextEdit {
 	
@@ -34,7 +36,7 @@ public final class ReplaceEdit extends TextEdit {
 		fText= text;
 	}
 	
-	/**
+	/*
 	 * Copy constructor
 	 * 
 	 * @param other the edit to copy from
@@ -54,14 +56,23 @@ public final class ReplaceEdit extends TextEdit {
 		return fText;
 	}
 	
+	/* non Java-doc
+	 * @see TextEdit#doCopy
+	 */	
 	protected TextEdit doCopy() {
 		return new ReplaceEdit(this);
 	}
 	
+	/* non Java-doc
+	 * @see TextEdit#perform
+	 */	
 	/* package */ void perform(IDocument document) throws BadLocationException {
 		document.replace(getOffset(), getLength(), fText);
 	}
 	
+	/* non Java-doc
+	 * @see TextEdit#update
+	 */	
 	/* package */ void update(DocumentEvent event, TreeIterationInfo info) {
 		markChildrenAsDeleted();
 		super.update(event, info);

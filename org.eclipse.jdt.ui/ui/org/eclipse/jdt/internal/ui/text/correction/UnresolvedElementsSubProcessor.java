@@ -377,7 +377,7 @@ public class UnresolvedElementsSubProcessor {
 			TextEdit root= proposal.getRootTextEdit();
 			
 			if (!importRewrite.isEmpty()) {
-				root.add(importRewrite.createEdit(buffer)); //$NON-NLS-1$
+				root.addChild(importRewrite.createEdit(buffer)); //$NON-NLS-1$
 			}
 			String packName= Signature.getQualifier(fullName);
 			String[] arg= { simpleName, packName };
@@ -386,7 +386,7 @@ public class UnresolvedElementsSubProcessor {
 				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", arg)); //$NON-NLS-1$
 				proposal.setRelevance(relevance + 20);
 			} else {			
-				root.add(new ReplaceEdit(node.getStartPosition(), node.getLength(), simpleName)); //$NON-NLS-1$
+				root.addChild(new ReplaceEdit(node.getStartPosition(), node.getLength(), simpleName)); //$NON-NLS-1$
 				if (packName.length() == 0) {
 					proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.nopack.description", simpleName)); //$NON-NLS-1$
 				} else {
@@ -1045,7 +1045,7 @@ public class UnresolvedElementsSubProcessor {
 					ImportRewrite importRewrite= new ImportRewrite(cu, JavaPreferencesSettings.getCodeGenerationSettings());
 					importRewrite.addImport(qualifiedTypeName);
 					importRewrite.setFindAmbiguosImports(true);
-					proposal.getRootTextEdit().add(importRewrite.createEdit(buffer));
+					proposal.getRootTextEdit().addChild(importRewrite.createEdit(buffer));
 					proposals.add(proposal);
 				} finally {
 					if (buffer != null)

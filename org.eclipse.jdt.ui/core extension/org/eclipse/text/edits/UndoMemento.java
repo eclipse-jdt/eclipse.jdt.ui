@@ -34,7 +34,7 @@ public final class UndoMemento {
 	 *  applied to the given document. Otherwise <code>false
 	 *  </code> is returned.
 	 */
-	public boolean canApply(IDocument document) {
+	public boolean canBeApplied(IDocument document) {
 		Assert.isNotNull(document);
 		return checkBufferLength(document.getLength()) != null;
 	}
@@ -57,7 +57,7 @@ public final class UndoMemento {
 		Assert.isNotNull(document);
 		TextEdit failure= checkBufferLength(document.getLength());
 		if (failure != null)
-			throw new MalformedTreeException(failure.getParent(), failure, "End position lies outside of document range");
+			throw new MalformedTreeException(failure.getParent(), failure, TextEditMessages.getString("UndoMemento.invalid_length")); //$NON-NLS-1$
 		return perform(document);		
 	}
 

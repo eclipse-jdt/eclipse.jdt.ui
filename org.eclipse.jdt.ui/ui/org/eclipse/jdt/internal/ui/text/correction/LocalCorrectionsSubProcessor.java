@@ -192,7 +192,7 @@ public class LocalCorrectionsSubProcessor {
 	
 					String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changevartype.description", typeName); //$NON-NLS-1$
 					ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, typeNode.getStartPosition(), typeNode.getLength(), typeName, 5);
-					varProposal.getRootTextEdit().add(importRewrite.createEdit(buffer));
+					varProposal.getRootTextEdit().addChild(importRewrite.createEdit(buffer));
 					proposals.add(varProposal);
 				} finally {
 					if (buffer != null)
@@ -472,7 +472,7 @@ public class LocalCorrectionsSubProcessor {
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addnon-nls.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 			CUCorrectionProposal nlsProposal= new CUCorrectionProposal(label, cu, 6, image);
-			nlsProposal.getRootTextEdit().add(edit);
+			nlsProposal.getRootTextEdit().addChild(edit);
 			proposals.add(nlsProposal);
 		}
 	}

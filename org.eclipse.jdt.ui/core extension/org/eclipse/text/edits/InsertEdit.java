@@ -17,6 +17,9 @@ import org.eclipse.jface.text.IDocument;
 /**
  * Text edit to insert a text at a given position in a 
  * document.
+ * <p>
+ * An insert edit is equivalent to <code>ReplaceEdit(offset, 0, text)
+ * </code>
  * 
  * @since 3.0
  */

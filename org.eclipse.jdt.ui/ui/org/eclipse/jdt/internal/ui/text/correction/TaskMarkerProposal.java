@@ -64,9 +64,9 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 			}
 		}
 		if (pos != null) {
-			rootEdit.add(new ReplaceEdit(pos.getOffset(), pos.getLength(), "")); //$NON-NLS-1$
+			rootEdit.addChild(new ReplaceEdit(pos.getOffset(), pos.getLength(), "")); //$NON-NLS-1$
 		} else {
-			rootEdit.add(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), "")); //$NON-NLS-1$
+			rootEdit.addChild(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), "")); //$NON-NLS-1$
 		}
 		return change;
 	}

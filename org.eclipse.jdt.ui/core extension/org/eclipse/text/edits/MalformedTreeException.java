@@ -16,6 +16,8 @@ package org.eclipse.text.edits;
  * one of it siblings.
  * 
  * @see TextEdit#add(TextEdit)
+ * 
+ * @since 3.0
  */
 public class MalformedTreeException extends RuntimeException {
 	
@@ -23,8 +25,7 @@ public class MalformedTreeException extends RuntimeException {
 	private TextEdit fChild;
 	
 	/** 
-	 * Constructs a new illegal edit exception with the given detail
-	 * message.
+	 * Constructs a new malformed tree exception.
 	 * 
 	 * @param parent the parent edit
 	 * @param child the child edit

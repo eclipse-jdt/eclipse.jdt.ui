@@ -14,13 +14,13 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 /**
- * A <tt>CopyRangeMarker</tt> can be used to track positions when executing 
- * text edits. Additionally a copy range marker stores a local copy of the text 
- * it captures when it gets executed.
+ * A <code>CopyingRangeMarker</code> can be used to track positions when executing 
+ * text edits. Additionally a copying range marker stores a local copy of the 
+ * text it captures when it gets executed.
  * 
  * @since 3.0
  */
-public final class CopyRangeMarker extends TextEdit {
+public final class CopyingRangeMarker extends TextEdit {
 	
 	private String fText;
 	
@@ -31,14 +31,14 @@ public final class CopyRangeMarker extends TextEdit {
 	 * @param offset the marker's offset
 	 * @param length the marker's length
 	 */
-	public CopyRangeMarker(int offset, int length) {
+	public CopyingRangeMarker(int offset, int length) {
 		super(offset, length);
 	}
 		
 	/*
 	 * Copy constructor
 	 */
-	private CopyRangeMarker(CopyRangeMarker other) {
+	private CopyingRangeMarker(CopyingRangeMarker other) {
 		super(other);
 		fText= other.fText;
 	}
@@ -47,7 +47,7 @@ public final class CopyRangeMarker extends TextEdit {
 	 * @see TextEdit#doCopy
 	 */	
 	protected TextEdit doCopy() {
-		return new CopyRangeMarker(this);
+		return new CopyingRangeMarker(this);
 	}	
 
 	/* non Java-doc

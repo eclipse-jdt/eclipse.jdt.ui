@@ -225,7 +225,8 @@ public class SourceProvider {
 		int size= ranges.size();
 		RangeMarker[] markers= new RangeMarker[size];
 		for (int i= 0; i < markers.length; i++) {
-			markers[i]= new RangeMarker((IRegion)ranges.get(i));
+			IRegion range= (IRegion)ranges.get(i);
+			markers[i]= new RangeMarker(range.getOffset(), range.getLength());
 		}
 		int split;
 		if (size <= 1) {
@@ -234,14 +235,14 @@ public class SourceProvider {
 			IRegion region= (IRegion)ranges.get(0);
 			split= region.getOffset() + region.getLength();
 		}
-		TextEdit[] edits= dummy.removeAll();
+		TextEdit[] edits= dummy.removeChildren();
 		for (int i= 0; i < edits.length; i++) {
 			TextEdit edit= edits[i];
 			int pos= edit.getOffset() >= split ? 1 : 0;
-			markers[pos].add(edit);
+			markers[pos].addChild(edit);
 		}
 		MultiTextEdit root= new MultiTextEdit();
-		root.addAll(markers);
+		root.addChildren(markers);
 		TextBufferEditor editor= new TextBufferEditor(fBuffer);
 		editor.add(root);
 		UndoMemento undo= editor.performEdits(null);

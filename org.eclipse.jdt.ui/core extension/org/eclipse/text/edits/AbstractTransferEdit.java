@@ -19,6 +19,8 @@ import java.util.List;
  * <p>
  * This class isn't intended to be subclassed outside of the edit framework. Clients 
  * are only allowed to subclass <code>MultiTextEdit</code>.
+ * 
+ * @since 3.0
  */
 public abstract class AbstractTransferEdit extends TextEdit {
 

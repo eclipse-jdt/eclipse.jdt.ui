@@ -11,35 +11,26 @@
 package org.eclipse.text.edits;
 
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 
 /**
- * A <tt>RangeMarker</tt> can be used to track positions when executing 
+ * A range marker can be used to track positions when executing 
  * text edits.
+ * 
+ * @since 3.0
  */
 public final class RangeMarker extends TextEdit {
 	
 	/**
-	 * Creates a new <tt>RangeMarker</tt> for the given
-	 * offset and length.
+	 * Creates a new range marker for the given offset and length.
 	 * 
-	 * @param offset the starting offset this text edit is "working on"
-	 * @param length the length this text edit is "working on"
+	 * @param offset the marker's offset
+	 * @param length the marker's length
 	 */
 	public RangeMarker(int offset, int length) {
 		super(offset, length);
 	}
 	
-	/**
-	 * Creates a new <tt>RangeMarker</tt> for the given range.
-	 * 
-	 * @param range the <code>TextRange</code> this text edit is "working on"
-	 */
-	public RangeMarker(IRegion range) {
-		super(range.getOffset(), range.getLength());
-	}
-	
-	/**
+	/*
 	 * Copy constructor
 	 */
 	private RangeMarker(RangeMarker other) {
@@ -50,6 +41,7 @@ public final class RangeMarker extends TextEdit {
 	 * @see TextEdit#perform
 	 */	
 	/* package */ final void perform(IDocument document)  {
+		// do nothing
 	}
 	
 	/* non Java-doc
