@@ -218,7 +218,7 @@ public class CodeTemplateBlock {
 		fCodeTemplateTree.addElement(COMMENT_NODE);
 		fCodeTemplateTree.addElement(CODE_NODE);
 		
-		fCreateJavaDocComments= new SelectionButtonDialogField(SWT.CHECK);
+		fCreateJavaDocComments= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
 		fCreateJavaDocComments.setLabelText(PreferencesMessages.getString("CodeTemplateBlock.createcomment.label")); //$NON-NLS-1$
 		fCreateJavaDocComments.setSelection(PreferenceConstants.getPreferenceStore().getBoolean(PREF_JAVADOC_STUBS));
 		
@@ -236,13 +236,17 @@ public class CodeTemplateBlock {
 		layout.numColumns= 2;
 		composite.setLayout(layout);
 		
-		fCreateJavaDocComments.doFillIntoGrid(composite, 2);
-		
 		fCodeTemplateTree.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalSpan(fCodeTemplateTree.getLabelControl(null), 2);
 		LayoutUtil.setHorizontalGrabbing(fCodeTemplateTree.getTreeControl(null));
 		
 		fPatternViewer= createViewer(composite, 2);
+		
+		fCreateJavaDocComments.doFillIntoGrid(composite, 2);
+		
+		DialogField label= new DialogField();
+		label.setLabelText(PreferencesMessages.getString("CodeTemplateBlock.createcomment.description")); //$NON-NLS-1$
+		label.doFillIntoGrid(composite, 2);
 		
 		return composite;
 	
