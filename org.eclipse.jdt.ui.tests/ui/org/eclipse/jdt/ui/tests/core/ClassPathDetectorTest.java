@@ -9,6 +9,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -42,7 +43,7 @@ public class ClassPathDetectorTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
@@ -145,6 +146,8 @@ public class ClassPathDetectorTest extends TestCase {
 		for (int i= 0; i < jreEntries.length; i++) {
 			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
 		}
+		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		
 		IClasspathEntry[] projectEntries= fJProject1.getRawClasspath();
 		IPath projectOutput= fJProject1.getPath().append("bin");
 		
@@ -184,6 +187,8 @@ public class ClassPathDetectorTest extends TestCase {
 		for (int i= 0; i < jreEntries.length; i++) {
 			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
 		}
+		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		
 		IClasspathEntry[] projectEntries= fJProject1.getRawClasspath();
 		
 		IPath projectOutput= fJProject1.getPath().append("bin");
@@ -224,6 +229,8 @@ public class ClassPathDetectorTest extends TestCase {
 		for (int i= 0; i < jreEntries.length; i++) {
 			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
 		}
+		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		
 		IClasspathEntry[] projectEntries= fJProject1.getRawClasspath();
 		
 		IPath projectOutput= fJProject1.getPath().append("bin");
@@ -240,5 +247,36 @@ public class ClassPathDetectorTest extends TestCase {
 		
 		assertTrue("Output folder", outputLocation.equals(projectOutput));
 	}
+	
+	public void testClassFolder() throws Exception {
+		// 2 nested source folders
+		
+/**		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
+		assertTrue("lib not found", lib != null && lib.exists());
+		ZipFile zipfile= new ZipFile(lib);
+		
+		JavaProjectHelper.addClassFolderWithImport(fJProject1, "cf", null, null, zipfile);
+		
+		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
+		for (int i= 0; i < jreEntries.length; i++) {
+			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
+		}
+		IClasspathEntry[] projectEntries= fJProject1.getRawClasspath();
+		
+		IPath projectOutput= fJProject1.getPath().append("bin");
+		clearClasspath();
+		
+		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject());
+		IPath outputLocation= detector.getOutputLocation();
+		IClasspathEntry[] entries= detector.getClasspath();
+		assertNotNull("No classpath detected", entries);
+		assertNotNull("No outputLocation detected", outputLocation);
+		
+		assertSameClasspath(projectEntries, entries);
+		
+		assertTrue("Output folder", outputLocation.equals(projectOutput));
+		*/
+	}	
+	
 
 }

@@ -1,8 +1,11 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -18,6 +21,9 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.util.IClassFileReader;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -25,9 +31,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
   */
 public class ClassPathDetector implements IResourceVisitor {
 		
-	private HashSet fSourceFolders;
+	private HashMap fSourceFolders;
+	private List fClassFiles;
 	private HashSet fJARFiles;
-	private HashSet fClassFolders;
 		
 	private IProject fProject;
 		
@@ -35,9 +41,9 @@ public class ClassPathDetector implements IResourceVisitor {
 	private IClasspathEntry[] fResultClasspath;
 		
 	public ClassPathDetector(IProject project) throws CoreException {
-		fSourceFolders= new HashSet();
+		fSourceFolders= new HashMap();
 		fJARFiles= new HashSet(10);
-		fClassFolders= new HashSet(100);
+		fClassFiles= new ArrayList(100);
 		fProject= project;
 			
 		project.accept(this);
@@ -59,35 +65,16 @@ public class ClassPathDetector implements IResourceVisitor {
 		return false;
 	}
 	
-	
 	/**
 	 * Method detectClasspath.
 	 */
 	private void detectClasspath() {
 		ArrayList cpEntries= new ArrayList();
-			
-		for (Iterator iter= fSourceFolders.iterator(); iter.hasNext();) {
-			IPath path= (IPath) iter.next();
-			ArrayList excluded= new ArrayList();
-			for (Iterator inner= fSourceFolders.iterator(); inner.hasNext();) {
-				IPath other= (IPath) inner.next();
-				if (!path.equals(other) && path.isPrefixOf(other)) {
-					IPath pathToExclude= other.removeFirstSegments(path.segmentCount()).addTrailingSeparator();
-					excluded.add(pathToExclude);
-				}
-			}
-			IPath[] excludedPaths= (IPath[]) excluded.toArray(new IPath[excluded.size()]);
-			IClasspathEntry entry= JavaCore.newSourceEntry(path, excludedPaths);
-			cpEntries.add(entry);
-		}
-			
-		for (Iterator iter= fJARFiles.iterator(); iter.hasNext();) {
-			IPath path= (IPath) iter.next();
-			if (!isNested(path, fSourceFolders.iterator())) {
-				IClasspathEntry entry= JavaCore.newLibraryEntry(path, null, null);
-				cpEntries.add(entry);	
-			}
-		}
+		
+		detectSourceFolders(cpEntries);
+		IPath outputLocation= detectOutputFolder(cpEntries);
+		
+		detectLibraries(cpEntries, outputLocation);
 			
 		if (cpEntries.isEmpty()) {
 			return;
@@ -96,17 +83,8 @@ public class ClassPathDetector implements IResourceVisitor {
 		for (int i= 0; i < jreEntries.length; i++) {
 			cpEntries.add(jreEntries[i]);
 		}
-
+		
 		IClasspathEntry[] entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
-		IPath outputLocation;
-
-		IPath projPath= fProject.getFullPath();
-		if (fSourceFolders.size() == 1 && entries[0].getPath().equals(projPath)) {
-			outputLocation= projPath;
-		} else {
-			outputLocation= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
-		} 			
-
 		if (!JavaConventions.validateClasspath(JavaCore.create(fProject), entries, outputLocation).isOK()) {
 			return;
 		}
@@ -114,8 +92,101 @@ public class ClassPathDetector implements IResourceVisitor {
 		fResultClasspath= entries;
 		fResultOutputFolder= outputLocation;
 	}
+	
+	private IPath findInSourceFolders(IPath path) {
+		Iterator iter= fSourceFolders.keySet().iterator();
+		while (iter.hasNext()) {
+			Object key= iter.next();
+			List cus= (List) fSourceFolders.get(key);
+			if (cus.contains(path)) {
+				return (IPath) key;
+			}
+		}
+		return null;
+	}
+	
+	private IPath detectOutputFolder(List entries) {
+		HashSet classFolders= new HashSet();
+		
+		for (Iterator iter= fClassFiles.iterator(); iter.hasNext();) {
+			IFile file= (IFile) iter.next();
+			
+			IClassFileReader reader= ToolFactory.createDefaultClassFileReader(file.getLocation().toOSString(), IClassFileReader.CLASSFILE_ATTRIBUTES);
+			char[] className= reader.getClassName();
+			char[] sourceName= reader.getSourceFileAttribute().getSourceFileName();
+			if (className != null && sourceName != null) {
+				IPath packPath= file.getParent().getFullPath();
+				int idx= CharOperation.lastIndexOf('/', className) + 1;
+				IPath relPath= new Path(new String(className, 0, idx));
+				IPath cuPath= relPath.append(new String(sourceName));
+				
+				IPath resPath= null;
+				if (idx == 0) {
+					resPath= packPath;
+				} else {
+					IPath folderPath= getFolderPath(packPath, relPath);
+					if (folderPath != null) {
+						resPath= folderPath;
+					}
+				}
+				if (resPath != null) {
+					IPath path= findInSourceFolders(cuPath);
+					if (path != null) {
+						return resPath;
+					} else {
+						classFolders.add(resPath);	
+					}
+				}
+			}			
+		}		
+		IPath projPath= fProject.getFullPath();
+		if (fSourceFolders.size() == 1 && classFolders.isEmpty() && fSourceFolders.get(projPath) != null) {
+			return projPath;
+		} else {
+			IPath path= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
+			while (classFolders.contains(path)) {
+				path= new Path(path.toString() + '1');
+			}
+			return path;
+		} 			
+	}
 
-	private boolean visitCompilationUnit(IFile file) throws JavaModelException {
+
+	private void detectLibraries(ArrayList cpEntries, IPath outputLocation) {
+		Set sourceFolderSet= fSourceFolders.keySet();
+		for (Iterator iter= fJARFiles.iterator(); iter.hasNext();) {
+			IPath path= (IPath) iter.next();
+			if (isNested(path, sourceFolderSet.iterator())) {
+				continue;
+			}
+			if (outputLocation != null && outputLocation.isPrefixOf(path)) {
+				continue;
+			}
+			IClasspathEntry entry= JavaCore.newLibraryEntry(path, null, null);
+			cpEntries.add(entry);	
+		}
+	}
+
+
+	private void detectSourceFolders(ArrayList resEntries) {
+		Set sourceFolderSet= fSourceFolders.keySet();
+		for (Iterator iter= sourceFolderSet.iterator(); iter.hasNext();) {
+			IPath path= (IPath) iter.next();
+			ArrayList excluded= new ArrayList();
+			for (Iterator inner= sourceFolderSet.iterator(); inner.hasNext();) {
+				IPath other= (IPath) inner.next();
+				if (!path.equals(other) && path.isPrefixOf(other)) {
+					IPath pathToExclude= other.removeFirstSegments(path.segmentCount()).addTrailingSeparator();
+					excluded.add(pathToExclude);
+				}
+			}
+			IPath[] excludedPaths= (IPath[]) excluded.toArray(new IPath[excluded.size()]);
+			IClasspathEntry entry= JavaCore.newSourceEntry(path, excludedPaths);
+			resEntries.add(entry);
+		}
+	}
+
+	private void visitCompilationUnit(IFile file) throws JavaModelException {
 		ICompilationUnit cu= JavaCore.createCompilationUnitFrom(file);
 		if (cu != null) {
 			ICompilationUnit workingCopy= null;
@@ -126,13 +197,14 @@ public class ClassPathDetector implements IResourceVisitor {
 				}
 				IPath packPath= file.getParent().getFullPath();
 				IPackageDeclaration[] decls= workingCopy.getPackageDeclarations();
+				String cuName= file.getName();
 				if (decls.length == 0) {
-					fSourceFolders.add(packPath);
+					addToMap(fSourceFolders, packPath, new Path(cuName));
 				} else {
 					IPath relpath= new Path(decls[0].getElementName().replace('.', '/'));
 					IPath folderPath= getFolderPath(packPath, relpath);
 					if (folderPath != null) {
-						fSourceFolders.add(folderPath);
+						addToMap(fSourceFolders, folderPath, relpath.append(cuName));
 					}
 				}						
 			} finally {
@@ -141,9 +213,16 @@ public class ClassPathDetector implements IResourceVisitor {
 				}
 			}
 		}
-		return true;
 	}
-
+	
+	private void addToMap(HashMap map, IPath folderPath, IPath relPath) {
+		List list= (List) map.get(folderPath);
+		if (list == null) {
+			list= new ArrayList(50);
+			map.put(folderPath, list);
+		}		
+		list.add(relPath);
+	}
 
 	private IPath getFolderPath(IPath packPath, IPath relpath) {
 		int remainingSegments= packPath.segmentCount() - relpath.segmentCount();
@@ -156,39 +235,18 @@ public class ClassPathDetector implements IResourceVisitor {
 		return null;
 	}
 		
-	private boolean visitClassFile(IFile file) {
-		/*
-		IClassFileReader reader= ToolFactory.createDefaultClassFileReader(file.getLocation().toOSString(), IClassFileReader.CLASSFILE_ATTRIBUTES);
-		char[] className= reader.getClassName();
-		if (className != null) {
-			IPath packPath= file.getParent().getFullPath();
-			int idx= CharOperation.indexOf('/', className) + 1;
-			if (idx == 0) {
-				fClassFolders.add(packPath);
-			} else {
-				IPath relPath= new Path(new String(className, 0, idx));
-				IPath folderPath= getFolderPath(packPath, relPath);
-				if (folderPath != null) {
-					fClassFolders.add(folderPath);
-				}
-			}
-		}
-		*/
-		return true;
-	}	
-		
 	public boolean visit(IResource resource) throws CoreException {
 		if (resource.getType() == IResource.FILE) {
 			IFile file= (IFile) resource;
 			String extension= resource.getFileExtension();
 			if ("java".equalsIgnoreCase(extension)) { //$NON-NLS-1$
-				return visitCompilationUnit(file);
+				visitCompilationUnit(file);
 			} else if ("class".equalsIgnoreCase(extension)) { //$NON-NLS-1$
-				return visitClassFile(file);
+				fClassFiles.add(file);
 			} else if ("jar".equalsIgnoreCase(extension)) { //$NON-NLS-1$
 				fJARFiles.add(file.getFullPath());
-				return false;
 			}
+			return false;
 		}
 		return true;
 	}
