@@ -40,8 +40,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFolderChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 public class DeleteRefactoring extends Refactoring {
 	
@@ -289,8 +291,22 @@ public class DeleteRefactoring extends Refactoring {
 	}
 
 	private IChange createDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
-		Assert.isTrue(! root.isExternal());
-		return new DeletePackageFragmentRootChange(root, fRootManipulationQuery);
+		IResource resource= ResourceUtil.getResource(root);
+		if (resource != null && resource.isLinked()){
+			//XXX using this code is a workaround for jcore bug 31998
+			//jcore cannot handle linked stuff
+			//normally, we should always create DeletePackageFragmentRootChange
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("DeleteRefactoring.delete_package_fragment_root"), 2); //$NON-NLS-1$
+		
+			composite.add(new DeleteFromClasspathChange(root));
+			if (! ReorgUtils.isClasspathDelete(root))
+				composite.add(createDeleteChange(getResourceToDelete(root)));
+		
+			return composite;
+		} else {
+			Assert.isTrue(! root.isExternal());
+			return new DeletePackageFragmentRootChange(root, fRootManipulationQuery);
+		}
 	}
 	
 	private static IResource[] getMembers(IFolder folder) throws JavaModelException {
