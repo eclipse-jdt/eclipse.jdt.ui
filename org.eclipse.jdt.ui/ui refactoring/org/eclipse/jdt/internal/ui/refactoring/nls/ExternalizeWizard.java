@@ -32,14 +32,6 @@ class ExternalizeWizard extends RefactoringWizard {
 		addPage(page2);
 	} 
 
-
-	/* non java-doc
-	 * @see RefactoringWizard#addPreviewPage
-	 */ 
-	protected void addPreviewPage(){
-		addPage(new PreviewWizardPage());
-	}
-
 	/* non java-doc
 	 * @see RefactoringWizard#checkActivationOnOpen
 	 */ 
