@@ -7,8 +7,6 @@ package org.eclipse.jdt.internal.ui.browsing;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.ISelectionListener;
@@ -20,7 +18,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 /**
  * This action selects all entries currently showing in view.
  */
-class SelectAllAction extends Action implements ISelectionChangedListener, ISelectionListener {
+class SelectAllAction extends Action implements ISelectionListener {
 
 	private TableViewer fViewer;
 
@@ -47,12 +45,8 @@ class SelectAllAction extends Action implements ISelectionChangedListener, ISele
 	}
 
 	/* (non-Javadoc)
-	 * Method declared on ISelectionChangedListener.
+	 * Method declared on ISelectionListener.
 	 */
-	public void selectionChanged(SelectionChangedEvent event) {
-		updateEnablement();
-	}
-
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		updateEnablement();
 	}
