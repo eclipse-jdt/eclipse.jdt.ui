@@ -191,12 +191,9 @@ public class CompositeChange extends Change implements ICompositeChange {
 	
 	/*non java-doc
 	 * @see IChange#isUndoable()
-	 * Composite can be undone if it's not marked as not undoable and all its sub-changes can be undone.
+	 * Composite can be undone iff all its sub-changes can be undone.
 	 */
 	public boolean isUndoable() {
-		if (! super.isUndoable())
-			return false;
-		
 		for (Iterator iter= fChanges.iterator(); iter.hasNext(); ) {
 			IChange each= (IChange)iter.next();
 			if (! each.isUndoable())
