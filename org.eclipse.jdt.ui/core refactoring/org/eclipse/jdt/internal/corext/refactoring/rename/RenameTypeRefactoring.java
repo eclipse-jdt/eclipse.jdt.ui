@@ -705,19 +705,15 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	 * @see IRefactoring#createChange
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
-		try{
-			pm.beginTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.creating_change"), 4); //$NON-NLS-1$
-			CompositeChange builder= new CompositeChange();
-			builder.addAll(fChangeManager.getAllChanges());
-			if (fQualifiedNameSearchResult != null)
-				builder.addAll(fQualifiedNameSearchResult.getAllChanges());
-			if (willRenameCU())
-				builder.add(new RenameResourceChange(ResourceUtil.getResource(fType), fNewName + ".java")); //$NON-NLS-1$
-			pm.worked(1);	
-			return builder;	
-		} catch (CoreException e){
-			throw new JavaModelException(e);
-		} 
+		pm.beginTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.creating_change"), 4); //$NON-NLS-1$
+		CompositeChange builder= new CompositeChange();
+		builder.addAll(fChangeManager.getAllChanges());
+		if (fQualifiedNameSearchResult != null)
+			builder.addAll(fQualifiedNameSearchResult.getAllChanges());
+		if (willRenameCU())
+			builder.add(new RenameResourceChange(ResourceUtil.getResource(fType), fNewName + ".java")); //$NON-NLS-1$
+		pm.worked(1);	
+		return builder;	
 	}
 	
 	private boolean willRenameCU() throws JavaModelException{

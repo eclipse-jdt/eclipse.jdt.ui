@@ -354,6 +354,8 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			fChangeManager= createTextChangeManager(new SubProgressMonitor(pm, 5));
 			result.merge(validateModifiesFiles());
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){	
 			throw new JavaModelException(e);
 		} finally{
@@ -371,6 +373,8 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), manager);
 			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
 		} finally{

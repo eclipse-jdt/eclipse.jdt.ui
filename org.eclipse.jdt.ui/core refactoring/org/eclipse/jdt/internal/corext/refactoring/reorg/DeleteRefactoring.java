@@ -312,6 +312,8 @@ public class DeleteRefactoring extends Refactoring {
 	private static IResource[] getMembers(IFolder folder) throws JavaModelException {
 		try{
 			return folder.members();
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){
 			throw new JavaModelException(e);
 		}

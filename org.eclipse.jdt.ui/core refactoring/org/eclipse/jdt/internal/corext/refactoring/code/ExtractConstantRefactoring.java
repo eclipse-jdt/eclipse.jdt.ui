@@ -201,8 +201,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 			pm.worked(1);
 
 			return checkSelection(new SubProgressMonitor(pm, 5));
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}
@@ -348,6 +346,8 @@ public class ExtractConstantRefactoring extends Refactoring {
             }
 	
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){
 			throw new JavaModelException(e);	
 		} 
@@ -370,6 +370,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 			pm.worked(1);
 
 			return change;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		} finally {

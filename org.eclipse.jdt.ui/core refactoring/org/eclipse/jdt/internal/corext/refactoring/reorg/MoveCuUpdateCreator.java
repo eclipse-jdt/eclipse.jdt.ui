@@ -95,6 +95,8 @@ class MoveCuUpdateCreator {
 					changeManager.get(cu).addTextEdit(RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importEdit); //$NON-NLS-1$
 			}
 			return changeManager;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){	
 			throw new JavaModelException(e);
 		} finally{

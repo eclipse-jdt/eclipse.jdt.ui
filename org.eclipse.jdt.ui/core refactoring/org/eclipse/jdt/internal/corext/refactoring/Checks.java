@@ -475,7 +475,8 @@ public class Checks {
 					return true;
 			}
 			return false;
-		
+		} catch (JavaModelException e){
+			throw e;		
 		} catch (CoreException e){
 			throw new JavaModelException(e);
 		}
@@ -511,6 +512,8 @@ public class Checks {
 					return true;
 			}
 			return false;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}

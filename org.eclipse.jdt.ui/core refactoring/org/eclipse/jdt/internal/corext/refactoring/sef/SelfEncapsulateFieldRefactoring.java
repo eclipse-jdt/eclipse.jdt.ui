@@ -147,27 +147,23 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		try {
-			fVisibility= (fField.getFlags() & (Flags.AccPublic | Flags.AccProtected | Flags.AccPrivate));
-			RefactoringStatus result=  new RefactoringStatus();
-			ASTNode node= JavaElementMapper.perform(fField, VariableDeclarationFragment.class);
-			if (node == null || !(node instanceof VariableDeclarationFragment)) {
-				return mappingErrorFound(result, node);
-			}
-			fFieldDeclaration= (VariableDeclarationFragment)node;
-			if (fFieldDeclaration.resolveBinding() == null) {
-				if (!processCompilerError(result, node))
-					result.addFatalError(RefactoringCoreMessages.getString("SelfEncapsulateField.type_not_resolveable")); //$NON-NLS-1$
-				return result;
-			}
-			result.merge(Checks.validateModifiesFiles(new IFile[]{ResourceUtil.getFile(fField.getCompilationUnit())}));
-			if (result.hasFatalError())
-				return result;
-			computeUsedNames();
-			return result;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+		fVisibility= (fField.getFlags() & (Flags.AccPublic | Flags.AccProtected | Flags.AccPrivate));
+		RefactoringStatus result=  new RefactoringStatus();
+		ASTNode node= JavaElementMapper.perform(fField, VariableDeclarationFragment.class);
+		if (node == null || !(node instanceof VariableDeclarationFragment)) {
+			return mappingErrorFound(result, node);
 		}
+		fFieldDeclaration= (VariableDeclarationFragment)node;
+		if (fFieldDeclaration.resolveBinding() == null) {
+			if (!processCompilerError(result, node))
+				result.addFatalError(RefactoringCoreMessages.getString("SelfEncapsulateField.type_not_resolveable")); //$NON-NLS-1$
+			return result;
+		}
+		result.merge(Checks.validateModifiesFiles(new IFile[]{ResourceUtil.getFile(fField.getCompilationUnit())}));
+		if (result.hasFatalError())
+			return result;
+		computeUsedNames();
+		return result;
 	}
 
 	private RefactoringStatus mappingErrorFound(RefactoringStatus result, ASTNode node) {
@@ -268,6 +264,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				return result;
 			sub.done();
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}
@@ -289,6 +287,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			}
 			pm.done();
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}

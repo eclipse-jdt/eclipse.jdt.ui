@@ -244,6 +244,8 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
 			result.merge(validateModifiesFiles());
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){	
 			throw new JavaModelException(e);	
 		} finally{
@@ -358,6 +360,8 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), manager);
 			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
 		} finally{

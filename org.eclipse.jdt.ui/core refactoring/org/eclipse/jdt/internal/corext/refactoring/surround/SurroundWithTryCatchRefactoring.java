@@ -112,17 +112,13 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		try {
-			RefactoringStatus result= new RefactoringStatus();
-			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit})));
-			if (result.hasFatalError())
-				return result;
-			
-			CompilationUnit rootNode= AST.parseCompilationUnit(fCUnit, true);
-			return checkActivationBasics(rootNode, pm);
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
-		}	
+		RefactoringStatus result= new RefactoringStatus();
+		result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit})));
+		if (result.hasFatalError())
+			return result;
+		
+		CompilationUnit rootNode= AST.parseCompilationUnit(fCUnit, true);
+		return checkActivationBasics(rootNode, pm);
 	}
 
 	/*

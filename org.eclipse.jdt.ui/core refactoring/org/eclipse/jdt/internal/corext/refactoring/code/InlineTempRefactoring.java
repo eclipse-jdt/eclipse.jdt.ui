@@ -101,8 +101,6 @@ public class InlineTempRefactoring extends Refactoring {
 			
 			result.merge(checkInitializer());	
 			return result;
-		} catch (CoreException e){		
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	

@@ -835,8 +835,6 @@ public class InlineConstantRefactoring extends Refactoring {
 			pm.worked(1);
 
 			return checkSelection(new SubProgressMonitor(pm, 2));
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
@@ -1036,6 +1034,8 @@ public class InlineConstantRefactoring extends Refactoring {
 			
 			
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}
@@ -1051,6 +1051,8 @@ public class InlineConstantRefactoring extends Refactoring {
 			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("InlineConstantRefactoring.inline")); //$NON-NLS-1$
 			composite.addAll(cuChanges);
 			return composite;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		} finally {

@@ -302,6 +302,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 				
 			result.merge(validateModifiesFiles());
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){	
 			throw new JavaModelException(e);
 		} finally{
@@ -477,8 +479,6 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			builder.add(new RenamePackageChange(fPackage, fNewName));
 			pm.worked(1);
 			return builder;
-		} catch (CoreException e){
-			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	

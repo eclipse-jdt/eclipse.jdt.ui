@@ -243,6 +243,8 @@ public class NLSRefactoring extends Refactoring {
 				result.addInfo(NLSMessages.getString("NLSrefactoring.Propfile") + getPropertyFilePath() + NLSMessages.getString("NLSrefactoring.will_be_created")); //$NON-NLS-2$ //$NON-NLS-1$
 			pm.worked(1);	
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){
 			throw new JavaModelException(e);
 		} finally {

@@ -169,6 +169,8 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){
 			throw new JavaModelException(e);	
 		} finally{

@@ -496,6 +496,8 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 						RefactoringStatus status= validateModifiesFiles();
 						if (status.hasFatalError())
 							fChangeManager= new TextChangeManager();
+					} catch (JavaModelException e){
+						throw e;
 					} catch(CoreException e) {
 						throw new JavaModelException(e);
 					}

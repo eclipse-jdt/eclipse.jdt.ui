@@ -235,6 +235,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     		addNestedClass(rewrite);
     		modifyConstructorCall(rewrite);
             return createChange(rewrite);
+    	} catch (JavaModelException e){
+    		throw e;
     	} catch (CoreException e) {
     		throw new JavaModelException(e);
         } finally{

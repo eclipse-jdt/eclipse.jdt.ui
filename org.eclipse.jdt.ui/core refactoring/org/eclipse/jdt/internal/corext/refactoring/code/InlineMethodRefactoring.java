@@ -236,6 +236,8 @@ public class InlineMethodRefactoring extends Refactoring {
 							new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {importer})); //$NON-NLS-1$
 					}
 				}
+			} catch (JavaModelException e){
+				throw e;
 			} catch (CoreException e) {
 				throw new JavaModelException(e);
 			} finally {
@@ -263,6 +265,8 @@ public class InlineMethodRefactoring extends Refactoring {
 					change.setEdit(delete);
 				}
 				change.addGroupDescription(description);
+			} catch (JavaModelException e){
+				throw e;
 			} catch (CoreException e) {
 				throw new JavaModelException(e);
 			}

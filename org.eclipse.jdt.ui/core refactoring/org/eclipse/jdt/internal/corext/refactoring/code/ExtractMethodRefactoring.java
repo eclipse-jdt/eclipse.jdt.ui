@@ -179,7 +179,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @return the refactoring status describing the result of the activation check.	 
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		try {
+		try{
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_selection"), 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			
@@ -203,8 +203,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 			initializeParameterInfos();
 			initializeUsedNames();
 			return result;
-		} catch (CoreException e){	
-			throw new JavaModelException(e);
 		} finally {
 			pm.worked(1);
 			pm.done();
@@ -381,7 +379,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 			} finally {
 				TextBuffer.release(buffer);
 			}
-			
+		} catch (JavaModelException e){
+			throw e;			
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}

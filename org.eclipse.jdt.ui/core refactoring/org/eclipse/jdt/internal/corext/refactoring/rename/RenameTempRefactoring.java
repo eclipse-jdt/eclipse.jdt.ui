@@ -236,8 +236,6 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 				return result;
 			result.merge(analyzeAST());
 			return result;
-		} catch (CoreException e){	
-			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	
@@ -265,8 +263,6 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(enclosing, edits, change, fullKey);
 			result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
 			return result;
-		} catch(CoreException e) {
-			throw new JavaModelException(e);
 		} finally{
 			if (wc != null)
 				wc.destroy();
@@ -323,6 +319,8 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			}
 			
 			return change;
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){
 			throw new JavaModelException(e);
 		} finally{

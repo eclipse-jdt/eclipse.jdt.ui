@@ -176,6 +176,8 @@ public abstract class TextChange extends AbstractTextChange {
 		try {
 			buffer= acquireTextBuffer();
 			return buffer.getContent();
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		} finally {
@@ -203,6 +205,8 @@ public abstract class TextChange extends AbstractTextChange {
 			addTextEdits(editor);
 			editor.performEdits(new NullProgressMonitor());
 			return editor.getTextBuffer();
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}

@@ -244,6 +244,8 @@ public class UndoManager implements IUndoManager {
 					}
 				},
 				new SubProgressMonitor(pm, 8));
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		} finally {
