@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -161,7 +162,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 		monitor.beginTask("", 1); //$NON-NLS-1$
 		try{
 			ExtractInterfaceUtil.updateReferences(manager, fInputType, fSuperTypeToUse, 
-			        new RefactoringWorkingCopyOwner(), true, new SubProgressMonitor(monitor, 1), 
+			        new WorkingCopyOwner() {}, true, new SubProgressMonitor(monitor, 1), 
 			        status);
 		} finally {
 			monitor.done();

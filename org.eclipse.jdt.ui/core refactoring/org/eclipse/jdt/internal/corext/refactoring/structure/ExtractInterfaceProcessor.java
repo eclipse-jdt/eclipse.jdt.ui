@@ -193,7 +193,7 @@ public final class ExtractInterfaceProcessor extends RefactoringProcessor {
 	private IMember[] fMembers= null;
 
 	/** The working copy owner */
-	private final WorkingCopyOwner fOwner= new RefactoringWorkingCopyOwner();
+	private final WorkingCopyOwner fOwner= new WorkingCopyOwner() {};
 
 	/** Should extracted methods be declared as public? */
 	private boolean fPublic= true;
