@@ -591,6 +591,7 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	 * @see IInformationControl#setFocus()
 	 */
 	public void setFocus() {
+		fShell.forceFocus();
 		fFilterText.setFocus();
 	}
 
