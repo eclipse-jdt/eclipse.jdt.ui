@@ -691,7 +691,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				int endOffset= fEndOffset.getOffset();
 				
 				if (startOffset == -1)
-					startOffset= endOffset; // fallback to carret offset
+					startOffset= endOffset; // fallback to caret offset
 				
 				if (endOffset == -1)
 					endOffset= startOffset; // fallback to other offset
@@ -1242,8 +1242,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	/**
-	 * Asks the user if it is ok to store in non-workbench encoding.
-	 * @return <true> if the user wants to continue
+	 * Asks the user if it is OK to store in non-workbench encoding.
+	 * @return <code>true</code> if the user wants to continue
 	 */
 	private boolean askIfNonWorkbenchEncodingIsOk() {
 		IDocumentProvider provider= getDocumentProvider();
