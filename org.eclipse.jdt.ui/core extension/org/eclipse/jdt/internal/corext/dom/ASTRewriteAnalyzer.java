@@ -1001,9 +1001,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayType)
 	 */
 	public boolean visit(ArrayType node) {
-		checkNoModification(node);
-		checkNoChange(node.getComponentType());
-		// no changes possible // need to check
+		rewriteRequiredNode(node.getComponentType());
 		return false;
 	}
 
@@ -1515,7 +1513,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(SimpleType)
 	 */
 	public boolean visit(SimpleType node) {
-		checkNoModification(node);
+		rewriteRequiredNode(node.getName());
 		return false;
 	}
 
