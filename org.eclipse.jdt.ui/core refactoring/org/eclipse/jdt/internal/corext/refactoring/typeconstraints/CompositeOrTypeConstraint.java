@@ -41,18 +41,6 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.experiments.ITypeConstraint#isSatisfied()
-	 */
-	public boolean isSatisfied() {
-		for (int i= 0; i < fConstraints.length; i++) {
-			ITypeConstraint constraint= fConstraints[i];
-			if (! constraint.isSatisfied())
-				return false;
-		}
-		return true;
-	}
-
-	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.experiments.ITypeConstraint#toResolvedString()
 	 */
 	public String toResolvedString() {

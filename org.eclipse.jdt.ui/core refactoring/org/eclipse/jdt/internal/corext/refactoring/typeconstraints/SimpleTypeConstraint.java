@@ -71,13 +71,6 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint#isSatisfied()
-	 */
-	public  boolean isSatisfied() {
-		return fOperator.isSatisfied(fLeft, fRight);
-	}
-
-	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.experiments.ITypeConstraint#isSimpleTypeConstraint()
 	 */
 	public  boolean isSimpleTypeConstraint() {
@@ -105,18 +98,18 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 	}
 	
 	public static SimpleTypeConstraint createStrictSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return createConstraint(v1, v2, StrictSubtypeOperator.create());
+		return createConstraint(v1, v2, ConstraintOperator.createStrictSubtypeOperator());
 	}
 	
 	public static SimpleTypeConstraint createSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return createConstraint(v1, v2, SubtypeOperator.create());
+		return createConstraint(v1, v2, ConstraintOperator.createSubTypeOperator());
 	}
 
 	public static SimpleTypeConstraint createEqualsConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return createConstraint(v1, v2, EqualsOperator.create());
+		return createConstraint(v1, v2, ConstraintOperator.createEqualsOperator());
 	}
 
 	public static SimpleTypeConstraint createDefinesConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return createConstraint(v1, v2, DefinesOperator.create());
+		return createConstraint(v1, v2, ConstraintOperator.createDefinesOperator());
 	}
 }

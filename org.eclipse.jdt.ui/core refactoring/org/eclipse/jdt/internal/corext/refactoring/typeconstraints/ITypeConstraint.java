@@ -12,12 +12,6 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 public interface ITypeConstraint {
 	/**
-	 * Returns <code>true</code> iff the constraint is satisfied in the program. 
-	 * In program that type-check, this should always be <code>true</code>.
-	 */
-	public abstract boolean isSatisfied();
-
-	/**
 	 * Returns the resolved representation of the constraint.
 	 * For example, if <code>toString</code> returns "[a] &lt;= [b]" and types of 'a' and 'b' are A and B,
 	 * repespectively, then this method returns "A &lt;= B".
