@@ -170,13 +170,17 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			IResourceLocator locator= (IResourceLocator) classFile.getAdapter(IResourceLocator.class);
 			if (locator != null)
 				resource= locator.getContainingResource(classFile);
-		} catch (JavaModelException ex) {
-			// resource will be null
+		} catch (JavaModelException x) {
+			throw new CoreException(x.getStatus());
 		}
 		
-		ClassFileMarkerAnnotationModel model= new ClassFileMarkerAnnotationModel(resource);
-		model.setClassFile(classFile);
-		return model;
+		if (resource != null) {
+			ClassFileMarkerAnnotationModel model= new ClassFileMarkerAnnotationModel(resource);
+			model.setClassFile(classFile);
+			return model;
+		}
+		
+		return null;
 	}
 	
 	/**

@@ -175,16 +175,21 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		
-		ContentAssistant assistant= new ContentAssistant();
-		assistant.setContentAssistProcessor(new JavaCompletionProcessor(getEditor()), IDocument.DEFAULT_CONTENT_TYPE);
-		assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), JavaPartitionScanner.JAVA_DOC);
+		if (getEditor() != null) {
 		
-		ContentAssistPreference.configure(assistant, getPreferenceStore());
+			ContentAssistant assistant= new ContentAssistant();
+			assistant.setContentAssistProcessor(new JavaCompletionProcessor(getEditor()), IDocument.DEFAULT_CONTENT_TYPE);
+			assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), JavaPartitionScanner.JAVA_DOC);
+			
+			ContentAssistPreference.configure(assistant, getPreferenceStore());
+			
+			assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
+			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+					
+			return assistant;
+		}
 		
-		assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
-		assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
-				
-		return assistant;
+		return null;
 	}
 	
 	/*
