@@ -116,7 +116,8 @@ public interface IJavaHelpContextIds {
 	public static final String DELETE_ACTION= 													PREFIX + "delete_action"; //$NON-NLS-1$	
 	public static final String SELECT_ALL_ACTION= 												PREFIX + "select_all_action"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_HIERARCHY_ACTION= 								PREFIX + "open_type_hierarchy_action"; //$NON-NLS-1$	
-	public static final String COLLAPSE_ALL_ACTION= 								PREFIX + "open_type_hierarchy_action"; //$NON-NLS-1$	
+	public static final String COLLAPSE_ALL_ACTION= 								PREFIX + "open_type_hierarchy_action"; //$NON-NLS-1$
+	public static final String GOTO_RESOURCE_ACTION=							PREFIX + "goto_resource_action"; 	 //$NON-NLS-1$
 
 	// Dialogs
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context"; //$NON-NLS-1$
@@ -141,11 +142,10 @@ public interface IJavaHelpContextIds {
 	public static final String EXCLUSION_PATTERN_DIALOG= PREFIX + "exclusion_pattern_dialog_context"; //$NON-NLS-1$
 	public static final String OUTPUT_LOCATION_DIALOG= PREFIX + "output_location_dialog_context"; //$NON-NLS-1$
 	public static final String VARIABLE_CREATION_DIALOG= PREFIX + "variable_creation_dialog_context"; //$NON-NLS-1$	
-	
 	public static final String JAVA_SEARCH_PAGE= PREFIX + "java_search_page_context"; //$NON-NLS-1$
 	public static final String NLS_SEARCH_PAGE= PREFIX + "nls_search_page_context"; //$NON-NLS-1$
-	
 	public static final String JAVA_EDITOR= PREFIX + "java_editor_context"; //$NON-NLS-1$
+	public static final String GOTO_RESOURCE_DIALOG= PREFIX + "goto_resource_dialog";  //$NON-NLS-1$
 	
 	// view parts
 	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context"; //$NON-NLS-1$
