@@ -11,61 +11,43 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 public class RefactoringAnalyzeUtil {
 	
-	private RefactoringAnalyzeUtil(){
+	private RefactoringAnalyzeUtil() {
+		//no instances
 	}
 	
-	public static ICompilationUnit getWorkingCopyWithNewContent(TextEdit[] edits, TextChange change, ICompilationUnit cu) throws CoreException {
-		for (int i= 0; i < edits.length; i++) {
-			TextChangeCompatibility.addTextEdit(change, "", edits[i]); //$NON-NLS-1$
-		}
-		ICompilationUnit wc= WorkingCopyUtil.getNewWorkingCopy(cu);
-		Assert.isTrue(! cu.equals(wc));
-		wc.getBuffer().setContents(change.getPreviewContent());
-		return wc;
-	}
-
-	public static IRegion[] getRanges(TextEdit[] edits, TextChange change){
+	public static IRegion[] getNewRanges(TextEdit[] edits, TextChange change){
 		IRegion[] result= new IRegion[edits.length];
 		for (int i= 0; i < edits.length; i++) {
-			result[i]= RefactoringAnalyzeUtil.getTextRange(edits[i], change);
+			result[i]= RefactoringAnalyzeUtil.getNewTextRange(edits[i], change);
 		}
 		return result;
 	}
@@ -78,16 +60,7 @@ public class RefactoringAnalyzeUtil {
 		}
 		return result;
 	}
-
-	public static TextEdit getFirstEdit(TextEdit[] edits){
-		Arrays.sort(edits, new Comparator(){
-			public int compare(Object o1, Object o2){
-				return ((TextEdit)o1).getOffset() - ((TextEdit)o2).getOffset();
-			}
-		});
-		return edits[0];
-	}
-
+	
 	public static String getFullBindingKey(VariableDeclaration decl){
 		StringBuffer buff= new StringBuffer();
 		if (decl.resolveBinding() != null) {
@@ -126,12 +99,12 @@ public class RefactoringAnalyzeUtil {
 	}
 
 	public static MethodDeclaration getMethodDeclaration(TextEdit edit, TextChange change, CompilationUnit cuNode){
-		ASTNode decl= RefactoringAnalyzeUtil.getNameNode(RefactoringAnalyzeUtil.getTextRange(edit, change), cuNode);
+		ASTNode decl= RefactoringAnalyzeUtil.findSimpleNameNode(RefactoringAnalyzeUtil.getNewTextRange(edit, change), cuNode);
 		return ((MethodDeclaration)ASTNodes.getParent(decl, MethodDeclaration.class));
 	}
 
 	public static Block getBlock(TextEdit edit, TextChange change, CompilationUnit cuNode){
-		ASTNode decl= RefactoringAnalyzeUtil.getNameNode(RefactoringAnalyzeUtil.getTextRange(edit, change), cuNode);
+		ASTNode decl= RefactoringAnalyzeUtil.findSimpleNameNode(RefactoringAnalyzeUtil.getNewTextRange(edit, change), cuNode);
 		return ((Block)ASTNodes.getParent(decl, Block.class));
 	}
 	
@@ -164,12 +137,6 @@ public class RefactoringAnalyzeUtil {
 		return true;
 	}
 
-
-	public static String getFullDeclarationBindingKey(TextEdit[] edits, CompilationUnit cuNode) {
-		Name declarationNameNode= getNameNode(getTextRange(getFirstEdit(edits), null), cuNode);
-		return getFullBindingKey((VariableDeclaration)declarationNameNode.getParent());
-	}
-
 	private static SimpleName getSimpleName(ASTNode node){
 		if (node instanceof SimpleName)
 			return (SimpleName)node;
@@ -178,18 +145,13 @@ public class RefactoringAnalyzeUtil {
 		return null;	
 	}
 
-	private static SimpleName getNameNode(IRegion range, CompilationUnit cuNode) {
-		Selection sel= Selection.createFromStartLength(range.getOffset(), range.getLength());
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(sel, true);
-		cuNode.accept(analyzer);
-		return getSimpleName(analyzer.getFirstSelectedNode());
+	private static SimpleName findSimpleNameNode(IRegion range, CompilationUnit cuNode) {
+		ASTNode node= NodeFinder.perform(cuNode, range.getOffset(), range.getLength());
+		return getSimpleName(node);
 	}
 
-	private static IRegion getTextRange(TextEdit edit, TextChange change){
-		if (change == null)
-			return edit.getRegion();
-		else
-			return change.getPreviewEdit(edit).getRegion();
+	private static IRegion getNewTextRange(TextEdit edit, TextChange change){
+		return change.getPreviewEdit(edit).getRegion();
 	}
 
 	private static Set getOldProblems(CompilationUnit oldCuNode) {

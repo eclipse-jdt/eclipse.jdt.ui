@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
-import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -474,13 +474,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     
     private void addTempRenames(ASTRewrite rewrite) {
-    	ASTNode[] tempRefs= TempOccurrenceFinder.findTempOccurrenceNodes(fTempDeclarationNode, true, false);
+		TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(fTempDeclarationNode, false);
+		analyzer.perform();
+    	SimpleName[] tempRefs= analyzer.getReferenceNodes(); // no javadocs (refactoring not for parameters)
 		for (int j= 0; j < tempRefs.length; j++) {
-			ASTNode occurence= tempRefs[j];
-			if (occurence instanceof SimpleName){
-				SimpleName newName= getAST().newSimpleName(fFieldName);
-				rewrite.markAsReplaced(occurence, newName, null);
-			}
+			SimpleName occurence= tempRefs[j];
+			SimpleName newName= getAST().newSimpleName(fFieldName);
+			rewrite.markAsReplaced(occurence, newName, null);
 		}
     }
     

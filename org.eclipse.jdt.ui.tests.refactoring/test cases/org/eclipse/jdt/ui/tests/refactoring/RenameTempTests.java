@@ -298,7 +298,7 @@ public class RenameTempTests extends RefactoringTest{
 	
 	public void test40() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#10660");
-		helper1("j", true, 3, 12, 3, 17);
+		helper1("j", true, 4, 12, 4, 17);
 	}
 	
 	public void test41() throws Exception{

@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
-import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -66,6 +66,7 @@ public class InlineTempRefactoring extends Refactoring {
 	//the following fields are set after the construction
 	private VariableDeclaration fTempDeclaration;
 	private CompilationUnit fCompilationUnitNode;
+	private int[] fReferenceOffsets;
 
 	private InlineTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -88,6 +89,26 @@ public class InlineTempRefactoring extends Refactoring {
 		return ref;
 	}
 	
+	private RefactoringStatus checkIfTempSelected(){
+		initializeAST();
+
+		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
+
+		if (fTempDeclaration == null){
+			String message= RefactoringCoreMessages.getString("InlineTempRefactoring.select_temp");//$NON-NLS-1$
+			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
+		}
+
+		if (fTempDeclaration.getParent() instanceof FieldDeclaration)
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTemRefactoring.error.message.fieldsCannotBeInlined")); //$NON-NLS-1$
+		
+		return new RefactoringStatus();
+	}
+	
+	private void initializeAST() {
+		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
+	}
+	
 	/*
 	 * @see IRefactoring#getName()
 	 */
@@ -99,8 +120,8 @@ public class InlineTempRefactoring extends Refactoring {
 		return fTempDeclaration.getName().getIdentifier();
 	}
 	
-	public int getOccurences() {
-		return getOccurrenceOffsets().length;
+	public int getReferencesCount() {
+		return getReferenceOffsets().length;
 	}
 	
 	/*
@@ -139,43 +160,7 @@ public class InlineTempRefactoring extends Refactoring {
     	}
     }
 
-	/*
-	 * @see Refactoring#checkInput(IProgressMonitor)
-	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
-		try {
-			pm.beginTask("", 1); //$NON-NLS-1$
-			return new RefactoringStatus();
-		} finally {
-			pm.done();
-		}	
-	}
-
-	private void initializeAST() {
-		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
-	}
-	
-	private RefactoringStatus checkIfTempSelected(){
-		initializeAST();
-
-		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
-
-		if (fTempDeclaration == null){
-			String message= RefactoringCoreMessages.getString("InlineTempRefactoring.select_temp");//$NON-NLS-1$
-			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
-		}
-
-		if (fTempDeclaration.getParent() instanceof FieldDeclaration)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTemRefactoring.error.message.fieldsCannotBeInlined")); //$NON-NLS-1$
-		
-		return new RefactoringStatus();
-	}
-	
 	private RefactoringStatus checkSelection() {
-		RefactoringStatus rs= checkIfTempSelected();
-		if (rs != null && rs.hasFatalError())
-			return rs;
-
 		if (fTempDeclaration.getParent() instanceof MethodDeclaration)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.method_parameter")); //$NON-NLS-1$
 		
@@ -211,6 +196,18 @@ public class InlineTempRefactoring extends Refactoring {
 		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}
 	
+	/*
+	 * @see Refactoring#checkInput(IProgressMonitor)
+	 */
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
+		try {
+			pm.beginTask("", 1); //$NON-NLS-1$
+			return new RefactoringStatus();
+		} finally {
+			pm.done();
+		}	
+	}
+	
 	//----- changes
 	
 	/*
@@ -229,12 +226,12 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 
 	private void inlineTemp(TextChange change, IProgressMonitor pm) throws JavaModelException {
-		Integer[] offsets= getOccurrenceOffsets();
+		int[] offsets= getReferenceOffsets();
 		pm.beginTask("", offsets.length); //$NON-NLS-1$
 		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.inline_edit_name") + getTempName(); //$NON-NLS-1$
 		int length= getTempName().length();
 		for(int i= 0; i < offsets.length; i++){
-			int offset= offsets[i].intValue();
+			int offset= offsets[i];
             String sourceToInline= getInitializerSource(needsBrackets(offset));
 			TextChangeCompatibility.addTextEdit(change, changeName, new ReplaceEdit(offset, length, sourceToInline));
 			pm.worked(1);	
@@ -272,7 +269,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 
 	private void removeTemp(TextChange change) throws JavaModelException {
-		//FIX ME - multi declarations
+		//TODO: FIX ME - multi declarations
 		
 		if (fTempDeclaration.getParent() instanceof VariableDeclarationStatement){
 			VariableDeclarationStatement vds= (VariableDeclarationStatement)fTempDeclaration.getParent();
@@ -280,7 +277,7 @@ public class InlineTempRefactoring extends Refactoring {
 				removeDeclaration(change, vds.getStartPosition(), vds.getLength());
 				return;
 			} else {
-				//FIX ME
+				//TODO: FIX ME
 				return;
 			}
 		}
@@ -308,8 +305,13 @@ public class InlineTempRefactoring extends Refactoring {
 		return fCu.getSource().substring(start, end);
 	}
 	
-	private Integer[] getOccurrenceOffsets() {
-		return TempOccurrenceFinder.findTempOccurrenceOffsets(fTempDeclaration, true, false);
+	private int[] getReferenceOffsets() {
+		if (fReferenceOffsets == null) {
+			TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(fTempDeclaration, false);
+			analyzer.perform();
+			fReferenceOffsets= analyzer.getReferenceOffsets();
+		}
+		return fReferenceOffsets;
 	}	
 	
 }

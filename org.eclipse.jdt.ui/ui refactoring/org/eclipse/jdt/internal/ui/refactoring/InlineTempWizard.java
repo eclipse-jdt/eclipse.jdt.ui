@@ -36,7 +36,7 @@ public class InlineTempWizard extends RefactoringWizard {
 
 		protected String getMessageString() {
 			InlineTempRefactoring refactoring= (InlineTempRefactoring)getRefactoring();
-			int occurences= refactoring.getOccurences();
+			int occurences= refactoring.getReferencesCount();
 			if (occurences == 1) 
 				return RefactoringMessages.getFormattedString("InlineTempInputPage.message.one",  refactoring.getTempName()); //$NON-NLS-1$
 			else

@@ -22,11 +22,11 @@ import java.util.Set;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -96,7 +96,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
-import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -1408,13 +1408,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (! info.getOldName().equals(param.getName().getIdentifier()))
 				return; //don't change if original parameter name != name in rippleMethod
 
-			ASTNode[] paramOccurrences= TempOccurrenceFinder.findTempOccurrenceNodes(param, true, true);
+			TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(param, false);
+			analyzer.perform();
+			SimpleName[] paramOccurrences= analyzer.getReferenceAndDeclarationNodes(); // @param tags are updated in changeJavaDocTags()
 			for (int j= 0; j < paramOccurrences.length; j++) {
-				ASTNode occurence= paramOccurrences[j];
-				if (occurence instanceof SimpleName){
-					SimpleName newName= occurence.getAST().newSimpleName(info.getNewName());
-					fRewrite.markAsReplaced(occurence, newName, null);
-				}
+				SimpleName occurence= paramOccurrences[j];
+				SimpleName newName= occurence.getAST().newSimpleName(info.getNewName());
+				fRewrite.markAsReplaced(occurence, newName, null);
 			}
 		}
 		
@@ -1749,7 +1749,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			for (Iterator iter= getDeletedInfos().iterator(); iter.hasNext();) {
 				ParameterInfo info= (ParameterInfo) iter.next();
 				SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
-				ASTNode[] paramRefs= TempOccurrenceFinder.findTempOccurrenceNodes(paramDecl, true, false);
+				TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(paramDecl, false);
+				analyzer.perform();
+				SimpleName[] paramRefs= analyzer.getReferenceNodes();
+
 				if (paramRefs.length > 0){
 					RefactoringStatusContext context= JavaStatusContext.create(getOccurrenceCu(), paramRefs[0]);
 					Object[] keys= new String[]{paramDecl.getName().getIdentifier(),

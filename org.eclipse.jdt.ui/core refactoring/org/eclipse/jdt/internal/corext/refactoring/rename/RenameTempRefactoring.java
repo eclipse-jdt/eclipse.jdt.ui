@@ -15,8 +15,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -45,13 +47,10 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -60,6 +59,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	private static class ProblemNodeFinder {
 	
 		private ProblemNodeFinder() {
+			//static
 		}
 		
 		public static SimpleName[] getProblemNodes(ASTNode methodNode, TextEdit[] edits, TextChange change, String key) {
@@ -77,7 +77,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			public NameNodeVisitor(TextEdit[] edits, TextChange change, String key) {
 				Assert.isNotNull(edits);
 				Assert.isNotNull(key);
-				fRanges= new HashSet(Arrays.asList(RefactoringAnalyzeUtil.getRanges(edits, change)));
+				fRanges= new HashSet(Arrays.asList(RefactoringAnalyzeUtil.getNewRanges(edits, change)));
 				fProblemNodes= new ArrayList(0);
 				fKey= key;
 			}
@@ -128,6 +128,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	private String fNewName;
 	private CompilationUnit fCompilationUnitNode;
 	private VariableDeclaration fTempDeclarationNode;
+	private TextChange fChange;
 	
 	private RenameTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -260,37 +261,56 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	}
 		
 	private RefactoringStatus analyzeAST() throws CoreException{
-		ICompilationUnit wc= null;
-		try {
-			RefactoringStatus result= new RefactoringStatus();
-						
-			TextEdit[] edits= getAllRenameEdits();
-			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
-			change.setKeepPreviewEdits(true);
-		
-			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(edits, change, fCu);
-			String newCuSource= change.getPreviewContent();
-			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
-			
-			result.merge(analyzeCompileErrors(newCuSource, newCUNode));
-			if (result.hasError())
-				return result;
-			
-			String fullKey= RefactoringAnalyzeUtil.getFullDeclarationBindingKey(edits, fCompilationUnitNode);	
-			ASTNode enclosing= getEnclosingBlockOrMethod(edits, change, newCUNode);
-			SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(enclosing, edits, change, fullKey);
-			result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
-			return result;
-		} finally{
-			if (wc != null)
-				wc.destroy();
+		TextEdit declarationEdit= createRenameEdit(fTempDeclarationNode.getName().getStartPosition());
+		TextEdit[] allRenameEdits= getAllRenameEdits(declarationEdit);
+		fChange= new CompilationUnitChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), fCu); //$NON-NLS-1$
+		MultiTextEdit rootEdit= new MultiTextEdit();
+		fChange.setEdit(rootEdit);
+		fChange.setKeepPreviewEdits(true);
+
+		String changeName= RefactoringCoreMessages.getFormattedString("RenameTempRefactoring.changeName", new String[]{fCurrentName, fNewName}); //$NON-NLS-1$
+		for (int i= 0; i < allRenameEdits.length; i++) {
+			rootEdit.addChild(allRenameEdits[i]);
+			fChange.addTextEditGroup(new TextEditGroup(changeName, allRenameEdits[i]));
 		}
+		String newCuSource= fChange.getPreviewContent();
+		CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
+
+		RefactoringStatus result= new RefactoringStatus();
+		result.merge(analyzeCompileErrors(newCuSource, newCUNode));
+		if (result.hasError())
+			return result;
+		
+		String fullKey= RefactoringAnalyzeUtil.getFullBindingKey(fTempDeclarationNode);	
+		ASTNode enclosing= getEnclosingBlockOrMethod(declarationEdit, fChange, newCUNode);
+		SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(enclosing, allRenameEdits, fChange, fullKey);
+		result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
+		return result;
 	}
 
-	private ASTNode getEnclosingBlockOrMethod(TextEdit[] edits, TextChange change, CompilationUnit newCUNode) {
-		ASTNode enclosing= RefactoringAnalyzeUtil.getBlock(RefactoringAnalyzeUtil.getFirstEdit(edits), change, newCUNode);
+	private TextEdit[] getAllRenameEdits(TextEdit declarationEdit) {
+		if (! fUpdateReferences)
+			return new TextEdit[] { declarationEdit };
+		
+		TempOccurrenceAnalyzer fTempAnalyzer= new TempOccurrenceAnalyzer(fTempDeclarationNode, true);
+		fTempAnalyzer.perform();
+		int[] referenceOffsets= fTempAnalyzer.getReferenceAndJavadocOffsets();
+
+		TextEdit[] allRenameEdits= new TextEdit[referenceOffsets.length + 1];
+		for (int i= 0; i < referenceOffsets.length; i++)
+			allRenameEdits[i]= createRenameEdit(referenceOffsets[i]);
+		allRenameEdits[referenceOffsets.length]= declarationEdit;
+		return allRenameEdits;
+	}
+
+	private TextEdit createRenameEdit(int offset) {
+		return new ReplaceEdit(offset, fCurrentName.length(), fNewName);
+	}
+	
+	private ASTNode getEnclosingBlockOrMethod(TextEdit declarationEdit, TextChange change, CompilationUnit newCUNode) {
+		ASTNode enclosing= RefactoringAnalyzeUtil.getBlock(declarationEdit, change, newCUNode);
 		if (enclosing == null)	
-			enclosing= RefactoringAnalyzeUtil.getMethodDeclaration(RefactoringAnalyzeUtil.getFirstEdit(edits), change, newCUNode);
+			enclosing= RefactoringAnalyzeUtil.getMethodDeclaration(declarationEdit, change, newCUNode);
 		return enclosing;
 	}
 	
@@ -304,41 +324,14 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
         }
         return result;
     }
-
-	private TextEdit[] getAllRenameEdits() {
-		Integer[] renamingOffsets= TempOccurrenceFinder.findTempOccurrenceOffsets(fTempDeclarationNode, fUpdateReferences, true);
-		Assert.isTrue(renamingOffsets.length > 0); //should be enforced by preconditions
-		TextEdit[] result= new TextEdit[renamingOffsets.length];
-		int length= fCurrentName.length();
-		for(int i= 0; i < renamingOffsets.length; i++){
-			int offset= renamingOffsets[i].intValue();
-			result[i]= new ReplaceEdit(offset, length, fNewName);
-		}
-		return result;
-	}
-	
+    
 	//--- changes 
 	
 	/* non java-doc
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		try {
-			pm.beginTask("", 2); //$NON-NLS-1$
-			pm.worked(1);
-			
-			final TextChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), fCu); //$NON-NLS-1$
-			
-			String changeName= RefactoringCoreMessages.getFormattedString("RenameTempRefactoring.changeName", //$NON-NLS-1$
-						new String[]{fCurrentName, fNewName});
-			TextEdit[] edits= getAllRenameEdits();
-			for (int i= 0; i < edits.length; i++) {
-				TextChangeCompatibility.addTextEdit(result, changeName, edits[i]);
-			}
-			
-			return result;
-		} finally {
-			pm.done();
-		}	
+		pm.done();
+		return fChange;
 	}
 }
