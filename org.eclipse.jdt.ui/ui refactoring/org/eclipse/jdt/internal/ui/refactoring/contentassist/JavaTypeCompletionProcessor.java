@@ -243,7 +243,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 		public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 			if (isDummyClass(typeName))
 				return;
-			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers);
+			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, false, modifiers);
 			ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
 			fProposals.add(createAdjustedTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
 		}
@@ -255,7 +255,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 		public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 			if (isDummyClass(typeName))
 				return;
-			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(true, false, modifiers);
+			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(true, false, false, modifiers);
 			ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
 			fProposals.add(createAdjustedTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
 		}

@@ -223,7 +223,8 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				if (binding.isPrimitive()) {
 					return null;
 				}
-				ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(binding.isInterface(), binding.isMember(), binding.getModifiers());
+				boolean isInInterface= binding.isMember() && binding.getDeclaringClass().isInterface();
+				ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(binding.isInterface(), binding.isMember(), isInInterface, binding.getModifiers());
 				return JavaPlugin.getImageDescriptorRegistry().get(descriptor);
 			}
 			return null;

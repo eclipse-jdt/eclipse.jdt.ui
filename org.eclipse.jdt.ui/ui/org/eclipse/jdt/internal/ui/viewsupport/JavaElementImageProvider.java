@@ -22,6 +22,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.Flags;
@@ -72,8 +73,8 @@ public class JavaElementImageProvider {
 	private static ImageDescriptor DESC_OBJ_PROJECT;	
 	{
 		ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages(); 
-		DESC_OBJ_PROJECT_CLOSED= images.getImageDescriptor(ISharedImages.IMG_OBJ_PROJECT_CLOSED);
-		DESC_OBJ_PROJECT= 		 images.getImageDescriptor(ISharedImages.IMG_OBJ_PROJECT);
+		DESC_OBJ_PROJECT_CLOSED= images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT_CLOSED);
+		DESC_OBJ_PROJECT= 		 images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
 	}
 	
 	private ImageDescriptorRegistry fRegistry;
@@ -208,7 +209,8 @@ public class JavaElementImageProvider {
 						return isInterface ? JavaPluginImages.DESC_OBJS_INTERFACEALT : JavaPluginImages.DESC_OBJS_CLASSALT;
 					}
 					boolean isInner= type.getDeclaringType() != null;
-					return getTypeImageDescriptor(isInterface, isInner, type.getFlags());
+					boolean isInInterface= isInner && type.getDeclaringType().isInterface();
+					return getTypeImageDescriptor(isInterface, isInner, isInInterface, type.getFlags());
 				}
 
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
@@ -375,12 +377,12 @@ public class JavaElementImageProvider {
 		return JavaPluginImages.DESC_FIELD_DEFAULT;
 	}		
 	
-	public static ImageDescriptor getTypeImageDescriptor(boolean isInterface, boolean isInner, int flags) {
+	public static ImageDescriptor getTypeImageDescriptor(boolean isInterface, boolean isInner, boolean isInInterface, int flags) {
 		if (isInner) {
 			if (isInterface) {
-				return getInnerInterfaceImageDescriptor(flags);
+				return getInnerInterfaceImageDescriptor(isInInterface, flags);
 			} else {
-				return getInnerClassImageDescriptor(flags);
+				return getInnerClassImageDescriptor(isInInterface, flags);
 			}
 		} else {
 			if (isInterface) {
@@ -398,8 +400,8 @@ public class JavaElementImageProvider {
 			return JavaPluginImages.DESC_OBJS_CLASS_DEFAULT;
 	}
 	
-	private static ImageDescriptor getInnerClassImageDescriptor(int flags) {
-		if (Flags.isPublic(flags))
+	private static ImageDescriptor getInnerClassImageDescriptor(boolean isInInterface, int flags) {
+		if (Flags.isPublic(flags) || isInInterface)
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PUBLIC;
 		else if (Flags.isPrivate(flags))
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PRIVATE;
@@ -416,8 +418,8 @@ public class JavaElementImageProvider {
 			return JavaPluginImages.DESC_OBJS_INTERFACE_DEFAULT;
 	}
 	
-	private static ImageDescriptor getInnerInterfaceImageDescriptor(int flags) {
-		if (Flags.isPublic(flags))
+	private static ImageDescriptor getInnerInterfaceImageDescriptor(boolean isInInterface, int flags) {
+		if (Flags.isPublic(flags) || isInInterface)
 			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PUBLIC;
 		else if (Flags.isPrivate(flags))
 			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PRIVATE;

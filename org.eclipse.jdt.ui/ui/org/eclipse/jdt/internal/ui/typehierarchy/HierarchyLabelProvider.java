@@ -156,7 +156,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (isDifferentScope(type)) {
 			desc= isInterface ? JavaPluginImages.DESC_OBJS_INTERFACEALT : JavaPluginImages.DESC_OBJS_CLASSALT;
 		} else {
-			desc= JavaElementImageProvider.getTypeImageDescriptor(isInterface, isInner, flags);
+			desc= JavaElementImageProvider.getTypeImageDescriptor(isInterface, isInner, false, flags);
 		}
 		int adornmentFlags= 0;
 		if (Flags.isFinal(flags)) {
