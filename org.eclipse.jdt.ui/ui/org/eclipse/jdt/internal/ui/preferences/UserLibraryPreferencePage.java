@@ -44,6 +44,7 @@ import org.xml.sax.SAXException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -645,6 +646,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	
 	private IDialogSettings fDialogSettings;
 	private TreeListDialogField fLibraryList;
+	private IJavaProject fDummyProject;
 		
 	private static final int IDX_NEW= 0;
 	private static final int IDX_EDIT= 1;
@@ -658,6 +660,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	 */
 	public UserLibraryPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+		fDummyProject= getNonExistingProject();
 	
 		// title only used when page is shown programatically
 		setTitle(PreferencesMessages.getString("UserLibraryPreferencePage.title")); //$NON-NLS-1$
@@ -683,11 +686,10 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		String[] names= JavaCore.getUserLibraryNames();
 		ArrayList elements= new ArrayList();
 		
-		IJavaProject jproject= getDummyProject();
 		for (int i= 0; i < names.length; i++) {
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(names[i]);
 			try {
-				IClasspathContainer container= JavaCore.getClasspathContainer(path, jproject);
+				IClasspathContainer container= JavaCore.getClasspathContainer(path, fDummyProject);
 				elements.add(new CPUserLibraryElement(names[i], container));
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
@@ -700,9 +702,16 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		doSelectionChanged(fLibraryList); //update button enable state 
 	}
 	
-	private IJavaProject getDummyProject() {
-		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject("Internal"); //$NON-NLS-1$
-		return JavaCore.create(project);
+	private IJavaProject getNonExistingProject() {
+		String name= "####internal"; //$NON-NLS-1$
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		while (true) {
+			IProject project= root.getProject(name);
+			if (!project.exists()) {
+				return JavaCore.create(project);
+			}
+			name += '1';
+		}		
 	}
 	
 	
@@ -795,15 +804,17 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	
 	
 	private void updateUserLibararies(IProgressMonitor monitor) throws CoreException {
-
-		
 		List list= fLibraryList.getElements();
 		HashSet oldNames= new HashSet(Arrays.asList(JavaCore.getUserLibraryNames()));
 		int nExisting= list.size();
 		
+		HashSet newEntries= new HashSet(list.size());
 		for (int i= 0; i < nExisting; i++) {
 			CPUserLibraryElement element= (CPUserLibraryElement) list.get(i);
-			oldNames.remove(element.getName());
+			boolean contained= oldNames.remove(element.getName());
+			if (!contained) {
+				newEntries.add(element);
+			}
 		}	
 		
 		int len= nExisting + oldNames.size();
@@ -811,7 +822,10 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		MultiStatus multiStatus= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, PreferencesMessages.getString("UserLibraryPreferencePage.operation.error"), null); //$NON-NLS-1$
 		
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(JavaCore.USER_LIBRARY_CONTAINER_ID);
-		IJavaProject jproject= getDummyProject();
+		IJavaProject jproject= fDummyProject;
+		
+		IJavaProject[] projectInit= new IJavaProject[] { jproject };
+		IClasspathContainer[] containerInit= new IClasspathContainer[] { null };
 		
 		ArrayList paths= new ArrayList();
 		ArrayList urls= new ArrayList();
@@ -819,11 +833,12 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		for (int i= 0; i < nExisting; i++) {
 			CPUserLibraryElement element= (CPUserLibraryElement) list.get(i);
 			IPath path= element.getPath();
-			IClasspathContainer oldContainer= JavaCore.getClasspathContainer(path, jproject);
-			if (oldContainer == null || element.hasChanges(oldContainer)) {
+			if (newEntries.contains(element) || element.hasChanges(JavaCore.getClasspathContainer(path, jproject))) {
 				IClasspathContainer updatedContainer= element.getUpdatedContainer();
 				try {
-					initializer.requestClasspathContainerUpdate(path, null, updatedContainer);
+					initializer.requestClasspathContainerUpdate(path, jproject, updatedContainer);
+					containerInit[0]= updatedContainer;
+					JavaCore.setClasspathContainer(path, projectInit, containerInit, null); // force updating of containers, bug 62250 
 				} catch (CoreException e) {
 					multiStatus.add(e.getStatus());
 				}
@@ -831,6 +846,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			element.collectJavaDocLocations(paths, urls);
 			monitor.worked(1);
 		}
+		
+		containerInit[0]= null;
 		Iterator iter= oldNames.iterator();
 		while (iter.hasNext()) {
 			String name= (String) iter.next();
@@ -838,6 +855,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(name);
 			try {
 				initializer.requestClasspathContainerUpdate(path, jproject, null);
+				JavaCore.setClasspathContainer(path, projectInit, containerInit, null); // force updating of containers, bug 62250 
 			} catch (CoreException e) {
 				multiStatus.add(e.getStatus());
 			}
