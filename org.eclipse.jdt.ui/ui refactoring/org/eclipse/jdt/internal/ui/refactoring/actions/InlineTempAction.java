@@ -13,7 +13,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class InlineTempAction extends TextSelectionBasedRefactoringAction {
 
 	public InlineTempAction() {
-		super("Inline Local Variable", "Inline Local Variable", "This action in unavailable on the current text selection. Select a local variable declaration or reference.");
+		super("Inline Local Variable", "Inline Local Variable", "This action is unavailable on the current text selection. Select a local variable declaration or reference.");
 	}
 	
 	public InlineTempAction(JavaEditor editor) {

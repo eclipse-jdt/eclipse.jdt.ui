@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 public class RenameTempAction extends TextSelectionBasedRefactoringAction{
 
 	public RenameTempAction() {
-		super("Rename Local Variable", "Rename Local Variable", "This action in unavailable on the current text selection. Select a local variable declaration or reference.");
+		super("Rename Local Variable", "Rename Local Variable", "This action is unavailable on the current text selection. Select a local variable declaration or reference.");
 	}
 	
 	public RenameTempAction(JavaEditor editor) {
