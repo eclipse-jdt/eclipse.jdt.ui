@@ -321,10 +321,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_FORMAT));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMDESC));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_NEWLINEPARAM));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES));
 
 		while (e.hasNext()) {
 			AnnotationPreference info= (AnnotationPreference) e.next();

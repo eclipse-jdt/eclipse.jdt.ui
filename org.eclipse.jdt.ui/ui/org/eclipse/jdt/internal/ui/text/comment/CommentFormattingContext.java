@@ -26,20 +26,20 @@ public class CommentFormattingContext extends FormattingContext {
 	 * @see org.eclipse.jface.text.formatter.IFormattingContext#getPreferenceKeys()
 	 */
 	public String[] getPreferenceKeys() {
-		return new String[] { PreferenceConstants.FORMATTER_COMMENT_FORMAT, PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE, PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMDESC, PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS, PreferenceConstants.FORMATTER_COMMENT_NEWLINEPARAM, PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS, PreferenceConstants.FORMATTER_COMMENT_SPLITLINE };
+		return new String[] { PreferenceConstants.FORMATTER_COMMENT_FORMAT, PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE, PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS, PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER, PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS, PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES };
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.formatter.IFormattingContext#isBooleanPreference(java.lang.String)
 	 */
 	public boolean isBooleanPreference(String key) {
-		return !key.equals(PreferenceConstants.FORMATTER_COMMENT_SPLITLINE);
+		return !key.equals(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH);
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.formatter.IFormattingContext#isIntegerPreference(java.lang.String)
 	 */
 	public boolean isIntegerPreference(String key) {
-		return key.equals(PreferenceConstants.FORMATTER_COMMENT_SPLITLINE);
+		return key.equals(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH);
 	}
 }

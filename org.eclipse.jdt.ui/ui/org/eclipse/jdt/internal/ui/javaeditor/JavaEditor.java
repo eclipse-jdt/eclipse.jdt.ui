@@ -180,6 +180,7 @@ import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
+
 /**
  * Java specific text editor.
  */
@@ -1234,7 +1235,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					// Check for leading underscores				
 					position += offset;
 					if (Character.getType(document.getChar(position - 1)) != Character.CONNECTOR_PUNCTUATION) {
+
 						setCaretPosition(position);
+						handleCursorPositionChanged();
 						return;
 					}
 				}
@@ -1242,6 +1245,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				// Use default behavior
 			}
 			super.run();
+			handleCursorPositionChanged();
 		}
 
 		/**
@@ -1271,8 +1275,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		 */
 		protected void setCaretPosition(final int position) {
 			final ISourceViewer viewer= getSourceViewer();
+			final StyledText text= viewer.getTextWidget();
 			
-			viewer.getTextWidget().setCaretOffset(modelOffset2WidgetOffset(viewer, position));
+			text.setCaretOffset(modelOffset2WidgetOffset(viewer, position));
+
+			final Event event= new Event();
+			event.x= text.getSelection().x;
+			event.y= text.getSelection().y;
+			text.notifyListeners(SWT.Selection, event);
 		}
 	}
 
@@ -1437,12 +1447,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 						character= document.getChar(--position);
 
 					setCaretPosition(position + 1);
+					handleCursorPositionChanged();
 					return;
 				}
 			} catch (BadLocationException exception) {
 				// Use default behavior
 			}
 			super.run();
+			handleCursorPositionChanged();
 		}
 
 		/**
@@ -1472,8 +1484,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		 */
 		protected void setCaretPosition(final int position) {
 			final ISourceViewer viewer= getSourceViewer();
+			final StyledText text= viewer.getTextWidget();
 			
-			viewer.getTextWidget().setCaretOffset(modelOffset2WidgetOffset(viewer, position));
+			text.setCaretOffset(modelOffset2WidgetOffset(viewer, position));
+
+			final Event event= new Event();
+			event.x= text.getSelection().x;
+			event.y= text.getSelection().y;
+			text.notifyListeners(SWT.Selection, event);
 		}
 	}
 
@@ -1548,11 +1566,21 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 	/**
 	 * Quick format action to format the enclosing java element.
+	 * <p>
+	 * The quick format action works as follows:
+	 * <ul>
+	 * <li>If there is no selection and the caret is positioned on a Java element,
+	 * only this element is formatted. If the element has some accompanying comment,
+	 * then the comment is formatted as well.</li>
+	 * <li>If the selection spans one or more partitions of the document, then all
+	 * partitions covered by the selection are entirely formatted.</li>
+	 * <p>
+	 * Partitions at the end of the selection are not completed, except for comments.
 	 * 
 	 * @since 3.0
 	 */
 	protected class QuickFormatAction extends Action {
-
+		
 		/**
 		 * Formats the range of the source viewer document.
 		 * 
@@ -1564,9 +1592,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		protected void format(final JavaSourceViewer viewer, int offset, int length, boolean normalize) {
 
 			final IDocument document= viewer.getDocument();
-
-			final Point selection= viewer.getSelectedRange();
-			viewer.saveSelection(selection.x, selection.y);
 
 			if (normalize) {
 
@@ -1587,12 +1612,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 				} catch (BadLocationException exception) {
 					// Should not happen
+					return;
 				}
 			}
-
+			
+			viewer.rememberSelection();
 			viewer.setSelectedRange(offset, length);
 			viewer.doOperation(ISourceViewer.FORMAT);
-
+	
 			viewer.restoreSelection();
 		}
 
@@ -1601,7 +1628,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		 */
 		public void run() {
 
-			final JavaSourceViewer viewer= (JavaSourceViewer)getSourceViewer();
+			final JavaSourceViewer viewer= (JavaSourceViewer) getSourceViewer();
 			if (viewer.isEditable()) {
 
 				final IDocument document= viewer.getDocument();

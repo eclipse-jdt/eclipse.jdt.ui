@@ -20,6 +20,9 @@ import java.util.LinkedList;
  */
 public abstract class CommentLine implements IBorderAttributes {
 
+	/** The javadoc attributes of this line */
+	private int fAttributes= 0;
+
 	/** The region this comment line belongs to */
 	private final CommentRegion fParent;
 
@@ -67,7 +70,7 @@ public abstract class CommentLine implements IBorderAttributes {
 		final String end= getEndingPrefix();
 		final String delimiter= parent.getDelimiter();
 
-		if (parent.getSize() == 1)
+		if (parent.isSingleLine() && parent.getSize() == 1)
 			buffer.append(end);
 		else {
 
@@ -146,7 +149,7 @@ public abstract class CommentLine implements IBorderAttributes {
 		final String start= getStartingPrefix();
 		final String content= getContentPrefix();
 
-		if (parent.getSize() == 1)
+		if (parent.isSingleLine() && parent.getSize() == 1)
 			buffer.append(start);
 		else {
 
@@ -235,16 +238,37 @@ public abstract class CommentLine implements IBorderAttributes {
 	protected abstract String getStartingPrefix();
 
 	/**
+	 * Is the attribute <code>attribute</code> true?
+	 * 
+	 * @param attribute The attribute to get.
+	 * @return <code>true</code> iff this attribute is <code>true</code>, <code>false</code> otherwise.
+	 */
+	protected final boolean hasAttribute(final int attribute) {
+		return (fAttributes & attribute) == attribute;
+	}
+
+	/**
 	 * Scans this line in the comment region.
 	 * 
 	 * @param line Index of this line in the comment region
 	 */
 	protected abstract void scanLine(final int line);
 
+	/**
+	 * Set the attribute <code>attribute</code> to true.
+	 * 
+	 * @param attribute The attribute to set.
+	 */
+	protected final void setAttribute(final int attribute) {
+		fAttributes |= attribute;
+	}
+
 	/** 
 	 * Tokenizes this line into token ranges.
+	 * 
+	 * @param line Index of this line in the comment region
 	 */
-	protected void tokenizeLine() {
+	protected void tokenizeLine(final int line) {
 
 		int offset= 0;
 		int index= offset;

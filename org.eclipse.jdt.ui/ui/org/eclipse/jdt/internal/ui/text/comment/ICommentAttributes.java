@@ -12,15 +12,27 @@
 package org.eclipse.jdt.internal.ui.text.comment;
 
 /**
- * Link tag constants.
+ * General comment range attributes.
  * 
  * @since 3.0
  */
-public interface ILinkTagConstants {
+public interface ICommentAttributes {
+	
+	/** Range has blank line attribute */
+	public static final int COMMENT_BLANKLINE= 1 << 16;
+	
+	/** Range has line break attribute */
+	public static final int COMMENT_BREAK= 1 << 17;
 
-	/** Link tag postfix */
-	public static final char LINK_TAG_POSTFIX= '}';
+	/** Range has close tag attribute */
+	public static final int COMMENT_CLOSE= 1 << 18;
 
-	/** Link tag prefix */
-	public static final String LINK_TAG_PREFIX= "{@"; //$NON-NLS-1$
+	/** Range has html tag attribute */
+	public static final int COMMENT_HTML= 1 << 19;
+
+	/** Range has new line attribute */
+	public static final int COMMENT_NEWLINE= 1 << 20;
+
+	/** Range has open tag attribute */
+	public static final int COMMENT_OPEN= 1 << 21;
 }

@@ -18,6 +18,8 @@ import java.util.Map;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.GC;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.ConfigurableLineTracker;
@@ -41,16 +43,19 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 public class CommentRegion extends TypedPosition implements IHtmlTagConstants, IBorderAttributes {
 
 	/** Position category of comment regions */
-	public static final String COMMENT_POSITION_CATEGORY= "__comment_position"; //$NON-NLS-1$
+	protected static final String COMMENT_POSITION_CATEGORY= "__comment_position"; //$NON-NLS-1$
 
 	/** Default line prefix length */
 	public static final int COMMENT_PREFIX_LENGTH= 3;
 
 	/** Default range delimiter */
-	public static final String COMMENT_RANGE_DELIMITER= " "; //$NON-NLS-1$
+	protected static final String COMMENT_RANGE_DELIMITER= " "; //$NON-NLS-1$
 
 	/** The borders of this range */
 	private int fBorders= 0;
+	
+	/** Should all blank lines be cleared during formatting? */
+	private final boolean fClearBlankLines;
 
 	/** The line delimiter used in this comment region */
 	private final String fDelimiter;
@@ -66,6 +71,9 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 	/** The sequence of comment ranges in this comment region */
 	private final LinkedList fRanges= new LinkedList();
+
+	/** Is this comment region a single line region? */
+	private final boolean fSingleLine;
 
 	/** The comment formatting strategy for this comment region */
 	private final CommentFormattingStrategy fStrategy;
@@ -85,6 +93,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 		fStrategy= strategy;
 		fDelimiter= delimiter;
+		fClearBlankLines= fStrategy.getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES) == IPreferenceStore.TRUE;
 
 		final ISourceViewer viewer= strategy.getViewer();
 		fDocument= viewer.getDocument();
@@ -95,14 +104,18 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 		fTabs= text.getTabs();
 
 		final ILineTracker tracker= new ConfigurableLineTracker(new String[] { delimiter });
+
+		IRegion range= null;
+		CommentLine line= null;
+
+		tracker.set(getText(0, getLength()));
+		final int lines= tracker.getNumberOfLines();
+
+		fSingleLine= lines == 1;
+
 		try {
 
-			IRegion range= null;
-			CommentLine line= null;
-
-			tracker.set(getText(0, getLength()));
-
-			for (int index= 0; index < tracker.getNumberOfLines(); index++) {
+			for (int index= 0; index < lines; index++) {
 
 				range= tracker.getLineInformation(index);
 				line= CommentObjectFactory.createLine(this);
@@ -215,7 +228,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 		int margin= 80;
 		try {
-			margin= Integer.parseInt(preferences.get(PreferenceConstants.FORMATTER_COMMENT_SPLITLINE).toString());
+			margin= Integer.parseInt(preferences.get(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH).toString());
 		} catch (Exception exception) {
 			// Do nothing
 		}
@@ -395,8 +408,17 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			line= (CommentLine)iterator.next();
 
 			line.scanLine(index);
-			line.tokenizeLine();
+			line.tokenizeLine(index);
 		}
+	}
+
+	/**
+	 * Should blank lines be cleared during formatting?
+	 * 
+	 * @return <code>true</code> iff blank lines should be cleared, <code>false</code> otherwise
+	 */
+	protected final boolean isClearBlankLines() {
+		return fClearBlankLines;
 	}
 
 	/**
@@ -405,7 +427,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 * @param current Comment range to test whether it is a word
 	 * @return <code>true</code> iff the comment range is a word, <code>false</code> otherwise.
 	 */
-	protected final boolean isWord(final CommentRange current) {
+	protected final boolean isCommentWord(final CommentRange current) {
 
 		final String token= getText(current.getOffset(), current.getLength());
 
@@ -414,6 +436,15 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 				return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Is this comment region a single line region?
+	 * 
+	 * @return <code>true</code> iff this region is single line, <code>false</code> otherwise.
+	 */
+	protected final boolean isSingleLine() {
+		return fSingleLine;
 	}
 
 	/**

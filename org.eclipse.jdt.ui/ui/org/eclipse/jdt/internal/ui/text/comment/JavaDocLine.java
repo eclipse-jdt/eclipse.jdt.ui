@@ -16,13 +16,10 @@ package org.eclipse.jdt.internal.ui.text.comment;
  * 
  * @since 3.0
  */
-public class JavaDocLine extends MultiCommentLine implements IJavaDocAttributes, IHtmlTagConstants, ILinkTagConstants {
+public class JavaDocLine extends MultiCommentLine implements IJavaDocAttributes {
 
 	/** Line prefix of javadoc start lines */
 	public static final String JAVADOC_START_PREFIX= "/**"; //$NON-NLS-1$
-
-	/** The javadoc attributes of this line */
-	private int fAttributes= 0;
 
 	/** The reference indentation of this line */
 	private String fReference= ""; //$NON-NLS-1$
@@ -42,7 +39,7 @@ public class JavaDocLine extends MultiCommentLine implements IJavaDocAttributes,
 	protected void adapt(final CommentLine previous) {
 
 		if (!hasAttribute(JAVADOC_ROOT) && !hasAttribute(JAVADOC_PARAMETER))
-			fReference= ((JavaDocLine)previous).getReference();
+			fReference= previous.getReference();
 	}
 
 	/*
@@ -50,12 +47,11 @@ public class JavaDocLine extends MultiCommentLine implements IJavaDocAttributes,
 	 */
 	protected void append(final CommentRange range) {
 
-		final JavaDocRange current= (JavaDocRange)range;
 		final JavaDocRegion parent= (JavaDocRegion)getParent();
 
-		if (current.hasAttribute(JAVADOC_PARAMETER))
+		if (range.hasAttribute(JAVADOC_PARAMETER))
 			setAttribute(JAVADOC_PARAMETER);
-		else if (current.hasAttribute(JAVADOC_ROOT))
+		else if (range.hasAttribute(JAVADOC_ROOT))
 			setAttribute(JAVADOC_ROOT);
 
 		final int ranges= getSize();
@@ -83,8 +79,8 @@ public class JavaDocLine extends MultiCommentLine implements IJavaDocAttributes,
 
 		final CommentRegion parent= getParent();
 
-		if (parent.getSize() == 1) {
-			parent.applyText(getStartingPrefix() + " ", 0, range.getOffset() - parent.getOffset()); //$NON-NLS-1$
+		if (parent.isSingleLine() && parent.getSize() == 1) {
+			parent.applyText(getStartingPrefix() + CommentRegion.COMMENT_RANGE_DELIMITER, 0, range.getOffset());
 		} else
 			super.applyStart(range, indentation, length);
 	}
@@ -101,78 +97,5 @@ public class JavaDocLine extends MultiCommentLine implements IJavaDocAttributes,
 	 */
 	protected String getStartingPrefix() {
 		return JAVADOC_START_PREFIX;
-	}
-
-	/**
-	 * Is the attribute <code>attribute</code> true?
-	 * 
-	 * @param attribute The attribute to get. Must be a javadoc attribute of <code>JavaDocRange</code>.
-	 * @return <code>true</code> iff this attribute is <code>true</code>, <code>false</code> otherwise.
-	 */
-	protected final boolean hasAttribute(final int attribute) {
-		return (fAttributes & attribute) == attribute;
-	}
-
-	/**
-	 * Set the attribute <code>attribute</code> to true.
-	 * 
-	 * @param attribute The attribute to set. Must be a javadoc attribute of <code>JavaDocRange</code>.
-	 */
-	protected final void setAttribute(final int attribute) {
-		fAttributes |= attribute;
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#tokenizeLine()
-	 */
-	protected void tokenizeLine() {
-
-		int offset= 0;
-		int index= offset;
-
-		final CommentRegion parent= getParent();
-		final CommentRange range= getFirst();
-		final int begin= range.getOffset();
-
-		final String content= parent.getText(begin, range.getLength());
-		final int length= content.length();
-
-		while (offset < length) {
-
-			while (offset < length && Character.isWhitespace(content.charAt(offset)))
-				offset++;
-
-			index= offset;
-			if (index < length) {
-
-				if (content.charAt(index) == HTML_TAG_PREFIX) {
-
-					while (index < length && content.charAt(index) != HTML_TAG_POSTFIX)
-						index++;
-
-					if (index < length && content.charAt(index) == HTML_TAG_POSTFIX)
-						index++;
-
-				} else if (content.startsWith(LINK_TAG_START, index)) {
-
-					while (index < length && content.charAt(index) != LINK_TAG_POSTFIX)
-						index++;
-
-					if (index < length && content.charAt(index) == LINK_TAG_POSTFIX)
-						index++;
-
-				} else {
-
-					while (index < length && !Character.isWhitespace(content.charAt(index)) && content.charAt(index) != HTML_TAG_PREFIX && content.charAt(index) != LINK_TAG_PREFIX)
-						index++;
-				}
-			}
-
-			if (index - offset > 0) {
-				parent.append(CommentObjectFactory.createRange(parent, begin + offset, index - offset));
-
-				offset= index;
-			}
-		}
 	}
 }

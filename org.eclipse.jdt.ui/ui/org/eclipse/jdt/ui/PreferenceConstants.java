@@ -1585,7 +1585,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 */	
-	public final static String FORMATTER_COMMENT_FORMATSOURCE= "org.eclipse.jdt.internal.ui.text.comment.FormatSource"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_FORMATSOURCE= "comment_format_source_code"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that controls whether description of Javadoc
@@ -1596,7 +1596,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 */	
-	public final static String FORMATTER_COMMENT_INDENTPARAMDESC= "org.eclipse.jdt.internal.ui.text.comment.IndentParamDesc"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= "comment_indent_parameter_description"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the header comment of
@@ -1607,7 +1607,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 */	
-	public final static String FORMATTER_COMMENT_FORMATHEADER= "org.eclipse.jdt.internal.ui.text.comment.FormatHeader"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_FORMATHEADER= "comment_format_header"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether Javadoc root tags
@@ -1618,7 +1618,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 */	
-	public final static String FORMATTER_COMMENT_INDENTROOTTAGS= "org.eclipse.jdt.internal.ui.text.comment.IndentRootTags"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_INDENTROOTTAGS= "comment_indent_root_tags"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that controls whether Javadoc comments
@@ -1629,7 +1629,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 */	
-	public final static String FORMATTER_COMMENT_FORMAT= "org.eclipse.jdt.internal.ui.text.comment.FormatComments"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_FORMAT= "comment_format_comments"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether a new line is inserted
@@ -1640,7 +1640,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 */	
-	public final static String FORMATTER_COMMENT_NEWLINEPARAM= "org.eclipse.jdt.internal.ui.text.comment.NewLineParam"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_NEWLINEFORPARAMETER= "comment_new_line_for_parameter"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether an empty line is inserted before
@@ -1651,17 +1651,27 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 */	
-	public final static String FORMATTER_COMMENT_SEPARATEROOTTAGS= "org.eclipse.jdt.internal.ui.text.comment.SeparateRootTags"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_SEPARATEROOTTAGS= "comment_separate_root_tags"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls the line length of comments.
+	 * A named preference that controls whether blank lines are cleared during formatting
 	 * <p>
-	 * Value is of type <code>Integer</code>.
+	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 *
 	 * @since 3.0
 	 */	
-	public final static String FORMATTER_COMMENT_SPLITLINE= "org.eclipse.jdt.internal.ui.text.comment.SplitLine"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_CLEARBLANKLINES= "comment_clear_blank_lines"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls the line length of comments.
+	 * <p>
+	 * Value is of type <code>Integer</code>. The value must be at least 4 for reasonable formatting.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public final static String FORMATTER_COMMENT_LINELENGTH= "comment_line_length"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if the Java code assist gets auto activated.
@@ -2133,11 +2143,12 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMAT, true);
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, false);
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE, true);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMDESC, true);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, true);
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS, true);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_NEWLINEPARAM, true);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER, true);
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS, true);
-		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_SPLITLINE, 80);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, false);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 80);
 
 		// work in progress
 		WorkInProgressPreferencePage.initDefaults(store);	

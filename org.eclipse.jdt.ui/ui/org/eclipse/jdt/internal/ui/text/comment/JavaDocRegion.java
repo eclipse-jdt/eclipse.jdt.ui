@@ -37,7 +37,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * 
  * @since 3.0
  */
-public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, IJavaDocTagConstants {
+public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttributes, IJavaDocTagConstants {
 
 	/** Position category of javadoc code ranges */
 	protected static final String CODE_POSITION_CATEGORY= "__javadoc_code_position"; //$NON-NLS-1$
@@ -72,8 +72,8 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 		fFormatSource= preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE) == IPreferenceStore.TRUE;
 		fIndentRootTags= preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS) == IPreferenceStore.TRUE;
 		fSeparateRootTags= preferences.get(PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS) == IPreferenceStore.TRUE;
-		fParameterNewLine= preferences.get(PreferenceConstants.FORMATTER_COMMENT_NEWLINEPARAM) == IPreferenceStore.TRUE;
-		fIndentRootDescriptions= preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMDESC) == IPreferenceStore.TRUE;
+		fParameterNewLine= preferences.get(PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER) == IPreferenceStore.TRUE;
+		fIndentRootDescriptions= preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION) == IPreferenceStore.TRUE;
 	}
 
 	/*
@@ -120,28 +120,25 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 	 */
 	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int offset, int length) {
 
-		final JavaDocRange current= (JavaDocRange)next;
-		final JavaDocRange last= (JavaDocRange)previous;
+		final boolean blank= next.hasAttribute(COMMENT_BLANKLINE);
 
-		final JavaDocLine reference= (JavaDocLine)line;
-
-		if (current.getLength() <= 2 && !isWord(current))
+		if (next.getLength() <= 2 && !blank && !isCommentWord(next))
 			return true;
 
-		if (fParameterNewLine && reference.hasAttribute(JAVADOC_PARAMETER) && reference.getSize() > 1)
+		if (fParameterNewLine && line.hasAttribute(JAVADOC_PARAMETER) && line.getSize() > 1)
 			return false;
 
-		if (last != null) {
+		if (previous != null) {
 
-			if (offset != 0 && (current.hasAttribute(JAVADOC_PARAMETER) || current.hasAttribute(JAVADOC_ROOT) || current.hasAttribute(JAVADOC_SEPARATOR) || current.hasAttribute(JAVADOC_NEWLINE) || last.hasAttribute(JAVADOC_BREAK) || last.hasAttribute(JAVADOC_SEPARATOR)))
+			if (offset != 0 && (blank || previous.hasAttribute(COMMENT_BLANKLINE) || next.hasAttribute(JAVADOC_PARAMETER) || next.hasAttribute(JAVADOC_ROOT) || next.hasAttribute(JAVADOC_SEPARATOR) || next.hasAttribute(COMMENT_NEWLINE) || previous.hasAttribute(COMMENT_BREAK) || previous.hasAttribute(JAVADOC_SEPARATOR)))
 				return false;
 
-			if (current.hasAttribute(JAVADOC_IMMUTABLE) && last.hasAttribute(JAVADOC_IMMUTABLE))
+			if (next.hasAttribute(JAVADOC_IMMUTABLE) && previous.hasAttribute(JAVADOC_IMMUTABLE))
 				return true;
 		}
 
-		if (fIndentRootTags && !reference.hasAttribute(JAVADOC_ROOT) && !reference.hasAttribute(JAVADOC_PARAMETER))
-			length -= stringToLength(reference.getReference());
+		if (fIndentRootTags && !line.hasAttribute(JAVADOC_ROOT) && !line.hasAttribute(JAVADOC_PARAMETER))
+			length -= stringToLength(line.getReference());
 
 		return super.canAppend(line, previous, next, offset, length);
 	}
@@ -151,13 +148,10 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 	 */
 	protected boolean canApply(final CommentRange previous, final CommentRange next) {
 
-		final JavaDocRange last= (JavaDocRange)previous;
-		final JavaDocRange current= (JavaDocRange)next;
+		if (previous != null) {
 
-		if (last != null) {
-
-			final boolean isCurrentCode= current.hasAttribute(JAVADOC_CODE);
-			final boolean isLastCode= last.hasAttribute(JAVADOC_CODE);
+			final boolean isCurrentCode= next.hasAttribute(JAVADOC_CODE);
+			final boolean isLastCode= previous.hasAttribute(JAVADOC_CODE);
 
 			try {
 
@@ -165,9 +159,9 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 				final IDocument document= getDocument();
 
 				if (!isLastCode && isCurrentCode)
-					document.addPosition(CODE_POSITION_CATEGORY, new Position(offset + current.getOffset() + current.getLength()));
+					document.addPosition(CODE_POSITION_CATEGORY, new Position(offset + next.getOffset() + next.getLength()));
 				else if (isLastCode && !isCurrentCode)
-					document.addPosition(CODE_POSITION_CATEGORY, new Position(offset + last.getOffset()));
+					document.addPosition(CODE_POSITION_CATEGORY, new Position(offset + previous.getOffset()));
 
 			} catch (BadLocationException exception) {
 				// Should not happen
@@ -175,7 +169,7 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 				// Should not happen
 			}
 
-			if (last.hasAttribute(JAVADOC_IMMUTABLE) && current.hasAttribute(JAVADOC_IMMUTABLE) && !isLastCode)
+			if (previous.hasAttribute(JAVADOC_IMMUTABLE) && next.hasAttribute(JAVADOC_IMMUTABLE) && !isLastCode)
 				return false;
 
 		}
@@ -187,36 +181,33 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 	 */
 	protected void finalizeRegion(final String indentation) {
 
-		if (fFormatSource) {
+		final String test= indentation + MultiCommentLine.MULTI_COMMENT_CONTENT_PREFIX;
+		final StringBuffer buffer= new StringBuffer();
 
-			final String test= indentation + JavaDocLine.MULTI_COMMENT_CONTENT_PREFIX;
-			final StringBuffer buffer= new StringBuffer();
+		buffer.append(test);
+		buffer.append(' ');
 
-			buffer.append(test);
-			buffer.append(' ');
+		final String delimiter= buffer.toString();
+		try {
 
-			final String delimiter= buffer.toString();
-			try {
+			final ILineTracker tracker= new ConfigurableLineTracker(new String[] { getDelimiter()});
+			tracker.set(getText(0, getLength()));
 
-				final ILineTracker tracker= new ConfigurableLineTracker(new String[] { getDelimiter()});
-				tracker.set(getText(0, getLength()));
+			int index= 0;
+			String content= null;
+			IRegion range= null;
 
-				int index= 0;
-				String content= null;
-				IRegion range= null;
+			for (int line= tracker.getNumberOfLines() - 3; line >= 1; line--) {
 
-				for (int line= tracker.getNumberOfLines() - 3; line >= 1; line--) {
+				range= tracker.getLineInformation(line);
+				index= range.getOffset();
+				content= getText(index, range.getLength());
 
-					range= tracker.getLineInformation(line);
-					index= range.getOffset();
-					content= getText(index, range.getLength());
-
-					if (!content.startsWith(test))
-						applyText(delimiter, index, 0);
-				}
-			} catch (BadLocationException exception) {
-				// Should not happen
+				if (!content.startsWith(test))
+					applyText(delimiter, index, 0);
 			}
+		} catch (BadLocationException exception) {
+			// Should not happen
 		}
 	}
 
@@ -255,25 +246,21 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 	 */
 	protected String getDelimiter(final CommentLine predecessor, final CommentLine successor, final CommentRange previous, final CommentRange next, final String indentation) {
 
-		final JavaDocRange last= (JavaDocRange)previous;
-		final JavaDocRange current= (JavaDocRange)next;
-
-		final JavaDocLine reference= (JavaDocLine)predecessor;
 		final String delimiter= super.getDelimiter(predecessor, successor, previous, next, indentation);
 
-		if (last != null) {
+		if (previous != null) {
 
-			if (last.hasAttribute(JAVADOC_IMMUTABLE | JAVADOC_SEPARATOR) && !current.hasAttribute(JAVADOC_CODE))
+			if (previous.hasAttribute(JAVADOC_IMMUTABLE | JAVADOC_SEPARATOR) && !next.hasAttribute(JAVADOC_CODE))
 				return delimiter + delimiter;
 
-			else if (last.hasAttribute(JAVADOC_CODE) && !current.hasAttribute(JAVADOC_CODE))
+			else if (previous.hasAttribute(JAVADOC_CODE) && !next.hasAttribute(JAVADOC_CODE))
 				return getDelimiter();
 
-			else if (current.hasAttribute(JAVADOC_IMMUTABLE | JAVADOC_SEPARATOR) || last.hasAttribute(JAVADOC_PARAGRAPH))
+			else if (next.hasAttribute(JAVADOC_IMMUTABLE | JAVADOC_SEPARATOR) || previous.hasAttribute(JAVADOC_PARAGRAPH))
 				return delimiter + delimiter;
 
-			else if (fIndentRootTags && !reference.hasAttribute(JAVADOC_ROOT) && !reference.hasAttribute(JAVADOC_PARAMETER))
-				return delimiter + stringToIndent(reference.getReference(), false);
+			else if (fIndentRootTags && !predecessor.hasAttribute(JAVADOC_ROOT) && !predecessor.hasAttribute(JAVADOC_PARAMETER))
+				return delimiter + stringToIndent(predecessor.getReference(), false);
 		}
 		return delimiter;
 	}
@@ -283,24 +270,21 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 	 */
 	protected String getDelimiter(final CommentRange previous, final CommentRange next) {
 
-		final JavaDocRange current= (JavaDocRange)next;
-		final JavaDocRange last= (JavaDocRange)previous;
+		if (previous != null) {
 
-		if (last != null) {
-
-			if (last.hasAttribute(JAVADOC_HTML) && current.hasAttribute(JAVADOC_HTML))
+			if (previous.hasAttribute(COMMENT_HTML) && next.hasAttribute(COMMENT_HTML))
 				return ""; //$NON-NLS-1$
 
-			else if (current.hasAttribute(JAVADOC_OPEN) || last.hasAttribute(JAVADOC_CLOSE))
+			else if (next.hasAttribute(COMMENT_OPEN) || previous.hasAttribute(COMMENT_HTML | COMMENT_CLOSE))
 				return ""; //$NON-NLS-1$
 
-			else if (!current.hasAttribute(JAVADOC_CODE) && last.hasAttribute(JAVADOC_CODE))
+			else if (!next.hasAttribute(JAVADOC_CODE) && previous.hasAttribute(JAVADOC_CODE))
 				return ""; //$NON-NLS-1$
 
-			else if (current.hasAttribute(JAVADOC_CLOSE) && last.getLength() <= 2 && !isWord(last))
+			else if (next.hasAttribute(COMMENT_CLOSE) && previous.getLength() <= 2 && !isCommentWord(previous))
 				return ""; //$NON-NLS-1$
 
-			else if (last.hasAttribute(JAVADOC_OPEN) && current.getLength() <= 2 && !isWord(current))
+			else if (previous.hasAttribute(COMMENT_OPEN) && next.getLength() <= 2 && !isCommentWord(next))
 				return ""; //$NON-NLS-1$
 		}
 		return super.getDelimiter(previous, next);
@@ -361,6 +345,7 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 	protected void markRanges(final String[] tags, final int key, final boolean html) {
 
 		int level= 0;
+		int length= 0;
 		String token= null;
 		JavaDocRange current= null;
 
@@ -370,9 +355,13 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 			for (final Iterator iterator= getRanges().iterator(); iterator.hasNext();) {
 
 				current= (JavaDocRange)iterator.next();
-				token= getText(current.getOffset(), current.getLength());
+				length= current.getLength();
 
-				level= current.markRange(token, tags[index], level, key, html);
+				if (length > 0) {
+
+					token= getText(current.getOffset(), current.getLength());
+					level= current.markRange(token, tags[index], level, key, html);
+				}
 			}
 		}
 	}
@@ -382,26 +371,36 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 	 */
 	protected void markRegion() {
 
+		int length= 0;
 		String token= null;
 		JavaDocRange range= null;
 
 		for (final Iterator iterator= getRanges().iterator(); iterator.hasNext();) {
 
 			range= (JavaDocRange)iterator.next();
-			token= getText(range.getOffset(), range.getLength()).toLowerCase();
+			length= range.getLength();
 
-			range.markJavadocTag(JAVADOC_PARAM_TAGS, token, JAVADOC_PARAMETER);
-			range.markJavadocTag(JAVADOC_ROOT_TAGS, token, JAVADOC_ROOT);
+			if (length > 0) {
 
-			if (fSeparateRootTags && (range.hasAttribute(JAVADOC_ROOT) || range.hasAttribute(JAVADOC_PARAMETER))) {
-				range.setAttribute(JAVADOC_PARAGRAPH);
-				fSeparateRootTags= false;
+				token= getText(range.getOffset(), length).toLowerCase();
+
+				range.markJavadocTag(JAVADOC_PARAM_TAGS, token, JAVADOC_PARAMETER);
+				range.markJavadocTag(JAVADOC_ROOT_TAGS, token, JAVADOC_ROOT);
+
+				if (fSeparateRootTags && (range.hasAttribute(JAVADOC_ROOT) || range.hasAttribute(JAVADOC_PARAMETER))) {
+
+					range.setAttribute(JAVADOC_PARAGRAPH);
+					fSeparateRootTags= false;
+				}
+
+				if (range.hasAttribute(COMMENT_HTML)) {
+
+					range.markHtmlTag(JAVADOC_SEPARATOR_TAGS, token, JAVADOC_SEPARATOR, true, true);
+					range.markHtmlTag(JAVADOC_BREAK_TAGS, token, COMMENT_BREAK, false, true);
+					range.markHtmlTag(JAVADOC_NEWLINE_TAGS, token, COMMENT_NEWLINE, true, false);
+					range.markHtmlTag(JAVADOC_IMMUTABLE_TAGS, token, JAVADOC_IMMUTABLE, true, true);
+				}
 			}
-
-			range.markHtmlTag(JAVADOC_SEPARATOR_TAGS, token, JAVADOC_SEPARATOR, true, true);
-			range.markHtmlTag(JAVADOC_BREAK_TAGS, token, JAVADOC_BREAK, false, true);
-			range.markHtmlTag(JAVADOC_NEWLINE_TAGS, token, JAVADOC_NEWLINE, true, false);
-			range.markHtmlTag(JAVADOC_IMMUTABLE_TAGS, token, JAVADOC_IMMUTABLE, true, true);
 		}
 
 		markRanges(JAVADOC_IMMUTABLE_TAGS, JAVADOC_IMMUTABLE, true);

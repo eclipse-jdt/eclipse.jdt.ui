@@ -74,6 +74,8 @@ public class CommentObjectFactory {
 
 		if (type.equals(IJavaPartitions.JAVA_DOC))
 			return new JavaDocRegion(strategy, range, delimiter);
+		else if (type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
+			return new MultiCommentRegion(strategy, range, delimiter);
 
 		return new CommentRegion(strategy, range, delimiter);
 	}

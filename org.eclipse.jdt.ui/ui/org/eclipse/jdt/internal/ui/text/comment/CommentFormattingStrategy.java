@@ -32,6 +32,8 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+
 /**
  * Formatting strategy for general source code comments.
  * <p>
@@ -102,23 +104,24 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		try {
 
 			final ITypedRegion partition= TextUtilities.getPartition(document, fFormatter.getDocumentPartitioning(), position.getOffset());
+			final String type= partition.getType();
+
 			position.offset= partition.getOffset();
 			position.length= partition.getLength();
 
+			final Map preferences= getPreferences();
+			final boolean format= preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMAT) == IPreferenceStore.TRUE;
+			final boolean header= preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER) == IPreferenceStore.TRUE;
+
+			if (format && (header || position.getOffset() != 0 || !type.equals(IJavaPartitions.JAVA_DOC))) {
+
+				final CommentRegion region= CommentObjectFactory.createRegion(this, position, getLineDelimiter(document));
+				final String indentation= getLineIndentation(document, region, position.getOffset());
+
+				region.format(indentation);
+			}
 		} catch (BadLocationException exception) {
 			// Should not happen
-		}
-
-		final Map preferences= getPreferences();
-		final boolean format= preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMAT) == IPreferenceStore.TRUE;
-		final boolean header= preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER) == IPreferenceStore.TRUE;
-
-		if (format && (header || position.getOffset() != 0)) {
-
-			final CommentRegion region= CommentObjectFactory.createRegion(this, position, getLineDelimiter(document));
-			final String indentation= getLineIndentation(document, region, position.getOffset());
-
-			region.format(indentation);
 		}
 	}
 

@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
@@ -147,5 +148,19 @@ public class JavaSourceViewer extends SourceViewer {
 			fHierarchyPresenter= null;
 		}		
 		super.handleDispose();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewer#rememberSelection()
+	 */
+	public Point rememberSelection() {
+		return super.rememberSelection();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewer#restoreSelection()
+	 */
+	public void restoreSelection() {
+		super.restoreSelection();
 	}
 }

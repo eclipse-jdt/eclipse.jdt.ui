@@ -19,7 +19,7 @@ import org.eclipse.jface.text.Region;
  * 
  * @since 3.0
  */
-public class MultiCommentLine extends CommentLine {
+public class MultiCommentLine extends CommentLine implements ICommentAttributes, IHtmlTagConstants, ILinkTagConstants {
 
 	/** Line prefix of multi-line comment content lines */
 	public static final String MULTI_COMMENT_CONTENT_PREFIX= " * "; //$NON-NLS-1$
@@ -92,19 +92,24 @@ public class MultiCommentLine extends CommentLine {
 				offset += start.length();
 				range.trimBegin(offset);
 
-				postfix= text.lastIndexOf(content);
-				if (postfix >= offset) {
-
+				postfix= text.lastIndexOf(end);
+				if (postfix > offset)
 					range.setLength(postfix - offset);
-					parent.setBorder(BORDER_UPPER);
+				else {
+					postfix= text.lastIndexOf(content);
+					if (postfix >= offset) {
 
-					if (postfix > offset) {
+						range.setLength(postfix - offset);
+						parent.setBorder(BORDER_UPPER);
 
-						text= parent.getText(range.getOffset(), range.getLength());
-						final IRegion region= trimLine(text, content);
+						if (postfix > offset) {
 
-						range.move(region.getOffset());
-						range.setLength(region.getLength());
+							text= parent.getText(range.getOffset(), range.getLength());
+							final IRegion region= trimLine(text, content);
+
+							range.move(region.getOffset());
+							range.setLength(region.getLength());
+						}
 					}
 				}
 			}
@@ -113,24 +118,26 @@ public class MultiCommentLine extends CommentLine {
 			offset= text.indexOf(content);
 			if (offset >= 0) {
 
-				if (text.startsWith(end, offset)) {
-
-					range.move(offset);
+				range.trimBegin(offset + 1);
+				if (text.startsWith(end, offset))
 					range.setLength(0);
-
-				} else {
+				else {
 
 					postfix= text.lastIndexOf(end);
 					if (postfix > offset) {
 
+						range.trimEnd(-end.length());
 						text= parent.getText(range.getOffset(), range.getLength());
+
 						final IRegion region= trimLine(text, content);
+						if (region.getOffset() != 0 || region.getLength() != text.length()) {
 
-						range.move(region.getOffset());
-						range.setLength(region.getLength());
+							range.move(region.getOffset());
+							range.setLength(region.getLength());
 
-						parent.setBorder(BORDER_UPPER);
-						parent.setBorder(BORDER_LOWER);
+							parent.setBorder(BORDER_UPPER);
+							parent.setBorder(BORDER_LOWER);
+						}
 					}
 				}
 			}
@@ -145,6 +152,82 @@ public class MultiCommentLine extends CommentLine {
 		}
 	}
 
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#tokenizeLine(int)
+	 */
+	protected void tokenizeLine(int line) {
+
+		int offset= 0;
+		int index= offset;
+
+		final CommentRegion parent= getParent();
+		final CommentRange range= getFirst();
+		final int begin= range.getOffset();
+
+		final String content= parent.getText(begin, range.getLength());
+		final int length= content.length();
+		
+		while (offset < length && Character.isWhitespace(content.charAt(offset)))
+			offset++;
+		
+		CommentRange result= null;
+		if (offset >= length && !parent.isClearBlankLines() && (line > 0 && line < parent.getSize() - 1)) {
+
+			result= CommentObjectFactory.createRange(parent, begin, 0);
+			result.setAttribute(COMMENT_BLANKLINE | COMMENT_NEWLINE);
+
+			parent.append(result);
+		}
+
+		int attribute= 0;
+		while (offset < length) {
+
+			while (offset < length && Character.isWhitespace(content.charAt(offset)))
+				offset++;
+
+			attribute= 0;
+			index= offset;
+
+			if (index < length) {
+
+				if (content.charAt(index) == HTML_TAG_PREFIX) {
+
+					while (index < length && content.charAt(index) != HTML_TAG_POSTFIX)
+						index++;
+
+					if (index < length && content.charAt(index) == HTML_TAG_POSTFIX)
+						index++;
+
+					attribute= COMMENT_HTML;
+
+				} else if (content.startsWith(LINK_TAG_PREFIX, index)) {
+
+					while (index < length && content.charAt(index) != LINK_TAG_POSTFIX)
+						index++;
+
+					if (index < length && content.charAt(index) == LINK_TAG_POSTFIX)
+						index++;
+
+					attribute= COMMENT_OPEN | COMMENT_CLOSE;
+
+				} else {
+
+					while (index < length && !Character.isWhitespace(content.charAt(index)) && content.charAt(index) != HTML_TAG_PREFIX && !content.startsWith(LINK_TAG_PREFIX, index))
+						index++;
+				}
+			}
+
+			if (index - offset > 0) {
+
+				result= CommentObjectFactory.createRange(parent, begin + offset, index - offset);
+				result.setAttribute(attribute);
+
+				parent.append(result);
+				offset= index;
+			}
+		}
+	}
+
 	/**
 	 * Removes all leading and trailing occurrences from <code>line</code>.
 	 * 
@@ -154,20 +237,17 @@ public class MultiCommentLine extends CommentLine {
 	 */
 	protected IRegion trimLine(final String line, final String trimmable) {
 
+		final int trim= trimmable.length();
+
 		int offset= 0;
+		int length= line.length() - trim;
 
-		final int length= trimmable.length();
-		final int total= line.length();
+		while (line.startsWith(trimmable, offset))
+			offset += trim;
 
-		while (offset < total && line.startsWith(trimmable, offset))
-			offset += length;
+		while (line.startsWith(trimmable, length))
+			length -= trim;
 
-		if (offset < total - length) {
-
-			final int index= line.indexOf(trimmable, offset + 1);
-			if (index >= offset + 1)
-				return new Region(offset, index - offset);
-		}
-		return new Region(0, 0);
+		return new Region(offset, length + trim);
 	}
 }

@@ -19,7 +19,9 @@ class File {
 
 	/**
 	 * Returns the number of bytes that can be read from this file input stream without blocking.<p>
-	 * Here is an example on how to use <code>availableSize</code>:
+	 * Here is an example on how to use <code>availableSize</code>.
+	 *
+	 * The Loop to compute the number of bytes works as follows:
 	 * <pre>
 	 * while ((size = availableSize(stream, size)) > 0) { System.out.println("available"); }
 	 * </pre>

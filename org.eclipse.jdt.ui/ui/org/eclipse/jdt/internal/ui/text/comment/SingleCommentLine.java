@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.text.comment;
 
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
+
 /**
  * Single-line comment line in a comment region.
  * 
@@ -20,6 +22,9 @@ public class SingleCommentLine extends CommentLine {
 
 	/** Line prefix for single line comments */
 	public static final String SINGLE_COMMENT_PREFIX= "// "; //$NON-NLS-1$
+	
+	/** Is the comment a NLS tag sequence? */
+	private boolean fNlsSequence= false;
 
 	/**
 	 * Creates a new single-line comment line.
@@ -89,7 +94,20 @@ public class SingleCommentLine extends CommentLine {
 		final String prefix= getContentPrefix().trim();
 
 		final int offset= content.indexOf(prefix);
-		if (offset >= 0)
+		if (offset >= 0) {
+			
+			if (content.startsWith(NLSElement.TAG_PREFIX))
+				fNlsSequence= true;
+			
 			range.trimBegin(offset + prefix.length());
+		}
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#tokenizeLine(int)
+	 */
+	protected void tokenizeLine(final int line) {
+		if (!fNlsSequence)
+			super.tokenizeLine(line);
 	}
 }

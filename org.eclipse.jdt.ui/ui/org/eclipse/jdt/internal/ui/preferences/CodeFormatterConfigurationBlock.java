@@ -76,13 +76,14 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
 	private static final String PREF_SPACE_CASTEXPRESSION= JavaCore.FORMATTER_SPACE_CASTEXPRESSION;
 	private static final String PREF_COMMENT_FORMATSOURCE= PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE;
-	private static final String PREF_COMMENT_INDENTPARAMDESC= PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMDESC;
+	private static final String PREF_COMMENT_INDENTPARAMDESC= PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION;
 	private static final String PREF_COMMENT_FORMATHEADER= PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER;
 	private static final String PREF_COMMENT_INDENTROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS;
 	private static final String PREF_COMMENT_FORMAT= PreferenceConstants.FORMATTER_COMMENT_FORMAT;
-	private static final String PREF_COMMENT_NEWLINEPARAM= PreferenceConstants.FORMATTER_COMMENT_NEWLINEPARAM;
+	private static final String PREF_COMMENT_NEWLINEPARAM= PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER;
 	private static final String PREF_COMMENT_SEPARATEROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS;
-	private static final String PREF_COMMENT_SPLIT= PreferenceConstants.FORMATTER_COMMENT_SPLITLINE;
+	private static final String PREF_COMMENT_CLEARBLANKLINES= PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES;
+	private static final String PREF_COMMENT_LINELENGTH= PreferenceConstants.FORMATTER_COMMENT_LINELENGTH;
 
 	// values
 	private static final String INSERT=  JavaCore.INSERT;
@@ -181,7 +182,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		addTextField(lineSplittingComposite, label, PREF_CODE_SPLIT, 0, textWidth);
 
 		label= PreferencesMessages.getString("CodeFormatterPreferencePage.split_comment.label"); //$NON-NLS-1$
-		addTextField(lineSplittingComposite, label, PREF_COMMENT_SPLIT, 0, textWidth);
+		addTextField(lineSplittingComposite, label, PREF_COMMENT_LINELENGTH, 0, textWidth);
 
 		layout= new GridLayout();
 		layout.numColumns= nColumns;	
@@ -219,6 +220,10 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_formatsource.label"); //$NON-NLS-1$
 		slave= addCheckBox(commentComposite, label, PREF_COMMENT_FORMATSOURCE, trueFalse, 20);
+		createSelectionDependency(master, slave);
+
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.newline_clear_lines"); //$NON-NLS-1$
+		slave= addCheckBox(commentComposite, label, PREF_COMMENT_CLEARBLANKLINES, trueFalse, 20);
 		createSelectionDependency(master, slave);
 
 		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_separateroottags.label"); //$NON-NLS-1$
@@ -313,8 +318,8 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 			fCodeLengthStatus= validatePositiveNumber(lineNumber, 4);
 		}
 
-		if (changedKey == null || PREF_COMMENT_SPLIT.equals(changedKey)) {
-			String lineNumber= (String)fWorkingValues.get(PREF_COMMENT_SPLIT);
+		if (changedKey == null || PREF_COMMENT_LINELENGTH.equals(changedKey)) {
+			String lineNumber= (String)fWorkingValues.get(PREF_COMMENT_LINELENGTH);
 			fCommentLengthStatus= validatePositiveNumber(lineNumber, 4);
 		}
 

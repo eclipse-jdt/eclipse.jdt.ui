@@ -33,6 +33,7 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.ContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.text.formatter.IFormattingStrategy;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
@@ -463,7 +464,9 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 		final ContentFormatter formatter= new ContentFormatter();
 		formatter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-		formatter.setFormattingStrategy(new JavaFormattingStrategy(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
+		IFormattingStrategy strategy= new JavaFormattingStrategy(sourceViewer);
+		formatter.setFormattingStrategy(strategy);
+		formatter.setFormattingStrategy(strategy, IDocument.DEFAULT_CONTENT_TYPE);
 		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_DOC);
 		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
