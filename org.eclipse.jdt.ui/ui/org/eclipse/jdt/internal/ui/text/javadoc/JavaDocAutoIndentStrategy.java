@@ -247,7 +247,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			IRegion line= document.getLineInformation(lineIndex);
 			ITypedRegion partition= document.getPartition(commandOffset);
 			if (document.getLineOffset(lineIndex) >= partition.getOffset() + partition.getLength())
-				return true;
+				return false;
 
 			String string= document.get(line.getOffset(), line.getLength());				
 			if (!string.trim().startsWith("*")) //$NON-NLS-1$
