@@ -190,13 +190,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 						String string = (String)value;
 						string = windEscapeChars(string);
 						substitution.setKey(string);
-						validateKeys();
 					}
 					if (PROPERTIES[VAL_PROP].equals(property)) {
 						String string = (String)value;
 						string = windEscapeChars(string);
 						substitution.setValue(string);
-						validateKeys();
 					}
 					if (PROPERTIES[STATE_PROP].equals(property)) {
 						substitution.setState(((Integer) value).intValue());
@@ -205,7 +203,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 						}
 					}
 				}
-				fTableViewer.refresh();
+				validateKeys(true);
 			}
 		}
 	}
@@ -541,7 +539,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 		composite.setWeights(new int[]{65, 45});
 
-		validateKeys();
+		validateKeys(false);
 
 		// promote control
 		setControl(supercomposite);
@@ -618,8 +616,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()), fNLSRefactoring.getAccessorClassName());
 			fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
 			fIsEclipseNLS.setEnabled(willCreateAccessorClass());
-			fTableViewer.refresh(true);
-			validateKeys();
+			validateKeys(true);
 		}
 	}
 	
@@ -709,8 +706,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()), fNLSRefactoring.getAccessorClassName());
 			fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
 			fIsEclipseNLS.setEnabled(willCreateAccessorClass());
-			fTableViewer.refresh(true);
-			validateKeys();
+			validateKeys(true);
 			updateAccessorChoices();
 		}
 	}
@@ -873,8 +869,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fPrefixField.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				fNLSRefactoring.setPrefix(fPrefixField.getText());
-				fTableViewer.refresh(true);
-				validateKeys();
+				validateKeys(true);
 			}
 		});
 	}
@@ -889,17 +884,19 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				super.widgetDefaultSelected(e);
 				fNLSRefactoring.setIsEclipseNLS(fIsEclipseNLS.getSelection());
-				validateKeys();
+				validateKeys(true);
 			}
 		});
 	}
 
-	private void validateKeys() {
+	private void validateKeys(boolean refreshTable) {
 		RefactoringStatus status= new RefactoringStatus();
 		checkInvalidKeys(status);
 		checkDuplicateKeys(status);
 		checkMissingKeys(status);
 		setPageComplete(status);
+		if (refreshTable)
+			fTableViewer.refresh(true);
 	}
 
 	private void checkInvalidKeys(RefactoringStatus status) {
@@ -919,7 +916,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return false;
 		
 		String key= substitution.getKey();
-		if (key.length() == 0 || !Character.isJavaIdentifierStart(key.charAt(0)))
+		if (key == null || key.length() == 0 || !Character.isJavaIdentifierStart(key.charAt(0)))
 			return false;
 		
 		for (int i= 1, length= key.length(); i < length; i++)
@@ -1148,7 +1145,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				substitution.setKey(kvPair.getKey());
 			}
 			substitution.setValue(kvPair.getValue());
-			validateKeys();
+			validateKeys(false);
 		} finally {
 			fTableViewer.refresh();
 			fTableViewer.getControl().setFocus();
