@@ -275,7 +275,10 @@ public class LinkedNodeFinder  {
 		
 		private static IBinding getErasure(IBinding binding) {
 			if (binding instanceof ITypeBinding) {
-				return ((ITypeBinding) binding).getErasure();
+				ITypeBinding typeBinding= (ITypeBinding) binding;
+				if (typeBinding.isParameterizedType()) { // not for type variables
+					return typeBinding.getErasure();
+				}
 			} else if (binding instanceof IMethodBinding) {
 				return ((IMethodBinding) binding).getErasure();
 			}
