@@ -41,7 +41,11 @@ public class Bindings {
 			return k1.equals(k2);
 		else
 			return k2.equals(k1);
-	}	
+	}
+	
+	private static boolean isPrimitiveOrArrayOfPrimitive(ITypeBinding type) {
+		return (type.isPrimitive() || (type.isArray() && type.getElementType().isPrimitive()));
+	}
 	
 	public static String asString(IMethodBinding method) {
 		StringBuffer result= new StringBuffer(method.getName());
@@ -59,7 +63,7 @@ public class Bindings {
 	}
 	
 	public static String getTypeQualifiedName(ITypeBinding type) {
-		if (type.isPrimitive())
+		if (isPrimitiveOrArrayOfPrimitive(type))
 			return type.getName();
 		StringBuffer buffer= new StringBuffer();
 		createName(buffer, type);
@@ -67,7 +71,7 @@ public class Bindings {
 	}
 	
 	public static String getFullyQualifiedName(ITypeBinding type) {
-		if (type.isPrimitive())
+		if (isPrimitiveOrArrayOfPrimitive(type))
 			return type.getName();
 		StringBuffer buffer= new StringBuffer();
 		if (!type.getPackage().isUnnamed()) {
@@ -88,7 +92,7 @@ public class Bindings {
 	}
 	
 	public static String[] getNameComponents(ITypeBinding type) {
-		if (type.isPrimitive())
+		if (isPrimitiveOrArrayOfPrimitive(type))
 			return new String[] { type.getName() };
 		List result= new ArrayList(3);
 		while(type != null) {
@@ -103,7 +107,7 @@ public class Bindings {
 	
 	public static String[] getAllNameComponents(ITypeBinding type) {
 		String[] typeComponents= getNameComponents(type);
-		if (type.isPrimitive())
+		if (isPrimitiveOrArrayOfPrimitive(type))
 			return typeComponents;
 		IPackageBinding pack= type.getPackage();
 		if (pack.isUnnamed())
@@ -143,7 +147,7 @@ public class Bindings {
 	 * 	otherwise <code>false</code> is returned
 	 */
 	public static boolean isRuntimeException(ITypeBinding thrownException, AST ast) {
-		if (thrownException == null || thrownException.isPrimitive())
+		if (thrownException == null || thrownException.isPrimitive() || thrownException.isArray())
 			return false;
 		
 		ITypeBinding runTimeException= ast.resolveWellKnownType("java.lang.RuntimeException"); //$NON-NLS-1$
