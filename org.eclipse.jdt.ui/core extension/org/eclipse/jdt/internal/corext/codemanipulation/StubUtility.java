@@ -91,7 +91,7 @@ public class StubUtility {
 			}
 		}
 		
-		if (Flags.isPublic(flags) || (declaringtype.isInterface() && !settings.noBody)) {
+		if (Flags.isPublic(flags) || isConstructor || (declaringtype.isInterface() && !settings.noBody)) {
 			buf.append("public "); //$NON-NLS-1$
 		} else if (Flags.isProtected(flags)) {
 			buf.append("protected "); //$NON-NLS-1$
