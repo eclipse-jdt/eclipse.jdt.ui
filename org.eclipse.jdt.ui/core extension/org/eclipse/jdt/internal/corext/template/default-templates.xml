@@ -143,14 +143,14 @@ return ${name};
  * Created on ${date}
  *
  * To change this generated comment edit the template variable "filecomment":
- * Workbench&gt;Preferences&gt;Java&gt;Templates.
+ * Window&gt;Preferences&gt;Java&gt;Templates.
  */</template>
 
 <template name="typecomment" description="type comment used by the class and interface wizards" context="java" enabled="true">/**
  * @author ${user}
  *
  * To change this generated comment edit the template variable &quot;typecomment&quot;:
- * Workbench&gt;Preferences&gt;Java&gt;Templates.
+ * Window&gt;Preferences&gt;Java&gt;Templates.
  */</template> 
 
   <template description="print to standard out" name="stdout" context="java"

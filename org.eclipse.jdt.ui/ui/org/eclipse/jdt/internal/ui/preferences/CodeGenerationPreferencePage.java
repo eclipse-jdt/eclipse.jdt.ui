@@ -104,7 +104,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		prefs.setDefault(PREF_GETTERSETTER_SUFFIX, "_"); //$NON-NLS-1$
 		prefs.setDefault(PREF_JAVADOC_STUBS, true);
 		prefs.setDefault(PREF_NON_JAVADOC_COMMENTS, false);
-		prefs.setDefault(PREF_FILE_COMMENTS, true);
+		prefs.setDefault(PREF_FILE_COMMENTS, false);
 	}
 	
 	private SelectionButtonDialogField fUseGetterSetterPrefix;
