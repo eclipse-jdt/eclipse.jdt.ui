@@ -210,7 +210,7 @@ public class JavaDocLocations {
 				break;
 			case IJavaElement.JAVA_PROJECT:
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT :
-				appendOverviewSummaryPath(pathBuffer);
+				appendIndexPath(pathBuffer);
 				break;
 			case IJavaElement.IMPORT_CONTAINER :
 				element= element.getParent();
@@ -286,8 +286,8 @@ public class JavaDocLocations {
 		buf.append("/package-summary.html");
 	}
 	
-	private static void appendOverviewSummaryPath(StringBuffer buf) {
-		buf.append("overview-summary.html");
+	private static void appendIndexPath(StringBuffer buf) {
+		buf.append("index.html");
 	}	
 	
 	private static boolean doesExist(URL url) {
