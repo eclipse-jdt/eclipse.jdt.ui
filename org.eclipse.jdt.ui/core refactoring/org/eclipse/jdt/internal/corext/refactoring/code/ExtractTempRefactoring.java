@@ -21,12 +21,16 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
@@ -145,12 +149,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				return result;
 			pm.worked(1);
 			
-			ITypeBinding tb= getSelectedExpression().resolveTypeBinding();
-			if (tb == null)
-				result.addFatalError("This expression cannot currenty be extracted.");
-			else if (tb.getName().equals("void"))
-				result.addFatalError("Cannot extract an expression of type 'void'.");
-				
+			result.merge(checkExpressionBinding());				
 			if (result.hasFatalError())
 				return result;
 				
@@ -164,6 +163,18 @@ public class ExtractTempRefactoring extends Refactoring {
 		}		
 	}
 
+	private RefactoringStatus checkExpressionBinding() throws JavaModelException{
+		Expression expression= getSelectedExpression();
+		ITypeBinding tb= expression.resolveTypeBinding();
+		if (tb == null)
+			return RefactoringStatus.createFatalErrorStatus("This expression cannot currenty be extracted.");
+		
+		if (tb.getName().equals("void"))
+			return RefactoringStatus.createFatalErrorStatus("Cannot extract an expression of type 'void'.");
+		
+		return null;	
+	}
+	
 	private void initializeTempNames() throws JavaModelException {
 		fAlreadyUsedNameMap= TempNameUtil.getLocalNameMap(getSelectedMethodNode());
 	}
@@ -373,11 +384,34 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	//without the trailing indent
 	private String createTempDeclarationSource() throws CoreException {
-		String typeName= getSelectedExpression().resolveTypeBinding().getName();
 		String modifier= fDeclareFinal ? "final ": "";
-		return (modifier + typeName + " " + fTempName + getAssignmentString() + getInitializerSource()) + ";" + getLineDelimiter();
+		return modifier + getTempTypeName() + " " + fTempName + getAssignmentString() + getInitializerSource() + ";" + getLineDelimiter();
 	}
 
+	private String getTempTypeName() throws JavaModelException {
+		Expression expression= getSelectedExpression();
+		String name= expression.resolveTypeBinding().getName();
+		if (! "".equals(name) || ! (expression instanceof ClassInstanceCreation))
+			return name;
+			
+		ClassInstanceCreation cic= (ClassInstanceCreation)expression;
+		if (cic.getAnonymousClassDeclaration() != null)
+			return getNameIdentifier(cic.getName());
+		else
+			return ""; //fallback
+	}
+	
+	private static String getNameIdentifier(Name name)  throws JavaModelException {
+		if (name.isSimpleName())
+			return ((SimpleName)name).getIdentifier();
+		if (name.isQualifiedName()){
+			QualifiedName qn= (QualifiedName)name;
+			return getNameIdentifier(qn.getQualifier()) + "." + qn.getName().getIdentifier(); 
+		}
+		Assert.isTrue(false);
+		return "";
+	}
+	
 	private String getInitializerSource() throws JavaModelException {
 		return removeTrailingSemicolons(fCu.getSource().substring(fSelectionStart, fSelectionStart + fSelectionLength));
 	}
