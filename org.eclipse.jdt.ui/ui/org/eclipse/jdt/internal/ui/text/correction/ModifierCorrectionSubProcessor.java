@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -138,13 +139,10 @@ public class ModifierCorrectionSubProcessor {
 			return Modifier.PUBLIC;
 		}
 		
-		ITypeBinding curr= currNodeBinding;
-		while (curr != null) {
-			if (curr.getKey().equals(targetType.getKey())) {
-				return Modifier.PROTECTED;
-			}
-			curr= curr.getSuperclass();
+		if (Bindings.findTypeInHierarchy(currNodeBinding, targetType)) {
+			return Modifier.PROTECTED;
 		}
+
 		if (currNodeBinding.getPackage().getKey().equals(targetType.getPackage().getKey())) {
 			return 0;
 		}
