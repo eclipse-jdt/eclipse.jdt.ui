@@ -40,12 +40,9 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	// References already handled as a LHS of an assignment
 	private List fLhsOfAssignment= new ArrayList(2);
 		
-	// Return statement handling if a return statement has been selected.
-	private ReturnStatement fExtractedReturnStatement;
-	
 	// Return type of an extracted expression
 	private TypeReference fExpressionReturnType;
-
+
 	// Code generation
 	private LocalVariableBinding fReturnStatementBinding;
 	private boolean fAsymetricAssignment;
@@ -66,9 +63,9 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		else
 			fAssignment= " = "; //$NON-NLS-1$
 	}
-
+
 	//---- Analyzing statements ----------------------------------------------------------------
-
+
 	public void visit(SingleNameReference reference, BlockScope scope, int mode) {
 		if (isOfInterestForRead(mode, reference))
 			processLocalVariableBindingRead(getLocalVariableBindingIfSingleNameReference(reference), mode);
@@ -92,7 +89,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 			}
 		}
 	}
-
+
 	public void visitPostfixPrefixExpression(Assignment assignment, BlockScope scope, int mode) {
 		Reference lhs= assignment.lhs;
 		if (isOfInterestForWrite(mode, lhs) || isOfInterestForRead(mode, lhs)) {
@@ -103,11 +100,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 			}
 		}
 	}
-
-	public void setExtractedReturnStatement(ReturnStatement returnStatement) {
-		fExtractedReturnStatement= returnStatement;
-	}
-	
+
 	public void setExpressionReturnType(TypeReference returnType) {
 		fExpressionReturnType= returnType;
 	}
@@ -131,7 +124,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		}
 		return null;
 	}
-
+
 	private void processLocalVariableBindingRead(LocalVariableBinding binding, int mode) {
 		if (binding != null) {
 			addLocalRead(binding, mode);	
@@ -174,15 +167,14 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	}
 	
 	//---- Precondition checking ----------------------------------------------------------------
-
+
 	public void checkActivation(RefactoringStatus status) {
 		checkLocalReads(status);
 		List followingLocals= computeFollowingLocals();
 		checkLocalWrites(status, followingLocals);
 		checkFollowingLocals(status, followingLocals);
-		checkReturnStatement(status);
 	}
-
+
 	private List computeFollowingLocals() {
 		List result= new ArrayList(2);
 		result.addAll(fFollowingLocalReads);
@@ -194,9 +186,21 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		}
 		return result;
 	}
-
+
 	//---- Code generation ----------------------------------------------------------------------
-
+
+	public boolean hasReturnType() {
+		return !returnTypeIsVoid();
+	}
+	
+	public String getReturnType() {
+		if (fExpressionReturnType != null) {
+			return fExpressionReturnType.toStringExpression(0);
+		} else {
+			return fReturnType;
+		}
+	}
+	
 	public String getCall(String methodName, boolean oneLine) {
 		StringBuffer result= new StringBuffer();
 		if (fLhs != null) {
@@ -218,12 +222,6 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	
 	public String getCallSignature(String methodName) {
 		StringBuffer result= new StringBuffer();
-		if (fExpressionReturnType != null) {
-			result.append(fExpressionReturnType.toStringExpression(0));
-		} else {
-			result.append(fReturnType);
-		}
-		result.append(" "); //$NON-NLS-1$
 		result.append(methodName);
 		result.append("("); //$NON-NLS-1$
 		for (int i= 0; i < fUsedLocals.size(); i++) {
@@ -334,13 +332,6 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 				status.addFatalError(RefactoringCoreMessages.getString("LocalVariableAnalyzer.assignment_and_reference_to_local")); //$NON-NLS-1$
 			}
 		}
-	}
-	
-	private void checkReturnStatement(RefactoringStatus status) {
-		if (fExtractedReturnStatement != null && fReturnStatementBinding != null && 
-				!isSameLocalVaraibleBinding(fExtractedReturnStatement, fReturnStatementBinding)) {
-			status.addFatalError(RefactoringCoreMessages.getString("LocalVariableAnalyzer.return_statement")); //$NON-NLS-1$
-		}	
 	}
 	
 	private boolean isSameLocalVaraibleBinding(ReturnStatement statement, LocalVariableBinding binding) {

@@ -3,23 +3,15 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.code;
-
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
-
-import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-
+
 import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.*;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
-import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.refactoring.ASTEndVisitAdapter;
@@ -28,6 +20,7 @@ import org.eclipse.jdt.internal.core.refactoring.AstNodeData;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 /**
  * Checks whether the source range denoted by <code>start</code> and <code>end</code>
@@ -43,35 +36,34 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	// Parent tracking interface
 	private IParentTracker fParentTracker;
 	
-	// The selection's start and end position
+	// The buffer containing the source code.
 	private ExtendedBuffer fBuffer;
-	private Selection fSelection;
 	
-	// internal state.
+	// Selection state.
+	private Selection fSelection;
 	private int fMode;
 	private int fCursorPosition;
-	private boolean fCompileErrorFound;
-
+
 	// Error handling	
+	private boolean fCompileErrorFound;
 	private RefactoringStatus fStatus= new RefactoringStatus();
 	private int[] fLineSeparatorPositions;	
 	private String fMessage;
-	
-	private AstNode fFirstSelectedNode;
-	private AstNode fParentOfFirstSelectedStatment;
-	private AstNode fLastSelectedNode;
-	private AstNode fLastSelectedNodeWithSameParentAsFirst;
-	private boolean fNeedsSemicolon;
-	
+
+	// The method that encloses the selection.	
 	private AbstractMethodDeclaration fEnclosingMethod;
 	
+	// Selected nodes
+	private List fTopNodes;
+	private AstNode fParentOfFirstSelectedStatment;
+	private AstNode fLastSelectedNode;
+	private boolean fNeedsSemicolon;
+	
+	// Helper-Analyzer
 	private LocalVariableAnalyzer fLocalVariableAnalyzer;
 	private LocalTypeAnalyzer fLocalTypeAnalyzer;
 	private ExceptionAnalyzer fExceptionAnalyzer;
-	
-	// Special return statement handling
-	private int fAdjustedSelectionEnd= -1;
-	private String fPotentialReturnMessage;
+	private ReturnAnalyzer fReturnAnalyzer;
 	
 	// Handling label and branch statements.
 	private Stack fImplicitBranchTargets= new Stack();	
@@ -94,6 +86,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		fLocalVariableAnalyzer= new LocalVariableAnalyzer(this, asymetricAssignment);
 		fLocalTypeAnalyzer= new LocalTypeAnalyzer();
 		fExceptionAnalyzer= new ExceptionAnalyzer();
+		fReturnAnalyzer= new ReturnAnalyzer(this);
 	}
 
 	//---- Parent tracking ----------------------------------------------------------
@@ -118,19 +111,16 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	public void checkActivation(RefactoringStatus status) {
 		if (fEnclosingMethod == null || fLastSelectedNode == null) {
 			if (fMessage == null && !fStatus.hasFatalError())
-				// begin PR: 1GEWDR8: ITPJCORE:WINNT - Refactoring - inconsistent error message for refusing extraction
 				fMessage= RefactoringCoreMessages.getString("StatementAnalyzer.only_method_body"); //$NON-NLS-1$
-				// end PR
 			if (fMessage != null)
 				status.addFatalError(fMessage);
 		}
 		status.merge(fStatus);
-		if (fFirstSelectedNode == fLastSelectedNodeWithSameParentAsFirst &&
-				fFirstSelectedNode instanceof ReturnStatement) {
-			status.addFatalError(RefactoringCoreMessages.getString("StatementAnalyzer.single_return")); //$NON-NLS-1$
-		}
 		fLocalVariableAnalyzer.checkActivation(status);
 		fLocalTypeAnalyzer.checkActivation(status);
+		fReturnAnalyzer.checkActivation(status, fTopNodes);
+		if (fLocalVariableAnalyzer.hasReturnType() && fReturnAnalyzer.hasReturnStatement())
+			status.addFatalError("Ambigious return value: return statement is to be extracted and new method must return a value due to an assignment to a local variable.");
 	}
 	
 	/**
@@ -138,6 +128,13 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	 */
 	public LocalVariableAnalyzer getLocalVariableAnalyzer() {
 		return fLocalVariableAnalyzer;
+	}
+	 
+	/**
+	 * Returns the return statement analyzer used by this statement analyzer.
+	 */
+	public ReturnAnalyzer getReturnAnalyzer() {
+		return fReturnAnalyzer;
 	}
 	 
 	/**
@@ -166,13 +163,25 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		return fLastSelectedNode.sourceEnd;
 	}
 	
+	/**
+	 * Returns the extracted method's signature.
+	 */
 	public String getSignature(String methodName) {
 		String modifier= ""; //$NON-NLS-1$
 		if ((fEnclosingMethod.modifiers & AstNode.AccStatic) != 0)
 			modifier= "static "; //$NON-NLS-1$
-			
-		return modifier + fLocalVariableAnalyzer.getCallSignature(methodName)
-		       + fExceptionAnalyzer.getThrowSignature();
+		
+		StringBuffer buffer= new StringBuffer(modifier);
+		
+		if (fReturnAnalyzer.hasReturnStatement()) {
+			buffer.append(fReturnAnalyzer.getReturnType());
+		} else {
+			buffer.append(fLocalVariableAnalyzer.getReturnType());
+		}
+		buffer.append(" ");	//$NON-NLS-1$
+		buffer.append(fLocalVariableAnalyzer.getCallSignature(methodName));
+		buffer.append(fExceptionAnalyzer.getThrowSignature());
+		return buffer.toString();
 	}
 	
 	/**
@@ -184,22 +193,10 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		return fNeedsSemicolon;
 	}
 	
-	/**
-	 * Returns the new selection end value, if the selection has to be adjusted. Returns
-	 * -1 if the current selection is ok.
-	 * 
-	 * @return the adjusted selection end or -1 if the selection doesn't have to be
-	 *  adjusted
-	 */
-	public int getAdjustedSelectionEnd() {
-		return fAdjustedSelectionEnd;
-	}
-	
 	//---- Helper methods -----------------------------------------------------------------------
 	
 	private void reset() {
 		fMode= UNDEFINED;
-		fFirstSelectedNode= null;
 		fLastSelectedNode= null;
 		fEnclosingMethod= null;
 		fStatus= new RefactoringStatus();
@@ -248,16 +245,19 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	
 	private void startFound(AstNode node) {
 		fMode= SELECTED;
-		fFirstSelectedNode= node;
 		fParentOfFirstSelectedStatment= getParent();
 		fLastSelectedNode= node;
-		fLastSelectedNodeWithSameParentAsFirst= node;
+
+		fTopNodes= new ArrayList(5);
+		fTopNodes.add(node);
+		fReturnAnalyzer.startFound();		
 	}
 	
 	private void trackLastSelectedNode(AstNode node) {
 		fLastSelectedNode= node;
-		if (fParentOfFirstSelectedStatment == getParent())
-			fLastSelectedNodeWithSameParentAsFirst= node;
+		if (fParentOfFirstSelectedStatment == getParent()) {
+			fTopNodes.add(node);
+		}
 	}
 	
 	private void trackLastEnd(int end) {
@@ -310,12 +310,6 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		return result;
 	}
 	
-	private void endVisitAbstractMethodDeclaration(AbstractMethodDeclaration node, Scope scope) {
-		if (node == fEnclosingMethod) {
-			checkLastSelectedStatement();
-		}
-	}
-	
 	private boolean visitLocalTypeDeclaration(TypeDeclaration declaration, BlockScope scope) {
 		if (!checkLocalTypeDeclaration(declaration))
 			return false;
@@ -342,6 +336,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	
 	private boolean visitBranchStatement(BranchStatement statement, BlockScope scope, String name) {
 		boolean result= visitNode(statement, scope);
+		fReturnAnalyzer.visit(statement, scope, fMode);
 		Statement target= findTarget(statement);
 		String label= "label"; //* new String(statement.label); //$NON-NLS-1$
 		if (target != null) {
@@ -370,28 +365,6 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		return null;
 	}
 	
-	private void checkLastSelectedStatement() {
-		if (fLastSelectedNodeWithSameParentAsFirst instanceof ReturnStatement) {
-			ReturnStatement statement= (ReturnStatement)fLastSelectedNodeWithSameParentAsFirst;
-			if (statement.expression == null) {
-				fPotentialReturnMessage= null;
-				fLocalVariableAnalyzer.setExtractedReturnStatement(statement);
-			} else {
-				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.void_return")); //$NON-NLS-1$
-			}
-		} else {
-			handlePotentialReturnMessage();
-			fAdjustedSelectionEnd= -1;
-		}
-	}
-	
-	private void handlePotentialReturnMessage() {
-		if (fPotentialReturnMessage != null) {
-			fStatus.addFatalError(fPotentialReturnMessage);
-			fPotentialReturnMessage= null;
-		}
-	}
-	
 	private boolean checkLocalTypeDeclaration(TypeDeclaration declaration) {
 		if (fSelection.intersects(declaration.declarationSourceStart, declaration.declarationSourceEnd)) {
 			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.middle_of_type_declaration")); //$NON-NLS-1$
@@ -407,7 +380,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	}
 	
 	//--- Expression / Condition handling -----------------------------------------
-
+
 	public boolean visitBinaryExpression(BinaryExpression binaryExpression, BlockScope scope, int returnType) {
 		int currentScanPosition= fCursorPosition;
 		if (!visitNode(binaryExpression, scope))
@@ -426,7 +399,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		}
 		return true;	
 	}
-
+
 	private boolean isConditionSelected(AstNode node, Expression condition, int scanStart) {
 		if (node == null || condition == null || scanStart < 0)
 			return false;
@@ -444,7 +417,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		int nextStart= fBuffer.indexOfStatementCharacter(node.sourceEnd + 1);
 		return fSelection.coveredBy(rangeStart, nextStart - 1) && fSelection.covers(node);
 	}
-
+
 	private void endVisitConditionBlock(AstNode node, String statementName) {
 		Boolean inCondition= (Boolean)fAstNodeData.get(node);
 		if (inCondition != null && inCondition.booleanValue() && fLocalVariableAnalyzer.getExpressionReturnType() == null) {
@@ -492,10 +465,6 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		return visitAbstractMethodDeclaration(clinit, scope);
 	}
 	
-	public void endVisit(Clinit clinit, ClassScope scope) {
-		endVisitAbstractMethodDeclaration(clinit, scope);
-	}
-	
 	public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
 		return fSelection.enclosedBy(typeDeclaration.declarationSourceStart,
 			typeDeclaration.declarationSourceEnd);
@@ -518,16 +487,8 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		return visitAbstractMethodDeclaration(constructorDeclaration, scope);
 	}
 	
-	public void endVisit(ConstructorDeclaration constructorDeclaration, ClassScope scope) {
-		endVisitAbstractMethodDeclaration(constructorDeclaration, scope);
-	}
-	
 	public boolean visit(MethodDeclaration methodDeclaration, ClassScope scope) {
 		return visitAbstractMethodDeclaration(methodDeclaration, scope);
-	}
-	
-	public void endVisit(MethodDeclaration methodDeclaration, ClassScope scope) {
-		endVisitAbstractMethodDeclaration(methodDeclaration, scope);
 	}
 	
 	public boolean visit(SingleTypeReference singleTypeReference, ClassScope scope) {
@@ -581,31 +542,31 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		// }
 		// return result;	
 	}
-
+
 	public boolean visit(FieldReference fieldReference, BlockScope scope) {
 		return false;
 	}
-
+
 	public boolean visit(ArrayReference arrayReference, BlockScope scope) {
 		return visitNode(arrayReference, scope);
 	}
-
+
 	public boolean visit(ArrayTypeReference arrayTypeReference, BlockScope scope) {
 		return visitTypeReference(arrayTypeReference, scope);
 	}
-
+
 	public boolean visit(ArrayQualifiedTypeReference arrayQualifiedTypeReference, BlockScope scope) {
 		return visitTypeReference(arrayQualifiedTypeReference, scope);
 	}
-
+
 	public boolean visit(SingleTypeReference singleTypeReference, BlockScope scope) {
 		return visitTypeReference(singleTypeReference, scope);
 	}
-
+
 	public boolean visit(QualifiedTypeReference qualifiedTypeReference, BlockScope scope) {
 		return visitTypeReference(qualifiedTypeReference, scope);
 	}
-
+
 	public boolean visit(QualifiedNameReference qualifiedNameReference, BlockScope scope) {
 		boolean result= visitNode(qualifiedNameReference, scope);
 		if (result) {
@@ -613,15 +574,15 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		}
 		return result;
 	}
-
+
 	public boolean visit(QualifiedSuperReference qualifiedSuperReference, BlockScope scope) {
 		return false;
 	}
-
+
 	public boolean visit(QualifiedThisReference qualifiedThisReference, BlockScope scope) {
 		return false;
 	}
-
+
 	public boolean visit(SingleNameReference singleNameReference, BlockScope scope) {
 		boolean result= visitNode(singleNameReference, scope);
 		if (result) {
@@ -630,20 +591,21 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		}	
 		return result;
 	}
-
+
 	public boolean visit(SuperReference superReference, BlockScope scope) {
 		return false;
 	}
-
+
 	public boolean visit(ThisReference thisReference, BlockScope scope) {
 		return false;
 	}
-
+
 	//---- Statements -------------------------------------------------------------
 	
 	public boolean visit(AllocationExpression allocationExpression, BlockScope scope) {
 		return visitNode(allocationExpression, scope);
 	}
+	
 	public boolean visit(AND_AND_Expression and_and_Expression, BlockScope scope) {
 		return visitBinaryExpression(and_and_Expression, scope, TypeIds.T_boolean);
 	}
@@ -659,13 +621,14 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	public boolean visit(Assignment assignment, BlockScope scope) {
 		return visitAssignment(assignment, scope, false);
 	}
-
+
 	public boolean visit(BinaryExpression binaryExpression, BlockScope scope) {
 		return visitBinaryExpression(binaryExpression, scope, TypeIds.T_undefined);
 	}
-
+
 	public boolean visit(Block block, BlockScope scope) {
 		boolean result= visitNode(block, scope);
+		fReturnAnalyzer.visit(block, scope, fMode);
 		
 		if (fSelection.intersects(block)) {
 			reset();
@@ -676,59 +639,68 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		
 		return result;
 	}
-
+
 	public void endVisit(Block block, BlockScope scope) {
 		// PR: 1GEWDJ4: ITPJCORE:WINNT - Refactoring - invalid variable initialization extraction
 		trackLastEnd(block.sourceEnd);
 		if (fSelection.covers(block))
 			fNeedsSemicolon= false;
+		fReturnAnalyzer.endVisit(block, scope, fMode);	
 	}
-
+
 	public boolean visit(Break breakStatement, BlockScope scope) {
 		if (breakStatement.label == null) {
 			breakStatement.sourceEnd= breakStatement.sourceStart + BREAK_LENGTH - 1;
 		}
 		return visitBranchStatement(breakStatement, scope, "break"); //$NON-NLS-1$
 	}
-
+
 	public boolean visit(Case caseStatement, BlockScope scope) {
-		return visitNode(caseStatement, scope);
+		if (!visitNode(caseStatement, scope))
+			return false;
+		fReturnAnalyzer.visit(caseStatement, scope, fMode);
+		return true;
 	}
-
+
 	public boolean visit(CastExpression castExpression, BlockScope scope) {
 		return visitNode(castExpression, scope);
 	}
-
+
 	public boolean visit(CharLiteral charLiteral, BlockScope scope) {
 		return visitNode(charLiteral, scope);
 	}
-
+
 	public boolean visit(ClassLiteralAccess classLiteral, BlockScope scope) {
 		return visitNode(classLiteral, scope);
 	}
-
+
 	public boolean visit(CompoundAssignment compoundAssignment, BlockScope scope) {
 		return visitAssignment(compoundAssignment, scope, true);
 	}
-
+
 	public boolean visit(ConditionalExpression conditionalExpression, BlockScope scope) {
 		return visitNode(conditionalExpression, scope);
 	}
-
+
 	public boolean visit(Continue continueStatement, BlockScope scope) {
 		if (continueStatement.label == null) {
 			continueStatement.sourceEnd= continueStatement.sourceStart + CONTINUE_LENGTH - 1;
 		}
 		return visitBranchStatement(continueStatement, scope, "continue"); //$NON-NLS-1$
 	}
-
+
 	public boolean visit(DefaultCase defaultCaseStatement, BlockScope scope) {
-		return visitNode(defaultCaseStatement, scope);
+		if (!visitNode(defaultCaseStatement, scope))
+			return false;
+		fReturnAnalyzer.visit(defaultCaseStatement, scope, fMode);
+		return true;
 	}
-
+
 	public boolean visit(DoStatement doStatement, BlockScope scope) {
 		if (!visitImplicitBranchTarget(doStatement, scope))
 			return false;
+		
+		fReturnAnalyzer.visit(doStatement, scope, fMode);
 		
 		if (isPartOfNodeSelected(doStatement)) {
 			
@@ -760,37 +732,39 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	public void endVisit(DoStatement doStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(doStatement, scope);
 		endVisitConditionBlock(doStatement, RefactoringCoreMessages.getString("StatementAnalyzer.do_while")); //$NON-NLS-1$
+		fReturnAnalyzer.endVisit(doStatement, scope, fMode);
 		fCursorPosition= doStatement.sourceEnd;
 	}
-
+
 	public boolean visit(DoubleLiteral doubleLiteral, BlockScope scope) {
 		return visitNode(doubleLiteral, scope);
 	}
-
+
 	public boolean visit(EqualExpression equalExpression, BlockScope scope) {
 		return visitBinaryExpression(equalExpression, scope, TypeIds.T_boolean);
 	}
-
+
 	public boolean visit(ExplicitConstructorCall explicitConstructor, BlockScope scope) {
 		return visitNode(explicitConstructor, scope);
 	}
-
+
 	public boolean visit(ExtendedStringLiteral extendedStringLiteral, BlockScope scope) {
 		return visitNode(extendedStringLiteral, scope);
 	}
-
+
 	public boolean visit(FalseLiteral falseLiteral, BlockScope scope) {
 		return visitNode(falseLiteral, scope);
 	}
-
+
 	public boolean visit(FloatLiteral floatLiteral, BlockScope scope) {
 		return visitNode(floatLiteral, scope);
 	}
-
+
 	public boolean visit(ForStatement forStatement, BlockScope scope) {
-		boolean result= visitImplicitBranchTarget(forStatement, scope);
-		if (!result)
+		if (!visitImplicitBranchTarget(forStatement, scope))
 			return false;
+
+		fReturnAnalyzer.visit(forStatement, scope, fMode);
 			
 		// forStatement.sourceEnd includes the statement's action. Since the
 		// selection can be the statements body adjust last end if so.
@@ -808,7 +782,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 			}
 			fCursorPosition= fBuffer.indexOf(')', start + 1);
 		}
-		return result;
+		return true;
 	}
 	
 	private boolean isConditionSelected(ForStatement forStatement) {
@@ -828,15 +802,18 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		}	
 		return false;
 	}
-
+
 	public void endVisit(ForStatement forStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(forStatement, scope);
 		endVisitConditionBlock(forStatement, RefactoringCoreMessages.getString("StatementAnalyzer.a_for")); //$NON-NLS-1$
+		fReturnAnalyzer.endVisit(forStatement, scope, fMode);
 	}
 	
 	public boolean visit(IfStatement ifStatement, BlockScope scope) {
 		if (!visitNode(ifStatement, scope))
 			return false;
+			
+		fReturnAnalyzer.visit(ifStatement, scope, fMode);
 			
 		int nextStart= fBuffer.indexOfStatementCharacter(ifStatement.sourceEnd + 1);
 		if (fMode == BEFORE && fSelection.end < nextStart) {
@@ -854,8 +831,9 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	
 	public void endVisit(IfStatement ifStatement, BlockScope scope) {
 		endVisitConditionBlock(ifStatement, RefactoringCoreMessages.getString("StatementAnalyzer.if-then-else")); //$NON-NLS-1$
+		fReturnAnalyzer.endVisit(ifStatement, scope, fMode);
 	}
-
+
 	private int getIfElseBodyStart(IfStatement ifStatement, int nextStart) {
 		int sourceStart;
 		int sourceEnd;
@@ -881,78 +859,70 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	public boolean visit(InstanceOfExpression instanceOfExpression, BlockScope scope) {
 		return visitNode(instanceOfExpression, scope);
 	}
-
+
 	public boolean visit(IntLiteral intLiteral, BlockScope scope) {
 		return visitNode(intLiteral, scope);
 	}
-
+
 	public boolean visit(LabeledStatement labeledStatement, BlockScope scope) {
 		fLabeledStatements.add(labeledStatement);
-		return visitNode(labeledStatement, scope);
+		if (!visitNode(labeledStatement, scope))
+			return false;
+		fReturnAnalyzer.visit(labeledStatement, scope, fMode);
+		return true;
 	}
-
+
 	public boolean visit(LongLiteral longLiteral, BlockScope scope) {
 		return visitNode(longLiteral, scope);
 	}
-
+
 	public boolean visit(MessageSend messageSend, BlockScope scope) {
 		boolean result= visitNode(messageSend, scope);
-		fExceptionAnalyzer.visitMessageSend(messageSend, scope, fMode);
+		fExceptionAnalyzer.visit(messageSend, scope, fMode);
 		return result;
 	}
-
+
 	public boolean visit(NullLiteral nullLiteral, BlockScope scope) {
 		return visitNode(nullLiteral, scope);
 	}
-
+
 	public boolean visit(OR_OR_Expression or_or_Expression, BlockScope scope) {
 		return visitBinaryExpression(or_or_Expression, scope, TypeIds.T_boolean);
 	}
-
+
 	public boolean visit(PostfixExpression postfixExpression, BlockScope scope) {
 		boolean result= visitNode(postfixExpression, scope);
 		fLocalVariableAnalyzer.visitPostfixPrefixExpression(postfixExpression, scope, fMode);
 		return result;
 	}
-
+
 	public boolean visit(PrefixExpression prefixExpression, BlockScope scope) {
 		boolean result= visitNode(prefixExpression, scope);
 		fLocalVariableAnalyzer.visitPostfixPrefixExpression(prefixExpression, scope, fMode);
 		return result;
 	}
-
+
 	public boolean visit(QualifiedAllocationExpression qualifiedAllocationExpression, BlockScope scope) {
 		return visitNode(qualifiedAllocationExpression, scope);
 	}
-
+
 	public boolean visit(ReturnStatement returnStatement, BlockScope scope) {
-		fAdjustedSelectionEnd= fBuffer.indexOfLastCharacterBeforeLineBreak(fCursorPosition);
 		boolean result= visitNode(returnStatement, scope);
-		if (fMode == StatementAnalyzer.SELECTED) {
-			if (fPotentialReturnMessage != null) {
-				fStatus.addFatalError(fPotentialReturnMessage);
-				fPotentialReturnMessage= null;
-			}
-			String message= RefactoringCoreMessages.getFormattedString("StatementAnalyzer.return_statement", Integer.toString(getLineNumber(returnStatement))); //$NON-NLS-1$
-			if (fParentOfFirstSelectedStatment != getParent()) {
-				fStatus.addFatalError(message);
-			} else {
-				fPotentialReturnMessage= message;
-			}
-		}
+		fReturnAnalyzer.visit(returnStatement, scope, fMode);
 		return result;
 	}
-
+
 	public boolean visit(StringLiteral stringLiteral, BlockScope scope) {
 		return visitNode(stringLiteral, scope);
 	}
-
+
 	public boolean visit(SwitchStatement switchStatement, BlockScope scope) {
 		// Include "}" into switch statement
 		switchStatement.sourceEnd++;
 		if (!visitImplicitBranchTarget(switchStatement, scope))
 			return false;
 		
+		fReturnAnalyzer.visit(switchStatement, scope, fMode);
 		if (isPartOfNodeSelected(switchStatement)) {
 			int lastEnd= getCaseBodyStart(switchStatement) - 1;
 			if (lastEnd < 0) {
@@ -964,11 +934,12 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		}
 		return true;
 	}
-
+
 	public void endVisit(SwitchStatement switchStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(switchStatement, scope);
+		fReturnAnalyzer.endVisit(switchStatement, scope, fMode);
 	}
-
+
 	private int getCaseBodyStart(SwitchStatement switchStatement) {
 		if (switchStatement.statements == null)
 			return -1;
@@ -1000,7 +971,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		result.add(statements[statements.length - 1]);
 		return result;
 	}
-
+
 	public boolean visit(SynchronizedStatement synchronizedStatement, BlockScope scope) {
 		if (!visitNode(synchronizedStatement, scope))
 			return false;
@@ -1016,29 +987,32 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		}
 		return true;
 	}
-
+
 	public boolean visit(ThrowStatement throwStatement, BlockScope scope) {
 		// Begin PR: 1GEUXTX: ITPJCORE:WINNT - Refactoring - invalid exception when extracting throws statement
 		if (!visitNode(throwStatement, scope))
 			return false;
-		fExceptionAnalyzer.visitThrowStatement(throwStatement, scope, fMode);
+		fExceptionAnalyzer.visit(throwStatement, scope, fMode);
 		return true;
 		// End PR
 	}
-
+
 	public boolean visit(TrueLiteral trueLiteral, BlockScope scope) {
 		return visitNode(trueLiteral, scope);
 	}
-
+
 	public boolean visit(TryStatement tryStatement, BlockScope scope) {
 		// Include "}" into sourceEnd;
 		tryStatement.sourceEnd++;
 		
-		if (!visitNode(tryStatement, scope))
+		boolean result= visitNode(tryStatement, scope);
+			
+		fExceptionAnalyzer.visit(tryStatement, scope, fMode);
+		fReturnAnalyzer.visit(tryStatement, scope, fMode);
+		
+		if (!result)
 			return false;
 			
-		fExceptionAnalyzer.visitTryStatement(tryStatement, scope, fMode);
-		
 		if (isPartOfNodeSelected(tryStatement)) {
 			if (fSelection.intersects(tryStatement)) {
 				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement")); //$NON-NLS-1$
@@ -1061,12 +1035,12 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		}
 		
 		return true;
-	}
-
+	}
 	public void endVisit(TryStatement tryStatement, BlockScope scope) {
 		if (tryStatement.catchArguments != null)
 			fExceptionAnalyzer.visitCatchArguments(tryStatement.catchArguments, scope, fMode);
-		fExceptionAnalyzer.visitEndTryStatement(tryStatement, scope, fMode);
+		fExceptionAnalyzer.endVisit(tryStatement, scope, fMode);
+		fReturnAnalyzer.endVisit(tryStatement, scope, fMode);
 		if (fSelection.covers(tryStatement))
 			fNeedsSemicolon= false;
 	}
@@ -1083,10 +1057,12 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 	public boolean visit(UnaryExpression unaryExpression, BlockScope scope) {
 		return visitNode(unaryExpression, scope);
 	}
-
+
 	public boolean visit(WhileStatement whileStatement, BlockScope scope) {
 		if (!visitImplicitBranchTarget(whileStatement, scope))
 			return false;
+		
+		fReturnAnalyzer.visit(whileStatement, scope, fMode);
 			
 		if (isPartOfNodeSelected(whileStatement)) {
 			if (isConditionSelected(whileStatement, whileStatement.condition, whileStatement.sourceStart + WHILE_LENGTH))
@@ -1096,9 +1072,10 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 		}
 		return true;
 	}
-
+
 	public void endVisit(WhileStatement whileStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(whileStatement, scope);
 		endVisitConditionBlock(whileStatement, RefactoringCoreMessages.getString("StatementAnalyzer.a_while")); //$NON-NLS-1$
+		fReturnAnalyzer.endVisit(whileStatement, scope, fMode);
 	}
 }

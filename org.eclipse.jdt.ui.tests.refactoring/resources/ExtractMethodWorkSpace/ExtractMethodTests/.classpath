@@ -2,5 +2,5 @@
 <classpath>
     <classpathentry kind="src" path=""/>
     <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
-    <classpathentry kind="output" path="bin"/>
+    <classpathentry kind="output" path=""/>
 </classpath>

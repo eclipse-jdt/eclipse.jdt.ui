@@ -21,6 +21,7 @@ public class ExtractMethodTests extends RefactoringTest {
 	private IPackageFragment fLocalsPackage;
 	private IPackageFragment fExpressionPackage;
 	private IPackageFragment fNestedPackage;
+	private IPackageFragment fReturnPackage;
 	
 	private static final int VALID_SELECTION=     1;
 	private static final int INVALID_SELECTION=   2;
@@ -236,6 +237,17 @@ public class ExtractMethodTests extends RefactoringTest {
 			fNestedPackage= getRoot().createPackageFragment("nested_in", true, null);
 					
 		return fNestedPackage;
+	}
+	
+	protected void returnTest() throws Exception {
+		performTest(getReturnPackage(), "A", COMPARE_WITH_OUTPUT, "return_out");
+	}
+	
+	private IPackageFragment getReturnPackage() throws JavaModelException {
+		if (fReturnPackage == null)
+			fReturnPackage= getRoot().createPackageFragment("return_in", true, null);
+					
+		return fReturnPackage;
 	}
 	
 	//=====================================================================================
@@ -545,6 +557,38 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test141() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test142() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test143() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test144() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test145() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test146() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test147() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test148() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test149() throws Exception {
 		invalidSelectionTest();
 	}
 	
@@ -1038,5 +1082,63 @@ public class ExtractMethodTests extends RefactoringTest {
 
 	public void test653() throws Exception {
 		nestedTest();
+	}
+	
+	//---- Extracting method containing a return statement.
+	
+	public void test700() throws Exception {
+		returnTest();
+	}	
+	
+	public void test701() throws Exception {
+		returnTest();
+	}	
+	
+	public void test702() throws Exception {
+		returnTest();
+	}	
+	
+	public void test703() throws Exception {
+		returnTest();
+	}	
+	
+	public void test704() throws Exception {
+		returnTest();
+	}	
+	
+	public void test705() throws Exception {
+		returnTest();
+	}	
+	
+	public void test706() throws Exception {
+		returnTest();
+	}	
+	
+	public void test707() throws Exception {
+		returnTest();
+	}
+		
+	public void test708() throws Exception {
+		returnTest();
+	}	
+	
+	public void test709() throws Exception {
+		returnTest();
+	}	
+	
+	public void test710() throws Exception {
+		returnTest();
+	}	
+	
+	public void test711() throws Exception {
+		returnTest();
+	}	
+	
+	public void test712() throws Exception {
+		returnTest();
+	}	
+	
+	public void test713() throws Exception {
+		returnTest();
 	}	
 }

@@ -41,9 +41,8 @@ public interface IChange {
 	 *				change.perform(context, pm);
 	 *			}
 	 *		}, progressMonitor);
-	 *		change.performed();
 	 *	} finally {
-	 *		performed();
+	 *		change.performed();
 	 *	}
 	 * </pre>
 	 */
@@ -68,9 +67,11 @@ public interface IChange {
 	/**
 	 * Returns the change that, when performed, will undo the receiver. <code>IChange</code> 
 	 * objects can assume that <code>perform</code> has been called on them before. It is the 
-	 * caller's responsiblity to make sure this is true. As mentioned in the class comment, it 
-	 * is the responsiblity of the implementors to make sure that this method does create a 
+	 * caller's responsiblity to make sure that this is true. As mentioned in the class comment, 
+	 * it is the responsiblity of the implementors to make sure that this method does create a 
 	 * reverse change.
+	 * 
+	 * @return the reverse change of this change
 	 */
 	public IChange getUndoChange();
 	
