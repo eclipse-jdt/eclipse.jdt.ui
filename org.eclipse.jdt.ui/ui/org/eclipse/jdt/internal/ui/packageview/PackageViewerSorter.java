@@ -98,11 +98,17 @@ public class PackageViewerSorter extends ViewerSorter {
 			if (p1 > p2)
 				return 1;
 		}
-				
+		
+		IPackageFragment p1= null;	
 		if (e1 instanceof IPackageFragment) {
+			p1= (IPackageFragment)e1;
+		}
+		IPackageFragment p2= null;	
+		if (e2 instanceof IPackageFragment) {
+			p2= (IPackageFragment)e2;
+		}
+		if (p1 != null && p2 != null) {
 			// compare between non-java package fragment and java package fragment
-			IPackageFragment p1= (IPackageFragment)e1;
-			IPackageFragment p2= (IPackageFragment)e2;
 			try {
 				boolean isFolder1= isFolder(p1);
 				boolean isFolder2= isFolder(p2);
