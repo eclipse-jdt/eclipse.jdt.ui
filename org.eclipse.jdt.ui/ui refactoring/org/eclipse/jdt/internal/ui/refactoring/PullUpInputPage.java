@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -37,6 +38,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -57,6 +59,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -345,6 +348,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 	}
 
 	private PullUpTreeViewer createTreeViewer(Composite composite, IProgressMonitor pm) {
+		pm.beginTask("", 2);
 		Tree tree= new Tree(composite, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 		final PullUpTreeViewer treeViever= new PullUpTreeViewer(tree);
@@ -352,30 +356,34 @@ public class PullUpInputPage extends UserInputWizardPage {
 		treeViever.setUseHashlookup(true);
 		treeViever.setSorter(new JavaElementSorter());
 
-		//XXX pm
 		try{
 			fMarkedMethods.addAll(Arrays.asList(getPullUpMethodsRefactoring().getElementsToPullUp()));
-			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements(pm);
-			ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getSuperTypeHierarchy(new NullProgressMonitor());
+			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements(new SubProgressMonitor(pm, 1));
+			ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getSuperTypeHierarchy(new SubProgressMonitor(pm, 1));
 			treeViever.addFilter(new PullUpFilter(hierarchy, matchingMethods));	
 			treeViever.setContentProvider(new PullUpHierarchyContentProvider(matchingMethods));
-			treeViever.setInput(hierarchy);
-			
+			treeViever.setInput(hierarchy);			
+			treeViever.expandAll();
+			treeViever.addSelectionChangedListener(new ISelectionChangedListener() {
+				public void selectionChanged(SelectionChangedEvent event) {
+					PullUpInputPage.this.selectionChanged(event);
+				}
+			});
+			treeViever.addCheckStateListener(new ICheckStateListener(){
+				public void checkStateChanged(CheckStateChangedEvent event){
+					updateTypeHierarchyLabel();
+				}
+			});
+		
+			IMember[] members= getPullUpMethodsRefactoring().getElementsToPullUp();
+			for (int i= 0; i < members.length; i++) {
+				treeViever.setCheckState(members[i], true);
+			}
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.getString("PullUpInputPage.pull_up1"), RefactoringMessages.getString("PullUpInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			treeViever.setInput(null);
 		}	
-		treeViever.expandAll();
-		treeViever.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				PullUpInputPage.this.selectionChanged(event);
-			}
-		});
-		treeViever.addCheckStateListener(new ICheckStateListener(){
-			public void checkStateChanged(CheckStateChangedEvent event){
-				updateTypeHierarchyLabel();
-			}
-		});
+		
 		return treeViever;
 	}
 
@@ -442,25 +450,24 @@ public class PullUpInputPage extends UserInputWizardPage {
 	}	
 	
 	private static Map createTypeToMemberArrayMapping(IMember[] members){
-			Map typeToMemberSet= new HashMap();
-			for (int i = 0; i < members.length; i++) {
-				IMember member = members[i];
-				IType type= member.getDeclaringType();
-				if (!typeToMemberSet.containsKey(type))
-					typeToMemberSet.put(type, new HashSet());
-
-				((Set)typeToMemberSet.get(type)).add(member);
-			}
-			
-			Map typeToMemberArray= new HashMap();
-			for (Iterator iter = typeToMemberSet.keySet().iterator(); iter.hasNext();) {
-				IType type = (IType) iter.next();
-				Set memberSet= (Set)typeToMemberSet.get(type);
-				IMember[] memberArray = (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-				typeToMemberArray.put(type, memberArray);
-			}
-			return typeToMemberArray;
+		Map typeToMemberSet= new HashMap();
+		for (int i = 0; i < members.length; i++) {
+			IMember member = members[i];
+			IType type= member.getDeclaringType();
+			if (! typeToMemberSet.containsKey(type))
+				typeToMemberSet.put(type, new HashSet());
+			((Set)typeToMemberSet.get(type)).add(member);
 		}
+			
+		Map typeToMemberArray= new HashMap();
+		for (Iterator iter = typeToMemberSet.keySet().iterator(); iter.hasNext();) {
+			IType type = (IType) iter.next();
+			Set memberSet= (Set)typeToMemberSet.get(type);
+			IMember[] memberArray = (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
+			typeToMemberArray.put(type, memberArray);
+		}
+		return typeToMemberArray;
+	}
 	
 	private PullUpRefactoring getPullUpMethodsRefactoring(){
 		return (PullUpRefactoring)getRefactoring();
