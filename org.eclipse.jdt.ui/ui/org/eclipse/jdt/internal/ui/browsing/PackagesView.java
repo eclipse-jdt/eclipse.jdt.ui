@@ -231,15 +231,6 @@ public class PackagesView extends JavaBrowsingPart{
 		return new PackagesViewLabelProvider(PackagesViewLabelProvider.FLAT_VIEW_STATE);
 	}
 	
-	private ILabelDecorator[] concat(ILabelDecorator[] d1, ILabelDecorator[] d2) {
-		int d1Len= d1.length;
-		int d2Len= d2.length;
-		ILabelDecorator[] decorators= new ILabelDecorator[d1Len + d2Len];
-		System.arraycopy(d1, 0, decorators, 0, d1Len);
-		System.arraycopy(d2, 0, decorators, d1Len, d2Len); 
-		return decorators;
-	}
-
 	/**
 	 * Returns the context ID for the Help system
 	 * 

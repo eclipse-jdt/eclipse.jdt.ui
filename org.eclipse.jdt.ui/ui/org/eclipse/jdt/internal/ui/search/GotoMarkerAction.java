@@ -9,8 +9,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -179,10 +177,4 @@ public class GotoMarkerAction extends Action {
 			return ((IMember)jElement).isBinary();
 		return false;
 	}
-
-	private void beep() {
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		if (shell != null && shell.getDisplay() != null)
-			shell.getDisplay().beep();
-	}	
 }

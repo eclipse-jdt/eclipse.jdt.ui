@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.action.IMenuListener;
@@ -505,21 +504,6 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	/**
-	 * Returns the shell to use for opening dialogs.
-	 * Used in this class, and in the actions.
-	 */
-	private Shell getShell() {
-		return fViewer.getTree().getShell();
-	}
-
-	/**
-	 * Returns the selection provider.
-	 */
-	private ISelectionProvider getSelectionProvider() {
-		return fViewer;
-	}
-	
-	/**
 	 * Returns the current selection.
 	 */
 	private ISelection getSelection() {
@@ -542,28 +526,6 @@ public class PackageExplorerPart extends ViewPart
 
 	private void makeActions() {
 		fActionSet= new PackageExplorerActionGroup(this);
-	}
-	
-	private boolean isSelectionOfType(ISelection s, Class clazz, boolean considerUnderlyingResource) {
-		if (! (s instanceof IStructuredSelection) || s.isEmpty())
-			return false;
-		
-		IStructuredSelection selection= (IStructuredSelection)s;
-		Iterator iter= selection.iterator();
-		while (iter.hasNext()) {
-			Object o= iter.next();
-			if (clazz.isInstance(o))
-				return true;
-			if (considerUnderlyingResource) {
-				if (! (o instanceof IJavaElement))
-					return false;
-				IJavaElement element= (IJavaElement)o;
-				Object resource= element.getAdapter(IResource.class);
-				if (! clazz.isInstance(resource))
-					return false;
-			}
-		}
-		return true;	
 	}
 	
 	//---- Event handling ----------------------------------------------------------

@@ -259,14 +259,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private JavaEditorHoverConfigurationBlock fJavaEditorHoverConfigurationBlock;
 	
 	private Map fColorButtons= new HashMap();
-	private SelectionListener fColorButtonListener= new SelectionListener() {
-		public void widgetDefaultSelected(SelectionEvent e) {
-		}
-		public void widgetSelected(SelectionEvent e) {
-			ColorEditor editor= (ColorEditor) e.widget.getData();
-			PreferenceConverter.setValue(fOverlayStore, (String) fColorButtons.get(editor), editor.getColorValue());
-		}
-	};
 	
 	private Map fCheckBoxes= new HashMap();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
@@ -1296,28 +1288,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		super.dispose();
 	}
 	
-	private Control addColorButton(Composite composite, String label, String key, int indentation) {
-
-		Label labelControl= new Label(composite, SWT.NONE);
-		labelControl.setText(label);
-		
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= indentation;
-		labelControl.setLayoutData(gd);
-		
-		ColorEditor editor= new ColorEditor(composite);
-		Button button= editor.getButton();
-		button.setData(editor);
-		
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		button.setLayoutData(gd);
-		button.addSelectionListener(fColorButtonListener);
-		
-		fColorButtons.put(editor, key);
-		
-		return composite;
-	}
-	
 	private Button addCheckBox(Composite parent, String label, String key, int indentation) {		
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(label);
@@ -1355,18 +1325,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		}
 			
 		return textControl;
-	}
-	
-	private void addTextFontEditor(Composite parent, String label, String key) {
-		
-		Composite editorComposite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 3;
-		editorComposite.setLayout(layout);		
-				
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
-		editorComposite.setLayoutData(gd);
 	}
 	
 	private String loadPreviewContentFromFile(String filename) {

@@ -301,16 +301,6 @@ class JavaEditorHoverConfigurationBlock {
 		fDescription.setText(description);
 	}
 
-	private int convertWidthInCharsToPixels(Control control, int chars) {
-		GC gc = new GC(control);
-		gc.setFont(control.getFont());
-		FontMetrics fontMetrics = gc.getFontMetrics();
-		gc.dispose();
-		if (fontMetrics == null)
-			return 0;
-		return Dialog.convertWidthInCharsToPixels(fontMetrics, chars);
-	}
-
 	private int convertHeightInCharsToPixels(Control control, int chars) {
 		GC gc = new GC(control);
 		gc.setFont(control.getFont());

@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class SelectWorkingSetAction extends Action {
 	private Shell fShell;
-	private IWorkingSet fWorkingSet;
 	private WorkingSetFilterActionGroup fActionGroup;
 
 	public SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup, Shell shell) {

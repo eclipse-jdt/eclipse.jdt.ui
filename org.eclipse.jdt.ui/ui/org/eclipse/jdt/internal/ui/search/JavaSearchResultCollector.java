@@ -17,11 +17,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.search.ui.IActionGroupFactory;
-import org.eclipse.search.ui.IContextMenuContributor;
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.SearchUI;
 
@@ -48,7 +46,6 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private static final String POTENTIAL_MATCH_DIALOG_ID= "Search.PotentialMatchDialog"; //$NON-NLS-1$
 	
 	private IProgressMonitor fMonitor;
-	private IContextMenuContributor fContextMenu;
 	private ISearchResultView fView;
 	private JavaSearchOperation fOperation;
 	private int fMatchCount= 0;
@@ -197,14 +194,5 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		fMessageFormatArgs[0]= new Integer(count);
 		return MessageFormat.format(MATCHES, fMessageFormatArgs);
 
-	}
-
-	private IWorkbenchWindow getWorbenchWindow() {
-		IWorkbenchWindow wbWindow= null;
-		if (fView != null && fView.getSite() != null)
-			wbWindow= fView.getSite().getWorkbenchWindow();
-		if (wbWindow == null)
-			wbWindow= JavaPlugin.getActiveWorkbenchWindow();
-		return wbWindow;
 	}
 }

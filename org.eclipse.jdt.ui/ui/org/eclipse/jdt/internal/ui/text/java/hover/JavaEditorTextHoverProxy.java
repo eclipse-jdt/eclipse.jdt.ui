@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.util.IPropertyChangeListener;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -29,7 +28,6 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 
 	private JavaEditorTextHoverDescriptor fHoverDescriptor;
 	private IJavaEditorTextHover fHover;
-	private IPropertyChangeListener fEnableStateUpdater;
 
 	public JavaEditorTextHoverProxy(JavaEditorTextHoverDescriptor descriptor, IEditorPart editor) {
 		fHoverDescriptor= descriptor;

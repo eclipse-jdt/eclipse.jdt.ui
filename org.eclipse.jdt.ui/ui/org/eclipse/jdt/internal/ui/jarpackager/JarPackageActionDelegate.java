@@ -27,7 +27,6 @@ import org.eclipse.ui.PlatformUI;
 abstract class JarPackageActionDelegate implements IActionDelegate {
 
 	private IStructuredSelection fSelection;
-	private IWorkbench fWorkbench;
 
 	/**
 	 * Returns the active shell.

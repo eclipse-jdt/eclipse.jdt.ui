@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
 import org.eclipse.jface.action.ContributionItem;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
@@ -42,7 +41,6 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.filters.CustomFiltersDialog;
 import org.eclipse.jdt.internal.ui.filters.FilterDescriptor;
 import org.eclipse.jdt.internal.ui.filters.FilterMessages;
@@ -172,11 +170,6 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		super.dispose();
 	}
 	
-	private void appendToGroup(IMenuManager menu, IAction action, String groupName) {
-		if (action.isEnabled())
-			menu.appendToGroup(groupName, action);
-	}
-
 	private void initializeWithPluginContributions() {
 		fUserDefinedPatterns= new String[0];
 		fUserDefinedPatternsEnabled= false;

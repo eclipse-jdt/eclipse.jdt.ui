@@ -16,8 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Shell;
@@ -56,7 +54,6 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	private WorkingSetFilter fWorkingSetFilter;
 	
 	private IWorkingSet fWorkingSet= null;
-	private IAdaptable[] fCachedWorkingSet= null;
 	
 	private ClearWorkingSetAction fClearWorkingSetAction;
 	private SelectWorkingSetAction fSelectWorkingSetAction;

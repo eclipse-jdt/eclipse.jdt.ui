@@ -149,45 +149,6 @@ public class SearchUtil extends JavaModelUtil {
 		return false;
 	}
 
-	private static IJavaElement fixCUName(IMarker marker, String handle) {
-			// FIXME: This is a dirty fix for 1GCE1EI: ITPJUI:WINNT - Can't handle rename of resource
-			if (handle != null) {
-				String resourceName= ""; //$NON-NLS-1$
-				if (marker.getResource() != null)
-					resourceName= marker.getResource().getName();
-				if (!handleContainsWrongCU(handle, resourceName)) {
-				 	handle= computeFixedHandle(handle, resourceName);
-					IJavaElement je= JavaCore.create(handle);
-				 	if (je != null && je.exists()) {
-				 		try {
-							marker.setAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID, handle);
-				 		} catch (CoreException ex) {
-				 			// leave old attribute
-				 		} finally {
-							return je;
-				 		}
-				 	}
-				}
-			}
-			return null;
-	}
-	
-	private static boolean handleContainsWrongCU(String handle, String resourceName) {
-		int start= handle.indexOf('{');
-		int end= handle.indexOf(".java"); //$NON-NLS-1$
-		if (start >= end)
-			return false;
-		String name= handle.substring(start + 1, end + 5);
-		return name.equals(resourceName);
-	}
-	
-	private static String computeFixedHandle(String handle, String resourceName) {
-		int start= handle.indexOf('{');
-		int end= handle.indexOf(".java"); //$NON-NLS-1$
-		handle= handle.substring(0, start + 1) + resourceName + handle.substring(end + 5);
-		return handle;
-	}
-
 	/** 
 	 * Returns the working copy of the given java element.
 	 * @param javaElement the javaElement for which the working copyshould be found

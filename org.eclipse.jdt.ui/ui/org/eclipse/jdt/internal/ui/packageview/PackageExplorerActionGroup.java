@@ -264,17 +264,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
 	}
 	
-	private boolean isNewTarget(IJavaElement element) {
-		if (element == null)
-			return false;
-		int type= element.getElementType();
-		return type == IJavaElement.JAVA_PROJECT ||
-			type == IJavaElement.PACKAGE_FRAGMENT_ROOT || 
-			type == IJavaElement.PACKAGE_FRAGMENT ||
-			type == IJavaElement.COMPILATION_UNIT ||
-			type == IJavaElement.TYPE;
-	}
-	
 	private boolean isGoIntoTarget(Object element) {
 		if (element == null)
 			return false;

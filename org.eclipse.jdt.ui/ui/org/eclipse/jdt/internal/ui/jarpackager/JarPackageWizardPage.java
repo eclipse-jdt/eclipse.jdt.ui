@@ -73,11 +73,9 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	private JarPackageData fJarPackage;
 	private IStructuredSelection fInitialSelection;
 	private CheckboxTreeAndListGroup fInputGroup;
-	private boolean fFirstTime= true;
 
 	// widgets
 	private Text	fSourceNameField;	
-	private Button	fSourceBrowseButton;
 	private Button	fExportClassFilesCheckbox;
 	private Button	fExportJavaFilesCheckbox;	
 	
@@ -86,11 +84,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	
 	private Button		fCompressCheckbox;
 	private Button		fOverwriteCheckbox;
-	private Composite	fDescriptionFileGroup;
-	private Button		fSaveDescriptionCheckbox;
-	private Label		fDescriptionFileLabel;
 	private Text		fDescriptionFileText;
-	private Button		fDescriptionFileBrowseButton;
 
 	// dialog store id constants
 	private final static String PAGE_NAME= "JarPackageWizardPage"; //$NON-NLS-1$

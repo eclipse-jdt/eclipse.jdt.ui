@@ -24,8 +24,6 @@ import org.eclipse.jdt.core.IJavaElement;
  */
 public class NonJavaElementFilter  extends ViewerFilter {
 	
-	private boolean fFilterContainers;
-	
 	/**
 	 * Returns the result of this filter, when applied to the
 	 * given inputs.

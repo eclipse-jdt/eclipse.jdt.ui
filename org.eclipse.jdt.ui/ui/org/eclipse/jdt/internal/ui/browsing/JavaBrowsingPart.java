@@ -488,17 +488,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fActionGroups.fillContextMenu(menu);
 		fActionGroups.setContext(null);
 	}
-
-	private boolean isNewTarget(IJavaElement element) {
-		if (element == null)
-			return false;
-		int type= element.getElementType();
-		return type == IJavaElement.JAVA_PROJECT ||
-			type == IJavaElement.PACKAGE_FRAGMENT_ROOT || 
-			type == IJavaElement.PACKAGE_FRAGMENT ||
-			type == IJavaElement.COMPILATION_UNIT ||
-			type == IJavaElement.TYPE;
-	}
 	
 	private void addOpenNewWindowAction(IMenuManager menu, Object element) {
 		if (element instanceof IJavaElement) {

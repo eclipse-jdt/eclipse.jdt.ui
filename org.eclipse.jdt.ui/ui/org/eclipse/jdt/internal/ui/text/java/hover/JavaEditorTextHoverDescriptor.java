@@ -52,8 +52,6 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 	private static final String ACTIVATE_PLUG_IN_ATTRIBUTE= "activate"; //$NON-NLS-1$
 	private static final String DESCRIPTION_ATTRIBUTE= "description"; //$NON-NLS-1$
 
-	private static List fgContributedHovers;
-
 	public static final String NO_MODIFIER= "0"; //$NON-NLS-1$
 	public static final String DISABLED_TAG= "!"; //$NON-NLS-1$
 	public static final String VALUE_SEPARATOR= ";"; //$NON-NLS-1$
