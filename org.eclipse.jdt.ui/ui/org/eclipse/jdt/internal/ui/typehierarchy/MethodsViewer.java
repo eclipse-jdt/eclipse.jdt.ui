@@ -295,8 +295,10 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 	 * Fills up the context menu with items for the method viewer
 	 * Should be called by the creator of the context menu
 	 */	
-	public void contributeToContextMenu(IMenuManager menu) {	
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);	
+	public void contributeToContextMenu(IMenuManager menu) {
+		if (fOpen.canActionBeAdded()) {
+			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);
+		}
 		ContextMenuGroup.add(menu, fStandardGroups, this);
 	}
 

@@ -98,7 +98,9 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 	 * Should be called by the creator of the context menu
 	 */	
 	public void contributeToContextMenu(IMenuManager menu) {
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);
+		if (fOpen.canActionBeAdded()) {
+			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);
+		}
 		// XXX need to decide when to contribute the Show in PackagesView action
 		// if (fShowInPackageViewAction.canOperateOn())
 		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowInPackageViewAction);
