@@ -31,61 +31,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class BasicEditorActionContributor extends BasicTextEditorActionContributor {
 	
-	
-	protected static class SelectionAction extends TextEditorAction implements ISelectionChangedListener {
-		
-		protected int fOperationCode;
-		protected ITextOperationTarget fOperationTarget= null;
-		
-		
-		public SelectionAction(String prefix, int operation) {
-			super(JavaEditorMessages.getResourceBundle(), prefix, null);
-			fOperationCode= operation;
-			setEnabled(false);
-		}
-		
-		/**
-		 * @see TextEditorAction#setEditor(ITextEditor)
-		 */
-		public void setEditor(ITextEditor editor) {
-			if (getTextEditor() != null) {
-				ISelectionProvider p= getTextEditor().getSelectionProvider();
-				if (p != null) p.removeSelectionChangedListener(this);
-			}
-				
-			super.setEditor(editor);
-			
-			if (editor != null) {
-				ISelectionProvider p= editor.getSelectionProvider();
-				if (p != null) p.addSelectionChangedListener(this);
-				fOperationTarget= (ITextOperationTarget) editor.getAdapter(ITextOperationTarget.class);
-			} else
-				fOperationTarget= null;
-				
-			selectionChanged(null);
-		}
-		
-		/**
-		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
-		 */
-		public void selectionChanged(SelectionChangedEvent event) {
-			boolean isEnabled= (fOperationTarget != null && fOperationTarget.canDoOperation(fOperationCode));
-			setEnabled(isEnabled);
-		}
-		
-		/**
-		 * @see Action#run()
-		 */
-		public void run() {
-			if (fOperationCode != -1 && fOperationTarget != null)
-				fOperationTarget.doOperation(fOperationCode);
-		}
-	};	
 	protected RetargetTextEditorAction fContentAssist;	
 	protected RetargetTextEditorAction fContextInformation;
 	protected RetargetTextEditorAction fCorrectionAssist;		
-	protected SelectionAction fShiftRight;
-	protected SelectionAction fShiftLeft;
+	protected RetargetTextEditorAction fShiftRight;
+	protected RetargetTextEditorAction fShiftLeft;
 	
 	
 	public BasicEditorActionContributor() {
@@ -94,14 +44,11 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		fContentAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal."); //$NON-NLS-1$
 		fContextInformation= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation."); //$NON-NLS-1$
 		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
-		fShiftRight= new SelectionAction("ShiftRight.", ITextOperationTarget.SHIFT_RIGHT);		 //$NON-NLS-1$
-		fShiftLeft= new SelectionAction("ShiftLeft.", ITextOperationTarget.SHIFT_LEFT); //$NON-NLS-1$
+		fShiftRight= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShiftRight.");		 //$NON-NLS-1$
+		fShiftLeft= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShiftLeft."); //$NON-NLS-1$
 		
 		fShiftRight.setImageDescriptor(JavaPluginImages.DESC_MENU_SHIFT_RIGHT);
 		fShiftLeft.setImageDescriptor(JavaPluginImages.DESC_MENU_SHIFT_LEFT);
-		
-		fShiftRight.setAccelerator(0);
-		fShiftLeft.setAccelerator(0);
 	}
 	
 	/**
@@ -145,7 +92,8 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		fContentAssist.setAction(getAction(textEditor, "ContentAssistProposal")); //$NON-NLS-1$
 		fContextInformation.setAction(getAction(textEditor, "ContentAssistContextInformation")); //$NON-NLS-1$
 		fCorrectionAssist.setAction(getAction(textEditor, "CorrectionAssistProposal")); //$NON-NLS-1$
-		fShiftRight.setEditor(textEditor);
-		fShiftLeft.setEditor(textEditor);
+		
+		fShiftRight.setAction(getAction(textEditor, "ShiftRight")); //$NON-NLS-1$
+		fShiftLeft.setAction(getAction(textEditor, "ShiftLeft")); //$NON-NLS-1$
 	}
 }
