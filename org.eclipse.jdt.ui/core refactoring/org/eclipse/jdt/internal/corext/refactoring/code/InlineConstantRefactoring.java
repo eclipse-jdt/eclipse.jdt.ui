@@ -785,8 +785,8 @@ public class InlineConstantRefactoring extends Refactoring {
 		engine.setScope(RefactoringScopeFactory.create(fField));
 		engine.setStatus(status);
 		engine.setRequestor(new IRefactoringSearchRequestor() {
-			public boolean acceptSearchMatch(SearchMatch match) {
-				return ! match.isInsideDocComment();
+			public SearchMatch acceptSearchMatch(SearchMatch match) {
+				return match.isInsideDocComment() ? null : match;
 			}
 		});
 		engine.searchPattern(new SubProgressMonitor(pm, 1));

@@ -23,7 +23,7 @@ public interface IRefactoringSearchRequestor {
 	 * Can the search match be accepted?
 	 * 
 	 * @param match the search match to test
-	 * @return <code>true</code> if the match could be accepted, <code>false</code> otherwise
+	 * @return The accepted match, or <code>null</code> if not accepted
 	 */
-	public boolean acceptSearchMatch(SearchMatch match);
+	public SearchMatch acceptSearchMatch(SearchMatch match);
 }
