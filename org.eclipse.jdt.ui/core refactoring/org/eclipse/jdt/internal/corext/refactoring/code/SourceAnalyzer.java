@@ -22,16 +22,20 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -76,6 +80,12 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
+		public boolean visit(TypeDeclaration node) {
+			return false;
+		}
+		public boolean visit(AnonymousClassDeclaration node) {
+			return false;
+		}
 		public boolean visit(MethodInvocation node) {
 			if (fBinding != null && fBinding == node.getName().resolveBinding() && !status.hasFatalError()) {
 				status.addFatalError(RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.recursive_call")); //$NON-NLS-1$
@@ -117,9 +127,29 @@ class SourceAnalyzer  {
 			if (fTypeCounter++ == 0) {
 				addNameData(node.getName());
 			}
+			Name superclass= node.getSuperclass();
+			if (superclass != null) {
+				ITypeBinding superBinding= ASTNodes.getTypeBinding(superclass);
+				if (superBinding != null)
+					fTypes.add(superclass);
+			}
+			List interfaces= node.superInterfaces();
+			for (Iterator iter= interfaces.iterator(); iter.hasNext();) {
+				Name element= (Name)iter.next();
+				ITypeBinding binding= ASTNodes.getTypeBinding(element);
+				if (binding != null)
+					fTypes.add(element);
+			}
 			return true;
 		}
 		public void endVisit(TypeDeclaration node) {
+			fTypeCounter--;
+		}
+		public boolean visit(AnonymousClassDeclaration node) {
+			fTypeCounter++;
+			return true;
+		}
+		public void endVisit(AnonymousClassDeclaration node) {
 			fTypeCounter--;
 		}
 		public boolean visit(MethodDeclaration node) {
@@ -177,7 +207,10 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
-
+		public boolean visit(SimpleType node) {
+			fTypes.add(node.getName());
+			return true;
+		}
 		private void addNameData(SimpleName name) {
 			fNames.put(name.resolveBinding(), new NameData(name.getIdentifier()));
 		}
@@ -188,6 +221,7 @@ class SourceAnalyzer  {
 	private Map fParameters;
 	private Map fNames;
 	private List fImplicitReceivers;
+	private List fTypes;
 	private boolean fInterruptedExecutionFlow;
 
 	public SourceAnalyzer(ICompilationUnit unit, MethodDeclaration declaration) {
@@ -202,6 +236,7 @@ class SourceAnalyzer  {
 		}
 		fNames= new HashMap();
 		fImplicitReceivers= new ArrayList(2);
+		fTypes= new ArrayList(2);
 	}
 	
 	public boolean isExecutionFlowInterrupted() {
@@ -268,6 +303,9 @@ class SourceAnalyzer  {
 		return fImplicitReceivers;
 	}
 	
+	public List getUsedTypes() {
+		return fTypes;
+	}
 	private ASTNode[] getStatements() {
 		List statements= fDeclaration.getBody().statements();
 		return (ASTNode[]) statements.toArray(new ASTNode[statements.size()]);

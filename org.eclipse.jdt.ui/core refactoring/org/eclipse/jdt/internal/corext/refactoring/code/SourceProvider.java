@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -169,6 +170,7 @@ public class SourceProvider {
 		replaceParameterWithExpression(context.arguments);
 		updateImplicitReceivers(context);
 		makeNamesUnique(context.scope);
+		updateTypes(context);
 		
 		List ranges= null;
 		if (hasReturnValue()) {
@@ -258,6 +260,20 @@ public class SourceProvider {
 				inst.setExpression(createReceiver(context, inst.resolveConstructorBinding()));
 			} else if (node instanceof Expression) {
 				fRewriter.markAsReplaced(node, fRewriter.createPlaceholder(context.receiver, ASTRewrite.EXPRESSION));
+			}
+		}
+	}
+	
+	private void updateTypes(CallContext context) {
+		ImportEdit importer= context.importer;
+		for (Iterator iter= fAnalyzer.getUsedTypes().iterator(); iter.hasNext();) {
+			Name element= (Name)iter.next();
+			ITypeBinding binding= ASTNodes.getTypeBinding(element);
+			if (binding != null && !binding.isLocal()) {
+				String s= importer.addImport(binding);
+				if (!ASTNodes.asString(element).equals(s)) {
+					fRewriter.markAsReplaced(element, fRewriter.createPlaceholder(s, ASTRewrite.EXPRESSION));
+				}
 			}
 		}
 	}
