@@ -25,10 +25,14 @@ interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdatingRef
 	public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException;
 	public RefactoringStatus setDestination(IResource resource) throws JavaModelException;
 	public RefactoringStatus setDestination(IJavaElement javaElement) throws JavaModelException;
+	
 	public IResource[] getResources();
 	public IJavaElement[] getJavaElements();
+	
 	public IResource getResourceDestination();
 	public IJavaElement getJavaElementDestination();
+	
+	public boolean hasAllInputSet();
 
 	public boolean canUpdateReferences();
 	public void setUpdateReferences(boolean update);
