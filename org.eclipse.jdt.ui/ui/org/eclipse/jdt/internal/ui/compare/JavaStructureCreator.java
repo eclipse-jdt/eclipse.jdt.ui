@@ -38,9 +38,14 @@ public class JavaStructureCreator implements IStructureCreator {
 	 */
 	static class ProblemFactory implements IProblemFactory {
 		
-		public IProblem createProblem(char[] originatingFileName, int problemId, String[] arguments, int severity, int startPosition, int endPosition, int lineNumber) {
+		public IProblem createProblem(char[] originatingFileName, int problemId, String[] arguments, String[] messageArguments, int severity, int startPosition, int endPosition, int lineNumber) {
 			throw new ParseError();
 		}
+		
+		/** @deprecated Remove after jcore 1/8/02 update */
+		public IProblem createProblem(char[] originatingFileName, int problemId, String[] arguments, int severity, int startPosition, int endPosition, int lineNumber) {
+			throw new ParseError();
+		}		
 		
 		public Locale getLocale() {
 			return Locale.getDefault();
