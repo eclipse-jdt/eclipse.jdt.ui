@@ -101,11 +101,15 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 	}
 		
 	private boolean canRun(ITextSelection selection){
-		IJavaElement[] elements= resolveElements();
-		if (elements.length != 1)
+		try {
+			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+			if (element == null)
+				return false;
+			return (element instanceof IMember) && shouldAcceptElements(new IJavaElement[]{element});
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
-
-		return (elements[0] instanceof IMember) && shouldAcceptElements(elements);
+		}
 	}
 
 	private MoveStaticMembersRefactoring createNewRefactoringInstance(Object[] elements){
@@ -127,10 +131,6 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		}	
 	}
 		
-	private IJavaElement[] resolveElements() {
-		return SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"));  //$NON-NLS-1$
-	}
-
 	private RefactoringWizard createWizard(){
 		String title= RefactoringMessages.getString("RefactoringGroup.move_Members"); //$NON-NLS-1$
 		String helpId= IJavaHelpContextIds.MOVE_MEMBERS_ERROR_WIZARD_PAGE;
