@@ -30,8 +30,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.actions.FindExceptionOccurrences;
-import org.eclipse.jdt.internal.ui.actions.FindImplementOccurrencesAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
@@ -85,7 +83,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	private String fGroupId;
 
 	private FindOccurrencesInFileAction fOccurrencesInFileAction;
-	private FindExceptionOccurrences fExceptionOccurrencesAction;
+	private FindExceptionOccurrencesAction fExceptionOccurrencesAction;
 	private FindImplementOccurrencesAction fFindImplementorOccurrencesAction;
 
 	/**
@@ -104,7 +102,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		// Need to reset the label
 		fOccurrencesInFileAction.setText(SearchMessages.getString("Search.FindOccurrencesInFile.shortLabel")); //$NON-NLS-1$
 
-		fExceptionOccurrencesAction= new FindExceptionOccurrences(site);
+		fExceptionOccurrencesAction= new FindExceptionOccurrencesAction(site);
 		fExceptionOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_EXCEPTION_OCCURRENCES_IN_FILE);
 
 		fFindImplementorOccurrencesAction= new FindImplementOccurrencesAction(site);
@@ -143,7 +141,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fOccurrencesInFileAction.setText(SearchMessages.getString("Search.FindOccurrencesInFile.shortLabel")); //$NON-NLS-1$
 		fEditor.setAction("SearchOccurrencesInFile", fOccurrencesInFileAction); //$NON-NLS-1$
 
-		fExceptionOccurrencesAction= new FindExceptionOccurrences(fEditor);
+		fExceptionOccurrencesAction= new FindExceptionOccurrencesAction(fEditor);
 		fExceptionOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_EXCEPTION_OCCURRENCES_IN_FILE);
 		fEditor.setAction("SearchExceptionOccurrences", fExceptionOccurrencesAction); //$NON-NLS-1$
 

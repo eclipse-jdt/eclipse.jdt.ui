@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.actions;
+package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -27,16 +27,15 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
 
- 
 /**
  * Action to find all originators of a exception (e.g. method invocations, 
  * class casts, ...) for a given exception.
@@ -44,22 +43,22 @@ import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * 
- * @since 3.0
+ * @since 3.1
  */
-public class FindExceptionOccurrences extends SelectionDispatchAction {
+public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	
 	private JavaEditor fEditor;
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
-	public FindExceptionOccurrences(JavaEditor editor) {
+	public FindExceptionOccurrencesAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(getEditorInput(editor) != null);
 	}
 	
-	public FindExceptionOccurrences(IWorkbenchSite site) {
+	public FindExceptionOccurrencesAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("FindExceptionOccurrences.text")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("FindExceptionOccurrences.toolTip")); //$NON-NLS-1$
