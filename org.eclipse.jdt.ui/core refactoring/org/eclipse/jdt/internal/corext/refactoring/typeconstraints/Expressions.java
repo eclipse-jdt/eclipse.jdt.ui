@@ -42,7 +42,7 @@ public final class Expressions {
 		else if (binding.getKey() == null)
 			return binding.hashCode();
 		else
-			return resolveBinding(expression).getKey().hashCode();
+			return binding.getKey().hashCode();
 	}
 	
 	private static IBinding resolveBinding(Expression expression){
