@@ -260,7 +260,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		
 		TabFolder folder= new TabFolder(parent, SWT.NONE);
 		folder.setLayout(new TabFolderLayout());	
-		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
+		//folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		Composite commonComposite= createStyleTabContent(folder);
 		Composite unusedComposite= createUnusedCodeTabContent(folder);

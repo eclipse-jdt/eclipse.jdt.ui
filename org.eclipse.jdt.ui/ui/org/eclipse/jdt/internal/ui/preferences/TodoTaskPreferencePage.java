@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.widgets.Composite;
@@ -43,6 +44,13 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
+		IStatusChangeListener listener= new IStatusChangeListener() {
+			public void statusChanged(IStatus status) {
+				setPreferenceContentStatus(status);
+			}
+		};		
+		fConfigurationBlock= new TodoTaskConfigurationBlock(listener, getProject());
+		
 		super.createControl(parent);
 		if (isProjectPreferencePage()) {
 			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.TODOTASK_PROPERTY_PAGE);
@@ -55,12 +63,6 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#createPreferenceContent(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createPreferenceContent(Composite composite) {
-		IStatusChangeListener listener= new IStatusChangeListener() {
-			public void statusChanged(IStatus status) {
-				setPreferenceContentStatus(status);
-			}
-		};		
-		fConfigurationBlock= new TodoTaskConfigurationBlock(listener, getProject());
 		return fConfigurationBlock.createContents(composite);
 	}
 	
@@ -104,6 +106,14 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 			return false;
 		}	
 		return super.performOk();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#setElement(org.eclipse.core.runtime.IAdaptable)
+	 */
+	public void setElement(IAdaptable element) {
+		super.setElement(element);
+		setDescription(null); // no description for property page
 	}
 
 

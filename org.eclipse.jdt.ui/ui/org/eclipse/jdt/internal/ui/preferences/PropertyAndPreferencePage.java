@@ -66,17 +66,17 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		
 		fUseWorkspaceSettings= new SelectionButtonDialogField(SWT.RADIO);
 		fUseWorkspaceSettings.setDialogFieldListener(listener);
-		fUseWorkspaceSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useworkspacesettings.label")); //$NON-NLS-1$
+		fUseWorkspaceSettings.setLabelText(PreferencesMessages.getString("PropertyAndPreferencePage.useworkspacesettings.label")); //$NON-NLS-1$
 
 		fChangeWorkspaceSettings= new SelectionButtonDialogField(SWT.PUSH);
-		fChangeWorkspaceSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useworkspacesettings.change")); //$NON-NLS-1$
+		fChangeWorkspaceSettings.setLabelText(PreferencesMessages.getString("PropertyAndPreferencePage.useworkspacesettings.change")); //$NON-NLS-1$
 		fChangeWorkspaceSettings.setDialogFieldListener(listener);
 	
 		fUseWorkspaceSettings.attachDialogField(fChangeWorkspaceSettings);
 
 		fUseProjectSettings= new SelectionButtonDialogField(SWT.RADIO);
 		fUseProjectSettings.setDialogFieldListener(listener);
-		fUseProjectSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useprojectsettings.label")); //$NON-NLS-1$
+		fUseProjectSettings.setLabelText(PreferencesMessages.getString("PropertyAndPreferencePage.useprojectsettings.label")); //$NON-NLS-1$
 	}
 
 	protected abstract Control createPreferenceContent(Composite composite);
@@ -103,7 +103,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			fUseProjectSettings.doFillIntoGrid(composite, 2);
 		}
 			
-		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL );
+		GridData data= new GridData(GridData.FILL, GridData.FILL, !isProjectPreferencePage(), false);
 		data.horizontalSpan= 2;
 		
 		fConfigurationBlockControl= createPreferenceContent(composite);
@@ -114,7 +114,8 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			
 			fUseProjectSettings.setSelection(useProjectSettings);
 			fUseWorkspaceSettings.setSelection(!useProjectSettings);
-			enablePreferenceContent(useProjectSettings);
+			
+			doProjectWorkspaceStateChanged();
 		}
 
 		Dialog.applyDialogFont(composite);
@@ -139,11 +140,15 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		if (field == fChangeWorkspaceSettings) {
 			openWorkspacePreferences();
 		} else {
-			enablePreferenceContent(useProjectSettings());
-			doStatusChanged();
+			doProjectWorkspaceStateChanged();
 		}
 	}	
 	
+	private void doProjectWorkspaceStateChanged() {
+		enablePreferenceContent(useProjectSettings());
+		doStatusChanged();
+	}
+
 	protected void setPreferenceContentStatus(IStatus status) {
 		fBlockStatus= status;
 		doStatusChanged();
