@@ -31,7 +31,8 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	private static final Class clazz= RenameVirtualMethodInClassTests.class;
 	private static final String REFACTORING_PATH= "RenameVirtualMethodInClass/";
 	
-	private static final boolean BUG_79976_Generics= true;
+	private static final boolean BUG_79976_RippleMethodFinder= true;
+	private static final boolean BUG_83083_CORE_SEARCH_NPE= true;
 		
 	public RenameVirtualMethodInClassTests(String name) {
 		super(name);
@@ -122,11 +123,31 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	public void testGenerics1() throws Exception {
-		if (BUG_79976_Generics) {
-			printTestDisabledMessage("Bug 79976: RippleMethodFinder doesn't account for generics");
+		if (BUG_79976_RippleMethodFinder || BUG_83083_CORE_SEARCH_NPE) {
+			printTestDisabledMessage("Bugs 79976, 83083");
 			return;
 		}
 		helper2_0("m", "k", new String[]{"QG;"});
+	}
+	
+	public void testGenerics2() throws Exception {
+		if (BUG_79976_RippleMethodFinder || BUG_83083_CORE_SEARCH_NPE) {
+			printTestDisabledMessage("Bugs 79976, 83083");
+			return;
+		}
+		helper2_0("add", "addIfPositive", new String[]{"QE;"});
+	}
+	
+	public void testGenerics3() throws Exception {
+		if (BUG_79976_RippleMethodFinder || BUG_83083_CORE_SEARCH_NPE) {
+			printTestDisabledMessage("Bugs 79976, 83083");
+			return;
+		}
+		helper2_0("add", "addIfPositive", new String[]{"QE;"});
+	}
+	
+	public void testGenerics4() throws Exception {
+		helper2_0("takeANumber", "doit", new String[]{"QNumber;"});
 	}
 	
 	public void testFail0() throws Exception{
