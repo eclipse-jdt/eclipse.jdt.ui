@@ -154,6 +154,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForVariable:
 			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
 			case IProblem.IncompatibleReturnType:
+			case IProblem.IncompatibleExceptionInThrowsClause:
 				return true;
 			default:
 				return false;
@@ -265,6 +266,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IncompatibleReturnType:
 				TypeMismatchSubProcessor.addIncompatibleReturnTypeProposals(context, problem, proposals);
 				break;
+			case IProblem.IncompatibleExceptionInThrowsClause:
+				TypeMismatchSubProcessor.addIncompatibleThrowsProposals(context, problem, proposals);
+				break;
+				
 			case IProblem.UnhandledException:
 				LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(context, problem, proposals);
 				break;
@@ -417,10 +422,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ArgumentHidingLocalVariable:
 			case IProblem.ArgumentHidingField:
 				LocalCorrectionsSubProcessor.addHidingVariablesProposals(context, problem, proposals);
-			case IProblem.IncompatibleExceptionInThrowsClause:
-			case IProblem.IncompatibleExceptionInInheritedMethodThrowsClause:
-				
-			
+				break;
 			default:
 		}
 	}

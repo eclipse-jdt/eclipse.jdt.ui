@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.CoreException;
@@ -19,7 +20,26 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -31,10 +51,11 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.ChangeDescription;
+import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
+import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.RemoveDescription;
 
-/**
- *
- */
+
 public class TypeMismatchSubProcessor {
 
 	private TypeMismatchSubProcessor() {
@@ -282,10 +303,7 @@ public class TypeMismatchSubProcessor {
 
 	public static void addIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= problem.getCoveredNode(astRoot);
-		if (selectedNode instanceof SimpleName) {
-			selectedNode= selectedNode.getParent();
-		}
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (!(selectedNode instanceof MethodDeclaration)) {
 			return;
 		}
@@ -311,8 +329,70 @@ public class TypeMismatchSubProcessor {
 		if (targetCu != null) {
 			proposals.add(new TypeChangeCompletionProposal(targetCu, overridden, astRoot, binding.getReturnType(), false, 7));
 		}
-
+	}
 	
+	public static void addIncompatibleThrowsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
+		if (!(selectedNode instanceof MethodDeclaration)) {
+			return;
+		}
+		MethodDeclaration decl= (MethodDeclaration) selectedNode;
+		IMethodBinding binding= decl.resolveBinding();
+		if (binding == null) {
+			return;
+		}
+		
+		IMethodBinding overridden= Bindings.findMethodDefininition(binding);
+		if (overridden == null) {
+			return;
+		}
+		
+		ICompilationUnit cu= context.getCompilationUnit();
+		
+		ITypeBinding[] methodExceptions= binding.getExceptionTypes();
+		ITypeBinding[] definedExceptions= overridden.getExceptionTypes();
+		
+		ArrayList undeclaredExceptions= new ArrayList();
+		{
+			ChangeDescription[] changes= new ChangeDescription[methodExceptions.length];
+			
+			for (int i= 0; i < methodExceptions.length; i++) {
+				if (!isDeclaredException(methodExceptions[i], definedExceptions)) {
+					changes[i]= new RemoveDescription();
+					undeclaredExceptions.add(methodExceptions[i]);
+				}
+			}
+			String label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.removeexceptions.description", binding.getName()); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
+			proposals.add(new ChangeMethodSignatureProposal(label, cu, astRoot, binding, null, changes, 8, image));
+		}
+		
+		ITypeBinding declaringType= overridden.getDeclaringClass();
+		ICompilationUnit targetCu= cu;
+		if (declaringType != null && declaringType.isFromSource()) {
+			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
+		}
+		if (targetCu != null) {
+			ChangeDescription[] changes= new ChangeDescription[definedExceptions.length + undeclaredExceptions.size()];
+			
+			for (int i= 0; i < undeclaredExceptions.size(); i++) {
+				changes[i + definedExceptions.length]= new InsertDescription((ITypeBinding) undeclaredExceptions.get(i), ""); //$NON-NLS-1$
+			}
+			String[] args= {  declaringType.getName(), overridden.getName() };
+			String label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.addexceptions.description", args); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+			proposals.add(new ChangeMethodSignatureProposal(label, targetCu, astRoot, overridden, null, changes, 7, image));
+		}
+	}
+	
+	private static boolean isDeclaredException(ITypeBinding curr, ITypeBinding[] declared) {
+		for (int i= 0; i < declared.length; i++) {
+			if (Bindings.isSuperType(declared[i], curr)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 

@@ -72,13 +72,15 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	private ASTNode fInvocationNode;
 	private IMethodBinding fSenderBinding;
 	private ChangeDescription[] fParameterChanges;
+	private ChangeDescription[] fExceptionChanges;
 		
-	public ChangeMethodSignatureProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, IMethodBinding binding, ChangeDescription[] changes, int relevance, Image image) {
+	public ChangeMethodSignatureProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, IMethodBinding binding, ChangeDescription[] paramChanges, ChangeDescription[] exceptionChanges, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
 		
 		fInvocationNode= invocationNode;
 		fSenderBinding= binding;
-		fParameterChanges= changes;
+		fParameterChanges= paramChanges;
+		fExceptionChanges= exceptionChanges;
 	}
 	
 	protected ASTRewrite getRewrite() throws CoreException {
@@ -98,14 +100,21 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			newMethodDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		if (newMethodDecl instanceof MethodDeclaration) {
+			MethodDeclaration decl= (MethodDeclaration) newMethodDecl;
+			
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
-			modifySignature(rewrite, (MethodDeclaration) newMethodDecl, isInDifferentCU);
+			if (fParameterChanges != null) {
+				modifyParameters(rewrite, decl, isInDifferentCU);
+			}
+			if (fExceptionChanges != null) {
+				modifyExceptions(rewrite, decl);
+			}
 			return rewrite;
 		}
 		return null;
 	}
 	
-	private void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
+	private void modifyParameters(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
 		AST ast= methodDecl.getAST();
 
 		ArrayList usedNames= new ArrayList();
@@ -233,4 +242,49 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			}
 		}
 	}
+	
+	private void modifyExceptions(ASTRewrite rewrite, MethodDeclaration methodDecl) throws CoreException {
+		AST ast= methodDecl.getAST();
+		
+		ImportRewrite imports= getImportRewrite();
+		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
+		
+		List exceptions= methodDecl.thrownExceptions(); // old exceptions
+		int k= 0; // index over the old exceptions
+		
+		for (int i= 0; i < fExceptionChanges.length; i++) {
+			ChangeDescription curr= fExceptionChanges[i];
+			
+			if (curr == null) {
+				k++;
+			} else if (curr instanceof InsertDescription) {
+				InsertDescription desc= (InsertDescription) curr;
+				String type= imports.addImport(desc.type);
+				ASTNode newNode= ASTNodeFactory.newName(ast, type);
+
+				listRewrite.insertAt(newNode, i, null);
+			} else if (curr instanceof RemoveDescription) {
+				listRewrite.remove((ASTNode) exceptions.get(k), null);
+				k++;
+			} else if (curr instanceof EditDescription) {
+				EditDescription desc= (EditDescription) curr;
+
+				String type= imports.addImport(desc.type);
+				ASTNode newNode= ASTNodeFactory.newName(ast, type);
+				
+				listRewrite.replace((ASTNode) exceptions.get(k), newNode, null);
+				k++;
+			} else if (curr instanceof SwapDescription) {
+				ASTNode decl1= (ASTNode) exceptions.get(k);
+				ASTNode decl2= (ASTNode) exceptions.get(((SwapDescription) curr).index);
+				
+				rewrite.replace(decl1, rewrite.createCopyTarget(decl2), null);
+				rewrite.replace(decl2, rewrite.createCopyTarget(decl1), null);
+				
+				k++;	
+			}
+		}
+	}
+
+	
 }
