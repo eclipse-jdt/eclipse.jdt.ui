@@ -66,7 +66,6 @@ public class TypesView extends JavaBrowsingPart {
 	 */
 	protected boolean isValidInput(Object element) {
 		return element instanceof IPackageFragment;
-		//|| element instanceof ICompilationUnit || element instanceof IClassFile;
 	}
 
 	/**
