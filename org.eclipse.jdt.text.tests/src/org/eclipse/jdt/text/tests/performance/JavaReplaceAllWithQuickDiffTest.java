@@ -95,7 +95,7 @@ public class JavaReplaceAllWithQuickDiffTest extends TextPerformanceTestCase {
 			SWTEventHelper.pressKeyChar(display, 'a');
 			SWTEventHelper.keyCodeUp(display, SWT.MOD3);
 			performanceMeter.stop();
-			SWTEventHelper.pressKeyChar(display, SWT.ESC);
+			SWTEventHelper.pressKeyCodeCombination(display, new int[] {SWT.ALT, SWT.F4});
 			DisplayHelper helper= new DisplayHelper() {
 				public boolean condition() {
 					return fEditor.isDirty();
