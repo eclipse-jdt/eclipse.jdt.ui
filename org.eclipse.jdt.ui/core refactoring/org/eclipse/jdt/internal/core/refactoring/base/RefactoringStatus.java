@@ -51,7 +51,7 @@ public class RefactoringStatus {
 	 * Creates a <code>RefactorngStatus</code> with one INFO entry.
 	 * This is a convenience method.
 	 */
-	public static RefactoringStatus createInfoStatus(String msg, IResource resource, ISourceRange range){
+	public static RefactoringStatus createInfoStatus(String msg, Object resource, ISourceRange range){
 		return createStatus(INFO, msg, resource, range); 
 	}
 	
@@ -67,7 +67,7 @@ public class RefactoringStatus {
 	 * Creates a <code>RefactorngStatus</code> with one WARNING entry.
 	 * This is a convenience method.
 	 */
-	public static RefactoringStatus createWarningStatus(String msg, IResource resource, ISourceRange range){
+	public static RefactoringStatus createWarningStatus(String msg, Object resource, ISourceRange range){
 		return createStatus(WARNING, msg, resource, range);  
 	}
 	
@@ -83,7 +83,7 @@ public class RefactoringStatus {
 	 * Creates a <code>RefactorngStatus</code> with one ERROR entry.
 	 * This is a convenience method.
 	 */
-	public static RefactoringStatus createErrorStatus(String msg, IResource resource, ISourceRange range){
+	public static RefactoringStatus createErrorStatus(String msg, Object resource, ISourceRange range){
 		return createStatus(ERROR, msg, resource, range);  
 	}
 		
@@ -99,11 +99,11 @@ public class RefactoringStatus {
 	 * Creates a <code>RefactorngStatus</code> with one FATAL entry.
 	 * This is a convenience method.
 	 */
-	public static RefactoringStatus createFatalErrorStatus(String msg, IResource resource, ISourceRange range){
+	public static RefactoringStatus createFatalErrorStatus(String msg, Object resource, ISourceRange range){
 		return createStatus(FATAL, msg, resource, range); 
 	}
 	
-	private static RefactoringStatus createStatus(int severity, String msg, IResource resource, ISourceRange range){
+	private static RefactoringStatus createStatus(int severity, String msg, Object resource, ISourceRange range){
 		RefactoringStatus result= new RefactoringStatus(); 
 		result.fEntries.add(new RefactoringStatusEntry(msg, severity, resource, range));
 		result.fSeverity= severity;
@@ -132,8 +132,7 @@ public class RefactoringStatus {
 	 * @see #OK
 	 * @see #INFO	 
 	 */ 
-	public void addInfo(String msg, IResource resource, ISourceRange range){
-		Assert.isNotNull(msg);
+	public void addInfo(String msg, Object resource, ISourceRange range){
 		fEntries.add(RefactoringStatusEntry.createInfo(msg, resource, range));
 		fSeverity= Math.max(fSeverity, INFO);
 	}
@@ -158,8 +157,7 @@ public class RefactoringStatus {
 	 * @see #INFO	 
 	 * @see #WARNING
 	 */
-	public void addWarning(String msg, IResource resource, ISourceRange range){
-		Assert.isNotNull(msg);
+	public void addWarning(String msg, Object resource, ISourceRange range){
 		fEntries.add(RefactoringStatusEntry.createWarning(msg, resource, range));
 		fSeverity= Math.max(fSeverity, WARNING);
 	}
@@ -189,8 +187,7 @@ public class RefactoringStatus {
 	 * @see #WARNING
 	 * @see #ERROR
 	 */	
-	public void addError(String msg, IResource resource, ISourceRange range){
-		Assert.isNotNull(msg);
+	public void addError(String msg, Object resource, ISourceRange range){
 		fEntries.add(RefactoringStatusEntry.createError(msg, resource, range));
 		fSeverity= Math.max(fSeverity, ERROR);
 	}
@@ -221,10 +218,20 @@ public class RefactoringStatus {
 	 * @see #ERROR
 	 * @see #FATAL
 	 */	
-	public void addFatalError(String msg, IResource resource, ISourceRange range){
-		Assert.isNotNull(msg);
+	public void addFatalError(String msg, Object resource, ISourceRange range){
 		fEntries.add(RefactoringStatusEntry.createFatal(msg, resource, range));
 		fSeverity= Math.max(fSeverity, FATAL);
+	}
+	
+	/**
+	 * Adds an <code>RefactoringStatusEntry</code>.
+	 * 
+	 * @param entry the <code>RefactoringStatusEntry</code> to be added
+	 */
+	public void addEntry(RefactoringStatusEntry entry) {
+		Assert.isNotNull(entry);
+		fEntries.add(entry);
+		fSeverity= Math.max(fSeverity, entry.getSeverity());
 	}
 	
 	/**

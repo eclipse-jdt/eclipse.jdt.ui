@@ -9,7 +9,9 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 
 /**
@@ -20,6 +22,14 @@ public class ASTUtil {
 	//no instances
 	private ASTUtil(){
 	}
+	
+	public static int getSimpleLength(AstNode node) {
+		return node.sourceEnd - node.sourceStart + 1;
+	}
+	
+	public static char[] getIdentifier(FieldBinding binding) {
+		return CharOperation.concat(binding.declaringClass.constantPoolName(), binding.name, '^');
+	}	
 	
 	/**
 	 * Returns the source start of a node independent whether it is a declaration or
@@ -49,13 +59,5 @@ public class ASTUtil {
 			return ((AbstractMethodDeclaration)node).declarationSourceEnd;
 			
 		return node.sourceEnd;
-	}
-	
-	public static int getSimpleLength(AstNode node) {
-		return node.sourceEnd - node.sourceStart + 1;
-	}
-	
-	public static char[] getIdentifier(FieldBinding binding) {
-		return CharOperation.concat(binding.declaringClass.constantPoolName(), binding.name, '^');
 	}	
 }

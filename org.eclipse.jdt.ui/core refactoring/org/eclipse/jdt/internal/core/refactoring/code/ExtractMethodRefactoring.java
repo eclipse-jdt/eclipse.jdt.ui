@@ -185,27 +185,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 		RefactoringStatus result= null;
 		AbstractMethodDeclaration node= fAnalyzer.getEnclosingMethod();
 		if (node != null) {
-			pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 4); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("ExtractMethodRefactoring.checking_new_name"), 2); //$NON-NLS-1$
 			pm.subTask(EMPTY);
 		
 			result= Checks.checkMethodName(fMethodName);
 			pm.worked(1);
-		
-			IMethod method= (IMethod)fCUnit.getElementAt(node.sourceStart);
-			IType type= method.getDeclaringType();
 			
-			if (type.getElementName().equals(fMethodName))
-				result.addWarning("New method name has constructor name");
-			
-//			LocalVariableAnalyzer localAnalyzer= fAnalyzer.getLocalVariableAnalyzer();
-//			String[] params= localAnalyzer.getParameterTypes();
-//		
-//			result.merge(Checks.checkMethodInType(type, fMethodName, params, false));
-//			pm.worked(1);
-//		
-//			result.merge(Checks.checkMethodInHierarchy(new SubProgressMonitor(pm, 1), 
-//				type, fMethodName, params, false, fMethodFlags));	
-//			pm.worked(1);
+			fAnalyzer.checkInput(result, fMethodName, fCUnit.getJavaProject());
+			pm.worked(1);
 		
 			pm.done();
 		} else {

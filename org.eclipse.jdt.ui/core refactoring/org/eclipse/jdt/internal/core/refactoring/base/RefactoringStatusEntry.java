@@ -9,9 +9,8 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 
 /**
- * An immutable tuple (message, severity) representing an entry in the list in <code>RefactoringStatus</code>.
- * Clients can instantiate.
- * This class is not intented to be subclassed.
+ * An immutable tuple (message, severity) representing an entry in the list in 
+ * <code>RefactoringStatus</code>.
  * <p>
  * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
  * and expected to change significantly before reaching stability. It is being made available at 
@@ -22,20 +21,21 @@ public class RefactoringStatusEntry{
 	
 	private String fMessage;
 	private int fSeverity;
-	private IResource fResource;
+	private Object fResource;
 	private ISourceRange fSourceRange;
 	
 	/**
 	 * Creates an entry with the given severity.
-	 * @param severity severity
 	 * @param msg message
+	 * @param severity severity
 	 */
-	RefactoringStatusEntry(String msg, int severity, IResource resource, ISourceRange sourceRange){
+	public RefactoringStatusEntry(String msg, int severity, Object resource, ISourceRange sourceRange){
 		Assert.isTrue(severity == RefactoringStatus.INFO 
 				   || severity == RefactoringStatus.WARNING
 				   || severity == RefactoringStatus.ERROR
 				   || severity == RefactoringStatus.FATAL);
 		fMessage= msg;
+		Assert.isNotNull(fMessage);
 		fSeverity= severity;
 		fResource= resource;
 		fSourceRange= sourceRange;
@@ -46,7 +46,7 @@ public class RefactoringStatusEntry{
 	 * @param severity severity
 	 * @param msg message
 	 */
-	RefactoringStatusEntry(String msg, int severity){
+	public RefactoringStatusEntry(String msg, int severity){
 		this(msg, severity, null, null);
 	}
 	
@@ -62,7 +62,7 @@ public class RefactoringStatusEntry{
 	 * Creates an entry with <code>RefactoringStatus.INFO</code> status.
 	 * @param msg message
 	 */
-	public static RefactoringStatusEntry createInfo(String msg, IResource resource, ISourceRange range){
+	public static RefactoringStatusEntry createInfo(String msg, Object resource, ISourceRange range){
 		return new RefactoringStatusEntry(msg, RefactoringStatus.INFO, resource, range);
 	}
 	/**
@@ -77,7 +77,7 @@ public class RefactoringStatusEntry{
 	 * Creates an entry with <code>RefactoringStatus.WARNING</code> status.
 	 * @param msg message
 	 */	
-	public static RefactoringStatusEntry createWarning(String msg, IResource resource, ISourceRange range){
+	public static RefactoringStatusEntry createWarning(String msg, Object resource, ISourceRange range){
 		return new RefactoringStatusEntry(msg, RefactoringStatus.WARNING, resource, range);
 	}
 	
@@ -93,7 +93,7 @@ public class RefactoringStatusEntry{
 	 * Creates an entry with <code>RefactoringStatus.ERROR</code> status.
 	 * @param msg message
 	 */		
-	public static RefactoringStatusEntry createError(String msg, IResource resource, ISourceRange range){
+	public static RefactoringStatusEntry createError(String msg, Object resource, ISourceRange range){
 		return new RefactoringStatusEntry(msg, RefactoringStatus.ERROR, resource, range);
 	}
 	
@@ -109,7 +109,7 @@ public class RefactoringStatusEntry{
 	 * Creates an entry with <code>RefactoringStatus.FATAL</code> status.
 	 * @param msg message
 	 */	
-	public static RefactoringStatusEntry createFatal(String msg, IResource resource, ISourceRange range){
+	public static RefactoringStatusEntry createFatal(String msg, Object resource, ISourceRange range){
 		return new RefactoringStatusEntry(msg, RefactoringStatus.FATAL, resource, range);
 	}
 	
@@ -157,7 +157,7 @@ public class RefactoringStatusEntry{
 		return fSeverity;
 	}
 
-	public IResource getCorrespondingResource(){
+	public Object getResource(){
 		return fResource;
 	}
 	
@@ -168,7 +168,7 @@ public class RefactoringStatusEntry{
 	 * for debugging only
 	 */
 	public String toString(){
-		String pathString= fResource == null ? "<Unspecified resource>": fResource.getFullPath().toString();
+		String pathString= fResource == null ? "<Unspecified resource>": fResource.toString();
 		String rangeString= fSourceRange == null ? "<Unspecified range>": fSourceRange.toString();	
 		return RefactoringStatus.getSeverityString(fSeverity) + ": " + fMessage + " in " + pathString + " " + rangeString;
 	}

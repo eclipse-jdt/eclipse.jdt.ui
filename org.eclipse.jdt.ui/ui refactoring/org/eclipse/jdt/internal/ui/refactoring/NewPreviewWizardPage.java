@@ -241,10 +241,11 @@ public class NewPreviewWizardPage extends RefactoringWizardPage implements IPrev
 	 * Subclasses may override to provide their own preview.
 	 * 
 	 * @param element the change element for which a preview control is requested
-	 * @param parent the parent used for the control to be returned
+	 * @param currentViewer the currently used preview viewer
+	 * @param parent the parent to be used if a new preview viewer must be created
 	 * @return the viewer to show a preview for the given change element
 	 */
-	protected IPreviewViewer getPreviewer(ChangeElement element, Composite parent) {
+	protected IPreviewViewer getPreviewer(ChangeElement element, IPreviewViewer currentViewer, Composite parent) {
 		CompareInput input= getCompareInput(element);
 		if (input != null) {
 			fComparePreview.setInput(input);
@@ -354,9 +355,11 @@ public class NewPreviewWizardPage extends RefactoringWizardPage implements IPrev
 	}	
 
 	private void showPreview(ChangeElement element) {
-		fCurrentPreviewViewer= null;
 		if (element != null)
-			fCurrentPreviewViewer= getPreviewer(element, fPreviewContainer);
+			fCurrentPreviewViewer= getPreviewer(element, fCurrentPreviewViewer, fPreviewContainer);
+		else
+			fCurrentPreviewViewer= null;
+			
 		if (fCurrentPreviewViewer == null)
 			fCurrentPreviewViewer= fNullPreviewer;
 		fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());

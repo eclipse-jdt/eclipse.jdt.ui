@@ -6,11 +6,12 @@ package org.eclipse.jdt.internal.core.refactoring.code;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
@@ -19,17 +20,20 @@ import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.code.flow.InputFlowAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.core.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.core.refactoring.code.flow.InOutFlowAnalyzer;
+import org.eclipse.jdt.internal.core.refactoring.code.flow.InputFlowAnalyzer;
+import org.eclipse.jdt.internal.core.refactoring.util.Binding2JavaModel;
 
-public class ExtractMethodAnalyzer extends StatementAnalyzer {
+/* package */ class ExtractMethodAnalyzer extends StatementAnalyzer {
 
 	public static final int ERROR=					-2;
 	public static final int UNDEFINED=				-1;
@@ -170,6 +174,29 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 		}
 	}
 	
+	public void checkInput(RefactoringStatus status, String methodName, IJavaProject scope) {
+		TypeBinding[] arguments= getArgumentTypes();
+		ReferenceBinding type= getEnclosingMethod().binding.declaringClass;
+		status.merge(Checks.checkMethodInType(type, methodName, arguments, scope));
+		status.merge(Checks.checkMethodInHierarchy(type.superclass(), methodName, arguments, scope));
+	}
+	
+	private TypeBinding[] getArgumentTypes() {
+		TypeBinding[] result= new TypeBinding[fArguments.length];
+		for (int i= 0; i < fArguments.length; i++) {
+			result[i]= fArguments[i].type;
+		}
+		return result;
+	}
+	
+	private String getMethodName(MethodBinding binding) {
+		StringBuffer buffer= new StringBuffer();
+		buffer.append(binding.declaringClass.sourceName());
+		buffer.append('.');
+		buffer.append(binding.selector);
+		return buffer.toString();
+	}
+	
 	private RefactoringStatus analyzeSelection(RefactoringStatus status) {
 		fInputFlowContext= new FlowContext(0, fOuterMostMethodScope.analysisIndex);
 		fInputFlowContext.setConsiderExecutionFlow(true);
@@ -201,17 +228,8 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 		computeOutput(status);
 		if (!status.hasFatalError())
 			adjustArgumentsAndMethodLocals();
+		compressArrays();
 		return status;
-	}
-	
-	private boolean enclosingMethodReturns() {
-		MethodBinding binding= getEnclosingMethod().binding;
-		if (binding == null)
-			return false;
-		else if (binding.returnType == BaseTypeBinding.VoidBinding)
-			return false;
-			
-		return true;	
 	}
 	
 	private void computeInput() {
@@ -300,6 +318,30 @@ public class ExtractMethodAnalyzer extends StatementAnalyzer {
 				}
 			}
 		}
+	}
+	
+	private void compressArrays() {
+		fArguments= compressArray(fArguments);
+		fCallerLocals= compressArray(fCallerLocals);
+		fMethodLocals= compressArray(fMethodLocals);
+	}
+	
+	private LocalVariableBinding[] compressArray(LocalVariableBinding[] array) {
+		if (array == null)
+			return null;
+		int size= 0;
+		for (int i= 0; i < array.length; i++) {
+			if (array[i] != null)
+				size++;	
+		}
+		if (size == array.length)
+			return array;
+		LocalVariableBinding[] result= new LocalVariableBinding[size];
+		for (int i= 0, r= 0; i < array.length; i++) {
+			if (array[i] != null)
+				result[r++]= array[i];		
+		}
+		return result;
 	}
 }
 

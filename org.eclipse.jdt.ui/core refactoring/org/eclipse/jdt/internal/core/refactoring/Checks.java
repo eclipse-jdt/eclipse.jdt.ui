@@ -16,24 +16,29 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
+import org.eclipse.jdt.internal.core.refactoring.util.Bindings;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -236,16 +241,14 @@ public class Checks {
 	/**
 	 * Checks if the new method is already used in the given type.
 	 */
-	public static RefactoringStatus checkMethodInType(IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+	public static RefactoringStatus checkMethodInType(ReferenceBinding type, String methodName, TypeBinding[] parameters, IJavaProject scope) {
 		RefactoringStatus result= new RefactoringStatus();
-		if (Character.isUpperCase(name.charAt(0))) {
-			result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.methodName.discouraged", name)); //$NON-NLS-1$
-		}
-		IMethod match= findMethod(name, paramTypes.length, false, type.getMethods());
-		if (match != null) {
-			result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.exists", PrettySignature.getUnqualifiedMethodSignature(match)),//$NON-NLS-1$
-										Refactoring.getResource(match), match.getNameRange()); 
-		}
+		if (methodName.equals(new String(type.sourceName())))
+			result.addWarning("New method name has constructor name");
+		MethodBinding method= Bindings.findMethodInType(type, methodName.toCharArray(), parameters);
+		if (method != null) 
+			result.addEntry(JavaStatusEntry.createError(
+				"Method " + methodName + " already exists in " + new String(type.sourceName), method, scope));	
 		return result;
 	}
 	
@@ -253,55 +256,20 @@ public class Checks {
 	 * Checks if the new method somehow conflicts with an already existing method in
 	 * the hierarchy. The following checks are done:
 	 * <ul>
-	 *   <li> if the new method overrides a method defined in a super class or super 
-	 *        interface of the given type. </li>
-	 *   <li> if the new method overloads an already existing method in a way that
-	 *        an ambiguity occurs. </li>
+	 *   <li> if the new method overrides a method defined in the given type or in one of its
+	 * 		super classes. </li>
 	 * </ul>
 	 */
-	public static RefactoringStatus checkMethodInHierarchy(IProgressMonitor pm, IType type, String methodName, String[] paramTypes, boolean isConstructor, int flags) throws JavaModelException {
+	public static RefactoringStatus checkMethodInHierarchy(ReferenceBinding type, String methodName, TypeBinding[] parameters, IJavaProject scope) {
 		RefactoringStatus result= new RefactoringStatus();
-		if (Flags.isPrivate(flags))
-			return result;
-		
-		ITypeHierarchy hierarchy= type.newTypeHierarchy(pm);
-		checkSuperHierarchy(result, hierarchy, type, methodName, paramTypes, isConstructor);
-		if (!result.isOK())
-			return result;
-		checkSubHierarchy(result, hierarchy, type, methodName, paramTypes, isConstructor);
-		return result;
-	}
-	
-	private static void checkSuperHierarchy(RefactoringStatus status, ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
-		IType[] superTypes= hierarchy.getSupertypes(type);
-		for (int i= 0; i < superTypes.length; i++) {
-			IMethod match= findMethod(name, paramTypes.length, false, superTypes[i].getMethods());
-			if (match != null) {
-				status.addError(makeHierarchyStatusMessage(match));
-				return;
-			}
-			checkSuperHierarchy(status, hierarchy, superTypes[i], name, paramTypes, isConstructor);
-			if (!status.isOK())
-				return;
+		MethodBinding method= Bindings.findMethodInHierarchy(type, methodName.toCharArray(), parameters);
+		if (method != null) {
+			ReferenceBinding dc= method.declaringClass;
+			result.addEntry(JavaStatusEntry.createError(
+				"New method " + methodName + " overrides existing method in " + new String(dc.sourceName),
+				method, scope));
 		}
-	}
-	
-	private static void checkSubHierarchy(RefactoringStatus status, ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
-		IType[] subTypes= hierarchy.getSubtypes(type);
-		for (int i= 0; i < subTypes.length; i++) {
-			IMethod match= findMethod(name,  paramTypes.length, isConstructor, subTypes[i].getMethods());
-			if (match != null) {
-				status.addError(makeHierarchyStatusMessage(match));
-				return;
-			}
-			checkSubHierarchy(status, hierarchy, subTypes[i], name, paramTypes, isConstructor);
-			if (!status.isOK())
-				return;
-		}		
-	}
-	
-	private static String makeHierarchyStatusMessage(IMethod method) {
-		return RefactoringCoreMessages.getFormattedString("Checks.methodInHierarchy.exists", PrettySignature.getMethodSignature(method)); //$NON-NLS-1$
+		return result;
 	}
 	
 	//-------------- main method checks ------------------
