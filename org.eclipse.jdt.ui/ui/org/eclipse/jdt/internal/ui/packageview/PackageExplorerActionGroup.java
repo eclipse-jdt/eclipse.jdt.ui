@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Shell;
@@ -29,9 +32,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
-
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
@@ -57,16 +57,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
-
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
+import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.ImportActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
@@ -77,6 +73,12 @@ import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
+
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+
+import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 public class PackageExplorerActionGroup extends CompositeActionGroup implements ISelectionChangedListener {
 
@@ -98,10 +100,9 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
 	
 	private MemberFilterActionGroup fMemberFilterActionGroup;
+	private CustomFiltersActionGroup fCustomFiltersActionGroup;	
 
- 	private ShowLibrariesAction fShowLibrariesAction;
-  	private FilterSelectionAction fFilterAction;
-  	
+ 	
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
 		fPart= part;
@@ -137,9 +138,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 		fGotoPackageAction= new GotoPackageAction(fPart);
 		
 		fMemberFilterActionGroup= new MemberFilterActionGroup(fPart.getViewer(), "PackageView");  //$NON-NLS-1$
-		
-		fShowLibrariesAction = new ShowLibrariesAction(fPart, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$				
-		fFilterAction = new FilterSelectionAction(shell, fPart, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$		
+		fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, fPart.getViewer());
 		
 		provider.addSelectionChangedListener(this);
 		update(selection);
@@ -179,11 +178,13 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 	/* package */ void restoreState(IMemento memento) {
 		fMemberFilterActionGroup.restoreState(memento);
 		fWorkingSetFilterActionGroup.restoreState(memento);
+		fCustomFiltersActionGroup.restoreState(memento);
 	}
 	
 	/* package */ void saveState(IMemento memento) {
 		fMemberFilterActionGroup.saveState(memento);
 		fWorkingSetFilterActionGroup.saveState(memento);
+		fCustomFiltersActionGroup.saveState(memento);
 	}
 
 	//---- Action Bars ----------------------------------------------------------------------------
@@ -193,6 +194,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 		setGlobalActionHandlers(actionBars);
 		fillToolBar(actionBars.getToolBarManager());
 		fillViewMenu(actionBars.getMenuManager());
+		fCustomFiltersActionGroup.fillActionBars(actionBars);
 	}
 
 	private void setGlobalActionHandlers(IActionBars actionBars) {
@@ -219,9 +221,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 	}
 	
 	/* package */ void fillViewMenu(IMenuManager menu) {
-		menu.add(fFilterAction);		
-		menu.add(fShowLibrariesAction);  
-		
+	
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$		
 	}

@@ -14,12 +14,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.packageview.PackageFilter;
+import org.eclipse.jdt.internal.ui.filters.AbstractFilter;
 
 /**
  * Filters out all elements which libraries
  */
-public class LibraryFilter extends PackageFilter {
+public class LibraryFilter extends AbstractFilter {
 
 	/**
 	 * Returns the result of this filter, when applied to the

@@ -90,6 +90,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
+import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.ImportActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
@@ -114,8 +115,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -140,6 +140,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private CCPActionGroup fCCPActionGroup;
 	private BuildActionGroup fBuildActionGroup;
 	protected CompositeActionGroup fActionGroups;
+
+	// Filters
+	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 	
 	private Menu fContextMenu;		
 	private IWorkbenchPart fPreviousSelectionProvider;
@@ -185,11 +188,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		}
 		if (fHasWorkingSetFilter)
 			fWorkingSetFilterActionGroup.saveState(memento);
+		fCustomFiltersActionGroup.saveState(memento);
 	}	
 
 	protected void restoreState(IMemento memento) {
 		if (fHasWorkingSetFilter)
 			fWorkingSetFilterActionGroup.restoreState(memento);
+		fCustomFiltersActionGroup.restoreState(memento);
 	}	
 
 	/**
@@ -220,7 +225,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		getSite().setSelectionProvider(fViewer);
 
 		createActions(); // call before registering for selection changes
-		addKeyListener();		
+		addKeyListener();
+
+		// Custom filter group
+		fCustomFiltersActionGroup= new CustomFiltersActionGroup(this, fViewer);
 
 		if (fMemento != null)
 			restoreState(fMemento);
@@ -311,6 +319,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 //		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
 
 		fActionGroups.fillActionBars(actionBars);
+		fCustomFiltersActionGroup.fillActionBars(actionBars);
 	}
 	
 	//---- IWorkbenchPart ------------------------------------------------------
@@ -664,6 +673,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 */
 	protected void addFilters() {
 		// default is to have no filters
+//		fCustomFiltersActionGroup= new CustomFiltersActionGroup(this);
 	}
 
 	/**

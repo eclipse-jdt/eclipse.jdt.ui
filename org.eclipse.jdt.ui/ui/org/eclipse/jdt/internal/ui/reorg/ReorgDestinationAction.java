@@ -54,8 +54,8 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.filters.AbstractFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.packageview.PackageFilter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
@@ -372,7 +372,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	}
 	
 	//-----
-	private static class ContainerFilter extends PackageFilter {
+	private static class ContainerFilter extends AbstractFilter {
 		private ReorgRefactoring fRefactoring;
 	
 		ContainerFilter(ReorgRefactoring refactoring) {

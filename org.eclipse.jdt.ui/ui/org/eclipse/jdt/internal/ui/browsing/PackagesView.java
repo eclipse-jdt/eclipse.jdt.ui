@@ -16,12 +16,12 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
-import org.eclipse.jdt.internal.ui.packageview.EmptyPackageFilter;
-import org.eclipse.jdt.internal.ui.packageview.JavaElementPatternFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
+
+import org.eclipse.jdt.internal.ui.filters.*;
 
 public class PackagesView extends JavaBrowsingPart {
 
@@ -30,14 +30,8 @@ public class PackagesView extends JavaBrowsingPart {
 	 */
 	protected void addFilters() {
 		super.addFilters();
-		getViewer().addFilter(new EmptyPackageFilter());
 		getViewer().addFilter(new NonJavaElementFilter());
 		getViewer().addFilter(new LibraryFilter());
-
-		// XXX: This can be removed when the cvs elements are private
-		JavaElementPatternFilter patternFilter= new JavaElementPatternFilter();
-		patternFilter.setPatterns(new String[] {"CVS", "*.CVS"}); //$NON-NLS-1$ //$NON-NLS-2$
-		getViewer().addFilter(patternFilter);
 	}
 
 	protected ILabelProvider createLabelProvider() {

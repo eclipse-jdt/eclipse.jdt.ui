@@ -10,14 +10,14 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.ui.packageview.PackageFilter;
+import org.eclipse.jdt.internal.ui.filters.AbstractFilter;
 
 /**
  * Only selects packages (i.e. IPackageFragments) which are in
  * the initial packages list and parent types (i.e. package fragment
  * root, Java project and Java model)
  */
-class SealPackagesFilter  extends PackageFilter {
+class SealPackagesFilter  extends AbstractFilter {
 
 	private List fAllowedPackages;	
 

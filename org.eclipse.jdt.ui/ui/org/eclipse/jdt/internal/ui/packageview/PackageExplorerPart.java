@@ -94,6 +94,8 @@ import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
@@ -138,9 +140,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
 	static final String TAG_SHOWLIBRARIES = "showLibraries"; //$NON-NLS-1$
 	static final String TAG_SHOWBINARIES = "showBinaries"; //$NON-NLS-1$
-
-	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
-	private LibraryFilter fLibraryFilter= new LibraryFilter();
 
 	private PackageExplorerActionGroup fActionSet;
 	private ProblemTreeViewer fViewer; 
@@ -258,10 +257,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			labelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator())
 		);
 		fViewer.setSorter(new JavaElementSorter());
-		fViewer.addFilter(new EmptyInnerPackageFilter());
 		fViewer.setUseHashlookup(true);
-		fViewer.addFilter(fPatternFilter);
-		fViewer.addFilter(fLibraryFilter);
 
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
@@ -274,12 +270,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		site.registerContextMenu(menuMgr, fViewer);
 		site.setSelectionProvider(fViewer);
 		site.getPage().addPartListener(fPartListener);
-		
-		if(fMemento != null) 
-			restoreFilters();
-		else
-			initFilterFromPreferences();
-		
 		
 		makeActions(); // call before registering for selection changes
 		
@@ -326,7 +316,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 	private void fillActionBars() {
 		IActionBars actionBars= getViewSite().getActionBars();
-		fActionSet.fillActionBars(actionBars);		
+		fActionSet.fillActionBars(actionBars);
 	}
 	
 	private Object findInputElement() {
@@ -597,28 +587,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		saveSelectionState(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
 		//saveScrollState(memento, fViewer.getTree());
-		savePatternFilterState(memento);
-		saveFilterState(memento);
 		fActionSet.saveState(memento);
-	}
-
-	protected void saveFilterState(IMemento memento) {
-		boolean showLibraries= getLibraryFilter().getShowLibraries();
-		String show= "true"; //$NON-NLS-1$
-		if (!showLibraries)
-			show= "false"; //$NON-NLS-1$
-		memento.putString(TAG_SHOWLIBRARIES, show);
-	}
-
-	protected void savePatternFilterState(IMemento memento) {
-		String filters[] = getPatternFilter().getPatterns();
-		if(filters.length > 0) {
-			IMemento filtersMem = memento.createChild(TAG_FILTERS);
-			for (int i = 0; i < filters.length; i++){
-				IMemento child = filtersMem.createChild(TAG_FILTER);
-				child.putString(TAG_ELEMENT,filters[i]);
-			}
-		}
 	}
 
 	protected void saveScrollState(IMemento memento, Tree tree) {
@@ -835,56 +804,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	TreeViewer getViewer() {
 		return fViewer;
 	}
-	
-	/**
- 	 * Returns the pattern filter for this view.
- 	 * @return the pattern filter
- 	 */
-	JavaElementPatternFilter getPatternFilter() {
-		return fPatternFilter;
-	}
-	
-	/**
- 	 * Returns the library filter for this view.
- 	 * @return the library filter
- 	 */
-	LibraryFilter getLibraryFilter() {
-		return fLibraryFilter;
-	}
-
-
-
-	void restoreFilters() {
-		IMemento filtersMem= fMemento.getChild(TAG_FILTERS);
-		if(filtersMem != null) {	
-			IMemento children[]= filtersMem.getChildren(TAG_FILTER);
-			String filters[]= new String[children.length];
-			for (int i = 0; i < children.length; i++) {
-				filters[i]= children[i].getString(TAG_ELEMENT);
-			}
-			getPatternFilter().setPatterns(filters);
-		} else {
-			getPatternFilter().setPatterns(new String[0]);
-		}
-		//restore library
-		String show= fMemento.getString(TAG_SHOWLIBRARIES);
-		if (show != null)
-			getLibraryFilter().setShowLibraries(show.equals("true")); //$NON-NLS-1$
-		else
-			initLibraryFilterFromPreferences();
-	}
-	
-	void initFilterFromPreferences() {
-		initLibraryFilterFromPreferences();
-	}
-
-	void initLibraryFilterFromPreferences() {
-		JavaPlugin plugin= JavaPlugin.getDefault();
-		boolean show= plugin.getPreferenceStore().getBoolean(TAG_SHOWLIBRARIES);
-		getLibraryFilter().setShowLibraries(show);
-	}
-
-
 	
 	boolean isExpandable(Object element) {
 		if (fViewer == null)

@@ -9,14 +9,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
+
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.action.Action;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -29,20 +31,18 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class GotoPackageAction extends Action {
 	
 	private PackageExplorerPart fPackageExplorer;
-	private EmptyInnerPackageFilter fFilter;
 	
 	GotoPackageAction(PackageExplorerPart part) {
 		super(PackagesMessages.getString("GotoPackage.action.label")); //$NON-NLS-1$
 		setDescription(PackagesMessages.getString("GotoPackage.action.description")); //$NON-NLS-1$
 		fPackageExplorer= part;
-		fFilter= new EmptyInnerPackageFilter();
 	}
  
 	public void run() { 
@@ -79,9 +79,7 @@ class GotoPackageAction extends Action {
 			IPackageFragmentRoot[] roots= projects[i].getPackageFragmentRoots();	
 			for (int j= 0; j < roots.length; j++) {
 				IPackageFragmentRoot root= roots[j];
-				if (root.isArchive() && !showLibraries()) 
-					continue;
-		 		if (!set.contains(root)) {
+		 		if (!isFiltered(root) && !set.contains(root)) {
 					set.add(root);
 					IJavaElement[] packages= root.getChildren();
 					appendPackages(allPackages, packages);
@@ -94,7 +92,7 @@ class GotoPackageAction extends Action {
 	private void appendPackages(List all, IJavaElement[] packages) {
 		for (int i= 0; i < packages.length; i++) {
 			IJavaElement element= packages[i];
-			if (fFilter.select(null, null, element))
+			if (!isFiltered(element))
 				all.add(element); 
 		}
 	}
@@ -108,10 +106,6 @@ class GotoPackageAction extends Action {
 		}
 	}
 	
-	private boolean showLibraries()  {
-		return fPackageExplorer.getLibraryFilter().getShowLibraries();
-	}
-	
 	private Object getSelectedElement() {
 		return ((IStructuredSelection)fPackageExplorer.getSite().getSelectionProvider().getSelection()).getFirstElement();
 	}	
@@ -120,4 +114,15 @@ class GotoPackageAction extends Action {
 		return PackagesMessages.getString("GotoPackage.dialog.title"); //$NON-NLS-1$
 	}
 	
+	private boolean isFiltered(Object element) {
+		StructuredViewer viewer= fPackageExplorer.getViewer();
+		ViewerFilter[] filters= viewer.getFilters();
+		if (filters != null) {
+			for (int i = 0; i < filters.length; i++) {
+				if (!filters[i].select(viewer, viewer.getInput(), element))
+					return true;
+			}
+		}
+		return false;
+	}
 }

@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
+import org.eclipse.jdt.internal.ui.filters.*;
+
 public class TypesView extends JavaBrowsingPart {
 
 	/**
