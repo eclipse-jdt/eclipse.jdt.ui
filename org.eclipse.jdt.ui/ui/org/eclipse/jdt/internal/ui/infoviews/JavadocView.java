@@ -349,6 +349,9 @@ public class JavadocView extends AbstractInfoView {
 		StringBuffer buffer= new StringBuffer();
 		int nResults= result.length;
 		
+		if (nResults == 0)
+			return null;
+		
 		if (nResults > 1) {
 			
 			for (int i= 0; i < result.length; i++) {

@@ -40,6 +40,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	protected String getHoverInfo(IJavaElement[] result) {
 		StringBuffer buffer= new StringBuffer();
 		int nResults= result.length;
+		if (nResults == 0)
+			return null;
 		
 		if (nResults > 1) {
 			
