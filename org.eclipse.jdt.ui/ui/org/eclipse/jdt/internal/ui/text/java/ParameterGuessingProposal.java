@@ -39,7 +39,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal.ExitPolicy;
 
 /**
  * This is a {@link org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal} which includes templates 
