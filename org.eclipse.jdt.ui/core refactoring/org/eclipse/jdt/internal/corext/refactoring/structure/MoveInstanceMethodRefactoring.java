@@ -142,14 +142,6 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 		fMover.setRemoveDelegator(removeDelegator);
 	}
 
-	public boolean getInlineDelegator() {
-		return fMover.getInlineDelegator();	
-	}
-	
-	public boolean getRemoveDelegator() {
-		return fMover.getRemoveDelegator();	
-	}
-
 	public INewReceiver[] getPossibleNewReceivers() {
 		return fMover.getPossibleNewReceivers();
 	}
