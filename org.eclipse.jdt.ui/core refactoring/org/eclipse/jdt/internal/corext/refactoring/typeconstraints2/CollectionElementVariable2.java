@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
+
 public class CollectionElementVariable2 extends ConstraintVariable2 {
 
 	public static final int NOT_DECLARED_TYPE_VARIABLE_INDEX= -1;
@@ -35,6 +37,13 @@ public class CollectionElementVariable2 extends ConstraintVariable2 {
 		if (! typeVariable.isTypeVariable())
 			throw new IllegalArgumentException(typeVariable.toString());
 		fTypeVariableKey= typeVariable.getKey();
+		fDeclarationTypeVariableIndex= declarationTypeVariableIndex;
+	}
+
+	public CollectionElementVariable2(ConstraintVariable2 parentCv, TypeVariable typeVariable, int declarationTypeVariableIndex) {
+		super(null);
+		fParentCv= parentCv;
+		fTypeVariableKey= typeVariable.getBindingKey();
 		fDeclarationTypeVariableIndex= declarationTypeVariableIndex;
 	}
 

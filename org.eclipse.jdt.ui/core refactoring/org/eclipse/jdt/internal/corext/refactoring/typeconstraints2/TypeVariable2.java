@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
@@ -26,6 +27,7 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 
 	public TypeVariable2(TType type, CompilationUnitRange range) {
 		super(type);
+		Assert.isNotNull(range);
 		fRange= range;
 	}
 	
@@ -61,5 +63,9 @@ public final class TypeVariable2 extends ConstraintVariable2 implements ITypeCon
 
 	public ICompilationUnit getCompilationUnit() {
 		return fRange.getCompilationUnit();
+	}
+	
+	public String toString() {
+		return super.toString() + " [" + fRange.getSourceRange().getOffset() + '+' + fRange.getSourceRange().getLength() + ']'; //$NON-NLS-1$
 	}
 }

@@ -14,7 +14,9 @@ package org.eclipse.jdt.internal.corext.refactoring.generics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,20 +24,22 @@ import java.util.List;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SingletonTypeSet;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeUniverseSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
 
 
 public class InferTypeArgumentsConstraintsSolver {
 
-	private final static String TYPE_ESTIMATE= "typeEstimate"; //$NON-NLS-1$
+	private final static String CHOSEN_TYPE= "chosenType"; //$NON-NLS-1$
 	
-	private final InferTypeArgumentsTCModel fTypeConstraintFactory;
+	private final InferTypeArgumentsTCModel fTCModel;
 	
 	/**
 	 * The work-list used by the type constraint solver to hold the set of
@@ -46,53 +50,114 @@ public class InferTypeArgumentsConstraintsSolver {
 	
 	private HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ fDeclarationsToUpdate;
 	private HashMap/*<ICompilationUnit, List<CastVariable2>>*/ fCastsToRemove;
+
+	private ElementStructureEnvironment fElemStructureEnv;
 	
 	public InferTypeArgumentsConstraintsSolver(InferTypeArgumentsTCModel typeConstraintFactory) {
-		fTypeConstraintFactory= typeConstraintFactory;
+		fTCModel= typeConstraintFactory;
 		fWorkList= new LinkedList();
 	}
 	
 	public void solveConstraints() {
-		ConstraintVariable2[] allConstraintVariables= fTypeConstraintFactory.getAllConstraintVariables();
+		ConstraintVariable2[] allConstraintVariables= fTCModel.getAllConstraintVariables();
+		ParametricStructureComputer parametricStructureComputer= new ParametricStructureComputer(allConstraintVariables, fTCModel);
+		Collection/*<CollectionElementVariable2>*/ newVars= parametricStructureComputer.createElemConstraintVariables();
+		fElemStructureEnv= parametricStructureComputer.getElemStructureEnv();
+		
+		ArrayList newAllConstraintVariables= new ArrayList();
+		newAllConstraintVariables.addAll(Arrays.asList(allConstraintVariables));
+		newAllConstraintVariables.addAll(newVars);
+		allConstraintVariables= (ConstraintVariable2[]) newAllConstraintVariables.toArray(new ConstraintVariable2[newAllConstraintVariables.size()]);
+		
+		
+		//loop over all TypeEquivalenceSets and unify the elements from the fElemStructureEnv with the existing TypeEquivalenceSets
+		HashSet allTypeEquivalenceSets= new HashSet();
+		for (int i= 0; i < allConstraintVariables.length; i++) {
+			TypeEquivalenceSet typeEquivalenceSet= allConstraintVariables[i].getTypeEquivalenceSet();
+			if (typeEquivalenceSet != null)
+				allTypeEquivalenceSets.add(typeEquivalenceSet);
+		}
+		for (Iterator iter= allTypeEquivalenceSets.iterator(); iter.hasNext();) {
+			TypeEquivalenceSet typeEquivalenceSet= (TypeEquivalenceSet) iter.next();
+			ConstraintVariable2[] contributingVariables= typeEquivalenceSet.getContributingVariables();
+			for (int i= 0; i < contributingVariables.length; i++) {
+				for (int j= i + 1; j < contributingVariables.length; j++) {
+					ConstraintVariable2 first= contributingVariables[i];
+					ConstraintVariable2 second= contributingVariables[j];
+					fTCModel.createElementEqualsConstraints(first, second); // recursively
+				}
+			}
+		}
+		ITypeConstraint2[] allTypeConstraints= fTCModel.getAllTypeConstraints();
+		for (int i= 0; i < allTypeConstraints.length; i++) {
+			ITypeConstraint2 typeConstraint= allTypeConstraints[i];
+			fTCModel.createElementEqualsConstraints(typeConstraint.getLeft(), typeConstraint.getRight());
+		}
+		
 		initializeTypeEstimates(allConstraintVariables);
 		fWorkList.addAll(Arrays.asList(allConstraintVariables));
 		runSolver();
 		chooseTypes(allConstraintVariables);
-		findCastsToRemove(fTypeConstraintFactory.getCastVariables());
+		findCastsToRemove(fTCModel.getCastVariables());
 		// TODO: clear caches?
 	}
 
 	private void initializeTypeEstimates(ConstraintVariable2[] allConstraintVariables) {
+		TypeSet.initialize(fTCModel.getJavaLangObject());
 		for (int i= 0; i < allConstraintVariables.length; i++) {
 			ConstraintVariable2 cv= allConstraintVariables[i];
 			//TODO: not necessary for types that are not used in a TypeConstraint but only as type in CollectionElementVariable
+			//TODO: handle nested element variables; see ParametricStructureComputer.createAndInitVars()
 			TypeEquivalenceSet set= cv.getTypeEquivalenceSet();
 			if (set == null) {
 				set= new TypeEquivalenceSet(cv);
-				set.setTypeEstimate(TypeSet.create(cv.getType()));
+				set.setTypeEstimate(createInitialEstimate(cv));
 				cv.setTypeEquivalenceSet(set);
 			} else {
-				ITypeSet typeEstimate= cv.getTypeEstimate();
+				TypeSet typeEstimate= (TypeSet) cv.getTypeEstimate();
 				if (typeEstimate == null) {
 					ConstraintVariable2[] cvs= set.getContributingVariables();
-					typeEstimate= TypeSet.getTypeUniverse();
-					for (int j= 0; j < cvs.length; j++)
-						typeEstimate= typeEstimate.restrictedTo(TypeSet.create(cvs[j].getType()));
+					typeEstimate= TypeUniverseSet.create();
+					for (int j= 0; j < cvs.length; j++) //TODO: optimize: just try to find an immutable CV; if not found, use Universe
+						typeEstimate= typeEstimate.intersectedWith(createInitialEstimate(cvs[j]));
 					set.setTypeEstimate(typeEstimate);
 				}
 			}
 		}
 	}
 
-//	private static ITypeSet getTypeEstimate(ConstraintVariable2 cv) {
-//		return (ITypeSet) cv.getData(TYPE_ESTIMATE);
-//	}
-//	
+	private TypeSet createInitialEstimate(ConstraintVariable2 cv) {
+		// TODO: check assumption: only immutable CVs have a type
+//		ParametricStructure parametricStructure= fElemStructureEnv.elemStructure(cv);
+//		if (parametricStructure != null && parametricStructure != ParametricStructureComputer.ParametricStructure.NONE) {
+//			return SubTypesOfSingleton.create(parametricStructure.getBase());
+//		}
+		
+		TType type= cv.getType();
+		if (type == null) {
+			return TypeUniverseSet.create();
+			
+		} else if (cv instanceof IndependentTypeVariable2) {
+			return TypeUniverseSet.create();
+			//TODO: solve problem with recursive bounds
+//			TypeVariable tv= (TypeVariable) type;
+//			TType[] bounds= tv.getBounds();
+//			TypeSet result= SubTypesOfSingleton.create(bounds[0].getErasure());
+//			for (int i= 1; i < bounds.length; i++) {
+//				result= result.intersectedWith(SubTypesOfSingleton.create(bounds[i].getErasure()));
+//			}
+//			return result;
+			
+		} else {
+			return new SingletonTypeSet(type);
+		}
+	}
+
 	private void runSolver() {
 		while (! fWorkList.isEmpty()) {
 			// Get a variable whose type estimate has changed
 			ConstraintVariable2 cv= (ConstraintVariable2) fWorkList.removeFirst();
-			List/*<ITypeConstraint2>*/ usedIn= fTypeConstraintFactory.getUsedIn(cv);
+			List/*<ITypeConstraint2>*/ usedIn= fTCModel.getUsedIn(cv);
 			processConstraints(usedIn, cv);
 		}
 	}
@@ -125,23 +190,39 @@ public class InferTypeArgumentsConstraintsSolver {
 		ConstraintVariable2 left= stc.getLeft();
 		ConstraintVariable2 right= stc.getRight();
 
-			TypeEquivalenceSet set= right.getTypeEquivalenceSet();
-			ITypeSet rightEstimate= right.getTypeEstimate();
-			ITypeSet leftEstimate= left.getTypeEstimate();
-			ITypeSet newRightEstimate= rightEstimate.restrictedTo(leftEstimate);
-			if (rightEstimate != newRightEstimate) {
-				set.setTypeEstimate(newRightEstimate);
-				fWorkList.addAll(Arrays.asList(set.getContributingVariables()));
-			}
-	}
+		TypeEquivalenceSet leftSet= left.getTypeEquivalenceSet();
+		TypeEquivalenceSet rightSet= right.getTypeEquivalenceSet();
+		TypeSet leftEstimate= (TypeSet) leftSet.getTypeEstimate();
+		TypeSet rightEstimate= (TypeSet) rightSet.getTypeEstimate();
+			
+		if (leftEstimate.isUniverse() && rightEstimate.isUniverse())
+			return; // nothing to do
 
-//	private boolean isConstantConstraint(TypeConstraint2 stc) {
-//		return isConstantTypeEntity(stc.getLeft()) || isConstantTypeEntity(stc.getRight());
-//	}
-//
-//	private static boolean isConstantTypeEntity(ConstraintVariable2 v) {
-//		return v instanceof ImmutableTypeVariable2 || v instanceof TypeVariable2;
-//	}
+		if (leftEstimate.equals(rightEstimate))
+			return; // nothing to do
+
+		TypeSet lhsSuperTypes= leftEstimate.superTypes();
+		TypeSet rhsSubTypes= rightEstimate.subTypes();
+
+		if (! rhsSubTypes.containsAll(leftEstimate)) {
+			TypeSet xsection= leftEstimate.intersectedWith(rhsSubTypes);
+
+			if (xsection.isEmpty())
+				throw new IllegalStateException("Type estimate set is now empty for LHS in " + left + " <= " + right + "; estimates were " + leftEstimate + " <= " + rightEstimate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+
+			leftSet.setTypeEstimate(xsection);
+			fWorkList.addAll(Arrays.asList(leftSet.getContributingVariables()));
+		}
+		if (! lhsSuperTypes.containsAll(rightEstimate)) {
+			TypeSet xsection= rightEstimate.intersectedWith(lhsSuperTypes);
+
+			if (xsection.isEmpty())
+				throw new IllegalStateException("Type estimate set is now empty for RHS in " + left + " <= " + right + "; estimates were " + leftEstimate + " <= " + rightEstimate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+
+			rightSet.setTypeEstimate(xsection);
+			fWorkList.addAll(Arrays.asList(rightSet.getContributingVariables()));
+		}
+	}
 
 	private void chooseTypes(ConstraintVariable2[] allConstraintVariables) {
 		fDeclarationsToUpdate= new HashMap();
@@ -160,6 +241,9 @@ public class InferTypeArgumentsConstraintsSolver {
 				ICompilationUnit cu= elementCv.getCompilationUnit();
 				if (cu != null) //TODO: shouldn't be the case
 					addToMultiMap(fDeclarationsToUpdate, cu, cv);
+				else {
+					int TODO= 1;
+				}
 			}
 		}
 	}
@@ -197,20 +281,20 @@ public class InferTypeArgumentsConstraintsSolver {
 	}
 	
 	public static TType getChosenType(ConstraintVariable2 cv) {
-		TType type= (TType) cv.getData(TYPE_ESTIMATE);
+		TType type= (TType) cv.getData(CHOSEN_TYPE);
 		if (type != null)
 			return type;
 		TypeEquivalenceSet set= cv.getTypeEquivalenceSet();
 		if (set == null) { //TODO: should not have to set this here. Clean up when caching chosen type
 			// no representative == no restriction
 			set= new TypeEquivalenceSet(cv);
-			set.setTypeEstimate(TypeSet.getTypeUniverse());
+			set.setTypeEstimate(TypeUniverseSet.create());
 			cv.setTypeEquivalenceSet(set);
 		}
 		return cv.getTypeEstimate().chooseSingleType();
 	}
 
 	private static void setChosenType(ConstraintVariable2 cv, TType type) {
-		cv.setData(TYPE_ESTIMATE, type);
+		cv.setData(CHOSEN_TYPE, type);
 	}
 }

@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
@@ -174,6 +175,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			fChangeManager= new TextChangeManager();
 			rewriteDeclarations(declarationsToUpdate, castsToRemove, new SubProgressMonitor(pm, 1));
 			
+			TypeSet.initialize(null); //TODO: should remove static field
+			
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 			result.merge(Checks.validateModifiesFiles(filesToModify, getValidationContext()));
 			return result;
@@ -273,75 +276,112 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 //				}
 			} else if (parentElement instanceof TypeVariable2) {
 				TypeVariable2 typeCv= (TypeVariable2) parentElement;
-				ASTNode node= typeCv.getRange().getNode(rewrite.getRoot());
-				if (node instanceof SimpleName) {
-					Type originalType= (Type) ((SimpleName) node).getParent();
-					
-					// Must rewrite all type arguments in one batch. Do the rewrite when the first one is encountered; skip the others.
-					Object rewritten= originalType.getProperty(REWRITTEN); //$NON-NLS-1$
-					if (rewritten == REWRITTEN)
-						return;
-					originalType.setProperty(REWRITTEN, REWRITTEN);
-					
-					Map elementCvs= fTCModel.getElementVariables(typeCv);
-					ArrayList typeArgumentCvs= new ArrayList();
-					for (Iterator iter= elementCvs.values().iterator(); iter.hasNext();) {
-						CollectionElementVariable2 elementCv= (CollectionElementVariable2) iter.next();
-						int index= elementCv.getDeclarationTypeVariableIndex();
-						if (index != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX) {
-							while (index >= typeArgumentCvs.size())
-								typeArgumentCvs.add(null);
-							typeArgumentCvs.set(index, elementCv);
-						}
-					}
-					Type[] typeArguments= new Type[typeArgumentCvs.size()];
-					for (int i= 0; i < typeArgumentCvs.size(); i++) {
-						CollectionElementVariable2 elementCv= (CollectionElementVariable2) typeArgumentCvs.get(i);
-						Type typeArgument;
-						TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
-						if (chosenType == null) { // couldn't infer an element type (no constraints)
-							if (fLeaveUnconstrainedRaw) {
-								// every guess could be wrong => leave the whole thing raw:
-								return;
-							} else {
-								if (unboundedWildcardAllowed(originalType)) {
-									typeArgument= rewrite.getAST().newWildcardType();
-								} else {
-									String object= rewrite.getImportRewrite().addImport("java.lang.Object"); //$NON-NLS-1$
-									typeArgument= (Type) rewrite.getASTRewrite().createStringPlaceholder(object, ASTNode.SIMPLE_TYPE);
-								}
-							}
-//							ASTNode originalTypeParent= originalType.getParent();
-//							if (originalTypeParent instanceof ClassInstanceCreation) {
-//								//No ? allowed. Take java.lang.Object.
-//								typeArgument= ASTNodeFactory.newType(rewrite.getAST(), rewrite.getImportRewrite().addImport("java.lang.Object")); //$NON-NLS-1$
-//							} else if (originalTypeParent instanceof ArrayCreation || originalTypeParent instanceof InstanceofExpression) {
-//								//Only ? allowed.
-//								typeArgument= rewrite.getAST().newWildcardType();
-//							} else {
-//								//E.g. field type: can put anything. Choosing ? in order to be most constraining.
-//								typeArgument= rewrite.getAST().newWildcardType();
-//							}
-						} else {
-							ITypeBinding[] binding= TypeEnvironment.createTypeBindings(new TType[] {chosenType}, rewrite.getCu().getJavaProject());
-							if (binding[0] == null)
-								return;
-							typeArgument= rewrite.getImportRewrite().addImport(binding[0], rewrite.getAST());
-						}
-						typeArguments[i]= typeArgument;
-					}
-					
-					Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
-					ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
-					
-					for (int i= 0; i < typeArguments.length; i++)
-						newType.typeArguments().add(typeArguments[i]);
-					
-					rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription("Add type arguments"));
-				} //TODO: other node types?
+				rewriteTypeVariable(typeCv, rewrite);
+			
+			} else {
+				int TODO= 1;
 			}
 			
 		}
+	}
+
+	private void rewriteTypeVariable(TypeVariable2 typeCv, CompilationUnitRewrite rewrite) {
+		ASTNode node= typeCv.getRange().getNode(rewrite.getRoot());
+		if (node instanceof SimpleName) {
+			Type originalType= (Type) ((SimpleName) node).getParent();
+			
+			// Must rewrite all type arguments in one batch. Do the rewrite when the first one is encountered; skip the others.
+			Object rewritten= originalType.getProperty(REWRITTEN); //$NON-NLS-1$
+			if (rewritten == REWRITTEN)
+				return;
+			originalType.setProperty(REWRITTEN, REWRITTEN);
+			
+			ArrayList typeArgumentCvs= getTypeArgumentCvs(typeCv);
+			Type[] typeArguments= getTypeArguments(originalType, typeArgumentCvs, rewrite);
+			if (typeArguments == null)
+				return;
+			
+			Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
+			ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
+			
+			for (int i= 0; i < typeArguments.length; i++)
+				newType.typeArguments().add(typeArguments[i]);
+			
+			rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription("Add type arguments"));
+		} //TODO: other node types?
+	}
+
+	/**
+	 * @return the new type arguments, or <code>null</code> iff an argument could not be infered
+	 */
+	private Type[] getTypeArguments(Type baseType, ArrayList typeArgumentCvs, CompilationUnitRewrite rewrite) {
+		if (typeArgumentCvs.size() == 0)
+			return null;
+		
+		Type[] typeArguments= new Type[typeArgumentCvs.size()];
+		for (int i= 0; i < typeArgumentCvs.size(); i++) {
+			CollectionElementVariable2 elementCv= (CollectionElementVariable2) typeArgumentCvs.get(i);
+			Type typeArgument;
+			TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
+			if (chosenType != null) {
+				ITypeBinding[] binding= TypeEnvironment.createTypeBindings(new TType[] {chosenType}, rewrite.getCu().getJavaProject());
+				if (binding[0] == null) {
+					return null;
+				} else {
+					typeArgument= rewrite.getImportRewrite().addImport(binding[0], rewrite.getAST());
+					//TODO: elements:
+					ArrayList nestedTypeArgumentCvs= getTypeArgumentCvs(elementCv);
+					Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite);
+					if (nestedTypeArguments != null) {
+						ParameterizedType parameterizedType= rewrite.getAST().newParameterizedType(typeArgument);
+						for (int j= 0; j < nestedTypeArguments.length; j++)
+							parameterizedType.typeArguments().add(nestedTypeArguments[j]);
+						typeArgument= parameterizedType;
+					}
+				}
+
+			} else { // couldn't infer an element type (no constraints)
+				if (fLeaveUnconstrainedRaw) {
+					// every guess could be wrong => leave the whole thing raw
+					return null;
+				} else {
+					if (unboundedWildcardAllowed(baseType)) {
+						typeArgument= rewrite.getAST().newWildcardType();
+					} else {
+						String object= rewrite.getImportRewrite().addImport("java.lang.Object"); //$NON-NLS-1$
+						typeArgument= (Type) rewrite.getASTRewrite().createStringPlaceholder(object, ASTNode.SIMPLE_TYPE);
+					}
+				}
+//				ASTNode baseTypeParent= baseType.getParent();
+//				if (baseTypeParent instanceof ClassInstanceCreation) {
+//					//No ? allowed. Take java.lang.Object.
+//					typeArgument= rewrite.getAST().newSimpleType(rewrite.getAST().newName(rewrite.getImportRewrite().addImport("java.lang.Object"))); //$NON-NLS-1$
+//				} else if (baseTypeParent instanceof ArrayCreation || baseTypeParent instanceof InstanceofExpression) {
+//					//Only ? allowed.
+//					typeArgument= rewrite.getAST().newWildcardType();
+//				} else {
+//					//E.g. field type: can put anything. Choosing ? in order to be most constraining.
+//					typeArgument= rewrite.getAST().newWildcardType();
+//				}
+			}
+			typeArguments[i]= typeArgument;
+		}
+		return typeArguments;
+	}
+
+	private ArrayList/*<CollectionElementVariable2>*/ getTypeArgumentCvs(ConstraintVariable2 baseCv) {
+		Map elementCvs= fTCModel.getElementVariables(baseCv);
+		ArrayList typeArgumentCvs= new ArrayList();
+		for (Iterator iter= elementCvs.values().iterator(); iter.hasNext();) {
+			CollectionElementVariable2 elementCv= (CollectionElementVariable2) iter.next();
+			int index= elementCv.getDeclarationTypeVariableIndex();
+			if (index != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX) {
+				while (index >= typeArgumentCvs.size())
+					typeArgumentCvs.add(null); // fill with null until set(index, ..) is possible
+				typeArgumentCvs.set(index, elementCv);
+			}
+		}
+		return typeArgumentCvs;
 	}
 
 	private boolean unboundedWildcardAllowed(Type originalType) {

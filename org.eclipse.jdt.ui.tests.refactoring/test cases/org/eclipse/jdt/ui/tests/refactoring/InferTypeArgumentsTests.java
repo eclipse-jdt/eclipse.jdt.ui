@@ -183,6 +183,18 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 
 // -------------------------------------------------------------------------------
 	
+	
+	public void testCuNestedCells1() throws Exception {
+		createCUfromTestFile(getPackageP(), "Cell");
+		fLeaveUnconstrainedRaw= false;
+		performCuOK();
+	}
+	
+	public void testCuNestedVectors0() throws Exception {
+		fLeaveUnconstrainedRaw= false;
+		performCuOK();
+	}
+	
 	public void testCuInferTypeVariable01() throws Exception {
 		if (BUG_86990_core_no_main_type || BUG_87050_core_resolve_method_type_param) {
 			printTestDisabledMessage("BUG_86990_core_no_main_type || BUG_87050_core_resolve_method_type_param");
