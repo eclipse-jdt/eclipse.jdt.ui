@@ -119,7 +119,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			Object parent= internalGetParent(element);			
 			postRemove(element);
 			if (parent instanceof IPackageFragment) 
-				updatePackageIcon((IPackageFragment)parent);
+				postUpdateIcon((IPackageFragment)parent);
 			// we are filtering out empty subpackages, so we
 			// a package becomes empty we remove it from the viewer. 
 			if (isPackageFragmentEmpty(element.getParent())) {
@@ -177,6 +177,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		// the contents of an external JAR has changed
 		if (element instanceof IPackageFragmentRoot && ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0))
 			postRefresh(element);
+
+		// the source attachment of a JAR has changed
+		if (element instanceof IPackageFragmentRoot && (((flags & IJavaElementDelta.F_SOURCEATTACHED) != 0 || ((flags & IJavaElementDelta.F_SOURCEDETACHED)) != 0)))
+			postUpdateIcon(element);
 			
 		if (isClassPathChange(delta)) {
 			 // throw the towel and do a full refresh of the affected java project. 
@@ -273,7 +277,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	/**
 	 * Updates the package icon
 	 */
-	 private void updatePackageIcon(final IJavaElement element) {
+	 private void postUpdateIcon(final IJavaElement element) {
 	 	postRunnable(new Runnable() {
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.

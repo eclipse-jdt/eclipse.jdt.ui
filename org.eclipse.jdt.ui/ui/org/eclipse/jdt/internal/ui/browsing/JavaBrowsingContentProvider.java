@@ -327,6 +327,10 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			if (pkgRoot.equals(inputsParent))
 				postRefresh(null);
 		}
+
+		// the source attachment of a JAR has changed
+		if (element instanceof IPackageFragmentRoot && (((flags & IJavaElementDelta.F_SOURCEATTACHED) != 0 || ((flags & IJavaElementDelta.F_SOURCEDETACHED)) != 0)))
+			postUpdateIcon(element);
 		
 		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
 		if (affectedChildren.length > 1) {
@@ -361,7 +365,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	/**
 	 * Updates the package icon
 	 */
-	 private void updatePackageIcon(final IJavaElement element) {
+	 private void postUpdateIcon(final IJavaElement element) {
 	 	postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
