@@ -87,6 +87,7 @@ public class JarWriter {
 	public void write(IFile resource, IPath destinationPath) throws IOException, CoreException {
 		ByteArrayOutputStream output= null;
 		BufferedInputStream contentStream= null;
+		
 		try {
 			output= new ByteArrayOutputStream();
 			if (!resource.isLocal(IResource.DEPTH_ZERO))
@@ -104,7 +105,14 @@ public class JarWriter {
 		}
 
 		try {
-			write(destinationPath, output.toByteArray());
+			IPath fileLocation= resource.getLocation();
+			long lastModified= System.currentTimeMillis();
+			if (fileLocation != null) {
+				File file= new File(resource.getLocation().toOSString());
+				if (file.exists())
+					lastModified= file.lastModified();
+			}
+			write(destinationPath, output.toByteArray(), lastModified);
 		} catch (IOException ex) {
 			// Ensure full path is visible
 			String message= JarPackagerMessages.getFormattedString("JarWriter.writeProblem", resource.getFullPath()); //$NON-NLS-1$
@@ -121,7 +129,7 @@ public class JarWriter {
 	 * @param contents byte[]
 	 * @exception java.io.IOException
 	 */
-	protected void write(IPath path, byte[] contents) throws IOException, CoreException {
+	protected void write(IPath path, byte[] contents, long lastModified) throws IOException, CoreException {
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
 
 		if (fJarPackage.isCompressed())
@@ -134,6 +142,10 @@ public class JarWriter {
 			checksumCalculator.update(contents);
 			newEntry.setCrc(checksumCalculator.getValue());
 		}
+		
+		// Set modification time
+		newEntry.setTime(lastModified);
+		
 		try {
 			fJarOutputStream.putNextEntry(newEntry);
 			fJarOutputStream.write(contents);
