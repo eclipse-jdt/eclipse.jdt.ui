@@ -73,7 +73,7 @@ public class UndoManager implements IUndoManager {
 	}
 	
 	public void performUndo(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
-		//maybe i should not check that and just let it fail
+		//XXX: maybe i should not check that and just let it fail
 		if (fUndoChanges.empty())
 			return;
 			
@@ -89,7 +89,7 @@ public class UndoManager implements IUndoManager {
 	}
 
 	public void performRedo(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
-		//maybe i should not check that and just let it fail
+		//XXX: maybe i should not check that and just let it fail
 		if (fRedoChanges.empty())
 			return;
 			
