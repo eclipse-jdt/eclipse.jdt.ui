@@ -13,6 +13,10 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -192,6 +196,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 * Actions
 	 */
 	private Action fRerunLastTestAction;
+	private Action fRerunLastFailedFirstAction;
 	private ScrollLockAction fScrollLockAction;
 	private ToggleOrientationAction[] fToggleOrientationActions;
 	
@@ -276,6 +281,21 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		}
 	}
 	
+	private class RerunLastFailedFirstAction extends Action {
+		public RerunLastFailedFirstAction() {
+			setText(JUnitMessages.getString("TestRunnerViewPart.rerunfailuresaction.label"));  //$NON-NLS-1$
+			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.rerunfailuresaction.tooltip"));  //$NON-NLS-1$
+			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunchf.gif")); //$NON-NLS-1$
+			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
+			setEnabled(false);
+		}
+		
+		public void run(){
+			rerunTestFailedFirst();
+		}
+	}
+
 	private class ToggleOrientationAction extends Action {
 		private final int fActionOrientation;
 		
@@ -463,7 +483,77 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			}
 		}
 		if (fLastLaunch != null && fLastLaunch.getLaunchConfiguration() != null) {
-			DebugUITools.launch(fLastLaunch.getLaunchConfiguration(), fLastLaunch.getLaunchMode());
+			ILaunchConfiguration configuration= prepareLaunchConfigForRelaunch(fLastLaunch.getLaunchConfiguration());
+			DebugUITools.launch(configuration, fLastLaunch.getLaunchMode());
+		}
+	}
+	
+	private ILaunchConfiguration prepareLaunchConfigForRelaunch(ILaunchConfiguration configuration) {
+		try {
+			String attribute= configuration.getAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, ""); //$NON-NLS-1$
+			if (attribute.length() != 0) {
+				String configName= JUnitMessages.getFormattedString("TestRunnerViewPart.configName", configuration.getName()); //$NON-NLS-1$
+				ILaunchConfigurationWorkingCopy tmp= configuration.copy(configName); 
+				tmp.setAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, ""); //$NON-NLS-1$
+				return tmp;
+			}
+		} catch (CoreException e) {
+			// fall through
+		}
+		return configuration;
+	}
+
+	public void rerunTestFailedFirst() {
+		if (lastLaunchIsKeptAlive()) {
+			// prompt for terminating the existing run
+			if (MessageDialog.openQuestion(getSite().getShell(), JUnitMessages.getString("TestRunnerViewPart.terminate.title"), JUnitMessages.getString("TestRunnerViewPart.terminate.message"))) {  //$NON-NLS-1$ //$NON-NLS-2$
+				if (fTestRunnerClient != null)
+					fTestRunnerClient.stopTest();
+			}
+		}
+		if (fLastLaunch != null && fLastLaunch.getLaunchConfiguration() != null) {
+				ILaunchConfiguration launchConfiguration= fLastLaunch.getLaunchConfiguration();
+				if (launchConfiguration != null) {
+					try {
+						String name= JUnitMessages.getString("TestRunnerViewPart.rerunLaunchConfigName"); //$NON-NLS-1$
+						String configName= JUnitMessages.getFormattedString("TestRunnerViewPart.configName", name); //$NON-NLS-1$
+						ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
+						tmp.setAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, createFailureNamesFile());
+						tmp.launch(fLastLaunch.getLaunchMode(), null);	
+						return;	
+					} catch (CoreException e) {
+						ErrorDialog.openError(getSite().getShell(), 
+							JUnitMessages.getString("TestRunnerViewPart.error.cannotrerun"), e.getMessage(), e.getStatus() //$NON-NLS-1$
+						);
+					}
+				}
+				MessageDialog.openInformation(getSite().getShell(), 
+					JUnitMessages.getString("TestRunnerViewPart.cannotrerun.title"),  //$NON-NLS-1$
+					JUnitMessages.getString("TestRunnerViewPart.cannotrerurn.message") //$NON-NLS-1$
+				); 
+		}
+	}	
+
+	private String createFailureNamesFile() throws CoreException {
+		try {
+			File file= File.createTempFile("testFailures", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
+			file.deleteOnExit();
+			BufferedWriter bw= null;
+			try {
+				bw= new BufferedWriter(new FileWriter(file));
+				for (int i= 0; i < fFailures.size(); i++) {
+					TestRunInfo testInfo= (TestRunInfo)fFailures.get(i);
+					bw.write(testInfo.getTestName());
+					bw.newLine();
+				}
+			} finally {
+				if (bw != null) {
+					bw.close();
+				}
+			}
+			return file.getAbsolutePath();
+		} catch (IOException e) {
+			throw new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
 		}
 	}
 
@@ -533,6 +623,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				if(isDisposed()) 
 					return;	
 				fStopAction.setEnabled(lastLaunchIsKeptAlive());
+				fRerunLastFailedFirstAction.setEnabled(hasErrorsOrFailures());
 				if (fFailures.size() > 0) {
 					selectFirstFailure();
 				}
@@ -602,6 +693,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 					return;	
 				resetViewIcon();
 				fStopAction.setEnabled(false);
+				fRerunLastFailedFirstAction.setEnabled(hasErrorsOrFailures());
 				fProgressBar.stopped();
 			}
 		});	
@@ -1203,6 +1295,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		IMenuManager viewMenu = actionBars.getMenuManager();
 		fRerunLastTestAction= new RerunLastAction();
+		fRerunLastFailedFirstAction= new RerunLastFailedFirstAction();
 		fScrollLockAction= new ScrollLockAction(this);
 		fToggleOrientationActions =
 			new ToggleOrientationAction[] {
@@ -1223,6 +1316,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		toolBar.add(fStopAction);
 		toolBar.add(new Separator());
 		toolBar.add(fRerunLastTestAction);
+		toolBar.add(fRerunLastFailedFirstAction);
 		toolBar.add(fScrollLockAction);
 
 		for (int i = 0; i < fToggleOrientationActions.length; ++i)

@@ -47,6 +47,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 		String progArgs= getProgramArguments(configuration);
 		VMRunnerConfiguration vmConfig= new VMRunnerConfiguration("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", classPath); //$NON-NLS-1$
 		String testName= configuration.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
+		String testFailureNames= configuration.getAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, "");
 		
 		// insert the program arguments
 		Vector argv= new Vector(10);
@@ -78,6 +79,10 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
 			argv.add("-classNames"); //$NON-NLS-1$
 			for (int i= 0; i < testTypes.length; i++) 
 				argv.add(testTypes[i].getFullyQualifiedName());
+		}
+		if (testFailureNames.length() > 0) {
+			argv.add("-testfailures"); //$NON-NLS-1$
+			argv.add(testFailureNames);			
 		}
 		String[] args= new String[argv.size()];
 		argv.copyInto(args);

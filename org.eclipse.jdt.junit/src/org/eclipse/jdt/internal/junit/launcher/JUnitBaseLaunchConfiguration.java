@@ -62,6 +62,11 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	 */
 	public static final String LAUNCH_CONTAINER_ATTR= JUnitPlugin.PLUGIN_ID+".CONTAINER"; //$NON-NLS-1$
 
+	/**
+	 * The name of the prioritized tests
+	 */
+	public static final String FAILURES_FILENAME_ATTR= JUnitPlugin.PLUGIN_ID+".FAILURENAMES"; //$NON-NLS-1$
+
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor pm) throws CoreException {		
 		IJavaProject javaProject= getJavaProject(configuration);
 		if ((javaProject == null) || !javaProject.exists()) {
