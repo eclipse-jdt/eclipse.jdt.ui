@@ -58,6 +58,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fUseSupertypeAction;
 	private SelectionDispatchAction fInlineMethodAction;	
 	private SelectionDispatchAction fExtractConstantAction;
+	private SelectionDispatchAction fInlineConstantAction;
     private SelectionDispatchAction fPromoteTempAction;
     private SelectionDispatchAction fConvertAnonymousToNestedAction;
 	
@@ -132,6 +133,11 @@ public class RefactorActionGroup extends ActionGroup {
 		fExtractConstantAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_CONSTANT);
 		initAction(fExtractConstantAction, provider, selection);
 		editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
+
+		fInlineConstantAction= new InlineConstantAction(editor);
+		fInlineConstantAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE_CONSTANT);
+		fInlineConstantAction.update(selection);
+		editor.setAction("InlineConstant", fInlineConstantAction); //$NON-NLS-1$
 
 		fExtractMethodAction= new ExtractMethodAction(editor);
 		fExtractMethodAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_METHOD);
@@ -222,6 +228,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE_TEMP, fInlineTempAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_TEMP, fExtractTempAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_CONSTANT, fExtractConstantAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE_CONSTANT, fInlineConstantAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE_METHOD, fInlineMethodAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
@@ -252,6 +259,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fInlineTempAction, provider);
 		disposeAction(fExtractTempAction, provider);
 		disposeAction(fExtractConstantAction, provider);
+		disposeAction(fInlineConstantAction, provider);
 		disposeAction(fExtractMethodAction, provider);
 		disposeAction(fInlineMethodAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
@@ -281,6 +289,7 @@ public class RefactorActionGroup extends ActionGroup {
 		addAction(refactorSubmenu, fExtractMethodAction);
 		addAction(refactorSubmenu, fExtractTempAction);
 		addAction(refactorSubmenu, fExtractConstantAction);
+		addAction(refactorSubmenu, fInlineConstantAction);
 		addAction(refactorSubmenu, fInlineMethodAction);
 		addAction(refactorSubmenu, fInlineTempAction);
 		addAction(refactorSubmenu, fPromoteTempAction);

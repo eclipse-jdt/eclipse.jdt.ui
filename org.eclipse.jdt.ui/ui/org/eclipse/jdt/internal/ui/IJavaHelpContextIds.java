@@ -229,6 +229,8 @@ public interface IJavaHelpContextIds {
 	public static final String USE_SUPERTYPE_ERROR_WIZARD_PAGE= 				PREFIX + "use_supertype_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String INLINE_METHOD_WIZARD_PAGE=				PREFIX + "inline_method_wizard_page_context"; //$NON-NLS-1$
 	public static final String INLINE_METHOD_ERROR_WIZARD_PAGE=				PREFIX + "inline_method_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String INLINE_CONSTANT_WIZARD_PAGE=				PREFIX + "inline_constant_wizard_page_context"; //$NON-NLS-1$
+	public static final String INLINE_CONSTANT_ERROR_WIZARD_PAGE=				PREFIX + "inline_constant_error_wizard_page_context"; //$NON-NLS-1$
 	
 	// reused ui-blocks
 	public static final String BUILD_PATH_BLOCK= PREFIX + "build_paths_context"; //$NON-NLS-1$
