@@ -91,14 +91,12 @@ public class JavaSourceViewer extends SourceViewer implements IPropertyChangeLis
 	 */
 	public IFormattingContext createFormattingContext() {
 
-		final IFormattingContext context= new CommentFormattingContext();
-		if (context != null) {
-			
-			final Map map= new Hashtable(JavaCore.getOptions());
-			
-			context.storeToMap(PreferenceConstants.getPreferenceStore(), map, false);
-			context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, map);
-		}
+		IFormattingContext context= new CommentFormattingContext();
+		Map map= new Hashtable(JavaCore.getOptions());
+		
+		context.storeToMap(PreferenceConstants.getPreferenceStore(), map, false);
+		context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, map);
+		
 		return context;
 	}
 

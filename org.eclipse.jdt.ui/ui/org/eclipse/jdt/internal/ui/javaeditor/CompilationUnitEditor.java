@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
@@ -61,6 +63,8 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistantExtension;
+import org.eclipse.jface.text.formatter.FormattingContextProperties;
+import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.link.ExclusivePositionUpdater;
 import org.eclipse.jface.text.link.ILinkedListener;
 import org.eclipse.jface.text.link.LinkedEnvironment;
@@ -92,6 +96,7 @@ import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -114,6 +119,7 @@ import org.eclipse.jdt.internal.ui.actions.RemoveBlockCommentAction;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
@@ -288,6 +294,27 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			fCorrectionAssistant.install(this);
 			IAutoEditStrategy smartSemi= new SmartSemicolonAutoEditStrategy(IJavaPartitions.JAVA_PARTITIONING);
 			prependAutoEditStrategy(smartSemi, IDocument.DEFAULT_CONTENT_TYPE);
+		}
+		
+		/*
+		 * @see org.eclipse.jface.text.source.SourceViewer#createFormattingContext()
+		 * @since 3.0
+		 */
+		public IFormattingContext createFormattingContext() {
+			IFormattingContext context= new CommentFormattingContext();
+			
+			Map preferences;
+			IJavaElement inputJavaElement= getInputJavaElement();
+			IJavaProject javaProject= inputJavaElement != null ? inputJavaElement.getJavaProject() : null;
+			if (javaProject == null)
+				preferences= new HashMap(JavaCore.getOptions());
+			else
+				preferences= new HashMap(javaProject.getOptions(true));
+			
+			context.storeToMap(PreferenceConstants.getPreferenceStore(), preferences, false);
+			context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, preferences);
+			
+			return context;
 		}
 	}
 	
