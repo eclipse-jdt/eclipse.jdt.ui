@@ -18,11 +18,7 @@ import java.util.Stack;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.Item;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
-
-import org.eclipse.jface.viewers.ViewerLabel;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -165,36 +161,19 @@ public class ResourceToItemsMapper {
 	private static IResource getCorrespondingResource(Object element) {
 		if (element instanceof IJavaElement) {
 			IJavaElement elem= (IJavaElement) element;
-			if (!elem.isReadOnly()) { // only modifieable elements can get error ticks
-				IResource res= elem.getResource();
-				if (res == null) {
-					ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
-					if (cu != null) {
-						// elements in compilation units are mapped to the underlying resource of the original cu
-						res= cu.getResource();
-					}
+			IResource res= elem.getResource();
+			if (res == null) {
+				ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
+				if (cu != null) {
+					// elements in compilation units are mapped to the underlying resource of the original cu
+					res= cu.getResource();
 				}
-				return res; 
 			}
-			return null;
+			return res; 
 		} else if (element instanceof IResource) {
 			return (IResource) element;
 		}
 		return null;
-	}
-
-	private void applyColorsAndFonts(Item item, ViewerLabel updateLabel) {
-		if (item instanceof TreeItem) {
-			TreeItem treeItem= (TreeItem) item;
-			treeItem.setFont(updateLabel.getFont());
-			treeItem.setForeground(updateLabel.getForeground());
-			treeItem.setBackground(updateLabel.getBackground());
-		} else if (item instanceof TableItem) {
-			TableItem tableItem= (TableItem) item;
-			tableItem.setFont(updateLabel.getFont());
-			tableItem.setForeground(updateLabel.getForeground());
-			tableItem.setBackground(updateLabel.getBackground());
-		}
 	}
 	
 }
