@@ -33,8 +33,7 @@ import org.eclipse.jdt.internal.compiler.SourceElementRequestorAdapter;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {

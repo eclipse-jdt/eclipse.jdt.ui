@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.ui.tests.core;
 
-
 import java.io.File;
 import java.util.zip.ZipFile;
 
@@ -27,7 +26,7 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
-import org.eclipse.jdt.internal.ui.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 public class ImportOrganizeTest extends TestCase {
 	

@@ -23,8 +23,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.search.JavaWorkspaceScope;
-import org.eclipse.jdt.internal.ui.util.TypeInfo;
-import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
 
 /**
  * Manages a search cache for types in the workspace. Instead of returning objects of type <code>IType</code>

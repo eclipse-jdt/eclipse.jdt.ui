@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.util;
+package org.eclipse.jdt.internal.corext.util;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -20,11 +20,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-/**
- * @deprecated Use org.eclipse.jdt.internal.corext.util.TypeInfo
- */
 public class TypeInfo {
 
 	private final String fName;

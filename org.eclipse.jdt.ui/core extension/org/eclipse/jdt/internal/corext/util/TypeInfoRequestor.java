@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.util;
+package org.eclipse.jdt.internal.corext.util;
 
 import java.util.Collection;
 
@@ -10,9 +10,6 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 
-/**
- * @deprecated Use org.eclipse.jdt.internal.corext.util.TypeInfoRequestor
- */
 public class TypeInfoRequestor implements ITypeNameRequestor {
 	
 	private Collection fTypesFound;
