@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -17,26 +21,16 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.core.runtime.IAdaptable;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenWithMenu;
 
-import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the actions opening a new editor to the 
@@ -72,13 +66,10 @@ public class OpenEditorActionGroup extends ActionGroup {
 	 */
 	public OpenEditorActionGroup(JavaEditor part) {
 		fIsEditorOwner= true;
-		fSite= part.getEditorSite();
-		IJavaElement input= SelectionConverter.getInput(part);
-		if (input == null || !JavaModelUtil.isOnClasspath(input))
-			return;
 		fOpen= new OpenAction(part);
 		fOpen.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 		part.setAction("OpenEditor", fOpen); //$NON-NLS-1$
+		fSite= part.getEditorSite();
 		initialize(fSite.getSelectionProvider());
 	}
 
@@ -124,8 +115,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	 */
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();
-		if (fOpen != null)
-			provider.removeSelectionChangedListener(fOpen);
+		provider.removeSelectionChangedListener(fOpen);
 		super.dispose();
 	}
 	
@@ -134,7 +124,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	}
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {
-		if (action != null && action.isEnabled())
+		if (action.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
 	}
 	

@@ -10,12 +10,12 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
@@ -25,12 +25,6 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.internal.ui.actions.NullActionGroup;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
@@ -51,11 +45,11 @@ public class JavaSearchActionGroup extends ActionGroup {
 	private JavaEditor fEditor;
 	private IWorkbenchSite fSite;
 
-	private ActionGroup fReferencesGroup;
-	private ActionGroup fReadAccessGroup;
-	private ActionGroup fWriteAccessGroup;
-	private ActionGroup fDeclarationsGroup;
-	private ActionGroup fImplementorsGroup;
+	private ReferencesSearchGroup fReferencesGroup;
+	private ReadReferencesSearchGroup fReadAccessGroup;
+	private WriteReferencesSearchGroup fWriteAccessGroup;
+	private DeclarationsSearchGroup fDeclarationsGroup;
+	private ImplementorsSearchGroup fImplementorsGroup;
 	
 	private FindOccurrencesInFileAction fOccurrencesInFileAction;
 	
@@ -92,22 +86,13 @@ public class JavaSearchActionGroup extends ActionGroup {
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		fSite= fEditor.getSite();
-		IJavaElement input= SelectionConverter.getInput(editor);
-		if (input != null && JavaModelUtil.isOnClasspath(input)) {
-			fReferencesGroup= new ReferencesSearchGroup(fEditor);
-			fReadAccessGroup= new ReadReferencesSearchGroup(fEditor);
-			fWriteAccessGroup= new WriteReferencesSearchGroup(fEditor);
-			fDeclarationsGroup= new DeclarationsSearchGroup(fEditor);
-			fImplementorsGroup= new ImplementorsSearchGroup(fEditor);
-			fOccurrencesInFileAction= new FindOccurrencesInFileAction(fEditor);
-		} else {
-			fReferencesGroup= NullActionGroup.INSTANCE;
-			fReadAccessGroup= NullActionGroup.INSTANCE;
-			fWriteAccessGroup= NullActionGroup.INSTANCE;
-			fDeclarationsGroup= NullActionGroup.INSTANCE;
-			fImplementorsGroup= NullActionGroup.INSTANCE;
-			fOccurrencesInFileAction= null;
-		}
+		
+		fReferencesGroup= new ReferencesSearchGroup(fEditor);
+		fReadAccessGroup= new ReadReferencesSearchGroup(fEditor);
+		fWriteAccessGroup= new WriteReferencesSearchGroup(fEditor);
+		fDeclarationsGroup= new DeclarationsSearchGroup(fEditor);
+		fImplementorsGroup= new ImplementorsSearchGroup(fEditor);
+		fOccurrencesInFileAction= new FindOccurrencesInFileAction(fEditor);
 	}
 
 	private JavaSearchActionGroup(IWorkbenchSite site) {

@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 /*
@@ -48,6 +50,12 @@ public class ActionUtil {
 			
 		MessageDialog.openInformation(shell, ActionMessages.getString("ActionUtil.not_possible"), ActionMessages.getString("ActionUtil.no_linked")); //$NON-NLS-1$ //$NON-NLS-2$
 		return true;
+	}
+	
+	public static boolean isProcessable(Shell shell, JavaEditor editor) {
+		if (editor == null)
+			return true;
+		return isProcessable(shell, SelectionConverter.getInput(editor));
 	}
 	
 	public static boolean isProcessable(Shell shell, Object element) {

@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -100,6 +101,8 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) {
+		if (!ActionUtil.isProcessable(getShell(), fEditor))
+			return;
 		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), getDialogTitle());
 		if (elements.length != 1 || !(elements[0] instanceof IField)) {
 			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.unavailable")); //$NON-NLS-1$
@@ -121,6 +124,8 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	}
 	
 	private void run(IField selectedField) {
+		if (!ActionUtil.isProcessable(getShell(), selectedField))
+			return;
 		IField field= null;
 		try {
 			field= (IField)WorkingCopyUtil.getWorkingCopyIfExists(selectedField);

@@ -34,17 +34,12 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ConvertLineDelimitersAction;
 import org.eclipse.ui.texteditor.IUpdate;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the source and generate actions to a part's context
@@ -91,9 +86,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fSite= editor.getSite();
 		fEditor= editor;
 		fGroupName= groupName;
-		ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(editor);
-		if (input == null || !JavaModelUtil.isOnClasspath(input))
-			return;
 				
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();

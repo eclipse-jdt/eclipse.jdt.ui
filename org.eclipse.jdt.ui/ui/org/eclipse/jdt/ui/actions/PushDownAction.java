@@ -115,6 +115,8 @@ public class PushDownAction extends SelectionDispatchAction{
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(ITextSelection)
 	 */
 	protected void run(ITextSelection selection) {
+		if (!ActionUtil.isProcessable(getShell(), fEditor))
+			return;
 		if (canRun(selection)){
 			startRefactoring();	
 		} else {

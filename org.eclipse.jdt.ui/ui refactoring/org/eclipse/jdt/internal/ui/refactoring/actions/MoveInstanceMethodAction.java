@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodR
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -121,6 +122,9 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 		Assert.isTrue(selectionOffset >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		
+		if (!ActionUtil.isProcessable(getShell(), cu))
+			return;
+			
 		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(
 			cu, selectionOffset, selectionLength,
 			JavaPreferencesSettings.getCodeGenerationSettings());

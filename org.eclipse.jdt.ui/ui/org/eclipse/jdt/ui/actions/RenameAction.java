@@ -21,6 +21,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction;
@@ -118,6 +119,8 @@ public class RenameAction extends SelectionDispatchAction {
 	}
 
 	protected void run(ITextSelection selection) {
+		if (!ActionUtil.isProcessable(getShell(), fEditor))
+			return;
 		if (fRenameTemp != null && fRenameTemp.canRun(selection))
 			fRenameTemp.run(selection);
 		else if (fRenameJavaElement.canRun(selection))

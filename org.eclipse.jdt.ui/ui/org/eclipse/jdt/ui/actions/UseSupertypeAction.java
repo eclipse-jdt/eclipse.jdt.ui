@@ -89,6 +89,8 @@ public class UseSupertypeAction extends SelectionDispatchAction{
      * @see SelectionDispatchAction#run(ITextSelection)
      */
 	protected void run(ITextSelection selection) {
+		if (!ActionUtil.isProcessable(getShell(), fEditor))
+			return;
 		if (canRun(selection)){
 			startRefactoring();
 		} else {
