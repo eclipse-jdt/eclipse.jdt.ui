@@ -275,7 +275,11 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
 			return;
 			
 		TestRunInfo testInfo= fTestRunnerPart.getTestInfo(testId);
-			
+		// fix for 61709 NPE in JUnit view plus strange behavior 
+		// the testInfo map can already be destroyed at this point
+		if (testInfo == null)
+			return;
+		
 		updateItem(treeItem, testInfo);
 		
 		if (fTestRunnerPart.isAutoScroll()) {
