@@ -687,6 +687,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	VariableDeclarationFragment fragment= getAST().newVariableDeclarationFragment();
         SimpleName variableName= getAST().newSimpleName(fFieldName);
         fragment.setName(variableName);
+        fragment.setExtraDimensions(fTempDeclarationNode.getExtraDimensions());
         if (fInitializeIn == INITIALIZE_IN_FIELD && tempHasInitializer()){
 	        Expression initializer= (Expression)rewrite.createCopy(getTempInitializer());
 	        fragment.setInitializer(initializer);

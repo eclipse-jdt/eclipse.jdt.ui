@@ -48,6 +48,11 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		return new MySetup(new TestSuite(clazz));
 	}
 	
+	/** See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=47316">Bug 47316</a>. */
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		Hashtable options= JavaCore.getOptions();
@@ -514,4 +519,19 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	public void test19() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=49840
+        int accessModifier= Modifier.PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(4, 13, 4, 22, "fSomeArray", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+
+	public void test20() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=49840
+        int accessModifier= Modifier.PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(4, 24, 4, 24, "fDoubleDim", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
 }
