@@ -1,0 +1,39 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+   <meta name="Author" content="Build">
+   <title>Eclipse Workbench Extension Point: View Actions</title>
+</head>
+<body link="#0000FF" vlink="#800080">
+
+<center>
+<h1>
+Java Element Filter Extensions</h1></center>
+<b><i>Identifier: </i></b>org.eclipse.jdt.ui.javaElementFilters
+<p><b><i>Description: </i></b>This extension point is used to extend the set of
+available filters provided by the Packages view. 
+<p><b><i>Configuration Markup:</i></b>
+<p><tt>&nbsp;&nbsp; &lt;!ELEMENT wizard EMPTY&gt;</tt><br>
+<tt>&nbsp;&nbsp; &lt;!ATTLIST wizard</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pattern CDATA #REQUIRED</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; selected CDATA <font color="#000000">#IMPLIED</font></tt><br>
+<tt>&nbsp;&nbsp; &gt;</tt>
+<ul>
+  <li><b>pattern</b> - the filter pattern (? = any character, * = any string)
+  <li><b>selected</b> - an optional attribute that defines whether the filter is
+    initially selected and active (&quot;true&quot; or &quot;false&quot;).
+</ul>
+<b><i>Examples:</i></b>
+<p>The following is an example of a pattern filter definition. It filters out
+inner classes and is initially selected:
+<p><tt>&nbsp;&nbsp; &lt;extension point=&quot;org.eclipse.jdt.ui.javaElementFilters&quot;&gt;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;filter</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pattern=&quot;*$*.class&quot;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; selected=&quot;true&quot;&gt;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/filter&gt;</tt><br>
+<tt>&nbsp;&nbsp; &lt;/extension&gt;</tt>
+<p><a href="hglegal.htm"><img SRC="ngibmcpy.gif" ALT="Copyright IBM Corporation 2000" BORDER=0 height=12 width=195></a>
+</body>
+</html>
