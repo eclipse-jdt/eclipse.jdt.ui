@@ -10,4 +10,4 @@ class test{
 			void m(){
 		}
 	}
-}
+}}

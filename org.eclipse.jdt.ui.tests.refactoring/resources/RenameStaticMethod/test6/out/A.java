@@ -7,7 +7,7 @@ class A{
 class test{
 	void m(){
 		class X extends A{
-			void m(){
+			void mm(){
 		}
 	}
-}
+}}
