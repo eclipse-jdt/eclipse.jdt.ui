@@ -145,7 +145,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				((ITextEditor) part).selectAndReveal(pos, 0);
 			}
 		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		}
 
 	}

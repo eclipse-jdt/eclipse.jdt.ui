@@ -21,6 +21,14 @@ public class JavaUIStatus extends Status {
 	private JavaUIStatus(int severity, int code, String message, Throwable throwable) {
 		super(severity, JavaPlugin.getPluginId(), code, message, throwable);
 	}
+	
+	public static IStatus createError(int code, Throwable throwable) {
+		String message= throwable.getMessage();
+		if (message == null) {
+			message= throwable.getClass().getName();
+		}
+		return new JavaUIStatus(IStatus.ERROR, code, message, throwable);
+	}
 
 	public static IStatus createError(int code, String message, Throwable throwable) {
 		return new JavaUIStatus(IStatus.ERROR, code, message, throwable);

@@ -62,7 +62,7 @@ public final class ImportRewrite {
 			}
 			return new ReplaceEdit(region.getOffset(), region.getLength(), text);
 		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		}
 	}
 			

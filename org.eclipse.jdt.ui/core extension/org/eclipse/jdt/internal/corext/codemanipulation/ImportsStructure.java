@@ -98,7 +98,7 @@ public final class ImportsStructure implements IImportsStructure {
 				document= aquireDocument();
 				addExistingImports(document, cu.getImports());
 			} catch (BadLocationException e) {
-				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 			} finally {
 				if (document != null) {
 					releaseDocument(document);
@@ -577,7 +577,7 @@ public final class ImportsStructure implements IImportsStructure {
 				}
 			}
 		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
 			if (document != null) {
 				releaseDocument(document);

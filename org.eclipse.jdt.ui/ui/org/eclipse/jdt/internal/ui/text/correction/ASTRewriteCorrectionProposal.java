@@ -45,7 +45,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 				getRootTextEdit().addChild(edit);
 				rewrite.removeModifications();
 			} catch (RewriteException e) {
-				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 			}
 		}
 	}

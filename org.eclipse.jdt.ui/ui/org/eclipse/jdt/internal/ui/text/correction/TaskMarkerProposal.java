@@ -64,7 +64,7 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 				rootEdit.addChild(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), "")); //$NON-NLS-1$
 			}
 		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e.getMessage(), e));
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		}
 	}
 	

@@ -18,10 +18,15 @@ import java.util.Set;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -36,10 +41,10 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ListRewriter;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  *
@@ -97,29 +102,31 @@ public class JavadocTagsSubProcessor {
 		}
 	}
 
-	private static CUCorrectionProposal getNewJavadocTagProposal(ICompilationUnit cu, int insertPosition, String comment, String label) throws CoreException {
+	private static CUCorrectionProposal getNewJavadocTagProposal(ICompilationUnit cu, final int insertPosition, final String comment, String label) {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG);
 		
-		CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 1, image);
-		TextBuffer buffer= TextBuffer.acquire((IFile) cu.getResource());
-		try {
-			int tabWidth= CodeFormatterUtil.getTabWidth();
-			int line= buffer.getLineOfOffset(insertPosition);
-			String lineContent= buffer.getLineContent(line);
-			String indentString= Strings.getIndentString(lineContent, tabWidth);
-			String str= Strings.changeIndent(comment, 0, tabWidth, indentString, buffer.getLineDelimiter());
-			TextEdit rootEdit= proposal.getRootTextEdit();
-			InsertEdit edit= new InsertEdit(insertPosition, str);
-			rootEdit.addChild(edit); //$NON-NLS-1$
-			if (comment.charAt(comment.length() - 1) != '\n') {
-				rootEdit.addChild(new InsertEdit(insertPosition, buffer.getLineDelimiter())); 
-				rootEdit.addChild(new InsertEdit(insertPosition, indentString));
+		return new CUCorrectionProposal(label, cu, 1, image) {
+			protected void addEdits(IDocument document) throws CoreException {
+				try {
+					String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
+					int tabWidth= CodeFormatterUtil.getTabWidth();
+					IRegion region= document.getLineInformationOfOffset(insertPosition);
+					
+					String lineContent= document.get(region.getOffset(), region.getLength());
+					String indentString= Strings.getIndentString(lineContent, tabWidth);
+					String str= Strings.changeIndent(comment, 0, tabWidth, indentString, lineDelimiter);
+					TextEdit rootEdit= getRootTextEdit();
+					InsertEdit edit= new InsertEdit(insertPosition, str);
+					rootEdit.addChild(edit); //$NON-NLS-1$
+					if (comment.charAt(comment.length() - 1) != '\n') {
+						rootEdit.addChild(new InsertEdit(insertPosition, lineDelimiter)); 
+						rootEdit.addChild(new InsertEdit(insertPosition, indentString));
+					}
+				} catch (BadLocationException e) {
+					throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+				}
 			}
-			
-			return proposal;
-		} finally {
-			TextBuffer.release(buffer);
-		}
+		};
 	}
 	
 	public static void getMissingJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
