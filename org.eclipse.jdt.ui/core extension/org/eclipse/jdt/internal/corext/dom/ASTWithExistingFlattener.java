@@ -56,6 +56,9 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 			case ASTRewrite.JAVADOC:
 				placeHolder= ast.newJavadoc();
 				break;				
+			case ASTRewrite.TYPE_DECLARATION:
+				placeHolder= ast.newTypeDeclaration();
+				break;
 			default:
 				return null;
 		}

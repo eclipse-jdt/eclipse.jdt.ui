@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -84,6 +85,7 @@ public final class ASTRewrite {
 	public static final int TYPE= 6;
 	public static final int JAVADOC= 7;
 	public static final int VAR_DECLARATION_FRAGMENT= 8;
+	public static final int TYPE_DECLARATION= 9;
 	
 	private static final String COMPOUND_CHILDREN= "collapsed"; //$NON-NLS-1$
 	
@@ -348,7 +350,7 @@ public final class ASTRewrite {
 	 * @param code String that will be inserted. The string must have no extra indent.
 	 * @param nodeType the type of the place holder. Valid values are <code>BODY_DECLARATION</code>,
 	 * <code>BLOCK</code>, <code>STATEMENT</code>, <code>SINGLEVAR_DECLARATION</code>,
-	 * <code>TYPE</code>, <code>EXPRESSION</code> and <code>JAVADOC</code> .
+	 * <code>TYPE</code>, <code>TYPE_DECLARATION</code>, <code>EXPRESSION</code> and <code>JAVADOC</code> .
 	 * @return the place holder node
 	 */
 	public final ASTNode createPlaceholder(String code, int nodeType) {
@@ -371,6 +373,8 @@ public final class ASTRewrite {
 			} else {
 				return STATEMENT;
 			}
+		} else if (existingNode instanceof TypeDeclaration) {
+			return TYPE_DECLARATION;
 		} else if (existingNode instanceof BodyDeclaration) {
 			return BODY_DECLARATION;
 		} else if (existingNode instanceof SingleVariableDeclaration) {
