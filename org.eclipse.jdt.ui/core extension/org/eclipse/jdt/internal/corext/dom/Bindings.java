@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, orporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -1320,5 +1321,42 @@ public class Bindings {
 				return false;
 		}
 		return true;
+	}
+	
+	static {
+		Set autoboxingCandidates= new HashSet();
+		// auto boxing candidates:
+		autoboxingCandidates.add("boolean"); //$NON-NLS-1$
+		autoboxingCandidates.add("byte"); //$NON-NLS-1$
+		autoboxingCandidates.add("short"); //$NON-NLS-1$
+		autoboxingCandidates.add("char"); //$NON-NLS-1$
+		autoboxingCandidates.add("int"); //$NON-NLS-1$
+		autoboxingCandidates.add("long"); //$NON-NLS-1$
+		autoboxingCandidates.add("float"); //$NON-NLS-1$
+		autoboxingCandidates.add("double"); //$NON-NLS-1$
+		// auto unboxing candidates
+		autoboxingCandidates.add("java.lang.Boolean"); //$NON-NLS-1$
+		autoboxingCandidates.add("java.lang.Byte"); //$NON-NLS-1$
+		autoboxingCandidates.add("java.lang.Short"); //$NON-NLS-1$
+		autoboxingCandidates.add("java.lang.Character"); //$NON-NLS-1$
+		autoboxingCandidates.add("java.lang.Integer"); //$NON-NLS-1$
+		autoboxingCandidates.add("java.lang.Long"); //$NON-NLS-1$
+		autoboxingCandidates.add("java.lang.Float"); //$NON-NLS-1$
+		autoboxingCandidates.add("java.lang.Double"); //$NON-NLS-1$
+
+		fgAutoboxingCandidates= Collections.unmodifiableSet(autoboxingCandidates);
+	}
+	private static final Set fgAutoboxingCandidates;
+
+	/**
+	 * Returns <code>true</code> if the given type binding represents a type
+	 * that may be auto(un)boxed, <code>false</code> otherwise.
+	 * 
+	 * @param binding the type <code>binding</code> to check for autoboxing
+	 * @return <code>true</code> if binding is an auto(un)boxing candidate,
+	 *         <code>false</code> if not
+	 */
+	public static boolean canAutoUnBox(ITypeBinding binding) {
+		return fgAutoboxingCandidates.contains(binding.getQualifiedName());
 	}
 }

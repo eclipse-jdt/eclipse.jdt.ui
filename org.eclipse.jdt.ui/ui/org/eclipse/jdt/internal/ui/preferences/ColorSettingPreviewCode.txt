@@ -12,10 +12,10 @@ public class ClassName<E> extends SuperClass {
 	private E field;
 	// TASK: refactor
 	@SuppressWarnings(value="all")
-	public int foo(int parameter) {
+	public int foo(Integer parameter) {
 		abstractMethod();
 		int local= 42*hashCode();
 		staticMethod();
-		return bar(local) + 24;
+		return bar(local) + parameter;
 	}
 }

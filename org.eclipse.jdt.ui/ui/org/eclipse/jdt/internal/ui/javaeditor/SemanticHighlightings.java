@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import java.util.List;
+
 import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -19,14 +21,21 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -34,6 +43,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -124,6 +134,14 @@ public class SemanticHighlightings {
 	 * @since 3.1
 	 */
 	public static final String METHOD="method"; //$NON-NLS-1$
+
+	/**
+	 * A named preference part that controls the highlighting of auto(un)boxed
+	 * expressions.
+	 * 
+	 * @since 3.1
+	 */
+	public static final String AUTOBOXING="autoboxing"; //$NON-NLS-1$
 
 	/**
 	 * Semantic highlightings
@@ -296,6 +314,247 @@ public class SemanticHighlightings {
 			IBinding binding= token.getBinding();
 			return binding != null && binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isField();
 		}
+	}
+	
+	/**
+	 * Semantic highlighting for auto(un)boxed expressions.
+	 */
+	private static final class AutoboxHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return AUTOBOXING;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(171, 48, 0);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.getString("SemanticHighlighting.autoboxing"); //$NON-NLS-1$
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumes(SemanticToken token) {
+			SimpleName node= token.getNode();
+
+			// early pruning
+			ITypeBinding thisType= node.resolveTypeBinding();
+			if (thisType == null)
+				return false;
+			
+			if (thisType.isArray())
+				thisType= thisType.getElementType();
+			if (!Bindings.canAutoUnBox(thisType))
+				return false;
+			
+			/*
+			 * walk the expression tree for expressions that propagate the
+			 * expression's type. Stop when the parent node is not a propagating
+			 * node or if the expression's type changes from primitive to
+			 * non-primitive.
+			 */
+			ASTNode child;
+			ASTNode parent= node;
+			do {
+				child= parent;
+				parent= child.getParent();
+				ITypeBinding destinationType= getBoundType(child, parent);
+				if (destinationType == null)
+					return false;
+				if (isAutoboxing(destinationType, thisType))
+					return true;
+				
+			} while (isPropagatingNode(child, parent));
+			
+			return false;
+		}
+		
+		/**
+		 * Returns the type binding of <code>child</code> within its
+		 * <code>parent</code>. Returns <code>null</code> if the binding
+		 * cannot be determined. Returns the <code>parent</code>'s type
+		 * binding if parent is a propagating node.
+		 * 
+		 * @param child the child node within <code>parent</code>
+		 * @param parent the parent of <code>child</code>
+		 * @return the type binding of <code>child</code> within
+		 *         <code>parent</code>, or <code>null</code>
+		 */
+		private ITypeBinding getBoundType(ASTNode child, ASTNode parent) {
+			if (parent == null)
+				return null;
+			
+			switch (parent.getNodeType()) {
+				// TODO also add other method like nodes
+				case ASTNode.METHOD_INVOCATION:
+					// return declared argument type
+					MethodInvocation invocation= (MethodInvocation) parent;
+					StructuralPropertyDescriptor location= child.getLocationInParent();
+					if (MethodInvocation.ARGUMENTS_PROPERTY == location) {
+						IMethodBinding methodBinding= invocation.resolveMethodBinding();
+						List arguments= invocation.arguments();
+						int index= arguments.indexOf(child);
+						if (index != -1) {
+							ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+							if (parameterTypes.length > index)
+								return parameterTypes[index];
+						}
+					}
+					break;
+
+				case ASTNode.ASSIGNMENT:
+					// return lhs type
+					Assignment assignment= (Assignment) parent;
+					if (child == assignment.getRightHandSide()) {
+						Expression lhs= assignment.getLeftHandSide();
+						return lhs.resolveTypeBinding();
+					}
+					break;
+				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+					// return variable type
+					IVariableBinding variable= ((VariableDeclaration) parent).resolveBinding();
+					if (variable != null)
+						return variable.getType();
+					break;
+					
+				case ASTNode.ARRAY_ACCESS:
+					// return index type: always int
+					if (child.getLocationInParent() == ArrayAccess.INDEX_PROPERTY)
+						return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+					break;
+				case ASTNode.ARRAY_CREATION:
+					// return index type
+					if (child.getLocationInParent() == ArrayCreation.DIMENSIONS_PROPERTY)
+						return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+					break;
+				case ASTNode.INFIX_EXPRESSION:
+					// return the primitive type when comparing autoboxed types
+					InfixExpression infix= (InfixExpression) parent;
+					Expression leftOperand= infix.getLeftOperand();
+					Expression rightOperand= infix.getRightOperand();
+					ITypeBinding thisBinding= null;
+					if (child == rightOperand)
+						thisBinding= rightOperand.resolveTypeBinding();
+					else if (child == leftOperand)
+						thisBinding= leftOperand.resolveTypeBinding();
+					ITypeBinding parentBinding= infix.resolveTypeBinding();
+					if (thisBinding != null && parentBinding != null) {
+						if (!parentBinding.isAssignmentCompatible(thisBinding)) {
+							// probably a comparison then
+							if (child == rightOperand && !thisBinding.isPrimitive())
+								return leftOperand.resolveTypeBinding();
+							else if (child == leftOperand && !thisBinding.isPrimitive())
+								return rightOperand.resolveTypeBinding();
+						}
+					}
+					break;
+					
+			}
+			
+			if (isPropagatingNode(child, parent))
+				return ((Expression) parent).resolveTypeBinding();
+			
+			return null;
+		}
+
+		/**
+		 * Returns <code>true</code> if the type of <code>child</code> is
+		 * relevant within the context of <code>parent</code>. This is the
+		 * case for expressions that propagate their type outwards, or for
+		 * method return types, if <code>child</code> is the method name of a
+		 * method invocation.
+		 * 
+		 * @param child the child node within <code>parent</code>
+		 * @param parent the parent of <code>child</code>
+		 * @return <code>true</code> if type of <code>child</code> is
+		 *         relevant in the context of <code>parent</code>
+		 */
+		private boolean isPropagatingNode(ASTNode child, ASTNode parent) {
+			if (parent == null)
+				return false;
+
+			StructuralPropertyDescriptor location= child.getLocationInParent();
+			
+			switch (parent.getNodeType()) {
+				case ASTNode.INFIX_EXPRESSION:
+					if (child instanceof Expression) {
+						InfixExpression infix= (InfixExpression) parent;
+						ITypeBinding binding= infix.resolveTypeBinding();
+						ITypeBinding type= ((Expression) child).resolveTypeBinding();
+						return binding.isAssignmentCompatible(type);
+					}
+					break;
+					
+				case ASTNode.PREFIX_EXPRESSION:
+				case ASTNode.CONDITIONAL_EXPRESSION:
+				case ASTNode.PARENTHESIZED_EXPRESSION:
+					return true;
+
+				// methods and similar
+				case ASTNode.ARRAY_ACCESS:
+					return location == ArrayAccess.ARRAY_PROPERTY;
+				case ASTNode.METHOD_INVOCATION:
+					return location == MethodInvocation.NAME_PROPERTY;
+				case ASTNode.CLASS_INSTANCE_CREATION:
+					return location == ClassInstanceCreation.NAME_PROPERTY;
+				case ASTNode.SUPER_METHOD_INVOCATION:
+					return location == SuperMethodInvocation.NAME_PROPERTY;
+				case ASTNode.ENUM_CONSTANT_DECLARATION:
+					return location == EnumConstantDeclaration.NAME_PROPERTY;
+					
+				// other
+				case ASTNode.ASSIGNMENT:
+					return location == Assignment.LEFT_HAND_SIDE_PROPERTY;
+			}
+			
+			return false;
+		}
+
+		/**
+		 * Returns <code>true</code> if <code>rhs</code> is auto boxed or
+		 * auto unboxed when assigned to <code>lhs</code>.
+		 * 
+		 * @param lhs the target type
+		 * @param rhs the origin type
+		 * @return <code>true</code> if an assignment from <code>rhs</code>
+		 *         to <code>lhs</code> involves auto(un)boxing
+		 */
+		private boolean isAutoboxing(ITypeBinding lhs, ITypeBinding rhs) {
+			return lhs != null && rhs != null && lhs.isPrimitive() != rhs.isPrimitive() && rhs.isAssignmentCompatible(lhs);
+		}
+
 	}
 	
 	/**
@@ -1113,6 +1372,7 @@ public class SemanticHighlightings {
 		if (fgSemanticHighlightings == null)
 			fgSemanticHighlightings= new SemanticHighlighting[] {
 				new DeprecatedMemberHighlighting(),
+				new AutoboxHighlighting(),
 				new StaticFinalFieldHighlighting(),
 				new StaticFieldHighlighting(),
 				new FieldHighlighting(),
