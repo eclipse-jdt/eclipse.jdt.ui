@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -72,13 +73,20 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  */
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 
-	private static class LinkedModeGroup {
-		public List positions= new ArrayList(); // list of ITrackedNodePosition
-		public List proposals= new ArrayList(); // list of ICompletionProposal
+	public static class LinkedModeGroup {
+		private List fPositions= new ArrayList(); // list of ITrackedNodePosition
+		private List fProposals= new ArrayList(); // list of IJavaCompletionProposal
+		
+		public ITrackedNodePosition[] getPositions() {
+			return (ITrackedNodePosition[])fPositions.toArray(new ITrackedNodePosition[fPositions.size()]);
+		}
+		public IJavaCompletionProposal[] getProposals() {
+			return (IJavaCompletionProposal[])fProposals.toArray(new IJavaCompletionProposal[fProposals.size()]);
+		}
 	}
 	
 	private ITrackedNodePosition fSelectionDescription;
-	private Map fLinkGroups;
+	private Map/*<String, LinkModeGroup>*/ fLinkGroups;
 	private List fPositionOrder;
 
 	/**
@@ -106,7 +114,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * are linked.
 	 */
 	public void addLinkedPosition(ITrackedNodePosition position, boolean isFirst, String groupID) {
-		getLinkedModeGroup(groupID).positions.add(position);
+		getLinkedModeGroup(groupID).fPositions.add(position);
 		if (fPositionOrder == null) {
 			fPositionOrder= new ArrayList();
 		}
@@ -151,9 +159,20 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * @param proposal The proposal to present.
 	 */
 	public void addLinkedPositionProposal(String groupID, IJavaCompletionProposal proposal) {
-		getLinkedModeGroup(groupID).proposals.add(proposal);
+		getLinkedModeGroup(groupID).fProposals.add(proposal);
 	}
 	
+	/**
+	 * Returns all collected linked mode groups.
+	 * 
+	 * @return all collected linked mode groups
+	 */
+	public LinkedModeGroup[] getLinkedModeGroups() {
+		if (fLinkGroups == null)
+			return new LinkedModeGroup[0];
+		Collection values= fLinkGroups.values();
+		return (LinkedModeGroup[])values.toArray(new LinkedModeGroup[values.size()]);
+	}
 
 	
 	private LinkedModeGroup getLinkedModeGroup(String name) {
@@ -202,12 +221,12 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		Iterator iterator= fLinkGroups.values().iterator();
 		while (iterator.hasNext()) {
 			LinkedModeGroup curr= (LinkedModeGroup) iterator.next();
-			List positions= curr.positions;
+			List positions= curr.fPositions;
 			
 			if (!positions.isEmpty()) {
 				LinkedPositionGroup group= new LinkedPositionGroup();
 
-				List proposals= curr.proposals;
+				List proposals= curr.fProposals;
 				if (proposals.size() <= 1) {
 					for (int i= 0; i < positions.size(); i++) {
 						ITrackedNodePosition pos= (ITrackedNodePosition) positions.get(i);

@@ -250,7 +250,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 	 */
 	public String getAdditionalProposalInfo() {
 		try {
-			initializeCompilationUnitChange(); // force the creation of the rewrite
+			initializeTextChange(); // force the creation of the rewrite
 			StringBuffer buf= new StringBuffer();
 			buf.append("<b>"); //$NON-NLS-1$
 			buf.append(CorrectionMessages.getFormattedString("UnimplementedMethodsCompletionProposal.info", String.valueOf(fMethodsToOverride.length))); //$NON-NLS-1$

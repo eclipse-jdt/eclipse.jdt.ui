@@ -11,43 +11,46 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.compare.contentmergeviewer.ITokenComparator;
-import org.eclipse.compare.rangedifferencer.RangeDifference;
-import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.compare.contentmergeviewer.ITokenComparator;
+import org.eclipse.compare.rangedifferencer.RangeDifference;
+import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 /**
@@ -75,10 +78,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * image is desired.
 	 */
 	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) {
-		super(name, createCompilationUnitChange(name, cu), relevance, image);
-		fCompilationUnit= cu;
-		fImportRewrite= null;
-		fIsInitialized= false;
+		this(name, cu, createTextChange(name, cu), relevance, image);
 	}
 	
 	/**
@@ -89,17 +89,30 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * @param image The image that is displayed for this proposal or <code>null</code> if no
 	 * image is desired.
 	 */
-	public CUCorrectionProposal(String name, CompilationUnitChange change, int relevance, Image image) {
+	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image) {
 		super(name, change, relevance, image);
-		fCompilationUnit= change.getCompilationUnit();
+		fCompilationUnit= cu;
+		fImportRewrite= null;
 		fIsInitialized= false;
 	}
 	
-	private static Change createCompilationUnitChange(String name, ICompilationUnit cu) {
-		CompilationUnitChange change= new CompilationUnitChange(name, cu);
-		change.setEdit(new MultiTextEdit());
-		change.setSaveMode(TextFileChange.LEAVE_DIRTY);
-		return change;
+	private static TextChange createTextChange(String name, ICompilationUnit cu) {
+		if (!cu.getResource().exists()) {
+			DocumentChange change = null;
+			try {
+				change= new DocumentChange(name, new Document(cu.getSource()));
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+				change= new DocumentChange(name, new Document("")); //$NON-NLS-1$
+			}
+			change.setEdit(new MultiTextEdit());
+			return change;
+		} else {
+			CompilationUnitChange change = new CompilationUnitChange(name, cu);
+			change.setEdit(new MultiTextEdit());
+			change.setSaveMode(TextFileChange.LEAVE_DIRTY);
+			return change;
+		}
 	}
 	
 	/**
@@ -109,25 +122,19 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * The default implementation calls {@link #addEdits(IDocument, TextEdit)}.
 	 * @throws CoreException Thrown when the initialization fails.
 	 */
-	protected void initializeCompilationUnitChange() throws CoreException {
+	protected void initializeTextChange() throws CoreException {
 		if (fIsInitialized) {
 			return;
 		}
 		fIsInitialized= true;
 		
-		TextEdit rootEdit= getCompilationUnitChange().getEdit();
+		TextChange textChange= getTextChange();
+		TextEdit rootEdit= textChange.getEdit();
 		if (rootEdit != null) {
-			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-			IPath path= getCompilationUnit().getPath();
-			manager.connect(path, null);
-			try {
-				IDocument document= manager.getTextFileBuffer(path).getDocument();
-				addEdits(document, rootEdit);
-				if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
-					rootEdit.addChild(fImportRewrite.createEdit(document));
-				}
-			} finally {
-				manager.disconnect(path, null);
+			IDocument document= textChange.getCurrentDocument(new NullProgressMonitor());
+			addEdits(document, rootEdit);
+			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
+				rootEdit.addChild(fImportRewrite.createEdit(document));
 			}
 		}
 	}
@@ -171,8 +178,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		StringBuffer buf= new StringBuffer();
 		
 		try {
-			initializeCompilationUnitChange();
-			CompilationUnitChange change= getCompilationUnitChange();
+			initializeTextChange();
+			TextChange change= getTextChange();
 
 			IDocument previewContent= change.getPreviewDocument();
 			String currentConentString= change.getCurrentContent();
@@ -248,7 +255,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
 	 */
 	protected void performChange(IEditorPart activeEditor, IDocument document) throws CoreException {
-		initializeCompilationUnitChange();
+		initializeTextChange();
 		super.performChange(activeEditor, document);
 	}
 	
@@ -257,24 +264,27 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 */
 	public void apply(IDocument document) {
 		try {
-			boolean canEdit= performValidateEdit();
-			if (!canEdit) {
-				return;
-			}
 			ICompilationUnit unit= getCompilationUnit();
-			IEditorPart part= EditorUtility.isOpenInEditor(unit);
-			if (part == null) {
-				part= EditorUtility.openInEditor(unit, true);
-				if (part != null) {
-					document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			IEditorPart part= null;
+			if (unit.getResource().exists()) {
+				boolean canEdit= performValidateEdit(unit);
+				if (!canEdit) {
+					return;
 				}
-			}
-			IWorkbenchPage page= JavaPlugin.getActivePage();
-			if (page != null && part != null) {
-				page.bringToTop(part);
-			}
-			if (part != null) {
-				part.setFocus();
+				part= EditorUtility.isOpenInEditor(unit);
+				if (part == null) {
+					part= EditorUtility.openInEditor(unit, true);
+					if (part != null) {
+						document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+					}
+				}
+				IWorkbenchPage page= JavaPlugin.getActivePage();
+				if (page != null && part != null) {
+					page.bringToTop(part);
+				}
+				if (part != null) {
+					part.setFocus();
+				}
 			}
 			performChange(part, document);
 		} catch (CoreException e) {
@@ -282,8 +292,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 	}
 	
-	private boolean performValidateEdit() {
-		ICompilationUnit unit= getCompilationUnit();
+	private boolean performValidateEdit(ICompilationUnit unit) {
 		IStatus status= Resources.makeCommittable(unit.getResource(), null);
 		if (!status.isOK()) {
 			String label= CorrectionMessages.getString("CUCorrectionProposal.error.title"); //$NON-NLS-1$
@@ -295,11 +304,11 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 
 	/**
-	 * Gets the compilation unit change that is invoked when the change is applied.
-	 * @return Returns a CompilationUnitChange
+	 * Gets the text change that is invoked when the change is applied.
+	 * @return Returns a text change
 	 */
-	public CompilationUnitChange getCompilationUnitChange() {
-		return (CompilationUnitChange) getChange();
+	public TextChange getTextChange() {
+		return (TextChange)getChange();
 	}
 	
 	/**
@@ -314,9 +323,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * @return Returns the preview of the changed compilation unit
 	 */
 	public String getPreviewContent() throws CoreException {
-		initializeCompilationUnitChange();
-		CompilationUnitChange change= getCompilationUnitChange();
-		return change.getPreviewContent();
+		initializeTextChange();
+		return getTextChange().getPreviewContent();
 	}
 	
 	/* (non-Javadoc)
@@ -329,6 +337,4 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 		return super.toString();
 	}
-
-
 }
