@@ -8,17 +8,18 @@ package org.eclipse.jdt.internal.ui;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
@@ -182,10 +183,15 @@ public class JavaPlugin extends AbstractUIPlugin {
 		manager.registerAdapters(new EditorInputAdapterFactory(), IEditorInput.class);
 		manager.registerAdapters(new ResourceAdapterFactory(), IResource.class);
 		
+		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				JavaRuntime.initializeJREVariables(monitor);
+			}
+		};
 		try {
-			JavaRuntime.initializeJREVariables(null);
+			getWorkspace().run(runnable, null);
 		} catch (CoreException e) {
-			log(e.getStatus());
+			log(e);
 		}
 	}
 		
