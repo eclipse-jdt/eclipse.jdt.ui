@@ -15,8 +15,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
@@ -35,26 +43,19 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.ResourceTransfer;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgEnablementPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 
 public class CopyToClipboardAction extends SelectionDispatchAction{
@@ -136,7 +137,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	//----------------------------------------------------------------------------------------//
 	
 	private static class ClipboardCopier{
-		private final boolean fAutoRepreatOnFailure;
+		private final boolean fAutoRepeatOnFailure;
 		private final IResource[] fResources;
 		private final IJavaElement[] fJavaElements;
 		private final Clipboard fClipboard;
@@ -153,7 +154,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			fClipboard= clipboard;
 			fShell= shell;
 			fLabelProvider= createLabelProvider();
-			fAutoRepreatOnFailure= autoRepeatOnFailure;
+			fAutoRepeatOnFailure= autoRepeatOnFailure;
 		}
 
 		public void copyToClipboard() throws JavaModelException{
@@ -230,7 +231,14 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			} catch (SWTError e) {
 				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD || repeat >= repeat_max_count)
 					throw e;
-				if (fAutoRepreatOnFailure || MessageDialog.openQuestion(fShell, "Problem Copying to Clipboard", "There was a problem when accessing the system clipboard. Retry?"))
+				if (fAutoRepeatOnFailure) {
+					try {
+						Thread.currentThread().sleep(500);
+					} catch (InterruptedException e1) {
+						// do nothing.
+					}
+				}
+				if (fAutoRepeatOnFailure || MessageDialog.openQuestion(fShell, "Problem Copying to Clipboard", "There was a problem when accessing the system clipboard. Retry?"))
 					copyToClipboard(resources, fileNames, names, javaElements, typedSources, repeat+1);
 			}
 		}
