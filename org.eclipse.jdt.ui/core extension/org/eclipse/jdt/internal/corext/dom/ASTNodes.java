@@ -682,8 +682,8 @@ public class ASTNodes {
 	public static SimpleName getLeftMostSimpleName(QualifiedName name) {
 		final SimpleName[] result= new SimpleName[1];
 		ASTVisitor visitor= new ASTVisitor() {
-			public boolean visit(QualifiedName name) {
-				Name left= name.getQualifier();
+			public boolean visit(QualifiedName qualifiedName) {
+				Name left= qualifiedName.getQualifier();
 				if (left instanceof SimpleName)
 					result[0]= (SimpleName)left;
 				else
