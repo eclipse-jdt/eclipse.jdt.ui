@@ -54,7 +54,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 */
 	public SelfEncapsulateFieldAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.getString("SelfEncapsulateFieldAction.label"));
+		setText(ActionMessages.getString("SelfEncapsulateFieldAction.label")); //$NON-NLS-1$
 	}
 	
 	/**
@@ -140,6 +140,6 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	}
 		
 	private String getDialogTitle() {
-		return ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title");
+		return ActionMessages.getString("SelfEncapsulateFieldAction.dialog.title"); //$NON-NLS-1$
 	}	
 }

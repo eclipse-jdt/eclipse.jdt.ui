@@ -59,7 +59,7 @@ public class CodeFormatterUtil {
 	 */
 	public static String createIndentString(int indent) {
 		ICodeFormatter formatter= ToolFactory.createCodeFormatter();
-		return formatter.format("", indent, null, "");
+		return formatter.format("", indent, null, ""); //$NON-NLS-1$ //$NON-NLS-2$
 	} 
 	
 	public static String createIndentString(String example) {

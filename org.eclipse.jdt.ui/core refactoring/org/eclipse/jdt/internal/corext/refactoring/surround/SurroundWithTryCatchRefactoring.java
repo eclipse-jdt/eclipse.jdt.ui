@@ -181,7 +181,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 					handleDeclarationStatements.add(ds);
 				}
 			} else {
-				Assert.isTrue(false, "Operation doesn't work for expressions. So should never happen");
+				Assert.isTrue(false, "Operation doesn't work for expressions. So should never happen"); //$NON-NLS-1$
 			}
 		}
 		editor.performEdits(null);

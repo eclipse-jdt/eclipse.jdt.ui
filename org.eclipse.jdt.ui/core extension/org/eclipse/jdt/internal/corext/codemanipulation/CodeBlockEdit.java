@@ -36,29 +36,31 @@ public final class CodeBlockEdit extends TextEdit {
 	private TextRange fRange;
 	private AbstractCodeBlock fBlock;
 	private int fIndent;
+	private int fSpacing;
 
 	public static CodeBlockEdit createReplace(int offset, int length, AbstractCodeBlock block, int indent) {
-		return new CodeBlockEdit(new TextRange(offset, length), block, indent);
+		return new CodeBlockEdit(new TextRange(offset, length), block, indent, 0);
 	}
 
 	public static CodeBlockEdit createReplace(int offset, int length, AbstractCodeBlock block) {
-		return new CodeBlockEdit(new TextRange(offset, length), block, -1);
+		return new CodeBlockEdit(new TextRange(offset, length), block, -1, 0);
 	}
 	
-	public static CodeBlockEdit createInsert(int offset, AbstractCodeBlock block) {
-		return new CodeBlockEdit(new TextRange(offset, 0), block, -1);
+	public static CodeBlockEdit createInsert(int offset, AbstractCodeBlock block, int spacing) {
+		return new CodeBlockEdit(new TextRange(offset, 0), block, -1, spacing);
 	}
 
-	private CodeBlockEdit(TextRange range, AbstractCodeBlock block, int indent) {
+	private CodeBlockEdit(TextRange range, AbstractCodeBlock block, int indent, int spacing) {
 		Assert.isNotNull(range);
 		Assert.isNotNull(block);
 		fRange= range;
 		fBlock= block;
 		fIndent= indent;
+		fSpacing= spacing;
 	}
 
 	public TextEdit copy() throws CoreException {
-		return new CodeBlockEdit(fRange.copy(), fBlock, fIndent);
+		return new CodeBlockEdit(fRange.copy(), fBlock, fIndent, fSpacing);
 	}
 
 	/* non Java-doc
@@ -99,15 +101,25 @@ public final class CodeBlockEdit extends TextEdit {
 		final int firstLine= buffer.getLineOfOffset(offset);
 		final TextRegion region= buffer.getLineInformation(firstLine);
 		
-		String firstLineIndent= CodeFormatterUtil.createIndentString(
-			Strings.computeIndent(buffer.getContent(offset, region.getLength() - (offset - region.getOffset())), tabWidth));
-		
 		if (fIndent < 0) {
 			fIndent= Strings.computeIndent(buffer.getLineContent(firstLine), tabWidth);
 		}
 		String indent= CodeFormatterUtil.createIndentString(fIndent);
+		String firstLineIndent= indent;
+		
+		if (fRange.getLength() == 0) {
+			if (fSpacing == 0)
+				firstLineIndent= ""; //$NON-NLS-1$
+		} else {
+			String lineContent= buffer.getContent(offset, region.getLength() - (offset - region.getOffset()));
+			firstLineIndent= CodeFormatterUtil.createIndentString(Strings.computeIndent(lineContent, tabWidth));
+		}
+				
 		String delimiter= buffer.getLineDelimiter(firstLine);
 		StringBuffer result= new StringBuffer();
+		for (int i= 0; i < fSpacing; i++) {
+			result.append(delimiter);
+		}
 		fBlock.fill(result, firstLineIndent, indent, delimiter);
 		return result.toString();
 	}

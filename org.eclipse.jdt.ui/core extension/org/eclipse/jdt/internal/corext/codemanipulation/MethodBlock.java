@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.util;
+package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,39 +26,34 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
-public class MethodBlock {
+public class MethodBlock extends AbstractCodeBlock {
 
 	private String fSignature;
-	private CodeBlock fBody;
+	private AbstractCodeBlock fBody;
 
-	public MethodBlock(String signature, CodeBlock body) {
+	public MethodBlock(String signature, AbstractCodeBlock body) {
 		fSignature= signature;
 		fBody= body;
 	}
 
-	public void fill(StringBuffer buffer, String indent, String lineSeparator) {
+	public boolean isEmpty() {
+		return false;
+	}
+
+	public void fill(StringBuffer buffer, String firstLineIndent, String indent, String lineSeparator) {
 		final String dummy= fSignature + "{ x(); }"; //$NON-NLS-1$
 		final String placeHolder= "x();"; //$NON-NLS-1$
 		ICodeFormatter formatter= ToolFactory.createCodeFormatter();
 		int placeHolderStart= dummy.indexOf(placeHolder);
-		Assert.isTrue(placeHolderStart != -1, "Place holder not found in original statements"); //$NON-NLS-1$
 		int[] positions= new int[] {placeHolderStart, placeHolderStart + placeHolder.length() - 1};
 		String formattedCode= formatter.format(dummy, 0, positions, lineSeparator);
 		TextBuffer textBuffer= TextBuffer.create(formattedCode);
 		String placeHolderLine= textBuffer.getLineContentOfOffset(positions[0]);
 		String bodyIndent= indent + CodeFormatterUtil.createIndentString(placeHolderLine.substring(0, placeHolderLine.indexOf(placeHolder)));
-		fill(buffer, formattedCode.substring(0, positions[0]), indent, lineSeparator, true);
-		List lines= fBody.lines();
-		int size= lines.size();
-		int lastLine= size - 1;
-		for (int i= 0; i < size; i++) {
-			if (i > 0)
-				buffer.append(bodyIndent);
-			buffer.append((String)lines.get(i));
-			if (i < lastLine)
-				buffer.append(lineSeparator);
-		}
-		fill(buffer, formattedCode.substring(positions[1] + 1), indent, lineSeparator, false);
+
+		fill(buffer, formattedCode.substring(0, positions[0]), firstLineIndent, indent, lineSeparator);
+		fBody.fill(buffer, "", bodyIndent, lineSeparator); //$NON-NLS-1$
+		fill(buffer, formattedCode.substring(positions[1] + 1), "", indent, lineSeparator);	//$NON-NLS-1$	
 	}
 
 	public static int probeSpacing(TextBuffer buffer, MethodDeclaration method) {
@@ -99,21 +94,5 @@ public class MethodBlock {
 			return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
 		}
 		return null;
-	}
-	
-	private void fill(StringBuffer buffer, String code, String indent, String lineSeparator, boolean indentFirstLine) {
-		if ("".equals(indent)) {
-			buffer.append(code);
-			return;
-		}	
-		String[] lines= Strings.convertIntoLines(code);
-		final int lastLine= lines.length - 1;
-		for (int i= 0; i < lines.length; i++) {
-			if (i > 0 || indentFirstLine)
-				buffer.append(indent);
-			buffer.append(lines[i]);
-			if (i < lastLine)
-				buffer.append(lineSeparator);
-		}
-	}
+	}	
 }

@@ -40,7 +40,6 @@ public class TryCatchBlock extends AbstractCodeBlock {
 		final String placeHolder= "x();"; //$NON-NLS-1$
 		ICodeFormatter formatter= ToolFactory.createCodeFormatter();
 		int placeHolderStart= dummy.indexOf(placeHolder);
-		Assert.isTrue(placeHolderStart != -1, "Place holder not found in original statements"); //$NON-NLS-1$
 		int[] positions= new int[] {placeHolderStart, placeHolderStart + placeHolder.length() - 1};
 		String formattedCode= formatter.format(dummy, 0, positions, lineSeparator);
 		TextBuffer textBuffer= TextBuffer.create(formattedCode);
@@ -48,8 +47,8 @@ public class TryCatchBlock extends AbstractCodeBlock {
 		String bodyIndent= indent + CodeFormatterUtil.createIndentString(placeHolderLine.substring(0, placeHolderLine.indexOf(placeHolder)));
 		
 		fill(buffer, formattedCode.substring(0, positions[0]), firstLineIndent, indent, lineSeparator);
-		fTryBody.fill(buffer, "", bodyIndent, lineSeparator);
-		fill(buffer, formattedCode.substring(positions[1] + 1), "", indent, lineSeparator);
+		fTryBody.fill(buffer, "", bodyIndent, lineSeparator); //$NON-NLS-1$
+		fill(buffer, formattedCode.substring(positions[1] + 1), "", indent, lineSeparator); //$NON-NLS-1$
 	}
 
 	private String createStatement() {

@@ -111,7 +111,7 @@ public class Strings {
 		if (end == size)
 			return line;
 		else if (end == 0)
-			return "";
+			return ""; //$NON-NLS-1$
 		else
 			return line.substring(0, end);
 	}
@@ -250,7 +250,7 @@ public class Strings {
 			}
 		}
 		if (end == 0)
-			return "";
+			return ""; //$NON-NLS-1$
 		else if (end == size)
 			return line;
 		else

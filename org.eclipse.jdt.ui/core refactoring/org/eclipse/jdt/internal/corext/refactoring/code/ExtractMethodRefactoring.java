@@ -29,9 +29,12 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlock;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlockEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.MethodBlock;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
@@ -43,8 +46,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.util.CodeBlock;
-import org.eclipse.jdt.internal.corext.refactoring.util.MethodBlock;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -281,7 +282,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(method.getStartPosition()));
 				// Inserting the new method
 				result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName), //$NON-NLS-1$
-					createNewMethodEdit(buffer, delimiter));
+					createNewMethodEdit(buffer));
 			
 				// Replacing the old statements with the new method call.
 				result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName), //$NON-NLS-1$
@@ -345,7 +346,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return status;	
 	}
 	
-	private TextEdit createNewMethodEdit(TextBuffer buffer, String delimiter) {
+	private TextEdit createNewMethodEdit(TextBuffer buffer) {
 		MethodDeclaration method= fAnalyzer.getEnclosingMethod();
 		final int methodStart= method.getStartPosition();
 		MethodBlock methodBlock= new MethodBlock(getSignature(), createMethodBody(buffer));
@@ -353,11 +354,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		StringBuffer code= new StringBuffer();
 		// +1 (e.g <=) for an extra newline since we insert the new code at
 		// the end of a method declaration (e.g. right after the closing }
-		for (int i= 0; i <= spacing; i++)
-			code.append(delimiter);
-		String indent= CodeFormatterUtil.createIndentString(buffer.getLineContentOfOffset(methodStart));
-		methodBlock.fill(code, indent, delimiter);
-		TextEdit result= SimpleTextEdit.createInsert(methodStart + method.getLength(), code.toString());
+		CodeBlockEdit result= CodeBlockEdit.createInsert(methodStart + method.getLength(), methodBlock, spacing + 1);
 		return result;
 	}
 	
@@ -414,7 +411,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 					binding= fAnalyzer.getReturnValue();
 					code.append(binding.getName());
 				}
-				code.append(" = ");
+				code.append(" = "); //$NON-NLS-1$
 				break;
 			case ExtractMethodAnalyzer.RETURN_STATEMENT_VALUE:
 				// We return a value. So the code must look like "return extracted();"

@@ -285,7 +285,7 @@ public class TextBuffer {
 			for (int i= 0; i < size; i++) {
 				IRegion region= tracker.getLineInformation(i);
 				String line= getContent(offset + region.getOffset(), region.getLength());
-				if (i < lastLine || !"".equals(line) || lastNewLineCreateEmptyLine)
+				if (i < lastLine || !"".equals(line) || lastNewLineCreateEmptyLine) //$NON-NLS-1$
 					result.add(line);
 			}
 			return (String[]) result.toArray(new String[result.size()]);
