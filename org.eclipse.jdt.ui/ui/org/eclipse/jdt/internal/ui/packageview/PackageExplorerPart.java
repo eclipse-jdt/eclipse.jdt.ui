@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -101,10 +100,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IPackagesViewPart;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IPreferencesConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -121,6 +120,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
@@ -129,8 +129,8 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.typehierarchy.MethodsViewerFilter;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyMessages;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
-import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -169,6 +169,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private MethodsViewerFilter fMemberFilter;
 
 	private ProblemTreeViewer fViewer; 
+	private PackageExplorerLabelProvider fJavaElementLabelProvider;
 	private PackagesFrameSource fFrameSource;
 	private FrameList fFrameList;
 	private ContextMenuGroup[] fStandardGroups;
@@ -294,9 +295,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fViewer);		
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		
-		JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(getLabelProviderFlags());
-		labelProvider.setErrorTickManager(new MarkerErrorTickProvider());
-		fViewer.setLabelProvider(new DecoratingLabelProvider(labelProvider, null));
+		fJavaElementLabelProvider= new PackageExplorerLabelProvider();
+		fViewer.setLabelProvider(new DecoratingLabelProvider(fJavaElementLabelProvider, null));
 		fViewer.setSorter(new JavaElementSorter());
 		fViewer.addFilter(new EmptyInnerPackageFilter());
 		fViewer.setUseHashlookup(true);
@@ -545,7 +545,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
-		boolean selectionHasElements= !selection.isEmpty();
 		Object element= selection.getFirstElement();
 		
 		fPropertyDialogAction.selectionChanged(selection);
@@ -1274,31 +1273,22 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * @param decorator a label decorator or <code>null</code> for no decorations.
 	 */
 	public void setLabelDecorator(ILabelDecorator decorator) {
-		JavaElementLabelProvider javaProvider= new JavaElementLabelProvider(getLabelProviderFlags());
-		javaProvider.setErrorTickManager(new MarkerErrorTickProvider());
-		if (decorator == null) {
-			fViewer.setLabelProvider(javaProvider);
-		} else {
-			fViewer.setLabelProvider(new DecoratingLabelProvider(javaProvider, decorator));
-		}
+		if (decorator == null)
+			fViewer.setLabelProvider(fJavaElementLabelProvider);
+		else
+			fViewer.setLabelProvider(new DecoratingLabelProvider(fJavaElementLabelProvider, decorator));
 	}
 	
-	/**
-	 * Gets the standard label flags
-	 */
-	private int getLabelProviderFlags() {
-		return JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
-					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE | JavaElementLabelProvider.SHOW_PARAMETERS;
-	}
-		
 	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty() != IPreferencesConstants.SHOW_CU_CHILDREN) 
+		if (fViewer == null)
 			return;
-					
-		if (fViewer != null) {
+		
+		boolean refreshViewer= false;
+	
+		if (event.getProperty() == IPreferencesConstants.SHOW_CU_CHILDREN) {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			IActionBars actionBars= getViewSite().getActionBars();
 			IToolBarManager toolBar= actionBars.getToolBarManager();
@@ -1312,8 +1302,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 					toolBar.remove(fFilterActions[i]);
 			}
 			actionBars.updateActionBars();
-			fViewer.refresh();
+			refreshViewer= true;
+		}			
+
+		if (event.getProperty() == WorkInProgressPreferencePage.PREF_COMPRESS_PKG_NAME_IN_PKG_VIEW) {
+			fJavaElementLabelProvider.setCompressingPkgNameInPackagesView(WorkInProgressPreferencePage.isCompressingPkgNameInPackagesView());
+			refreshViewer= true;
 		}
+
+		if (refreshViewer)
+			fViewer.refresh();
 	}
 
 	protected void addFilterActions(IToolBarManager toolBar) {

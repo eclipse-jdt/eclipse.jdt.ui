@@ -13,9 +13,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class JavaElementLabels {
 	
@@ -162,7 +162,7 @@ public class JavaElementLabels {
 	 * e.g. <code>java.util - MyProject/src</code>
 	 */	
 	public final static int P_POST_QUALIFIED= 1 << 23;
-	
+
 	/**
 	 * Package Fragment Roots contain variable name if from a variable.
 	 * e.g. <code>JRE_LIB - c:\java\lib\rt.jar</code>
@@ -194,6 +194,12 @@ public class JavaElementLabels {
 	 * Option only applies to getElementLabel
 	 */
 	public final static int PREPEND_ROOT_PATH= 1 << 28;
+
+	/**
+	 * Package names are compressed.
+	 * e.g. <code>o*.e*.search</code>
+	 */	
+	public final static int P_COMPRESSED= 1 << 29;
 	
 	/**
 	 * Qualify all elements
@@ -248,7 +254,7 @@ public class JavaElementLabels {
 	public static void getElementLabel(IJavaElement element, int flags, StringBuffer buf) {
 		int type= element.getElementType();
 		IPackageFragmentRoot root= null;
-
+		
 		if (type != IJavaElement.JAVA_MODEL && type != IJavaElement.JAVA_PROJECT && type != IJavaElement.PACKAGE_FRAGMENT_ROOT)
 			root= JavaModelUtil.getPackageFragmentRoot(element);
 		if (root != null && getFlag(flags, PREPEND_ROOT_PATH)) {
@@ -293,7 +299,7 @@ public class JavaElementLabels {
 			default:
 				buf.append(element.getElementName());
 		}
-
+		
 		if (root != null && getFlag(flags, APPEND_ROOT_PATH)) {
 			buf.append(CONCAT_STRING);
 			getPackageFragmentRootLabel(root, ROOT_QUALIFIED, buf);
@@ -312,7 +318,7 @@ public class JavaElementLabels {
 				buf.append(Signature.getSimpleName(Signature.toString(method.getReturnType())));
 				buf.append(' ');
 			}
-
+			
 			// qualification
 			if (getFlag(flags, M_FULLY_QUALIFIED)) {
 				getTypeLabel(method.getDeclaringType(), T_FULLY_QUALIFIED, buf);
@@ -523,6 +529,17 @@ public class JavaElementLabels {
 		}
 		if (pack.isDefaultPackage()) {
 			buf.append(JavaUIMessages.getString("JavaElementLabels.default_package")); //$NON-NLS-1$
+		} else if (getFlag(flags, P_COMPRESSED)) {
+				String name= pack.getElementName();
+				int start= 0;
+				int dot= name.indexOf('.', start);
+				while (dot > 0) {
+					buf.append(name.charAt(start));
+					buf.append("*.");
+					start= dot + 1;
+					dot= name.indexOf('.', start);
+				}
+				buf.append(name.substring(start));
 		} else {
 			buf.append(pack.getElementName());
 		}
@@ -565,8 +582,4 @@ public class JavaElementLabels {
 			}
 		}		
 	}	
-	
-
-
 }
-
