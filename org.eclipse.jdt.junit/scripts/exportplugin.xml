@@ -35,10 +35,6 @@
 		<copy file="plugin.properties" todir="${dest}"/>
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
-		</copy>
-		<copy todir="${dest}/doc">
-			<fileset dir="doc" />
-		</copy>
-		
+		</copy>		
 	</target>
 </project>
