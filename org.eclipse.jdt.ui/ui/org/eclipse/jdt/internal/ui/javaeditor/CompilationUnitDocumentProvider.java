@@ -270,12 +270,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				// commit working copy
 				info.fCopy.commit(overwrite, monitor);
 				
-				if (resource != null)
-					info.setModificationStamp(computeModificationStamp(resource));
-				
 				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
 				model.updateMarkers(info.fDocument);
-						
+				
+				if (resource != null)
+					info.setModificationStamp(computeModificationStamp(resource));
+										
 			} catch (JavaModelException x) {
 				throw new CoreException(x.getStatus());
 			}
