@@ -16,9 +16,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
@@ -44,6 +41,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -52,9 +52,12 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITypedRegion;
@@ -109,7 +112,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
@@ -121,10 +123,8 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorHoverConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
@@ -182,7 +182,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * Link mode.  
 	 */
 	class MouseClickListener implements KeyListener, MouseListener, MouseMoveListener, MouseTrackListener,
-		FocusListener, PaintListener, IPropertyChangeListener {		
+		FocusListener, PaintListener, IPropertyChangeListener, IDocumentListener, ITextInputListener {		
 
 		/** The session is active. */
 		private boolean fActive;
@@ -192,6 +192,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		/** The hand cursor. */
 		private Cursor fCursor;
+		
+		/** The default cursor. */
+		private Cursor fDefaultCursor;
 		
 		/** The link color. */
 		private Color fColor;
@@ -215,6 +218,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				return;
 				
 			updateColor(sourceViewer);
+			
+			sourceViewer.addTextInputListener(this);
+			
+			IDocument document= sourceViewer.getDocument();
+			if (document != null)
+				document.addDocumentListener(this);			
 
 			text.addKeyListener(this);
 			text.addMouseListener(this);
@@ -235,6 +244,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			StyledText text= sourceViewer.getTextWidget();
 			if (text == null || text.isDisposed())
 				return;
+
+			sourceViewer.removeTextInputListener(this);
+
+			IDocument document= sourceViewer.getDocument();
+			if (document != null)
+				document.removeDocumentListener(this);
 				
 			text.removeKeyListener(this);
 			text.removeMouseListener(this);
@@ -457,8 +472,11 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			StyledText text= viewer.getTextWidget();
 			if (text == null || text.isDisposed())
 				return;
-						
-			text.setCursor(null);
+			Display display= text.getDisplay();			
+			if (fDefaultCursor == null)
+				fDefaultCursor= new Cursor(display, SWT.CURSOR_IBEAM);			
+			text.setCursor(fDefaultCursor);
+			
 			if (fCursor != null) {
 				fCursor.dispose();
 				fCursor= null;
@@ -620,6 +638,38 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 
 		/*
+		 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
+		 */
+		public void documentAboutToBeChanged(DocumentEvent event) {
+			deactivate();
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
+		 */
+		public void documentChanged(DocumentEvent event) {
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentAboutToBeChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
+		 */
+		public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
+			if (oldInput == null)
+				return;
+			deactivate();
+			uninstall();
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
+		 */
+		public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
+			if (newInput == null)
+				return;
+			install();
+		}
+
+		/*
 		 * @see PaintListener#paintControl(PaintEvent)
 		 */
 		public void paintControl(PaintEvent event) {	
@@ -697,7 +747,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	/** Preference key for the foreground color of the line numbers */
 	public final static String LINE_NUMBER_COLOR= "lineNumberColor"; //$NON-NLS-1$
 	/** Preference key for the link color */
-	public final static String LINK_COLOR= "linkColor";	
+	public final static String LINK_COLOR= "linkColor"; //$NON-NLS-1$
 	
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
@@ -1151,7 +1201,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		});
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
 		
-		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$				
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		setAction("ShowJavaDoc", action); //$NON-NLS-1$
 	
