@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import org.eclipse.core.runtime.Platform;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
@@ -54,6 +56,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * that represent the best guess completion for each parameter of a method.
  */
 public class ParameterGuessingProposal extends JavaCompletionProposal {
+
+	/** Tells whether this class is in debug mode. */
+	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
 
 	private final String fName;
 	private final char[][] fParameterNames;
@@ -118,8 +123,9 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				positionLengths= new int[parameterCount];
 				positions= new Position[parameterCount];
 				
-
+				long millis= DEBUG ? System.currentTimeMillis() : 0;
 				replacementString= computeGuessingCompletion(baseOffset, positionOffsets, positionLengths, document, positions);
+				if (DEBUG) System.err.println("Parameter Guessing: " + (System.currentTimeMillis() - millis) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 			} else {
 				parameterCount= 0;
