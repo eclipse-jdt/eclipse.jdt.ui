@@ -693,7 +693,27 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=47785
 		validatePassingTest("A", "I", true, false);
 	}
-	
+
+	public void test101() throws Exception{
+		String[] names= new String[]{};
+		String[][] signatures= new String[][]{};
+		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
+	}
+
+	public void test102() throws Exception{
+		String[] names= new String[]{};
+		String[][] signatures= new String[][]{};
+// Disabled test: Convert to new type constraints infrastructure
+//		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
+	}
+
+	public void test103() throws Exception{
+		String[] names= new String[]{};
+		String[][] signatures= new String[][]{};
+// Disabled test: Convert to new type constraints infrastructure
+//		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
+	}
+
 	public void testPaperExample0() throws Exception{
 		String[] names= new String[]{"add", "addAll", "iterator"};
 		String[][] signatures= new String[][]{new String[]{"QComparable;"}, new String[]{"QA;"}, new String[0]};
