@@ -204,7 +204,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 		if (dest instanceof IPackageFragment){
 			String newName= createNewName(cu, (IPackageFragment)dest);
 			CopyCompilationUnitChange simpleCopy= new CopyCompilationUnitChange(cu, (IPackageFragment)dest, fCopyQueries.createStaticQuery(newName));
-			if (newName == null || newName.equals(cu.getElementName()) || cu.findPrimaryType() == null)
+			if (newName == null || newName.equals(cu.getElementName()))
 				return simpleCopy;
 			
 			try {

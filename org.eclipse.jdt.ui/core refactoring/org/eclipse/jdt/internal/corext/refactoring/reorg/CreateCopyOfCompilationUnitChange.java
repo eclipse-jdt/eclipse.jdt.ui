@@ -97,6 +97,8 @@ class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	private static SearchResultGroup getReferences(ICompilationUnit wc, IProgressMonitor pm) throws JavaModelException{
 		pm.subTask(RefactoringCoreMessages.getString("CopyRefactoring.searching")); //$NON-NLS-1$
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{wc});
+		if (wc.findPrimaryType() == null)
+			return null;
 		ISearchPattern pattern= createSearchPattern(wc.findPrimaryType());
 		SearchResultGroup[] groups= RefactoringSearchEngine.search(pm, scope, pattern, new ICompilationUnit[]{wc});
 		Assert.isTrue(groups.length <= 1); //just 1 file or none
@@ -106,7 +108,7 @@ class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 			return groups[0];
 	}
 	
-	private static 	ISearchPattern createSearchPattern(IType type) throws JavaModelException{
+	private static ISearchPattern createSearchPattern(IType type) throws JavaModelException{
 		ISearchPattern pattern= SearchEngine.createSearchPattern(type, IJavaSearchConstants.ALL_OCCURRENCES);
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
 		ISearchPattern constructorDeclarationPattern= RefactoringSearchEngine.createSearchPattern(constructors, IJavaSearchConstants.DECLARATIONS);
