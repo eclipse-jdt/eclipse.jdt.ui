@@ -208,7 +208,7 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		List editorsToSave= getEditorsToSave(unsavedEditorsList);
 		List unsavedFiles= getFiles(createDifference(unsavedEditorsList, editorsToSave));
 		//XXX no the nicest place to do this
-		getRefactoring().setUnsavedFileList(unsavedFiles);
+		getRefactoring().setUnsavedFiles((IFile[])unsavedFiles.toArray(new IFile[unsavedFiles.size()]));
 		if (editorsToSave == null) //saving canceled, so unsuccesful
 			return false;
 		if (editorsToSave.isEmpty()) //nothing to do
