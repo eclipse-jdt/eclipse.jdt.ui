@@ -18,21 +18,21 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class ModifyParametersInputPage extends UserInputWizardPage {
+public class ChangeSignatureInputPage extends UserInputWizardPage {
 
-	public static final String PAGE_NAME= "ModifyParametersInputPage"; //$NON-NLS-1$
+	public static final String PAGE_NAME= "ChangeSignatureInputPage"; //$NON-NLS-1$
 	private Label fSignaturePreview;
 	
-	public ModifyParametersInputPage() {
+	public ChangeSignatureInputPage() {
 		super(PAGE_NAME, true);
-		setMessage(RefactoringMessages.getString("ModifyParametersInputPage.new_order")); //$NON-NLS-1$
+		setMessage(RefactoringMessages.getString("ChangeSignatureInputPage.new_order")); //$NON-NLS-1$
 	}
 	
 	/*
@@ -123,7 +123,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	}
 	
 	private void createParameterTableComposite(Composite composite) {
-		String labelText= RefactoringMessages.getString("ModifyParametersInputPage.parameters");
+		String labelText= RefactoringMessages.getString("ChangeSignatureInputPage.parameters");
 		ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new ParameterListChangeListener() {
 			public void parameterChanged(ParameterInfo parameter) {
 				update(true);
@@ -136,8 +136,8 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		cp.setInput(getModifyParametersRefactoring().getParameterInfos());
 	}
 
-	private ModifyParametersRefactoring getModifyParametersRefactoring(){
-		return	(ModifyParametersRefactoring)getRefactoring();
+	private ChangeSignatureRefactoring getModifyParametersRefactoring(){
+		return	(ChangeSignatureRefactoring)getRefactoring();
 	}
 
 	private void update(boolean displayErrorMessage){
@@ -164,9 +164,9 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 
 	private void updateSignaturePreview() {
 		try{
-			fSignaturePreview.setText(RefactoringMessages.getString("ModifyParametersInputPage.method_Signature_Preview") + getModifyParametersRefactoring().getMethodSignaturePreview()); //$NON-NLS-1$
+			fSignaturePreview.setText(RefactoringMessages.getString("ChangeSignatureInputPage.method_Signature_Preview") + getModifyParametersRefactoring().getMethodSignaturePreview()); //$NON-NLS-1$
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("ModifyParamatersInputPage.modify_Parameters"), RefactoringMessages.getString("ModifyParametersInputPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, RefactoringMessages.getString("ChangeSignatureRefactoring.modify_Parameters"), RefactoringMessages.getString("ChangeSignatureInputPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}	
 	}	
 }	

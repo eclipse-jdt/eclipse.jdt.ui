@@ -1,10 +1,10 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 
 public class ModifyParametersWizard extends RefactoringWizard {
 
-	public ModifyParametersWizard(ModifyParametersRefactoring ref, String pageTitle, String errorPageContextHelpId) {
+	public ModifyParametersWizard(ChangeSignatureRefactoring ref, String pageTitle, String errorPageContextHelpId) {
 		super(ref, pageTitle, errorPageContextHelpId);
 	}
 
@@ -12,6 +12,6 @@ public class ModifyParametersWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		addPage(new ModifyParametersInputPage());
+		addPage(new ChangeSignatureInputPage());
 	}
 }

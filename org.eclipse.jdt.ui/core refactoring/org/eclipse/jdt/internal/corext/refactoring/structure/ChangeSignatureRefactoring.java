@@ -75,7 +75,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class ModifyParametersRefactoring extends Refactoring {
+public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private final List fParameterInfos;
 	private TextChangeManager fChangeManager;
@@ -97,7 +97,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 															"long", 	//$NON-NLS-1$
 															"short"});	//$NON-NLS-1$
 
-	public ModifyParametersRefactoring(IMethod method){
+	public ChangeSignatureRefactoring(IMethod method){
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
 		fAstManager= new ASTNodeMappingManager();
@@ -132,7 +132,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("ModifyParamatersRefactoring.modify_Parameters"); //$NON-NLS-1$
+		return RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_Parameters"); //$NON-NLS-1$
 	}
 	
 	public IMethod getMethod() {
@@ -180,7 +180,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 		if (fMethod.getNumberOfParameters() == 0 && fParameterInfos.isEmpty() && isVisibilitySameAsInitial())
 			return RefactoringStatus.createFatalErrorStatus("No parameters were added and visibility is unchanged");
 		if (areNamesSameAsInitial() && isOrderSameAsInitial() && isVisibilitySameAsInitial())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.no_changes")); //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.no_changes")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		checkForDuplicateNames(result);
 		if (result.hasFatalError())
@@ -254,8 +254,8 @@ public class ModifyParametersRefactoring extends Refactoring {
 			return result;
 			
 		//XXX disable for constructors  - broken. see bug 23585
-		if (fMethod.isConstructor())
-			return RefactoringStatus.createFatalErrorStatus("This refactoring is not implemented for constructors");
+//		if (fMethod.isConstructor())
+//			return RefactoringStatus.createFatalErrorStatus("This refactoring is not implemented for constructors");
 
 		return result;
 	}
@@ -271,7 +271,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 				return result;
 			IMethod orig= (IMethod)WorkingCopyUtil.getOriginal(fMethod);
 			if (orig == null || ! orig.exists()){
-				String message= RefactoringCoreMessages.getFormattedString("ReorderParametersRefactoring.method_deleted", fMethod.getCompilationUnit().getElementName());//$NON-NLS-1$
+				String message= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.method_deleted", fMethod.getCompilationUnit().getElementName());//$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(message);
 			}
 			fMethod= orig;
@@ -302,7 +302,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.checking_preconditions"), 5); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 5); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkParameters());
 			if (result.hasFatalError())
@@ -374,7 +374,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 			ParameterInfo info= (ParameterInfo)iter.next();
 			String newName= info.getNewName();
 			if (found.contains(newName) && !doubled.contains(newName)){
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameParametersRefactoring.duplicate_name", newName));//$NON-NLS-1$	
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.duplicate_name", newName));//$NON-NLS-1$	
 				doubled.add(newName);
 			} else {
 				found.add(newName);
@@ -388,7 +388,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 			String newName= info.getNewName();
 			result.merge(Checks.checkFieldName(newName));	
 			if (! Checks.startsWithLowerCase(newName))
-				result.addWarning(RefactoringCoreMessages.getString("RenameParametersRefactoring.should_start_lowercase")); //$NON-NLS-1$
+				result.addWarning(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.should_start_lowercase")); //$NON-NLS-1$
 		}
 	}
 
@@ -416,7 +416,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 			TextEdit[] allEdits= getAllEdits(map);
 			
 			CompilationUnit compliationUnitNode= AST.parseCompilationUnit(getCu(), true);
-			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_Paremeters"), TextBuffer.create(getCu().getSource())); //$NON-NLS-1$
+			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.rename_Paremeters"), TextBuffer.create(getCu().getSource())); //$NON-NLS-1$
 			change.setKeepExecutedTextEdits(true);
 		
 			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(allEdits, change, getCu());
@@ -488,7 +488,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 
 	private RefactoringStatus checkReorderings(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("ReorderParametersRefactoring.checking_preconditions"), 2); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 2); //$NON-NLS-1$
 
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkNativeMethods());
@@ -531,7 +531,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fRippleMethods.length; i++) {
 			if (JdtFlags.isNative(fRippleMethods[i])){
-				String message= RefactoringCoreMessages.getFormattedString("ReorderParametersRefactoring.native", //$NON-NLS-1$
+				String message= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.native", //$NON-NLS-1$
 					new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), JavaModelUtil.getFullyQualifiedName(fRippleMethods[i].getDeclaringType())});
 				result.addError(message, JavaSourceContext.create(fRippleMethods[i]));			
 			}								
@@ -550,14 +550,14 @@ public class ModifyParametersRefactoring extends Refactoring {
 	//--  changes ----
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			return new CompositeChange(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.restructure_parameters"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+			return new CompositeChange(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.restructure_parameters"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
 		}	
 	}
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.preparing_preview"), 4); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.preparing_preview"), 4); //$NON-NLS-1$
 		TextChangeManager manager= new TextChangeManager();
 
 		if (! isVisibilitySameAsInitial())
@@ -674,9 +674,9 @@ public class ModifyParametersRefactoring extends Refactoring {
 		try{
 			TextChange change= manager.get(WorkingCopyUtil.getWorkingCopyIfExists(getCu()));
 			TextEdit[] edits= getAllRenameEdits();
-			pm.beginTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.preview"), edits.length);  //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.preview"), edits.length);  //$NON-NLS-1$
 			for (int i= 0; i < edits.length; i++) {
-				change.addTextEdit(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_method_parameter"), edits[i]); //$NON-NLS-1$
+				change.addTextEdit(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.rename_method_parameter"), edits[i]); //$NON-NLS-1$
 			}
 		}catch (CoreException e)	{
 			throw new JavaModelException(e);
@@ -689,7 +689,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 		if (fOccurrenceNodes == null)
 			return;
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("ReorderParametersRefactoring.preview"), fOccurrenceNodes.length); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.preview"), fOccurrenceNodes.length); //$NON-NLS-1$
 			for (int i= 0; i < fOccurrenceNodes.length ; i++){
 				ASTNode node= fOccurrenceNodes[i];
 				ISourceRange[] sourceRanges= getParameterOccurrenceSourceRanges(node);
@@ -895,7 +895,7 @@ public class ModifyParametersRefactoring extends Refactoring {
 		}
 		if (! edits.isEmpty())
 			change.addTextEdit(
-				RefactoringCoreMessages.getString("ReorderParametersRefactoring.editName"),  //$NON-NLS-1$
+				RefactoringCoreMessages.getString("ChangeSignatureRefactoring.editName"),  //$NON-NLS-1$
 				(TextEdit[]) edits.toArray(new TextEdit[edits.size()]));
 	}
 

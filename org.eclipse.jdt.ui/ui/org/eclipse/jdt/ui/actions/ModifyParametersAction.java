@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ModifyParametersAction extends SelectionDispatchAction {
 	
-	private ModifyParametersRefactoring fRefactoring;
+	private ChangeSignatureRefactoring fRefactoring;
 	private CompilationUnitEditor fEditor;
 	
 	/**
@@ -151,7 +151,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 			return false;
 		
 		try{
-			fRefactoring= new ModifyParametersRefactoring(method);
+			fRefactoring= new ChangeSignatureRefactoring(method);
 			return fRefactoring.checkPreactivation().isOK();
 		} catch (JavaModelException e) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
