@@ -18,6 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
@@ -309,4 +311,84 @@ public class ReorgUtils2 {
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}
 	
+	public static IFolder[] getFolders(IResource[] resources) {
+		List result= getResourcesOfType(resources, IResource.FOLDER);
+		return (IFolder[]) result.toArray(new IFolder[result.size()]);
+	}
+
+	public static IFile[] getFiles(IResource[] resources) {
+		List result= getResourcesOfType(resources, IResource.FILE);
+		return (IFile[]) result.toArray(new IFile[result.size()]);
+	}
+		
+	//the result can be cast down to the requested type array
+	public static List getResourcesOfType(IResource[] resources, int typeMask){
+		List result= new ArrayList(resources.length);
+		for (int i= 0; i < resources.length; i++) {
+			if (isOfType(resources[i], typeMask))
+				result.add(resources[i]);
+		}
+		return result;
+	}
+	
+	//the result can be cast down to the requested type array
+	//type is _not_ a mask	
+	public static List getElementsOfType(IJavaElement[] javaElements, int type){
+		List result= new ArrayList(javaElements.length);
+		for (int i= 0; i < javaElements.length; i++) {
+			if (isOfType(javaElements[i], type))
+				result.add(javaElements[i]);
+		}
+		return result;
+	}
+
+	public static boolean hasElementsNotOfType(IResource[] resources, int typeMask) {
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			if (resource != null && ! isOfType(resource, typeMask))
+				return true;
+		}
+		return false;
+	}
+
+	//type is _not_ a mask	
+	public static boolean hasElementsNotOfType(IJavaElement[] javaElements, int type) {
+		for (int i= 0; i < javaElements.length; i++) {
+			IJavaElement element= javaElements[i];
+			if (element != null && ! isOfType(element, type))
+				return true;
+		}
+		return false;
+	}
+	
+	//type is _not_ a mask	
+	public static boolean hasElementsOfType(IJavaElement[] javaElements, int type) {
+		for (int i= 0; i < javaElements.length; i++) {
+			IJavaElement element= javaElements[i];
+			if (element != null && isOfType(element, type))
+				return true;
+		}
+		return false;
+	}
+
+	public static boolean hasElementsOfType(IResource[] resources, int typeMask) {
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			if (resource != null && isOfType(resource, typeMask))
+				return true;
+		}
+		return false;
+	}
+
+	private static boolean isOfType(IJavaElement element, int type) {
+		return element.getElementType() == type;//this is _not_ a mask
+	}
+		
+	private static boolean isOfType(IResource resource, int type) {
+		return isFlagSet(resource.getType(), type);
+	}
+		
+	private static boolean isFlagSet(int flags, int flag){
+		return (flags & flag) != 0;
+	}
 }
