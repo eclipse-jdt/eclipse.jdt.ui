@@ -38,17 +38,17 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
 /**
  * Caution: this implementation is a layer breaker and contains some "shortcuts"
  */
-public class JavaTextHover implements ITextHover {
+public class JavaTextHover extends JavaElementHover {
 		
 	class EditorWatcher implements IPartListener {
 		
@@ -68,8 +68,8 @@ public class JavaTextHover implements ITextHover {
 		 * @see IPartListener#partClosed(IWorkbenchPart)
 		 */
 		public void partClosed(IWorkbenchPart part) {
-			if (part == fEditor) {
-				fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(fPartListener);
+			if (part == getEditor()) {
+				getEditor().getSite().getWorkbenchWindow().getPartService().removePartListener(fPartListener);
 				fPartListener= null;
 				
 				IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -147,8 +147,6 @@ public class JavaTextHover implements ITextHover {
 		}
 	}
 	
-	
-	protected IEditorPart fEditor;
 	protected IPartListener fPartListener;
 	protected IPropertyChangeListener fPropertyChangeListener;
 	
@@ -159,12 +157,12 @@ public class JavaTextHover implements ITextHover {
 	
 	public JavaTextHover(IEditorPart editor) {
 		
-		fEditor= editor;
+		setEditor(editor);
 		
-		if (fEditor != null) {
+		if (getEditor() != null) {
 			
 			fPartListener= new EditorWatcher();
-			IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
+			IWorkbenchWindow window= getEditor().getSite().getWorkbenchWindow();
 			window.getPartService().addPartListener(fPartListener);
 			
 			fPropertyChangeListener= new PropertyChangeListener();
@@ -201,7 +199,7 @@ public class JavaTextHover implements ITextHover {
 
 	protected void update() {
 		
-		IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
+		IWorkbenchWindow window= getEditor().getSite().getWorkbenchWindow();
 		IWorkbenchPage page= window.getActivePage();
 		if (page != null) {
 			
@@ -227,7 +225,7 @@ public class JavaTextHover implements ITextHover {
 
 			IJavaEditorTextHover hover= createTextHover(spec);
 			if (hover != null) {
-				hover.setEditor(fEditor);
+				hover.setEditor(getEditor());
 				addTextHover(hover);					
 			}
 		}
@@ -275,14 +273,11 @@ public class JavaTextHover implements ITextHover {
 	 * @see ITextHover#getHoverRegion(ITextViewer, int)
 	 */
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
-
-		if (!fEnabled)
+		if (fEnabled)
+			return super.getHoverRegion(textViewer, offset);
+		else
 			return null;
 
-		if (textViewer != null)
-			return JavaWordFinder.findWord(textViewer.getDocument(), offset);
-
-		return null;
 	}
 		
 	/*
