@@ -16,8 +16,8 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 	private ISelectionProvider fProvider;
 	
 	public BasicSelectionTransferDragAdapter(ISelectionProvider provider) {
+		Assert.isNotNull(provider);
 		fProvider= provider;
-		Assert.isNotNull(fProvider);
 	}
 
 	/**
@@ -27,7 +27,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 		return LocalSelectionTransfer.getInstance();
 	}
 	
-	/**
+	/* non Java-doc
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragStart
 	 */
 	public void dragStart(DragSourceEvent event) {
@@ -37,13 +37,18 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 	}
 	
 	/**
-	 * Overwrite to validate selection
+	 * Checks if the elements contained in the given selection can
+	 * be dragged.
+	 * <p>
+	 * Subclasses may override.
+	 * 
+	 * @param selection containing the elements to be dragged
 	 */
 	protected boolean isDragable(ISelection selection) {
 		return true;
 	}
 
-	/**
+	/* non Java-doc
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData
 	 */		
 	public void dragSetData(DragSourceEvent event) {
@@ -53,7 +58,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 		event.data= LocalSelectionTransfer.getInstance().getSelection();
 	}
 
-	/**
+	/* non Java-doc
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished
 	 */	
 	public void dragFinished(DragSourceEvent event) {

@@ -16,6 +16,11 @@ import org.eclipse.swt.dnd.TransferData;
 
 import org.eclipse.jface.util.Assert;
 
+/**
+ * A delegating drag adapter negotiates between a set of <code>TransferDragSourceListener</code>s
+ * On <code>dragStart</code> the adapter determines the listener to be used for any further
+ * <code>drag*</code> callback.
+ */
 public class DelegatingDragAdapter implements DragSourceListener {
 
 	private TransferDragSourceListener[] fPossibleListeners;
@@ -27,6 +32,9 @@ public class DelegatingDragAdapter implements DragSourceListener {
 		fPossibleListeners= listeners;
 	}
 	
+	/* non Java-doc
+	 * @see DragSourceListener
+	 */
 	public void dragStart(DragSourceEvent event) {
 		fFinishListener= null;
 		boolean saveDoit= event.doit;
@@ -52,13 +60,19 @@ public class DelegatingDragAdapter implements DragSourceListener {
 		event.doit= doIt;
 	}
 
-	public void dragSetData(DragSourceEvent event){
+	/* non Java-doc
+	 * @see DragSourceListener
+	 */
+	public void dragSetData(DragSourceEvent event) {
 		fFinishListener= getListener(event.dataType);
 		if (fFinishListener != null)
 			fFinishListener.dragSetData(event);
 	}
 	
-	public void dragFinished(DragSourceEvent event){
+	/* non Java-doc
+	 * @see DragSourceListener
+	 */
+	public void dragFinished(DragSourceEvent event) {
 		if (fFinishListener != null) {
 			fFinishListener.dragFinished(event);
 		} else {

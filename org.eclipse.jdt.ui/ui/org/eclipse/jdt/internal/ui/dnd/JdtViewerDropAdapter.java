@@ -18,36 +18,36 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.StructuredViewer;
 
 /**
- * An drag and drop adapter to be used together with structured viewers.
- * The adpater delegates the <code>dragEnter</code>, <code>dragOperationChanged
- * </code>, <code>dragOver</code> and <code>dropAccept</code> method to the <
- * code>validateDrop</code> method. Furthermore it adds location feedback.
+ * A drag and drop adapter to be used together with structured viewers.
+ * The adapater delegates the <code>dragEnter</code>, <code>dragOperationChanged
+ * </code>, <code>dragOver</code> and <code>dropAccept</code> method to the
+ * <code>validateDrop</code> method. Furthermore it adds location feedback.
  */
 public class JdtViewerDropAdapter implements DropTargetListener {
 
 	/**
-	 * Constant describing the position of the cursor relative 
+	 * Constant describing the position of the mouse cursor relative 
 	 * to the target object.  This means the mouse is positioned
 	 * slightly before the target.
 	 */
 	protected static final int LOCATION_BEFORE= 1;
 	
 	/**
-	 * Constant describing the position of the cursor relative 
+	 * Constant describing the position of the mouse cursor relative 
 	 * to the target object.  This means the mouse is positioned
 	 * slightly after the target.
 	 */
 	protected static final int LOCATION_AFTER= 2;
 	
 	/**
-	 * Constant describing the position of the cursor relative 
+	 * Constant describing the position of the mouse cursor relative 
 	 * to the target object.  This means the mouse is positioned
 	 * directly on the target.
 	 */
 	protected static final int LOCATION_ON= 3;
 	
 	/**
-	 * Constant describing the position of the cursor relative 
+	 * Constant describing the position of the mouse cursor relative 
 	 * to the target object.  This means the mouse is not positioned
 	 * over or near any valid target.
 	 */
@@ -55,15 +55,9 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	
 	/**
 	 * The threshold used to determine if the mouse is before or after
-	 * a item.
+	 * an item.
 	 */
 	private static final int LOCATION_EPSILON= 5; 
-	
-	/**
-	 * The threshold used to determine if the mouse is near the border
-	 * and scrollinh should occur.
-	 */
-	private static final int SCROLL_EPSILON= 20;
 	
 	/**
 	 * Style to enable location feedback.
@@ -75,7 +69,6 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	private boolean fShowInsertionFeedback;
 	private int fRequestedOperation;
 	private int fLastOperation;
-	private long fLastScroll;
 	protected int fLocation;
 	protected Object fTarget;
 
@@ -123,7 +116,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	}
 	
 	/**
-	 * Validates if the drop is valid. The method calls <code>validateDrop
+	 * Checks if the drop is valid. The method calls <code>validateDrop
 	 * (Object target, DropTargetEvent event). Implementors can alter the 
 	 * <code>currentDataType</code> field and the <code>detail</code> field 
 	 * to give feedback about drop acceptence.
@@ -133,7 +126,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	}
 	
 	/**
-	 * Validates if the drop on the current target is valid. The method
+	 * Checks if the drop on the current target is valid. The method
 	 * can alter the <code>currentDataType</code> field and the <code>
 	 * detail</code> field to give feedback about drop acceptence.
 	 * @param target the drop target in form of a domain element.
@@ -144,14 +137,12 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	}
 	
 	public void dragEnter(DropTargetEvent event) {
-		fLastScroll= System.currentTimeMillis();
 		dragOperationChanged(event);
 	}
 	
 	public void dragLeave(DropTargetEvent event) {
 		fTarget= null;
 		fLocation= LOCATION_NONE;
-		fLastScroll= 0;
 	}
 	
 	public void dragOperationChanged(DropTargetEvent event) {
@@ -186,7 +177,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	}
 	
 	/**
-	 * Returns the data hold by <code>event.item</code>. Inside a viewer
+	 * Returns the data held by <code>event.item</code>. Inside a viewer
 	 * this corresponds to the items data model element.
 	 */
 	protected Object computeTarget(DropTargetEvent event) {
@@ -200,13 +191,11 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	 * defined in this class.
 	 */
 	final protected int computeLocation(DropTargetEvent event) {
-		if (!(event.item instanceof Item)) {
+		if (!(event.item instanceof Item))
 			return LOCATION_NONE;
-		}
 		
 		Item item= (Item) event.item;
-		Point coordinates= new Point(event.x, event.y);
-		coordinates= fViewer.getControl().toControl(coordinates);
+		Point coordinates= fViewer.getControl().toControl(new Point(event.x, event.y));
 		Rectangle bounds= getBounds(item);
 		if (bounds == null) {
 			return LOCATION_NONE;
@@ -225,12 +214,12 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	 * valid type of item.
 	 */
 	private Rectangle getBounds(Item item) {
-		if (item instanceof TreeItem) {
+		if (item instanceof TreeItem)
 			return ((TreeItem) item).getBounds();
-		}
-		if (item instanceof TableItem) {
+			
+		if (item instanceof TableItem)
 			return ((TableItem) item).getBounds(0);
-		}
+			
 		return null;
 	}
 
@@ -254,7 +243,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	}
 	
 	/**
-	 * Sets the dop operation to </code>DROP_NODE<code>.
+	 * Sets the drop operation to </code>DROP_NODE<code>.
 	 */
 	protected void clearDropOperation(DropTargetEvent event) {
 		event.detail= DND.DROP_NONE;

@@ -10,63 +10,91 @@ import org.eclipse.swt.dnd.TransferData;
 
 import org.eclipse.jface.util.Assert;
 
+/**
+ * A delegating drop adapter negotiates between a set of <code>TransferDropTargetListener</code>s
+ * On <code>dragEnter</code> the adapter determines the listener to be used for any further
+ * <code>drag*</code> callback.
+ */
 public class DelegatingDropAdapter implements DropTargetListener {
 
 	private TransferDropTargetListener[] fListeners;
 	
-	private TransferDropTargetListener fChoosenListener;
-	
+	private TransferDropTargetListener fChosenListener;
+
+	/**
+	 * Creates a new delegating drop adapter.
+	 * 
+	 * @param listeners an array of potential listeners
+	 */	
 	public DelegatingDropAdapter(TransferDropTargetListener[] listeners) {
 		fListeners= listeners;
 		Assert.isNotNull(listeners);
 	}
 
+	/* non Java-doc
+	 * @see DropTargetListener
+	 */
 	public void dragEnter(DropTargetEvent event) {
-		fChoosenListener= null;
+		fChosenListener= null;
 		event.currentDataType= selectPreferredListener(event.dataTypes);
-		if (fChoosenListener != null)
-			fChoosenListener.dragEnter(event);
+		if (fChosenListener != null)
+			fChosenListener.dragEnter(event);
 	}
 	
+	/* non Java-doc
+	 * @see DropTargetListener
+	 */
 	public void dragLeave(DropTargetEvent event){
-		if (fChoosenListener != null)
-			fChoosenListener.dragLeave(event);
+		if (fChosenListener != null)
+			fChosenListener.dragLeave(event);
 	}
 	
+	/* non Java-doc
+	 * @see DropTargetListener
+	 */
 	public void dragOperationChanged(DropTargetEvent event){
-		if (fChoosenListener != null)
-			fChoosenListener.dragOperationChanged(event);
+		if (fChosenListener != null)
+			fChosenListener.dragOperationChanged(event);
 	}
 	
+	/* non Java-doc
+	 * @see DropTargetListener
+	 */
 	public void dragOver(DropTargetEvent event){
-		if (fChoosenListener != null)
-			fChoosenListener.dragOver(event);
+		if (fChosenListener != null)
+			fChosenListener.dragOver(event);
 	}
 	
+	/* non Java-doc
+	 * @see DropTargetListener
+	 */
 	public void drop(DropTargetEvent event){
-		if (fChoosenListener != null)
-			fChoosenListener.drop(event);
-		fChoosenListener= null;	
+		if (fChosenListener != null)
+			fChosenListener.drop(event);
+		fChosenListener= null;	
 	}
 	
+	/* non Java-doc
+	 * @see DropTargetListener
+	 */
 	public void dropAccept(DropTargetEvent event){
-		if (fChoosenListener != null)
-			fChoosenListener.dropAccept(event);
+		if (fChosenListener != null)
+			fChosenListener.dropAccept(event);
 	}
 	
 	private TransferData selectPreferredListener(TransferData[] dataTypes) {
 		for (int i= 0; i < fListeners.length; i++) {
-			TransferData data= getTransferData(dataTypes, fListeners[i]);
+			TransferData data= computeTransferData(dataTypes, fListeners[i]);
 			if (data != null)
 				return data;
 		}
 		return null;
 	}
 	
-	private TransferData getTransferData(TransferData[] dataTypes, TransferDropTargetListener listener) {
+	private TransferData computeTransferData(TransferData[] dataTypes, TransferDropTargetListener listener) {
 		for (int i= 0; i < dataTypes.length; i++) {
 			if (listener.getTransfer().isSupportedType(dataTypes[i])) {
-				fChoosenListener= listener;
+				fChosenListener= listener;
 				return dataTypes[i];
 			}
 		}

@@ -12,15 +12,10 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class LocalSelectionTransfer extends ByteArrayTransfer {
 
-	private static String TYPE_NAME;
 	// First attempt to create a UUID for the type name to make sure that
 	// different Eclipse applications use different "types" of
 	// <code>LocalSelectionTransfer</code>
-	static {
-		TYPE_NAME= "local-selection-transfer-format"; //$NON-NLS-1$
-		long time= System.currentTimeMillis();
-		TYPE_NAME= TYPE_NAME + (new Long(time)).toString();
-	}
+	private static final String TYPE_NAME= "local-selection-transfer-format" + (new Long(System.currentTimeMillis())).toString(); //$NON-NLS-1$;
 	private static final int TYPEID= registerType(TYPE_NAME);
 	
 	private static final LocalSelectionTransfer INSTANCE= new LocalSelectionTransfer();
@@ -58,14 +53,18 @@ public class LocalSelectionTransfer extends ByteArrayTransfer {
 
 	public Object nativeToJava(TransferData transferData) {
 		Object result= super.nativeToJava(transferData);
-		if (!(result instanceof byte[]) || !TYPE_NAME.equals(new String((byte[])result))) {
+		if (isInvalidNativeType(result)) {
 			JavaPlugin.logErrorMessage(JavaUIMessages.getString("LocalSelectionTransfer.errorMessage")); //$NON-NLS-1$
 		}
 		return fSelection;
 	}
+
+	private boolean isInvalidNativeType(Object result) {
+		return !(result instanceof byte[]) || !TYPE_NAME.equals(new String((byte[])result));
+	}
 	
 	/**
-	 * The used type id to identify this transfer.
+	 * The type id used to identify this transfer.
 	 */
 	protected int[] getTypeIds() {
 		return new int[] {TYPEID};
