@@ -1553,7 +1553,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * @throws BadLocationException in case lineOffset is not valid in document
 	 */
 	public static int[] getBidiLineSegments(IDocument document, int lineOffset) throws BadLocationException {
-	
+			
 		IRegion line= document.getLineInformationOfOffset(lineOffset);
 		ITypedRegion[] linePartitioning= document.computePartitioning(lineOffset, line.getLength());
 		
@@ -1604,13 +1604,26 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * @param line the content of the line
 	 * @return the line's bidi segmentation
 	 */
-	protected int[] getBidiLineSegments(int lineOffset, String line) {
+	protected int[] getBidiLineSegments(int widgetLineOffset, String line) {
 		IDocumentProvider provider= getDocumentProvider();
 		if (provider != null && line != null && line.length() > 0) {
 			IDocument document= provider.getDocument(getEditorInput());
 			if (document != null)
 				try {
+					
+					int lineOffset;
+					
+					ISourceViewer sourceViewer= getSourceViewer();
+					if (sourceViewer instanceof ITextViewerExtension3) {
+						ITextViewerExtension3 extension= (ITextViewerExtension3) sourceViewer;
+						lineOffset= extension.widgetOffset2ModelOffset(widgetLineOffset);
+					} else {
+						IRegion visible= sourceViewer.getVisibleRegion();
+						lineOffset= visible.getOffset() + widgetLineOffset;
+					}
+					
 					return getBidiLineSegments(document, lineOffset);
+					
 				} catch (BadLocationException x) {
 					// ignore
 				}
