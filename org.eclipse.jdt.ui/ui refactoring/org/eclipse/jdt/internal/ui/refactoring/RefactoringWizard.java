@@ -339,8 +339,9 @@ public class RefactoringWizard extends Wizard {
 			status= new RefactoringStatus();
 			String message= exception.getMessage();
 			if (message == null)
-				message= "Internal error during precondition checking";
+				message= "Internal error during precondition checking. See log for detailed error description";
 			status.addFatalError(message);
+			JavaPlugin.log(exception);
 		} else {
 			status= op.getStatus();
 		}

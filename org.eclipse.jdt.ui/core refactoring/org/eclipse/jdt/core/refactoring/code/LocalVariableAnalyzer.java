@@ -16,8 +16,8 @@ import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
-import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
-import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
+import org.eclipse.jdt.internal.compiler.ast.Statement;import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 
@@ -34,12 +34,17 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	private List fFollowingLocalWrites= new ArrayList(2);
 	private List fFollowingLocalReads= new ArrayList(2);
 	
+	// Return statement handling if a return statement has been selected.
+	private ReturnStatement fExtractedReturnStatement;
+
+	// Code generation
+	private LocalVariableBinding fReturnStatementBinding;
 	private boolean fAsymetricAssignment;
 	private String fAssignment;
 	private String fLocalDeclaration= null;	
 	private String fLocalReturnValueDeclaration= null;
 	private String fLhs= null;
-	private String fReturnStatement= null;
+	private String fReturnStatement= null;	
 	private String fReturnType= "void";
 	
 	private List fUsedLocals= new ArrayList(2);
@@ -99,6 +104,10 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		}
 	}
 
+	public void setExtractedReturnStatement(ReturnStatement returnStatement) {
+		fExtractedReturnStatement= returnStatement;
+	}
+	
 	private LocalVariableBinding getLocalVariableBindingIfSingleNameReference(Reference ref) {
 		if (ref instanceof SingleNameReference && 
 		    ((SingleNameReference)ref).binding instanceof LocalVariableBinding) {
@@ -162,6 +171,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 		List followingLocals= computeFollowingLocals();
 		checkLocalWrites(status, followingLocals);
 		checkFollowingLocals(status, followingLocals);
+		checkReturnStatement(status);
 	}
 
 	private List computeFollowingLocals() {
@@ -250,76 +260,91 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	}
 	
 	private void checkLocalWrites(RefactoringStatus status, List followingLocals) {
-		LocalDeclaration returnDeclaration= null;
+		LocalVariableBinding returnBinding= null;
 		boolean isHardReturnDeclaration= false;
 		Iterator iter= fSelectedLocalWrites.iterator();
 		while (iter.hasNext()) {
 			LocalVariableBinding binding= (LocalVariableBinding)iter.next();
-			LocalDeclaration declaration= binding.declaration;
-			if (!fStatementAnalyzer.isSelected(declaration)) {
+			if (!fStatementAnalyzer.isSelected(binding.declaration)) {
 				boolean isUsedAfterSelection= followingLocals.contains(binding);
-				if (returnDeclaration == null) {
-					returnDeclaration= declaration;
+				if (returnBinding == null) {
+					returnBinding= binding;
 					isHardReturnDeclaration= isUsedAfterSelection;
 				} else {
 					if (isHardReturnDeclaration) {
 						status.addFatalError("Ambigious return value: selected block contains more than one assignment to local variable");
 						return;
 					} else if (isUsedAfterSelection) {
-						returnDeclaration= declaration;
+						returnBinding= binding;
 						isHardReturnDeclaration= true;
 					}
 				}
 				// The variable is not part of the read accesses. So we have to create a local variable declaration.
 				if (!fUsedLocals.contains(binding))
-					fLocalReturnValueDeclaration= makeDeclaration(declaration) + ";"; 
+					fLocalReturnValueDeclaration= makeDeclaration(binding) + ";"; 
 			}
 		}
-		if (returnDeclaration != null) {
-			computeReturnType(returnDeclaration);
+		if (returnBinding != null) {
+			fReturnStatementBinding= returnBinding;
+			computeReturnType(returnBinding);
 		}
 	}
 	
 	private void checkFollowingLocals(RefactoringStatus status, List followingLocals) {
 		int count= 0;
-		LocalDeclaration returnDeclaration= null;
+		LocalVariableBinding returnBinding= null;
 		Iterator iter= followingLocals.iterator();
 		while (iter.hasNext()) {
 			LocalVariableBinding binding= (LocalVariableBinding)iter.next();
-			LocalDeclaration declaration= binding.declaration;
-			if (fStatementAnalyzer.isSelected(declaration)) {
+			if (fStatementAnalyzer.isSelected(binding.declaration)) {
 				count++;
 				if (count > 1) {
 					status.addFatalError("Ambigious return value: more than one reference to selected local declaration found");
 					return;
 				} else {
-					returnDeclaration= declaration;
+					returnBinding= binding;
 				}
 			}
 		}
-		if (returnDeclaration != null && ! returnTypeIsVoid()) {
-			status.addFatalError("Ambigious return value: assignment to local variable and reference to a selected local declaration found");
-			return;
+		if (returnBinding != null) {
+			if (returnTypeIsVoid()) {
+				fReturnStatementBinding= returnBinding;
+				computeReturnType(returnBinding);
+				fLocalDeclaration= makeDeclaration(returnBinding);
+			} else {
+				status.addFatalError("Ambigious return value: assignment to local variable and reference to a selected local declaration found");
+			}
 		}
-		
-		if (returnDeclaration != null) {
-			computeReturnType(returnDeclaration);
-			fLocalDeclaration= makeDeclaration(returnDeclaration);
-		}
+	}
+	
+	private void checkReturnStatement(RefactoringStatus status) {
+		if (fExtractedReturnStatement != null && fReturnStatementBinding != null && 
+				!isSameLocalVaraibleBinding(fExtractedReturnStatement, fReturnStatementBinding)) {
+			status.addFatalError("Ambigious return value: selection contains return statement and a value must be returned from the extracted method");
+		}	
+	}
+	
+	private boolean isSameLocalVaraibleBinding(ReturnStatement statement, LocalVariableBinding binding) {
+		if(!(statement.expression instanceof SingleNameReference))
+			return false;
+		SingleNameReference reference= (SingleNameReference)statement.expression;
+		return reference.binding == binding;	
 	}
 	
 	private boolean returnTypeIsVoid() {
 		return "void".equals(fReturnType);
 	}
 	
-	private void computeReturnType(LocalDeclaration declaration) {
+	private void computeReturnType(LocalVariableBinding binding) {
+		LocalDeclaration declaration= binding.declaration;
 		TypeReference typeRef= declaration.type;
 		fReturnType= typeRef.toStringExpression(0);
 		fLhs= declaration.name();
 		fReturnStatement= "return " + declaration.name() + ";";
 	}
 	
-	private String makeDeclaration(LocalDeclaration declaration) {
+	private String makeDeclaration(LocalVariableBinding binding) {
+		LocalDeclaration declaration= binding.declaration;
 		TypeReference typeRef= declaration.type;
 		return typeRef.toStringExpression(0) + " " + declaration.name();
 	}		

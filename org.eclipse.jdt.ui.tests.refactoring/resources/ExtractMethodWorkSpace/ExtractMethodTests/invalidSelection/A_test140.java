@@ -1,11 +1,8 @@
 package invalidSelection;
 
 public class A_test140 {
-	public void foo() {
-		synchronized(this) {
-			foo();
-		}
-		
-		foo();
+	public int foo() {
+		/*]*/int i= 10;
+		return i;/*[*/
 	}
 }

@@ -91,7 +91,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 	
 	private TableViewer getTableViewer(Composite parent){
 		if (fTableViewer == null){
-			Table table= new Table(parent, SWT.BORDER | SWT.SINGLE);
+			Table table= new Table(parent, SWT.BORDER | SWT.SINGLE | SWT.H_SCROLL);
 			fTableViewer= new TableViewer(table);
 			fTableViewer.setLabelProvider(createLabelProvider());
 			fTableViewer.setContentProvider(createContentProvider());

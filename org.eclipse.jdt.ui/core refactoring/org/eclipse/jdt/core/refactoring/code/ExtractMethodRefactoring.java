@@ -205,6 +205,8 @@ public class ExtractMethodRefactoring extends Refactoring{
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		if (fMethodName == null)
 			return null;
+		
+		adjustSelection();
 			
 		ITextBufferChange result= fTextBufferChangeCreator.create("Extract Method", fCUnit);
 		
@@ -260,6 +262,21 @@ public class ExtractMethodRefactoring extends Refactoring{
 			s= fVisibility;
 			
 		return s + " " + fStatementAnalyzer.getSignature(name);
+	}
+	
+	//---- Helper methods ------------------------------------------------------------------------
+	
+	private void adjustSelection() {
+		int newEnd= fStatementAnalyzer.getAdjustedSelectionEnd();
+		if (newEnd != -1) {
+			if (newEnd > fSelectionStart) {
+				fSelectionEnd= newEnd;
+				fSelectionLength= fSelectionEnd - fSelectionStart + 1;
+			} else {
+				fSelectionLength= 0;
+				fSelectionEnd= fSelectionStart - 1;
+			}
+		}
 	}
 	
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {

@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.compiler.util.CharOperation;
+import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.refactoring.ASTEndVisitAdapter;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
@@ -46,21 +46,27 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	// internal state.
 	private int fMode;
 	private int fLastEnd;
-	// private int fCheckIntersectStart= -1;
+
+	// Error handling	
+	private RefactoringStatus fStatus= new RefactoringStatus();
+	private int[] fLineSeparatorPositions;	
+	private String fMessage;
 	
 	private Statement fFirstSelectedStatement;
+	private AstNode fParentOfFirstSelectedStatment;
 	private Statement fLastSelectedStatement;
+	private Statement fLastSelectedStatementWithSameParentAsFirst;
 	private boolean fNeedsSemicolon;
-	
-	private boolean fIsCompleteStatementRange;
 	
 	private AbstractMethodDeclaration fEnclosingMethod;
 	
-	private RefactoringStatus fStatus= new RefactoringStatus();
-	private String fMessage;
 	private LocalVariableAnalyzer fLocalVariableAnalyzer;
 	private LocalTypeAnalyzer fLocalTypeAnalyzer;
 	private ExceptionAnalyzer fExceptionAnalyzer;
+	
+	// Special return statement handling
+	private int fAdjustedSelectionEnd= -1;
+	private String fPotentialReturnMessage;
 	
 	// Handling label and branch statements.
 	private Stack fImplicitBranchTargets= new Stack();	
@@ -105,11 +111,12 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			if (fMessage == null)
 				fMessage= "TextSelection doesn't mark a text range that can be extracted";
 			status.addFatalError(fMessage);
-		} else {
-			if (!fIsCompleteStatementRange)
-				status.addFatalError("TextSelection ends in the middle of a statement");
 		}
 		status.merge(fStatus);
+		if (fFirstSelectedStatement == fLastSelectedStatementWithSameParentAsFirst &&
+				fFirstSelectedStatement instanceof ReturnStatement) {
+			status.addFatalError("Can not extract single return statement");
+		}
 		fLocalVariableAnalyzer.checkActivation(status);
 		fLocalTypeAnalyzer.checkActivation(status);
 	}
@@ -165,6 +172,19 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		return fNeedsSemicolon;
 	}
 	
+	/**
+	 * Returns the new selection end value, if the selection has to be adjusted. Returns
+	 * -1 if the current selection is ok.
+	 * 
+	 * @return the adjusted selection end or -1 if the selection doesn't have to be
+	 *  adjusted
+	 */
+	public int getAdjustedSelectionEnd() {
+		return fAdjustedSelectionEnd;
+	}
+	
+	//---- Helper methods -----------------------------------------------------------------------
+	
 	private void reset() {
 		fMode= UNDEFINED;
 		fFirstSelectedStatement= null;
@@ -172,7 +192,6 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		fEnclosingMethod= null;
 		fStatus= new RefactoringStatus();
 		fMessage= null;
-		fIsCompleteStatementRange= false;
 		fNeedsSemicolon= true;
 	}
 	
@@ -190,18 +209,16 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			case BEFORE:
 				if (fLastEnd < fSelection.start && fSelection.covers(statement)) {
 					startFound(statement);
-					fIsCompleteStatementRange= true;
 				}
 				break;
 			case SELECTED:
 				if (fSelection.endsIn(statement)) { // Selection ends in the middle of a statement
-					fMode= AFTER;
-					fLastSelectedStatement= statement;
-					fIsCompleteStatementRange= false;
+					invalidSelection("TextSelection ends in the middle of a statement");
+					return false;
 				} else if (statement.sourceEnd > fSelection.end) {
 					fMode= AFTER;
 				} else {
-					fLastSelectedStatement= statement;
+					trackLastSelectedStatement(statement);
 					fNeedsSemicolon= true;
 				}
 				break;
@@ -215,7 +232,15 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	private void startFound(Statement statement) {
 		fMode= SELECTED;
 		fFirstSelectedStatement= statement;
+		fParentOfFirstSelectedStatment= getParent();
 		fLastSelectedStatement= statement;
+		fLastSelectedStatementWithSameParentAsFirst= statement;
+	}
+	
+	private void trackLastSelectedStatement(Statement statement) {
+		fLastSelectedStatement= statement;
+		if (fParentOfFirstSelectedStatment == getParent())
+			fLastSelectedStatementWithSameParentAsFirst= statement;
 	}
 	
 	private void trackLastEnd(Statement statement) {
@@ -247,6 +272,12 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			fMode= BEFORE;
 		}
 		return result;	
+	}
+	
+	private void endVisitAbstractMethodDeclaration(AbstractMethodDeclaration node, Scope scope) {
+		if (node == fEnclosingMethod) {
+			checkLastSelectedStatement();
+		}
 	}
 	
 	private boolean visitLocalTypeDeclaration(TypeDeclaration declaration, BlockScope scope) {
@@ -299,19 +330,47 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		return null;
 	}
 	
+	private void checkLastSelectedStatement() {
+		if (fLastSelectedStatementWithSameParentAsFirst instanceof ReturnStatement) {
+			ReturnStatement statement= (ReturnStatement)fLastSelectedStatementWithSameParentAsFirst;
+			if (statement.expression == null) {
+				fPotentialReturnMessage= null;
+				fLocalVariableAnalyzer.setExtractedReturnStatement(statement);
+			} else {
+				invalidSelection("Can only extract void return statement");
+			}
+		} else {
+			handlePotentialReturnMessage();
+			fAdjustedSelectionEnd= -1;
+		}
+	}
+	
+	private void handlePotentialReturnMessage() {
+		if (fPotentialReturnMessage != null) {
+			fStatus.addFatalError(fPotentialReturnMessage);
+			fPotentialReturnMessage= null;
+		}
+	}	
+	
 	//---- Problem management -----------------------------------------------------
 	
 	public void acceptProblem(IProblem problem) {
 		if (fMode != UNDEFINED) {
 			reset();
 			fLastEnd= Integer.MAX_VALUE;
-			fStatus.addFatalError("Compilation unit has compile error: " + problem.getMessage());
+			fStatus.addFatalError("Compilation unit has compile error at line " + problem.getSourceLineNumber() + ": " + problem.getMessage());
 		}
+	}
+	
+	private int getLineNumber(AstNode node){
+		Assert.isNotNull(fLineSeparatorPositions);
+		return ProblemHandler.searchLineNumber(fLineSeparatorPositions, node.sourceStart);
 	}
 	
 	//---- Compilation Unit -------------------------------------------------------
 	
 	public boolean visit(CompilationUnitDeclaration compilationUnitDeclaration, CompilationUnitScope scope) {
+		fLineSeparatorPositions= compilationUnitDeclaration.compilationResult.lineSeparatorPositions;
 		return fSelection.enclosedBy(compilationUnitDeclaration);
 	}
 	
@@ -349,8 +408,16 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		return visitAbstractMethodDeclaration(constructorDeclaration, scope);
 	}
 	
+	public void endVisit(ConstructorDeclaration constructorDeclaration, ClassScope scope) {
+		endVisitAbstractMethodDeclaration(constructorDeclaration, scope);
+	}
+	
 	public boolean visit(MethodDeclaration methodDeclaration, ClassScope scope) {
 		return visitAbstractMethodDeclaration(methodDeclaration, scope);
+	}
+	
+	public void endVisit(MethodDeclaration methodDeclaration, ClassScope scope) {
+		endVisitAbstractMethodDeclaration(methodDeclaration, scope);
 	}
 	
 	public boolean visit(SingleTypeReference singleTypeReference, ClassScope scope) {
@@ -706,9 +773,20 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(ReturnStatement returnStatement, BlockScope scope) {
+		fAdjustedSelectionEnd= fBuffer.indexOfLastCharacterBeforeLineBreak(fLastEnd);
 		boolean result= visitStatement(returnStatement, scope);
-		if (fMode == SELECTED)
-			fStatus.addFatalError("Selected block contains a return statement");
+		if (fMode == StatementAnalyzer.SELECTED) {
+			if (fPotentialReturnMessage != null) {
+				fStatus.addFatalError(fPotentialReturnMessage);
+				fPotentialReturnMessage= null;
+			}
+			String message= "Selected block contains a return statement at line " + getLineNumber(returnStatement);
+			if (fParentOfFirstSelectedStatment != getParent()) {
+				fStatus.addFatalError(message);
+			} else {
+				fPotentialReturnMessage= message;
+			}
+		}
 		return result;
 	}
 
@@ -772,8 +850,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(SynchronizedStatement synchronizedStatement, BlockScope scope) {
-		// Include "}" into sourceEnd;
-		synchronizedStatement.sourceEnd++;
+		HackFinder.fixMeSoon("1GE2LO2: ITPJCORE:WIN2000 - SourceStart and SourceEnd of synchronized statement");
 		if (!visitStatement(synchronizedStatement, scope))
 			return false;
 		
@@ -781,6 +858,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		if (fMode == BEFORE && fSelection.end < nextStart) {
 			if (fSelection.intersects(synchronizedStatement)) {
 				invalidSelection("Seleciton must either cover whole synchronized statement or parts of the synchronized block");
+				return false;
 			} else {
 				if (fSelection.enclosedBy(synchronizedStatement.block)) {
 					fLastEnd= synchronizedStatement.block.sourceStart;

@@ -109,6 +109,24 @@ public class ExtendedBuffer {
 		return -1;
 	}
 	
+	public int indexOfLastCharacterBeforeLineBreak(int start) {
+		int length= getLength();
+		int i= start;
+		loop: for (; i < length; i++) {
+			char c= getChar(i);
+			switch (c) {
+				case '\n':
+					break loop;
+				case '\r':
+					break loop;
+			}
+		}
+		if (i == start)
+			return -1;
+			
+		return i - 1;
+	}
+	
 	private int getCommentEnd(int start) {
 		int length= getLength();
 		for (int i= start; i < length; i++) {
