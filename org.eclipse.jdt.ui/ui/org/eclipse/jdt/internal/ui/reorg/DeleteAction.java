@@ -17,7 +17,6 @@ public class DeleteAction extends ReorgAction {
 	private final static String DESCRIPTION= PREFIX + "description";
 	private final static String ERROR_PREFIX= PREFIX+"error.";
 	private final static String ERROR_STATUS= ERROR_PREFIX+"status";
-	private final static String TASK=PREFIX+"task.label";
 	private final static String CONFIRM_TITLE=PREFIX+"confirm.title";
 	private final static String CONFIRM_LABEL=PREFIX+"confirm.label";
 	private final static String CONFIRM_DELETE_PROJECT_TITLE= PREFIX + "confirm.project.title";
@@ -59,7 +58,7 @@ public class DeleteAction extends ReorgAction {
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor pm) {
 				int size= elements.size();
-				pm.beginTask(JavaPlugin.getResourceString(TASK), size);
+				pm.beginTask("", size);
 				final IDeleteSupport support= ReorgSupportFactory.createDeleteSupport(elements);
 				Comparator lengthComparator= new Comparator() {
 					public int compare(Object left, Object right) {
