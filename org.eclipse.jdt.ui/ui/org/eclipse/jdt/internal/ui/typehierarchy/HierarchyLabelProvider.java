@@ -1,9 +1,14 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import org.eclipse.swt.graphics.Image;
+import java.util.HashMap;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProviderListener;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -55,8 +60,33 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 	}
 
+	private static class FocusDescriptor extends CompositeImageDescriptor {
+		private ImageDescriptor fBase;
+		private Point fSize;
+		public FocusDescriptor(ImageDescriptor base, Point size) {
+			fBase= base;
+			fSize= size;
+		}
+		protected void drawCompositeImage(int width, int height) {
+			drawImage(fBase.getImageData(), 0, 0);
+			drawImage(JavaPluginImages.DESC_OVR_FOCUS.getImageData(), 0, 0);
+		}
+		protected Point getSize() {
+			return fSize;
+		}
+		public int hashCode() {
+			return fBase.hashCode() | fSize.hashCode();
+		}
+		public boolean equals(Object object) {
+			if (!FocusDescriptor.class.equals(object.getClass()))
+				return false;				
+			FocusDescriptor other= (FocusDescriptor)object;
+			return (fBase.equals(other.fBase) && fSize.equals(other.fSize));
+		}		
+	}
 
 	private TypeHierarchyLifeCycle fHierarchy;
+	private static final Point IMAGE_SIZE= new Point(16,16);
 
 	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
 		super(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS, getDecorators(lifeCycle));
@@ -92,6 +122,9 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (element instanceof IType) {
 			ImageDescriptor desc= getTypeImageDescriptor((IType) element);
 			if (desc != null) {
+				if (element.equals(fHierarchy.getInputElement())) {
+					desc= new FocusDescriptor(desc, IMAGE_SIZE);
+				}
 				result= JavaPlugin.getImageDescriptorRegistry().get(desc);
 			}
 		} else {
