@@ -27,13 +27,16 @@ import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -165,17 +168,17 @@ public class EditorUtility {
 	/** 
 	 * Selects and reveals the given offset and length in the given editor part.
 	 */	
-	public static void revealInEditor(IEditorPart part, final int offset, final int length) {
-		if (part instanceof ITextEditor) {
-			((ITextEditor)part).selectAndReveal(offset, length);
+	public static void revealInEditor(IEditorPart editor, final int offset, final int length) {
+		if (editor instanceof ITextEditor) {
+			((ITextEditor)editor).selectAndReveal(offset, length);
 			return;
 		}
 		
-		// Support for non-text editor
-		 if (part instanceof IGotoMarker) {
-			final IEditorInput input= part.getEditorInput();
+		// Support for non-text editor - try IGotoMarker interface
+		 if (editor instanceof IGotoMarker) {
+			final IEditorInput input= editor.getEditorInput();
 			if (input instanceof IFileEditorInput) {
-				final IGotoMarker gotoMarkerTarget= (IGotoMarker)part;
+				final IGotoMarker gotoMarkerTarget= (IGotoMarker)editor;
 				WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 					protected void execute(IProgressMonitor monitor) throws CoreException {
 						IMarker marker= null;
@@ -201,6 +204,23 @@ public class EditorUtility {
 					Assert.isTrue(false, "this operation can not be canceled"); //$NON-NLS-1$
 				}
 			}
+			return;
+		}
+		
+		/*
+		 * Workaround: send out a text selection
+		 * XXX: Needs to be improved, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=32214
+		 */
+		if (editor != null && editor.getEditorSite().getSelectionProvider() != null) {
+			IEditorSite site= editor.getEditorSite();
+			if (site == null)
+				return;
+			
+			ISelectionProvider provider= editor.getEditorSite().getSelectionProvider();
+			if (provider == null)
+				return;
+			
+			provider.setSelection(new TextSelection(offset, length));
 		}
 	}
 	
