@@ -152,8 +152,16 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		if (expressionCv == null)
 			return;
 		
-		fTCModel.makeCastVariable(node, expressionCv);
 		createElementEqualsConstraints(expressionCv, typeCv);
+		
+		if (expression instanceof MethodInvocation) {
+			MethodInvocation invoc= (MethodInvocation) expression;
+			if (! isSpecialCloneInvocation(invoc.resolveMethodBinding(), invoc.getExpression())) {
+				fTCModel.makeCastVariable(node, expressionCv);
+			}
+		} else {
+			fTCModel.makeCastVariable(node, expressionCv);
+		}
 		
 		boolean eitherIsIntf= type.resolveBinding().isInterface() || expression.resolveTypeBinding().isInterface();
 		if (eitherIsIntf)
@@ -334,11 +342,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	
 	private void doVisitMethodInvocationReturnType(MethodInvocation node, IMethodBinding methodBinding, Expression receiver, Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables) {
 		ITypeBinding declaredReturnType= methodBinding.getMethodDeclaration().getReturnType();
-		if (fAssumeCloneReturnsSameType
-				&& "clone".equals(methodBinding.getName()) //$NON-NLS-1$
-				&& methodBinding.getParameterTypes().length == 0
-				&& receiver != null
-				&& receiver.resolveTypeBinding() != declaredReturnType) {
+		if (isSpecialCloneInvocation(methodBinding, receiver)) {
 			ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
 			// [retVal] =^= [receiver]:
 			setConstraintVariable(node, expressionCv);
@@ -392,6 +396,14 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			ReturnTypeVariable2 returnTypeCv= fTCModel.makeReturnTypeVariable(methodBinding);
 			setConstraintVariable(node, returnTypeCv);
 		}
+	}
+
+	private boolean isSpecialCloneInvocation(IMethodBinding methodBinding, Expression receiver) {
+		return fAssumeCloneReturnsSameType
+				&& "clone".equals(methodBinding.getName()) //$NON-NLS-1$
+				&& methodBinding.getParameterTypes().length == 0
+				&& receiver != null
+				&& receiver.resolveTypeBinding() != methodBinding.getMethodDeclaration().getReturnType();
 	}
 
 	private void doVisitMethodInvocationArguments(IMethodBinding methodBinding, List arguments, Expression receiver, Map methodTypeVariables, Type createdType) {

@@ -147,24 +147,24 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				IJavaElement[] javaElements= (IJavaElement[]) javaElementsList.toArray(new IJavaElement[javaElementsList.size()]);
 				final ICompilationUnit[] cus= JavaModelUtil.getAllCompilationUnits(javaElements);
 				
+				final SubProgressMonitor projectMonitor= new SubProgressMonitor(pm, 1);
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 				parser.setResolveBindings(true);
 				parser.setProject(project);
 				parser.createASTs(cus, new String[0], new ASTRequestor() {
-
 					public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
-						pm.subTask(source.getElementName());
+						projectMonitor.subTask(source.getElementName());
 						ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
 						ast.accept(unitCollector);
 						fTCModel.newCu();
 					}
-
 					public void acceptBinding(String bindingKey, IBinding binding) {
 						//do nothing
 					}
-				}, new SubProgressMonitor(pm, 1));
-
+				}, projectMonitor);
+				
+				projectMonitor.done();
 				fTCModel.newCu();
 			}
 			pm.setTaskName("Solving constraints...");

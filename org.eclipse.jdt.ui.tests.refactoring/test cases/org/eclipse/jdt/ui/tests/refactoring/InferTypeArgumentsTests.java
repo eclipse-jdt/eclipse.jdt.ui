@@ -202,6 +202,31 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		
 	}
 	
+	public void testJUnitWithCloneNotRaw() throws Exception {
+		fAssumeCloneReturnsSameType= true;
+		fLeaveUnconstrainedRaw= false;
+		
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject("InferTypeArguments", "bin");
+		try {
+			IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(javaProject);
+			Assert.assertNotNull(jdk);
+			
+			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
+			Assert.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
+			
+			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainerWithImport(javaProject, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
+			
+			boolean performed= perform(new IJavaElement[] { javaProject }, RefactoringStatus.OK, RefactoringStatus.OK);
+			assertTrue(performed);
+			
+			compareWithZipFile(src, "junit381-noUI-clone-not-raw-src.zip");
+		} finally {
+			if (javaProject != null && javaProject.exists())
+				JavaProjectHelper.delete(javaProject);
+		}
+		
+	}
+	
 	public void testCuTwoVectorElements() throws Exception {
 		performCuOK();
 	}
