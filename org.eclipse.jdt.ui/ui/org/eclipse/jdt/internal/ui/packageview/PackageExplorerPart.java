@@ -118,7 +118,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	} 
 		
 	 public void dispose() {
-		JavaPlugin.getErrorTickManager().removeListener(fViewer);
+		JavaPlugin.getDefault().getJavaProblemMarkerFilter().removeListener(fViewer);
 		if (fContextMenu != null && !fContextMenu.isDisposed())
 			fContextMenu.dispose();
 		getSite().getPage().removePartListener(fPartListener);
@@ -131,7 +131,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer= new PackageViewer(parent);
 		
 		fViewer.setContentProvider(new JavaElementContentProvider());
-		JavaPlugin.getErrorTickManager().addListener(fViewer);		
+		JavaPlugin.getDefault().getJavaProblemMarkerFilter().addListener(fViewer);		
 
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
 					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE;

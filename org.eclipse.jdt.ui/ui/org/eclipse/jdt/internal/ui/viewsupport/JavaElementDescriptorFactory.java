@@ -16,6 +16,12 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  {
 	
+	private ErrorTickManager fErrorTickManager;
+	
+	public JavaElementDescriptorFactory() {
+		fErrorTickManager= new ErrorTickManager();
+	}
+	
 	/**
 	 * Although all methods of a Java interface are abstract, the 
 	 * abstract icon should not be shown.
@@ -48,8 +54,7 @@ public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  
 		int flags= 0;
 
 		IJavaElement jElement= (IJavaElement)element;
-		ErrorTickManager errorManager= JavaPlugin.getErrorTickManager();
-		int info= errorManager.getErrorInfo(jElement);
+		int info= fErrorTickManager.getErrorInfo(jElement);
 		if ((info & ErrorTickManager.ERRORTICK_ERROR) != 0) {
 			flags |= JavaOverlayDescriptor.ERROR;
 		} else if ((info & ErrorTickManager.ERRORTICK_WARNING) != 0) {

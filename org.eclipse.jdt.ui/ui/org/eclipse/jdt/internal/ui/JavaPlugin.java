@@ -61,7 +61,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickManager;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaProblemMarkerFilter;
 
 /**
  * Represents the java plugin. It provides a series of convenience methods such as
@@ -77,7 +77,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
 	private FileDocumentProvider fSnippetDocumentProvider;
 	private JavaTextTools fJavaTextTools;
-	private ErrorTickManager fErrorTickManager;
+	private JavaProblemMarkerFilter fJavaProblemMarkerFilter;
 	
 	
 	public static JavaPlugin getDefault() {
@@ -198,10 +198,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return getDefault().isDebugging();
 	}
 	
-	public static ErrorTickManager getErrorTickManager() {
-		return getDefault().fErrorTickManager;
-	}
-	
 	/* package */ static IPath getInstallLocation() {
 		return new Path(getDefault().getDescriptor().getInstallURL().getFile());
 	}
@@ -226,8 +222,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		manager.registerAdapters(new MarkerAdapterFactory(), IMarker.class);
 		manager.registerAdapters(new EditorInputAdapterFactory(), IEditorInput.class);
 		manager.registerAdapters(new ResourceAdapterFactory(), IResource.class);
-				
-		fErrorTickManager= new ErrorTickManager();
 		
 		try {
 			VMPreferencePage.initializeVMInstall();
@@ -286,6 +280,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public IWorkingCopyManager getWorkingCopyManager() {
 		return getCompilationUnitDocumentProvider();
 	}
+	
+	public JavaProblemMarkerFilter getJavaProblemMarkerFilter() {
+		if (fJavaProblemMarkerFilter == null)
+			fJavaProblemMarkerFilter= new JavaProblemMarkerFilter();
+		return fJavaProblemMarkerFilter;
+	}	
 	
 	public JavaTextTools getJavaTextTools() {
 		if (fJavaTextTools == null)

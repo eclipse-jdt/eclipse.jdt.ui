@@ -34,16 +34,18 @@ public class ResourceFilter extends ViewerFilter {
 				return false;
 			}
 			String ext= ((IFile)element).getFullPath().getFileExtension();
-			if (fCaseSensitive) {
-				for (int i= 0; i < fExtensions.length; i++) {
-					if (ext.equals(fExtensions[i])) {
-						return true;
+			if (ext != null && ext.length() > 0) {
+				if (fCaseSensitive) {
+					for (int i= 0; i < fExtensions.length; i++) {
+						if (ext.equals(fExtensions[i])) {
+							return true;
+						}
 					}
-				}
-			} else {
-				for (int i= 0; i < fExtensions.length; i++) {
-					if (ext.equalsIgnoreCase(fExtensions[i])) {
-						return true;
+				} else {
+					for (int i= 0; i < fExtensions.length; i++) {
+						if (ext.equalsIgnoreCase(fExtensions[i])) {
+							return true;
+						}
 					}
 				}
 			}

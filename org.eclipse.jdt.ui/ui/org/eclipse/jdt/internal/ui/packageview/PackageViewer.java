@@ -21,13 +21,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.ISeverityListener;
+import org.eclipse.jdt.internal.ui.viewsupport.IJavaProblemListener;
 import org.eclipse.jdt.internal.ui.viewsupport.SeverityItemMapper;
 
 /**
  * A Subclass of tree viewer to allow fast updates of error ticks.
  */
-public class PackageViewer extends TreeViewer implements ISeverityListener {
+public class PackageViewer extends TreeViewer implements IJavaProblemListener {
 	private SeverityItemMapper fSeverityItemMapper;
 		
 	public PackageViewer(Composite parent) {

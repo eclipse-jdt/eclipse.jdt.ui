@@ -88,7 +88,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.ISeverityListener;
+import org.eclipse.jdt.internal.ui.viewsupport.IJavaProblemListener;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -119,7 +119,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private ArrayList fInputHistory;
 	private int fCurrHistoryIndex;
 	
-	private ISeverityListener fSeverityListener;
+	private IJavaProblemListener fJavaProblemListener;
 	
 	private TypeHierarchyLifeCycle fHierarchyLifeCycle;
 	private ITypeHierarchyLifeCycleListener fTypeHierarchyLifeCycleListener;
@@ -166,12 +166,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		};
 		fHierarchyLifeCycle.addChangedListener(fTypeHierarchyLifeCycleListener);
 		
-		fSeverityListener= new ISeverityListener() {
+		fJavaProblemListener= new IJavaProblemListener() {
 			public void severitiesChanged(Set elements) {
 				doSeverityChanged(elements);
 			}
 		};
-		JavaPlugin.getErrorTickManager().addListener(fSeverityListener);
+		JavaPlugin.getDefault().getJavaProblemMarkerFilter().addListener(fJavaProblemListener);
 		
 		
 		fIsEnableMemberFilter= false;
@@ -364,7 +364,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	public void dispose() {
 		fHierarchyLifeCycle.freeHierarchy();
 		fHierarchyLifeCycle.removeChangedListener(fTypeHierarchyLifeCycleListener);
-		JavaPlugin.getErrorTickManager().removeListener(fSeverityListener);
+		JavaPlugin.getDefault().getJavaProblemMarkerFilter().removeListener(fJavaProblemListener);
 		fPaneLabelProvider.dispose();
 		getSite().getPage().removePartListener(fPartListener);
 		super.dispose();
