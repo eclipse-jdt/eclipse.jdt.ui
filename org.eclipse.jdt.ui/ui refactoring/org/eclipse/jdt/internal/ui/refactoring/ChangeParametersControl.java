@@ -113,7 +113,7 @@ public class ChangeParametersControl extends Composite {
 			ParameterInfo parameterInfo= (ParameterInfo) data;
 			if (property.equals(PROPERTIES[NEWNAME_PROP])) {
 				parameterInfo.setNewName((String) value);
-				fListener.paramterChanged(parameterInfo);
+				fListener.parameterChanged(parameterInfo);
 				fTableViewer.update(parameterInfo, new String[] { property });
 			}
 		}
@@ -257,7 +257,7 @@ public class ChangeParametersControl extends Composite {
 						return;
 					}
 					parameterInfo.setNewName(dialog.getValue());
-					fListener.paramterChanged(parameterInfo);
+					fListener.parameterChanged(parameterInfo);
 					fTableViewer.update(parameterInfo, new String[] { PROPERTIES[NEWNAME_PROP] });
 				} finally {
 					fTableViewer.refresh();

@@ -108,7 +108,7 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 		layouter.perform(label, group, 1);
 		
 		ChangeParametersControl cp= new ChangeParametersControl(result, SWT.NULL, "Parameters", new ParameterChangeListener() {
-			public void paramterChanged(ParameterInfo parameter) {
+			public void parameterChanged(ParameterInfo parameter) {
 				updatePreview(getText());
 			}
 			public void parameterReordered() {
