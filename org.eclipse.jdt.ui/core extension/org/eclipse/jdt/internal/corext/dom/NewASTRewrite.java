@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
@@ -563,6 +562,14 @@ public class NewASTRewrite {
 			this.childProperty= childProperty;
 			this.event= change;
 		}
+		
+		public String toString() {
+			StringBuffer buf= new StringBuffer();
+			buf.append(parent).append(" - "); //$NON-NLS-1$
+			buf.append(ASTNodeConstants.getPropertyName(childProperty)).append(": "); //$NON-NLS-1$
+			buf.append(event).append('\n');
+			return buf.toString();
+		}
 	}
 	
 	public static class NodeSourceData {
@@ -600,10 +607,7 @@ public class NewASTRewrite {
 		StringBuffer buf= new StringBuffer();
 		buf.append("Events:\n"); //$NON-NLS-1$
 		for (int i= 0; i < fEvents.size(); i++) {
-			EventHolder holder= (EventHolder) fEvents.get(i);
-			buf.append(holder.parent).append(" - "); //$NON-NLS-1$
-			buf.append(ASTNodeConstants.getPropertyName(holder.childProperty)).append(": "); //$NON-NLS-1$
-			buf.append(holder.event).append('\n');
+			buf.append(fEvents.get(i).toString()).append('\n');
 		}
 		return buf.toString();
 	}

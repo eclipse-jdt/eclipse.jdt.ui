@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -3118,10 +3119,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			VariableDeclarationStatement decl= (VariableDeclarationStatement) statements.get(0);
 			
 			// add modifier
-			VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
-			modifiedNode.setModifiers(Modifier.FINAL);
-			
-			rewrite.markAsModified(decl, modifiedNode);
+			int newModifiers= Modifier.FINAL;
+			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 			
 			PrimitiveType newType= ast.newPrimitiveType(PrimitiveType.BOOLEAN);
 			rewrite.markAsReplaced(decl.getType(), newType);
@@ -3140,10 +3139,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			VariableDeclarationStatement decl= (VariableDeclarationStatement) statements.get(1);
 			
 			// add modifier
-			VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
-			modifiedNode.setModifiers(Modifier.FINAL);
-			
-			rewrite.markAsModified(decl, modifiedNode);
+			int newModifiers= Modifier.FINAL;
+			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 			
 			List fragments= decl.fragments();
 			assertTrue("Number of fragments not 3", fragments.size() == 3);
@@ -3160,11 +3157,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		{	// remove modifiers
 			VariableDeclarationStatement decl= (VariableDeclarationStatement) statements.get(2);
 			
-			// add modifier
-			VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
-			modifiedNode.setModifiers(0);
-			
-			rewrite.markAsModified(decl, modifiedNode);
+			// add modifiers
+			int newModifiers= 0;
+			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 		}
 				
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);

@@ -155,7 +155,7 @@ public final class ASTRewrite extends NewASTRewrite {
 			ASTNode node= (ASTNode) iter.next();
 			ASTChange object= getChangeProperty(node);
 			if (object instanceof ASTInsert) {
-				if (node.getParent().getStartPosition() != -1) {
+				if (node.getParent().getStartPosition() != -1) { // ignore unnecessary inserts
 					processChange(node, null, node, object.description, processedListEvents);
 					if (((ASTInsert) object).isBoundToPrevious) {
 						setInsertBoundToPrevious(node);
@@ -187,7 +187,7 @@ public final class ASTRewrite extends NewASTRewrite {
 			ASTNode curr= (ASTNode) modifiedList.get(i);
 			ASTChange object= getChangeProperty(curr);
 			if (object instanceof ASTInsert) {
-				RewriteEvent change= listEvent.insertEntry(insertIndex, curr);
+				RewriteEvent change= listEvent.insertAtOriginalIndex(curr, insertIndex);
 				setDescription(change, object.description);
 				if (((ASTInsert) object).isBoundToPrevious) {
 					setInsertBoundToPrevious(curr);
@@ -223,10 +223,107 @@ public final class ASTRewrite extends NewASTRewrite {
 		validateIsNodeProperty(childProperty);
 		NodeRewriteEvent nodeEvent= getNodeEvent(parent, childProperty, true);
 		nodeEvent.setNewValue(insertedNode);
+
 		if (description != null) {
 			setDescription(nodeEvent, description);
 		}
 	}
+	
+	/**
+	 * Mark a node to be inserted in a list.
+	 * @param parent The node to change
+	 * @param childProperty The propert of the child to be inserted.
+	 * @param insertedNode the node or attribute to insert.
+	 * @param siblingInOriginalList
+	 * @param description Description of the change.
+	 */
+	public final void markAsInsertBeforeOriginal(ASTNode parent, int childProperty, ASTNode insertedNode, ASTNode siblingInOriginalList, GroupDescription description) {
+		validateIsInsideRoot(parent);
+		validateIsListProperty(childProperty);
+		ListRewriteEvent listEvent= getListEvent(parent, childProperty, true);
+		RewriteEvent res= listEvent.insertBeforeOriginalSibling(insertedNode, siblingInOriginalList);
+		if (res == null) {
+			throw new IllegalArgumentException("Sibling is not member of the original list"); //$NON-NLS-1$
+		}
+		if (isInsertBoundToPreviousByDefault(insertedNode)) {
+			setInsertBoundToPrevious(insertedNode);
+		}
+		if (description != null) {
+			setDescription(res, description);
+		}
+	}
+	
+	/**
+	 * Mark a node to be inserted in a list.
+	 * @param parent The node to change
+	 * @param childProperty The propert of the child to be inserted.
+	 * @param insertedNode the node or attribute to insert.
+	 * @param siblingInNewList
+	 * @param description Description of the change.
+	 */
+	public final void markAsInsertBeforeNew(ASTNode parent, int childProperty, ASTNode insertedNode, ASTNode siblingInNewList, GroupDescription description) {
+		validateIsInsideRoot(parent);
+		validateIsListProperty(childProperty);
+		ListRewriteEvent listEvent= getListEvent(parent, childProperty, true);
+		RewriteEvent res= listEvent.insertBeforeOriginalSibling(insertedNode, siblingInNewList);
+		if (res == null) {
+			throw new IllegalArgumentException("Sibling is not member of the new list"); //$NON-NLS-1$
+		}
+		if (isInsertBoundToPreviousByDefault(insertedNode)) {
+			setInsertBoundToPrevious(insertedNode);
+		}
+		if (description != null) {
+			setDescription(res, description);
+		}
+	}
+	
+	/**
+	 * Mark a node to be inserted in a list.
+	 * @param parent The node to change
+	 * @param childProperty The propert of the child to be inserted.
+	 * @param insertedNode the node or attribute to insert.
+	 * @param indexInOriginalList
+	 * @param description Description of the change.
+	 */
+	public final void markAsInsertInOriginal(ASTNode parent, int childProperty, ASTNode insertedNode, int indexInOriginalList, GroupDescription description) {
+		validateIsInsideRoot(parent);
+		validateIsListProperty(childProperty);
+		ListRewriteEvent listEvent= getListEvent(parent, childProperty, true);
+		RewriteEvent res= listEvent.insertAtOriginalIndex(insertedNode, indexInOriginalList);
+		if (res == null) {
+			throw new IllegalArgumentException("Sibling is not member of the original list"); //$NON-NLS-1$
+		}
+		if (isInsertBoundToPreviousByDefault(insertedNode)) {
+			setInsertBoundToPrevious(insertedNode);
+		}
+		if (description != null) {
+			setDescription(res, description);
+		}
+	}
+	
+	/**
+	 * Mark a node to be inserted in a list.
+	 * @param parent The node to change
+	 * @param childProperty The propert of the child to be inserted.
+	 * @param insertedNode the node or attribute to insert.
+	 * @param indexInNewList
+	 * @param description Description of the change.
+	 */
+	public final void markAsInsertInNew(ASTNode parent, int childProperty, ASTNode insertedNode, int indexInNewList, GroupDescription description) {
+		validateIsInsideRoot(parent);
+		validateIsListProperty(childProperty);
+		ListRewriteEvent listEvent= getListEvent(parent, childProperty, true);
+		RewriteEvent res= listEvent.insertAtNewIndex(insertedNode, indexInNewList);
+		if (res == null) {
+			throw new IllegalArgumentException("Sibling is not member of the new list"); //$NON-NLS-1$
+		}
+		if (isInsertBoundToPreviousByDefault(insertedNode)) {
+			setInsertBoundToPrevious(insertedNode);
+		}
+		if (description != null) {
+			setDescription(res, description);
+		}
+	}		
 	
 			
 	/**
@@ -234,11 +331,12 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 * @param node The node to be marked as inserted.
 	 * @param description Description of the change.
+	 * @deprecated Use markAsInsertBeforeNew, markAsInsertBeforeOriginal or markAsInsert  
 	 */
 	public final void markAsInserted(ASTNode node, GroupDescription description) {
 		Assert.isTrue(!isCollapsed(node), "Tries to insert a collapsed node"); //$NON-NLS-1$
 		ASTInsert insert= new ASTInsert();
-		insert.isBoundToPrevious= getDefaultBoundBehaviour(node);
+		insert.isBoundToPrevious= isInsertBoundToPreviousByDefault(node);
 		insert.description= description;
 		setChangeProperty(node, insert);
 		fHasASTModifications= true;
@@ -248,12 +346,13 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
 	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 * @param node The node to be marked as inserted.
+	 * @deprecated Use markAsInsertBeforeNew, markAsInsertBeforeOriginal or markAsInsert  
 	 */
 	public final void markAsInserted(ASTNode node) {
 		markAsInserted(node, (GroupDescription) null);
 	}
 	
-	private boolean getDefaultBoundBehaviour(ASTNode node) {
+	private boolean isInsertBoundToPreviousByDefault(ASTNode node) {
 		return (node instanceof Statement || node instanceof FieldDeclaration);
 	}
 	
@@ -401,7 +500,6 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @param children The target nodes to collapse
 	 * @return A placeholder node that stands for all of the statements 
 	 */
-	
 	public final Block getCollapseTargetPlaceholder(Statement[] children) {
 		Block res= createCollapsePlaceholder();
 		List statements= res.statements();
@@ -409,36 +507,6 @@ public final class ASTRewrite extends NewASTRewrite {
 			statements.add(children[i]);
 		}
 		return res;
-	}
-
-	/**
-	 * Marks an node as modified. The modifiued node describes changes like changed modifiers,
-	 * or operators: This is only for properties that are not children nodes of type ASTNode.
-	 * @param node The node to be marked as modified.
-	 * @param modifiedNode The node of the same type as the modified node but with the new properties.
-	 * @param description Description of the change. 
-	 */			
-	public final void markAsModified(ASTNode node, ASTNode modifiedNode, GroupDescription description) {
-		int[] properties= ASTNodeConstants.getNodeChildProperties(node);
-		for (int i= 0; i < properties.length; i++) {
-			int property= properties[i];
-			if (ASTNodeConstants.isAttributeProperty(property)) {
-				NodeRewriteEvent event= getNodeEvent(node, property, true);
-				Object newChild= ASTNodeConstants.getNodeChild(modifiedNode, property);
-				event.setNewValue(newChild);
-				setDescription(event, description);
-			}
-		}		
-	}
-	
-	/**
-	 * Marks an node as modified. The modifiied node describes changes like changed modifiers,
-	 * or operators: This is only for properties that are not children nodes of type ASTNode.
-	 * @param node The node to be marked as modified.
-	 * @param modifiedNode The node of the same type as the modified node but with the new properties.
-	 */		
-	public final void markAsModified(ASTNode node, ASTNode modifiedNode) {
-		markAsModified(node, modifiedNode, (GroupDescription) null);
 	}
 	
 	/**
@@ -596,6 +664,8 @@ public final class ASTRewrite extends NewASTRewrite {
 			buf.append(getNodeString(element));
 			buf.append('\n');
 		}
+		buf.append("-----------------\n"); //$NON-NLS-1$
+		buf.append(super.toString());
 		return buf.toString();
 	}
 	

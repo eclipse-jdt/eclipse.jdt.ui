@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
@@ -387,15 +388,11 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(2);
 			Assignment assignment= (Assignment) stmt.getExpression();
 			
-			Assignment modifiedNode= ast.newAssignment();
-			modifiedNode.setOperator(Assignment.Operator.DIVIDE_ASSIGN);
-			rewrite.markAsModified(assignment, modifiedNode);
+			rewrite.markAsReplaced(assignment, ASTNodeConstants.OPERATOR, Assignment.Operator.DIVIDE_ASSIGN, null);
 			
 			Assignment inner= (Assignment) assignment.getRightHandSide();
-			
-			Assignment modifiedInner= ast.newAssignment();
-			modifiedInner.setOperator(Assignment.Operator.RIGHT_SHIFT_UNSIGNED_ASSIGN);
-			rewrite.markAsModified(inner, modifiedInner);			
+						
+			rewrite.markAsReplaced(inner, ASTNodeConstants.OPERATOR, Assignment.Operator.RIGHT_SHIFT_UNSIGNED_ASSIGN, null);
 		}
 				
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -860,9 +857,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(expr.getRightOperand(), rightOp);	
 			
 			// change operand
-			InfixExpression modifiedNode= ast.newInfixExpression();
-			modifiedNode.setOperator(InfixExpression.Operator.MINUS);
-			rewrite.markAsModified(expr, modifiedNode);
+			rewrite.markAsReplaced(expr, ASTNodeConstants.OPERATOR, InfixExpression.Operator.MINUS, null);
 		}
 		
 		{ // remove an ext. operand, add one and replace one
@@ -889,9 +884,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			Assignment assignment= (Assignment) stmt.getExpression();
 			InfixExpression expr= (InfixExpression) assignment.getRightHandSide();			
 			
-			InfixExpression modifiedNode= ast.newInfixExpression();
-			modifiedNode.setOperator(InfixExpression.Operator.TIMES);
-			rewrite.markAsModified(expr, modifiedNode);
+			rewrite.markAsReplaced(expr, ASTNodeConstants.OPERATOR, InfixExpression.Operator.TIMES, null);
 		}			
 			
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -1280,10 +1273,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			NumberLiteral newOperation= ast.newNumberLiteral("10");
 			rewrite.markAsReplaced(preExpression.getOperand(), newOperation);
 			
-			PrefixExpression modifiedNode= ast.newPrefixExpression();
-			modifiedNode.setOperator(PrefixExpression.Operator.COMPLEMENT);
-			
-			rewrite.markAsModified(preExpression, modifiedNode);
+			rewrite.markAsReplaced(preExpression, ASTNodeConstants.OPERATOR, PrefixExpression.Operator.COMPLEMENT, null);
 		}
 			
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -1333,10 +1323,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			NumberLiteral newOperation= ast.newNumberLiteral("10");
 			rewrite.markAsReplaced(postExpression.getOperand(), newOperation);
 			
-			PostfixExpression modifiedNode= ast.newPostfixExpression();
-			modifiedNode.setOperator(PostfixExpression.Operator.INCREMENT);
-			
-			rewrite.markAsModified(postExpression, modifiedNode);
+			rewrite.markAsReplaced(postExpression, ASTNodeConstants.OPERATOR, PostfixExpression.Operator.INCREMENT, null);
 		}
 			
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);

@@ -132,7 +132,7 @@ public class ReturnTypeSubProcessor {
 				
 				if (methodDeclaration.isConstructor()) {
 					rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.IS_CONSTRUCTOR, Boolean.FALSE, null);
-					rewrite.markAsInsert(methodDeclaration, ASTNodeConstants.RETURN_TYPE, newReturnType, null);
+					rewrite.markAsReplaced(methodDeclaration, ASTNodeConstants.RETURN_TYPE, newReturnType, null);
 				} else {
 					rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
 				}

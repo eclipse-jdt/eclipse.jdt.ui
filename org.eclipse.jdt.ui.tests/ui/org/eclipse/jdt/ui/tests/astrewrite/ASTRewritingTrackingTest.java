@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
@@ -286,10 +287,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		rewrite.markAsTracked(frag1.getName(),  getDescription(gd, "x1"));
 		
 		// change modifier
-		FieldDeclaration modifiedField= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-		modifiedField.setModifiers(Modifier.STATIC | Modifier.TRANSIENT | Modifier.PRIVATE);
-		rewrite.markAsModified(field, modifiedField);
-		
+		int newModifiers= Modifier.STATIC | Modifier.TRANSIENT | Modifier.PRIVATE;
+		rewrite.markAsReplaced(field, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 								
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
