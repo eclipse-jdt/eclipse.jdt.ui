@@ -17,7 +17,7 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-import org.w3c.dom.range.Range;
+import org.w3c.dom.ranges.Range;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
