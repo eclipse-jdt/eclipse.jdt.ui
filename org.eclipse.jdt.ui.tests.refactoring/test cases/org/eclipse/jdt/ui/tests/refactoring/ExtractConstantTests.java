@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -96,7 +97,7 @@ public class ExtractConstantTests extends RefactoringTest {
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		assertEquals("incorrect extraction", getFileContents(getTestFileName(true, false)), newcu.getSource());
+		SourceCompareUtil.compare(newcu.getSource(), getFileContents(getTestFileName(true, false)));
 	}
 	
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception{
@@ -186,18 +187,15 @@ public class ExtractConstantTests extends RefactoringTest {
 	}	
 
 	public void test15() throws Exception{
-		printTestDisabledMessage("name guessing is to be implemented");
-//		helper1(5, 16, 5, 25, true, false, "CONSTANT", "FRED");
+		helper1(5, 16, 5, 25, true, false, "CONSTANT", "FRED");
 	}	
 
 	public void test16() throws Exception{
-		printTestDisabledMessage("name guessing is to be implemented");
-//		helper1(5, 20, 5, 27, true, false, "CONSTANT", "RED");
+		helper1(5, 20, 5, 27, true, false, "CONSTANT", "RED");
 	}	
 
 	public void test17() throws Exception{
-		printTestDisabledMessage("name guessing is to be implemented");
-//		helper1(5, 16, 5, 35, true, false, "CONSTANT", "YET_ANOTHER_FRED");
+		helper1(5, 16, 5, 35, true, false, "CONSTANT", "YET_ANOTHER_FRED");
 	}	
 	
 	// -- testing failing preconditions
