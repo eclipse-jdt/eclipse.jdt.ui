@@ -27,6 +27,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 /**
   */
 public class QuickFixProcessor implements IQuickFixProcessor {
+	
 
 	public boolean hasCorrections(ICompilationUnit cu, int problemId) {
 		switch (problemId) {
@@ -116,6 +117,11 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocMissingParamTag:
 			case IProblem.JavadocMissingReturnTag:
 			case IProblem.JavadocMissingThrowsTag:
+			case IProblem.UndefinedType + IProblem.Javadoc:
+			case IProblem.AmbiguousType + IProblem.Javadoc:
+			case IProblem.NotVisibleType + IProblem.Javadoc:
+			//case IProblem.UndefinedMethod + IProblem.Javadoc:
+			//case IProblem.ParameterMismatch + IProblem.Javadoc:
 				return true;
 			default:
 				return false;
@@ -181,7 +187,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UndefinedConstructor:
 				UnresolvedElementsSubProcessor.getConstructorProposals(context, problem, proposals);
-				break;					
+				break;
 			case IProblem.ParameterMismatch:
 				UnresolvedElementsSubProcessor.getMethodProposals(context, problem, true, proposals); 
 				break;
@@ -198,7 +204,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ReturnTypeAmbiguous:
 			case IProblem.SuperclassAmbiguous:
 			case IProblem.InterfaceAmbiguous:
-			case IProblem.AmbiguousType:	
+			case IProblem.AmbiguousType:
+			case IProblem.AmbiguousType + IProblem.Javadoc:
 				UnresolvedElementsSubProcessor.getAmbiguosTypeReferenceProposals(context, problem, proposals);
 				break;	
 			case IProblem.PublicClassMustMatchFileName:
@@ -214,6 +221,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SuperclassNotFound:
 			case IProblem.ExceptionTypeNotFound:
 			case IProblem.InterfaceNotFound: 
+			case IProblem.UndefinedType + IProblem.Javadoc:
 				UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
 				break;	
 			case IProblem.TypeMismatch:
@@ -260,6 +268,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ExceptionTypeNotVisible:
 			case IProblem.NotVisibleField:
 			case IProblem.ImportNotVisible:
+			case IProblem.NotVisibleType + IProblem.Javadoc:
 				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 5); 
 				break;
 			case IProblem.BodyForAbstractMethod:

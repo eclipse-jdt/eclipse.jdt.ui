@@ -282,7 +282,18 @@ public class ASTResolving {
         case ASTNode.TYPE_LITERAL:
         case ASTNode.CLASS_INSTANCE_CREATION:
         	return getPossibleReferenceBinding(parent);
-            					
+        case ASTNode.TAG_ELEMENT:
+        	TagElement tagElement= (TagElement) parent;
+        	if ("@throws".equals(tagElement.getTagName()) || "@exception".equals(tagElement.getTagName())) {  //$NON-NLS-1$//$NON-NLS-2$
+        		ASTNode methNode= tagElement.getParent().getParent();
+        		if (methNode instanceof MethodDeclaration) {
+        			List thrownExcpetions= ((MethodDeclaration) methNode).thrownExceptions();
+        			if (thrownExcpetions.size() == 1) {
+        				return ((Name) thrownExcpetions.get(0)).resolveTypeBinding();
+        			}
+        		}
+        	}
+        	break;
      	}   	
     	return null;
     }

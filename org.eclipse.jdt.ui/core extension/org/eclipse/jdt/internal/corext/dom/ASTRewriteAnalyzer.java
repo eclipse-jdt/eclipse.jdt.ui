@@ -1957,8 +1957,10 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		if (!hasChildrenChanges(node)) {
 			return visitChildrenNeeded(node);
 		}
+		int startPos= node.getStartPosition() + 3;
+		String separator= getLineDelimiter() + getIndent(node.getStartPosition()) + " * "; //$NON-NLS-1$
 		
-		changeNotSupported(node); // no modification possible
+		rewriteNodeList(node, ASTNodeConstants.TAGS, startPos, separator, separator);
 		return false;
 	}
 
@@ -2458,9 +2460,91 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		return false;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MemberRef)
+	 */
+	public boolean visit(MemberRef node) {
+		if (!hasChildrenChanges(node)) {
+			return visitChildrenNeeded(node);
+		}
+		rewriteNode(node, ASTNodeConstants.QUALIFIER, node.getStartPosition(), ASTRewriteFormatter.NONE); //$NON-NLS-1$
+
+		rewriteRequiredNode(node, ASTNodeConstants.NAME);
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRef)
+	 */
+	public boolean visit(MethodRef node) {
+		if (!hasChildrenChanges(node)) {
+			return visitChildrenNeeded(node);
+		}
+		rewriteNode(node, ASTNodeConstants.QUALIFIER, node.getStartPosition(), ASTRewriteFormatter.NONE); //$NON-NLS-1$
+
+		int pos= rewriteRequiredNode(node, ASTNodeConstants.NAME);
+
+		if (isChanged(node, ASTNodeConstants.PARAMETERS)) {
+			// eval position after opening parent
+			try {
+				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLPAREN, pos);
+				rewriteNodeList(node, ASTNodeConstants.PARAMETERS, startOffset, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+			} catch (CoreException e) {
+				handleException(e);
+			}
+		} else {
+			doVisit(node, ASTNodeConstants.PARAMETERS, 0);
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRefParameter)
+	 */
+	public boolean visit(MethodRefParameter node) {
+		if (!hasChildrenChanges(node)) {
+			return visitChildrenNeeded(node);
+		}
+		int pos= rewriteRequiredNode(node, ASTNodeConstants.TYPE);
+		rewriteNode(node, ASTNodeConstants.NAME, pos, ASTRewriteFormatter.SPACE); //$NON-NLS-1$
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TagElement)
+	 */
+	public boolean visit(TagElement node) {
+		if (!hasChildrenChanges(node)) {
+			return visitChildrenNeeded(node);
+		}
+		if (isChanged(node, ASTNodeConstants.FRAGMENTS)) {
+			// eval position after opening parent
+			try {
+				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameIdentifier, node.getStartPosition());
+				rewriteNodeList(node, ASTNodeConstants.FRAGMENTS, startOffset, " ", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+			} catch (CoreException e) {
+				handleException(e);
+			}
+		} else {
+			doVisit(node, ASTNodeConstants.PARAMETERS, 0);
+		}
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TextElement)
+	 */
+	public boolean visit(TextElement node) {
+		if (!hasChildrenChanges(node)) {
+			return visitChildrenNeeded(node);
+		}
+		changeNotSupported(node); // no modification possible
+		return true;
+	}
+	
 	private void handleException(Throwable e) {
 		JavaPlugin.log(e);
 		throw new RewriteRuntimeException(e);
 	}
-
+	
 }

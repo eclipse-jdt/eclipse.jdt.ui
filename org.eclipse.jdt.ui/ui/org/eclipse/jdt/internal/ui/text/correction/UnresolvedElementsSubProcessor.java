@@ -360,6 +360,9 @@ public class UnresolvedElementsSubProcessor {
 					kind= SimilarElementsRequestor.CLASSES;
 				}
 				break;
+			case ASTNode.TAG_ELEMENT:
+				kind= SimilarElementsRequestor.REF_TYPES;
+				break;
 			default:
 		}		
 		

@@ -16,11 +16,14 @@ import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
@@ -53,6 +56,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		
 		String identifier= ASTResolving.getSimpleName(name);
 		String returnType= null;
+		ICompilationUnit preparedCU= null;
 		
 		if ((kind & REF_TYPES) != 0) {
 			if (name.isQualifiedName()) {
@@ -60,6 +64,12 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 			} else {
 				pos= name.getStartPosition() + 1; // first letter must be included, other
 			}
+			Javadoc javadoc=  (Javadoc) ASTNodes.getParent(name, ASTNode.JAVADOC);
+			if (javadoc != null) {
+				preparedCU= createPreparedCU(cu, javadoc, name.getStartPosition());
+				cu= preparedCU;
+			}
+			
 		} else {	
 			if (name.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
 				MethodInvocation invocation= (MethodInvocation) name.getParent();
@@ -77,9 +87,39 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 				returnType= binding.getName();
 			}
 		}
-		SimilarElementsRequestor requestor= new SimilarElementsRequestor(identifier, kind, nArguments, returnType);
-		return requestor.process(cu, pos);		
+
+		try {
+			SimilarElementsRequestor requestor= new SimilarElementsRequestor(identifier, kind, nArguments, returnType);
+			return requestor.process(cu, pos);		
+		} finally {
+			if (preparedCU != null) {
+				preparedCU.discardWorkingCopy();
+			}
+		}
 	}
+	
+	private static ICompilationUnit createPreparedCU(ICompilationUnit cu, Javadoc comment, int wordStart) throws JavaModelException {
+		int startpos= comment.getStartPosition();
+		boolean isTopLevel= comment.getParent().getParent() instanceof CompilationUnit;
+		char[] content= (char[]) cu.getBuffer().getCharacters().clone();
+		if (isTopLevel && (wordStart + 6 < content.length)) {
+			content[startpos++]= 'i'; content[startpos++]= 'm'; content[startpos++]= 'p';
+			content[startpos++]= 'o'; content[startpos++]= 'r'; content[startpos++]= 't';
+		}		
+		if (wordStart < content.length) {
+			for (int i= startpos; i < wordStart; i++) {
+				content[i]= ' ';
+			}
+		}
+
+		/*
+		 * Explicitly create a new non-shared working copy.
+		 */
+		ICompilationUnit newCU= cu.getWorkingCopy(null);
+		newCU.getBuffer().setContents(content);
+		return newCU;
+	}
+	
 
 	/**
 	 * Constructor for SimilarElementsRequestor.

@@ -130,8 +130,8 @@ public class ProblemLocation implements IProblemLocation {
 		if ((code & IProblem.Syntax) != 0) {
 			buf.append("Syntax + "); //$NON-NLS-1$
 		}
-		if ((code & IProblem.Annotation) != 0) {
-			buf.append("Annotation + "); //$NON-NLS-1$
+		if ((code & IProblem.Javadoc) != 0) {
+			buf.append("Javadoc + "); //$NON-NLS-1$
 		}
 		buf.append(code & IProblem.IgnoreCategoriesMask);
 			

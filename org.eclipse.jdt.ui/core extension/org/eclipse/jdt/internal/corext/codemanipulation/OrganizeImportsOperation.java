@@ -310,9 +310,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		
 		public boolean visit(MethodRef node) {
-			Name name= node.getName();
-			if (name != null) {
-				typeRefFound(name);
+			Name qualifier= node.getQualifier();
+			if (qualifier != null) {
+				typeRefFound(qualifier);
 			}
 			List list= node.parameters();
 			if (list != null) {
