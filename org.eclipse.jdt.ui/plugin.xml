@@ -3037,7 +3037,5 @@
 		class="org.eclipse.jdt.internal.ui.infoviews.JavadocView">
 	</view>
 </extension>
-
-</extension>
    
 </plugin>
