@@ -46,7 +46,6 @@ import org.eclipse.jdt.internal.corext.buildpath.EditOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
-import org.eclipse.jdt.internal.corext.buildpath.IncludeOperation;
 import org.eclipse.jdt.internal.corext.buildpath.LinkedSourceFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
 import org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation;
@@ -147,6 +146,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     private ClasspathModifierAction[] fActions;
     private int fLastType;
     private List fListeners;
+    private static final int fContextSensitiveActions= 5;
     
     /**
      * Constructor which creates the operations and based on this 
@@ -176,8 +176,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP, JavaPluginImages.DESC_DLCL_REMOVE_FROM_BP, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP")), //$NON-NLS-1$
                 IClasspathInformationProvider.REMOVE_FROM_BP);
-        op= new IncludeOperation(listener, provider);
-        /*addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION, 
+        /*op= new IncludeOperation(listener, provider);
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Include")), //$NON-NLS-1$
                 IClasspathInformationProvider.INCLUDE);
         op= new UnincludeOperation(listener, provider);
@@ -196,14 +196,14 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_TEXT_EDIT, JavaPluginImages.DESC_DLCL_TEXT_EDIT, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit")), //$NON-NLS-1$
                 IClasspathInformationProvider.EDIT);
-        op= new ResetAllOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset")), //$NON-NLS-1$
-                IClasspathInformationProvider.RESET_ALL);
         op= new LinkedSourceFolderOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_TOOL_NEWPACKROOT, JavaPluginImages.DESC_DLCL_NEWPACKROOT, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link")), //$NON-NLS-1$
                 IClasspathInformationProvider.CREATE_LINK);
+        op= new ResetAllOperation(listener, provider);
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR, 
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset")), //$NON-NLS-1$
+                IClasspathInformationProvider.RESET_ALL);
     }
 
     private void addAction(ClasspathModifierAction action, int index) {
@@ -231,11 +231,11 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * ToolBarManager</code> for.
      * @return the created <code>ToolBarManager</code>
      */
-    public ToolBarManager createToolBarManager(ViewerPane pane) {
+    public ToolBarManager createLeftToolBarManager(ViewerPane pane) {
         ToolBarManager tbm= pane.getToolBarManager();
-        for (int i= 0; i < fActions.length; i++) {
+        for (int i= 0; i < fContextSensitiveActions; i++) {
             tbm.add(fActions[i]);
-            if (i == 1 || i == 3 || i == 4 || i == 5)
+            if (i == 1 || i == 3)
                 tbm.add(new Separator());
         }
         tbm.update(true);
@@ -243,16 +243,19 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     }
     
     /**
-     * Create a toolbar manager with only one element which 
-     * represents a help action (that links to a html page)
+     * Create a toolbar manager for a given 
+     * <code>ViewerPane</code>
      * 
      * @param pane the pane to create the help toolbar for
-     * @return the toolbar manager for this help action
+     * @return the created <code>ToolBarManager</code>
      */
-    public ToolBarManager createHelpToolBar(ViewerPane pane) {
+    public ToolBarManager createLeftToolBar(ViewerPane pane) {
         ToolBar tb= new ToolBar(pane, SWT.FLAT);
         pane.setTopRight(tb);
         ToolBarManager tbm= new ToolBarManager(tb);
+        for (int i= fContextSensitiveActions; i < fActions.length; i++) {
+            tbm.add(fActions[i]);
+        }
         tbm.add(new HelpAction());
         tbm.update(true);
         return tbm;
@@ -360,6 +363,21 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         }
         
         internalSetContext(selectedElements, project, type);
+    }
+    
+    /**
+     * Get a description for the last selection explaining 
+     * why no operation is possible.<p>
+     * This can be usefull if a context sensitive widget does 
+     * not want to display all operations although some of them 
+     * are valid.
+     * 
+     * @return a description for the last selection that explains 
+     * why no operation is available.
+     */
+    public String getNoActionDescription() {
+        String[] description= noAction(fLastType);
+        return description[0];
     }
     
     /**

@@ -572,8 +572,9 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         // Display available actions
         ClasspathModifierAction[] actions= event.getEnabledActions();
         String[] descriptionText= event.getEnabledActionsText();
-        if (actions.length == 0) {
-            createFormText(childComposite, NewWizardMessages.getFormattedString("HintTextGroup.NoAction", descriptionText[0])); //$NON-NLS-1$
+        if (noContextHelpAvailable(actions)) {
+            String noAction= fActionGroup.getNoActionDescription();
+            createFormText(childComposite, NewWizardMessages.getFormattedString("HintTextGroup.NoAction", noAction)); //$NON-NLS-1$
             fTopComposite.layout(true);
             return;
         }
@@ -588,5 +589,39 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         }
         
         fTopComposite.layout(true);
+    }
+    
+    /**
+     * Check if for the current type of selection, no context specific actions can 
+     * be applied. Note: this does not mean, that there are NO actions available at all.<p>
+     * 
+     * For example: if the default package is selected, there is no specific action for this kind 
+     * of selection as no operations are allowed on the default package. Nevertheless, the 
+     * <code>PackageExplorerActionEvent</code> will return at least one action that allows to 
+     * link to an existing folder in the file system, but this operation is always available 
+     * and does not add any supporting information to the current selection. Therefore, 
+     * it can be filtered and the correct answer to the user is that there is no specific 
+     * action for the default package.
+     * 
+     * @param actions an array of provided actions
+     * @return <code>true</code> if there is at least one action that allows context 
+     * sensitive operations, <code>false</code> otherwise.
+     */
+    private boolean noContextHelpAvailable(ClasspathModifierAction[] actions) {
+        if (actions.length == 0)
+            return true;
+        if (actions.length == 1) {
+            int id= Integer.parseInt(actions[0].getId());
+            if (id == IClasspathInformationProvider.CREATE_LINK)
+                return true;
+        }
+        if (actions.length == 2) {
+            int idReset= Integer.parseInt(actions[0].getId());
+            int idLink= Integer.parseInt(actions[1].getId());
+            if (idReset == IClasspathInformationProvider.RESET_ALL && 
+                idLink == IClasspathInformationProvider.CREATE_LINK)
+                return true;
+        }
+        return false;
     }
 }

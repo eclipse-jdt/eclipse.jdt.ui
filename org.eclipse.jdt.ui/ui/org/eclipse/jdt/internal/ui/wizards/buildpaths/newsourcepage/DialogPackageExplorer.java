@@ -152,9 +152,9 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                         IClasspathEntry entry= root.getRawClasspathEntry();
                         int excluded= entry.getExclusionPatterns().length;
                         if (excluded == 1)
-                            text= text + NewWizardMessages.getString("DialogPackageExplorer.LabelProvider.SingleExcluded"); //$NON-NLS-1$ //$NON-NLS-2$
+                            return NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.SingleExcluded", text); //$NON-NLS-1$ //$NON-NLS-2$
                         else if (excluded > 1)
-                            text= text + NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.MultiExcluded", new Integer(excluded)); //$NON-NLS-1$ //$NON-NLS-2$
+                            return NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.MultiExcluded", new Object[] {text, new Integer(excluded)}); //$NON-NLS-1$ //$NON-NLS-2$
                     }
                 }
                 if (element instanceof IJavaProject) {
@@ -165,16 +165,16 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                             IClasspathEntry entry= root.getRawClasspathEntry();
                             int excluded= entry.getExclusionPatterns().length;
                             if (excluded == 1)
-                                text= text + NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.SingleExcluded", " - "); //$NON-NLS-1$ //$NON-NLS-2$
+                                return NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.SingleExcluded", text); //$NON-NLS-1$ //$NON-NLS-2$
                             else if (excluded > 1)
-                                text= text + NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.MultiExcluded", new Object[] {" - ", new Integer(excluded)}); //$NON-NLS-1$ //$NON-NLS-2$
+                                return NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.MultiExcluded", new Object[] {text, new Integer(excluded)}); //$NON-NLS-1$ //$NON-NLS-2$
                         }
                     }
                 }
                 if (element instanceof IFile || element instanceof IFolder) {
                     IResource resource= (IResource)element;
                         if (ClasspathModifier.isExcluded(resource, fCurrJProject))
-                            text= text + NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.Excluded", " - "); //$NON-NLS-1$ //$NON-NLS-2$
+                            return NewWizardMessages.getFormattedString("DialogPackageExplorer.LabelProvider.Excluded", text); //$NON-NLS-1$ //$NON-NLS-2$
                 }
             } catch (JavaModelException e) {
                 JavaPlugin.log(e);

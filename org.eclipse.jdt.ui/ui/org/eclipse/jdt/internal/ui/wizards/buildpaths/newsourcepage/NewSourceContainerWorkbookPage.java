@@ -292,12 +292,12 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         });
         
         // Create toolbar with actions on the left
-        ToolBarManager tbm= actionGroup.createToolBarManager(pane);
+        ToolBarManager tbm= actionGroup.createLeftToolBarManager(pane);
         pane.setTopCenter(null);
         pane.setTopLeft(tbm.getControl());
         
         // Create toolbar with help on the right
-        tbm= actionGroup.createHelpToolBar(pane);
+        tbm= actionGroup.createLeftToolBar(pane);
         pane.setTopRight(tbm.getControl());
         
         fHintTextGroup.setActionGroup(actionGroup);

@@ -132,13 +132,13 @@ public class EditOperation extends ClasspathModifierOperation {
         if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
             return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"); //$NON-NLS-1$
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT_ROOT)
-            NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"); //$NON-NLS-1$
+            return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"); //$NON-NLS-1$
         if (type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
-            NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"); //$NON-NLS-1$
+            return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"); //$NON-NLS-1$
         if (type == DialogPackageExplorerActionGroup.OUTPUT)
             return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.EditOutputFolder"); //$NON-NLS-1$
         if (type == DialogPackageExplorerActionGroup.DEFAULT_OUTPUT)
             return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.EditOutputFolder"); //$NON-NLS-1$
-        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.Exclude"); //$NON-NLS-1$
+        return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.Edit"); //$NON-NLS-1$
     }
 }

@@ -67,8 +67,7 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
     }
 
     /**
-     * Find out whether this operation can be executed on 
-     * the provided list of elements.
+     * This particular operation is always valid.
      * 
      * @param elements a list of elements
      * @param types an array of types for each element, that is, 
@@ -81,7 +80,7 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
      * @throws JavaModelException 
      */
     public boolean isValid(List elements, int[] types) throws JavaModelException {
-        return elements.size() == 1;
+        return true;
     }
 
     /**

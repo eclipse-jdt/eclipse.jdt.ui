@@ -52,8 +52,8 @@ public interface IClasspathInformationProvider {
     public static final int EXCLUDE= 0x02;
     public static final int UNEXCLUDE= 0x03;
     public static final int EDIT= 0x04;
-    public static final int RESET_ALL= 0x05;
-    public static final int CREATE_LINK= 0x06;
+    public static final int CREATE_LINK= 0x05;
+    public static final int RESET_ALL= 0x06;
     public static final int CREATE_OUTPUT= 0x07;
     public static final int RESET= 0x08;
     public static final int INCLUDE= 0x09;
