@@ -41,7 +41,7 @@ public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdati
 		if (javaElements != null) {
 			for (int i= 0; i < javaElements.length; i++) {
 				IJavaElement element= javaElements[i];
-				if (element.getElementType() == IJavaElement.TYPE && ((IType)element).isLocal())
+				if ((element instanceof IType) && ((IType)element).isLocal())
 					return false;
 			}
 		}
