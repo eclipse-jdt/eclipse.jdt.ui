@@ -849,36 +849,50 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				currPos++;
 			}
 		}
-		for (int i= 0; i < markers.size(); i++) {
+		for (int i= 0; i < markers.size(); i++) { // markers.size can change!
 			NodeMarker curr= (NodeMarker) markers.get(i);
 			
 			int offset= curr.offset;
 			if (offset != currPos) {
-				String insertStr= formatted.substring(currPos, offset);
-				doTextInsert(insertOffset, insertStr, description);
+				String insertStr= formatted.substring(currPos, offset); 
+				doTextInsert(insertOffset, insertStr, description); // insert until the marker's begin
 			}
+
 			Object data= curr.data;
-			if (data instanceof GroupDescription) {
+			if (data instanceof GroupDescription) { // tracking a node
+				// need to split and create 2 edits as tracking node can surround replaced node.
 				TextEdit edit= new RangeMarker(insertOffset, 0);
 				addDescription((GroupDescription) data, edit);
-				addEdit(edit);				
+				addEdit(edit);
+				if (curr.length != 0) {
+					int end= offset + curr.length;
+					int k= i + 1;
+					while (k < markers.size() && ((NodeMarker) markers.get(k)).offset < end) {
+						k++;
+					}
+					curr.offset= end;
+					curr.length= 0;
+					markers.add(k, curr); // add again for end position
+				}
+				currPos= offset;
 			} else {
 				String destIndentString=  Strings.getIndentString(getCurrentLine(formatted, offset), tabWidth);
-				if (data instanceof MovePlaceholderData) {
+				if (data instanceof MovePlaceholderData) { // replace with a move target
 					ASTNode existingNode= ((MovePlaceholderData) data).node;
 					int srcIndentLevel= getIndent(existingNode.getStartPosition());
 					doTextMove(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
-				} else if (data instanceof CopyPlaceholderData) {
+				} else if (data instanceof CopyPlaceholderData) { // replace with a copy target
 					ASTNode existingNode= ((CopyPlaceholderData) data).node;
 					int srcIndentLevel= getIndent(existingNode.getStartPosition());
 					doTextCopy(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
-				} else if (data instanceof StringPlaceholderData) {
+				} else if (data instanceof StringPlaceholderData) { // replace with a placeholder
 					String code= ((StringPlaceholderData) data).code;
 					String str= Strings.changeIndent(code, 0, tabWidth, destIndentString, fTextBuffer.getLineDelimiter()); 
 					doTextInsert(insertOffset, str, description);
 				}
+				currPos= offset + curr.length; // continue to insert after the replaced string
 			}
-			currPos= offset + curr.length;
+
 		}
 		if (currPos < formatted.length()) {
 			String insertStr= formatted.substring(currPos);

@@ -14,6 +14,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.Position;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTNode;
 
@@ -21,23 +25,18 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 /* package */ class ASTRewriteFormatter {
 
-	public static class NodeMarker {
+	public static class NodeMarker extends Position {
 		public Object data;
-		public int offset;
-		public int length;		
 	}
-	
-
-	
 		
 	private static class ExtendedFlattener extends ASTFlattener {
-		
-		private ArrayList fExistingNodes;
+
+		private ArrayList fPositions;
 		private ASTRewrite fRewrite;
 
 		
 		public ExtendedFlattener(ASTRewrite rewrite) {
-			fExistingNodes= new ArrayList();
+			fPositions= new ArrayList();
 			fRewrite= rewrite;
 		}
 	
@@ -65,7 +64,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			}
 			Object trackData= fRewrite.getTrackedNodeData(node);
 			if (trackData != null) {
-				addMarker(trackData, fResult.length(), -1);
+				fixupLength(trackData, fResult.length());
 			}
 		}
 	
@@ -74,13 +73,13 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			marker.offset= startOffset;
 			marker.length= length;
 			marker.data= annotation;
-			fExistingNodes.add(marker);
+			fPositions.add(marker);
 			return marker;
 		}
 	
 		private void fixupLength(Object data, int endOffset) {
-			for (int i= fExistingNodes.size()-1; i >= 0 ; i--) {
-				NodeMarker marker= (NodeMarker) fExistingNodes.get(i);
+			for (int i= fPositions.size()-1; i >= 0 ; i--) {
+				NodeMarker marker= (NodeMarker) fPositions.get(i);
 				if (marker.data == data) {
 					marker.length= endOffset - marker.offset;
 					return;
@@ -88,8 +87,8 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			}
 		}
 
-		public ArrayList getMarkers() {
-			return fExistingNodes;
+		public NodeMarker[] getMarkers() {
+			return (NodeMarker[]) fPositions.toArray(new NodeMarker[fPositions.size()]);
 		}
 	}
 	
@@ -117,54 +116,20 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		ExtendedFlattener flattener= new ExtendedFlattener(fRewrite);
 		node.accept(flattener);
 
-		ArrayList markers= flattener.getMarkers();
-		
-		int nExistingNodes= markers.size();
-
-		int nPositions= nExistingNodes;
-		for (int i= 0; i < nExistingNodes; i++) {
-			NodeMarker curr= (NodeMarker) markers.get(i);
-			if (curr.length > 0) {
-				nPositions++;
-			}
-		}
-
-		int[] positions= new int[nPositions];
-		for (int i= 0, k= 0; i < nExistingNodes; i++) {
-			NodeMarker curr= (NodeMarker) markers.get(i);
-			
-			int startPos= curr.offset;
-			int length= curr.length;
-			if (length == -1) {
-				startPos--;
-			}
-			positions[k++]= startPos;
-			if (length > 0) {
-				positions[k++]= startPos + length - 1;
-			}
+		NodeMarker[] markers= flattener.getMarkers();
+		for (int i= 0; i < markers.length; i++) {
+			resultingMarkers.add(markers[i]); // add to result
 		}		
 		
 		Hashtable map= JavaCore.getOptions();
 		map.put(JavaCore.FORMATTER_LINE_SPLIT, String.valueOf(9999));
-		String formatted= CodeFormatterUtil.format(node, flattener.getResult(), initialIndentationLevel, positions, fLineDelimiter, map);
-		
-		for (int i= 0, k= 0; i < nExistingNodes; i++) {
-			int startPos= positions[k++];
-			NodeMarker curr= (NodeMarker) markers.get(i);
-			resultingMarkers.add(curr);
-			
-			int markerLength= curr.length;
-			if (markerLength == -1) {
-				startPos++;
-				curr.length= 0;
-			}
-			curr.offset= startPos;
-			if (markerLength > 0) {
-				int endPos= positions[k++] + 1;
-				curr.length= endPos - startPos;
-			}
+		String unformatted= flattener.getResult();
+		TextEdit edit= CodeFormatterUtil.format2(node, unformatted, initialIndentationLevel, fLineDelimiter, map);
+		if (edit == null) {
+			return unformatted;
 		}
-		return formatted;
+		
+		return CodeFormatterUtil.evaluateFormatterEdit(unformatted, edit, markers);
 	}
 	
 	public static interface Prefix {
@@ -191,28 +156,54 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		private int fKind;
 		private String fString;
 		private int fStart;
-		private int fEnd;
+		private int fLength;
 		
 		public FormattingPrefix(String string, String sub, int kind) {
 			fStart= string.indexOf(sub);
-			fEnd= fStart + sub.length() - 1;
+			fLength= sub.length();
 			fString= string;
 			fKind= kind;
 		}
 		
 		public String getPrefix(int indent, String lineDelim) {
-			int[] pos= new int[] { fStart, fEnd }; 
-			String res= CodeFormatterUtil.format(fKind, fString, indent, pos, lineDelim, null);
-			return res.substring(pos[0] + 1, pos[1]);
+			Position pos= new Position(fStart, fLength);
+			String str= fString;
+			TextEdit res= CodeFormatterUtil.format2(fKind, str, indent, lineDelim, null);
+			if (res != null) {
+				str= CodeFormatterUtil.evaluateFormatterEdit(str, res, new Position[] { pos });
+			}
+			return str.substring(pos.offset + 1, pos.offset + pos.length - 1);
+		}
+	}
+
+	private static class BlockFormattingPrefix implements BlockContext {
+		private String fPrefix;
+		private int fStart;
+		
+		public BlockFormattingPrefix(String prefix, int start) {
+			fStart= start;
+			fPrefix= prefix;
+		}
+		
+		public String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node) {
+			String nodeString= ASTNodes.asString(node);
+			String str= fPrefix + nodeString;
+			Position pos= new Position(fStart, fPrefix.length() + 1 - fStart);
+
+			TextEdit res= CodeFormatterUtil.format2(CodeFormatterUtil.K_STATEMENTS, str, indent, lineDelim, null);
+			if (res != null) {
+				str= CodeFormatterUtil.evaluateFormatterEdit(str, res, new Position[] { pos });
+			}
+			return new String[] { str.substring(pos.offset + 1, pos.offset + pos.length - 1), ""}; //$NON-NLS-1$
 		}
 	}
 	
-	private static class BlockFormattingPrefix implements BlockContext {
+	private static class BlockFormattingPrefixSuffix implements BlockContext {
 		private String fPrefix;
 		private String fSuffix;
 		private int fStart;
 		
-		public BlockFormattingPrefix(String prefix, String suffix, int start) {
+		public BlockFormattingPrefixSuffix(String prefix, String suffix, int start) {
 			fStart= start;
 			fSuffix= suffix;
 			fPrefix= prefix;
@@ -223,17 +214,19 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			int nodeStart= fPrefix.length();
 			int nodeEnd= nodeStart + nodeString.length() - 1;
 			
-			String s= fPrefix + nodeString + fSuffix;
-		
-			if (fSuffix.length() == 0) {
-				int[] pos= new int[] { fStart, nodeStart, nodeEnd}; 
-				String res= CodeFormatterUtil.format(CodeFormatterUtil.K_STATEMENTS, s, indent, pos, lineDelim, null);
-				return new String[] { res.substring(pos[0] + 1, pos[1]), res.substring(pos[2], pos[2]) };
-			} else {
-				int[] pos= new int[] { fStart, nodeStart, nodeEnd, nodeEnd + 1}; 
-				String res= CodeFormatterUtil.format(CodeFormatterUtil.K_STATEMENTS, s, indent, pos, lineDelim, null);
-				return new String[] { res.substring(pos[0] + 1, pos[1]), res.substring(pos[2]+ 1, pos[3]) };
+			String str= fPrefix + nodeString + fSuffix;
+			
+			Position pos1= new Position(fStart, nodeStart + 1 - fStart);
+			Position pos2= new Position(nodeEnd, 2);
+
+			TextEdit res= CodeFormatterUtil.format2(CodeFormatterUtil.K_STATEMENTS, str, indent, lineDelim, null);
+			if (res != null) {
+				str= CodeFormatterUtil.evaluateFormatterEdit(str, res, new Position[] { pos1, pos2 });
 			}
+			return new String[] {
+				str.substring(pos1.offset + 1, pos1.offset + pos1.length - 1),
+				str.substring(pos2.offset + 1, pos2.offset + pos2.length - 1)
+			};
 		}
 	}	
 	
@@ -246,13 +239,13 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	public final static Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", "} finally {", CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
 	public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch(Exception e) {}", "} c" , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
 
-	public final static BlockContext IF_BLOCK_WITH_ELSE= new BlockFormattingPrefix("if (true)", "else{}", 8); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext IF_BLOCK_NO_ELSE= new BlockFormattingPrefix("if (true)", "", 8); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext ELSE_AFTER_STATEMENT= new BlockFormattingPrefix("if (true) foo(); else ", "", 15); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext ELSE_AFTER_BLOCK= new BlockFormattingPrefix("if (true) {} else ", "", 11); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext IF_BLOCK_WITH_ELSE= new BlockFormattingPrefixSuffix("if (true)", "else{}", 8); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext IF_BLOCK_NO_ELSE= new BlockFormattingPrefix("if (true)", 8); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext ELSE_AFTER_STATEMENT= new BlockFormattingPrefix("if (true) foo(); else ", 15); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext ELSE_AFTER_BLOCK= new BlockFormattingPrefix("if (true) {} else ", 11); //$NON-NLS-1$ //$NON-NLS-2$
 
-	public final static BlockContext FOR_BLOCK= new BlockFormattingPrefix("for (;;) ", "", 7); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext WHILE_BLOCK= new BlockFormattingPrefix("while (true)", "", 11); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static BlockContext DO_BLOCK= new BlockFormattingPrefix("do ", "while (true);", 1); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext FOR_BLOCK= new BlockFormattingPrefix("for (;;) ", 7); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext WHILE_BLOCK= new BlockFormattingPrefix("while (true)", 11); //$NON-NLS-1$ //$NON-NLS-2$
+	public final static BlockContext DO_BLOCK= new BlockFormattingPrefixSuffix("do ", "while (true);", 1); //$NON-NLS-1$ //$NON-NLS-2$
 
 }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.eclipse.text.edits.DeleteEdit;
@@ -23,20 +24,24 @@ import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.CodeFormatter;
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -46,8 +51,6 @@ public class CodeFormatterUtil {
 	public static boolean OLD_FORMATTER= true;
 	public static boolean OLD_FUNC= true;
 	public static boolean DEBUG= false;
-	
-	private static boolean BUG_43437= true;
 	
 	public static final int K_UNKNOWN= CodeFormatter.K_UNKNOWN;
 	public static final int K_EXPRESSION = CodeFormatter.K_EXPRESSION;
@@ -215,9 +218,6 @@ public class CodeFormatterUtil {
 			suffix = ";"; //$NON-NLS-1$
 		} else if (node instanceof Expression) {
 			code= CodeFormatterUtil.K_EXPRESSION;
-			if (BUG_43437 && node instanceof StringLiteral) {
-				return new InsertEdit(0, createIndentString(indentationLevel));
-			}		
 		} else if (node instanceof Type) {
 			suffix= " x;"; //$NON-NLS-1$
 			code= CodeFormatterUtil.K_STATEMENTS;
@@ -289,6 +289,13 @@ public class CodeFormatterUtil {
 						result.addChild(edit);
 					}
 				}
+				if (TokenScanner.isComment(origTok) && origEnd >= offset && origNextStart <= end) {
+					char[] origComment= origScanner.getCurrentTokenSource();
+					char[] newComment= newScanner.getCurrentTokenSource();
+					if (!CharOperation.equals(origComment, newComment)) {
+						commentDifferent(new String(origComment), new String(newComment), origEnd, result);
+					}
+				}
 			} while (origNextStart != -1);
 			if (indentationLevel > 0) {
 				result.addChild(new InsertEdit(offset, createIndentString(indentationLevel)));
@@ -304,6 +311,55 @@ public class CodeFormatterUtil {
 		return null;
 	}
 	
+	private static void commentDifferent(String origComment, String newComment, int offset, TextEdit result) {
+		DefaultLineTracker tracker1= new DefaultLineTracker();
+		tracker1.set(origComment);
+		DefaultLineTracker tracker2= new DefaultLineTracker();
+		tracker2.set(newComment);
+		
+		ArrayList res= new ArrayList();
+		
+		int nLines= tracker2.getNumberOfLines();
+		if (tracker1.getNumberOfLines() == nLines) {
+			try {
+				int start1= 0, start2= 0;
+				for (int i= 0; i < nLines; i++) {
+					IRegion region1= tracker1.getLineInformation(i);
+					IRegion region2= tracker2.getLineInformation(i);
+					int lineEnd1= region1.getOffset() + region1.getLength();
+					int lineEnd2= region2.getOffset() + region2.getLength();
+					int sameStart1= region1.getOffset();
+					int sameStart2= lineEnd2 - region1.getLength();
+					if (isDifferent(origComment, sameStart1, lineEnd1, newComment, sameStart2, lineEnd2)) {
+						// should not happen: replace full line
+						if (DEBUG) {
+							System.out.println("Comment line changed: is: " + origComment.substring(sameStart1, lineEnd1) + ", was: " + newComment.substring(sameStart2, lineEnd2));  //$NON-NLS-1$//$NON-NLS-2$
+						}
+						res.add(new ReplaceEdit(start1 + offset, lineEnd1 - start1, newComment.substring(start2, lineEnd2)));
+					} else {
+						if (isDifferent(origComment, start1, sameStart1, newComment, start2, sameStart2)) {
+							res.add(new ReplaceEdit(start1 + offset, sameStart1 - start1, newComment.substring(start2, sameStart2)));
+						}
+					}
+					start1= lineEnd1;
+					start2= lineEnd2;
+				}
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+				res.clear();
+			}
+		}
+		if (res.isEmpty()) {
+			// replace all
+			result.addChild(new ReplaceEdit(offset, origComment.length(), newComment));
+		} else {
+			for (int i= 0; i < res.size(); i++) {
+				result.addChild((TextEdit) res.get(i));
+			}
+		}
+	}
+	
+		
 	private static IScanner getTokenScanner(String str) {
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		scanner.setSource(str.toCharArray());
