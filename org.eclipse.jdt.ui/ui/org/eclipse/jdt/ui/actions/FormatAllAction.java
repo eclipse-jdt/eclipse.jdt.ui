@@ -218,7 +218,8 @@ public class FormatAllAction extends SelectionDispatchAction {
 								IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 								return (root.getKind() == IPackageFragmentRoot.K_SOURCE);
 							case IJavaElement.JAVA_PROJECT:
-								return hasSourceFolders((IJavaProject) elem);
+								// https://bugs.eclipse.org/bugs/show_bug.cgi?id=65638
+								return true;
 						}
 					}
 				} else if (selected[i] instanceof LogicalPackage) {
@@ -241,7 +242,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 		}
 		return false;
 	}
-
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -253,6 +254,8 @@ public class FormatAllAction extends SelectionDispatchAction {
 	 */
 	public void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= getCompilationUnits(selection);
+		if (cus.length == 0)
+			return;
 		if (cus.length > 1) {
 			int returnCode= OptionalMessageDialog.open("FormatAll",  //$NON-NLS-1$
 					getShell(), 

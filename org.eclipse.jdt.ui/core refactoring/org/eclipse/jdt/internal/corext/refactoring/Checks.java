@@ -662,7 +662,10 @@ public class Checks {
 		if (javaElement.isReadOnly())
 			return false;
 		// work around for https://bugs.eclipse.org/bugs/show_bug.cgi?id=48422
-		if (!(javaElement instanceof ILocalVariable) && !javaElement.isStructureKnown())
+		// the Java project is now cheating regarding its children so we shouldn't
+		// call isStructureKnown if the project isn't open.
+		// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=52474
+		if (!(javaElement instanceof IJavaProject) && !(javaElement instanceof ILocalVariable) && !javaElement.isStructureKnown())
 			return false;
 		if (javaElement instanceof IMember && ((IMember)javaElement).isBinary())
 			return false;
