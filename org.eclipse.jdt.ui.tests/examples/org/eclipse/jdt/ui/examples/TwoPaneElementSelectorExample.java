@@ -3,7 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.examples;
-
+
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -12,9 +13,11 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 
 
-
+
+
 public class TwoPaneElementSelectorExample {
-
+
+
 	public static void main(String[] args) {
 		java.util.Random random= new java.util.Random();
 		Object[] elements= new Object[8000];

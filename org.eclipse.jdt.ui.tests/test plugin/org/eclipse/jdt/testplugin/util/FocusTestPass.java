@@ -1,19 +1,22 @@
 package org.eclipse.jdt.testplugin.util;
-
+
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
  
 import java.util.ArrayList;
-
+
+
 /*
  * This test pass verifies the initial focus of a dialog
  * when it is given focus.
  */
 public class FocusTestPass implements IDialogTestPass {
 	private static final int CHECKLIST_SIZE = 1;
-
+
+
 	/**
 	 * @see IDialogTestPass#title()
 	 */

@@ -3,7 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.tests.core;
-import junit.framework.Test;
+
+import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -23,14 +24,16 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-public class AddUnimplementedMethodsTest extends TestCase {
+
+public class AddUnimplementedMethodsTest extends TestCase {
 	
 	private static final Class THIS= AddUnimplementedMethodsTest.class;
 	
 	private IJavaProject fJavaProject;
 	private IPackageFragment fPackage;
 	private IType fClassA, fInterfaceB, fClassC, fClassD, fInterfaceE;
-
+
+
 	public AddUnimplementedMethodsTest(String name) {
 		super(name);
 	}
@@ -71,7 +74,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 		fClassC= cu.createType("public abstract class C {\n}\n", null, true, null);
 		fClassC.createMethod("public void c(java.util.Hashtable h) {\n}\n", null, true, null);
 		fClassC.createMethod("public abstract java.util.Enumeration d(java.util.Hashtable h) {\n}\n", null, true, null);
-
+
+
 		cu= fPackage.getCompilationUnit("D.java");
 		fClassD= cu.createType("public abstract class D extends C {\n}\n", null, true, null);
 		fClassD.createMethod("public abstract void c(java.util.Hashtable h);\n", null, true, null);
@@ -81,7 +85,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 		fInterfaceE.createMethod("void c(java.util.Hashtable h);\n", null, true, null);
 		fInterfaceE.createMethod("void e() throws java.util.NoSuchElementException;\n", null, true, null);	
 	}
-
+
+
 	/**
 	 * Removes the test java project.
 	 */
@@ -130,7 +135,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Enumeration", "java.util.Hashtable" }, imports);
 	}	
-
+
+
 	/*
 	 * method c() is implemented in C but made abstract again in class D
 	 */
@@ -184,7 +190,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 			assertTrue("import " + impName + " expected", nameContained(impName, imports));
 		}
 	}
-
+
+
 	private boolean nameContained(String methName, IJavaElement[] methods) {
 		for (int i= 0; i < methods.length; i++) {
 			if (methods[i].getElementName().equals(methName)) {
@@ -193,5 +200,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 		}
 		return false;
 	}	
-
+
+
 }

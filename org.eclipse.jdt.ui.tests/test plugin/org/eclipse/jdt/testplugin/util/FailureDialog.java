@@ -1,5 +1,6 @@
 package org.eclipse.jdt.testplugin.util;
-
+
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
@@ -16,7 +17,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
-
+
+
 /*
  * A dialog for collecting notes from the tester regarding
  * the failure of a test.
@@ -101,4 +103,5 @@ public class FailureDialog extends Dialog {
 		return getText();
 	}
 }
-
+
+

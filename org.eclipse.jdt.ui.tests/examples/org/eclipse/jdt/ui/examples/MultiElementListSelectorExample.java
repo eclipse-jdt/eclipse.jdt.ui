@@ -3,7 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.examples;
-
+
+
 import java.util.Random;
 
 import org.eclipse.core.runtime.IStatus;
@@ -17,11 +18,14 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-
+
+
 public class MultiElementListSelectorExample {
-
+
+
 	public static void main(String[] args) {
-
+
+
 		ISelectionStatusValidator validator= new ISelectionStatusValidator() {
 			public IStatus validate(Object[] selection) {
 				if (selection != null && selection.length == 1) {
@@ -34,7 +38,8 @@ public class MultiElementListSelectorExample {
 				
 			}
 		};
-
+
+
 
 		Random random= new Random();
 		

@@ -3,7 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.tests.core;
-import junit.framework.Test;
+
+import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -18,14 +19,16 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
+
+
 public class TypeHierarchyTest extends TestCase {
 	
 	private static final Class THIS= TypeHierarchyTest.class;
 	
 	private IJavaProject fJavaProject1;
 	private IJavaProject fJavaProject2;
-	public TypeHierarchyTest(String name) {
+
+	public TypeHierarchyTest(String name) {
 		super(name);
 	}
 
@@ -75,5 +78,6 @@ public class TypeHierarchyTest extends TestCase {
 
 	}	
 	
-
+
+
 }

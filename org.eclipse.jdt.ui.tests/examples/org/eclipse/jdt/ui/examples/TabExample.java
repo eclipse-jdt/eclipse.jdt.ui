@@ -3,7 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.examples;
-
+
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,16 +14,19 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
-
+
+
 import org.eclipse.jface.viewers.LabelProvider;
-
+
+
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-
+
+
 public class TabExample {
 	private Shell fShell;
 	private Label fLabel;
@@ -67,7 +71,8 @@ public class TabExample {
 		ListDialogField list= new ListDialogField(new Adapter(), addButtons, new LabelProvider());
 		list.setRemoveButtonIndex(3);
 		list.setLabelText("List: ");
-
+
+
 		Composite c1= new Composite(folder, SWT.NONE);
 		LayoutUtil.doDefaultLayout(c1, new DialogField[] { list }, true);
 		
@@ -95,7 +100,8 @@ public class TabExample {
 		fShell.open ();
 		return this;
 	}
-
+
+
 	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
 		
 		// -------- IStringButtonAdapter

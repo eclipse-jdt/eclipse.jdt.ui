@@ -1,7 +1,9 @@
 package org.eclipse.jdt.testplugin.util;
-
+
+
 import java.util.ArrayList;
-
+
+
 public class AccessibilityTestPass implements IDialogTestPass {
 	private static final int CHECKLIST_SIZE = 5;
 	

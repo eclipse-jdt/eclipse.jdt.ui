@@ -3,17 +3,21 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.examples;
-
+
+
 import java.util.Random;
-
+
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-
+
+
 import org.eclipse.jface.viewers.LabelProvider;
-
+
+
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -25,7 +29,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.swt.layout.GridData;
-
+
+
 public class DialogFieldExample {
 	private Shell fShell;
 	private Label fLabel;

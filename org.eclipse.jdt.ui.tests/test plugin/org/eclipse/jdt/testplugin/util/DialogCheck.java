@@ -1,10 +1,12 @@
 package org.eclipse.jdt.testplugin.util;
-
+
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-
+
+
 import junit.framework.Assert;
 
 import org.eclipse.swt.SWT;
@@ -19,7 +21,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ui.internal.WorkbenchPlugin;
-
+
+
 /**
  * A <code>DialogCheck</code> is used test a dialog in
  * various ways. 
@@ -32,7 +35,8 @@ public class DialogCheck {
 	private DialogCheck() {
 	}
 	private static VerifyDialog _verifyDialog;
-
+
+
 	/**
 	 * Asserts that a given dialog is not null and that it passes
 	 * certain visual tests.  These tests will be verified manually
@@ -60,7 +64,8 @@ public class DialogCheck {
 			assert.assertTrue(_verifyDialog.getFailureText(), false);
 		}
 	}
-
+
+
 	/**
 	 * Automated test that checks all the labels and buttons of a dialog
 	 * to make sure there is enough room to display all the text.  Any
@@ -78,7 +83,8 @@ public class DialogCheck {
 		verifyCompositeText(shell, assert);
 		dialog.close();
 	}
-
+
+
 	/**
 	 * This method should be called when creating dialogs to test.  This
 	 * ensures that the dialog's parent shell will be that of the
@@ -98,7 +104,8 @@ public class DialogCheck {
 		_verifyDialog.create();
 		return _verifyDialog.getShell();
 	}
-
+
+
 	/*
 	 * Looks at all the child widgets of a given composite and
 	 * verifies the text on all labels and widgets.
@@ -135,7 +142,8 @@ public class DialogCheck {
 	private static void verifyButtonText(Button button, Assert assert) {
 		String widget = button.toString();
 		Point size = button.getSize();
-
+
+
 		//compute the size with no line wrapping
 		Point preferred = button.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		//if (size.y/preferred.y) == X, then label spans X lines, so divide
@@ -146,7 +154,8 @@ public class DialogCheck {
 				preferred.x /= (size.y / preferred.y);
 			}
 		}
-
+
+
 		String message =
 			new StringBuffer("Warning: ")
 				.append(widget)
@@ -170,7 +179,8 @@ public class DialogCheck {
 	private static void verifyLabelText(Label label, Assert assert) {
 		String widget = label.toString();
 		Point size = label.getSize();
-
+
+
 		//compute the size with no line wrapping
 		Point preferred = label.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		//if (size.y/preferred.y) == X, then label spans X lines, so divide

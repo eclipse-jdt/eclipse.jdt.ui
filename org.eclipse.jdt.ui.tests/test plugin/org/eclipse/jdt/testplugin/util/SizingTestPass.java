@@ -1,19 +1,22 @@
 package org.eclipse.jdt.testplugin.util;
-
+
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
  
 import java.util.ArrayList;
-
+
+
 /*
  * This test pass verifies visually the sizing of the dialog and its
  * widgets.
  */
 class SizingTestPass implements IDialogTestPass {
 	private static final int CHECKLIST_SIZE = 5;
-
+
+
 	/**
 	 * @see IDialogTestPass#title()
 	 */

@@ -1,7 +1,9 @@
 package org.eclipse.jdt.testplugin.util;
-
+
+
 import java.util.ArrayList;
-
+
+
 /*
  * Interface to describe a visual test pass for a dialog test.
  */
@@ -42,4 +44,5 @@ public interface IDialogTestPass {
 	 */
 	public int getID();
 }
-
+
+

@@ -1,7 +1,9 @@
 package org.eclipse.jdt.testplugin.util;
-
+
+
 import java.util.Iterator;
-
+
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -19,7 +21,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-
+
+
 /*
  * This dialog is intended to verify a dialogs in a testing
  * environment.  The tester can test for sizing, initial focus,
@@ -33,7 +36,8 @@ public class VerifyDialog extends TitleAreaDialog {
 	public static final int TEST_FOCUS  = 1;
 	public static final int TEST_ACCESS = 2;
 	private IDialogTestPass _dialogTests[] = new IDialogTestPass[3];
-
+
+
 	private Dialog _testDialog; //the dialog to test
 	private Point  _testDialogSize;
 	
@@ -92,7 +96,8 @@ public class VerifyDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent) {
 		// top level composite
 		Composite parentComposite = (Composite)super.createDialogArea(parent);
-
+
+
 		// create a composite with standard margins and spacing
 		Composite composite = new Composite(parentComposite, SWT.NONE);
 		composite.setSize(SIZING_WIDTH, SWT.DEFAULT);
@@ -103,10 +108,12 @@ public class VerifyDialog extends TitleAreaDialog {
 		layout.horizontalSpacing = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-
+
+
 		createTestSelectionGroup(composite);
 		createCheckListGroup(composite);
-
+
+
 		_queryLabel = new Label(composite, SWT.NONE);
 		_queryLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
@@ -294,4 +301,5 @@ public class VerifyDialog extends TitleAreaDialog {
 		handleFailure();
 	}
 }
-
+
+
