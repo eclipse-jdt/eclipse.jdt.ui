@@ -1,7 +1,6 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -322,11 +321,11 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
 		String label;
 		if (selection.size() == 1){
-			String pattern= ReorgMessages.getString("DeleteSourceReferencesAction.sure"); //$NON-NLS-1$
-			label= MessageFormat.format(pattern, new String[]{ReorgUtils.getName(selection.getFirstElement())});
+			String[] keys= {ReorgUtils.getName(selection.getFirstElement())};
+			label= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.sure", keys); //$NON-NLS-1$
 		} else {
-			String pattern= ReorgMessages.getString("DeleteSourceReferencesAction.sure_elements"); //$NON-NLS-1$
-			label= MessageFormat.format(pattern, new String[]{String.valueOf(selection.size())});
+			String[] keys= {String.valueOf(selection.size())};
+			label= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.sure_elements", keys); //$NON-NLS-1$
 		}
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, label);
 	}

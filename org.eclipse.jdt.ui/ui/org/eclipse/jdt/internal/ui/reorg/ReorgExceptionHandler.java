@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -78,7 +76,7 @@ class ReorgExceptionHandler implements IReorgExceptionHandler{
 				shell,
 				ReorgMessages.getString("ReorgExceptionHandler.error.title"), //$NON-NLS-1$
 				null,
-				MessageFormat.format(ReorgMessages.getString("ReorgExceptionHandler.error.message"), new Object[] {name}),	 //$NON-NLS-1$
+				ReorgMessages.getFormattedString("ReorgExceptionHandler.error.message", new String[] {name}),	 //$NON-NLS-1$
 				MessageDialog.QUESTION,
 				new String[] {
 					IDialogConstants.YES_LABEL,

@@ -1,7 +1,5 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -49,22 +47,22 @@ public class CopyQueries implements ICopyQueries {
 	}
 
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu) {
-		String key= ReorgMessages.getString("CopyQueries.enterNewNameQuestion"); //$NON-NLS-1$
-		String message= MessageFormat.format(key, new String[]{removeTrailingJava(cu.getElementName())});
+		String[] keys= {removeTrailingJava(cu.getElementName())};
+		String message= ReorgMessages.getFormattedString("CopyQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
 		return createStaticQuery(createCompilationUnitNameValidator(cu), message, removeTrailingJava(cu.getElementName()));
 	}
 
 
 	public INewNameQuery createNewResourceNameQuery(IResource res) {
-		String key= ReorgMessages.getString("CopyQueries.enterNewNameQuestion"); //$NON-NLS-1$
-		String message= MessageFormat.format(key, new String[]{ res.getName()});
+		String[] keys= {res.getName()};
+		String message= ReorgMessages.getFormattedString("CopyQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
 		return createStaticQuery(createResourceNameValidator(res), message, res.getName());
 	}
 
 
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack) {
-		String key= ReorgMessages.getString("CopyQueries.enterNewNameQuestion"); //$NON-NLS-1$
-		String message= MessageFormat.format(key, new String[]{pack.getElementName()});
+		String[] keys= {pack.getElementName()};
+		String message= ReorgMessages.getFormattedString("CopyQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
 		return createStaticQuery(createPackageNameValidator(pack), message, pack.getElementName());
 	}
 
@@ -209,8 +207,8 @@ public class CopyQueries implements ICopyQueries {
 						IDialogConstants.NO_TO_ALL_ID,
 						IDialogConstants.CANCEL_ID};
  
-					String message= MessageFormat.format(	ReorgMessages.getString("CopyQueries.deep_copy"), //$NON-NLS-1$
-						new Object[] {source.getFullPath().makeRelative()});
+					String message= ReorgMessages.getFormattedString("CopyQueries.deep_copy", //$NON-NLS-1$
+						new String[] {source.getFullPath().makeRelative().toString()});
 					MessageDialog dialog= new MessageDialog(
 						parentShell, 
 						ReorgMessages.getString("CopyQueries.Linked_Resource"), //$NON-NLS-1$
