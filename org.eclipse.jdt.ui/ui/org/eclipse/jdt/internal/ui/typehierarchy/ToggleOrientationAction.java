@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class ToggleOrientationAction extends Action {
 
 	private TypeHierarchyViewPart fView;	
-	private int fOrientation;
+	private int fActionOrientation;
 	
 	public ToggleOrientationAction(TypeHierarchyViewPart v, int orientation) {
 		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
@@ -38,6 +38,11 @@ public class ToggleOrientationAction extends Action {
 			setDescription(TypeHierarchyMessages.getString("ToggleOrientationAction.vertical.description")); //$NON-NLS-1$
 			setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.vertical.tooltip")); //$NON-NLS-1$	
 			JavaPluginImages.setLocalImageDescriptors(this, "th_vertical.gif"); //$NON-NLS-1$
+		} else if (orientation == TypeHierarchyViewPart.VIEW_ORIENTATION_AUTOMATIC) {
+			setText(TypeHierarchyMessages.getString("ToggleOrientationAction.automatic.label")); //$NON-NLS-1$
+			setDescription(TypeHierarchyMessages.getString("ToggleOrientationAction.automatic.description")); //$NON-NLS-1$
+			setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.automatic.tooltip")); //$NON-NLS-1$	
+			JavaPluginImages.setLocalImageDescriptors(this, "th_automatic.gif"); //$NON-NLS-1$
 		} else if (orientation == TypeHierarchyViewPart.VIEW_ORIENTATION_SINGLE) {
 			setText(TypeHierarchyMessages.getString("ToggleOrientationAction.single.label")); //$NON-NLS-1$
 			setDescription(TypeHierarchyMessages.getString("ToggleOrientationAction.single.description")); //$NON-NLS-1$
@@ -47,19 +52,22 @@ public class ToggleOrientationAction extends Action {
 			Assert.isTrue(false);
 		}
 		fView= v;
-		fOrientation= orientation;
+		fActionOrientation= orientation;
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_ORIENTATION_ACTION);
 	}
 	
 	public int getOrientation() {
-		return fOrientation;
+		return fActionOrientation;
 	}	
 	
 	/*
 	 * @see Action#actionPerformed
 	 */		
 	public void run() {
-		fView.setOrientation(fOrientation); // will toggle the checked state
+		if (isChecked()) {
+			fView.fOrientation= fActionOrientation; 
+			fView.computeOrientation();
+		}
 	}
 	
 }

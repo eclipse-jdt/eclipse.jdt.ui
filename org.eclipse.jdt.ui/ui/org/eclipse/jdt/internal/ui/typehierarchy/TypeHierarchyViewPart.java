@@ -13,13 +13,70 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
+import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
+import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
+import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.CCPActionGroup;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.IBasicPropertyConstants;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
@@ -42,29 +99,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.ToolBar;
-
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.IBasicPropertyConstants;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.Viewer;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
@@ -86,47 +120,6 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.actions.CCPActionGroup;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
-import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
-import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
-import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
-import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
-
 /**
  * view showing the super types/sub types of its input.
  */
@@ -139,6 +132,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	public static final int VIEW_ORIENTATION_VERTICAL= 0;
 	public static final int VIEW_ORIENTATION_HORIZONTAL= 1;
 	public static final int VIEW_ORIENTATION_SINGLE= 2;
+	public static final int VIEW_ORIENTATION_AUTOMATIC= 3;
 	
 	private static final String DIALOGSTORE_HIERARCHYVIEW= "TypeHierarchyViewPart.hierarchyview";	 //$NON-NLS-1$
 	private static final String DIALOGSTORE_VIEWORIENTATION= "TypeHierarchyViewPart.orientation";	 //$NON-NLS-1$
@@ -174,6 +168,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private IPartListener2 fPartListener;
 
 	private int fCurrentOrientation;
+	int fOrientation= VIEW_ORIENTATION_AUTOMATIC;
 	private boolean fLinkingEnabled;
 	private boolean fSelectInEditor;
 	
@@ -258,6 +253,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fToggleOrientationActions= new ToggleOrientationAction[] {
 			new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
 			new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
+			new ToggleOrientationAction(this, VIEW_ORIENTATION_AUTOMATIC),
 			new ToggleOrientationAction(this, VIEW_ORIENTATION_SINGLE)
 		};
 			
@@ -764,19 +760,18 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		fPagebook.showPage(fNoHierarchyShownLabel);
 
-		int orientation;
 		try {
-			orientation= fDialogSettings.getInt(DIALOGSTORE_VIEWORIENTATION);
-			if (orientation < 0 || orientation > 2) {
-				orientation= VIEW_ORIENTATION_VERTICAL;
+			fOrientation= fDialogSettings.getInt(DIALOGSTORE_VIEWORIENTATION);
+			if (fOrientation < 0 || fOrientation > 3) {
+				fOrientation= VIEW_ORIENTATION_VERTICAL;
 			}
 		} catch (NumberFormatException e) {
-			orientation= VIEW_ORIENTATION_VERTICAL;
+			fOrientation= VIEW_ORIENTATION_AUTOMATIC;
 		}
 		// force the update
 		fCurrentOrientation= -1;
 		// will fill the main tool bar
-		setOrientation(orientation);
+		setOrientation(fOrientation);
 		
 		if (fMemento != null) { // restore state before creating action
 			restoreLinkingEnabled(fMemento);
@@ -862,17 +857,26 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			public void controlMoved(ControlEvent e) {
 			}
 			public void controlResized(ControlEvent e) {
-				if (fCurrentOrientation == VIEW_ORIENTATION_SINGLE)
-					return;
-				Point size= fParent.getSize();
-				if (size.x != 0 && size.y != 0) {
-					if (size.x > size.y) 
-						setOrientation(VIEW_ORIENTATION_HORIZONTAL);
-					else 
-						setOrientation(VIEW_ORIENTATION_VERTICAL);
-				}
+				computeOrientation();
 			}
 		});
+	}
+
+	void computeOrientation() {
+		if (fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
+			setOrientation(fOrientation);
+		}
+		else {
+			if (fCurrentOrientation == VIEW_ORIENTATION_SINGLE)
+				return;
+			Point size= fParent.getSize();
+			if (size.x != 0 && size.y != 0) {
+				if (size.x > size.y) 
+					setOrientation(VIEW_ORIENTATION_HORIZONTAL);
+				else 
+					setOrientation(VIEW_ORIENTATION_VERTICAL);
+			}
+		}
 	}
 
 	/**
@@ -881,6 +885,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */	
 	public void setOrientation(int orientation) {
 		if (fCurrentOrientation != orientation) {
+			fCurrentOrientation= orientation;
 			boolean methodViewerNeedsUpdate= false;
 			
 			if (fMethodViewerViewForm != null && !fMethodViewerViewForm.isDisposed()
@@ -900,9 +905,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				updateMainToolbar(orientation);
 				fTypeMethodsSplitter.layout();
 			}
-			for (int i= 0; i < fToggleOrientationActions.length; i++) {
-				fToggleOrientationActions[i].setChecked(orientation == fToggleOrientationActions[i].getOrientation());
-			}
+			updateCheckedState();
 			fCurrentOrientation= orientation;
 			if (methodViewerNeedsUpdate) {
 				updateMethodViewer(fSelectedType);
@@ -912,6 +915,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 		
+	private void updateCheckedState() {
+		for (int i= 0; i < fToggleOrientationActions.length; i++) {
+			fToggleOrientationActions[i].setChecked(fOrientation == fToggleOrientationActions[i].getOrientation());
+		}
+	}
+
 	private void updateMainToolbar(int orientation) {
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager tbmanager= actionBars.getToolBarManager();	
@@ -1370,7 +1379,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			memento.putString(TAG_INPUT, handleIndentifier);
 		}		
 		memento.putInteger(TAG_VIEW, getViewIndex());
-		memento.putInteger(TAG_ORIENTATION, fCurrentOrientation);	
+		memento.putInteger(TAG_ORIENTATION, fOrientation);	
 		int weigths[]= fTypeMethodsSplitter.getWeights();
 		int ratio= (weigths[0] * 1000) / (weigths[0] + weigths[1]);
 		memento.putInteger(TAG_RATIO, ratio);
@@ -1462,8 +1471,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		Integer orientation= memento.getInteger(TAG_ORIENTATION);
 		if (orientation != null) {
-			setOrientation(orientation.intValue());
+			fOrientation= orientation.intValue();
 		}
+		computeOrientation();
+		updateCheckedState();
+
 		Integer ratio= memento.getInteger(TAG_RATIO);
 		if (ratio != null) {
 			fTypeMethodsSplitter.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue() });
