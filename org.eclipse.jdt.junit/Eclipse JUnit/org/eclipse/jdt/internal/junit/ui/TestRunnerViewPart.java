@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.junit.runner.*;
  * A ViewPart that shows the results of a test run.
  * It listens for the test results.
  */
-public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IRunViewContext {
+public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 
 	public static final String NAME= "org.eclipse.jdt.junit.viewpart";
 
@@ -430,7 +430,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IR
 		GridData gridData= new GridData();
 		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL));
 
-		fFailureRunView= new FailureRunView(tabFolder, this);
+		fFailureRunView= new FailureRunView(tabFolder, this); 
 		fTestHierarchyRunView= new HierarchyRunView(tabFolder, this);
 		fHierarchyTree= ((HierarchyRunView) fTestHierarchyRunView).getTree();
 		gridData= new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);

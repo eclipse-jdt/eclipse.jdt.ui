@@ -35,14 +35,14 @@ import org.eclipse.jface.action.MenuManager;
  */
 class FailureRunView implements ITestRunView {
 	private Table fTable;
-	private IRunViewContext fRunViewContext;
+	private TestRunnerViewPart fRunViewContext;
 	private boolean fPressed= false;
-	private static final String fgName= "Failures/Errors";
+	private static final String fgName= "Failures";
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("icons/error.gif", getClass());
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("icons/failure.gif", getClass());
 	
-	public FailureRunView(CTabFolder tabFolder, IRunViewContext context) {
+	public FailureRunView(CTabFolder tabFolder, TestRunnerViewPart context) {
 		fRunViewContext= context;
 		
 		CTabItem failureTab= new CTabItem(tabFolder, SWT.NONE);

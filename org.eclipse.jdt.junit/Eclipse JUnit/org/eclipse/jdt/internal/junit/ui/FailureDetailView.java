@@ -33,6 +33,7 @@ class FailureDetailView {
 	public FailureDetailView(Composite parent, TestRunnerViewPart testRunner) {
 		fDetailView= new Table(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		fTestRunner= testRunner;
+		
 		fDetailView.addMouseListener(new MouseAdapter() {
 			public void mouseDoubleClick(MouseEvent e){
 				if(fDetailView.getSelection().length != 0)

@@ -73,7 +73,7 @@ class HierarchyRunView implements ITestRunView {
 	}	
 	
 	protected Composite fTestTreePanel;
-	protected IRunViewContext fRunViewContext;
+	protected TestRunnerViewPart fRunViewContext;
 	private String fProjectName;
 	private String fTestName;
 	private static final String fgName= "Test Hierarchy";

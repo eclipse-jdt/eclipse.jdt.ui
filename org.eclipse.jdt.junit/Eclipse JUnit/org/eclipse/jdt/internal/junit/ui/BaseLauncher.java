@@ -149,6 +149,7 @@ public abstract class BaseLauncher implements ILauncherDelegate {
 		} catch (PartInitException e) {
 			throw new InvocationTargetException(e);
 		}
+		// TODO revisit this tangled interaction
 		testRunner.startTestRunListening(testType, port, this);	
 		return true;
 	}
