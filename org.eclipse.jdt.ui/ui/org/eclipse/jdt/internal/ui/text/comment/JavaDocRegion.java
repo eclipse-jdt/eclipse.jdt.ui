@@ -54,9 +54,6 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	/** Should source code regions be formatted? */
 	private final boolean fFormatSource;
 	
-	/** Should the rest of the formatting be skipped? */
-	private boolean fSkipFormatting= false;
-
  	/**
  	 * Creates a new Javadoc region.
  	 * 
@@ -107,55 +104,52 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	 * @inheritDoc
  	 */
 	protected final void formatRegion(final String indentation, final int width) {
+	
+		super.formatRegion(indentation, width);
 		
-		if (!fSkipFormatting) {
+		if (fFormatSource) {
 			
-			super.formatRegion(indentation, width);
-			
-			if (fFormatSource) {
+			try {
 				
-				try {
+				if (fCodePositions.size() > 0) {
 					
-					if (fCodePositions.size() > 0) {
+					int begin= 0;
+					int end= 0;
+					
+					Position position= null;
+					
+					final IDocument document= getDocument();
+					
+					for (int index= fCodePositions.size() - 1; index >= 0;) {
 						
-						int begin= 0;
-						int end= 0;
+						position= (Position)fCodePositions.get(index--);
+						begin= position.getOffset();
 						
-						Position position= null;
-						
-						final IDocument document= getDocument();
-						
-						for (int index= fCodePositions.size() - 1; index >= 0;) {
-							
+						if (index >= 0) {
 							position= (Position)fCodePositions.get(index--);
-							begin= position.getOffset();
-							
-							if (index >= 0) {
-								position= (Position)fCodePositions.get(index--);
-								end= position.getOffset();
-							} else {
-								/* 
-								 * Handle missing closing tag
-								 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=57011
-								 */
-								position= null;
-								end= getOffset() + getLength() - MultiCommentLine.MULTI_COMMENT_END_PREFIX.trim().length();
-								while (end > begin && Character.isWhitespace(document.getChar(end - 1)))
-									end--;
-							}
-							
-							String snippet= document.get(begin, end - begin);
-							snippet= preprocessCodeSnippet(snippet);
-							snippet= formatCodeSnippet(snippet);
-							snippet= postprocessCodeSnippet(snippet, indentation);
-							
-							logEdit(snippet, begin - getOffset(), end - begin);
+							end= position.getOffset();
+						} else {
+							/* 
+							 * Handle missing closing tag
+							 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=57011
+							 */
+							position= null;
+							end= getOffset() + getLength() - MultiCommentLine.MULTI_COMMENT_END_PREFIX.trim().length();
+							while (end > begin && Character.isWhitespace(document.getChar(end - 1)))
+								end--;
 						}
+						
+						String snippet= document.get(begin, end - begin);
+						snippet= preprocessCodeSnippet(snippet);
+						snippet= formatCodeSnippet(snippet);
+						snippet= postprocessCodeSnippet(snippet, indentation);
+						
+						logEdit(snippet, begin - getOffset(), end - begin);
 					}
-				} catch (BadLocationException e) {
-					// Can not happen
-					JavaPlugin.log(e);
 				}
+			} catch (BadLocationException e) {
+				// Can not happen
+				JavaPlugin.log(e);
 			}
 		}
 	}
@@ -271,10 +265,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	protected final void markJavadocTag(final CommentRange range, final String token) {
 
 		range.markPrefixTag(JAVADOC_PARAM_TAGS, COMMENT_TAG_PREFIX, token, COMMENT_PARAMETER);
-		range.markPrefixTag(JAVADOC_ROOT_TAGS, COMMENT_TAG_PREFIX, token, COMMENT_ROOT);
 
-		if (token.charAt(0) == JAVADOC_TAG_PREFIX && !range.hasAttribute(COMMENT_PARAMETER) && !range.hasAttribute(COMMENT_ROOT))
-			fSkipFormatting= true;
+		if (token.charAt(0) == JAVADOC_TAG_PREFIX && !range.hasAttribute(COMMENT_PARAMETER))
+			range.setAttribute(COMMENT_ROOT);
 	}
 
 	/**
@@ -309,15 +302,6 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	protected final void wrapRegion(final int width) {
-		
-		if (!fSkipFormatting)
-			super.wrapRegion(width);
-	}
-	
 	/**
 	 * @inheritDoc
 	 */
