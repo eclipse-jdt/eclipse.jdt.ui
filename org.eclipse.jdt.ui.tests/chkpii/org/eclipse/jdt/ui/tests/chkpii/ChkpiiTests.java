@@ -16,12 +16,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import org.eclipse.osgi.service.environment.Constants;
+import java.net.URL;
+import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.boot.BootLoader;
+import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.osgi.service.environment.Constants;
 
 public class ChkpiiTests extends TestCase {
 	
@@ -132,8 +134,21 @@ public class ChkpiiTests extends TestCase {
 	}
 
 
-	private String getUserDirectory() {
-		return System.getProperty("user.dir") + File.separator; //$NON-NLS-1$
+	private String getPluginDirectory() {
+		
+		// Get some path inside a plug-in
+		String filePath= toLocation(getClass().getResource("ignoreFiles.txt"));
+
+		StringTokenizer tokenizer= new StringTokenizer(filePath, File.pathSeparator);
+		String path= tokenizer.nextToken();
+		while (tokenizer.hasMoreTokens()) {
+			String token= tokenizer.nextToken();
+			if (token.equals("bin"))
+				break;
+			
+			path= path + File.pathSeparator + token; 
+		}
+		return path + File.pathSeparator;
 	}
 
 	/**
@@ -144,9 +159,7 @@ public class ChkpiiTests extends TestCase {
 	 */
 	private String getFilesToTest(int type) {
 			
-		String sniffFolder=	getUserDirectory() + ".." + File.separator; //$NON-NLS-1$
-
-		String aString= sniffFolder;
+		String aString= getPluginDirectory();
 			
 		switch (type) {
 			case HTML :
@@ -162,14 +175,29 @@ public class ChkpiiTests extends TestCase {
 		}
 	}
 	
+	private String toLocation(URL platformURL) {
+		File localFile;
+		try {
+			localFile= new File(Platform.asLocalURL(platformURL).getFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return platformURL.getFile();
+		}
+		try {
+			return localFile.getCanonicalPath();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return localFile.getPath();
+		}
+	}
+	
 	/**
 	 * Method getExcludeFiles.
 	 * 
 	 * @return String
 	 */
 	private String getExcludeFile() {
-		String aString= getUserDirectory() + "chkpii" + File.separator + "ignoreFiles.txt";  //$NON-NLS-1$//$NON-NLS-2$
-		return new File(aString).getPath();
+		return toLocation(getClass().getResource("ignoreFiles.txt"));
 	}
 	
 	/**
@@ -212,13 +240,12 @@ public class ChkpiiTests extends TestCase {
 		
 		String fileName;
 		
-		if (BootLoader.getOS().equals(Constants.OS_WIN32))
+		if (Platform.getOS().equals(Constants.OS_WIN32))
 			fileName= "ignoreErrorsWindows.txt"; //$NON-NLS-1$
 		else
 			fileName= "ignoreErrorsUnix.txt"; //$NON-NLS-1$
 		
-		String aString= getUserDirectory() + "chkpii" + File.separator + fileName; //$NON-NLS-1$
-		return new File(aString).getPath();
+		return toLocation(getClass().getResource(fileName));
 	}
 		
 	/**
@@ -260,13 +287,8 @@ public class ChkpiiTests extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
-		fLogDirectoryName= getUserDirectory() + ".." + File.separator + "chkpiiResults" + File.separator; //$NON-NLS-1$ //$NON-NLS-2$
-		try {
-			fLogDirectoryName= new File(fLogDirectoryName).getCanonicalPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-			fLogDirectoryName= new File(fLogDirectoryName).getPath();
-		}
+
+		fLogDirectoryName= getPluginDirectory() + "chkpiiResults" + File.separator; //$NON-NLS-1$ //$NON-NLS-2$
 
 		new File(fLogDirectoryName).mkdirs();
 
