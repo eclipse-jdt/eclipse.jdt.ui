@@ -426,6 +426,12 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		StringBuffer buff= new StringBuffer();
 		switch (sig.charAt(0)) {
 			case 'B' :
+				buff.append(" (0x");
+				int intVal = Integer.parseInt(value.getValueString());
+				intVal = intVal & 0xFF;
+				buff.append(Integer.toHexString(intVal));
+				buff.append(')');
+				break;
 			case 'I' :
 			case 'S' :
 				buff.append(" (0x");
