@@ -284,7 +284,9 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 			main= createExpandableList(contents);
 		else
 			main= createTabSection(contents);
-		main.setLayoutData(new GridData(GridData.FILL_BOTH));
+		GridData gridData= new GridData(GridData.FILL_BOTH);
+		gridData.heightHint= 400;
+		main.setLayoutData(gridData);
 		
 		initialize();
 		applyDialogFont(contents);

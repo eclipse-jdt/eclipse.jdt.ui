@@ -17,6 +17,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -71,30 +72,54 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 	 * @return the control for the preference page
 	 */
 	public Control createControl(Composite parent) {
-		SectionManager manager= new SectionManager(JavaPlugin.getDefault().getPreferenceStore(), "smart_typing_preference_dialog_last_open_section"); //$NON-NLS-1$
-		Composite control= manager.createSectionComposite(parent);
+		boolean useCollapsibleSections= false;
+		
+		SectionManager manager;
+		Composite control;
+		if (useCollapsibleSections) {
+			manager= new SectionManager(JavaPlugin.getDefault().getPreferenceStore(), "smart_typing_preference_dialog_last_open_section"); //$NON-NLS-1$
+			control= manager.createSectionComposite(parent);
+		} else {
+			manager= null;
+			control= new Composite(parent, SWT.NONE);
+			GridLayout layout= new GridLayout();
+			layout.numColumns= 1;
+			control.setLayout(layout);
+		}
 
 		Composite composite;
-
-		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.autoclose.title")); //$NON-NLS-1$
+		
+		composite= createSubsection(control, manager, PreferencesMessages.getString("SmartTypingConfigurationBlock.autoclose.title")); //$NON-NLS-1$
 		addAutoclosingSection(composite);
 		
-		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.automove.title")); //$NON-NLS-1$
+		composite= createSubsection(control, manager, PreferencesMessages.getString("SmartTypingConfigurationBlock.automove.title")); //$NON-NLS-1$
 		addAutopositionSection(composite);
 		
-		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.tabs.title")); //$NON-NLS-1$
+		composite= createSubsection(control, manager, PreferencesMessages.getString("SmartTypingConfigurationBlock.tabs.title")); //$NON-NLS-1$
 		addTabSection(composite);
 
-		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.pasting.title")); //$NON-NLS-1$
+		composite= createSubsection(control, manager, PreferencesMessages.getString("SmartTypingConfigurationBlock.pasting.title")); //$NON-NLS-1$
 		addPasteSection(composite);
 		
-		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.strings.title")); //$NON-NLS-1$
+		composite= createSubsection(control, manager, PreferencesMessages.getString("SmartTypingConfigurationBlock.strings.title")); //$NON-NLS-1$
 		addStringsSection(composite);
 		
-		composite= manager.createSection(PreferencesMessages.getString("SmartTypingConfigurationBlock.other.title")); //$NON-NLS-1$
+		composite= createSubsection(control, manager, PreferencesMessages.getString("SmartTypingConfigurationBlock.other.title")); //$NON-NLS-1$
 		addOthersSection(composite);
 		
 		return control;
+	}
+
+	private Composite createSubsection(Composite parent, SectionManager manager, String label) {
+		if (manager != null) {
+			return manager.createSection(label);
+		} else {
+			Group group= new Group(parent, SWT.SHADOW_NONE);
+			group.setText(label);
+			GridData data= new GridData(SWT.FILL, SWT.CENTER, true, false);
+			group.setLayoutData(data);
+			return group;
+		}
 	}
 	
 	private void addOthersSection(Composite composite) {
