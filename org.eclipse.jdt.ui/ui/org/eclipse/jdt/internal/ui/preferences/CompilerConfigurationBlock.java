@@ -75,7 +75,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_INDIRECT_STATIC_ACCESS= JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS;
 	private static final String PREF_PB_SUPERFLUOUS_SEMICOLON= JavaCore.COMPILER_PB_SUPERFLUOUS_SEMICOLON;
 	private static final String PREF_PB_UNNECESSARY_TYPE_CHECK= JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK;
-
+	private static final String PREF_PB_INVALID_ANNOTATION= JavaCore.COMPILER_PB_INVALID_ANNOTATION;
+	private static final String PREF_PB_MISSING_ANNOTATION= "org.eclipse.jdt.core.compiler.problem.missingAnnotation"; //$NON-NLS-1$
+	
 
 	private static final String PREF_SOURCE_COMPATIBILITY= JavaCore.COMPILER_SOURCE;
 	private static final String PREF_COMPLIANCE= JavaCore.COMPILER_COMPLIANCE;
@@ -154,8 +156,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_PB_INDIRECT_STATIC_ACCESS,
 		PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
 		PREF_PB_UNNECESSARY_TYPE_CHECK, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, PREF_PB_UNQUALIFIED_FIELD_ACCESS,
-		PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING
-		
+		PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, PREF_PB_INVALID_ANNOTATION,
+		PREF_PB_MISSING_ANNOTATION
 	};	
 	
 	protected String[] getAllKeys() {
@@ -226,6 +228,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
 		};
 
+		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
+		
 		int nColumns= 3;
 		
 		GridLayout layout= new GridLayout();
@@ -268,6 +272,13 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_undocumented_empty_block.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_javadoc.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_INVALID_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
+		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_missing_javadoc.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_MISSING_ANNOTATION, enabledDisabled, indent);
+		
 		return composite;
 	}
 
@@ -321,7 +332,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unqualified_field_access.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_UNQUALIFIED_FIELD_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-		
 		
 		gd= new GridData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(6);
