@@ -80,6 +80,10 @@ public class Binding2JavaModel {
 	public static IType find(ITypeBinding type, IJavaProject scope) throws JavaModelException {
 		if (type.isPrimitive())
 			return null;
+		if (type.isNullType())
+			return null;
+		if (type.isArray())
+			return find(type.getElementType(), scope);
 		String[] typeElements= Bindings.getNameComponents(type);
 		IJavaElement element= scope.findElement(getPathToCompilationUnit(type.getPackage(), typeElements[0]));
 		IType candidate= null;
