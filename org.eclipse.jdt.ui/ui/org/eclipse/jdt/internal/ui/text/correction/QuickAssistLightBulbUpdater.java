@@ -64,12 +64,12 @@ public class QuickAssistLightBulbUpdater {
 		private static final int LAYER;
 		
 		static {
-			Annotation annotation= new Annotation("org.eclipse.jdt.ui.error", false, null); //$NON-NLS-1$
+			Annotation annotation= new Annotation("org.eclipse.jdt.ui.warning", false, null); //$NON-NLS-1$
 			AnnotationPreference preference= EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
 			if (preference != null)
-				LAYER= preference.getPresentationLayer() + 1;
+				LAYER= preference.getPresentationLayer() - 1;
 			else
-				LAYER= IAnnotationAccessExtension.DEFAULT_LAYER + 1;
+				LAYER= IAnnotationAccessExtension.DEFAULT_LAYER;
 			
 		}
 		
