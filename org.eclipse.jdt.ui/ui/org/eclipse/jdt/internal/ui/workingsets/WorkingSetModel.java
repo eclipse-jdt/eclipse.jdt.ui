@@ -213,11 +213,6 @@ public class WorkingSetModel {
 		addListenersToWorkingSetManagers();
     	fActiveWorkingSets= new ArrayList(2);
     	
-		IWorkingSet history= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.getString("WorkingSetModel.histroy.name"), new IAdaptable[0]); //$NON-NLS-1$
-    	history.setId(HistoryWorkingSetUpdater.ID);
-    	fLocalWorkingSetManager.addWorkingSet(history);
-    	fActiveWorkingSets.add(history);
-    	
     	IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.getString("WorkingSetModel.others.name"), new IAdaptable[0]); //$NON-NLS-1$
     	others.setId(OthersWorkingSetUpdater.ID);
     	fLocalWorkingSetManager.addWorkingSet(others);
@@ -293,9 +288,8 @@ public class WorkingSetModel {
     }
     
     public boolean needsConfiguration() {
-    	return !fConfigured && fActiveWorkingSets.size() == 2 &&
-			HistoryWorkingSetUpdater.ID.equals(((IWorkingSet)fActiveWorkingSets.get(0)).getId()) &&
-			OthersWorkingSetUpdater.ID.equals(((IWorkingSet)fActiveWorkingSets.get(1)).getId());
+    	return !fConfigured && fActiveWorkingSets.size() == 1 &&
+			OthersWorkingSetUpdater.ID.equals(((IWorkingSet)fActiveWorkingSets.get(0)).getId());
     }
     
     public void configured() {
@@ -366,6 +360,10 @@ public class WorkingSetModel {
 		fLocalWorkingSetManager= PlatformUI.getWorkbench().createLocalWorkingSetManager();
 		addListenersToWorkingSetManagers();
 		fLocalWorkingSetManager.restoreState(memento.getChild(TAG_LOCAL_WORKING_SET_MANAGER));
+		IWorkingSet history= getHistoryWorkingSet();
+		if (history != null) {
+			fLocalWorkingSetManager.removeWorkingSet(history);
+		}
 		IMemento[] actives= memento.getChildren(TAG_ACTIVE_WORKING_SET);
 		fActiveWorkingSets= new ArrayList(actives.length);
 		for (int i= 0; i < actives.length; i++) {
@@ -428,4 +426,13 @@ public class WorkingSetModel {
     	}
     	return false;
     }
+	
+	private IWorkingSet getHistoryWorkingSet() {
+		IWorkingSet[] workingSets= fLocalWorkingSetManager.getWorkingSets();
+		for (int i= 0; i < workingSets.length; i++) {
+			if (HistoryWorkingSetUpdater.ID.equals(workingSets[i].getId()))
+				return workingSets[i];
+		}
+		return null;
+	}
 }
