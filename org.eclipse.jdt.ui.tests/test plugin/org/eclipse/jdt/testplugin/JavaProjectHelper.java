@@ -39,7 +39,7 @@ import org.eclipse.jdt.launching.LibraryLocation;
  */
 public class JavaProjectHelper {
 	
-	private static final IPath JCL_MAX= new Path("test-resources/jclmax.jar");
+	private static final IPath JCL_MAX= new Path("testresources/jclmax.jar");
 	
 
 	/**

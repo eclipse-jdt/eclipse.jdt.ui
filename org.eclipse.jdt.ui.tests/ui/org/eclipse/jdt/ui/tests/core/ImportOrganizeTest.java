@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -45,7 +46,7 @@ public class ImportOrganizeTest extends TestCase {
 	
 	private IJavaProject fJProject1;
 
-	private static final IPath SOURCES= new Path("test-resources/junit32-noUI.zip");
+	private static final IPath SOURCES= new Path("testresources/junit32-noUI.zip");
 
 	public ImportOrganizeTest(String name) {
 		super(name);
@@ -80,7 +81,7 @@ public class ImportOrganizeTest extends TestCase {
 	
 	private IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
 		return new IChooseImportQuery() {
-			public TypeInfo[] chooseImports(TypeInfo[][] openChoices) {
+			public TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges) {
 				assertTrue(name + "-query-nchoices1", choices.length == openChoices.length);
 				assertTrue(name + "-query-nchoices2", nEntries.length == openChoices.length);
 				if (nEntries != null) {
@@ -149,13 +150,13 @@ public class ImportOrganizeTest extends TestCase {
 			"java.io.FileNotFoundException",
 			"java.io.IOException",
 			"java.io.InputStream",
-			"java.net.URL",
 			"java.util.Enumeration",
 			"java.util.Properties",
 			"java.util.StringTokenizer",
 			"java.util.Vector"		
 		});	
 	}
+	
 	
 	public void test3() throws Exception {
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/util/TestCaseClassLoader.java"));
@@ -169,7 +170,6 @@ public class ImportOrganizeTest extends TestCase {
 		
 		assertImports(cu, new String[] {
 			"java.io.*",
-			"java.net.URL",
 			"java.util.*",	
 		});	
 	}	

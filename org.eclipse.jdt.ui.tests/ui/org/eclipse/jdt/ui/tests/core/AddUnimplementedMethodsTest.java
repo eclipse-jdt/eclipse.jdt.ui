@@ -102,7 +102,7 @@ import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOpera
 		IType testClass= cu.createType("public class Test1 extends A implements B {\n}\n", null, true, null);
 		
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, true);
-		op.execute(new NullProgressMonitor());
+		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "a", "b", "c" }, methods);
@@ -120,7 +120,7 @@ import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOpera
 		IType testClass= cu.createType("public class Test2 extends C implements B {\n}\n", null, true, null);
 		
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, true);
-		op.execute(new NullProgressMonitor());
+		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "d" }, methods);
@@ -137,7 +137,7 @@ import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOpera
 		IType testClass= cu.createType("public class Test3 extends D {\n}\n", null, true, null);
 		
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, true);
-		op.execute(new NullProgressMonitor());
+		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "c", "d" }, methods);
@@ -155,7 +155,7 @@ import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOpera
 		IType testClass= cu.createType("public class Test4 implements B, E {\n}\n", null, true, null);
 		
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, true);
-		op.execute(new NullProgressMonitor());
+		op.run(new NullProgressMonitor());
 		
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "c", "e" }, methods);

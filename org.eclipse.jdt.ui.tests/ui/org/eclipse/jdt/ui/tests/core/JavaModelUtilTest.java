@@ -40,8 +40,8 @@ public class JavaModelUtilTest extends TestCase {
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
 
-	private static final IPath SOURCES= new Path("test-resources/junit32-noUI.zip");
-	private static final IPath LIB= new Path("test-resources/mylib.jar");
+	private static final IPath SOURCES= new Path("testresources/junit32-noUI.zip");
+	private static final IPath LIB= new Path("testresources/mylib.jar");
 
 	public JavaModelUtilTest(String name) {
 		super(name);

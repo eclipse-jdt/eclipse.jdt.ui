@@ -56,11 +56,20 @@ public class NewMain extends Main {
 	public static String getLocationFromProperties(String key) {
 		Properties properties= new Properties();
 		try {
-			FileInputStream fis= new FileInputStream("eclipse-platform.properties");
+			FileInputStream fis= new FileInputStream(getSettingsFile());
 			properties.load(fis);
 			return properties.getProperty(key);
 		} catch (IOException e) {
 		}
 		return null;
-	}		
+	}	
+	
+	private static File getSettingsFile() {
+		String home= System.getProperty("user.home");
+		if (home == null) {
+			System.out.println("Home dir not defined");
+			return null;
+		}
+		return new File(home, "eclipse-workspaces.properties");	
+	}	
 }
