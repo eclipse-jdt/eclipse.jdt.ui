@@ -7,8 +7,11 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 	
 import org.eclipse.core.resources.IFile;
+
 import org.eclipse.ui.part.FileEditorInput;
+
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.JavaCore;
 
 
 /**
@@ -18,9 +21,9 @@ public class ExternalClassFileEditorInput extends FileEditorInput implements ICl
 	
 	private IClassFile fClassFile;
 	
-	ExternalClassFileEditorInput(IFile file, IClassFile classFile) {
+	ExternalClassFileEditorInput(IFile file) {
 		super(file);
-		fClassFile= classFile;
+		refresh();
 	}
 	
 	/*
@@ -28,5 +31,14 @@ public class ExternalClassFileEditorInput extends FileEditorInput implements ICl
 	 */
 	public IClassFile getClassFile() {
 		return fClassFile;
+	}
+	
+	/**
+	 * Refreshs this input element. Workaround for non-updating class file elements.
+	 */
+	public void refresh() {
+		Object element= JavaCore.create(getFile());
+		if (element instanceof IClassFile)
+			fClassFile= (IClassFile) element;
 	}
 }

@@ -8,6 +8,8 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IMenuManager;
 
 import org.eclipse.ui.IEditorInput;
@@ -96,9 +98,9 @@ public class ClassFileEditor extends JavaEditor {
 		
 		if (input instanceof IFileEditorInput) {
 			IFile file= ((IFileEditorInput) input).getFile();
-			Object element= JavaCore.create(file);
-			if (element instanceof IClassFile)
-				input= new ExternalClassFileEditorInput(file, (IClassFile) element);
+			IClassFileEditorInput classFileInput= new ExternalClassFileEditorInput(file);
+			if (classFileInput.getClassFile() != null)
+				input= classFileInput;
 		}
 		
 		if (!(input instanceof IClassFileEditorInput))
@@ -174,5 +176,21 @@ public class ClassFileEditor extends JavaEditor {
 	 */
 	public boolean isEditable() {
 		return false;
+	}
+	
+	/*
+	 * @see AbstractTextEditor#doSetInput(IEditorInput)
+	 */
+	protected void doSetInput(IEditorInput input) throws CoreException {
+		if (input instanceof ExternalClassFileEditorInput) {
+			ExternalClassFileEditorInput classFileInput= (ExternalClassFileEditorInput) input;
+			IFile file= classFileInput.getFile();
+			try {
+				file.refreshLocal(IResource.DEPTH_INFINITE, null);
+			} catch (CoreException x) {
+				JavaPlugin.log(x);
+			}
+		}
+		super.doSetInput(input);
 	}
 }

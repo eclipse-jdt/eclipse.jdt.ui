@@ -34,11 +34,14 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	protected boolean fChangesApplied;
 	
 
-	public ClassFileMarkerAnnotationModel(IResource markerResource, IClassFile classFile) {
+	public ClassFileMarkerAnnotationModel(IResource markerResource) {
 		super();
 		fMarkerResource= markerResource;
+		fWorkspace= fMarkerResource.getWorkspace();
+	}
+	
+	public void setClassFile(IClassFile classFile) {
 		fClassFile= classFile;
-		fWorkspace= classFile.getJavaModel().getWorkspace();
 	}
 	
 	/**

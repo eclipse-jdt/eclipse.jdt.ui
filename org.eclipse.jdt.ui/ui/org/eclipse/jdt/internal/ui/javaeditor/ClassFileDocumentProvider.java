@@ -14,6 +14,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 
@@ -32,7 +33,9 @@ import org.eclipse.jdt.internal.ui.IResourceLocator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
-
+/**
+ * A document provider for class files. Class files can be either inside 
+ */
 public class ClassFileDocumentProvider extends FileDocumentProvider {
 		
 	/**
@@ -71,7 +74,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			JavaCore.removeElementChangedListener(this);
 		}		
 		
-		/**
+		/*
 		 * @see IElementChangedListener#elementChanged
 		 */
 		public void elementChanged(ElementChangedEvent e) {
@@ -87,13 +90,13 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			
 			if ((delta.getKind() & IJavaElementDelta.REMOVED) != 0 || (delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0) { 
 				if (element.equals(input.getJavaProject())) {
-					handleDelete(fInput);
+					handleDeleted(fInput);
 					return true;
 				}
 			}
 			
 			if (((delta.getFlags() & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) && input.equals(element)) {
-				handleDelete(fInput);
+				handleDeleted(fInput);
 				return true;
 			}
 			
@@ -107,6 +110,9 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		}
 	};
 	
+	/**
+	 * Correcting the visibility of <code>FileSynchronizer</code>.
+	 */
 	protected class _FileSynchronizer extends FileSynchronizer {
 		public _FileSynchronizer(IFileEditorInput fileEditorInput) {
 			super(fileEditorInput);
@@ -129,9 +135,37 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			fClassFileSynchronizer= classFileSynchronizer;
 		}
 	};
-		
-	protected IAnnotationModel createClassFileAnnotationModel(IClassFile classFile) throws CoreException {
+	
+	
+	/**
+	 * Creates a new document provider.
+	 */
+	public ClassFileDocumentProvider() {
+		super();
+	}
+	
+	/*
+	 * @see StorageDocumentProvider#setDocumentContent(IDocument, IEditorInput)
+	 */
+	protected boolean setDocumentContent(IDocument document, IEditorInput editorInput) throws CoreException {
+		if (editorInput instanceof IClassFileEditorInput) {
+			IClassFile classFile= ((IClassFileEditorInput) editorInput).getClassFile();
+			document.set(classFile.getSource());
+			return true;
+		}
+		return super.setDocumentContent(document, editorInput);
+	}
+	
+	/**
+	 * Creates an annotation model derrived from the given class file editor input.
+	 * @param the editor input from which to query the annotations
+	 * @return the created annotation model
+	 * @exception CoreException if the editor input could not be accessed
+	 */
+	protected IAnnotationModel createClassFileAnnotationModel(IClassFileEditorInput classFileEditorInput) throws CoreException {
 		IResource resource= null;
+		IClassFile classFile= classFileEditorInput.getClassFile();
+		
 		try {
 			IResourceLocator locator= (IResourceLocator) classFile.getAdapter(IResourceLocator.class);
 			if (locator != null)
@@ -140,17 +174,27 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			// resource will be null
 		}
 		
-		return new ClassFileMarkerAnnotationModel(resource, classFile);
+		ClassFileMarkerAnnotationModel model= new ClassFileMarkerAnnotationModel(resource);
+		model.setClassFile(classFile);
+		return model;
 	}
 	
-	protected IDocument createClassFileDocument(IClassFile classFile) throws CoreException {
+	/**
+	 * Creates a document derriving the content from the given editor input.
+	 * @param the editor input providing the document content
+	 * @return the created document or <code>null</code> if no document could be created
+	 * @exception CoreException if the editor inpur could not be accessed
+	 */
+	protected IDocument createClassFileDocument(IClassFileEditorInput classFileEditorInput) throws CoreException {
 		try {
 			
-			Document document= new Document(classFile.getSource());
-			JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-			IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
-			document.setDocumentPartitioner(partitioner);
-			partitioner.connect(document);
+			IDocument document= createDocument(classFileEditorInput);
+			if (document != null) {
+				JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+				IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
+				document.setDocumentPartitioner(partitioner);
+				partitioner.connect(document);
+			}
 			
 			return document;
 			
@@ -159,32 +203,34 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		}
 	}
 	
-	/**
+	/*
 	 * @see AbstractDocumentProvider#createElementInfo(Object)
 	 */
 	protected ElementInfo createElementInfo(Object element) throws CoreException {
 		
 		if (element instanceof IClassFileEditorInput) {
 			IClassFileEditorInput input = (IClassFileEditorInput) element;
-			IClassFile c= input.getClassFile();
-			IDocument d= createClassFileDocument(c);
-			IAnnotationModel m= createClassFileAnnotationModel(c);
+			IDocument d= createClassFileDocument(input);
+			IAnnotationModel m= createClassFileAnnotationModel(input);
 			
 			if (input instanceof InternalClassFileEditorInput) {
 				ClassFileSynchronizer s= new ClassFileSynchronizer(input);
 				s.install();
 				return new ClassFileInfo(d, m, s);			
 			} else if (element instanceof ExternalClassFileEditorInput) {
-				_FileSynchronizer s= new _FileSynchronizer((ExternalClassFileEditorInput) input);
-				s.install();
-				return new ClassFileInfo(d, m, s);
+				ExternalClassFileEditorInput external= (ExternalClassFileEditorInput) input;
+//				_FileSynchronizer s= new _FileSynchronizer(external);
+//				s.install();
+				ClassFileInfo info= new ClassFileInfo(d, m,  (_FileSynchronizer) null /* s */);
+				info.fModificationStamp= computeModificationStamp(external.getFile());
+				return info;
 			}
 		}
 		
 		return null;
 	}
 	
-	/**
+	/*
 	 * @see FileDocumentProvider#disposeElementInfo(Object, ElementInfo)
 	 */
 	protected void disposeElementInfo(Object element, ElementInfo info) {
@@ -197,13 +243,17 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		super.disposeElementInfo(element, info);
 	}	
 	
-	/**
+	/*
 	 * @see AbstractDocumentProvider#doSaveDocument(IProgressMonitor, Object, IDocument)
 	 */
 	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document) throws CoreException {
 	}
 	
-	protected void handleDelete(IClassFileEditorInput input) {
+	/**
+	 * Handles the deletion of the element underlying the given class file editor input.
+	 * @param input the editor input
+	 */
+	protected void handleDeleted(IClassFileEditorInput input) {
 		fireElementDeleted(input);
 	}
 }
