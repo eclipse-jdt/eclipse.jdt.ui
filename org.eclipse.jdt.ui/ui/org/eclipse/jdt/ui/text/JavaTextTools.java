@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
 
-
 /**
  * Tools required to configure a Java text viewer. 
  * The color manager and all scanner exist only one time, i.e.
@@ -333,25 +332,25 @@ public class JavaTextTools {
 		if (fJavaDocScanner.affectsBehavior(event))
 			fJavaDocScanner.adaptToPreferenceChange(event);
 	}
-	
+
 	/**
-	 * Sets up the given document for the default partitioning.
+	 * Sets up the Java document partitioner for the given document for the default partitioning.
 	 * 
 	 * @param document the document to be set up
 	 * @since 3.0
 	 */
-	public void setupDocument(IDocument document) {
-		setupDocument(document, IDocumentExtension3.DEFAULT_PARTITIONING);
+	public void setupJavaDocumentPartitioner(IDocument document) {
+		setupJavaDocumentPartitioner(document, IDocumentExtension3.DEFAULT_PARTITIONING);
 	}
-	
+
 	/**
-	 * Sets up the given document for the given partitioning.
+	 * Sets up the Java document partitioner for the given document for the given partitioning.
 	 * 
 	 * @param document the document to be set up
 	 * @param partitioning the document partitioning
 	 * @since 3.0
 	 */
-	public void setupDocument(IDocument document, String partitioning) {
+	public void setupJavaDocumentPartitioner(IDocument document, String partitioning) {
 		IDocumentPartitioner partitioner= createDocumentPartitioner();
 		if (document instanceof IDocumentExtension3) {
 			IDocumentExtension3 extension3= (IDocumentExtension3) document;
@@ -360,5 +359,28 @@ public class JavaTextTools {
 			document.setDocumentPartitioner(partitioner);
 		}
 		partitioner.connect(document);
+	}
+	
+	/**
+	 * Sets up the given document for the default partitioning.
+	 * 
+	 * @param document the document to be set up
+	 * @since 3.0
+	 * @deprecated As of 3.0, replaced by {@link #setupJavaDocumentPartitioner(IDocument)}
+	 */
+	public void setupDocument(IDocument document) {
+		setupJavaDocumentPartitioner(document, IDocumentExtension3.DEFAULT_PARTITIONING);
+	}
+	
+	/**
+	 * Sets up the given document for the given partitioning.
+	 * 
+	 * @param document the document to be set up
+	 * @param partitioning the document partitioning
+	 * @since 3.0
+	 * @deprecated As of 3.0, replaced by {@link #setupJavaDocumentPartitioner(IDocument, String)}
+	 */
+	public void setupDocument(IDocument document, String partitioning) {
+		setupJavaDocumentPartitioner(document, partitioning);
 	}
 }
