@@ -91,6 +91,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
@@ -1187,7 +1188,7 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 		private void createSourceViewer(Composite c) {
-			  fSourceViewer= new SourceViewer(c, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+			  fSourceViewer= new JavaSourceViewer(c, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 			  fSourceViewer.configure(new JavaSourceViewerConfiguration(getJavaTextTools(), null));
 			  fSourceViewer.setEditable(false);
 			  fSourceViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
