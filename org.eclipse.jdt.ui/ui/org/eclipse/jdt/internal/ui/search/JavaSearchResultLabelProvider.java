@@ -25,7 +25,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 
 	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
 	public static final int SHOW_CONTAINER_ELEMENT= 2;
-//	public static final int SHOW_RESOURCE= 3;
+	public static final int SHOW_PATH= 3;
 
 	private JavaElementLabelProvider fLabelProvider;
 	private JavaTextLabelProvider fTextLabelProvider;
@@ -38,7 +38,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 
 	public JavaSearchResultLabelProvider() {
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_CONTAINER | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
-		fTextLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_CONTAINER | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION | JavaElementLabelProvider.SHOW_ROOT);
+		fTextLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_CONTAINER | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
 	}	
 
 	public String getText(Object o) {
@@ -67,14 +67,21 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		if (orderFlag == SHOW_ELEMENT_CONTAINER) {
 			fTextLabelProvider.turnOn(JavaElementLabelProvider.SHOW_CONTAINER);
 			fTextLabelProvider.turnOff(JavaTextLabelProvider.SHOW_MEMBER_FULLY_QUALIFIED);
-
 			fTextLabelProvider.turnOn(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION);
+			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_ROOT);
 		}
 		else if (orderFlag == SHOW_CONTAINER_ELEMENT) {
 			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_CONTAINER);
 			fTextLabelProvider.turnOn(JavaTextLabelProvider.SHOW_MEMBER_FULLY_QUALIFIED);
-			
-			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION);			
+			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION);
+			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_ROOT);			
+		}
+		else if (orderFlag == SHOW_PATH) {
+			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_CONTAINER);
+			fTextLabelProvider.turnOn(JavaTextLabelProvider.SHOW_MEMBER_FULLY_QUALIFIED);
+			fTextLabelProvider.turnOff(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION);
+			fTextLabelProvider.turnOn(JavaElementLabelProvider.SHOW_ROOT);
+			fTextLabelProvider.turnOff(JavaTextLabelProvider.SHOW_ROOT_POSTFIX);
 		}
 	}
 

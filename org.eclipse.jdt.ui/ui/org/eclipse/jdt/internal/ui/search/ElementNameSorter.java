@@ -13,9 +13,9 @@ import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.SearchUI;
 
 /**
- * Sorts the search result viewer by the resource path.
+ * Sorts the search result viewer by the Java Element name.
  */
-public class ByElementNameSorter extends ViewerSorter {
+public class ElementNameSorter extends ViewerSorter {
 	
 	private ILabelProvider fLabelProvider;
 
