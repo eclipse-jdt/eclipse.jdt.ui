@@ -39,10 +39,17 @@ import org.eclipse.swt.widgets.Display;
 /**
  * Manages a search cache for types in the workspace. Instead of returning objects of type <code>IType</code>
  * the methods of this class returns a list of the lightweight objects <code>TypeInfo</code>.
+ * <p>
+ * The AllTypesCache supports a synchronous and an asynchronous (background) mode.
+ * In synchronous mode a dirty cache is rebuild as soon as <code>getAllTypes</code> is called.
+ * In asynchronous mode dirtying the cache starts a timer . If the cache is dirty again while
+ * the query runs, the query is aborted and the timer is resetted.
+ * If <code>getAllTypes</code> is called before the background job has finished, getAllTypes waits
+ * for the termination of the 
+ * AllTypesCache tries to automatically switch from synchronous to asynchronous mode when it detects
+ * that the UI event loop is
  */
 public class AllTypesCache {
-	
-	private static final boolean DEBUG= false;
 	
 	private static final int INITIAL_DELAY= 4000;
 	private static final int TIMEOUT= 3000;
@@ -64,56 +71,44 @@ public class AllTypesCache {
 			setPriority(Thread.NORM_PRIORITY-1);
 		}
 		
-		public void start() {
-			if (DEBUG) System.err.println("  start"); //$NON-NLS-1$
-			super.start();
-		}
 		void reset() {
-			if (DEBUG) System.err.println("  reset"); //$NON-NLS-1$
 			fReset= true;
 			interrupt();
 		}
 		
 		public void abort() {
-			if (DEBUG) System.err.println("  abort"); //$NON-NLS-1$
 			fReset= fAbort= true;
 			interrupt();
 		}
 		
 		public void run() {
-			if (DEBUG) System.err.println("  run"); //$NON-NLS-1$
-			while (true) {
+			// we loop until we got a complete result
+			while (!fAbort) {
 				if (fDelay > 0) {
 					try {
 						Thread.sleep(fDelay);
 					} catch (InterruptedException e) {
 						if (fAbort)
-							return;
-						if (DEBUG) System.err.println("  timer restarted"); //$NON-NLS-1$
-						continue;
+							break;
+						continue;	// restart timer
 					}
 				}
-								
+				
 				fReset= false;
-				try {
-					Collection searchResult= doSearchTypes();
-					if (searchResult != null) {
+				Collection searchResult= doSearchTypes();
+				if (searchResult != null) {
+					if (!fAbort && !fReset) {
 						TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
-						Arrays.sort(result, getTypeNameComperator());
-						if (!fAbort && !fReset)
-							setCache(result);
-						if (!fReset)
-							return;
+						Arrays.sort(result, fgTypeNameComparator);
+						setCache(result);
 					}
-					if (fAbort)
-						return;
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
+					if (!fReset)
+						break;
 				}
 			}
 		}
 		
-		private Collection doSearchTypes() throws JavaModelException {
+		private Collection doSearchTypes() {
 
 			final ArrayList typesFound= new ArrayList(fSizeHint);
 			final TypeInfoFactory factory= new TypeInfoFactory();
@@ -121,7 +116,7 @@ public class AllTypesCache {
 			class RequestorAbort extends Error { }
 		
 			ITypeNameRequestor requestor= new ITypeNameRequestor() {
-				public void acceptInterface(char[] packageName, char[] typeName, char[][] enclosingTypeNames,String path) {
+				public void acceptInterface(char[] packageName, char[] typeName, char[][] enclosingTypeNames, String path) {
 					if (fReset)
 						throw new RequestorAbort();
 					typesFound.add(factory.create(packageName, typeName, enclosingTypeNames, true, path));
@@ -133,21 +128,11 @@ public class AllTypesCache {
 				}
 			};
 
-			if (fMonitor == null)
-				fMonitor= new NullProgressMonitor();
 			try {
-				new SearchEngine().searchAllTypeNames(ResourcesPlugin.getWorkspace(),
-					null,
-					null,
-					IJavaSearchConstants.PATTERN_MATCH,
-					IJavaSearchConstants.CASE_INSENSITIVE,
-					IJavaSearchConstants.TYPE,
-					SearchEngine.createWorkspaceScope(),
-					requestor,
-					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-					fMonitor);
+				if (! search(requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, fMonitor))
+					return null;
 			} catch (RequestorAbort e) {
-				if (DEBUG) System.err.println("  **** query cancelled"); //$NON-NLS-1$
+				// query cancelled
 				return null;
 			}
 			return typesFound;
@@ -158,25 +143,26 @@ public class AllTypesCache {
 	 * The lock for synchronizing all activity in the AllTypesCache.
 	 */
 	private static Object fgLock= new Object();
-	private static TypeCacher fgTypeCacherThread;
-
-	private static TypeInfo[] fgTypeCache;
-	private static int fgSizeHint= INITIAL_SIZE;
-	private static boolean fgTerminated;
-	private static boolean fgBackground;
+		private static TypeCacher fgTypeCacherThread;
+		private static TypeInfo[] fgTypeCache;
+		private static int fgSizeHint= INITIAL_SIZE;
+		private static boolean fgTerminated;	
+		private static boolean fgAsyncMode;		// if true cache updates are run via a background thread
+	
 	
 	private static int fgNumberOfCacheFlushes;
 	
 	private static TypeCacheDeltaListener fgDeltaListener;
 
-	private static class TypeNameComparator implements Comparator {
+	/**
+	 * A comparator for simple type names
+	 */
+	private static Comparator fgTypeNameComparator= new Comparator() {
 		public int compare(Object o1, Object o2) {
 			return ((TypeInfo)o1).getTypeName().compareTo(((TypeInfo)o2).getTypeName());
 		}
-	}
-	private static Comparator fgTypeNameComparator= new TypeNameComparator();
-	
-	
+	};
+		
 	/**
 	 * Returns all types in the given scope.
 	 * @param kind IJavaSearchConstants.CLASS, IJavaSearchConstants.INTERFACE
@@ -209,7 +195,6 @@ public class AllTypesCache {
 			fgTypeCacherThread= null;
 			fgLock.notifyAll();
 		}		
-		if (DEBUG) System.err.println("setCache: " + fgSizeHint); //$NON-NLS-1$
 	}
 
 	/**
@@ -225,11 +210,14 @@ public class AllTypesCache {
 				
 				if (fgTypeCacherThread == null) {
 					// cache synchroneously
-					fgTypeCache= doSynchSearchTypes(monitor, fgSizeHint);
-					if (fgTypeCache != null) {
-						fgSizeHint= fgTypeCache.length;
-						if (DEBUG) System.err.println("synch cache: " + fgSizeHint); //$NON-NLS-1$
+					ArrayList searchResult= new ArrayList(fgSizeHint);
+					if (search(new TypeInfoRequestor(searchResult), IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor)) {
+						TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
+						Arrays.sort(result, fgTypeNameComparator);
+						fgTypeCache= result;
 					}
+					if (fgTypeCache != null)
+						fgSizeHint= fgTypeCache.length;
 				} else {
 					// wait for the thread to finished
 					if (fgTypeCacherThread != null) {
@@ -250,37 +238,7 @@ public class AllTypesCache {
 			return fgTypeCache;
 		}
 	}
-	
-	private static TypeInfo[] doSynchSearchTypes(IProgressMonitor monitor, int sizeHint) {
 		
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
-		
-		try {
-			ArrayList searchResult= new ArrayList(sizeHint);
-			new SearchEngine().searchAllTypeNames(ResourcesPlugin.getWorkspace(),
-				null,
-				null,
-				IJavaSearchConstants.PATTERN_MATCH,
-				IJavaSearchConstants.CASE_INSENSITIVE,
-				IJavaSearchConstants.TYPE,
-				SearchEngine.createWorkspaceScope(),
-				new TypeInfoRequestor(searchResult),
-				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-				monitor);
-				
-				if (searchResult != null) {
-					TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
-					Arrays.sort(result, getTypeNameComperator());
-					return result;
-				}
-				
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
-		return null;
-	}
-	
 	/**
 	 * Returns true if the type cache is up to date.
 	 */
@@ -295,13 +253,6 @@ public class AllTypesCache {
 		return fgSizeHint;
 	}
 	
-	/**
-	 * Returns a compartor that compares the simple type names
-	 */
-	public static Comparator getTypeNameComperator() {
-		return fgTypeNameComparator;
-	}	
-
 	
 	private static class TypeCacheDeltaListener implements IElementChangedListener {
 		
@@ -319,7 +270,7 @@ public class AllTypesCache {
 					if (fgTypeCacherThread != null) {
 						fgTypeCacherThread.reset();
 					} else {
-						if (fgBackground) {	// start thread only if we are in background mode
+						if (fgAsyncMode) {	// start thread only if we are in background mode
 							fgTypeCacherThread= new TypeCacher(fgSizeHint, TIMEOUT, null);
 							fgTypeCacherThread.start();
 						}
@@ -397,7 +348,7 @@ public class AllTypesCache {
 		Set namesFound= new HashSet();
 		TypeInfo[] allTypes= AllTypesCache.getAllTypes(monitor); // all types in workspace, sorted by type name
 		TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, true, null); //$NON-NLS-1$
-		int index= Arrays.binarySearch(allTypes, key, AllTypesCache.getTypeNameComperator());
+		int index= Arrays.binarySearch(allTypes, key, fgTypeNameComparator);
 		if (index >= 0 && index < allTypes.length) {
 			for (int i= index - 1; i>= 0; i--) {
 				TypeInfo curr= allTypes[i];
@@ -441,6 +392,23 @@ public class AllTypesCache {
 			}
 		};
 		try {
+			if (! search(requestor, IJavaSearchConstants.CANCEL_IF_NOT_READY_TO_SEARCH, null))
+				return false;
+		} catch (OperationCanceledException e) {
+			return false;
+		} catch (TypeFoundException e) {
+		}
+		return true;
+	}
+
+	/*
+	 * A precanned type search.
+	 * Returns false if a JavaModelException occured.
+	 */
+	static boolean search(ITypeNameRequestor requestor, int waitingPolicy, IProgressMonitor monitor) {
+		try {
+			if (monitor == null)
+				monitor= new NullProgressMonitor();
 			new SearchEngine().searchAllTypeNames(ResourcesPlugin.getWorkspace(),
 				null,
 				null,
@@ -449,20 +417,19 @@ public class AllTypesCache {
 				IJavaSearchConstants.TYPE,
 				SearchEngine.createWorkspaceScope(),
 				requestor,
-				IJavaSearchConstants.CANCEL_IF_NOT_READY_TO_SEARCH,
-				new NullProgressMonitor());
+				waitingPolicy,
+				monitor);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return false;
-		} catch (OperationCanceledException e) {
-			return false;			
-		} catch (TypeFoundException e) {
 		}
 		return true;
 	}
-
+	
+	/**
+	 * Initialize the AllTypesCache.
+	 */
 	public static void initialize() {
-		if (DEBUG) System.err.println("initialize"); //$NON-NLS-1$
 		
 		fgDeltaListener= new TypeCacheDeltaListener();
 		JavaCore.addElementChangedListener(fgDeltaListener);
@@ -472,41 +439,50 @@ public class AllTypesCache {
 			d.asyncExec(
 				new Runnable() {
 					public void run() {
-						synchronized(fgLock) {
-							if (fgTypeCacherThread != null) {
-								if (fgTerminated) {
-									fgTypeCacherThread.abort();																		
-								} else {
-									fgBackground= true;
-									if (DEBUG) System.err.println("inititialize: cache is being uptodated");	//$NON-NLS-1$
-								}							
-							} else {
-								if (fgTerminated) {
-									if (DEBUG) System.err.println("inititialize: already terminated");	 //$NON-NLS-1$
-								} else {
-									fgBackground= true;
-									if (fgTypeCache != null) {
-										if (DEBUG) System.err.println("inititialize: cache is uptodate");	//$NON-NLS-1$
-									} else {
-										fgTypeCacherThread= new TypeCacher(fgSizeHint, INITIAL_DELAY, null);
-										fgTypeCacherThread.start();
-									}							
-								}
-							}
-						}		
+						startBackgroundMode();
 					}
 				}
 			);
 	}
 	
+	private static void startBackgroundMode() {
+		synchronized(fgLock) {
+			if (fgTypeCacherThread != null) {
+				// there is already a thread
+				if (fgTerminated) {
+					fgTypeCacherThread.abort();																		
+				} else {
+					// there is already a thread running
+					fgAsyncMode= true;
+				}							
+			} else {
+				if (fgTerminated) {
+					// already terminated: do nothing
+				} else {
+					fgAsyncMode= true;
+					if (fgTypeCache != null) {
+						// the cache is already uptodate
+					} else {
+						fgTypeCacherThread= new TypeCacher(fgSizeHint, INITIAL_DELAY, null);
+						fgTypeCacherThread.start();
+					}							
+				}
+			}
+		}		
+	}
+	
+	/**
+	 * Terminate the service provided by AllTypesCache.
+	 */
 	public static void terminate() {
-		if (DEBUG) System.err.println("terminate"); //$NON-NLS-1$
+		
 		if (fgDeltaListener != null)
 			JavaCore.removeElementChangedListener(fgDeltaListener);
 		fgDeltaListener= null;
+		
 		synchronized(fgLock) {
 			fgTerminated= true;
-			fgBackground= false;
+			fgAsyncMode= false;
 			if (fgTypeCacherThread != null)
 				fgTypeCacherThread.abort();
 			fgTypeCacherThread= null;
