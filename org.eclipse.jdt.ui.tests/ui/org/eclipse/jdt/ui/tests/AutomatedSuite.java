@@ -20,7 +20,7 @@ import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
-import org.eclipse.jdt.ui.tests.packageview.PackageExplorerContentProviderTests;
+import org.eclipse.jdt.ui.tests.packageview.PackageExplorerTests;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
@@ -34,6 +34,8 @@ public class AutomatedSuite extends TestSuite {
 	/**
 	 * Returns the suite.  This is required to
 	 * use the JUnit Launcher.
+	 * 
+	 * @return the test
 	 */
 	public static Test suite() {
 		return new TestOptionsSetup(new AutomatedSuite());
@@ -49,7 +51,7 @@ public class AutomatedSuite extends TestSuite {
 		
 		addTest(NewJavaProjectWizardTest.suite());
 		
-		addTest(PackageExplorerContentProviderTests.suite());
+		addTest(PackageExplorerTests.suite());
 		
 		addTest(PackagesViewContentProviderTests.suite());
 		addTest(PackagesViewDeltaTests.suite());

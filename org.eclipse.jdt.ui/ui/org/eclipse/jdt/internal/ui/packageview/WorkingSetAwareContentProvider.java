@@ -15,7 +15,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -142,7 +145,11 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	}
 	
 	protected void augmentElementToRefresh(List toRefresh, int relation, Object affectedElement) {
-		if (relation == GRANT_PARENT) {
+		// we are refreshing the JavaModel and are in working set mode.
+		if (JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).equals(affectedElement)) {
+			toRefresh.remove(affectedElement);
+			toRefresh.add(fWorkingSetModel);
+		} else if (relation == GRANT_PARENT) {
 			Object parent= internalGetParent(affectedElement);
 			if (parent != null) {
 				toRefresh.addAll(Arrays.asList(fWorkingSetModel.getAllParents(parent)));

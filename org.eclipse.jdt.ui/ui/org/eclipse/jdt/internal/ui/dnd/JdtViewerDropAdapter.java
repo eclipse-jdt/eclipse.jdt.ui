@@ -32,31 +32,31 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 
 	/**
 	 * Constant describing the position of the mouse cursor relative 
-	 * to the target object.  This means the mouse is positioned
-	 * slightly before the target.
+	 * to the target object.  This means the mouse is not positioned
+	 * over or near any valid target.
 	 */
-	protected static final int LOCATION_BEFORE= 1;
-	
-	/**
-	 * Constant describing the position of the mouse cursor relative 
-	 * to the target object.  This means the mouse is positioned
-	 * slightly after the target.
-	 */
-	protected static final int LOCATION_AFTER= 2;
+	public static final int LOCATION_NONE= DND.FEEDBACK_NONE;
 	
 	/**
 	 * Constant describing the position of the mouse cursor relative 
 	 * to the target object.  This means the mouse is positioned
 	 * directly on the target.
 	 */
-	protected static final int LOCATION_ON= 3;
+	public static final int LOCATION_ON= DND.FEEDBACK_SELECT;
 	
 	/**
 	 * Constant describing the position of the mouse cursor relative 
-	 * to the target object.  This means the mouse is not positioned
-	 * over or near any valid target.
+	 * to the target object.  This means the mouse is positioned
+	 * slightly before the target.
 	 */
-	protected static final int LOCATION_NONE= 4;
+	public static final int LOCATION_BEFORE= DND.FEEDBACK_INSERT_BEFORE;
+	
+	/**
+	 * Constant describing the position of the mouse cursor relative 
+	 * to the target object.  This means the mouse is positioned
+	 * slightly after the target.
+	 */
+	public static final int LOCATION_AFTER= DND.FEEDBACK_INSERT_AFTER;
 	
 	/**
 	 * The threshold used to determine if the mouse is before or after
@@ -78,8 +78,8 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	protected Object fTarget;
 
 	public JdtViewerDropAdapter(StructuredViewer viewer, int feedback) {
+		Assert.isNotNull(viewer);
 		fViewer= viewer;
-		Assert.isNotNull(fViewer);
 		fFeedback= feedback;
 		fLastOperation= -1;
 	}
@@ -236,11 +236,7 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 		if (!fShowInsertionFeedback && fLocation != LOCATION_NONE) {
 			event.feedback= DND.FEEDBACK_SELECT;
 		} else {
-			if (fLocation == LOCATION_BEFORE) {
-				event.feedback= DND.FEEDBACK_INSERT_BEFORE;
-			} else if (fLocation == LOCATION_AFTER) {
-				event.feedback= DND.FEEDBACK_INSERT_AFTER;
-			}
+			event.feedback= fLocation;
 		}
 		event.feedback|= fFeedback;
 	}
@@ -258,4 +254,14 @@ public class JdtViewerDropAdapter implements DropTargetListener {
 	protected int getRequestedOperation() {
 		return fRequestedOperation;
 	} 
+	
+	protected void setDefaultFeedback(int feedback) {
+		fFeedback= feedback;
+	}
+	
+	//---- helper methods to test DnD 
+	
+	public void internalTestSetLocation(int location) {
+		fLocation= location;
+	}
 }

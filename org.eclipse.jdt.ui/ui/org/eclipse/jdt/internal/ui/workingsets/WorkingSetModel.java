@@ -214,12 +214,12 @@ public class WorkingSetModel {
 		addListenersToWorkingSetManagers();
     	fActiveWorkingSets= new ArrayList(2);
     	
-		IWorkingSet history= fLocalWorkingSetManager.createWorkingSet("History", new IAdaptable[0]);
+		IWorkingSet history= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.getString("WorkingSetModel.histroy.name"), new IAdaptable[0]); //$NON-NLS-1$
     	history.setId(HistoryWorkingSetUpdater.ID);
     	fLocalWorkingSetManager.addWorkingSet(history);
     	fActiveWorkingSets.add(history);
     	
-    	IWorkingSet others= fLocalWorkingSetManager.createWorkingSet("Other Projects", new IAdaptable[0]);
+    	IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.getString("WorkingSetModel.others.name"), new IAdaptable[0]); //$NON-NLS-1$
     	others.setId(OthersWorkingSetUpdater.ID);
     	fLocalWorkingSetManager.addWorkingSet(others);
     	fActiveWorkingSets.add(others);
@@ -343,7 +343,7 @@ public class WorkingSetModel {
     	return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
     }
     
-    /* package */ void setActiveWorkingSets(IWorkingSet[] workingSets) {
+    public void setActiveWorkingSets(IWorkingSet[] workingSets) {
     	fActiveWorkingSets= new ArrayList(Arrays.asList(workingSets));
     	fElementMapper.rebuild(getActiveWorkingSets());
     	fOthersWorkingSetUpdater.updateElements();

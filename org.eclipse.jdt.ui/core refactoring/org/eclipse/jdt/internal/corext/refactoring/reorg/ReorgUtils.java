@@ -593,14 +593,46 @@ public class ReorgUtils {
 		return result;
 	}
 	
-	public static void splitIntoJavaElementsAndResources(IResource[] resources, List javaElementResult, List resourceResult) {
-		for (int i= 0; i < resources.length; i++) {
-			IResource resource= resources[i];
-			IJavaElement jElement= JavaCore.create(resource);
-			if (jElement != null && jElement.exists())
-				javaElementResult.add(jElement);
-			else
-				resourceResult.add(resource);
+	public static void splitIntoJavaElementsAndResources(Object[] elements, List javaElementResult, List resourceResult) {
+		for (int i= 0; i < elements.length; i++) {
+			Object element= elements[i];
+			if (element instanceof IJavaElement) {
+				javaElementResult.add(element);
+			} else if (element instanceof IResource) {
+				IResource resource= (IResource)element;
+				IJavaElement jElement= JavaCore.create(resource);
+				if (jElement != null && jElement.exists())
+					javaElementResult.add(jElement);
+				else
+					resourceResult.add(resource);
+			}
 		}
+	}
+
+	public static boolean containsElementOrParent(Set elements, IJavaElement element) {
+		if (elements.contains(element))
+			return true;
+		IJavaElement parent= element.getParent();
+		while (parent != null) {
+			if (elements.contains(parent))
+				return true;
+			parent= parent.getParent();
+		}
+		return false;
+	}
+
+	public static boolean containsElementOrParent(Set elements, IResource element) {
+		if (elements.contains(element))
+			return true;
+		IResource parent= element.getParent();
+		while (parent != null) {
+			if (elements.contains(parent))
+				return true;
+			IJavaElement parentAsJavaElement= JavaCore.create(parent);
+			if (parentAsJavaElement != null && parentAsJavaElement.exists() && elements.contains(parentAsJavaElement))
+				return true;
+			parent= parent.getParent();
+		}
+		return false;
 	}
 }

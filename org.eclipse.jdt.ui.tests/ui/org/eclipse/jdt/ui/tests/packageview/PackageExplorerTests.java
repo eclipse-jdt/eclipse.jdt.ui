@@ -14,7 +14,7 @@ package org.eclipse.jdt.ui.tests.packageview;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class PackageExplorerContentProviderTests {
+public class PackageExplorerTests {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite("Test for org.eclipse.jdt.ui.tests.packageview");
@@ -24,6 +24,7 @@ public class PackageExplorerContentProviderTests {
 		suite.addTest(ContentProviderTests3.suite());
 		suite.addTest(ContentProviderTests4.suite());
 		suite.addTest(ContentProviderTests5.suite());
+		suite.addTestSuite(WorkingSetDropAdapterTest.class);
 		//$JUnit-END$
 		return suite;
 	}

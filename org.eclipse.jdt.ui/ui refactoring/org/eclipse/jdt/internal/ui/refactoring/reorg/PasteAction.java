@@ -56,7 +56,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -243,7 +242,7 @@ public class PasteAction extends SelectionDispatchAction{
 			IJavaElement[] javaElements= getClipboardJavaElements(availableTypes);
 			if (javaElements != null) {
 				for (int i= 0; i < javaElements.length; i++) {
-					if (!contains(elements, javaElements[i]))
+					if (!ReorgUtils.containsElementOrParent(elements, javaElements[i]))
 						elements.add(javaElements[i]);
 				}
 			}
@@ -254,12 +253,12 @@ public class PasteAction extends SelectionDispatchAction{
 				ReorgUtils.splitIntoJavaElementsAndResources(resources, realJavaElements, realResource);
 				for (Iterator iter= realJavaElements.iterator(); iter.hasNext();) {
 					IJavaElement element= (IJavaElement)iter.next();
-					if (!contains(elements, element))
+					if (!ReorgUtils.containsElementOrParent(elements, element))
 						elements.add(element);
 				}
 				for (Iterator iter= realResource.iterator(); iter.hasNext();) {
 					IResource element= (IResource)iter.next();
-					if (!contains(elements, element))
+					if (!ReorgUtils.containsElementOrParent(elements, element))
 						elements.add(element);
 				}
 			}
@@ -274,31 +273,6 @@ public class PasteAction extends SelectionDispatchAction{
 				return false;
 			IWorkingSet ws= selectedWorkingSets[0];
 			return !OthersWorkingSetUpdater.ID.equals(ws.getId());
-		}
-		private boolean contains(Set elements, IJavaElement element) {
-			if (elements.contains(element))
-				return true;
-			IJavaElement parent= element.getParent();
-			while (parent != null) {
-				if (elements.contains(parent))
-					return true;
-				parent= parent.getParent();
-			}
-			return false;
-		}
-		private boolean contains(Set elements, IResource element) {
-			if (elements.contains(element))
-				return true;
-			IResource parent= element.getParent();
-			while (parent != null) {
-				if (elements.contains(parent))
-					return true;
-				IJavaElement parentAsJavaElement= JavaCore.create(parent);
-				if (parentAsJavaElement != null && parentAsJavaElement.exists() && elements.contains(parentAsJavaElement))
-					return true;
-				parent= parent.getParent();
-			}
-			return false;
 		}
 	}
 	

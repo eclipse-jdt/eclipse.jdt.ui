@@ -1044,7 +1044,8 @@ public class PackageExplorerPart extends ViewPart
 			FileTransfer.getInstance()};
 		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
 			new SelectionTransferDropAdapter(fViewer),
-			new FileTransferDropAdapter(fViewer)
+			new FileTransferDropAdapter(fViewer),
+			new WorkingSetDropAdapter(this)
 		};
 		fViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
 	}
@@ -1841,5 +1842,15 @@ public class PackageExplorerPart extends ViewPart
 		} else {
 			fViewer.setSorter(new JavaElementSorter());
 		}
+	}
+	
+	//---- test methods for working set mode -------------------------------
+	
+	public void internalTestShowWorkingSets(IWorkingSet[] workingSets) {
+		if (fWorkingSetModel == null)
+			createWorkingSetModel();
+		fWorkingSetModel.setActiveWorkingSets(workingSets);
+		fWorkingSetModel.configured();
+		rootModeChanged(ViewActionGroup.SHOW_WORKING_SETS);
 	}
 }
