@@ -118,7 +118,7 @@ public class DialogsTest extends TestCase {
 		dialog.setMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.message")); //$NON-NLS-1$
 		dialog.setPageInfoMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.pageinfo")); //$NON-NLS-1$
 	
-		assert(list.size() > 15);
+		assertTrue(list.size() > 15);
 		TypeInfo[][] refs= new TypeInfo[][] { getRefs(list, 0, 3), getRefs(list, 4, 6), getRefs(list, 10, 5) };
 		dialog.setElements(refs);
 		dialog.setInitialSelections(new Object[refs.length]);
@@ -215,7 +215,7 @@ public class DialogsTest extends TestCase {
 		DialogCheck.assertDialog(dialog, this);
 		
 		Object[] results= dialog.getResult();
-		assert(results.length == 1);
+		assertTrue(results.length == 1);
 		assertEquals(new Integer(7), results[0]);
 	}
 

@@ -369,8 +369,8 @@ public class JavaModelUtil {
 	}
 	
 	/**
-	 * Finds a method in a type's hierarchy. The search is top down, so this
-	 * returns the declaration of the method.
+	 * Finds a method declararion in a type's hierarchy. The search is top down, so this
+	 * returns the first declaration of the method in the hierarchy.
 	 * This searches for a method with a name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done.
 	 * Constructors are only compared by parameters, not the name.
@@ -379,7 +379,7 @@ public class JavaModelUtil {
 	 * @param isConstructor If the method is a constructor
 	 * @return The first method found or null, if nothing found
 	 */
-	public static IMethod findMethodInHierarchy(ITypeHierarchy hierarchy, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+	public static IMethod findMethodDeclarationInHierarchy(ITypeHierarchy hierarchy, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
 		IType[] superTypes= hierarchy.getAllSupertypes(hierarchy.getType());
 		for (int i= superTypes.length - 1; i >= 0; i--) {
 			IMethod found= findMethod(name, paramTypes, isConstructor, superTypes[i]);
@@ -388,10 +388,32 @@ public class JavaModelUtil {
 			}
 		}
 		return null;
-	}			
+	}
 	
 	/**
-	 * Tests if a method equals to teh give signature.
+	 * Finds a method implementation in a type's hierarchy. The search is bottom-up, so this
+	 * returns the overwritten method.
+	 * This searches for a method with a name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
+	 * @param name The name of the method to find
+	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
+	 * @param isConstructor If the method is a constructor
+	 * @return The first method found or null, if nothing found
+	 */
+	public static IMethod findMethodImplementationInHierarchy(ITypeHierarchy hierarchy, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+		IType[] superTypes= hierarchy.getAllSupertypes(hierarchy.getType());
+		for (int i= 0; i < superTypes.length; i++) {
+			IMethod found= findMethod(name, paramTypes, isConstructor, superTypes[i]);
+			if (found != null) {
+				return found;
+			}
+		}
+		return null;
+	}	
+	
+	/**
+	 * Tests if a method equals to the given signature.
 	 * Parameter types are only compared by the simple name, no resolving for
 	 * the fully qualified type name is done. Constructors are only compared by
 	 * parameters, not the name.

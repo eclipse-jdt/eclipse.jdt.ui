@@ -114,19 +114,21 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						}
 					}			 	
 					
-					IMethod inheritedMethod= JavaModelUtil.findMethodInHierarchy(typeHierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-					if (inheritedMethod == null) {
+					IMethod overwrittenMethod= JavaModelUtil.findMethodImplementationInHierarchy(typeHierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
+					if (overwrittenMethod == null) {
 						// create method without super call
 						content= StubUtility.genStub(fType, curr, false, false, imports);
 					} else {
-						int flags= inheritedMethod.getFlags();
+						int flags= overwrittenMethod.getFlags();
 						if (Flags.isFinal(flags) || Flags.isPrivate(flags)) {
 							// ask before overwriting final methods
-							if (!queryOverrideFinalMethods(inheritedMethod)) {
+							if (!queryOverrideFinalMethods(overwrittenMethod)) {
 								continue;
 							}
 						}
-						content= StubUtility.genStub(fType, inheritedMethod, imports);	
+						boolean callSuper= overwrittenMethod.getDeclaringType().isClass() && !Flags.isAbstract(overwrittenMethod.getFlags());	
+						IMethod declaration= JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
+						content= StubUtility.genStub(fType, declaration, true, callSuper, imports);	
 					}
 					IJavaElement sibling= null;
 					IMethod existing= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), existingMethods);

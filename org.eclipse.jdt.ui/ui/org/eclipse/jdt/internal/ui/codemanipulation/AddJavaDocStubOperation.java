@@ -55,7 +55,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 			fLastTypeHierarchy= declaringType.newSupertypeHierarchy(null);
 		}
 		StringBuffer buf= new StringBuffer();
-		IMethod inheritedMethod= JavaModelUtil.findMethodInHierarchy(fLastTypeHierarchy, meth.getElementName(), meth.getParameterTypes(), meth.isConstructor());
+		IMethod inheritedMethod= JavaModelUtil.findMethodDeclarationInHierarchy(fLastTypeHierarchy, meth.getElementName(), meth.getParameterTypes(), meth.isConstructor());
 		if (inheritedMethod != null) {
 			StubUtility.genJavaDocSeeTag(inheritedMethod.getDeclaringType().getElementName(), inheritedMethod.getElementName(), inheritedMethod.getParameterTypes(), buf);
 		} else {

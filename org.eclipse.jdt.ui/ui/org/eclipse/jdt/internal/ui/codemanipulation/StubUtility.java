@@ -48,25 +48,10 @@ public class StubUtility {
 	/**
 	 * Generates a stub. Given a template method, a stub with the same signature
 	 * will be constructed so it can be added to a type.
-	 * The method is asumed to be from a supertype, as a super call will be generated in
-	 * the method body.
-	 * @param parenttype The type to which the method will be added to
-	 * @param method A method template (method belongs to different type than the parent)
-	 * @param imports Imports required by the sub are added to the imports structure
-	 * @throws JavaModelException
-	 */
-	public static String genStub(IType parenttype, IMethod method, IImportsStructure imports) throws JavaModelException {
-		boolean callSuper= !Flags.isAbstract(method.getFlags()) && !Flags.isStatic(method.getFlags())
-			&& method.getDeclaringType().isClass();
-		return genStub(parenttype, method, callSuper, true, imports);
-	}
-
-	/**
-	 * Generates a stub. Given a template method, a stub with the same signature
-	 * will be constructed so it can be added to a type.
 	 * @param parenttype The type to which the method will be added to
 	 * @param method A method template (method belongs to different type than the parent)
 	 * @param callSuper If set a super call will be added to the method body
+	 * @param addSeeTag A see tag to the given method is generated in the java doc comment.
 	 * @param imports Imports required by the sub are added to the imports structure
 	 * @throws JavaModelException
 	 */
@@ -277,7 +262,7 @@ public class StubUtility {
 		for (int i= 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
 			if (curr.isConstructor() && JavaModelUtil.isVisible(curr, type.getPackageFragment())) {
-				String newStub= genStub(type, methods[i], imports);
+				String newStub= genStub(type, methods[i], true, false, imports);
 				newMethods.add(newStub);
 			}
 		}
