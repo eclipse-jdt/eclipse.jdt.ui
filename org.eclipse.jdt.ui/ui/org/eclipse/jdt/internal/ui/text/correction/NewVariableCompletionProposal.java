@@ -223,16 +223,23 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 	private Type evaluateVariableType(AST ast) throws CoreException {
 		ITypeBinding binding= ASTResolving.guessBindingForReference(fOriginalNode);
 		if (binding != null) {
-			ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, binding);
-			for (int i= 0; i < typeProposals.length; i++) {
-				addLinkedModeProposal(KEY_TYPE, typeProposals[i]);
-			}		
-			
+			if (isVariableAssigned()) {
+				ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, binding);
+				for (int i= 0; i < typeProposals.length; i++) {
+					addLinkedModeProposal(KEY_TYPE, typeProposals[i]);
+				}
+			}
 			String typeName= addImport(binding);
 			return ASTNodeFactory.newType(ast, typeName);			
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}
+	
+	private boolean isVariableAssigned() {
+		ASTNode parent= fOriginalNode.getParent();
+		return (parent instanceof Assignment) && (fOriginalNode == ((Assignment) parent).getLeftHandSide());
+	}
+	
 	
 	private int evaluateFieldModifiers(ASTNode newTypeDecl) {
 		if (fSenderBinding.isInterface()) {
