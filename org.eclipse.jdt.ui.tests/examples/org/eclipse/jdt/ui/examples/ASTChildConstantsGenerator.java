@@ -178,10 +178,12 @@ public class ASTChildConstantsGenerator extends TestCase {
 		createPropertyList(astClases, buf);
 		createPropertyValidator(astClases, buf);
 		createIsListTest(astClases, buf);
+		createIsAttributeTest(astClases, buf);
 		createListAccessor(astClases, buf);
 		createGetNodeChild(astClases, buf);
 		createGetPropertyOfNode(astClases, buf);
 		createGetNodeChildProperties(astClases, buf);
+		createGetChildPropertyName(astClases, buf);
 		
 		buf.append("}");
 		
@@ -201,8 +203,6 @@ public class ASTChildConstantsGenerator extends TestCase {
 		System.out.print(res);
 	}
 	
-
-
 	public void createPropertyList(Class[] astClases, StringBuffer buf) throws Exception {
 		HashMap properties= getPropertyList(astClases);
 		
@@ -320,6 +320,52 @@ public class ASTChildConstantsGenerator extends TestCase {
 		buf.append("return false;");
 		buf.append("}\n\n");
 	}
+	
+	public void createIsAttributeTest(Class[] astClases, StringBuffer buf) throws Exception {
+		
+		HashSet otherProperties= new HashSet();
+		HashSet attribProperties= new HashSet();
+		
+		for (int i= 0; i < astClases.length; i++) {
+			Class cl= astClases[i];
+			Method[] properties= getProperties(cl);
+			for (int k= 0; k < properties.length; k++) {
+				Method curr= properties[k];
+				Class ret= curr.getReturnType();
+
+				String name= toConstantName(getPropertyName(curr));
+				if (fgPrimitiveFilter.accept(ret)) {
+					attribProperties.add(name);
+					if (otherProperties.contains(name)) {
+						System.err.println("Property is attribute and non-attribute: " + name);
+					}
+				} else {
+					if (attribProperties.contains(name)) {
+						System.err.println("Property is attribute and non-attribute: " + name);
+					} else {
+						otherProperties.add(name);
+					}
+				}
+			}
+		}
+
+		String[] lists= (String[]) attribProperties.toArray(new String[attribProperties.size()]);
+		Arrays.sort(lists, Collator.getInstance());
+		
+		buf.append("\n/**");	
+		buf.append("\n  * Returns <code>true</code> if property of a node is an attribute property (Not a List and not an ASTNode).");
+		buf.append("\n */\n");
+		buf.append("public static boolean isAttributeProperty(int property) {");	
+		buf.append("switch (property) {");	
+		
+		for (int i= 0; i < lists.length; i++) {
+			buf.append("case " + lists[i] + ":");
+		}
+		buf.append("return true;");
+		buf.append("}");	
+		buf.append("return false;");
+		buf.append("}\n\n");
+	}	
 	
 	
 	public void createListAccessor(Class[] astClases, StringBuffer buf) throws Exception {
@@ -493,7 +539,39 @@ public class ASTChildConstantsGenerator extends TestCase {
 		buf.append("}");	
 		buf.append("return new int[0];");
 		buf.append("}\n\n");
-	}		
+	}
+	
+	private void createGetChildPropertyName(Class[] astClases, StringBuffer buf) {
+		HashSet result= new HashSet();
+		for (int i= 0; i < astClases.length; i++) {
+			Class cl= astClases[i];
+			Method[] properties= getProperties(cl);
+			for (int k= 0; k < properties.length; k++) {
+				Method curr= properties[k];
+				String name= getPropertyName(curr);
+				result.add(name);
+			}
+		}
+		Object[] properties= result.toArray();
+		Arrays.sort(properties, Collator.getInstance());
+		
+		buf.append("\n/**");	
+		buf.append("\n * Returns the name of a property.");
+		buf.append("\n */\n");
+		buf.append("public static String getPropertyName(int property) {");
+		
+		buf.append("switch (property) {");
+		
+		for (int i= 0; i < properties.length; i++) {
+			String curr= toConstantName((String) properties[i]);
+			
+			buf.append("case " + curr + ":");
+			buf.append("return ").append('"').append(curr).append('"').append("; //$NON-NLS-1$\n");
+		}
+		buf.append("}");	
+		buf.append("throw new IllegalArgumentException();");
+		buf.append("}\n\n");
+	}
 	
 	
 	private HashMap getPropertyList(Class[] astClases) {

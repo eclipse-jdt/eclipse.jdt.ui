@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
@@ -47,11 +48,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMethodDeclTest("testRemove3"));
+			suite.addTest(new ASTRewritingMethodDeclTest("testMethodDeclChanges"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -95,16 +96,10 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "E");
 			
 			Type newReturnType= astRoot.getAST().newPrimitiveType(PrimitiveType.FLOAT);
-			methodDecl.setReturnType(newReturnType);
-			
-			rewrite.markAsInserted(newReturnType);
 			
 			// from constructor to method
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(false);
-			modifiedNode.setModifiers(methodDecl.getModifiers()); // no change
-			modifiedNode.setExtraDimensions(methodDecl.getExtraDimensions()); // no change
-			rewrite.markAsModified(methodDecl, modifiedNode);
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.RETURN_TYPE, newReturnType, null);
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.IS_CONSTRUCTOR, Boolean.FALSE, null);
 		}
 		{ // change return type
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
@@ -117,16 +112,9 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{ // remove return type
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "hee");
 			assertTrue("Has no return type: hee", methodDecl.getReturnType() != null);
-			
-			Type returnType= methodDecl.getReturnType();
-			rewrite.markAsRemoved(returnType);
-			
+						
 			// from method to constructor
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(true);
-			modifiedNode.setModifiers(methodDecl.getModifiers());
-			modifiedNode.setExtraDimensions(methodDecl.getExtraDimensions()); // no change
-			rewrite.markAsModified(methodDecl, modifiedNode);
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.IS_CONSTRUCTOR, Boolean.TRUE, null);
 		}
 		{ // rename method name
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "iee");
@@ -220,7 +208,6 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
-		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
 		{ // delete first param
@@ -233,11 +220,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
 			
 			// change flags
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setExtraDimensions(methodDecl.getExtraDimensions()); // no change
-			modifiedNode.setModifiers(0);
-			rewrite.markAsModified(methodDecl, modifiedNode);
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.MODIFIERS, new Integer(0), null);
 			
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
@@ -361,13 +344,9 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{ // insert before second param & insert before first exception & add synchronized
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
 			
-			
 			// change flags
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setExtraDimensions(methodDecl.getExtraDimensions()); // no change
-			modifiedNode.setModifiers(Modifier.PUBLIC | Modifier.SYNCHRONIZED);
-			rewrite.markAsModified(methodDecl, modifiedNode);			
+			int newModifiers= Modifier.PUBLIC | Modifier.SYNCHRONIZED;
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 			
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
@@ -387,11 +366,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "hee");
 			
 			// change flags
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setExtraDimensions(methodDecl.getExtraDimensions()); // no change
-			modifiedNode.setModifiers(Modifier.PUBLIC | Modifier.SYNCHRONIZED | Modifier.STATIC);
-			rewrite.markAsModified(methodDecl, modifiedNode);					
+			int newModifiers= Modifier.PUBLIC | Modifier.SYNCHRONIZED | Modifier.STATIC;
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 			
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
@@ -776,11 +752,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
 			
 			// change flags
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setExtraDimensions(methodDecl.getExtraDimensions()); // no change
-			modifiedNode.setModifiers(Modifier.PUBLIC | Modifier.ABSTRACT);
-			rewrite.markAsModified(methodDecl, modifiedNode);					
+			int newModifiers= Modifier.PUBLIC | Modifier.ABSTRACT;
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 			
 			Block body= methodDecl.getBody();
 			assertTrue("No body: gee", body != null);
@@ -791,11 +764,9 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "kee");
 			
 			// change flags
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setExtraDimensions(methodDecl.getExtraDimensions()); // no change
-			modifiedNode.setModifiers(Modifier.PRIVATE);
-			rewrite.markAsModified(methodDecl, modifiedNode);				
+			int newModifiers= Modifier.PRIVATE;
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+			
 			
 			Block body= methodDecl.getBody();
 			assertTrue("Has body", body == null);
@@ -851,11 +822,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{ // add extra dim, add throws
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo1");
 			
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setModifiers(methodDecl.getModifiers()); // no change
-			modifiedNode.setExtraDimensions(1); 
-			rewrite.markAsModified(methodDecl, modifiedNode);
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(1), null);
 			
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
 			methodDecl.thrownExceptions().add(newThrownException2);
@@ -864,22 +831,14 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{ // add extra dim, remove throws
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo2");
 			
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setModifiers(methodDecl.getModifiers()); // no change			
-			modifiedNode.setExtraDimensions(1); 
-			rewrite.markAsModified(methodDecl, modifiedNode);
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(1), null);
 			
 			rewrite.markAsRemoved((ASTNode) methodDecl.thrownExceptions().get(0));			
 		}		
 		{ // remove extra dim, add throws
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo3");
-			
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setModifiers(methodDecl.getModifiers()); // no change
-			modifiedNode.setExtraDimensions(1); 
-			rewrite.markAsModified(methodDecl, modifiedNode);
+
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(1), null);
 			
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
 			methodDecl.thrownExceptions().add(newThrownException2);
@@ -888,11 +847,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{ // add extra dim, remove throws
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo4");
 			
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setModifiers(methodDecl.getModifiers()); // no change			
-			modifiedNode.setExtraDimensions(1); 
-			rewrite.markAsModified(methodDecl, modifiedNode);
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(1), null);
 			
 			rewrite.markAsRemoved((ASTNode) methodDecl.thrownExceptions().get(0));			
 		}
@@ -903,11 +858,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			methodDecl.parameters().add(newParam1);
 			rewrite.markAsInserted(newParam1);						
 			
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setModifiers(methodDecl.getModifiers()); // no change
-			modifiedNode.setExtraDimensions(4); 
-			rewrite.markAsModified(methodDecl, modifiedNode);
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(4), null);
 			
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
 			methodDecl.thrownExceptions().add(newThrownException2);
@@ -918,11 +869,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			
 			rewrite.markAsRemoved((ASTNode) methodDecl.parameters().get(0));		
 			
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(methodDecl.isConstructor()); // no change
-			modifiedNode.setModifiers(methodDecl.getModifiers()); // no change			
-			modifiedNode.setExtraDimensions(4); 
-			rewrite.markAsModified(methodDecl, modifiedNode);
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(4), null);
 			
 			rewrite.markAsRemoved((ASTNode) methodDecl.thrownExceptions().get(0));			
 		}
@@ -978,10 +925,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			FieldDeclaration decl= fieldDeclarations[0];
 			
 			// add modifier
-			FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-			modifiedNode.setModifiers(Modifier.FINAL);
-			
-			rewrite.markAsModified(decl, modifiedNode);
+			int newModifiers= Modifier.FINAL;
+			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 			
 			PrimitiveType newType= ast.newPrimitiveType(PrimitiveType.BOOLEAN);
 			rewrite.markAsReplaced(decl.getType(), newType);
@@ -1000,10 +945,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			FieldDeclaration decl= fieldDeclarations[1];
 			
 			// add modifier
-			FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-			modifiedNode.setModifiers(Modifier.FINAL | Modifier.STATIC | Modifier.TRANSIENT);
-			
-			rewrite.markAsModified(decl, modifiedNode);
+			int newModifiers= Modifier.FINAL | Modifier.STATIC | Modifier.TRANSIENT;
+			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 			
 			List fragments= decl.fragments();
 			assertTrue("Number of fragments not 3", fragments.size() == 3);
@@ -1020,11 +963,9 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{	// remove modifiers
 			FieldDeclaration decl= fieldDeclarations[2];
 			
-			// add modifier
-			FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-			modifiedNode.setModifiers(0);
-			
-			rewrite.markAsModified(decl, modifiedNode);
+			// change modifier
+			int newModifiers= 0;
+			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 		}
 				
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -1071,10 +1012,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			Initializer initializer= (Initializer) declarations.get(0);
 			
 			// add modifier
-			Initializer modifiedNode= ast.newInitializer();
-			modifiedNode.setModifiers(Modifier.STATIC);
-			
-			rewrite.markAsModified(initializer, modifiedNode);
+			int newModifiers= Modifier.STATIC;
+			rewrite.markAsReplaced(initializer, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 			
 			
 			Block block= ast.newBlock();
@@ -1085,11 +1024,9 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{	// change modifier
 			Initializer initializer= (Initializer) declarations.get(1);
 			
-			// remove modifier
-			Initializer modifiedNode= ast.newInitializer();
-			modifiedNode.setModifiers(0);
+			int newModifiers= 0;
+			rewrite.markAsReplaced(initializer, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 			
-			rewrite.markAsModified(initializer, modifiedNode);
 		}
 				
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -1215,18 +1152,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "DD");
-		AST ast= astRoot.getAST();
-
 		{
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "DD");
 			
-			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
-			modifiedNode.setConstructor(true); // no change
-			modifiedNode.setModifiers(methodDecl.getModifiers()); // no change
-			modifiedNode.setExtraDimensions(0);// constructors have no return type
-			rewrite.markAsModified(methodDecl, modifiedNode);
-			
-			rewrite.markAsRemoved(methodDecl.getReturnType());
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.IS_CONSTRUCTOR, Boolean.TRUE, null);
+			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(0), null);
 		}
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);

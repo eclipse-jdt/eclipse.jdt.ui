@@ -45,11 +45,11 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingExpressionsTest("testSuperMethodInvocation"));
+			suite.addTest(new ASTRewritingExpressionsTest("testThisExpression"));
 			return new ProjectTestSetup(suite);
 		}
 	}

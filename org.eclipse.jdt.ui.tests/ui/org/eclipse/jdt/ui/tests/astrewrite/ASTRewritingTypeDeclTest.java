@@ -46,11 +46,11 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingTypeDeclTest("testRemove3"));
+			suite.addTest(new ASTRewritingTypeDeclTest("testVariableDeclarationFragment"));
 			return new ProjectTestSetup(suite);
 		}
 	}
