@@ -190,7 +190,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	protected ElementInfo createElementInfo(Object element) throws CoreException {
 		
 		if ( !(element instanceof IFileEditorInput))
-			throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE));
+			return super.createElementInfo(element);
 			
 		IFileEditorInput input= (IFileEditorInput) element;
 		ICompilationUnit original= createCompilationUnit(input.getFile());
