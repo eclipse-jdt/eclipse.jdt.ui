@@ -314,6 +314,18 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performArgumentTest();
 	}
 	
+	public void testVarargs3() throws Exception {
+		performArgumentTest();
+	}
+	
+	public void testVarargs4() throws Exception {
+		performArgumentTest();
+	}
+	
+	public void testVarargs5() throws Exception {
+		performArgumentTest();
+	}
+	
 	/* *********************** Name Conflict Tests ******************************* */
 		
 	private void performNameConflictTest() throws Exception {

@@ -68,6 +68,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -85,13 +86,14 @@ import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -99,16 +101,17 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class CallInliner {
 
 	private ICompilationUnit fCUnit;
+	private ASTRewrite fRewrite;
 	private ImportRewrite fImportEdit;
 	private ITextFileBuffer fBuffer;
 	private SourceProvider fSourceProvider;
+	private TypeEnvironment fTypeEnvironment;
 	
 	private BodyDeclaration fBodyDeclaration;
 	private CodeScopeBuilder.Scope fRootScope;
 	private int fNumberOfLocals;
 	
 	private ASTNode fInvocation;
-	private ASTRewrite fRewrite;
 	
 	private int fInsertionIndex;
 	private ListRewrite fListRewrite;
@@ -175,16 +178,15 @@ public class CallInliner {
 	}
 
 	private static class AmbiguousMethodAnalyzer implements TypeBindingVisitor {
-		private String fMethodName;
-		private ITypeBinding[] fTypes;
+		private TypeEnvironment fTypeEnvironment;
+		private TType[] fTypes;
 		private IMethodBinding fOriginal;
 
-		public AmbiguousMethodAnalyzer(IMethodBinding original, ITypeBinding[] types) {
-			this.fOriginal= original;
-			this.fMethodName= original.getName();
-			this.fTypes= types;
+		public AmbiguousMethodAnalyzer(TypeEnvironment typeEnvironment, IMethodBinding original, TType[] types) {
+			fTypeEnvironment= typeEnvironment;
+			fOriginal= original;
+			fTypes= types;
 		}
-
 		public boolean visit(ITypeBinding node) {
 			IMethodBinding[] methods= node.getDeclaredMethods();
 			for (int i= 0; i < methods.length; i++) {
@@ -192,7 +194,7 @@ public class CallInliner {
 				if (candidate == fOriginal) {
 					continue;
 				}
-				if (fMethodName.equals(candidate.getName())) {
+				if (fOriginal.getName().equals(candidate.getName())) {
 					if (canImplicitlyCall(candidate)) {
 						return false;
 					}
@@ -200,10 +202,8 @@ public class CallInliner {
 			}
 			return true;
 		}
-
 		/**
-		 * @param candidate method binding to check
-		 * @return <code>true</code> if the method can be called without explicit casts, 
+		 * Returns <code>true</code> if the method can be called without explicit casts; 
 		 * otherwise <code>false</code>.
 		 */
 		private boolean canImplicitlyCall(IMethodBinding candidate) {
@@ -212,7 +212,7 @@ public class CallInliner {
 				return false;
 			}
 			for (int i= 0; i < parameters.length; i++) {
-				if (!TypeRules.canAssign(fTypes[i], parameters[i])) {
+				if (!fTypes[i].canAssignTo(fTypeEnvironment.create(parameters[i]))) {
 					return false;
 				}
 			}
@@ -228,6 +228,7 @@ public class CallInliner {
 		fImportEdit= new ImportRewrite(fCUnit);
 		fLocals= new ArrayList(3);
 		fRewrite= ASTRewrite.create(ast);
+		fTypeEnvironment= new TypeEnvironment();
 	}
 
 	public void dispose() {
@@ -457,15 +458,16 @@ public class CallInliner {
 		}
 	}
 	
-	public void perform(TextEditGroup textEditGroup) throws CoreException {
-		
+	public RefactoringStatus perform(TextEditGroup textEditGroup) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
 		String[] blocks= fSourceProvider.getCodeBlocks(fContext);
 		if(!fFieldInitializer) {
 			initializeInsertionPoint(fSourceProvider.getNumberOfStatements() + fLocals.size());
 		}
 		
 		addNewLocals(textEditGroup);
-		replaceCall(blocks, textEditGroup);
+		replaceCall(result, blocks, textEditGroup);
+		return result;
 	}
 	
 	public TextEdit getModifications() {
@@ -474,10 +476,10 @@ public class CallInliner {
 
 	private void computeRealArguments() throws BadLocationException {
 		List arguments= Invocations.getArguments(fInvocation);
-		boolean isVarargs= fSourceProvider.isVarargs();
+		boolean needsVarargBoxing= needsVarargBoxing(arguments);
 		int varargIndex= fSourceProvider.getVarargIndex();
-		String[] realArguments= new String[isVarargs ? varargIndex + 1 : arguments.size()];
-		for (int i= 0; i < (isVarargs ? varargIndex : arguments.size()); i++) {
+		String[] realArguments= new String[needsVarargBoxing ? varargIndex + 1 : arguments.size()];
+		for (int i= 0; i < (needsVarargBoxing ? varargIndex : arguments.size()); i++) {
 			Expression expression= (Expression)arguments.get(i);
 			ParameterData parameter= fSourceProvider.getParameterData(i);
 			if (canInline(expression, parameter)) {
@@ -494,22 +496,43 @@ public class CallInliner {
 					(Expression)fRewrite.createCopyTarget(expression)));
 			}
 		}
-		if (isVarargs) {
+		if (needsVarargBoxing) {
 			ParameterData parameter= fSourceProvider.getParameterData(varargIndex);
 			String name= fInvocationScope.createName(parameter.getName(), true);
 			realArguments[varargIndex]= name;
-			String typeName= fImportEdit.addImport(parameter.getTypeBinding());
 			AST ast= fInvocation.getAST();
-			VariableDeclarationStatement decl= (VariableDeclarationStatement)ASTNodeFactory.newStatement(
-				ast, typeName + "[] " + name + ";"); //$NON-NLS-1$ //$NON-NLS-2$
+			Type type= fImportEdit.addImport(parameter.getTypeBinding(), ast);
+			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
+			fragment.setName(ast.newSimpleName(name));
 			ArrayInitializer initializer= ast.newArrayInitializer();
 			for (int i= varargIndex; i < arguments.size(); i++) {
 				initializer.expressions().add(fRewrite.createCopyTarget((ASTNode)arguments.get(i)));
 			}
-			((VariableDeclarationFragment)decl.fragments().get(0)).setInitializer(initializer);
+			fragment.setInitializer(initializer);
+			VariableDeclarationStatement decl= ast.newVariableDeclarationStatement(fragment);
+			decl.setType(type);
 			fLocals.add(decl);
 		}
 		fContext.arguments= realArguments;
+	}
+	
+	private boolean needsVarargBoxing(List arguments) {
+		if (!fSourceProvider.isVarargs())
+			return false;
+		int index= fSourceProvider.getVarargIndex();
+		// we have varags but the call doesn't pass any arguments
+		if (index >= arguments.size())
+			return true;
+		// we have exactly one argument as a vararg. We have to
+		// check if it is assignment compatible.
+		if (index == arguments.size() - 1) {
+			ITypeBinding binding= ((Expression)arguments.get(index)).resolveTypeBinding();
+			if (binding == null)
+				return false;
+			ParameterData parameter= fSourceProvider.getParameterData(index);
+			return !fTypeEnvironment.create(binding).canAssignTo(fTypeEnvironment.create(parameter.getTypeBinding()));
+		}
+		return true;
 	}
 	
 	private void computeReceiver() throws BadLocationException {
@@ -555,7 +578,7 @@ public class CallInliner {
 		}
 	}
 
-	private void replaceCall(String[] blocks, TextEditGroup textEditGroup) {
+	private void replaceCall(RefactoringStatus status, String[] blocks, TextEditGroup textEditGroup) {
 		// Inline empty body
 		if (blocks.length == 0) {
 			if (fNeedsStatement) {
@@ -591,7 +614,7 @@ public class CallInliner {
 				node= fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION);
 				
 				// fixes bug #24941
-				if(needsExplicitCast()) {
+				if(needsExplicitCast(status)) {
 					AST ast= node.getAST();
 					CastExpression castExpression= ast.newCastExpression();
 					ITypeBinding returnType= fSourceProvider.getReturnType();
@@ -628,7 +651,7 @@ public class CallInliner {
 	/**
 	 * @return <code>true</code> if explicit cast is needed otherwise <code>false</code>
 	 */
-	private boolean needsExplicitCast() {
+	private boolean needsExplicitCast(RefactoringStatus status) {
 		// if the return type of the method is the same as the type of the
 		// returned expression then we don't need an explicit cast.
 		if (fSourceProvider.returnTypeMatchesReturnExpressions())
@@ -640,6 +663,11 @@ public class CallInliner {
 			if(methodInvocation.getExpression() == fTargetNode)
 				return false;
 			IMethodBinding method= methodInvocation.resolveMethodBinding();
+			if (method == null) {
+				status.addError(RefactoringCoreMessages.getString("CallInliner.cast_analysis.error"),  //$NON-NLS-1$
+					JavaStatusContext.create(fCUnit, methodInvocation));
+				return false;
+			}
 			ITypeBinding[] parameters= method.getParameterTypes();
 			int argumentIndex= methodInvocation.arguments().indexOf(fInvocation);
 			List returnExprs= fSourceProvider.getReturnExpressions();
@@ -651,7 +679,8 @@ public class CallInliner {
 			parameters[argumentIndex]= ((Expression)returnExprs.get(0)).resolveTypeBinding();
 
 			ITypeBinding type= ASTNodes.getReceiverTypeBinding(methodInvocation);
-			TypeBindingVisitor visitor= new AmbiguousMethodAnalyzer(method, parameters);
+			TypeBindingVisitor visitor= new AmbiguousMethodAnalyzer(
+				fTypeEnvironment, method, fTypeEnvironment.create(parameters));
 			if(!visitor.visit(type)) {
 				return true;
 			}

@@ -166,6 +166,14 @@ public class TypeEnvironment {
 		return createStandardType(binding);
 	}
 	
+	public TType[] create(ITypeBinding[] bindings) {
+		TType[] result= new TType[bindings.length];
+		for (int i= 0; i < bindings.length; i++) {
+			result[i]= create(bindings[i]);
+		}
+		return result;
+	}
+	
 	/* package */ TType getJavaLangObject() {
 		return OBJECT_TYPE;
 	}

@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 
 /* package */ class ParameterData {
@@ -39,15 +38,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 		return fDeclaration.getName().getIdentifier();
 	}
 	
-	public String getTypeName() {
-		ITypeBinding binding= getTypeBinding();
-		if (binding != null)
-			return binding.getName();
-		return ASTNodes.asString(fDeclaration.getType());
-	}
-	
 	public ITypeBinding getTypeBinding() {
-		return fDeclaration.getType().resolveBinding();
+		return fDeclaration.resolveBinding().getType();
 	}
 	
 	public void addReference(ASTNode node) {

@@ -230,7 +230,7 @@ public class InlineMethodRefactoring extends Refactoring {
 							break;
 						if (result.getSeverity() < fTargetProvider.getStatusSeverity()) {
 							added= true;
-							inliner.perform(new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"))); //$NON-NLS-1$
+							result.merge(inliner.perform(new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline")))); //$NON-NLS-1$
 						} else {
 							fDeleteSource= false;
 						}
@@ -435,7 +435,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			ASTNode parent= parents[i];
 			while (parent != null) {
 				if (parent == invocation) {
-					status.addError("Nested invocation. Only the innermost invocation will be inlined", 
+					status.addError(RefactoringCoreMessages.getString("InlineMethodRefactoring.nestedInvocation"),  //$NON-NLS-1$
 						JavaStatusContext.create(unit, parent));
 					invocations[index]= null;
 				}
