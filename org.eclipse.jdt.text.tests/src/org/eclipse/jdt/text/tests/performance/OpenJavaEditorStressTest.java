@@ -46,7 +46,7 @@ public class OpenJavaEditorStressTest extends TestCase {
 			}
 			performanceMeter.stop();
 			performanceMeter.commit();
-			performance.assertPerformanceInRelativeBand(performanceMeter, Dimension.USED_JAVA_HEAP, -100, +100); // TODO: use absolute band
+			performance.assertPerformanceInAbsoluteBand(performanceMeter, Dimension.USED_JAVA_HEAP, -20*1024*1024, +20*1024*1024);
 		} finally {
 			performanceMeter.dispose();
 			EditorTestHelper.closeAllEditors();
