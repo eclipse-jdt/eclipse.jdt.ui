@@ -1258,7 +1258,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		if (isDisposed())
 			return;
 
-		if (IJUnitPreferencesConstants.SHOW_ON_ERROR_ONLY.equals(event.getProperty())) {
+		if (JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY.equals(event.getProperty())) {
 			if (!JUnitPreferencePage.getShowOnErrorOnly()) {
 				fViewImage= fOriginalViewImage;
 				firePropertyChange(IWorkbenchPart.PROP_TITLE);

@@ -84,17 +84,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	private static final Image IMG_CUNIT= JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
 	private static final Image IMG_PKG= JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PACKAGE);
 	
-	private static String[] fgDefaultFilterPatterns= new String[] { "org.eclipse.jdt.internal.junit.runner.*", //$NON-NLS-1$
-		"org.eclipse.jdt.internal.junit.ui.*", //$NON-NLS-1$
-		"junit.framework.TestCase", //$NON-NLS-1$
-		"junit.framework.TestResult", //$NON-NLS-1$
-		"junit.framework.TestSuite", //$NON-NLS-1$
-		"junit.framework.Assert", //$NON-NLS-1$
-		"java.lang.reflect.Method.invoke", //$NON-NLS-1$
-		"junit.framework.TestResult$1" //$NON-NLS-1$
-
-	};
-
 	// Step filter widgets
 	private CheckboxTableViewer fFilterViewer;
 	private Table fFilterTable;
@@ -237,7 +226,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		public void setDefaults() {
 			fFilterViewer.remove(fFilters.toArray());
-			List active= createDefaultStackFiltersList();
+			List active= JUnitPreferencesConstants.createDefaultStackFiltersList();
 			List inactive= new ArrayList();
 			populateFilters(active, inactive);
 		}
@@ -281,10 +270,10 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 				else
 					inactive.add(name);
 			}
-			String pref= JUnitPreferencePage.serializeList((String[]) active.toArray(new String[active.size()]));
-			getPreferenceStore().setValue(IJUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, pref);
-			pref= JUnitPreferencePage.serializeList((String[]) inactive.toArray(new String[inactive.size()]));
-			getPreferenceStore().setValue(IJUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, pref);
+			String pref= JUnitPreferencesConstants.serializeList((String[]) active.toArray(new String[active.size()]));
+			getPreferenceStore().setValue(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, pref);
+			pref= JUnitPreferencesConstants.serializeList((String[]) inactive.toArray(new String[inactive.size()]));
+			getPreferenceStore().setValue(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, pref);
 		}
 
 		public void removeFilters(Object[] filters) {
@@ -731,7 +720,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	
 	public boolean performOk() {
 		IPreferenceStore store= getPreferenceStore();
-		store.setValue(IJUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, fShowOnErrorCheck.getSelection());
+		store.setValue(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, fShowOnErrorCheck.getSelection());
 		fStackFilterContentProvider.saveFilters();
 		return true;
 	}
@@ -743,15 +732,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	private void setDefaultValues() {
 		fStackFilterContentProvider.setDefaults();
-	}
-
-	/**
-	 * Returns the default list of active stack filters.
-	 * 
-	 * @return list
-	 */
-	protected List createDefaultStackFiltersList() {
-		return Arrays.asList(fgDefaultFilterPatterns);
 	}
 
 	/**
@@ -770,7 +750,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	 */
 	protected List createInactiveStackFiltersList() {
 		String[] strings=
-			JUnitPreferencePage.parseList(getPreferenceStore().getString(IJUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST));
+			JUnitPreferencePage.parseList(getPreferenceStore().getString(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST));
 		return Arrays.asList(strings);
 	}
 
@@ -785,36 +765,22 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	public static String[] getFilterPatterns() {
 		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		return JUnitPreferencePage.parseList(store.getString(IJUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST));
+		return JUnitPreferencePage.parseList(store.getString(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST));
 	}
 
 	public static boolean getFilterStack() {
 		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(IJUnitPreferencesConstants.DO_FILTER_STACK);
+		return store.getBoolean(JUnitPreferencesConstants.DO_FILTER_STACK);
 	}
 
 	public static void setFilterStack(boolean filter) {
 		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		store.setValue(IJUnitPreferencesConstants.DO_FILTER_STACK, filter);
-	}
-
-	public static void initializeDefaults(IPreferenceStore store) {
-		store.setDefault(IJUnitPreferencesConstants.DO_FILTER_STACK, true);
-		store.setDefault(IJUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, true);
-
-		String list= store.getString(IJUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST);
-
-		if ("".equals(list)) { //$NON-NLS-1$
-			String pref= JUnitPreferencePage.serializeList(fgDefaultFilterPatterns);
-			store.setValue(IJUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, pref);
-		}
-
-		store.setValue(IJUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$
+		store.setValue(JUnitPreferencesConstants.DO_FILTER_STACK, filter);
 	}
 
 	public static boolean getShowOnErrorOnly() {
 		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(IJUnitPreferencesConstants.SHOW_ON_ERROR_ONLY);
+		return store.getBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY);
 	}
 	
 	/**
@@ -828,26 +794,5 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		while (tokenizer.hasMoreTokens())
 			list.add(tokenizer.nextToken());
 		return (String[]) list.toArray(new String[list.size()]);
-	}
-
-	/**
-	 * Serializes the array of strings into one comma
-	 * separated string.
-	 * 
-	 * @param list array of strings
-	 * @return a single string composed of the given list
-	 */
-	private static String serializeList(String[] list) {
-		if (list == null)
-			return ""; //$NON-NLS-1$
-
-		StringBuffer buffer= new StringBuffer();
-		for (int i= 0; i < list.length; i++) {
-			if (i > 0)
-				buffer.append(',');
-
-			buffer.append(list[i]);
-		}
-		return buffer.toString();
 	}
 }
