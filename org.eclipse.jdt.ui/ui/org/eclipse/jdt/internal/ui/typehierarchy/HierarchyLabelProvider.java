@@ -142,7 +142,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			} catch (JavaModelException e) {
 			}
 		}
-		return text;
+		return decorateText(text, element);
 	}	
 	
 	
@@ -162,14 +162,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		} else {
 			result= fImageLabelProvider.getImageLabel(element, evaluateImageFlags(element));
 		}
-
-		if (fLabelDecorators != null && result != null) {
-			for (int i= 0; i < fLabelDecorators.size(); i++) {
-				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
-				result= decorator.decorateImage(result, element);
-			}
-		}			
-		return result;
+		return decorateImage(result, element);
 	}
 
 	private ImageDescriptor getTypeImageDescriptor(IType type) {

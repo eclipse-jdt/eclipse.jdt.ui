@@ -92,11 +92,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	
 	private Image decorateCompoundElement(ImageDescriptor imageDescriptor, LogicalPackage cp) {
 		Image image= fRegistry.get(imageDescriptor);
-		for (int i= 0; i < fLabelDecorators.size(); i++) {
-			ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
-			image= decorator.decorateImage(image, cp);
-		}	
-		return image;
+		return decorateImage(image, cp);
 	}
 	
 	private boolean isEmpty(IPackageFragment fragment) { 
@@ -160,18 +156,6 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 
 	}
 	
-	private String decorateText(String name, Object element) {
-		if (fLabelDecorators == null)
-			return name;
-
-		for (int i= 0; i < fLabelDecorators.size(); i++) {
-			ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
-			name= decorator.decorateText(name, element);
-		}
-		return name;	
-	}
-	
-
 	private class ElementImageProvider extends JavaElementImageProvider{
 		
 		public ElementImageProvider() {

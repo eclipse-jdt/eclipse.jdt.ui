@@ -27,7 +27,7 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 	protected JavaElementImageProvider fImageLabelProvider;
 	protected StorageLabelProvider fStorageLabelProvider;
 	
-	protected ArrayList fLabelDecorators;
+	private ArrayList fLabelDecorators;
 
 	private int fImageFlags;
 	private int fTextFlags;
@@ -112,6 +112,15 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 		return getTextFlags();
 	}
 	
+	protected Image decorateImage(Image image, Object element) {
+		if (fLabelDecorators != null && image != null) {
+			for (int i= 0; i < fLabelDecorators.size(); i++) {
+				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
+				image= decorator.decorateImage(image, element);
+			}
+		}
+		return image;
+	}
 
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
@@ -121,14 +130,20 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 		if (result == null && (element instanceof IStorage)) {
 			result= fStorageLabelProvider.getImage(element);
 		}
-		if (fLabelDecorators != null && result != null) {
+		
+		return decorateImage(result, element);
+	}
+
+	protected String decorateText(String text, Object element) {
+		if (fLabelDecorators != null && text.length() > 0) {
 			for (int i= 0; i < fLabelDecorators.size(); i++) {
 				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
-				result= decorator.decorateImage(result, element);
+				text= decorator.decorateText(text, element);
 			}
-		}			
-		return result;
+		}	
+		return text;
 	}
+
 
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getText
@@ -138,13 +153,8 @@ public class JavaUILabelProvider extends LabelProvider implements IColorProvider
 		if (result.length() == 0 && (element instanceof IStorage)) {
 			result= fStorageLabelProvider.getText(element);
 		}
-		if (fLabelDecorators != null && result.length() > 0) {
-			for (int i= 0; i < fLabelDecorators.size(); i++) {
-				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
-				result= decorator.decorateText(result, element);
-			}
-		}			
-		return result;
+		
+		return decorateText(result, element);
 	}
 
 	/* (non-Javadoc)
