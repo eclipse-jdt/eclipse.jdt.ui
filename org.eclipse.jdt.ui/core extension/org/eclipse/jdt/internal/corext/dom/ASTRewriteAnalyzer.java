@@ -919,10 +919,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		// type members
 		List members= typeDecl.bodyDeclarations();
 
-		// startPos : find position after left brace of type
+		// startPos : find position after left brace of type, be aware that bracket might be missing
 		try {
 			int startIndent= getIndent(typeDecl.getStartPosition()) + 1;
-			int startPos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameLBRACE, pos);		
+			int nextToken= getScanner().readNext(pos, true);
+			int startPos= (nextToken == ITerminalSymbols.TokenNameLBRACE) ? getScanner().getCurrentEndOffset() : pos;
 			rewriteParagraphList(members, startPos, startIndent, -1);
 		} catch (CoreException e) {
 			// ignore
