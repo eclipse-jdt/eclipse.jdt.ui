@@ -19,7 +19,9 @@ import java.text.NumberFormat;
 public class Unit {
 	private static final int T_DECIMAL= 1000;
 	private static final int T_BINARY= 1024;
-	protected static final String[] PREFIXES= new String[] { "k", "M", "G", "P", "E" };
+	
+	protected static final String[] PREFIXES= new String[] { "a", "f", "p", "n", "u", "m", "\0", "k", "M", "G", "T", "P", "E" };
+	protected static final String[] FULL_PREFIXES= new String[] { "atto", "femto", "pico", "nano", "micro", "milli", "\0", "kilo", "mega", "giga", "tera", "peta", "exa" };
 	
 	private final String fShortName;
 	private final String fFullName;
@@ -37,17 +39,23 @@ public class Unit {
 	public DisplayValue getDisplayValue(double magnitude) {
 		int div= fIsBinary ? T_BINARY : T_DECIMAL;
 		double mag= magnitude, ratio= mag / div;
-		int divs= 0;
-		while (ratio > 1) {
+		int divs= 6;
+		while (ratio >= 1) {
 			mag= ratio;
 			divs++;
 			ratio= mag / div;
+		}
+		ratio= mag * div;
+		while (ratio < div) {
+			mag= ratio;
+			divs--;
+			ratio= mag * div;
 		}
 		
 		NumberFormat format= NumberFormat.getInstance();
 		format.setMaximumFractionDigits(fPrecision);
 		if (divs > 0 && divs <= PREFIXES.length)
-			return new DisplayValue(PREFIXES[divs - 1] + getShortName(), format.format(mag));
+			return new DisplayValue(PREFIXES[divs] + getShortName(), format.format(mag));
 		else
 			return new DisplayValue(getShortName(), "" + magnitude);
 	}

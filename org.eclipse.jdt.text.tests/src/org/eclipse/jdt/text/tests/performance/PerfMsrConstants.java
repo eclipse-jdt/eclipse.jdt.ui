@@ -10,19 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.jdt.text.tests.performance.data.Dimension;
-import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
-
 
 /**
  * @since 3.1
  */
-public interface IEvaluator {
-
-	void evaluate(MeteringSession session);
-
-	void setDimensions(Dimension[] dimensions);
-
-	void setReferenceFilterProperties(String driver, String testname, String host, String timestamp);
-
+public final class PerfMsrConstants {
+	public static final String BEFORE= "1"; //$NON-NLS-1$
+	public static final String AFTER= "2"; //$NON-NLS-1$
+	public static final String DRIVER_PROPERTY= "driver"; //$NON-NLS-1$
+	public static final String HOSTNAME_PROPERTY= "hostname"; //$NON-NLS-1$
+	public static final String RUN_TS_PROPERTY= "runTS"; //$NON-NLS-1$
+	public static final String TESTNAME_PROPERTY= "testname"; //$NON-NLS-1$
 }

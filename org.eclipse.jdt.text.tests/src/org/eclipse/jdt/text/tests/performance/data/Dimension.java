@@ -49,4 +49,8 @@ public class Dimension {
 	public DisplayValue getDisplayValue(Scalar scalar) {
 		return fUnit.getDisplayValue((double) scalar.getMagnitude() / fMultiplier);
 	}
+	
+	public DisplayValue getDisplayValue(double scalar) {
+		return fUnit.getDisplayValue(scalar / fMultiplier);
+	}
 }
