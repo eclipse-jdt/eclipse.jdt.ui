@@ -5,7 +5,32 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Listener;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+
+import org.eclipse.ui.help.DialogPageContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.IJavaProject;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
 
 /*
  * The page for setting java runtime
@@ -19,52 +44,66 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 	
 	public VMPropertyPage() {
 		fVMSelector= new VMSelector();
+		setTitle(LauncherMessages.getString("vmPropertyPage.title")); //$NON-NLS-1$
+		noDefaultAndApplyButton();
 	}
 	
-	protected Control createJavaContents(Composite ancestor) {
-		noDefaultAndApplyButton();
+	protected Control createJavaContents(Composite ancestor) {		
 		Composite parent= new Composite(ancestor, SWT.NULL);
 		parent.setLayout(new GridLayout());
 		
+		SelectionListener listener= new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {				
+			}
+
+			public void widgetSelected(SelectionEvent e) {
+				buttonSelected(e.widget);
+			}
+		};
+								
 		fUseDefault= new Button(parent, SWT.RADIO);
 		fUseDefault.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fUseDefault.setText(LauncherMessages.getString("vmPropertyPage.useDefaultJRE")); //$NON-NLS-1$
-		fUseDefault.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event evt) {
-				enableCustom(false);
-			}
-		});
+		fUseDefault.addSelectionListener(listener);
 		
 		fUseCustom= new Button(parent, SWT.RADIO);
 		fUseCustom.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fUseCustom.setText(LauncherMessages.getString("vmPropertyPage.useCustomJRE")); //$NON-NLS-1$
-		fUseCustom.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event evt) {
-				enableCustom(true);
-			}
-		});
+		fUseCustom.addSelectionListener(listener);
 
 		fVMSelectorWidget= fVMSelector.createContents(parent);
 		fVMSelector.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				setValid(fVMSelector.validateSelection(event.getSelection()));
+				listSelectionChanged(event.getSelection());
 			}
 		});
 		fVMSelectorWidget.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		initFromProject(getJavaProject());
+		
 		WorkbenchHelp.setHelp(ancestor, new DialogPageContextComputer(this, IJavaHelpContextIds.LAUNCH_JRE_PROPERYY_PAGE));			
 		return parent;
 	}
 	
+	private void buttonSelected(Widget widget) {
+		fVMSelectorWidget.setEnabled(widget == fUseCustom);
+	}
+	
+	private void listSelectionChanged(ISelection newSelection) {
+		setValid(fVMSelector.validateSelection(newSelection));
+	}	
+	
 	/**
-	 * Must be called after createContents
+	 * Called to initialize the dialog
 	 */ 
-	public void initFromProject(IJavaProject project) {
+	private void initFromProject(IJavaProject project) {
 		IVMInstall vm= null;
 		try {
 			vm= JavaRuntime.getVMInstall(project);
 		} catch (CoreException e) {
+			JavaPlugin.log(e.getStatus());
 		}
-		enableCustom(vm != null);
+		fVMSelectorWidget.setEnabled(vm != null);
 		fUseCustom.setSelection(vm != null);
 		fUseDefault.setSelection(vm == null);
 		if (vm == null) {
@@ -82,30 +121,10 @@ public class VMPropertyPage extends JavaProjectPropertyPage {
 					 vm= fVMSelector.getSelectedVM();
 				JavaRuntime.setVM(project, vm);
 			} catch (CoreException e) {
+				JavaPlugin.log(e.getStatus());
 			}
 		}
 		return true;
 	}
-	
-	public void setElement(IAdaptable element) {
-		super.setElement(element);
-		if (getJavaProject() != null && isOpenProject())
-			setDescription(LauncherMessages.getString("vmPropertyPage.description")); //$NON-NLS-1$
-	} 
-	
-	public void setVisible(boolean visible) {
-		if (visible && fFirstTime) {
-			fFirstTime= false;
-			setTitle(LauncherMessages.getString("vmPropertyPage.title")); //$NON-NLS-1$
-			// fix: 1GET9NJ: ITPJUI:ALL - NPE looking at JRE properties for closed project		
-			if (isCreated())
-				initFromProject(getJavaProject());
-			// end fix.
-		}
-		super.setVisible(visible);
-	}
-	
-	private void enableCustom(boolean useCustom) {
-		fVMSelectorWidget.setEnabled(useCustom);
-	}
+
 }

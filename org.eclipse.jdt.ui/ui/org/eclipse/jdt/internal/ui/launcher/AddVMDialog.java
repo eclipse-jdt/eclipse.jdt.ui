@@ -4,7 +4,9 @@
  */
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.Enumeration;import java.util.zip.ZipEntry;import java.util.zip.ZipFile;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.help.WorkbenchHelp;
+import java.io.File;import java.io.IOException;import java.util.Enumeration;import java.util.zip.ZipEntry;import java.util.zip.ZipFile;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IUIConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.help.WorkbenchHelp;
 
 public class AddVMDialog extends StatusDialog {
 	private static final String JAVA_LANG_OBJECT= "java/lang/Object.java"; //$NON-NLS-1$
@@ -24,6 +26,8 @@ public class AddVMDialog extends StatusDialog {
 	
 	protected Button fUseDefaultLibrary;
 	
+	private IDialogSettings fDialogSettings;
+	
 	protected IStatus[] fStati;
 		
 	public AddVMDialog(VMPreferencePage page, IVMInstallType[] vmInstallTypes, IVMInstallType initialVMType) {
@@ -33,6 +37,8 @@ public class AddVMDialog extends StatusDialog {
 		
 		fVMTypes= vmInstallTypes;
 		fSelectedVMType= initialVMType;
+		
+		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	}
 	
 	/**
@@ -346,27 +352,26 @@ public class AddVMDialog extends StatusDialog {
 	 * try finding the package prefix
 	 */
 	private String determinePackagePrefix(File f) {
+		ZipFile zip= null;
 		try {
-			ZipFile zip= null;
-			try {
-				zip= new ZipFile(f);
-				Enumeration zipEntries= zip.entries();
-				while (zipEntries.hasMoreElements()) {
-					ZipEntry entry= (ZipEntry) zipEntries.nextElement();
-					String name= entry.getName();
-					if (name.endsWith(JAVA_LANG_OBJECT)) {
-						String prefix= name.substring(0, name.length() - JAVA_LANG_OBJECT.length());
-						if (prefix.endsWith("/")) //$NON-NLS-1$
-							prefix= prefix.substring(0, prefix.length() - 1);
-						return prefix;
-					}
+			zip= new ZipFile(f);
+			Enumeration zipEntries= zip.entries();
+			while (zipEntries.hasMoreElements()) {
+				ZipEntry entry= (ZipEntry) zipEntries.nextElement();
+				String name= entry.getName();
+				if (name.endsWith(JAVA_LANG_OBJECT)) {
+					String prefix= name.substring(0, name.length() - JAVA_LANG_OBJECT.length());
+					if (prefix.endsWith("/")) //$NON-NLS-1$
+						prefix= prefix.substring(0, prefix.length() - 1);
+					return prefix;
 				}
-			} catch (IOException e) {
-			} finally {
-				if (zip != null)
-					zip.close();
 			}
 		} catch (IOException e) {
+			JavaPlugin.log(e);
+		} finally {
+			if (zip != null) {
+				try { zip.close(); } catch (IOException e) {};
+			}
 		}
 		return null;
 	}
@@ -381,18 +386,53 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	private void browseForSystemLibrary() {
+		String currPath= fSystemLibrary.getText();
+		String lastUsedDir;	
+		if (currPath.length() == 0) {
+			lastUsedDir= fDialogSettings.get(IUIConstants.DIALOGSTORE_LASTEXTJAR);
+			if (lastUsedDir == null) {
+				lastUsedDir= fJDKRoot.getText();
+			}
+		} else {
+			IPath prevPath= new Path(currPath);
+			String ext= prevPath.getFileExtension();
+			if ("jar".equals(ext) || "zip".equals(ext)) {
+				prevPath= prevPath.removeLastSegments(1);
+			}
+			lastUsedDir= prevPath.toOSString();
+		}
+		
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setFilterPath(fSystemLibrary.getText());
+		dialog.setFilterPath(lastUsedDir);
 		dialog.setText(LauncherMessages.getString("addVMDialog.pickJREJar")); //$NON-NLS-1$
-		dialog.setFilterExtensions(new String[] { "*.jar", "*.zip"}); //$NON-NLS-2$ //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] { "*.jar;*.zip"}); //$NON-NLS-2$ //$NON-NLS-1$
 		String newPath= dialog.open();
-		if  (newPath != null)
+		if  (newPath != null) {
 			fSystemLibrary.setText(newPath);
+			fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTJAR, dialog.getFilterPath());
+		}
 	}
 	
 	private void browseForSystemLibrarySource() {
+		String currPath= fSystemLibrarySource.getText();
+		String lastUsedDir;	
+		if (currPath.length() == 0) {
+			currPath= fSystemLibrary.getText();
+		}
+		if (currPath.length() == 0) {
+			lastUsedDir= fJDKRoot.getText();
+		} else {
+			IPath prevPath= new Path(currPath);
+			String ext= prevPath.getFileExtension();
+			if ("jar".equals(ext) || "zip".equals(ext)) {
+				prevPath= prevPath.removeLastSegments(1);
+			}
+			lastUsedDir= prevPath.toOSString();
+		}		
+		
+		
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setFilterPath(fSystemLibrarySource.getText());
+		dialog.setFilterPath(lastUsedDir);
 		dialog.setText(LauncherMessages.getString("addVMDialog.pickJRESource")); //$NON-NLS-1$
 		dialog.setFilterExtensions(new String[] { "*.jar;*.zip"}); //$NON-NLS-1$
 		String newPath= dialog.open();
