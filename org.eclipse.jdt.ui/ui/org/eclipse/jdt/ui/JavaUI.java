@@ -107,12 +107,20 @@ public final class JavaUI {
 	public static final String ID_CODING_ACTION_SET= "org.eclipse.jdt.ui.CodingActionSet"; //$NON-NLS-1$
 
 	/**
-	 * The id of the Java Search action set
-	 * (value <code>org.eclipse.jdt.ui.JavaSearchActionSet"</code>).
+	 * The id of the Java action set for open actions
+	 * (value <code>"org.eclipse.jdt.ui.OpenActionSet"</code>).
 	 * 
 	 * @since 2.0
 	 */
-	public static final String ID_JAVA_SEARCH_ACTION_SET= "org.eclipse.jdt.ui.JavaSearchActionSet";
+	public static final String ID_OPEN_ACTION_SET= "org.eclipse.jdt.ui.OpenActionSet"; //$NON-NLS-1$
+
+	/**
+	 * The id of the Java Search action set
+	 * (value <code>org.eclipse.jdt.ui.SearchActionSet"</code>).
+	 * 
+	 * @since 2.0
+	 */
+	public static final String ID_SEARCH_ACTION_SET= "org.eclipse.jdt.ui.SearchActionSet";
 	
 	/**
 	 * The editor part id of the editor that presents Java compilation units
