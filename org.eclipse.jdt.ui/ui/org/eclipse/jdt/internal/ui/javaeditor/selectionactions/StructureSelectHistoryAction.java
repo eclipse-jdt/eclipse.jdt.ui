@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.javaeditor.structureselection;
+package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;

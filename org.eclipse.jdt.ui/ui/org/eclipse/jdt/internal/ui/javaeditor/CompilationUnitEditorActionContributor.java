@@ -38,8 +38,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.structureselection.GoToNextPreviousMemberAction;
-import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;

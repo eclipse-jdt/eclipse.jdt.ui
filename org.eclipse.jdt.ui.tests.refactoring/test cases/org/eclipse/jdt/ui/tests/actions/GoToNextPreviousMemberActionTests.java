@@ -10,7 +10,7 @@ import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
-import org.eclipse.jdt.internal.ui.javaeditor.structureselection.GoToNextPreviousMemberAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 
 public class GoToNextPreviousMemberActionTests extends RefactoringTest{
 
