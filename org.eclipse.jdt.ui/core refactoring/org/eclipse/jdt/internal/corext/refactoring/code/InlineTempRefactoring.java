@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
@@ -262,8 +263,9 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private void removeDeclaration(TextChange change, int offset, int length)  throws JavaModelException {
+		ISourceRange range= SourceRangeComputer.computeSourceRange(new SourceRange(offset, length), fCu.getSource());
 		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.remove_edit_name") + getTempName();  //$NON-NLS-1$
-		change.addTextEdit(changeName, new LineEndDeleteTextEdit(offset, length, fCu.getSource()));
+		change.addTextEdit(changeName, SimpleTextEdit.createDelete(range.getOffset(), range.getLength()));
 	}
 	
 	private String getInitializerSource(boolean brackets) throws JavaModelException{
