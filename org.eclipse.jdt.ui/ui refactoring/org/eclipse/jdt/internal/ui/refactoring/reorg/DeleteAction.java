@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.ISharedImages;
@@ -29,7 +32,9 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -42,17 +47,20 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public class DeleteAction extends SelectionDispatchAction{
 
 	private boolean fSuggestGetterSetterDeletion;
+	private boolean fAskForConfirmation;
 
 	public DeleteAction(IWorkbenchSite site) {
 		super(site);
 		setText(ReorgMessages.getString("DeleteAction.3")); //$NON-NLS-1$
 		setDescription(ReorgMessages.getString("DeleteAction.4")); //$NON-NLS-1$
-		fSuggestGetterSetterDeletion= true;//default
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));		
 		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE_HOVER));
 
+		fSuggestGetterSetterDeletion= true;//default
+		fAskForConfirmation= true;//default
+		
 		update(getSelection());
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.DELETE_ACTION);
 	}
@@ -61,6 +69,10 @@ public class DeleteAction extends SelectionDispatchAction{
 		fSuggestGetterSetterDeletion= suggest;
 	}
 
+	public void setAskForConfirmation(boolean ask){
+		fAskForConfirmation= ask;
+	}
+	
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
@@ -116,11 +128,22 @@ public class DeleteAction extends SelectionDispatchAction{
 				startRefactoring(resources, javaElements);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		}		
+		} catch (InterruptedException e) {
+			//OK
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		}	
 	}
 
-	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
+	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException, InterruptedException, InvocationTargetException{
 		DeleteRefactoring refactoring= createRefactoring(resources, javaElements);
+		if (fAskForConfirmation)
+			runWithWizard(refactoring);		
+		else
+			runWithoutWizard(refactoring);
+	}
+	
+	private void runWithWizard(DeleteRefactoring refactoring) throws JavaModelException {
 		RefactoringWizard wizard= createWizard(refactoring);
 		/*
 		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
@@ -131,6 +154,12 @@ public class DeleteAction extends SelectionDispatchAction{
 			new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
 	}
 
+	private void runWithoutWizard(DeleteRefactoring refactoring) throws InterruptedException, InvocationTargetException {
+		IRunnableContext context= new ProgressMonitorDialog(getShell());
+		refactoring.setQueries(new ReorgQueries(getShell()));
+		new RefactoringExecutionHelper(refactoring, RefactoringPreferences.getStopSeverity(), false, getShell(), context).perform();
+	}
+	
 	private static RefactoringWizard createWizard(DeleteRefactoring refactoring){
 		return new DeleteWizard(refactoring);
 	}
