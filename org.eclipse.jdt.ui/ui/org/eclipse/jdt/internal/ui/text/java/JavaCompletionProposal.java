@@ -24,11 +24,15 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -168,23 +172,29 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 				string= buffer.toString();
 			}
 
+			// reference position just at the end of the document change.
+			int referenceOffset= fReplacementOffset + fReplacementLength;
+			final ReferenceTracker referenceTracker= new ReferenceTracker();
+			referenceTracker.preReplace(document, referenceOffset);
+
 			replace(document, fReplacementOffset, fReplacementLength, string);
+
+			referenceOffset= referenceTracker.postReplace(document);			
+			fReplacementOffset= referenceOffset - (string == null ? 0 : string.length());
 
 			if (fTextViewer != null && string != null) {
 				int index= string.indexOf("()"); //$NON-NLS-1$
-				if (index != -1) {
-					
+				if (index != -1 && index + 1 == fCursorPosition) {
 					IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 					if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS)) {
-	
-						int newOffset= fReplacementOffset + index;
-		
+						int newOffset= fReplacementOffset + fCursorPosition;
+						
 						LinkedPositionManager manager= new LinkedPositionManager(document);
-						manager.addPosition(newOffset + 1, 0);
+						manager.addPosition(newOffset, 0);
 		
 						LinkedPositionUI editor= new LinkedPositionUI(fTextViewer, manager);
 						editor.setExitPolicy(new ExitPolicy(')'));
-						editor.setFinalCaretOffset(newOffset + 2);
+						editor.setFinalCaretOffset(newOffset + 1);
 						editor.enter();							
 					}
 				}
@@ -194,6 +204,56 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			// ignore
 		}		
 	}
+
+	/**
+	 * A class to simplify tracking a reference position in a document. 
+	 */
+	private static final class ReferenceTracker {
+
+		/** The reference position category name. */
+		private static final String CATEGORY= "reference_position"; //$NON-NLS-1$
+		/** The position updater of the reference position. */
+		private final IPositionUpdater fPositionUpdater= new DefaultPositionUpdater(CATEGORY);
+		/** The reference position. */
+		private final Position fPosition= new Position(0);
+		
+		/**
+		 * Called before document changes occur. It must be followed by a call to postReplace().
+		 * 
+		 * @param document the document on which to track the reference position.
+		 *	
+		 */
+		public void preReplace(IDocument document, int offset) throws BadLocationException {
+			fPosition.setOffset(offset);
+			try {
+				document.addPositionCategory(CATEGORY);
+				document.addPositionUpdater(fPositionUpdater);
+				document.addPosition(CATEGORY, fPosition);
+
+			} catch (BadPositionCategoryException e) {
+				// should not happen
+				JavaPlugin.log(e);
+			}
+		}
+	
+		/**
+		 * Called after the document changed occured. It must be preceded by a call to preReplace().
+		 * 
+		 * @param document the document on which to track the reference position.
+		 */
+		public int postReplace(IDocument document) {
+			try {
+				document.removePosition(CATEGORY, fPosition);
+				document.removePositionUpdater(fPositionUpdater);
+				document.removePositionCategory(CATEGORY);
+				 
+			} catch (BadPositionCategoryException e) {
+				// should not happen
+				JavaPlugin.log(e);
+			}
+			return fPosition.getOffset();
+		}
+	}	
 	
 	private static class ExitPolicy implements LinkedPositionUI.ExitPolicy {
 		

@@ -87,6 +87,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			}
 			
 			LinkedPositionUI editor= new LinkedPositionUI(viewer, manager);
+			editor.setInitialOffset(offset);
 			editor.setFinalCaretOffset(offset);
 			editor.enter();
 			

@@ -15,6 +15,8 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
@@ -37,6 +39,7 @@ import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
+import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextEvent;
@@ -53,7 +56,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * A user interface for <code>LinkedPositionManager</code>, using <code>ITextViewer</code>.
  */
 public class LinkedPositionUI implements LinkedPositionListener,
-	ITextInputListener, ITextListener, ModifyListener, VerifyListener, VerifyKeyListener, PaintListener, IPropertyChangeListener {
+	ITextInputListener, ITextListener, ModifyListener, VerifyListener, VerifyKeyListener, PaintListener, IPropertyChangeListener, ShellListener {
 
 	/**
 	 * A listener for notification when the user cancelled the edit operation.
@@ -92,6 +95,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	private int fFinalCaretOffset= -1; // no final caret offset
 
 	private Position fFramePosition;
+	private int fInitialOffset= -1;
 	private int fCaretOffset;
 	
 	private ExitPolicy fExitPolicy;
@@ -99,6 +103,8 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	
 	private boolean fNeedRedraw;
 	
+	private String fContentType;
+
 	/**
 	 * Creates a user interface for <code>LinkedPositionManager</code>.
 	 * 
@@ -160,6 +166,14 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		
 		return null;
 	}
+
+	/**
+	 * Sets the initial offset.
+	 * @param offset
+	 */
+	public void setInitialOffset(int offset) {
+		fInitialOffset= offset;	
+	}
 	
 	/**
 	 * Sets the final position of the caret when the linked mode is exited
@@ -204,10 +218,16 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 * @see #exit(boolean)
 	 */
 	public void enter() {
+
+		fFramePosition= (fInitialOffset == -1) ? fManager.getFirstPosition() : fManager.getPosition(fInitialOffset);
+		if (fFramePosition == null)
+			return;
+
 		// track final caret
 		IDocument document= fViewer.getDocument();
 		document.addPositionCategory(CARET_POSITION);
 		document.addPositionUpdater(fgUpdater);
+
 		try {
 			if (fFinalCaretOffset != -1)
 				document.addPosition(CARET_POSITION, new Position(fFinalCaretOffset));
@@ -217,6 +237,18 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		} catch (BadPositionCategoryException e) {
 			JavaPlugin.log(e);
 			Assert.isTrue(false);
+		}
+
+		try {		
+			fContentType= document.getContentType(fFramePosition.offset);
+			if (fViewer instanceof ITextViewerExtension2) {
+				((ITextViewerExtension2) fViewer).prependAutoEditStrategy(fManager, fContentType);
+			} else {
+				Assert.isTrue(false);
+			}
+
+		} catch (BadLocationException e) {
+			handleException(fViewer.getTextWidget().getShell(), e);
 		}
 
 		fViewer.addTextInputListener(this);
@@ -231,9 +263,8 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		text.addPaintListener(this);
 		text.showSelection();
 
-		fFramePosition= fManager.getFirstPosition();
-		if (fFramePosition == null)
-			leave(UNINSTALL | COMMIT | UPDATE_CARET);
+		Shell shell= text.getShell();
+		shell.addShellListener(this);
 
 		fgStore.addPropertyChangeListener(this);
 	}
@@ -258,6 +289,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	}
 	
 	private void leave(int flags) {
+
+		fInitialOffset= -1;
+		
 		if ((flags & UNINSTALL) != 0)
 			fManager.uninstall((flags & COMMIT) != 0);
 
@@ -273,8 +307,15 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		text.removeModifyListener(this);
 		text.removeVerifyListener(this);
 
+		Shell shell= text.getShell();
+		shell.removeShellListener(this);
+
 		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
 		extension.removeVerifyKeyListener(this);
+
+		if (fViewer instanceof ITextViewerExtension2)
+			((ITextViewerExtension2) fViewer).removeAutoEditStrategy(fManager, fContentType);
+		fContentType= null;
 
 		fViewer.removeTextListener(this);
 		fViewer.removeTextInputListener(this);
@@ -570,6 +611,39 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			
 		redrawRegion();
 		fNeedRedraw= false;
+	}
+
+	/*
+	 * @see org.eclipse.swt.events.ShellListener#shellActivated(org.eclipse.swt.events.ShellEvent)
+	 */
+	public void shellActivated(ShellEvent event) {
+	}
+
+	/*
+	 * @see org.eclipse.swt.events.ShellListener#shellClosed(org.eclipse.swt.events.ShellEvent)
+	 */
+	public void shellClosed(ShellEvent event) {
+	 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
+	}
+
+	/*
+	 * @see org.eclipse.swt.events.ShellListener#shellDeactivated(org.eclipse.swt.events.ShellEvent)
+	 */
+	public void shellDeactivated(ShellEvent event) {
+	 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
+	}
+
+	/*
+	 * @see org.eclipse.swt.events.ShellListener#shellDeiconified(org.eclipse.swt.events.ShellEvent)
+	 */
+	public void shellDeiconified(ShellEvent event) {
+	}
+
+	/*
+	 * @see org.eclipse.swt.events.ShellListener#shellIconified(org.eclipse.swt.events.ShellEvent)
+	 */
+	public void shellIconified(ShellEvent event) {
+	 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
 	}
 
 }

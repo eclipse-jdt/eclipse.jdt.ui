@@ -18,7 +18,9 @@ import java.util.Map;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension;
 import org.eclipse.jface.text.IDocumentListener;
@@ -47,20 +49,17 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  *       gain control of the same document.
  * </ul>
  */
-public class LinkedPositionManager implements IDocumentListener, IPositionUpdater {
-	
-	private static class PositionComparator implements Comparator {
-		/*
-		 * @see Comparator#compare(Object, Object)
-		 */
-		public int compare(Object object0, Object object1) {
-			Position position0= (Position) object0;
-			Position position1= (Position) object1;
-			
-			return position0.getOffset() - position1.getOffset();
-		}
-	}
-	
+public class LinkedPositionManager implements IDocumentListener, IPositionUpdater, IAutoEditStrategy {
+
+	// This class still exists to properly handle code assist. 
+	// This is due to the fact that it cannot be distinguished betweeen document changes which are
+	// issued by code assist and document changes which origin from another text viewer.
+	// There is a conflict in interest since in the latter case the linked mode should be left, but in the former case
+	// the linked mode should remain.
+	// To support content assist, document changes have to be propagated to connected positions
+	// by registering replace commands using IDocumentExtension.
+	// if it wasn't for the support of content assist, the documentChanged() method could be reduced to 
+	// a simple call to leave(true)  
 	private class Replace implements IDocumentExtension.IReplace {
 		
 		private Position fReplacePosition;
@@ -84,6 +83,18 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 				// TBD
 			}
 			document.addDocumentListener(owner);
+		}
+	}
+	
+	private static class PositionComparator implements Comparator {
+		/*
+		 * @see Comparator#compare(Object, Object)
+		 */
+		public int compare(Object object0, Object object1) {
+			Position position0= (Position) object0;
+			Position position1= (Position) object1;
+			
+			return position0.getOffset() - position1.getOffset();
 		}
 	}
 
@@ -203,6 +214,24 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	}
 
 	/**
+	 * Returns the position at the given offset, <code>null</code> if there is no position.
+	 * @since 2.1
+	 */
+	public Position getPosition(int offset) {
+		Position[] positions= getPositions(fDocument);		
+		if (positions == null)
+			return null;
+
+		for (int i= positions.length - 1; i >= 0; i--) {
+			Position position= positions[i];
+			if (offset >= position.getOffset() && offset <= position.getOffset() + position.getLength())
+				return positions[i];
+		}
+		
+		return null;
+	}
+
+	/**
 	 * Returns the first linked position.
 	 * 
 	 * @return returns <code>null</code> if no linked position exist.
@@ -247,17 +276,20 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 * @return returns <code>null</code> if no linked position exist.
 	 */
 	public Position getPreviousPosition(int offset) {
-		Position[] positions= getPositions(fDocument);		
+		Position[] positions= getPositions(fDocument);
 		if (positions == null)
 			return null;
 
+		TypedPosition currentPosition= (TypedPosition) findCurrentPosition(positions, offset);
+		String currentType= currentPosition == null ? null : currentPosition.getType();
+
 		Position lastPosition= null;
 		Position position= getFirstPosition();
-		
-		while ((position != null) && (position.getOffset() < offset)) {
+
+		while ((position != null) && (position.getOffset() < offset) && !((TypedPosition) position).getType().equals(currentType)) {
 			lastPosition= position;
 			position= findNextPosition(positions, position.getOffset());
-		}		
+		}
 		
 		return lastPosition;
 	}
@@ -308,29 +340,21 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 * @see IDocumentListener#documentAboutToBeChanged(DocumentEvent)
 	 */
 	public void documentAboutToBeChanged(DocumentEvent event) {
+
 		IDocument document= event.getDocument();
 
 		Position[] positions= getPositions(document);
-		Position position= findCurrentEditablePosition(positions, event.getOffset());
+		Position position= findCurrentPosition(positions, event.getOffset());
 
 		// modification outside editable position
 		if (position == null) {
-			position= findCurrentPosition(positions, event.getOffset());
-
-			// modification outside any position			
-			if (position == null) {
-				// check for destruction of constraints (spacing of at least 1)
-				if ((event.getText().length() == 0) &&
-					(findCurrentPosition(positions, event.getOffset()) != null) &&
-					(findCurrentPosition(positions, event.getOffset() + event.getLength()) != null))
-				{
-					leave(true);
-				}
-				
-			// modification intersects non-editable position
-			} else {
+			// check for destruction of constraints (spacing of at least 1)
+			if ((event.getText().length() == 0) &&
+				(findCurrentPosition(positions, event.getOffset()) != null) &&
+				(findCurrentPosition(positions, event.getOffset() + event.getLength()) != null))
+			{
 				leave(true);
-			}
+			}				
 
 		// modification intersects editable position
 		} else {
@@ -349,11 +373,15 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	/*
 	 * @see IDocumentListener#documentChanged(DocumentEvent)
 	 */
-	public void documentChanged(DocumentEvent event) {		
+	public void documentChanged(DocumentEvent event) {
+		
+		// have to handle code assist, so can't just leave the linked mode 
+		// leave(true);
+		
 		IDocument document= event.getDocument();
 
 		Position[] positions= getPositions(document);
-		TypedPosition currentPosition= (TypedPosition) findCurrentEditablePosition(positions, event.getOffset());
+		TypedPosition currentPosition= (TypedPosition) findCurrentPosition(positions, event.getOffset());
 
 		// ignore document changes (assume it won't invalidate constraints)
 		if (currentPosition == null)
@@ -362,8 +390,8 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		int deltaOffset= event.getOffset() - currentPosition.getOffset();		
 
 		if (fListener != null)
-			fListener.setCurrentPosition(currentPosition, deltaOffset + event.getText().length());
-		
+			fListener.setCurrentPosition(currentPosition, deltaOffset + event.getText().length());		
+
 		for (int i= 0; i != positions.length; i++) {
 			TypedPosition p= (TypedPosition) positions[i];			
 			
@@ -419,15 +447,6 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		return null;			
 	}
 
-	private static Position findCurrentEditablePosition(Position[] positions, int offset) {
-		Position position= positions[0];
-
-		while ((position != null) && !includes(position, offset, 0))
-			position= findNextPosition(positions, position.getOffset());
-
-		return position;
-	}
-
 	private boolean containsLineDelimiters(String string) {
 		String[] delimiters= fDocument.getLegalLineDelimiters();
 
@@ -444,11 +463,55 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	public boolean anyPositionIncludes(int offset, int length) {
 		Position[] positions= getPositions(fDocument);
 
-		Position position= findCurrentEditablePosition(positions, offset);
+		Position position= findCurrentPosition(positions, offset);
 		if (position == null)
 			return false;
 		
 		return includes(position, offset, length);
 	}
 	
+	/*
+	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
+	 */
+	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
+
+		// don't interfere with preceding auto edit strategies
+		if (command.getCommandCount() != 1) {
+			leave(true);
+			return;
+		}
+
+		Position[] positions= getPositions(document);
+		TypedPosition currentPosition= (TypedPosition) findCurrentPosition(positions, command.offset);
+
+		// handle edits outside of a position
+		if (currentPosition == null) {
+			leave(true);
+			return;
+		}
+
+		if (! command.doit)
+			return;
+
+		command.doit= false;
+		command.owner= this;
+		command.caretOffset= command.offset + command.length;
+
+		int deltaOffset= command.offset - currentPosition.getOffset();		
+
+		if (fListener != null)
+			fListener.setCurrentPosition(currentPosition, deltaOffset + command.text.length());
+		
+		for (int i= 0; i != positions.length; i++) {
+			TypedPosition position= (TypedPosition) positions[i];			
+			
+			try {
+				if (position.getType().equals(currentPosition.getType()) && !position.equals(currentPosition))
+					command.addCommand(position.getOffset() + deltaOffset, command.length, command.text, this);
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
+		}
+	}
+
 }
