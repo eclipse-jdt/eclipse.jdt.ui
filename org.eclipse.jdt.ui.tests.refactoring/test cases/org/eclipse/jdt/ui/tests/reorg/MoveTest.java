@@ -942,24 +942,36 @@ public class MoveTest extends RefactoringTest {
 	}
 
 	public void testDestination_yes_cuToOtherPackage() throws Exception{
-		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
 		IPackageFragment otherPackage= getRoot().createPackageFragment("otherPackage", true, new NullProgressMonitor());
+		String oldSource= "package p;class A{void foo(){}class Inner{}}";
+		String newSource= "package otherPackage;class A{void foo(){}class Inner{}}";
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", oldSource, false, new NullProgressMonitor());
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
 			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= otherPackage;
-			verifyValidDestination(ref, destination);			
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source file does not exist before moving", cu1.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			assertTrue("source file exists after moving", ! cu1.exists());
+			ICompilationUnit newCu= otherPackage.getCompilationUnit(cu1.getElementName());
+			assertTrue("new file does not exist after moving", newCu.exists());
+			SourceCompareUtil.compare("source differs", newCu.getSource(), newSource);
 		}finally{
 			performDummySearch();
-			cu1.delete(true, new NullProgressMonitor());
 			otherPackage.delete(true, new NullProgressMonitor());
 		}
 	}
 
 	public void testDestination_yes_cuToRoot() throws Exception{
-		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		String newSource= "class A{void foo(){}class Inner{}}";
+		String oldSource= "package p;class A{void foo(){}class Inner{}}";
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", oldSource, false, new NullProgressMonitor());
+		ICompilationUnit newCu= null;
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
@@ -967,14 +979,26 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);			
+			
+			assertTrue("source file does not exist before moving", cu1.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			assertTrue("source file exists after moving", ! cu1.exists());
+			newCu= getRoot().getPackageFragment("").getCompilationUnit(cu1.getElementName());
+			assertTrue("new file does not exist after moving", newCu.exists());
+			SourceCompareUtil.compare("source differs", newCu.getSource(), newSource);
+
 		}finally{
 			performDummySearch();
-			cu1.delete(true, new NullProgressMonitor());
+			newCu.delete(true, new NullProgressMonitor());
 		}
 	}
 
 	public void testDestination_yes_cuToProject() throws Exception{
-		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		String oldSource= "package p;class A{void foo(){}class Inner{}}";
+		String newSource= oldSource;
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", oldSource, false, new NullProgressMonitor());
+		IFile newFile= null;
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
@@ -982,17 +1006,27 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= MySetup.getProject();
 			verifyValidDestination(ref, destination);			
+
+			assertTrue("source file does not exist before moving", cu1.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			assertTrue("source file exists after moving", ! cu1.exists());
+			newFile= MySetup.getProject().getProject().getFile(cu1.getElementName());
+			SourceCompareUtil.compare("source differs", getContents(newFile), newSource);
 		}finally{
 			performDummySearch();
-			cu1.delete(true, new NullProgressMonitor());
+			newFile.delete(true, false, null);
 		}
 	}
 
 	public void testDestination_yes_cuToSimpleProject() throws Exception{
-		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		String oldSource= "package p;class A{void foo(){}class Inner{}}";
+		String newSource= oldSource;
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", oldSource, false, new NullProgressMonitor());
 		IProject simpleProject= ResourcesPlugin.getWorkspace().getRoot().getProject("mySImpleProject");
 		simpleProject.create(null);
 		simpleProject.open(null);
+		IFile newFile= null;
 		try{
 			IJavaElement[] javaElements= { cu1};
 			IResource[] resources= {};
@@ -1000,9 +1034,15 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= simpleProject;
 			verifyValidDestination(ref, destination);
+
+			assertTrue("source file does not exist before moving", cu1.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			assertTrue("source file exists after moving", ! cu1.exists());
+			newFile= simpleProject.getFile(cu1.getElementName());
+			SourceCompareUtil.compare("source differs", getContents(newFile), newSource);
 		}finally{
 			performDummySearch();
-			cu1.delete(true, new NullProgressMonitor());
 			simpleProject.delete(true, true, null);
 		}
 	}
@@ -1235,15 +1275,12 @@ public class MoveTest extends RefactoringTest {
 			Object destination= otherFolder;
 			verifyValidDestination(ref, destination);
 			
-			assertTrue("source file does not exist before", folder.exists());
-			
+			assertTrue("folder does not exist before", folder.exists());
 			RefactoringStatus status= performRefactoring(ref);
 			assertEquals(null, status);
-			
-			assertTrue("source file not moved", ! folder.exists());
-			
+			assertTrue("folder not moved", ! folder.exists());
 			newFolder= otherFolder.getFolder(folder.getName());
-			assertTrue("new file does not exist after", newFolder.exists());		
+			assertTrue("new folder does not exist after", newFolder.exists());		
 		} finally{
 			performDummySearch();
 			newFolder.delete(true, new NullProgressMonitor());			
@@ -1273,7 +1310,8 @@ public class MoveTest extends RefactoringTest {
 		IProject superFolder= MySetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
-
+		
+		IPackageFragment newPackage= null;
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
@@ -1281,9 +1319,16 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= getRoot();
 			verifyValidDestination(ref, destination);						
+			
+			assertTrue("folder does not exist before", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			assertTrue("folder not moved", ! folder.exists());
+			newPackage= getRoot().getPackageFragment(folder.getName());
+			assertTrue("new folder does not exist after", newPackage.exists());		
 		} finally{
 			performDummySearch();
-			folder.delete(true, new NullProgressMonitor());			
+			newPackage.delete(true, new NullProgressMonitor());
 		}
 	}
 
@@ -1292,6 +1337,7 @@ public class MoveTest extends RefactoringTest {
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
+		IPackageFragment newPackage= null;
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
@@ -1299,9 +1345,17 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= getPackageP();
 			verifyValidDestination(ref, destination);						
+
+			assertTrue("folder does not exist before", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			assertTrue("folder not moved", ! folder.exists());
+			newPackage= getRoot().getPackageFragment(getPackageP().getElementName() + "." + folder.getName());
+			assertTrue("new package does not exist after", newPackage.exists());		
 		} finally{
 			performDummySearch();
-			folder.delete(true, new NullProgressMonitor());			
+			if (newPackage != null && newPackage.exists())
+				newPackage.delete(true, new NullProgressMonitor());
 		}
 	}
 	
@@ -1315,6 +1369,7 @@ public class MoveTest extends RefactoringTest {
 		IFile fileInAnotherFolder= otherFolder.getFile("f.tex");
 		fileInAnotherFolder.create(getStream("123"), true, null);
 
+		IFolder newFolder= null;
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
@@ -1322,9 +1377,16 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= fileInAnotherFolder;
 			verifyValidDestination(ref, destination);						
+			
+			assertTrue("folder does not exist before", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			assertTrue("folder not moved", ! folder.exists());
+			newFolder= otherFolder.getFolder(folder.getName());
+			assertTrue("new folder does not exist after", newFolder.exists());
 		} finally{
 			performDummySearch();
-			folder.delete(true, new NullProgressMonitor());	
+//			folder.delete(true, new NullProgressMonitor());	
 			otherFolder.delete(true, new NullProgressMonitor());
 		}
 	}
@@ -1335,6 +1397,8 @@ public class MoveTest extends RefactoringTest {
 		folder.create(true, true, null);
 
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		
+		IPackageFragment newPackage= null;
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
@@ -1342,9 +1406,17 @@ public class MoveTest extends RefactoringTest {
 
 			Object destination= cu;
 			verifyValidDestination(ref, destination);						
+
+			assertTrue("folder does not exist before", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			assertTrue("folder not moved", ! folder.exists());
+			newPackage= getRoot().getPackageFragment(getPackageP().getElementName() + "." + folder.getName());
+			assertTrue("new package does not exist after", newPackage.exists());		
 		} finally{
 			performDummySearch();
-			folder.delete(true, new NullProgressMonitor());			
+			if (newPackage != null && newPackage.exists())
+				newPackage.delete(true, new NullProgressMonitor());
 			cu.delete(true, new NullProgressMonitor());
 		}
 	}
@@ -1357,13 +1429,22 @@ public class MoveTest extends RefactoringTest {
 		IProject simpleProject= ResourcesPlugin.getWorkspace().getRoot().getProject("mySImpleProject");
 		simpleProject.create(null);
 		simpleProject.open(null);
+		
+		IFolder newFolder= null;
 		try{
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {folder};
 			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= simpleProject;
-			verifyValidDestination(ref, destination);						
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("folder does not exist before", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			assertTrue("folder not moved", ! folder.exists());
+			newFolder= simpleProject.getFolder(folder.getName());
+			assertTrue("new folder does not exist after", newFolder.exists());		
 		} finally{
 			performDummySearch();
 			folder.delete(true, new NullProgressMonitor());			
@@ -1374,17 +1455,26 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_yes_sourceFolderToOtherProject() throws Exception{
 		IJavaProject otherJavaProject= JavaProjectHelper.createJavaProject("other", "bin");
 		
+		IPackageFragmentRoot oldRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "newSrc");
+		IPackageFragmentRoot newRoot= null;
 		try {
-			IJavaElement[] javaElements= { getRoot()};
+			IJavaElement[] javaElements= { oldRoot };
 			IResource[] resources= {};
 			MoveRefactoring2 ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= otherJavaProject;
 			verifyValidDestination(ref, destination);
+
+			assertTrue("folder does not exist before", oldRoot.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			assertTrue("folder not moved", ! oldRoot.exists());
+			newRoot= getSourceFolder(otherJavaProject, oldRoot.getElementName());
+			assertTrue("new folder does not exist after", newRoot.exists());		
 		} finally {
 			performDummySearch();
 			JavaProjectHelper.delete(otherJavaProject);
-		}						
+		}
 	}
 
 	public void testDestination_no_methodToItself() throws Exception{

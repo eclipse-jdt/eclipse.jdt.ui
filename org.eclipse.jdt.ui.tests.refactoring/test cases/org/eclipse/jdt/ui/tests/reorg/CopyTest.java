@@ -2666,15 +2666,6 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
-	private static IPackageFragmentRoot getSourceFolder(IJavaProject javaProject, String name) throws JavaModelException{
-		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			if (! roots[i].isArchive() && roots[i].getElementName().equals(name))
-				return roots[i];
-		}
-		return null;
-	}
-	
 	public void testCopy_root_to_same_Java_project() throws Exception {
 		IPackageFragmentRoot newRoot= null;
 		try {
