@@ -411,7 +411,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         
         for (int i= 0; i < usedLocals.length; i++) {
             IVariableBinding local= usedLocals[i];
-            String assignmentCode= ToolFactory.createCodeFormatter().format("this." + local.getName() + "=" + local.getName(), 0, null, getLineSeparator()); //$NON-NLS-1$ //$NON-NLS-2$
+            String assignmentCode= ToolFactory.createCodeFormatter(null).format("this." + local.getName() + "=" + local.getName(), 0, null, getLineSeparator()); //$NON-NLS-1$ //$NON-NLS-2$
             Expression assignmentExpression= (Expression)rewrite.createPlaceholder(assignmentCode, ASTRewrite.EXPRESSION);
             ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignmentExpression);
 	        constructorBody.statements().add(assignmentStatement);

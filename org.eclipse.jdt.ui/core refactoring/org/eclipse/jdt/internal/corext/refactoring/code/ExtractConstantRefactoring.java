@@ -666,7 +666,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	// !!! similar to one in ExtractTempRefactoring
 	//*without the trailing indent*
 	private String createConstantDeclarationSource(String initializerSource) throws CoreException {
-		ICodeFormatter formatter= ToolFactory.createCodeFormatter();
+		ICodeFormatter formatter= ToolFactory.createCodeFormatter(null);
 		String dummyInitializer= "0"; //$NON-NLS-1$
 		String semicolon= ";"; //$NON-NLS-1$
 		String dummyDeclaration= getModifier() + " " + getConstantTypeName() + " " + fConstantName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
