@@ -100,14 +100,25 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	}
 	
 	private String getClassName() {
-		String className= getSelectedText();
-		className= className.substring(className.indexOf('(') + 1);
-		return className.substring(0, className.indexOf(')'));
+		return cutFromTo(getSelectedText(), '(', ')');
 	}
 	
 	private String getMethodName() {
-		String methodName= getSelectedText();
-		return methodName.substring(0, methodName.indexOf('('));
+		return cutTo(getSelectedText(), '(');
+	}
+	
+	private static String cutFromTo(String string, char from, char to){
+		String modified= string;
+		modified= modified.substring(modified.indexOf(from) + 1);
+		return cutTo(modified, to);
+	}
+	
+	private static String cutTo(String string, char to){
+		int toIndex= string.indexOf(to);
+		if (toIndex == -1)
+			return string;
+		else	
+			return string.substring(0, toIndex);
 	}
 
 	public void menuAboutToShow(IMenuManager manager){
