@@ -72,8 +72,11 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
  */
 public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
-	/** Key used to look up display tab width */
+	/** Preference key used to look up display tab width */
 	public final static String PREFERENCE_TAB_WIDTH= "org.eclipse.jdt.ui.editor.tab.width"; //$NON-NLS-1$
+	/** Preference key for inserting spaces rather than tabs */
+	public final static String SPACES_FOR_TABS= "spacesForTabs"; //$NON-NLS-1$
+
 	
 	private JavaTextTools fJavaTextTools;
 	private ITextEditor fTextEditor;
@@ -275,8 +278,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 				
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 		int tabWidth= preferences.getInt(JavaCore.FORMATTER_TAB_SIZE);
-		boolean useSpaces= preferences.getString(JavaCore.FORMATTER_TAB_CHAR).equals("space"); //$NON-NLS-1$
-
+		boolean useSpaces= getPreferenceStore().getBoolean(SPACES_FOR_TABS);
+		
 		for (int i= 0; i <= tabWidth; i++) {
 		    StringBuffer prefix= new StringBuffer();
 
