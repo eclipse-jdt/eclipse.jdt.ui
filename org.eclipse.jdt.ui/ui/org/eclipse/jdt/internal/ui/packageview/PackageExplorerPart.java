@@ -1037,7 +1037,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	}
 
 	public void collapseAll() {
+		fViewer.getControl().setRedraw(false);		
 		fViewer.collapseToLevel(getViewPartInput(), TreeViewer.ALL_LEVELS);
+		fViewer.getControl().setRedraw(true);
 	}
+	
 	public PackageExplorerPart() { 
-	}}
+	}
+}
