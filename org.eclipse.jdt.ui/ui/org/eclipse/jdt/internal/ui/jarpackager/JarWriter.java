@@ -45,8 +45,8 @@ public class JarWriter {
 	 * 				if user selected not to overwrite the existing JAR
 	 */
 	public JarWriter(JarPackage jarPackage, Shell parent) throws IOException, CoreException, OperationCanceledException {
-		Assert.isNotNull(jarPackage, JarPackagerMessages.getString("JarWriter.error.jarSpecificationIsNull")); //$NON-NLS-1$
-		Assert.isTrue(jarPackage.isValid(), JarPackagerMessages.getString("JarWriter.error.invalidJarSpecification")); //$NON-NLS-1$
+		Assert.isNotNull(jarPackage, "The JAR specification is null"); //$NON-NLS-1$
+		Assert.isTrue(jarPackage.isValid(), "The JAR package specification is invalid"); //$NON-NLS-1$
 		if (!jarPackage.canCreateJar(parent))
 			throw new OperationCanceledException();
 		if (jarPackage.usesManifest() && jarPackage.areClassFilesExported()) {

@@ -157,7 +157,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		setControl(composite);
 
 		updateModel();
-		updateWidgetEnablements();
+		updateEnableState();
 		setPageComplete(computePageCompletion());
 
 		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.JARMANIFEST_WIZARD_PAGE));								
@@ -374,7 +374,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		if (getControl() == null)
 			return;
 		updateModel();
-		updateWidgetEnablements();
+		updateEnableState();
 		updatePageCompletion();
 	}
 	/**
@@ -453,9 +453,9 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		updateSealingInfo();
 	}
 	/**
-	 * Updates the enablements of this page's controls. Subclasses may extend.
+	 * Updates the enable state of this page's controls. Subclasses may extend.
 	 */
-	protected void updateWidgetEnablements() {
+	protected void updateEnableState() {
 		boolean generate= fGenerateManifestRadioButton.getSelection();
 
 		boolean save= generate && fSaveManifestCheckbox.getSelection();

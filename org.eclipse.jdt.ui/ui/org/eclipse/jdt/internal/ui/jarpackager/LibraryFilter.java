@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageFilter;
  * Filters out all elements which libraries
  */
 public class LibraryFilter extends PackageFilter {
+
 	/**
 	 * Returns the result of this filter, when applied to the
 	 * given inputs.
@@ -28,14 +29,8 @@ public class LibraryFilter extends PackageFilter {
 	 * @return Returns true if element should be included in filtered set
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
-		if (element instanceof IPackageFragmentRoot) {
-			try {
-				if (((IPackageFragmentRoot)element).getKind() != IPackageFragmentRoot.K_SOURCE)
-					return false;
-			} catch (JavaModelException ex) {
-				return true;
-			}
-		}
+		if (element instanceof IPackageFragmentRoot)
+			return !((IPackageFragmentRoot)element).isArchive();
 		return true;
 	}
 }
