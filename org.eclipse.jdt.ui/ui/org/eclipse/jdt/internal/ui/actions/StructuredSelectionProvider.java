@@ -52,19 +52,21 @@ public abstract class StructuredSelectionProvider {
 		
 		protected IStructuredSelection asStructuredSelection(ITextSelection selection, IEditorPart editor, int flags) throws CoreException {
 			if ((flags & FLAGS_DO_CODERESOLVE) != 0) {
-				if (selection.getLength() != 0) {		
-					IStructuredSelection result= considerCache(selection);
+				IStructuredSelection result;
+				if (!selection.isEmpty()) {		
+					result= considerCache(selection);
 					if (result != null)
 						return result;
-					
-					IJavaElement assist= getEditorInput(editor);
-					if (assist instanceof ICodeAssist) {
-						IJavaElement[] elements= ((ICodeAssist)assist).codeSelect(selection.getOffset(), selection.getLength());
-						result= new StructuredSelection(elements);
-						cacheResult(selection, result);
-						return result;
-					}				
 				}
+				
+				IJavaElement assist= getEditorInput(editor);
+				if (assist instanceof ICodeAssist) {
+					IJavaElement[] elements= ((ICodeAssist)assist).codeSelect(selection.getOffset(), selection.getLength());
+					result= new StructuredSelection(elements);
+					if (!selection.isEmpty())
+						cacheResult(selection, result);
+					return result;
+				}				
 			}
 			if ((flags & FLAGS_DO_ELEMENT_AT_OFFSET) != 0) {
 				IJavaElement assist= getEditorInput(editor);
