@@ -340,46 +340,83 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					Item item;
 					Object element;
 					
+					IJavaElement parent= delta.getElement();
 					IJavaElementDelta[] affected= delta.getAffectedChildren();
 					Item[] children= getChildren(w);
 
 					boolean doUpdateParent= false;
 										
 					Vector deletions= new Vector();
+					Vector additions= new Vector();
+					
 					go1: for (int i= 0; i < children.length; i++) {
 						item= children[i];
 						element= item.getData();
 						for (int j= 0; j < affected.length; j++) {
+							
 							IJavaElement affectedElement= affected[j].getElement();
+							int status= affected[j].getKind();
+							
 							if (affectedElement.equals(element)) {
-								int status= affected[j].getKind();
+								
 								// removed
 								if ((status & IJavaElementDelta.REMOVED) != 0) {
 									deletions.addElement(item);
 									doUpdateParent= doUpdateParent || mustUpdateParent(affected[j], affectedElement);
 									continue go1;
 								}
+								
 								// changed
 								if ((status & IJavaElementDelta.CHANGED) != 0) {
 									int change= affected[j].getFlags();
 									doUpdateParent= doUpdateParent || mustUpdateParent(affected[j], affectedElement);
-									if ((change & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_MODIFIERS)) != 0)
-										updateItem(item, (Object) affected[j].getElement());
+									
+									if ((change & IJavaElementDelta.F_MODIFIERS) != 0) {
+										if (filtered(parent, affectedElement))
+											deletions.addElement(item);
+										else
+											updateItem(item, affectedElement);
+									}
+									
+									if ((change & IJavaElementDelta.F_CONTENT) != 0)
+										updateItem(item, affectedElement);
+										
 									if ((change & IJavaElementDelta.F_CHILDREN) != 0)
 										update(item, affected[j]);
+									
 									continue go1;							
 								}
+								
+							} else {
+								// changed
+								if ((status & IJavaElementDelta.CHANGED) != 0 &&
+										(affected[j].getFlags() & IJavaElementDelta.F_MODIFIERS) != 0 &&
+										!filtered(parent, affectedElement))
+									additions.addElement(affected[j]);
 							}
 						}
 					}
-							
+					
+					// find all elements to add
+					IJavaElementDelta[] add= delta.getAddedChildren();
+					if (additions.size() > 0) {
+						IJavaElementDelta[] tmp= new IJavaElementDelta[add.length + additions.size()];
+						System.arraycopy(add, 0, tmp, 0, add.length);
+						for (int i= 0; i < additions.size(); i++)
+							tmp[i + add.length]= (IJavaElementDelta) additions.elementAt(i);
+						add= tmp;
+					}
+					
 					// add at the right position
-					IJavaElementDelta[] add= delta.getAddedChildren();		
 					go2: for (int i= 0; i < add.length; i++) {
 						
 						try {
+							
 							IJavaElement e= add[i].getElement();
-							ISourceReference r= (ISourceReference)e ;
+							if (filtered(parent, e))
+								continue go2;
+								
+							ISourceReference r= (ISourceReference) e ;
 							doUpdateParent= doUpdateParent || mustUpdateParent(add[i], e);
 							ISourceRange rng= r.getSourceRange();
 							int start= rng.getOffset();
@@ -463,6 +500,19 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					} catch (JavaModelException x) {
 						return false;
 					}
+				}
+				
+				protected boolean filtered(IJavaElement parent, IJavaElement child) {
+					
+					Object[] result= new Object[] { child };
+					ViewerFilter[] filters= getFilters();
+					for (int i= 0; i < filters.length; i++) {
+						result= filters[i].filter(this, parent, result);
+						if (result.length == 0)
+							return true;
+					}
+					
+					return false;
 				}
 			};
 			
