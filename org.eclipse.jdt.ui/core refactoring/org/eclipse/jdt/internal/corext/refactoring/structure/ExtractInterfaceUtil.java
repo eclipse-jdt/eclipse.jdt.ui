@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -605,15 +604,7 @@ class ExtractInterfaceUtil {
 	}
 
 	private static ITypeBinding getTypeBinding(IType type, WorkingCopyOwner workingCopyOwner) throws JavaModelException {
-		final CompilationUnit unit= ASTCreator.createAST(type.getCompilationUnit(), workingCopyOwner);
-		AbstractTypeDeclaration decl= null;
-		if (type.isAnnotation())
-			decl= ASTNodeSearchUtil.getAnnotationTypeDeclarationNode(type, unit);
-		else if (type.isEnum())
-			decl= ASTNodeSearchUtil.getEnumDeclarationNode(type, unit);
-		else
-			decl= ASTNodeSearchUtil.getTypeDeclarationNode(type, unit);
-		return decl.resolveBinding();
+		return ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, ASTCreator.createAST(type.getCompilationUnit(), workingCopyOwner)).resolveBinding();
 	}
 
 	private CompilationUnitRange[] getCompilationUnitRanges(ConstraintVariable[] variables, IType inputType, ITypeBinding inputTypeBinding) throws CoreException {

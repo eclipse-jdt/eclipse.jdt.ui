@@ -48,7 +48,9 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -295,7 +297,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			CompilationUnit typeCuNode= (CompilationUnit) p.createAST(null);
 			OldASTRewrite typeCuRewrite= new OldASTRewrite(typeCuNode);
 			IType theType= (IType)JavaModelUtil.findInCompilationUnit(typeCu, fInputType);
-			TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(theType, typeCuNode);
+			AbstractTypeDeclaration td= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(theType, typeCuNode);
 
 			modifyInputTypeCu(typeCu, typeCuNode, typeCuRewrite, td);
 			TextEditGroup description= trackReferenceNodes(typeCuNode, typeCuRewrite, td);
@@ -338,15 +340,16 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			pm.done();
 		}	
 	}
-	
-	private void modifyInputTypeCu(ICompilationUnit typeCu, CompilationUnit typeCuNode, OldASTRewrite typeCuRewrite, TypeDeclaration td) throws CoreException, JavaModelException {
+
+	private void modifyInputTypeCu(ICompilationUnit typeCu, CompilationUnit typeCuNode, OldASTRewrite typeCuRewrite, AbstractTypeDeclaration td) throws CoreException, JavaModelException {
 		deleteExtractedFields(typeCuNode, typeCu, typeCuRewrite);
 		if (fInputType.isInterface())
 			deleteExtractedMethods(typeCuNode, typeCu, typeCuRewrite);
-		
-		AST ast= td.getAST();
-		Type newInterface= ast.newSimpleType(ast.newSimpleName(fNewInterfaceName));
-		td.superInterfaceTypes().add(newInterface);
+		Type newInterface= td.getAST().newSimpleType(td.getAST().newSimpleName(fNewInterfaceName));
+		if (td instanceof TypeDeclaration)
+			((TypeDeclaration) td).superInterfaceTypes().add(newInterface);
+		else if (td instanceof EnumDeclaration)
+			((EnumDeclaration) td).superInterfaceTypes().add(newInterface);
 		typeCuRewrite.markAsInserted(newInterface);
 	}
 
@@ -360,7 +363,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}
 	}
 
-	private TextEditGroup trackReferenceNodes(CompilationUnit typeCuNode, OldASTRewrite typeCuRewrite, TypeDeclaration td) {
+	private TextEditGroup trackReferenceNodes(CompilationUnit typeCuNode, OldASTRewrite typeCuRewrite, AbstractTypeDeclaration td) {
 		ASTNode[] refs= getReferencesToType(typeCuNode, td.resolveBinding());
 		TextEditGroup description= new TextEditGroup("N.N"); //$NON-NLS-1$
 		for (int i= 0; i < refs.length; i++) {
