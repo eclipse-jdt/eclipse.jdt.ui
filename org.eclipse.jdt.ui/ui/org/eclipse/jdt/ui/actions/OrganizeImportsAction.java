@@ -15,6 +15,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -25,16 +34,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
@@ -53,12 +52,15 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -72,10 +74,6 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Organizes the imports of a compilation unit.
@@ -263,7 +261,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, Status.OK, message, null);
 			
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
-			dialog.run(false, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
+			dialog.run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
 				public void run(IProgressMonitor monitor) {
 					doRunOnMultiple(cus, status, doResolve, monitor);
 				}
@@ -277,14 +275,14 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		} catch (InterruptedException e) {
 			// cancelled by user
 		}		
+	
 		
 	}
 	
+	static final class OrganizeImportError extends Error {
+	}
+	
 	private void doRunOnMultiple(ICompilationUnit[] cus, MultiStatus status, boolean doResolve, IProgressMonitor monitor) throws OperationCanceledException {
-	
-		final class OrganizeImportError extends Error {
-		}
-	
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}	
@@ -301,41 +299,53 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					throw new OrganizeImportError();
 				}
 			};
-	
+			
 			for (int i= 0; i < cus.length; i++) {
 				ICompilationUnit cu= cus[i];
 				String cuLocation= cu.getPath().makeRelative().toString();
 				
-				try {
-					cu= JavaModelUtil.toWorkingCopy(cu);
-					
-					monitor.subTask(cuLocation);
-					OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, query);
-					op.run(new SubProgressMonitor(monitor, 1));
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-					
-					IProblem parseError= op.getParseError();
-					if (parseError != null) {
-						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
-						status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
-					} 
-				} catch (OrganizeImportError e) {
-					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unresolvable", cuLocation); //$NON-NLS-1$
+				cu= JavaModelUtil.toWorkingCopy(cu);
+				
+				monitor.subTask(cuLocation);
+				
+				OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), doResolve, query);
+				runInSync(op, cuLocation, status, monitor);
+
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				
+				IProblem parseError= op.getParseError();
+				if (parseError != null) {
+					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
 					status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+				} 
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+	
+	private void runInSync(final OrganizeImportsOperation op, final String cuLocation, final MultiStatus status, final IProgressMonitor monitor) {
+		Runnable runnable= new Runnable() {
+			public void run() {
+				try {
+					op.run(new SubProgressMonitor(monitor, 1));
 				} catch (ValidateEditException e) {
 					status.add(e.getStatus());
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
 					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getStatus().getMessage()); //$NON-NLS-1$
 					status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
+				} catch (OrganizeImportError e) {
+					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unresolvable", cuLocation); //$NON-NLS-1$
+					status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
 				}
 			}
-		} finally {
-			monitor.done();
-		}
+		};
+		getShell().getDisplay().syncExec(runnable);
 	}
+	
 				
 
 	private void runOnSingle(ICompilationUnit cu, boolean doResolve, boolean inEditor) {
