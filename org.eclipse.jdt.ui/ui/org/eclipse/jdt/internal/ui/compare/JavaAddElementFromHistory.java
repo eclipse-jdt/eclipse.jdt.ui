@@ -56,6 +56,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		int insertPosition= -1;		// where to insert the element
 		
 		if (selection.isEmpty()) {
+			// no selection: we try to use the editor's input
 			if (fEditor != null) {
 				IEditorInput editorInput= fEditor.getEditorInput();
 				IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
@@ -95,6 +96,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		
 		if (insertPosition < 0) {
 			// haven't found an insertion point yet
+			
 			insertPosition= 0;
 		}
 		
