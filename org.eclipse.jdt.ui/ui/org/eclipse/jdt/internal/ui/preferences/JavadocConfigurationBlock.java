@@ -74,11 +74,13 @@ public class JavadocConfigurationBlock {
 	private SelectionButtonDialogField fBrowseArchivePath;
 	private Shell fShell;
 	private IStatusChangeListener fContext;
-	private URL fJavaDocLocation;
-	
+		
 	private IStatus fURLStatus;
 	private IStatus fArchiveStatus;
 	private IStatus fArchivePathStatus;
+	
+	private URL fURLResult;
+	private URL fArchiveURLResult;
 	
 	boolean fIsForSource;
 	
@@ -245,7 +247,10 @@ public class JavadocConfigurationBlock {
 	}
 	
 	public URL getJavadocLocation() {
-		return fJavaDocLocation;
+		if (fIsForSource || fURLRadioButton.isSelected()) {
+			return fURLResult;
+		}
+		return fArchiveURLResult;
 	}
 		
 	private class EntryValidator implements Runnable {
@@ -406,8 +411,9 @@ public class JavadocConfigurationBlock {
 		} else {
 			status= StatusUtil.getMoreSevere(fArchiveStatus, fArchivePathStatus);
 		}
-		fBrowseArchivePath.setEnabled(!isURL && fArchiveStatus.isOK() && fArchiveField.getText().length() > 0);
-		
+		if (!fIsForSource) {
+			fBrowseArchivePath.setEnabled(!isURL && fArchiveStatus.isOK() && fArchiveField.getText().length() > 0);
+		}
 		fContext.statusChanged(status);
 	}
 
@@ -425,20 +431,33 @@ public class JavadocConfigurationBlock {
 		
 
 	private String internalChooseArchivePath() {		
-		ILabelProvider lp= new ZipDialogLabelProvider();
-		ITreeContentProvider cp= new ZipDialogContentProvider();
-		
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, lp, cp);
-		dialog.setValidator(new ZipDialogValidator());
-		dialog.setTitle(PreferencesMessages.getString("JavadocConfigurationBlock.browse_jarorzip_path.title")); //$NON-NLS-1$
-		dialog.setMessage(PreferencesMessages.getString("JavadocConfigurationBlock.location_in_jarorzip.message")); //$NON-NLS-1$
-		//dialog.addFilter(filter);
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
-		
 		ZipFile zipFile= null;
 		try {
 			zipFile= new ZipFile(fArchiveField.getText());
 
+			ILabelProvider lp= new ZipDialogLabelProvider();
+			ZipDialogContentProvider cp= new ZipDialogContentProvider(zipFile);
+			
+			ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, lp, cp);
+			dialog.setValidator(new ZipDialogValidator());
+			dialog.setTitle(PreferencesMessages.getString("JavadocConfigurationBlock.browse_jarorzip_path.title")); //$NON-NLS-1$
+			dialog.setMessage(PreferencesMessages.getString("JavadocConfigurationBlock.location_in_jarorzip.message")); //$NON-NLS-1$
+			//dialog.addFilter(filter);
+			dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+			
+			String init= fArchivePathField.getText();
+			if (init.length() > 0) {
+				ZipTreeNode initNode= cp.getSelectedNode(init);
+				if (initNode != null) {
+					dialog.setInitialSelection(initNode);
+				}
+			} else {
+				ZipTreeNode initNode= cp.getSelectedNode("docs/api"); //$NON-NLS-1$
+				if (initNode != null) {
+					dialog.setInitialSelection(initNode);
+				}
+			}
+			
 			dialog.setInput(zipFile);
 			if (dialog.open() == ElementTreeSelectionDialog.OK) {
 				Object element= dialog.getFirstResult();
@@ -484,19 +503,28 @@ public class JavadocConfigurationBlock {
 		
 	private String chooseJavaDocFolder() {
 		String initPath= ""; //$NON-NLS-1$
-		if (fJavaDocLocation != null && "file".equals(fJavaDocLocation.getProtocol())) { //$NON-NLS-1$
-			initPath= (new File(fJavaDocLocation.getFile())).getPath();
+		if (fURLResult != null && "file".equals(fURLResult.getProtocol())) { //$NON-NLS-1$
+			initPath= (new File(fURLResult.getFile())).getPath();
 		}
 		DirectoryDialog dialog= new DirectoryDialog(fShell);
 		dialog.setText(PreferencesMessages.getString("JavadocConfigurationBlock.javadocFolderDialog.label")); //$NON-NLS-1$
 		dialog.setMessage(PreferencesMessages.getString("JavadocConfigurationBlock.javadocFolderDialog.message")); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
-		return dialog.open();
+		String result= dialog.open();
+		if (result != null) {
+			try {
+				URL url= new File(result).toURL();
+				return url.toExternalForm();
+			} catch (MalformedURLException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return null;
 	}
 		
 	private IStatus updateURLStatus() {
 		StatusInfo status= new StatusInfo();
-		fJavaDocLocation= null;
+		fURLResult= null;
 		try {
 			String jdocLocation= fURLField.getText();
 			if (jdocLocation.length() == 0) {
@@ -521,7 +549,7 @@ public class JavadocConfigurationBlock {
 						}						
 					}
 				}
-				fJavaDocLocation= url;
+				fURLResult= url;
 			} 
 		} catch (MalformedURLException e) {
 			status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.MalformedURL.error"));  //$NON-NLS-1$
@@ -533,6 +561,8 @@ public class JavadocConfigurationBlock {
 	
 	private IStatus updateArchiveStatus() {
 		try {
+			fArchiveURLResult= null;
+			
 			StatusInfo status= new StatusInfo();
 			String jdocLocation= fArchiveField.getText();
 			if (jdocLocation.length() > 0)  {
@@ -545,7 +575,7 @@ public class JavadocConfigurationBlock {
 					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafile")); //$NON-NLS-1$
 					return status;													
 				}
-				fJavaDocLocation= getArchiveURL();
+				fArchiveURLResult= getArchiveURL();
 			}
 			return status;
 		} catch (MalformedURLException e) {
@@ -558,8 +588,9 @@ public class JavadocConfigurationBlock {
 	private IStatus updateArchivePathStatus() {
 		// no validation yet
 		try {
-			fJavaDocLocation= getArchiveURL();
+			fArchiveURLResult= getArchiveURL();
 		} catch (MalformedURLException e) {
+			fArchiveURLResult= null;
 			StatusInfo status= new StatusInfo();
 			status.setError(e.getMessage());  //$NON-NLS-1$
 			//status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.MalformedURL.error"));  //$NON-NLS-1$
@@ -596,9 +627,13 @@ public class JavadocConfigurationBlock {
 	private class ZipDialogContentProvider implements ITreeContentProvider {
 	
 		private ZipTreeNode fTree;
-		private ZipFile fZipFile;
+		
+		public ZipDialogContentProvider(ZipFile file) {
+			fTree= createTree(file);
+		}
+		
 	
-		ZipTreeNode getSelectedNode(String initialSelection) {
+		public ZipTreeNode getSelectedNode(String initialSelection) {
 			ZipTreeNode node= null;
 			if (initialSelection != null) {
 				node= fTree.findNode(initialSelection);
@@ -608,15 +643,8 @@ public class JavadocConfigurationBlock {
 			}
 			return node;
 		}
-	
-		void setInitialInput(ZipFile file) {
-			fTree= createTree(file);
-		}
-	
+		
 		private ZipTreeNode createTree(ZipFile zipFile) {
-			if (zipFile.equals(fZipFile))
-				return fTree;
-			fZipFile= zipFile;
 			return ZipTreeNode.newZipTree(zipFile);
 		}
 	
@@ -624,12 +652,6 @@ public class JavadocConfigurationBlock {
 		 * @see ITreeContentProvider#inputChanged
 		 */
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			if (newInput instanceof ZipFile)
-				fTree= createTree((ZipFile) newInput);
-			else {
-				fTree= null;
-				fZipFile= null;
-			}
 		}
 	
 		/* non java-doc
@@ -668,7 +690,6 @@ public class JavadocConfigurationBlock {
 		 */
 		public void dispose() {
 			fTree= null;
-			fZipFile= null;
 		}
 	}
 	
