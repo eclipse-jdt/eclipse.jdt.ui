@@ -2,6 +2,8 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -9,18 +11,21 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
 public class ModifyParametersRefactoring extends Refactoring implements IMultiRenameRefactoring, IReferenceUpdatingRefactoring{
 	
 	private RenameParametersRefactoring fRenameParameters;
 	private ReorderParametersRefactoring fReorderParameters;
+	private TextChangeManager fChangeManager;
 
 	public ModifyParametersRefactoring(IMethod method){
 		fRenameParameters= new RenameParametersRefactoring(method);
@@ -110,7 +115,13 @@ public class ModifyParametersRefactoring extends Refactoring implements IMultiRe
 				 result= fReorderParameters.checkInput(new SubProgressMonitor(pm, 1));		
 			}	 
 			
+			if (result.hasFatalError())
+				return result;
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+			result.merge(validateModifiesFiles());
 			return result;
+		} catch (CoreException e){	
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}
@@ -167,18 +178,31 @@ public class ModifyParametersRefactoring extends Refactoring implements IMultiRe
 		return result;
 	}
 
+	private IFile[] getAllFilesToModify() throws CoreException{
+		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+	}
+	
+	private RefactoringStatus validateModifiesFiles() throws CoreException{
+		return Checks.validateModifiesFiles(getAllFilesToModify());
+	}
+
 	//--  changes ----
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("Preparing preview", 2);
-			TextChangeManager manager= new TextChangeManager();
-			if (! fRenameParameters.isInputSameAsInitial())
-				fRenameParameters.createChange(new SubProgressMonitor(pm, 1), manager);
-			if (! fReorderParameters.isInputSameAsInitial())	
-				fReorderParameters.createChange(new SubProgressMonitor(pm, 1), manager);
-			return new CompositeChange("Restructure parameters", manager.getAllChanges());
+			return new CompositeChange("Restructure parameters", fChangeManager.getAllChanges());
 		} finally{
 			pm.done();
 		}	
-	}	
+	}
+
+	private TextChangeManager createChangeManager(IProgressMonitor pm) throws JavaModelException {
+		TextChangeManager manager= new TextChangeManager();
+		if (! fRenameParameters.isInputSameAsInitial())
+			fRenameParameters.createChange(new SubProgressMonitor(pm, 1), manager);
+		if (! fReorderParameters.isInputSameAsInitial())	
+			fReorderParameters.createChange(new SubProgressMonitor(pm, 1), manager);
+		return manager;
+	}
+	
 }
