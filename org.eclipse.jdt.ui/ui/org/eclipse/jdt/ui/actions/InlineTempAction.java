@@ -11,15 +11,14 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -27,6 +26,9 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 /**
  * Inlines the value of a local variable at all places where a read reference
@@ -47,17 +49,22 @@ public class InlineTempAction extends SelectionDispatchAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public InlineTempAction(CompilationUnitEditor editor) {
-		super(editor.getEditorSite());
-		setText(RefactoringMessages.getString("InlineTempAction.label"));//$NON-NLS-1$
+		this(editor.getEditorSite());
 		fEditor= editor;
-		setEnabled(getCompilationUnit() != null);
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_TEMP_ACTION);
+		setEnabled(SelectionConverter.canOperateOn(fEditor));
+	}
+	
+	public InlineTempAction(IWorkbenchSite site) {
+		super(site);
+		setText(RefactoringMessages.getString("InlineTempAction.label"));//$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
 	protected void selectionChanged(ITextSelection selection) {
+		//do nothing
 	}
 	
 	/* (non-Javadoc)
@@ -83,8 +90,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	 * Note: this method is for internal use only. Clients should not call this method.
 	 */
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
-		//XXX wrong help
-		String helpId= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
+		String helpId= IJavaHelpContextIds.INLINE_TEMP_ERROR_WIZARD_PAGE;
 		String pageTitle= RefactoringMessages.getString("InlineTempAction.inline_temp"); //$NON-NLS-1$
 		RefactoringWizard result= new RefactoringWizard((InlineTempRefactoring)refactoring, pageTitle, helpId);
 		result.setExpandFirstNode(true);
@@ -94,4 +100,19 @@ public class InlineTempAction extends SelectionDispatchAction {
 	private ICompilationUnit getCompilationUnit(){
 		return SelectionConverter.getInputAsCompilationUnit(fEditor);
 	}	
+	
+	/*
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
+	protected void run(IStructuredSelection selection) {
+		//do nothing
+	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
+	protected void selectionChanged(IStructuredSelection selection) {
+		setEnabled(false);
+	}
+
 }
