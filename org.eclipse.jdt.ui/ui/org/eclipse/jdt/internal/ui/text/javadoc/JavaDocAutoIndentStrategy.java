@@ -540,7 +540,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			// first word of line is always appended			
 			} else if (lineBuffer.length() == 0) {
 				lineBuffer.append(prefix);
-				lineBuffer.append(whiteSpaceBuffer);
+				lineBuffer.append(whiteSpaceBuffer.toString());
 				lineBuffer.append(word);
 
 			} else {
@@ -549,7 +549,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				// margin exceeded 
 				if (calculateDisplayedWidth(line) > margin) {
 					// flush line buffer and wrap paragraph
-					paragraphBuffer.append(lineBuffer);
+					paragraphBuffer.append(lineBuffer.toString());
 					paragraphBuffer.append(lineDelimiter);
 					lineBuffer.setLength(0);
 					lineBuffer.append(prefix);
@@ -568,7 +568,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 				// margin not exceeded
 				} else {
-					lineBuffer.append(whiteSpaceBuffer);
+					lineBuffer.append(whiteSpaceBuffer.toString());
 					lineBuffer.append(word);
 					whiteSpaceBuffer.setLength(0);
 				}
@@ -582,7 +582,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}
 
 		// flush line buffer		
-		paragraphBuffer.append(lineBuffer);
+		paragraphBuffer.append(lineBuffer.toString());
 		paragraphBuffer.append(lineDelimiter);
 
 		// flush index buffer
