@@ -43,7 +43,7 @@ public final class JavaOverlayDescriptor implements IOverlayDescriptor {
 	public ImageDescriptor[][] getOverlays() {
 		ImageDescriptor[][] overlays= new ImageDescriptor[3][];
 		overlays[0]= new ImageDescriptor[5];
-		overlays[1]= new ImageDescriptor[1];
+		overlays[1]= new ImageDescriptor[2];
 		overlays[2]= new ImageDescriptor[2];
 		int n= 0;
 		if (isStatic())
@@ -52,12 +52,14 @@ public final class JavaOverlayDescriptor implements IOverlayDescriptor {
 			overlays[0][n++]= JavaPluginImages.DESC_OVR_FINAL;
 		if (isAbstract())
 			overlays[0][n++]= JavaPluginImages.DESC_OVR_ABSTRACT;
-		if (isSynchronized())
-			overlays[0][n++]= JavaPluginImages.DESC_OVR_SYNCH;
+//		if (isSynchronized())
+//			overlays[0][n++]= JavaPluginImages.DESC_OVR_SYNCH;
 		
 		n= 0;
 		if (isRunnable())
 			overlays[1][n++]= JavaPluginImages.DESC_OVR_RUN;	
+		if (isSynchronized())
+			overlays[1][n++]= JavaPluginImages.DESC_OVR_SYNCH;
 		
 		n= 0;
 		if (isWarning())
