@@ -90,17 +90,14 @@ public class InlineTempRefactoring extends Refactoring {
 			pm.beginTask("Checking preconditions", 1);
 			fAST= new AST(fCu);
 			
-			if (fAST.isMalformed()){
+			if (fAST.hasProblems()){
 				RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
 				if (compileErrors.hasFatalError())
 					return compileErrors;
 			}
-
 			initializeSelection(); //cannot initialize earlier
-
 			if (!fCu.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus("Syntax errors in this compilation unit prevent local variable inlining. Fix the errors first.");						
-
 			RefactoringStatus result= new RefactoringStatus();
 			
 			result.merge(checkSelection());
@@ -114,7 +111,6 @@ public class InlineTempRefactoring extends Refactoring {
 				result.addWarning("Local variable '" + getTempName() + "' is initialized with an expression that can have side effects.");
 			
 			result.merge(checkAssignments());
-
 			return result;
 		} finally{
 			pm.done();

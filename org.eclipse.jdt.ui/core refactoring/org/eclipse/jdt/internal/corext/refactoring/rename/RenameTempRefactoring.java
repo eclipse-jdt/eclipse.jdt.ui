@@ -144,7 +144,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	
 	private RefactoringStatus checkSelection() throws JavaModelException {
 				
-		if (fAST.isMalformed()){
+		if (fAST.hasProblems()){
 			RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
 			if (compileErrors.hasFatalError())
 				return compileErrors;
@@ -153,7 +153,6 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		LocalDeclaration local= TempDeclarationFinder.findTempDeclaration(fAST, fCu, fSelectionStart, fSelectionLength);
 		if (local == null)
 			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
-
 		initializeTempDeclaration(local);
 		return new RefactoringStatus();
 	}
