@@ -694,7 +694,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fOutlineViewer.setInput(fInput);	
 		fOutlineViewer.getControl().addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
-				handleKeyPressed(e);
+				handleKeyReleased(e);
 			}
 		});
 	}
@@ -846,7 +846,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	/**
  	 * Handles key events in viewer.
  	 */
-	private void handleKeyPressed(KeyEvent event) {
+	private void handleKeyReleased(KeyEvent event) {
 		
 		if (event.stateMask != 0)
 			return;
