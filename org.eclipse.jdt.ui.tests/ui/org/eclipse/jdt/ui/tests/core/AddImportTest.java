@@ -48,12 +48,13 @@ public class AddImportTest extends CoreTests {
 
 
 	protected void setUp() throws Exception {
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 	}
 
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.delete(fJProject1);
 	}
 	
 	public void testAddImports1() throws Exception {
