@@ -15,11 +15,6 @@ import java.text.MessageFormat;import java.util.ArrayList;import java.util.Lis
 public class JavaPlugin extends AbstractUIPlugin {
 		
 	private static JavaPlugin fgJavaPlugin;
-	private static IRuntimeDefaultPreferences[] fgRuntimeSettings= new IRuntimeDefaultPreferences[] {
-		new J9Settings(),
-		new JDK122Settings()
-	};
-	
 	private static ResourceBundle fgResourceBundle;
 
 	private CompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
@@ -258,22 +253,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		menu.add(new Separator(IContextMenuConstants.GROUP_PROPERTIES));
 	}
 
-	//---- Runtime settings -------------------------------------------------------
-	
-	public static IRuntimeDefaultPreferences[] getRuntimeSettings() {
-		return fgRuntimeSettings;
-	}
-	
-	protected void initializeJavaSettings(IPreferenceStore store) {
-		IRuntimeDefaultPreferences[] settings= getRuntimeSettings();
-		for (int i= 0; i < settings.length; i++) {
-			if (settings[i].matches()) {
-				settings[i].setDefaultPreferences(store);
-				return;
-			}
-		}
-	}
-	
 	/**
 	 * @see AbstractUIPlugin#initializeDefaultPreferences
 	 */
@@ -295,30 +274,5 @@ public class JavaPlugin extends AbstractUIPlugin {
 		PackageExplorerPart.initDefaults(store);
 		JavaEditorPreferencePage.initDefaults(store);
 		
-		initializeJavaSettings(store);
-		//ClasspathVariablesPreferencePage.initJREVariables();
 	}
-
-	/*private File findSourceJarStandard(File javaHome) {
-		String parent= javaHome.getParent();
-		if (parent == null)
-			return null;
-		File jre= new File(parent);
-		parent= jre.getParent();
-		if (parent == null)
-			return null;
-		String srcPath= parent+File.separator+"src.jar";
-		File srcJar= new File(srcPath);
-		if (srcJar.isFile())
-			return srcJar;
-		return null;
-	}
-	
-	private File findSourceJarWSW(File javaHome) {
-		String srcPath= javaHome.toString()+File.separator+"src.jar";
-		File srcJar= new File(srcPath);
-		if (srcJar.isFile())
-			return srcJar;
-		return null;
-	}*/
 }

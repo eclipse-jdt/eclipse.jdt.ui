@@ -510,7 +510,9 @@ public class SourceAttachmentBlock {
 					return path;
 				}
 			} catch (IOException e) {
-				MessageDialog.openError(getShell(), "Error", "IOException when opening ZipFile " + fResolvedFile.getPath());
+				String title= JavaPlugin.getResourceString(DIALOG_PREFIXDIALOG + ".error.title");
+				String message= JavaPlugin.getFormattedString(DIALOG_PREFIXDIALOG + ".error.message", fResolvedFile.getPath());
+				MessageDialog.openError(getShell(), title, message);
 			}				
 		
 		}
