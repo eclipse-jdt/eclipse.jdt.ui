@@ -134,6 +134,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	private static JavaPlugin fgJavaPlugin;
 	
+	private static LinkedHashMap fgRepeatedMessages= new LinkedHashMap(20, 0.75f, true) {
+		private static final long serialVersionUID= 1L;
+		protected boolean removeEldestEntry(java.util.Map.Entry eldest) {
+			return size() >= 20;
+		}
+	};
+	
 	/** 
 	 * The template context type registry for the java editor. 
 	 * @since 3.0
@@ -311,20 +318,26 @@ public class JavaPlugin extends AbstractUIPlugin {
 		log(new Status(IStatus.ERROR, getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.getString("JavaPlugin.internal_error"), e)); //$NON-NLS-1$
 	}
 	
-	private static LinkedHashMap fgRepeatedMessages= new LinkedHashMap(20, .75f, true) {
-		private static final long serialVersionUID= 1L;
-		protected boolean removeEldestEntry(java.util.Map.Entry eldest) {
-			return true;
-		}
-	};
-	
+	/**
+	 * Log a message that is potentionally repeated after a very short time.
+	 * The first time this method is called with a given message, the
+	 * message is written to the log along with the detail message and a stacktrace. 
+	 * <p>
+	 * Only intended for use in debug statements.
+	 * 
+	 * @param message the (generic) message
+	 * @param detail the detail message
+	 */
 	public static void logRepeatedMessage(String message, String detail) {
+		long now= System.currentTimeMillis();
+		boolean writeToLog= true;
 		if (fgRepeatedMessages.containsKey(message)) {
 			long last= ((Long) fgRepeatedMessages.get(message)).longValue();
-			long now= System.currentTimeMillis();
-			if (now - last < 2000)
-				log(new Exception(message + detail).fillInStackTrace());
+			writeToLog= now - last > 5000;
 		}
+		fgRepeatedMessages.put(message, new Long(now));
+		if (writeToLog)
+			log(new Exception(message + detail).fillInStackTrace());
 	}
 	
 	public static boolean isDebug() {

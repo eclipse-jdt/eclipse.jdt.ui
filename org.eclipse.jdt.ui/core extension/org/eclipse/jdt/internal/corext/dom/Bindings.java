@@ -76,7 +76,8 @@ public class Bindings {
 			}
 			if (equalTo != originalEquals) {
 				String message= "Unexpected difference between Bindings.equals(..) and IBinding#isEqualTo(..)"; //$NON-NLS-1$
-				String detail= "\nb1 == " + b1.getKey() + ", b2 == " + (b2 == null ? "null binding" : b2.getKey()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String detail= "\nb1 == " + b1.getKey() + ", b2 == " + (b2 == null ? "null binding" : b2.getKey()) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						+ "\nb1.getJavaElement() == " + b1.getJavaElement() + ", b2.getJavaElement() == " + (b2 == null ? "null binding" : b2.getJavaElement().toString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				JavaPlugin.logRepeatedMessage(message, detail);
 			}
 		}
