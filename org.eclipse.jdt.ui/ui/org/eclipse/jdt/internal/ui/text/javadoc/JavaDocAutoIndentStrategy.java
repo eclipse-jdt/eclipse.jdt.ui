@@ -62,9 +62,9 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				if (end < c.offset) {
 					if (d.getChar(end) == '/') {
 						// javadoc started on this line
-						buf.append(" * ");	
+						buf.append(" * ");	 //$NON-NLS-1$
 					} else if (d.getChar(end) == '*') {
-						buf.append("* ");
+						buf.append("* "); //$NON-NLS-1$
 					}
 				}			
 			}
@@ -82,7 +82,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			return;
 		}
 		try {
-			if ("* ".equals(d.get(c.offset - 2, 2))) {
+			if ("* ".equals(d.get(c.offset - 2, 2))) { //$NON-NLS-1$
 				// modify document command
 				c.length++;
 				c.offset--;
@@ -98,7 +98,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		if (c.length == 0 && c.text != null && endsWithDelimiter(d, c.text))
 			jdocIndentAfterNewLine(d, c);
-		else if ("/".equals(c.text)) {
+		else if ("/".equals(c.text)) { //$NON-NLS-1$
 			jdocIndentForCommentEnd(d, c);
 		}
 	}

@@ -74,7 +74,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
 		if (typeName.length > 0) {
-			nameBuffer.append("   ");
+			nameBuffer.append("   "); //$NON-NLS-1$
 			nameBuffer.append(typeName);
 		}
 	
@@ -116,7 +116,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers, int start, int end) {
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
-		nameBuffer.append("   ");
+		nameBuffer.append("   "); //$NON-NLS-1$
 		nameBuffer.append(typeName);
 	
 		fVariables.add(createCompletion(start, end, new String(name), null, nameBuffer.toString(), null, false, null));
@@ -155,7 +155,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 				nameBuffer.append(parameterTypeNames[i]);
 			}
 		}
-		nameBuffer.append(")   ");
+		nameBuffer.append(")   "); //$NON-NLS-1$
 		nameBuffer.append(returnTypeName);
 		
 		ProposalInfo info= new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames);
@@ -190,8 +190,8 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	
 	public String getErrorMessage() {
 		if (fLastProblem != null)
-			return fLastProblem.getAttribute(IMarker.MESSAGE, "Compile Error");
-		return "";
+			return fLastProblem.getAttribute(IMarker.MESSAGE, JavaTextMessages.getString("ResultCollector.compile_error.message")); //$NON-NLS-1$
+		return ""; //$NON-NLS-1$
 	}
 
 	public ICompletionProposal[] getResults() {
@@ -225,7 +225,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalInfo proposalInfo) {
 		
 		if (qualification != null)
-			name += (" - " + qualification);
+			name += (" - " + qualification); //$NON-NLS-1$
 			
 		int cursorPosition= completion == null ? 0 : completion.length();
 		if (!placeCursorBehindInsertion)

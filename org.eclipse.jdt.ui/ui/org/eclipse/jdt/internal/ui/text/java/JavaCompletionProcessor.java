@@ -32,10 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Java completion processor.
  */
 public class JavaCompletionProcessor implements IContentAssistProcessor {
-	
-	private final static String ERROR_TITLE= "Editor.error.access.title";
-	private final static String ERROR_MESSAGE= "Editor.error.access.message";
-	
+		
 	private IEditorPart fEditor;
 	private ResultCollector fCollector;
 	private IWorkingCopyManager fManager;
@@ -94,9 +91,8 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 				unit.codeComplete(offset, fCollector);
 			}
 		} catch (JavaModelException x) {
-			ResourceBundle b= JavaPlugin.getDefault().getResourceBundle();
 			Shell shell= viewer.getTextWidget().getShell();
-			ErrorDialog.openError(shell, b.getString(ERROR_TITLE), b.getString(ERROR_MESSAGE), x.getStatus());
+			ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		
 		ICompletionProposal[] results= fCollector.getResults();

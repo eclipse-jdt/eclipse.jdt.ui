@@ -59,10 +59,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	
 	/** Outliner context menu Id */
 	protected String fOutlinerContextMenuId;
-	
-	/** The resource bundle */
-	private ResourceBundle fResourceBundle;
-		
+			
 	
 	/**
 	 * Returns the smallest ISourceReference also implementing IJavaElement
@@ -85,15 +82,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this));
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-	}
-	
-	/** 
-	 * Returns the editor's resource bundle.
-	 *
-	 * @return the editor's resource bundle
-	 */
-	protected ResourceBundle _getResourceBundle() {
-		return JavaEditorMessages.getResourceBundle();
 	}
 	
 	/**
@@ -131,7 +119,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		page.addSelectionChangedListener(this);
 		setOutlinePageInput(page, getEditorInput());
 		
-		// page.setAction("ShowTypeHierarchy", new ShowTypeHierarchyAction(page));
+		// page.setAction("ShowTypeHierarchy", new ShowTypeHierarchyAction(page));	//$NON-NLS-1$
 		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page)); //$NON-NLS-1$
 		page.setAction("ShowInPackageView", new ShowInPackageViewAction(getSite(), page)); //$NON-NLS-1$
 		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page)); //$NON-NLS-1$
@@ -300,10 +288,10 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setAction("RunToLine", new RunToLineAction(this)); //$NON-NLS-1$
 		
 		Action action= new InspectAction(this);
-		action.setText("I&nspect");
-		action.setToolTipText("Inspect the Result of Evaluating the Selected Text");
-		action.setDescription("Inspect the result of evaluating the selected text");
-		setAction("Inspect", action);
+		action.setText(JavaEditorMessages.getString("JavaEditor.Inspect.label")); //$NON-NLS-1$
+		action.setToolTipText(JavaEditorMessages.getString("JavaEditor.Inspect.tooltip")); //$NON-NLS-1$
+		action.setDescription(JavaEditorMessages.getString("JavaEditor.Inspect.description")); //$NON-NLS-1$
+		setAction("Inspect", action); //$NON-NLS-1$
 	}
 	
 	private boolean isTextSelectionEmpty() {

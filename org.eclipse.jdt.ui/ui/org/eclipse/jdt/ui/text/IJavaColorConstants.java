@@ -20,24 +20,24 @@ package org.eclipse.jdt.ui.text;
 public interface IJavaColorConstants {
 	
 	/** The color key for multi-line comments in Java code. */
-	String JAVA_MULTI_LINE_COMMENT= "java_multi_line_comment";
+	String JAVA_MULTI_LINE_COMMENT= "java_multi_line_comment"; //$NON-NLS-1$
 	/** The color key for single-line comments in Java code. */
-	String JAVA_SINGLE_LINE_COMMENT= "java_single_line_comment";
+	String JAVA_SINGLE_LINE_COMMENT= "java_single_line_comment"; //$NON-NLS-1$
 	/** The color key for Java keywords in Java code. */
-	String JAVA_KEYWORD= "java_keyword";
+	String JAVA_KEYWORD= "java_keyword"; //$NON-NLS-1$
 	/** The color key for the Java built-in types such as int and char in Java code. */
-	String JAVA_TYPE= "java_type";
+	String JAVA_TYPE= "java_type"; //$NON-NLS-1$
 	/** The color key for string and character literals in Java code. */
-	String JAVA_STRING= "java_string";
+	String JAVA_STRING= "java_string"; //$NON-NLS-1$
 	/** The color key for everthing in Java code for which no other color is specified. */
-	String JAVA_DEFAULT= "java_default";
+	String JAVA_DEFAULT= "java_default"; //$NON-NLS-1$
 	
 	/** The color key for JavaDoc keywords (<code>@foo</code>) in JavaDoc comments. */
-	String JAVADOC_KEYWORD= "javadoc_keyword";
+	String JAVADOC_KEYWORD= "javadoc_keyword"; //$NON-NLS-1$
 	/** The color key for HTML tags (<code>&lt;foo&gt;</code>) in JavaDoc comments. */
-	String JAVADOC_TAG= "javadoc_tag";
+	String JAVADOC_TAG= "javadoc_tag"; //$NON-NLS-1$
 	/** The color key for JavaDoc links (<code>{foo}</code>) in JavaDoc comments. */
-	String JAVADOC_LINK= "javadoc_link";
+	String JAVADOC_LINK= "javadoc_link"; //$NON-NLS-1$
 	/** The color key for everthing in JavaDoc comments for which no other color is specified. */
-	String JAVADOC_DEFAULT= "javadoc_default";
+	String JAVADOC_DEFAULT= "javadoc_default"; //$NON-NLS-1$
 }

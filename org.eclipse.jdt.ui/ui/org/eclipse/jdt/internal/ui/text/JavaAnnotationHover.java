@@ -94,7 +94,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	 * Formats the message of this hover to fit onto the screen.
 	 */
 	private String formatHoverText(String text, Display display) {
-		String lineDelim= System.getProperty("line.separator", "\n");
+		String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-2$ //$NON-NLS-1$
 		
 				
 		Reader textReader= new StringReader(text);

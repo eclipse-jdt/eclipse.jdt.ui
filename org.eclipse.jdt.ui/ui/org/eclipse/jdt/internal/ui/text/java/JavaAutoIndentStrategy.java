@@ -111,7 +111,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int whiteend= findEndOfWhiteSpace(d, start, end);
 			return d.get(start, whiteend - start);
 		} else {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 
@@ -156,7 +156,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				}
 			}
 		} catch (BadLocationException excp) {
-			System.out.println("JavaAutoIndentStrategy.calcShiftBackReplace: BadLocationException");
+			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message1")); //$NON-NLS-1$
 		}
 	}
 
@@ -195,7 +195,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			c.text= buf.toString();
 
 		} catch (BadLocationException excp) {
-			System.out.println("JavaAutoIndentStrategy.getAutoIndentString: BadLocationException");
+			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message2")); //$NON-NLS-1$
 		}
 	}
 	
@@ -220,7 +220,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		if (c.length == 0 && c.text != null && endsWithDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
-		else if ("}".equals(c.text)) {
+		else if ("}".equals(c.text)) { //$NON-NLS-1$
 			smartInsertAfterBracket(d, c);
 		}
 	}

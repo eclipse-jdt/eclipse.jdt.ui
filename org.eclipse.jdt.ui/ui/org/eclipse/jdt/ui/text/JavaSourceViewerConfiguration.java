@@ -188,14 +188,14 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getDefaultPrefix(ISourceViewer, String)
 	 */
 	public String getDefaultPrefix(ISourceViewer sourceViewer, String contentType) {
-		return "//";
+		return "//"; //$NON-NLS-1$
 	}
 
 	/*
 	 * @see SourceViewerConfiguration#getIndentPrefixes(ISourceViewer, String)
 	 */
 	public String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType) {
-		return new String[] {"\t", "    ", ""};
+		return new String[] {"\t", "    ", ""}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/*

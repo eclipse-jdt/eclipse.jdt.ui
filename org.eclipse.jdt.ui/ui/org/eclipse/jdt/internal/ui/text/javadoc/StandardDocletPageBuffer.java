@@ -31,11 +31,11 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 public class StandardDocletPageBuffer {
 	
-	private static final String TYPE_BEG= "<!-- ======== START OF CLASS DATA ======== -->";
-	private static final String TYPE_END= "<!-- ======== INNER CLASS SUMMARY ======== -->";
-	private static final String MEMBER_BEG= "<!-- ============ FIELD DETAIL =========== -->";
-	private static final String MEMBER_END= "<!-- ========= END OF CLASS DATA ========= -->";
-	private static final String NAME_BEG= "<A NAME=\"";
+	private static final String TYPE_BEG= "<!-- ======== START OF CLASS DATA ======== -->"; //$NON-NLS-1$
+	private static final String TYPE_END= "<!-- ======== INNER CLASS SUMMARY ======== -->"; //$NON-NLS-1$
+	private static final String MEMBER_BEG= "<!-- ============ FIELD DETAIL =========== -->"; //$NON-NLS-1$
+	private static final String MEMBER_END= "<!-- ========= END OF CLASS DATA ========= -->"; //$NON-NLS-1$
+	private static final String NAME_BEG= "<A NAME=\""; //$NON-NLS-1$
 	
 	private URL fJDocLocation;
 	
@@ -72,7 +72,7 @@ public class StandardDocletPageBuffer {
 	}
 	
 	private void findRanges(BufferedReader rd) throws IOException {
-		String lineDelim= System.getProperty("line.separator", "\n");
+		String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-2$ //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer(10000);
 		
 		fTypeRange= findTypeRange(rd, buf, lineDelim);
@@ -119,8 +119,8 @@ public class StandardDocletPageBuffer {
 		Range resRange= new Range();
 		String line= readUpToLine(rd, TYPE_BEG, null, null);
 		if (line != null) {
-			line= readUpToLine(rd, new String[] { TYPE_END, "<P>" }, null, null);
-			if ("<P>".equals(line)) {
+			line= readUpToLine(rd, new String[] { TYPE_END, "<P>" }, null, null); //$NON-NLS-1$
+			if ("<P>".equals(line)) { //$NON-NLS-1$
 				resRange.offset= buf.length();
 				line= readUpToLine(rd, TYPE_END, buf, lineDelim);
 				if (line != null) {
@@ -147,7 +147,7 @@ public class StandardDocletPageBuffer {
 					currRange.offset= buf.length();
 					String name= readSignature(line);					
 					result.put(name, currRange);
-					line= readUpToLine(rd, "<DL>", null, null);
+					line= readUpToLine(rd, "<DL>", null, null); //$NON-NLS-1$
 				}
 				buf.append(line);
 				buf.append(lineDelim);
@@ -167,7 +167,7 @@ public class StandardDocletPageBuffer {
 		if (end != -1) {
 			return line.substring(start, end);
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	private String getHTMLFileName(IType type) {
@@ -178,7 +178,7 @@ public class StandardDocletPageBuffer {
 			buf.append('/');
 		}
 		buf.append(JavaModelUtility.getTypeQualifiedName(type));
-		buf.append(".html");
+		buf.append(".html"); //$NON-NLS-1$
 		return buf.toString();
 	}
 	
@@ -215,7 +215,7 @@ public class StandardDocletPageBuffer {
 			buf.append('(');
 			for (int i= 0; i < paramTypes.length; i++) {
 				if (i != 0) {
-					buf.append(", ");
+					buf.append(", "); //$NON-NLS-1$
 				}
 				String currType= paramTypes[i];
 				int arrayCount= Signature.getArrayCount(currType);
@@ -226,7 +226,7 @@ public class StandardDocletPageBuffer {
 				}
 				buf.append(fullTypeName);
 				for (int k= 0; k < arrayCount; k++) {
-					buf.append("[]");
+					buf.append("[]"); //$NON-NLS-1$
 				}
 			}
 			buf.append(')');
@@ -236,12 +236,12 @@ public class StandardDocletPageBuffer {
 		
 	public void printContent() {
 		if (fContent != null) {
-			System.out.println("Type description:");
+			System.out.println(JavaDocMessages.getString("DocletPageBuffer.type_description")); //$NON-NLS-1$
 			System.out.println(new String(fContent, fTypeRange.offset, fTypeRange.length));
 			
 			Object[] keys= fMemberRanges.keySet().toArray();
 			for (int i= 0; i < keys.length; i++) {
-				System.out.println("Method " + keys[i].toString() + ":");
+				System.out.println(JavaDocMessages.getString("DocletPageBuffer.method") + keys[i].toString() + JavaDocMessages.getString("DocletPageBuffer.colon")); //$NON-NLS-2$ //$NON-NLS-1$
 				Range range= (Range)fMemberRanges.get(keys[i]);			
 				System.out.println(new String(fContent, range.offset, range.length));
 			}

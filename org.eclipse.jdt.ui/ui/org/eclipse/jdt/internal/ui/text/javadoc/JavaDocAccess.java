@@ -30,7 +30,7 @@ public class JavaDocAccess {
 	
 	
 	private static QualifiedName getQualifiedName(IPackageFragmentRoot root) {
-		return new QualifiedName(JavaUI.ID_PLUGIN, "jdocattachment: " + root.getPath().toString());
+		return new QualifiedName(JavaUI.ID_PLUGIN, "jdocattachment: " + root.getPath().toString()); //$NON-NLS-1$
 	}	
 	
 	/**
@@ -65,7 +65,7 @@ public class JavaDocAccess {
 	 */	
 	public static void setJavaDocLocation(IPackageFragmentRoot root, URL url) throws CoreException {
 		if (!root.isArchive()) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "only possible on library packagefragment roots", null));
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaDocMessages.getString("JavaDocAccess.error.no_library"), null)); //$NON-NLS-1$
 		}
 		
 		String urlDesc;

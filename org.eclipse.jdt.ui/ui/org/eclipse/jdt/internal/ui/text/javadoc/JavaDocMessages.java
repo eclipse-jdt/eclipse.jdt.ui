@@ -2,18 +2,18 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.javaeditor;
+package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-class JavaEditorMessages {
+public class JavaDocMessages {
 
-	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages";//$NON-NLS-1$
+	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.ui.text.javadoc.JavaDocMessages";//$NON-NLS-1$
 
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
 
-	private JavaEditorMessages() {
+	private JavaDocMessages() {
 	}
 
 	public static String getString(String key) {
@@ -22,9 +22,5 @@ class JavaEditorMessages {
 		} catch (MissingResourceException e) {
 			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
 		}
-	}
-	
-	public static ResourceBundle getResourceBundle() {
-		return fgResourceBundle;
 	}
 }

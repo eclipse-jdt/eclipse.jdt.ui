@@ -62,7 +62,7 @@ public class ProposalInfo {
 					member= type;
 				}
 				if (member != null) {
-					String lineDelim= System.getProperty("line.separator", "\n");
+					String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-2$ //$NON-NLS-1$
 					return getJavaDocText(member, lineDelim);
 				}
 			}
@@ -107,7 +107,7 @@ public class ProposalInfo {
 				}
 				if (line != null) {
 					buf.append(lineDelim);
-					buf.append(" ...");
+					buf.append(JavaTextMessages.getString("ProposalInfo.more_to_come")); //$NON-NLS-1$
 				}
 				return buf.toString();
 			} catch (IOException e) {

@@ -61,14 +61,14 @@ public class JavaDocScanner extends BufferedRuleBasedScanner {
 		 * @see SingleLineRule
 		 */
 		public TagRule(IToken token) {
-			super("<", ">", token, (char) 0);
+			super("<", ">", token, (char) 0); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		
 		/*
 		 * @see SingleLineRule 
 		 */
 		public TagRule(IToken token, char escapeCharacter) {
-			super("<", ">", token, escapeCharacter);
+			super("<", ">", token, escapeCharacter); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		
 		private IToken checkForWhitespace(ICharacterScanner scanner) {
@@ -97,7 +97,7 @@ public class JavaDocScanner extends BufferedRuleBasedScanner {
 	};
 	
 	
-	private static String[] fgKeywords= {"@author", "@deprecated", "@exception", "@param", "@return", "@see", "@serial", "@serialData", "@serialField", "@since", "@throws", "@version"};
+	private static String[] fgKeywords= {"@author", "@deprecated", "@exception", "@param", "@return", "@see", "@serial", "@serialData", "@serialField", "@since", "@throws", "@version"}; //$NON-NLS-12$ //$NON-NLS-11$ //$NON-NLS-10$ //$NON-NLS-7$ //$NON-NLS-9$ //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 	
 	
 	public JavaDocScanner(IColorManager manager) {
@@ -114,7 +114,7 @@ public class JavaDocScanner extends BufferedRuleBasedScanner {
 		list.add(new TagRule(tag));
 		
 		// Add rule for links.
-		list.add(new SingleLineRule("{", "}", link));
+		list.add(new SingleLineRule("{", "}", link)); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		// Add generic whitespace rule.
 		list.add(new WhitespaceRule(new JavaWhitespaceDetector()));

@@ -48,7 +48,7 @@ public class JavaTypeHover implements ITextHover {
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null) {
-			String lineDelim= System.getProperty("line.separator", "\n");
+			String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-2$ //$NON-NLS-1$
 			try {
 				IJavaElement[] result= resolve.codeSelect(hoverRegion.getOffset(), hoverRegion.getLength());
 				int nResults= result.length;
@@ -123,7 +123,7 @@ public class JavaTypeHover implements ITextHover {
 				}
 				if (line != null) {
 					buf.append(lineDelim);
-					buf.append(" ...");
+					buf.append(JavaHoverMessages.getString("TypeHover.more_to_come")); //$NON-NLS-1$
 				}
 				return buf.toString();
 			} catch (IOException e) {

@@ -15,9 +15,9 @@ public class EditorDisplayAction extends DisplayAction {
 	public EditorDisplayAction(IWorkbenchPart part) {
 		super(part);
 		
-		setText("D&isplay");
-		setToolTipText("Display");
-		setDescription("Display");
+		setText(JavaEditorMessages.getString("EditorDisplay.label")); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("EditorDisplay.tooltip")); //$NON-NLS-1$
+		setDescription(JavaEditorMessages.getString("EditorDisplay.description")); //$NON-NLS-1$
 		
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.DISPLAY_ACTION });	
 	}
@@ -34,7 +34,7 @@ public class EditorDisplayAction extends DisplayAction {
 					return (IDataDisplay) value;
 			}			
 		} catch (PartInitException e) {
-			MessageDialog.openError(getShell(), JavaEditorMessages.getString("EditorDisplayAction.error.title1"), e.getMessage()); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), JavaEditorMessages.getString("EditorDisplay.error.title1"), e.getMessage()); //$NON-NLS-1$
 		}
 		
 		return null;

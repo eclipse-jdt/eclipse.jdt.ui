@@ -39,23 +39,23 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaImageLabelProvider;
 public class CompletionEvaluator {
 	
 	protected final static String[] fgTagProposals= {
-		"@author",
-		"@deprecated",
-		"@exception",
-		"@link",
-		"@param",
-		"@return",
-		"@see", "@serial", "@serialData", "@serialField", "@since",
-		"@throws",
-		"@version"
+		"@author", //$NON-NLS-1$
+		"@deprecated", //$NON-NLS-1$
+		"@exception", //$NON-NLS-1$
+		"@link", //$NON-NLS-1$
+		"@param", //$NON-NLS-1$
+		"@return", //$NON-NLS-1$
+		"@see", "@serial", "@serialData", "@serialField", "@since", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		"@throws", //$NON-NLS-1$
+		"@version" //$NON-NLS-1$
 	};
 	
 	protected final static String[] fgHTMLProposals= {
-		"<code>", "</code>",
-		"<br>",
-		"<b>", "</b>",
-		"<i>", "</i>",
-		"<pre>", "</pre>"
+		"<code>", "</code>", //$NON-NLS-2$ //$NON-NLS-1$
+		"<br>", //$NON-NLS-1$
+		"<b>", "</b>", //$NON-NLS-2$ //$NON-NLS-1$
+		"<i>", "</i>", //$NON-NLS-2$ //$NON-NLS-1$
+		"<pre>", "</pre>" //$NON-NLS-2$ //$NON-NLS-1$
 	};	
 	
 	private ICompilationUnit fCompilationUnit;
@@ -125,7 +125,7 @@ public class CompletionEvaluator {
 			IRegion lineInfo= doc.getLineInformationOfOffset(pos);
 			int end= lineInfo.getOffset() + lineInfo.getLength();
 			
-			if (newText.endsWith(">")) {
+			if (newText.endsWith(">")) { //$NON-NLS-1$
 				// for html, search the tag end character
 				return findClosingCharacter(doc, pos, end, '>');
 			} else {
@@ -136,7 +136,7 @@ public class CompletionEvaluator {
 				}
 				if (pos1 < end) {
 					// for method references, search the closing bracket
-					if ((ch == '(') && newText.endsWith(")")) {
+					if ((ch == '(') && newText.endsWith(")")) { //$NON-NLS-1$
 						return findClosingCharacter(doc, pos1, end, ')');
 					} 
 					
@@ -200,14 +200,14 @@ public class CompletionEvaluator {
 	}
 
 	private void addAllTags(String prefix) {
-		String jdocPrefix= "@" + prefix;
+		String jdocPrefix= "@" + prefix; //$NON-NLS-1$
 		for (int i= 0; i < fgTagProposals.length; i++) {
 			String curr= fgTagProposals[i];
 			if (curr.startsWith(jdocPrefix)) {
 				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), null));
 			}		
 		}
-		String htmlPrefix= "<" + prefix;
+		String htmlPrefix= "<" + prefix; //$NON-NLS-1$
 		for (int i= 0; i < fgHTMLProposals.length; i++) {
 			String curr= fgHTMLProposals[i];
 			if (curr.startsWith(htmlPrefix)) {
@@ -259,7 +259,7 @@ public class CompletionEvaluator {
 			for (int i= 0; i <= last; i++) {
 				buf.append(Signature.toString(types[i]));
 				if (i != last) {
-					buf.append(", ");
+					buf.append(", "); //$NON-NLS-1$
 				}
 			}
 			buf.append(')');
@@ -273,17 +273,17 @@ public class CompletionEvaluator {
 	 * Returns true if case is handeled
 	 */
 	private boolean addArgumentProposals(String tag, String argument) throws JavaModelException {	
-		if ("@see".equals(tag) || "@link".equals(tag)) {
+		if ("@see".equals(tag) || "@link".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-1$
 			evalSeeTag(argument);
 			return true;
-		} else if ("@param".equals(tag)) {
+		} else if ("@param".equals(tag)) { //$NON-NLS-1$
 			IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
 			if (elem instanceof IMethod) {
 				String[] names= ((IMethod)elem).getParameterNames();
 				addProposals(argument, names, JavaPluginImages.IMG_MISC_DEFAULT);
 			}
 			return true;
-		} else if ("@throws".equals(tag) || "@exception".equals(tag)) {
+		} else if ("@throws".equals(tag) || "@exception".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-1$
 			IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
 			if (elem instanceof IMethod) {
 				String[] exceptions= ((IMethod)elem).getExceptionTypes();
@@ -295,7 +295,7 @@ public class CompletionEvaluator {
 				}
 			}
 			return true;
-		} else if ("@serialData".equals(tag)) {
+		} else if ("@serialData".equals(tag)) { //$NON-NLS-1$
 			IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
 			if (elem instanceof IField) {
 				JavaImageLabelProvider iprovider= new JavaImageLabelProvider(0);

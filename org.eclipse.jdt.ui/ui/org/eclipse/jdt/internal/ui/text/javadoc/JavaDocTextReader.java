@@ -17,27 +17,27 @@ import java.io.Reader;
  */
 public class JavaDocTextReader extends SingleCharReader {
 	
-	private static final String LINE_DELIM= System.getProperty("line.separator", "\n");
+	private static final String LINE_DELIM= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	private static HashMap fgHTMLTagLookup;
 	private static HashMap fgEntityLookup;
 	
 	static {
 		fgHTMLTagLookup= new HashMap(7);
-		fgHTMLTagLookup.put("p", LINE_DELIM);
-		fgHTMLTagLookup.put("br", LINE_DELIM);
-		fgHTMLTagLookup.put("dt", LINE_DELIM);	// definition title in definition list
-		fgHTMLTagLookup.put("dd", " ");		// definition doc in definition list
-		fgHTMLTagLookup.put("li", LINE_DELIM + "· ");
+		fgHTMLTagLookup.put("p", LINE_DELIM); //$NON-NLS-1$
+		fgHTMLTagLookup.put("br", LINE_DELIM); //$NON-NLS-1$
+		fgHTMLTagLookup.put("dt", LINE_DELIM);	// definition title in definition list //$NON-NLS-1$
+		fgHTMLTagLookup.put("dd", " ");		// definition doc in definition list //$NON-NLS-1$ //$NON-NLS-2$
+		fgHTMLTagLookup.put("li", LINE_DELIM + "· "); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		fgEntityLookup= new HashMap(7);
-		fgEntityLookup.put("lt", "<");
-		fgEntityLookup.put("gt", ">");
-		fgEntityLookup.put("nbsp", " ");
-		fgEntityLookup.put("amp", "&");
-		fgEntityLookup.put("circ", "^");
-		fgEntityLookup.put("tilde", "~");
-		fgEntityLookup.put("quot", "\"");		
+		fgEntityLookup.put("lt", "<"); //$NON-NLS-1$ //$NON-NLS-2$
+		fgEntityLookup.put("gt", ">"); //$NON-NLS-1$ //$NON-NLS-2$
+		fgEntityLookup.put("nbsp", " "); //$NON-NLS-1$ //$NON-NLS-2$
+		fgEntityLookup.put("amp", "&"); //$NON-NLS-1$ //$NON-NLS-2$
+		fgEntityLookup.put("circ", "^"); //$NON-NLS-1$ //$NON-NLS-2$
+		fgEntityLookup.put("tilde", "~"); //$NON-NLS-2$ //$NON-NLS-1$
+		fgEntityLookup.put("quot", "\"");		 //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private Reader fReader;
@@ -136,8 +136,8 @@ public class JavaDocTextReader extends SingleCharReader {
 			
 			int tagLen= buf.length();
 			// needs special treatment for comments 
-			if ((tagLen >= 3 && "!--".equals(buf.substring(0, 3)))
-				&& !(tagLen >= 5 && "--".equals(buf.substring(tagLen - 2)))) {
+			if ((tagLen >= 3 && "!--".equals(buf.substring(0, 3))) //$NON-NLS-1$
+				&& !(tagLen >= 5 && "--".equals(buf.substring(tagLen - 2)))) { //$NON-NLS-1$
 				// unfinished comment
 				buf.append(ch);
 			} else {
@@ -159,13 +159,13 @@ public class JavaDocTextReader extends SingleCharReader {
 	 * A '@' has been read. Process a jdoc tag
 	 */ 			
 	private void processJDocTag() throws IOException {
-		StringBuffer buf= new StringBuffer("@");
+		StringBuffer buf= new StringBuffer("@"); //$NON-NLS-1$
 		int ch= nextChar();
 		while (ch != -1 && Character.isLetter((char)ch)) {
 			buf.append((char)ch);
 			ch= nextChar();
 		}
-		if (!"@link".equals(buf.toString())) {
+		if (!"@link".equals(buf.toString())) { //$NON-NLS-1$
 			buf.insert(0, LINE_DELIM);
 		}
 		buf.append((char)ch);
@@ -203,7 +203,7 @@ public class JavaDocTextReader extends SingleCharReader {
 				} else {
 					ch= Integer.parseInt(symbol.substring(1), 10);
 				}
-				return "" + (char)ch;
+				return "" + (char)ch; //$NON-NLS-1$
 			} catch (NumberFormatException e) {
 			}
 		} else {
@@ -212,7 +212,7 @@ public class JavaDocTextReader extends SingleCharReader {
 				return str;
 			}
 		}
-		return "&" + symbol; // not found
+		return "&" + symbol; // not found //$NON-NLS-1$
 	}
 	
 	/**
