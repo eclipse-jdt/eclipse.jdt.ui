@@ -232,6 +232,11 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class S
 		helperSelectPrevious(5, 30, 7, 10);
 	}
 	
+	public void test24() throws Exception{
+		//regression test for bug#11424
+		helperSelectPrevious(3, 13, 5, 6);
+	}
+	
 	public void testZeroLength0() throws Exception{
 		//printTestDisabledMessage("");
 		helperZeroLength(4, 20);
