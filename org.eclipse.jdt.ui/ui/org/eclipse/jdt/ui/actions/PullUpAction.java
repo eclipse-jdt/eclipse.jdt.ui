@@ -2,48 +2,143 @@ package org.eclipse.jdt.ui.actions;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PullUpWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class PullUpAction extends OpenRefactoringWizardAction {
+public class PullUpAction extends SelectionDispatchAction{
 
-	private static final String TITLE= RefactoringMessages.getString("RefactoringGroup.pull_Up_label"); //$NON-NLS-1$
-	private static final String UNAVAILABLE= RefactoringMessages.getString("PullUpAction.unavailable"); //$NON-NLS-1$
+	private PullUpRefactoring fRefactoring;
+	private CompilationUnitEditor fEditor;
 	
 	public PullUpAction(CompilationUnitEditor editor) {
-		super(TITLE, UNAVAILABLE, editor, IMember.class, true);
+		this(editor.getEditorSite());
+		fEditor= editor;
 	}
 
 	public PullUpAction(IWorkbenchSite site) {
-		super(TITLE, UNAVAILABLE, site, IMember.class, true);
+		super(site);
+		setText(RefactoringMessages.getString("RefactoringGroup.pull_Up_label"));//$NON-NLS-1$
 	}
 
-	protected Refactoring createNewRefactoringInstance(Object obj){
+	/*
+	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
+	 */
+	protected void selectionChanged(IStructuredSelection selection) {
+		setEnabled(canEnable(selection));
+	}
+
+	protected void selectionChanged(ITextSelection selection) {
+		//resolving is too expensive to do on selection changes in the editor - just enable here, we'll check it later
+		setEnabled(checkEnabled(selection));
+	}
+	
+	private boolean checkEnabled(ITextSelection selection) {
+		if (fEditor == null)
+			return false;
+		return SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+	}
+
+	/*
+	 * @see SelectionDispatchAction#run(IStructuredSelection)
+	 */
+	protected void run(IStructuredSelection selection) {
+		startRefactoring();
+	}
+
+	protected void run(ITextSelection selection) {
+		if (! canRun(selection)){
+			String unavailable= RefactoringMessages.getString("PullUpAction.unavailable"); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
+			fRefactoring= null;
+			return;
+		}
+		startRefactoring();	
+	}
+		
+	private boolean canEnable(IStructuredSelection selection){
+		if (selection.isEmpty())
+			return false;
+		
+		for  (Iterator iter= selection.iterator(); iter.hasNext(); ) {
+			if (! (iter.next() instanceof IMember))
+				return false;
+		}
+		return shouldAcceptElements(selection.toArray());
+	}
+		
+	private boolean canRun(ITextSelection selection){
+		IJavaElement[] elements= resolveElements();
+		if (elements.length != 1)
+			return false;
+
+		return (elements[0] instanceof IMember) && shouldAcceptElements(elements);
+	}
+
+	private PullUpRefactoring createNewRefactoringInstance(Object[] obj){
 		Set memberSet= new HashSet();
-		memberSet.addAll(Arrays.asList((Object[])obj));
+		memberSet.addAll(Arrays.asList(obj));
 		IMember[] members= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
 		return new PullUpRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
-	protected boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
-		return ((PullUpRefactoring)refactoring).checkPreactivation().isOK();
+
+	private boolean shouldAcceptElements(Object[] elements) {
+		try{
+			fRefactoring= createNewRefactoringInstance(elements);
+			return fRefactoring.checkPreactivation().isOK();
+		} catch (JavaModelException e){
+			JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
+			return false;
+		}	
+	}
+		
+	private IJavaElement[] resolveElements() {
+		return SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"));  //$NON-NLS-1$
 	}
 
-	protected RefactoringWizard createWizard(Refactoring ref){
+	private RefactoringWizard createWizard(){
 		String title= RefactoringMessages.getString("RefactoringGroup.pull_up"); //$NON-NLS-1$
 		//FIX ME: wrong
 		String helpId= "HELPID"; //$NON-NLS-1$
-		return new PullUpWizard((PullUpRefactoring)ref, title, helpId);
+		return new PullUpWizard(fRefactoring, title, helpId);
 	}
+		
+	private void startRefactoring() {
+		Assert.isNotNull(fRefactoring);
+		try{
+			Object newElementToProcess= new RefactoringStarter().activate(fRefactoring, createWizard(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+			if (newElementToProcess == null)
+				return;
+			IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
+			selectionChanged(mockSelection);
+			if (isEnabled())
+				run(mockSelection);
+			else
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Refactoring", "Operation not possible.");	
+		} catch (JavaModelException e){
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}	
 }
