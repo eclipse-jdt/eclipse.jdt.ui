@@ -11,7 +11,15 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
@@ -40,7 +48,7 @@ public class TextPerformanceTestCase extends TestCase {
 	private static final boolean OVERRIDE_RUNS= Boolean.toString(true).equals(Platform.getDebugOption(PLUGIN_ID + OVERRIDE_RUNS_OPTION));
 	
 	/** overridden number of warm-up runs */
-	private static final int OVERRIDE_WARM_UP_RUNS= intValueOf(Platform.getDebugOption(PLUGIN_ID + OVERRIDE_WARM_UP_RUNS_OPTION), 1);
+	private static final int OVERRIDE_WARM_UP_RUNS= intValueOf(Platform.getDebugOption(PLUGIN_ID + OVERRIDE_WARM_UP_RUNS_OPTION), 2);
 	
 	/** overridden number of measured runs */
 	private static final int OVERRIDE_MEASURED_RUNS= intValueOf(Platform.getDebugOption(PLUGIN_ID + OVERRIDE_MEASURED_RUNS_OPTION), 2);
@@ -50,6 +58,9 @@ public class TextPerformanceTestCase extends TestCase {
 	
 	/** custom number of measured runs */
 	private int fCustomMeasuredRuns= -1;
+
+	/** created performance meters */
+	private List fPerformanceMeters;
 	
 	/*
 	 * @see TestCase#TestCase()
@@ -84,6 +95,16 @@ public class TextPerformanceTestCase extends TestCase {
 		return defaultValue;
 	}
 
+	/*
+	 * @see junit.framework.TestCase#tearDown()
+	 */
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		if (fPerformanceMeters != null)
+			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
+				((PerformanceMeter) iter.next()).dispose();
+	}
+	
 	/**
 	 * @return number of warm-up runs, must have been set before
 	 */
@@ -120,5 +141,56 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected final void setMeasuredRuns(int runs) {
 		fCustomMeasuredRuns= runs;
+	}
+
+	/**
+	 * Create a performance meter with a default scenario id. The
+	 * performance meter will be disposed on {@link #tearDown()}.
+	 * 
+	 * @return the created performance meter
+	 */
+	protected final PerformanceMeter createPerformanceMeter() {
+		Performance performance= Performance.getDefault();
+		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		if (fPerformanceMeters == null)
+			fPerformanceMeters= new ArrayList();
+		fPerformanceMeters.add(performanceMeter);
+		return performanceMeter;
+	}
+
+	/**
+	 * Create a performance meter with a default scenario id and mark the
+	 * scenario to be included into the component performance summary. The
+	 * summary shows the given dimension of the scenario and labels the
+	 * scenario with the short name. The performance meter will be disposed
+	 * on {@link #tearDown()}.
+	 * 
+	 * @param shortName a short (shorter than 40 characters) descriptive
+	 *                name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 * @return the created performance meter
+	 */
+	protected final PerformanceMeter createPerformanceMeterForSummary(String shortName, Dimension dimension) {
+		PerformanceMeter performanceMeter= createPerformanceMeter();
+		Performance.getDefault().tagAsSummary(performanceMeter, shortName, dimension);
+		return performanceMeter;
+	}
+
+	/**
+	 * Create a performance meter with a default scenario id and mark the
+	 * scenario to be included into the global performance summary. The
+	 * summary shows the given dimension of the scenario and labels the
+	 * scenario with the short name. The performance meter will be disposed
+	 * on {@link #tearDown()}.
+	 * 
+	 * @param shortName a short (shorter than 40 characters) descriptive
+	 *                name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 * @return the created performance meter
+	 */
+	protected final PerformanceMeter createPerformanceMeterForGlobalSummary(String shortName, Dimension dimension) {
+		PerformanceMeter performanceMeter= createPerformanceMeter();
+		Performance.getDefault().tagAsGlobalSummary(performanceMeter, shortName, dimension);
+		return performanceMeter;
 	}
 }

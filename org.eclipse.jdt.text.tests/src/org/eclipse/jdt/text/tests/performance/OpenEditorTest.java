@@ -28,25 +28,14 @@ public abstract class OpenEditorTest extends TextPerformanceTestCase {
 		super(name);
 	}
 
-	protected void measureOpenInEditor(IFile[] files, PerformanceMeter performanceMeter, boolean closeAll) throws PartInitException {
-		try {
-			for (int i= 0, n= files.length; i < n; i++) {
-				if (performanceMeter != null)
-					performanceMeter.start();
-				EditorTestHelper.openInEditor(files[i], true);
-				if (performanceMeter != null)
-					performanceMeter.stop();
-				EditorTestHelper.runEventQueue(2000);
-			}
-			if (performanceMeter != null) {
-				performanceMeter.commit();
-				Performance.getDefault().assertPerformance(performanceMeter);
-			}
-		} finally {
-			if (performanceMeter != null)
-				performanceMeter.dispose();
-			if (closeAll)
-				EditorTestHelper.closeAllEditors();
+	protected void measureOpenInEditor(IFile[] files, PerformanceMeter performanceMeter) throws PartInitException {
+		for (int i= 0, n= files.length; i < n; i++) {
+			performanceMeter.start();
+			EditorTestHelper.openInEditor(files[i], true);
+			performanceMeter.stop();
+			EditorTestHelper.runEventQueue(2000);
 		}
+		performanceMeter.commit();
+		Performance.getDefault().assertPerformance(performanceMeter);
 	}
 }
