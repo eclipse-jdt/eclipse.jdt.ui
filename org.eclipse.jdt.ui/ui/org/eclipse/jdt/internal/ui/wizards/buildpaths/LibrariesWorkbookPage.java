@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -52,6 +55,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -355,9 +359,26 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				containerPath= ((CPListElement) parentContainer).getPath();
 				applyChanges= true;
 			}
-			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry(), containerPath, fCurrJProject, applyChanges);
+			Shell shell= getShell();
+			SourceAttachmentDialog dialog= new SourceAttachmentDialog(shell, selElement.getClasspathEntry());
 			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, dialog.getSourceAttachmentPath());
+				IClasspathEntry result= dialog.getResult();
+				
+				if (applyChanges) {
+					try {
+						IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(shell, result, fCurrJProject, containerPath);
+						new ProgressMonitorDialog(shell).run(true, true, runnable);
+
+					} catch (InvocationTargetException e) {
+						String title= NewWizardMessages.getString("LibrariesWorkbookPage.configurecontainer.error.title"); //$NON-NLS-1$
+						String message= NewWizardMessages.getString("LibrariesWorkbookPage.configurecontainer.error.message"); //$NON-NLS-1$
+						ExceptionHandler.handle(e, shell, title, message);
+
+					} catch (InterruptedException e) {
+						return;
+					}
+				}
+				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
 				fLibrariesList.refresh();
 				fClassPathList.refresh(); // images
 			}

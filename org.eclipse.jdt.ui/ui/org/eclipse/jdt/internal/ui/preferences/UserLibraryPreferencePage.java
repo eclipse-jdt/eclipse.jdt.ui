@@ -811,10 +811,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
 			CPListElement selElement= elem.getParent();
 			
-			IPath containerPath= null;
-			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry(), containerPath, null, false);
+			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry());
 			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, dialog.getSourceAttachmentPath());
+				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, dialog.getResult().getSourceAttachmentPath());
 				fLibraryList.refresh();
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {

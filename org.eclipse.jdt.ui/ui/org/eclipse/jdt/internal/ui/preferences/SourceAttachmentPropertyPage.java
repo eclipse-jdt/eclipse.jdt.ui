@@ -41,13 +41,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
 
 /**
  * Property page to configure a archive's JARs source attachment
@@ -56,6 +56,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 
 	private SourceAttachmentBlock fSourceAttachmentBlock;
 	private IPackageFragmentRoot fRoot;
+	private IPath fContainerPath;
 
 	public SourceAttachmentPropertyPage() {
 	}
@@ -94,7 +95,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 			} else {
 				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 					containerPath= entry.getPath();
-					entry= SourceAttachmentDialog.getClasspathEntryToEdit(jproject, containerPath, fRoot.getPath());
+					entry= JavaModelUtil.getClasspathEntryToEdit(jproject, containerPath, fRoot.getPath());
 					if (entry == null) {
 						IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 						String containerName= container != null ? container.getDescription() : containerPath.toString();
@@ -102,7 +103,9 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 					}
 				}
 			}
-			fSourceAttachmentBlock= new SourceAttachmentBlock(this, entry, containerPath, jproject);
+			fContainerPath= containerPath;
+			
+			fSourceAttachmentBlock= new SourceAttachmentBlock(this, entry);
 			return fSourceAttachmentBlock.createControl(composite);				
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -134,7 +137,8 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	public boolean performOk() {
 		if (fSourceAttachmentBlock != null) {
 			try {
-				IRunnableWithProgress runnable= fSourceAttachmentBlock.getRunnable(getShell());		
+				IClasspathEntry entry= fSourceAttachmentBlock.getNewEntry();
+				IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(getShell(), entry, fRoot.getJavaProject(), fContainerPath);		
 				new ProgressMonitorDialog(getShell()).run(true, true, runnable);						
 			} catch (InvocationTargetException e) {
 				String title= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.title"); //$NON-NLS-1$

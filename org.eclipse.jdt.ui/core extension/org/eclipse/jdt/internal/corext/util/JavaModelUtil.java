@@ -766,9 +766,31 @@ public final class JavaModelUtil {
 		}
 		return fgIsJDTCore_1_5.booleanValue();
 	}
-	
-	
-	
-	
-	
+
+	/**
+	 * Helper method that tests if an classpath entry can be found in a
+	 * container. <code>null</code> is returned if the entry can not be found
+	 * or if the container does not allows the configuration of source
+	 * attachments
+	 * @param jproject The container's parent project
+	 * @param containerPath The path of the container
+	 * @param libPath The path of the library to be found
+	 * @return IClasspathEntry A classpath entry from the container of
+	 * <code>null</code> if the container can not be modified.
+	 */
+	public static IClasspathEntry getClasspathEntryToEdit(IJavaProject jproject, IPath containerPath, IPath libPath) throws JavaModelException {
+		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
+		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
+		if (container != null && initializer != null && initializer.canUpdateClasspathContainer(containerPath, jproject)) {
+			IClasspathEntry[] entries= container.getClasspathEntries();
+			for (int i= 0; i < entries.length; i++) {
+				IClasspathEntry curr= entries[i];
+				IClasspathEntry resolved= JavaCore.getResolvedClasspathEntry(curr);
+				if (resolved != null && libPath.equals(resolved.getPath())) {
+					return curr; // return the real entry
+				}
+			}
+		}
+		return null; // attachment not possible
+	}
 }

@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -43,15 +44,17 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ScrollBar;
+import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.window.Window;
-
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -73,9 +76,12 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.util.IClassFileDisassembler;
 import org.eclipse.jdt.core.util.IClassFileReader;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
 
 /**
@@ -221,7 +227,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				
 				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 					containerPath= entry.getPath();
-					IClasspathEntry entry2= SourceAttachmentDialog.getClasspathEntryToEdit(jproject, containerPath, root.getPath());
+					IClasspathEntry entry2= JavaModelUtil.getClasspathEntryToEdit(jproject, containerPath, root.getPath());
 					if (entry2 == null) {
 						IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());							
 						String containerName= container == null ? entry.getPath().toString() : container.getDescription();
@@ -257,9 +263,12 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				return new SelectionListener() {
 					public void widgetSelected(SelectionEvent event) {				
 						try {
-							SourceAttachmentDialog dialog= new SourceAttachmentDialog(fScrolledComposite.getShell(), entry, containerPath, jproject, true);
-							if (dialog.open() == Window.OK)
+							Shell shell= fScrolledComposite.getShell();
+							SourceAttachmentDialog dialog= new SourceAttachmentDialog(shell, entry);
+							if (dialog.open() == Window.OK) {
+								applySourceAttachment(shell, dialog.getResult(), jproject, containerPath);
 								verifyInput(getEditorInput());
+							}
 	
 						} catch (CoreException e) {
 							String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
@@ -270,8 +279,22 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	
 					public void widgetDefaultSelected(SelectionEvent e) {}
 				};
-			}	
+			}
 			
+			protected void applySourceAttachment(Shell shell, IClasspathEntry newEntry, IJavaProject project, IPath containerPath) {
+				try {
+					IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(shell, newEntry, project, containerPath);
+					new ProgressMonitorDialog(shell).run(true, true, runnable);
+	
+				} catch (InvocationTargetException e) {
+					String title= NewWizardMessages.getString("SourceAttachmentForm.attach.error.title"); //$NON-NLS-1$
+					String message= NewWizardMessages.getString("SourceAttachmentForm.attach.error.message"); //$NON-NLS-1$
+					ExceptionHandler.handle(e, shell, title, message);
+	
+				} catch (InterruptedException e) {
+					// cancelled
+				}
+			}
 		
 			/*
 			 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)

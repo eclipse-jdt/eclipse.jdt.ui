@@ -128,30 +128,17 @@ public class SourceAttachmentBlock {
 	private IClasspathEntry fEntry;
 	private IPath fContainerPath;
 
-	/**
-	 * @deprecated 
-	 */
-	public SourceAttachmentBlock(IWorkspaceRoot root, IStatusChangeListener context, IClasspathEntry oldEntry) {
-		this(context, oldEntry, null, null);
-	}	
-	
+
 	/**
 	 * @param context listeners for status updates
 	 * @param entry The entry to edit
-	 * @param containerPath Path of the container that contains the given entry or
-	 * <code>null</code> if the entry does not belong to a container.
-	 * @param project Project to which the entry belongs. Can be
-	 * <code>null</code> if <code>getRunnable</code> is not run and the entry
-	 * does not belong to a container.
-	 *
 	 */
-	public SourceAttachmentBlock(IStatusChangeListener context, IClasspathEntry entry, IPath containerPath, IJavaProject project) {
+	public SourceAttachmentBlock(IStatusChangeListener context, IClasspathEntry entry) {
 		Assert.isNotNull(entry);
 		
 		fContext= context;
 		fEntry= entry;
-		fContainerPath= containerPath;
-		fProject= project;
+
 		
 		int kind= entry.getEntryKind();
 		Assert.isTrue(kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE);
@@ -189,6 +176,15 @@ public class SourceAttachmentBlock {
 		setDefaults();
 	}
 	
+	/**
+	 * @deprecated Use API {@link org.eclipse.jdt.ui.wizards.BuildPathDialogs#configureSourceAttachment(Shell, IClasspathEntry)}
+	 */
+	public SourceAttachmentBlock(IStatusChangeListener context, IClasspathEntry entry, IPath containerPath, IJavaProject project) {
+		this(context, entry);
+		fContainerPath= containerPath;
+		fProject= project;
+	}
+	
 	public void setDefaults() {
 		if (fEntry.getSourceAttachmentPath() != null) {
 			fFileNameField.setText(fEntry.getSourceAttachmentPath().toString());
@@ -218,6 +214,17 @@ public class SourceAttachmentBlock {
 	 */
 	public IPath getSourceAttachmentRootPath() {
 		return null;
+	}
+	
+	public IClasspathEntry getNewEntry() {
+		boolean isExported= fEntry.isExported();
+		IClasspathEntry newEntry;
+		if (fEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+			newEntry= JavaCore.newVariableEntry(fEntry.getPath(), getSourceAttachmentPath(), getSourceAttachmentRootPath(), isExported);
+		} else {
+			newEntry= JavaCore.newLibraryEntry(fEntry.getPath(), getSourceAttachmentPath(), getSourceAttachmentRootPath(), isExported);
+		}
+		return newEntry;
 	}
 	
 		
@@ -592,44 +599,35 @@ public class SourceAttachmentBlock {
 	/**
 	 * Creates a runnable that sets the source attachment by modifying the project's classpath.
 	 */
-	public IRunnableWithProgress getRunnable(final IJavaProject jproject, final Shell shell) {
-		fProject= jproject;
-		return getRunnable(shell);
-	}
-
-	/**
-	 * Creates a runnable that sets the source attachment by modifying the
-	 * project's classpath or updating a container.
-	 */
-	public IRunnableWithProgress getRunnable(final Shell shell) {
+	public static IRunnableWithProgress getRunnable(final Shell shell, final IClasspathEntry newEntry, final IJavaProject jproject, final IPath containerPath) {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {				
 				try {
-					attachSource(shell, monitor);
+					attachSource(shell, newEntry, jproject, containerPath, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
 			}
 		};
+	}
+
+	/**
+	 * @deprecated Use {@link #getRunnable(Shell, IClasspathEntry, IJavaProject, IPath)}
+	 */
+	public IRunnableWithProgress getRunnable(final Shell shell) {
+		return getRunnable(shell, getNewEntry(), fProject, fContainerPath);
 	}	
 	
 	
-	protected void attachSource(final Shell shell, IProgressMonitor monitor) throws CoreException {
-		boolean isExported= fEntry.isExported();
-		IClasspathEntry newEntry;
-		if (fEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-			newEntry= JavaCore.newVariableEntry(fEntry.getPath(), getSourceAttachmentPath(), getSourceAttachmentRootPath(), isExported);
+	protected static void attachSource(Shell shell, IClasspathEntry newEntry, IJavaProject jproject, IPath containerPath, IProgressMonitor monitor) throws CoreException {
+		if (containerPath != null) {
+			updateContainerClasspath(jproject, containerPath, newEntry, monitor);
 		} else {
-			newEntry= JavaCore.newLibraryEntry(fEntry.getPath(), getSourceAttachmentPath(), getSourceAttachmentRootPath(), isExported);
-		}
-		if (fContainerPath != null) {
-			updateContainerClasspath(fProject, fContainerPath, newEntry, monitor);
-		} else {
-			updateProjectClasspath(shell, fProject, newEntry, monitor);
+			updateProjectClasspath(shell, jproject, newEntry, monitor);
 		}
 	}
 
-	private void updateContainerClasspath(IJavaProject jproject, IPath containerPath, IClasspathEntry newEntry, IProgressMonitor monitor) throws CoreException {
+	private static void updateContainerClasspath(IJavaProject jproject, IPath containerPath, IClasspathEntry newEntry, IProgressMonitor monitor) throws CoreException {
 		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 		IClasspathEntry[] entries= container.getClasspathEntries();
 		IClasspathEntry[] newEntries= new IClasspathEntry[entries.length];
@@ -648,7 +646,7 @@ public class SourceAttachmentBlock {
 		monitor.worked(1);
 	}
 
-	private void updateProjectClasspath(Shell shell, IJavaProject jproject, IClasspathEntry newEntry, IProgressMonitor monitor) throws JavaModelException {
+	private static void updateProjectClasspath(Shell shell, IJavaProject jproject, IClasspathEntry newEntry, IProgressMonitor monitor) throws JavaModelException {
 		IClasspathEntry[] oldClasspath= jproject.getRawClasspath();
 		int nEntries= oldClasspath.length;
 		ArrayList newEntries= new ArrayList(nEntries + 1);
@@ -676,7 +674,7 @@ public class SourceAttachmentBlock {
 		jproject.setRawClasspath(newClasspath, monitor);
 	}
 	
-	private boolean putJarOnClasspathDialog(Shell shell) {
+	private static boolean putJarOnClasspathDialog(Shell shell) {
 		final boolean[] result= new boolean[1];
 		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
