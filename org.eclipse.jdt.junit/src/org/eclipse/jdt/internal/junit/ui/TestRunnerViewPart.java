@@ -14,6 +14,7 @@ import java.util.Vector;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.*;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.DebugUITools;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -240,6 +241,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	public void rerunTestRun() {
 		if (fLastLaunch != null && fLastLaunch.getLaunchConfiguration() != null) {
 			try {
+				DebugUITools.saveAndBuildBeforeLaunch();
 				fLastLaunch.getLaunchConfiguration().launch(fLastLaunch.getLaunchMode(), null);		
 			} catch (CoreException e) {
 				ErrorDialog.openError(getSite().getShell(), 
