@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
+
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -300,8 +301,9 @@ public class PullUpRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 3);
+			pm.beginTask("", 4);
 			RefactoringStatus result= new RefactoringStatus();
+			result.merge(checkFinalFields(new SubProgressMonitor(pm, 1)));
 			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
 			result.merge(MemberCheckUtil.checkMembersInDestinationType(fElementsToPullUp, getSuperType(new SubProgressMonitor(pm, 1))));
 			pm.worked(1);
@@ -391,6 +393,20 @@ public class PullUpRefactoring extends Refactoring {
 				return false;			
 		}	
 		return true;
+	}
+	
+	private RefactoringStatus checkFinalFields(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
+		pm.beginTask("", fElementsToPullUp.length);
+		for (int i= 0; i < fElementsToPullUp.length; i++) {
+			if (fElementsToPullUp[i].getElementType() == IJavaElement.FIELD && JdtFlags.isFinal(fElementsToPullUp[i])){
+				Context context= JavaSourceContext.create(fElementsToPullUp[i]);
+				result.addWarning("Pulling up final fields will result in compilation errors if they are not initialized on creation or in constructors", context);
+			}
+			pm.worked(1);
+		}
+		pm.done();
+		return result;
 	}
 	
 	private RefactoringStatus checkAccesses(IProgressMonitor pm) throws JavaModelException{
