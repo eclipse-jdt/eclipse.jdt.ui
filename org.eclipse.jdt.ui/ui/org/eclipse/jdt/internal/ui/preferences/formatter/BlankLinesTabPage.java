@@ -12,17 +12,13 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.Map;
 
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+
 public class BlankLinesTabPage extends ModifyDialogTabPage {
 
 	private final String PREVIEW=

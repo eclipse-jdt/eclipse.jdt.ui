@@ -12,11 +12,12 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.Map;
 
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
 public class NewLinesTabPage extends ModifyDialogTabPage {

@@ -35,14 +35,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
-
-
 public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelectionChangedListener, ICheckStateListener {
 	
 	
@@ -99,11 +91,22 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 	}
 	
 	
+	private final Category assignmentCategory= new Category("Assignments", 
+			new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS, "before assignment operator" ),
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATORS, "after assignment operator" )
+	},
+	"class Example {" +
+	"void foo() {" +
+	"int a= 4;" +
+	"}" +
+	"}"
+	);
+	
+	
 	
 	private final Category operatorCategory= new Category( "Operators",
 		new Option[] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS, "before assignment operators" ),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATORS, "after assignment operators" ),
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR, "before binary operators" ),
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR, "after binary operators" ),
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_UNARY_OPERATOR, "before unary operators" ),
@@ -318,7 +321,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 	
 	
 	private final Category switchStatementCategory= new Category(
-		"'switch...case'",
+		"'switch case'",
 		new Option [] {
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE, "before colon in case"),
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_DEFAULT, "before colon in default"),
@@ -339,7 +342,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 	
 	
 	private final Category doWhileCategory= new Category(
-		"'do...while'",
+		"'do while'",
 		new Option [] {
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_WHILE_CONDITION, "before condition"),
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_WHILE_CONDITION, "in condition")
@@ -371,7 +374,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 	
 	
 	private final Category tryStatementCategory= new Category(
-		"'try...finally' / 'try...catch'",
+		"'try finally' / 'try catch'",
 		new Option [] {
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CATCH_EXPRESSION, "before catch expression"),
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_CATCH_EXPRESSION, "in catch expression")
@@ -389,7 +392,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 	
 	
 	private final Category ifStatementCategory= new Category(
-		"'if...else'",
+		"'if else'",
 		new Option [] {
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_IF_CONDITION, "before condition"),
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_IF_CONDITION, "in condition")
@@ -547,6 +550,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 		statementCategory.addChild(synchronizedCategory);
 		
 		expressionsCategory.addChild(functionCallCategory);
+		expressionsCategory.addChild(assignmentCategory);
 		expressionsCategory.addChild(operatorCategory);
 		expressionsCategory.addChild(parenthesizedExpressionOptions);
 		expressionsCategory.addChild(typecastCategory);
@@ -613,13 +617,9 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 		fCategoriesViewer.addSelectionChangedListener(this);
 		fOptionsViewer.addCheckStateListener(this);
 		fCategoriesViewer.getTree().setFocus();
-		fCategoriesViewer.setSelection( new StructuredSelection( fCategories.iterator().next() ));
+		fCategoriesViewer.setSelection( new StructuredSelection( classCategory ));
 	}
 	
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-	 */
 	public void selectionChanged(SelectionChangedEvent event) {
 		final Category selected= (Category)((IStructuredSelection)event.getSelection()).getFirstElement();
 		fJavaPreview.setPreviewText(selected.getPreviewText());
@@ -632,9 +632,6 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
-	 */
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		final Option option= (Option)event.getElement();
 		fWorkingValues.put(option.key, event.getChecked() ? JavaCore.INSERT : JavaCore.DO_NOT_INSERT);

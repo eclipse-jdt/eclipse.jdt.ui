@@ -18,12 +18,7 @@ import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
+
 public class IndentationTabPage extends ModifyDialogTabPage {
 	
 	private final String PREVIEW=

@@ -50,7 +50,7 @@ public class ProfileManager extends Observable {
 		public abstract String getID();
 		
 		public final int compareTo(Object o) {
-			return getName().compareTo(((Profile)o).getName());
+			return getName().compareToIgnoreCase(((Profile)o).getName());
 		}
 	}
 	
@@ -116,6 +116,7 @@ public class ProfileManager extends Observable {
 			if (fManager != null) { 
 				fManager.fProfiles.remove(oldID);
 				fManager.fProfiles.put(getID(), this);
+				Collections.sort(fManager.fProfilesByName);
 				notifyObservers(PROFILE_RENAMED_EVENT);
 			}
 		}
@@ -180,19 +181,12 @@ public class ProfileManager extends Observable {
 	protected final Map fProfiles;
 	
 	
-	
 	/**
-	 * The profiles, sorted by name. If this is null, the collection has to be updated. 
+	 * The available profiles, sorted by name.
 	 */
-	private ArrayList fSortedProfiles;
+	protected final List fProfilesByName;
 	
-	
-	/**
-	 * The profile names, sorted by names.
-	 */
-	private String [] fSortedNames;
-	
-	
+
 	/**
 	 * The currently selected profile. 
 	 */
@@ -216,12 +210,18 @@ public class ProfileManager extends Observable {
 		fUIKeys= getUIKeys();
 		fCoreKeys= getCoreKeys();
 		fProfiles= new HashMap();
+		fProfilesByName= new ArrayList();
 	
-		addBuiltinProfiles(fProfiles);
+		addBuiltinProfiles(fProfiles, fProfilesByName);
+		
 		for (Iterator iter = profiles.iterator(); iter.hasNext();) {
-			final Profile profile= (Profile) iter.next();
+			final CustomProfile profile= (CustomProfile) iter.next();
+			profile.setManager(this);
 			fProfiles.put(profile.getID(), profile);
+			fProfilesByName.add(profile);
 		}
+		
+		Collections.sort(fProfilesByName);
 		
 		final String id= getUIPreferenceStore().getString(PROFILE_KEY);
 		fSelected= (Profile)fProfiles.get(id);
@@ -242,8 +242,6 @@ public class ProfileManager extends Observable {
 	
 	/**
 	 * Update all formatter settings with the settings of the specified profile. 
-	 *  
-	 * @param Profile The profile
 	 */
 	private void writeToPreferenceStore(Profile profile) {
 	
@@ -262,13 +260,6 @@ public class ProfileManager extends Observable {
 			}
 		}
 		
-		//TODO: remove after transition is done
-//		if (DefaultCodeFormatterConstants.TRUE.equals(profileOptions.get(DefaultCodeFormatterConstants.FORMATTER_CONVERT_OLD_TO_NEW))) {
-//			profileOptions.put(DefaultCodeFormatterConstants.FORMATTER_CONVERT_OLD_TO_NEW, DefaultCodeFormatterConstants.FALSE);
-//			hasChanges= true;
-//		}
-		
-
 		if (hasChanges) {
 			JavaCore.setOptions(actualOptions);
 		}
@@ -288,9 +279,14 @@ public class ProfileManager extends Observable {
 	 * @param map The map where the profiles are to be added.
 	 */
 
-	private void addBuiltinProfiles(Map map) {
-		map.put(DEFAULT_PROFILE, new BuiltInProfile(DEFAULT_PROFILE, "Default", getDefaultSettings()));
-		map.put(JAVA_PROFILE, new BuiltInProfile(JAVA_PROFILE, "Java Conventions", getJavaSettings()));
+	private void addBuiltinProfiles(Map profiles, List profilesByName) {
+		final Profile defaultProfile= new BuiltInProfile(DEFAULT_PROFILE, "Default", getDefaultSettings());
+		profiles.put(defaultProfile.getID(), defaultProfile);
+		profilesByName.add(defaultProfile);
+		
+		final Profile javaProfile= new BuiltInProfile(JAVA_PROFILE, "Java Conventions", getJavaSettings());
+		profiles.put(javaProfile.getID(), javaProfile);
+		profilesByName.add(javaProfile);
 	}
 	
 	
@@ -318,24 +314,17 @@ public class ProfileManager extends Observable {
 	}
 	
 	public List getSortedProfiles() {
-		if (fSortedProfiles == null) {
-			fSortedProfiles= new ArrayList(fProfiles.values());
-			Collections.sort(fSortedProfiles);
-		}
-		return fSortedProfiles;
+		return new ArrayList(fProfilesByName);
 	}
 	
 	public String [] getSortedNames() {
-		if (fSortedNames == null) {
-			final List sortedProfiles= getSortedProfiles();
-			fSortedNames= new String[sortedProfiles.size()];
-			for (int i = 0; i < fSortedNames.length; i++) {
-				fSortedNames[i]= ((Profile)sortedProfiles.get(i)).getName();
-			}
+		final String [] sortedNames= new String[fProfilesByName.size()];
+		int i= 0;
+		for (Iterator iter = fProfilesByName.iterator(); iter.hasNext();) {
+			sortedNames[i++]= ((Profile) iter.next()).getName();
 		}
-		return fSortedNames;
+		return sortedNames;
 	}
-	
 	
 	public Profile getProfile(String ID) {
 		return (Profile)fProfiles.get(ID);
@@ -373,47 +362,28 @@ public class ProfileManager extends Observable {
 		return fProfiles.containsKey(ID_PREFIX + name);
 	}
 	
-	public Profile createProfile(String name, Map settings) {
-		if (name == null || settings == null) return null;
-		final Profile profile= new CustomProfile(name, settings);
-		fProfiles.put(profile.getID(), profile);
-		fSortedProfiles= null;
-		fSortedNames= null;
-		fSelected= profile;
-		notifyObservers(PROFILE_CREATED_EVENT);
-		return profile;
-	}
 	
 	public void addProfile(CustomProfile profile) {
-		fProfiles.put(profile.getID(), profile);
 		profile.setManager(this);
-		fSortedProfiles= null;
-		fSortedNames= null;
+		fProfiles.put(profile.getID(), profile);
+		fProfilesByName.add(profile);
+		Collections.sort(fProfilesByName);
 		fSelected= profile;
 		notifyObservers(PROFILE_CREATED_EVENT);
 	}
 	
-	public void deleteProfile(CustomProfile profile) {
-		if (!fProfiles.containsKey(profile.getID())) 
-			return;
-		fProfiles.remove(profile);
-		profile.setManager(null);
-	}
 	
 	public boolean deleteSelected() {
-		if (fSelected instanceof BuiltInProfile) 
+		if (!(fSelected instanceof CustomProfile)) 
 			return false;
 
-		int index= getSortedProfiles().indexOf(fSelected);
-		
+		int index= fProfilesByName.indexOf(fSelected);
+		fProfilesByName.remove(fSelected);
 		fProfiles.remove(fSelected.getID());
-
-		fSortedProfiles= null;
-		fSortedNames= null;	
 		
-		if (index >= getSortedProfiles().size()) 
-				--index;
-		fSelected= (Profile)getSortedProfiles().get(index);
+		if (index >= fProfilesByName.size())
+			index--;
+		fSelected= (Profile)fProfilesByName.get(index);
 
 		notifyObservers(PROFILE_DELETED_EVENT);
 		return true;
@@ -422,5 +392,4 @@ public class ProfileManager extends Observable {
 	public static IPreferenceStore getUIPreferenceStore() {
 		return PreferenceConstants.getPreferenceStore();
 	}
-
 }

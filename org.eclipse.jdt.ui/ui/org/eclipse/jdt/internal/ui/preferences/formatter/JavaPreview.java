@@ -43,12 +43,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
+
 public class JavaPreview {
 	
 	
@@ -114,17 +109,9 @@ public class JavaPreview {
 		fTextTools= JavaPlugin.getDefault().getJavaTextTools();
 		fViewerConfiguration= new JavaSourceViewerConfiguration( fTextTools, null, IJavaPartitions.JAVA_PARTITIONING);
 		fPreviewDocument= new Document();
-//		fFontRegistry= new FontRegistry();
 		fWorkingValues= workingValues;
 		fTextTools.setupJavaDocumentPartitioner( fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);	
-//		initializePreviewFont();
 	}
-	
-//	private void initializePreviewFont() {
-//		FontData[] fontData = JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT).getFontData();
-//		fontData[0].setHeight((int) (PREVIEW_FONT_SCALE_FACTOR * fontData[0].height));
-//		fFontRegistry.put(PREVIEW_FONT, fontData);
-//	}
 
 	public Control createContents(Composite parent) {
 		if (fSourceViewer != null) 
@@ -134,7 +121,6 @@ public class JavaPreview {
 		fSourceViewer.configure(fViewerConfiguration);
 		fSourceViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 		
-//		fSourceViewer.getTextWidget().setFont(fFontRegistry.get(PREVIEW_FONT));
 		new JavaSourcePreviewerUpdater(fSourceViewer, fTextTools);
 		fSourceViewer.setDocument(fPreviewDocument);
 		update();
@@ -163,7 +149,6 @@ public class JavaPreview {
 		fSourceViewer.setRedraw(false);
 		
 		final Point selection = fSourceViewer.getSelectedRange();		
-//		fTextTools.setupJavaDocumentPartitioner( fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);
 
 		fPreviewDocument.set(fPreviewText);
 		final IFormattingContext context = new CommentFormattingContext();

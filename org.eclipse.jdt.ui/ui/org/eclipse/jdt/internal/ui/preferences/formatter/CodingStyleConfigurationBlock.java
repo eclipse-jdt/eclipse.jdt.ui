@@ -18,7 +18,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +83,6 @@ public class CodingStyleConfigurationBlock {
 	private static final String PREF_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".codeformatter.savepath"; //$NON-NLS-1$
 	
 
-	
 	private class XMLFileUpdater implements Observer {
 		
 		private final File fFile;
@@ -157,7 +155,8 @@ public class CodingStyleConfigurationBlock {
 		public ButtonController() {
 			fProfileManager.addObserver(this);
 			fNewButton.addSelectionListener(this);
-			fModifyButton.addSelectionListener(this);
+			fRenameButton.addSelectionListener(this);
+			fEditButton.addSelectionListener(this);
 			fDeleteButton.addSelectionListener(this);
 			fSaveButton.addSelectionListener(this);
 			fLoadButton.addSelectionListener(this);
@@ -166,14 +165,15 @@ public class CodingStyleConfigurationBlock {
 
 		public void update(Observable o, Object arg) {
 			final boolean state= ((ProfileManager)o).getSelected() instanceof CustomProfile;
-			fModifyButton.setEnabled(state);
+			fEditButton.setEnabled(state);
 			fDeleteButton.setEnabled(state);
 			fSaveButton.setEnabled(state);
+			fRenameButton.setEnabled(state);
 		}
 
 		public void widgetSelected(SelectionEvent e) {
 			final Button button= (Button)e.widget;
-			if (button == fModifyButton)
+			if (button == fEditButton)
 				modifyButtonPressed();
 			else if (button == fDeleteButton) 
 				deleteButtonPressed();
@@ -183,19 +183,23 @@ public class CodingStyleConfigurationBlock {
 				loadButtonPressed();
 			else if (button == fSaveButton)
 				saveButtonPressed();
+			else if (button == fRenameButton) 
+				renameButtonPressed();
 		}
-		
 		
 		public void widgetDefaultSelected(SelectionEvent e) {
 		}
 		
+		private void renameButtonPressed() {
+			if (!(fProfileManager.getSelected() instanceof CustomProfile)) return;
+			final CustomProfile profile= (CustomProfile)fProfileManager.getSelected();
+			final RenameProfileDialog renameDialog= new RenameProfileDialog(fComposite.getShell(), profile);
+			renameDialog.open();
+		}
+		
 		private void modifyButtonPressed() {
-			final Profile profile= fProfileManager.getSelected();
-			final Map modifiedSettings= new HashMap(profile.getSettings());
-			final ModifyDialog c= new ModifyDialog(fComposite.getShell(),	modifiedSettings);
-			if (c.open() == Window.OK) {
-				profile.setSettings(modifiedSettings);
-			}
+			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), fProfileManager.getSelected());
+			modifyDialog.open();
 		}
 		
 		private void deleteButtonPressed() {
@@ -204,7 +208,10 @@ public class CodingStyleConfigurationBlock {
 		
 		private void newButtonPressed() {
 			final CreateProfileDialog p= new CreateProfileDialog(fComposite.getShell(), fProfileManager);
-			p.open();
+			if (p.open() != Window.OK) 
+				return;
+			final ModifyDialog modifyDialog= new ModifyDialog(fComposite.getShell(), p.getCreatedProfile());
+			modifyDialog.open();
 		}
 		
 		private void saveButtonPressed() {
@@ -330,7 +337,8 @@ public class CodingStyleConfigurationBlock {
 	 */
 	protected Composite fComposite;
 	protected Combo fProfileCombo;
-	protected Button fModifyButton;
+	protected Button fEditButton;
+	protected Button fRenameButton;
 	protected Button fDeleteButton;
 	protected Button fNewButton;
 	protected Button fLoadButton;
@@ -345,6 +353,7 @@ public class CodingStyleConfigurationBlock {
 	 * The JavaPreview.
 	 */
 	protected final JavaPreview fJavaPreview;
+	private PixelConverter fPixConv;
 
 	
 	/**
@@ -367,41 +376,32 @@ public class CodingStyleConfigurationBlock {
 	}
 
 	/**
-	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
+	 * Create the contents
 	 */
 	public Control createContents(Composite parent) {
 
 		final int numColumns = 5;
 		
-		final PixelConverter pixConv = new PixelConverter(parent);
-		
+		fPixConv = new PixelConverter(parent);
 		fComposite = createComposite(parent, numColumns, false);
 
 		createLabel(fComposite, "&Coding style:", numColumns);
-
-		fProfileCombo= createProfileCombo(fComposite, numColumns - 2, pixConv.convertWidthInCharsToPixels(20));
-		
-		fModifyButton= createButton(fComposite, "&Edit...", GridData.HORIZONTAL_ALIGN_BEGINNING);
+		fProfileCombo= createProfileCombo(fComposite, numColumns - 3, fPixConv.convertWidthInCharsToPixels(20));
+		fEditButton= createButton(fComposite, "&Edit...", GridData.HORIZONTAL_ALIGN_BEGINNING);
+		fRenameButton= createButton(fComposite, "Re&name...", GridData.HORIZONTAL_ALIGN_BEGINNING);
 		fDeleteButton= createButton(fComposite, "&Remove", GridData.HORIZONTAL_ALIGN_BEGINNING);
-		
 
 		final Composite group= createComposite(fComposite, 4, false);
 		final GridData groupData= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		groupData.horizontalSpan= numColumns;
 		group.setLayoutData(groupData);
 
-
 		fNewButton= createButton(group, "&New...", GridData.HORIZONTAL_ALIGN_BEGINNING);
-
 		((GridData)createLabel(group, "", 1).getLayoutData()).grabExcessHorizontalSpace= true;
-
 		fLoadButton= createButton(group, "Loa&d...", GridData.HORIZONTAL_ALIGN_END);
-		
-		
 		fSaveButton= createButton(group, "Sa&ve...", GridData.HORIZONTAL_ALIGN_END);
-		
-		createLabel(fComposite, "Prev&iew:", numColumns);
 
+		createLabel(fComposite, "Prev&iew:", numColumns);
 		configurePreview(fComposite, numColumns);
 		
 		new ButtonController();
@@ -433,7 +433,7 @@ public class CodingStyleConfigurationBlock {
 		return combo;
 	}
 	
-	private static Label createLabel(Composite composite, String text, int numColumns) {
+	private Label createLabel(Composite composite, String text, int numColumns) {
 		final GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan = numColumns;
 		gd.widthHint= 0;
@@ -444,18 +444,18 @@ public class CodingStyleConfigurationBlock {
 		return label;		
 	}
 	
-	private static Composite createComposite(Composite parent, int numColumns, boolean margins) {
+	private Composite createComposite(Composite parent, int numColumns, boolean margins) {
 		final Composite composite = new Composite(parent, SWT.NONE);
 		final GridLayout layout = new GridLayout(numColumns, false);
 		if (margins) {
-			layout.marginHeight= IDialogConstants.VERTICAL_MARGIN;
-			layout.marginWidth= IDialogConstants.HORIZONTAL_MARGIN;
+			layout.marginHeight= fPixConv.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+			layout.marginWidth= fPixConv.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		} else {
 			layout.marginHeight = 0;
 			layout.marginWidth = 0;
 		}
-		layout.horizontalSpacing= IDialogConstants.HORIZONTAL_SPACING;
-		layout.verticalSpacing= IDialogConstants.VERTICAL_SPACING;
+		layout.horizontalSpacing= fPixConv.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+		layout.verticalSpacing= fPixConv.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
 		composite.setLayout(layout);
 		return composite;
 	}
@@ -508,7 +508,7 @@ public class CodingStyleConfigurationBlock {
 		
 		Element cpElement;
 		try {
-			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			final DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			cpElement = parser.parse(new InputSource(reader)).getDocumentElement();
 		} catch (SAXException e) {
 			throw createException(e, "Problems reading profiles from XML"); 
@@ -575,7 +575,7 @@ public class CodingStyleConfigurationBlock {
 	public static void writeProfilesToFile(Collection profiles, File file) throws IOException, CoreException {
 		Writer writer= new FileWriter(file);
 		try {
-		writeProfilesToStream(profiles, writer);
+			writeProfilesToStream(profiles, writer);
 		} finally {
 			if (writer != null)
 				writer.close();

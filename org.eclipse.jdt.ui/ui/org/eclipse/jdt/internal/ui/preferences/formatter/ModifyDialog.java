@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -24,33 +27,33 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
-import org.eclipse.jface.dialogs.Dialog;
-
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
 public class ModifyDialog extends Dialog {
 	
-	private final static String DIALOG_TITLE= "Code Formatter Settings";
+	private final String fTitle;
 
+	private final Profile fProfile;
 	private final Map fWorkingValues;
 	
 		
-	protected ModifyDialog(Shell parentShell, Map workingValues) {
+	protected ModifyDialog(Shell parentShell, Profile profile) {
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX );
-		fWorkingValues= workingValues;
+		fProfile= profile;
+		fWorkingValues= new HashMap(fProfile.getSettings());
+		fTitle= "Edit \"" + profile.getName() + "\"";
 	}
 	
 	
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText(DIALOG_TITLE);
+		shell.setText(fTitle);
 	}
+
 	
+	protected void okPressed() {
+		fProfile.setSettings(fWorkingValues);
+		super.okPressed();
+	}
 	
 	protected Control createDialogArea(Composite parent) {
 		
@@ -76,7 +79,7 @@ public class ModifyDialog extends Dialog {
 		addTabPage(tabFolder, "Con&trol Statements", new ControlStatementsTabPage(fWorkingValues));
 		addTabPage(tabFolder, "Lin&e Wrapping", new LineWrappingTabPage(fWorkingValues));
 		addTabPage(tabFolder, "Co&mments", new CommentsTabPage(fWorkingValues));
-		addTabPage(tabFolder, "&Other", new GeneralSettingsTabPage(fWorkingValues));
+		addTabPage(tabFolder, "&Other", new OtherSettingsTabPage(fWorkingValues));
 		
 		tabFolder.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {}

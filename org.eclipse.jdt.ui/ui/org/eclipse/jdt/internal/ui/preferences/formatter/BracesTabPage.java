@@ -9,27 +9,22 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
-
+ 
 import java.util.Map;
 
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+
 public class BracesTabPage extends ModifyDialogTabPage {
 	
 	private final String PREVIEW=
-	"/**\n" +
-	"* Braces\n" +
-	"*/\n\n" +
-	"class Empty {}\n\n" +
+	createPreviewHeader("Braces") +
+	"class Empty {}\n" +
+	"\n" +
 	"class Example {" +
 	"  SomeClass fField= new SomeClass() {" +
 	"  };" +
@@ -58,8 +53,7 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	private final String [] BRACE_POSITION_NAMES= {"Same line", "Next line", "Next line indented"};
 	
 	private final int numColumns= 4; 
-	
-	
+
 	
 	/**
 	 * Create a new BracesTabPage.

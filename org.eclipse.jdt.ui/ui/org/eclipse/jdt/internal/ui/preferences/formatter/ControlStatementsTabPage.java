@@ -14,20 +14,16 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+
 public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	
 	private final String PREVIEW=
@@ -73,10 +69,8 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	
 	
 	protected CheckboxPreference fThenStatementPref, fSimpleIfPref;
+
 	
-	/**
-	 * @param workingValues
-	 */
 	public ControlStatementsTabPage(Map workingValues) {
 		super(workingValues);
 		fJavaPreview.setPreviewText(PREVIEW);

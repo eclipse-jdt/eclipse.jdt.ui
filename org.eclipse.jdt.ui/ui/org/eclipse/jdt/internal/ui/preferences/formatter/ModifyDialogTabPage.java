@@ -35,12 +35,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
+
 public abstract class ModifyDialogTabPage {
 	
 	
@@ -190,22 +185,19 @@ public abstract class ModifyDialogTabPage {
 			
 			createLabel(numColumns - 1, composite, text);
 			
-			Composite buttons= new Composite( composite, SWT.NONE);
-			buttons.setLayout(createGridLayout(3, false));
-			buttons.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-
-			fNumberText= new Text(buttons, SWT.SINGLE | SWT.BORDER | SWT.RIGHT);
+			fNumberText= new Text(composite, SWT.SINGLE | SWT.BORDER | SWT.RIGHT);
 			
-			fMinValue= minValue;
-			fMaxValue= maxValue;
 			
 			fPreferences= preferences;
 			
 			setKey(key); 
 
-			final GridData gd= createGridData(1);
+			final GridData gd= createGridData(1, GridData.HORIZONTAL_ALIGN_END);
 			gd.widthHint= new PixelConverter(composite).convertWidthInCharsToPixels(5);
 			fNumberText.setLayoutData(gd);
+			
+			fMinValue= minValue;
+			fMaxValue= maxValue;
 			
 			fNumberText.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {

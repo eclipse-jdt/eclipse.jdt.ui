@@ -12,24 +12,23 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.Map;
 
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
-public class GeneralSettingsTabPage extends ModifyDialogTabPage {
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+
+public class OtherSettingsTabPage extends ModifyDialogTabPage {
 	
 	private final String preview=
+		createPreviewHeader("Other Settings") +
 		"class Example {" +
-		"int myInt= 1;" +
-		"String myString= \"Hello\";" +
-		"double myDouble= 3.0;" +
+		"int theInt= 1;" +
+		"String someString= \"Hello\";" +
+		"double aDouble= 3.0;" +
+		"void foo(int a, int b, int c, int d, int e, int f) {" +
+		"}" +
 		"}";
 		
 	
@@ -51,7 +50,7 @@ public class GeneralSettingsTabPage extends ModifyDialogTabPage {
 	/**
 	 * Create a new GeneralSettingsTabPage.
 	 */
-	public GeneralSettingsTabPage(Map workingValues) {
+	public OtherSettingsTabPage(Map workingValues) {
 		super(workingValues);
 		fJavaPreview.setPreviewText(preview);
 	}
@@ -66,7 +65,7 @@ public class GeneralSettingsTabPage extends ModifyDialogTabPage {
 		createComboPref(generalGroup, numColumns, "Line delimiter for so&urce files:", DefaultCodeFormatterConstants.FORMATTER_LINE_SEPARATOR, lineDelimiters, lineDelimiterNames);
 
 		final Group typeMemberGroup= createGroup(numColumns, composite, "Alignment of fields in class declarations");
-		createCheckboxPref(typeMemberGroup, numColumns, "Align fields in columns:", DefaultCodeFormatterConstants.FORMATTER_TYPE_MEMBER_ALIGNMENT, multiAlign);
+		createCheckboxPref(typeMemberGroup, numColumns, "Align fields in &columns", DefaultCodeFormatterConstants.FORMATTER_TYPE_MEMBER_ALIGNMENT, multiAlign);
 		
 		return composite;
 	}

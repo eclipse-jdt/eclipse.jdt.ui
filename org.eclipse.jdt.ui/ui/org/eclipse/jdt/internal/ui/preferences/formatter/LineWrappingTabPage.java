@@ -39,12 +39,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
  
-/**
- * @author sib
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
+
 public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelectionChangedListener {
 
 
@@ -77,7 +72,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 	private final Category compactIfCategory= new Category(
 			DefaultCodeFormatterConstants.FORMATTER_COMPACT_IF_ALIGNMENT,
 			COMPACT_IF_PREVIEW,
-			"Compact 'if...else'", null);
+			"Compact 'if else'", null);
 	
 	
 
@@ -264,7 +259,9 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 	protected Combo fSplitStyleCombo;
 	protected Combo fIndentStyleCombo;
 	protected Button fForceSplit;
+
 	private Composite fOptionsComposite;
+	private Group fOptionsGroup;
 
 	
 	private final Collection fCategories;
@@ -281,7 +278,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 		fPreviewPreferences= new HashMap();
 		fPreviewPreferences.put(LINE_SPLIT, Integer.toString(DEFAULT_PREVIEW_WINDOW_LINE_WIDTH));
 		
-		fCategories= compileCategories();
+		fCategories= createCategories();
 		
 		fCurrentKey= ((Category)fCategories.iterator().next()).key;
 		
@@ -290,7 +287,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 		fIndentMask= getMask( INDENT_STYLE_VALUES );
 	}
 	
-	protected Collection compileCategories() {
+	protected Collection createCategories() {
 
 		final List classDeclarationsChildren= new ArrayList(2);
 		classDeclarationsChildren.add(typeDeclarationSuperclassCategory);
@@ -377,17 +374,15 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 		fCategoriesViewer.setExpandedElements(fCategories.toArray());
 
 		final GridData gd= createGridData(numColumns, GridData.FILL_BOTH);
-//		gd.heightHint= fPixelConverter.convertHeightInCharsToPixels(CATEGORIES_VIEWER_LINES);
 		fCategoriesViewer.getControl().setLayoutData(gd);
 		
 
-		final Group group= new Group(composite, SWT.SHADOW_ETCHED_OUT);
-		group.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL));
-		group.setLayout(createGridLayout(numColumns, false));
+		fOptionsGroup = new Group(composite, SWT.SHADOW_ETCHED_OUT);
+		fOptionsGroup.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL));
+		fOptionsGroup.setLayout(createGridLayout(numColumns, false));
 		
 		
-		// composite for options
-		fOptionsComposite= new Composite(group, SWT.NONE);
+		fOptionsComposite= new Composite(fOptionsGroup, SWT.NONE);
 		fOptionsComposite.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH));
 		fOptionsComposite.setLayout(createGridLayout(numColumns, true));
 		
@@ -456,7 +451,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 			}
 		});
 		
-		fCategoriesViewer.setSelection(new StructuredSelection(fCategories.iterator().next()), true);
+		fCategoriesViewer.setSelection(new StructuredSelection(typeDeclarationSuperclassCategory), true);
 	}
 	
 	protected void updatePreview() {
@@ -469,6 +464,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 	public void selectionChanged(SelectionChangedEvent event) {
 		final Category c= (Category)((IStructuredSelection)event.getSelection()).getFirstElement();
 		fCurrentKey= c.key;
+		fOptionsGroup.setText("Settings for " + c.name.toLowerCase());
 		fJavaPreview.setPreviewText(c.previewText);
 		updatePreview();
 		final String key= (String)fWorkingValues.get(c.key);
