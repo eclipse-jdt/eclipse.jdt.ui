@@ -674,9 +674,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 	
 	private void validateSuperClass() {
-		// disable due to: http://dev.eclipse.org/bugs/show_bug.cgi?id=16494
-		if (true)	
-			return; 
 		fMethodStubsButtons.setEnabled(2, true);//enable setUp() checkbox
 		fMethodStubsButtons.setEnabled(3, true);//enable tearDown() checkbox
 		String superClassName= getSuperClass();
