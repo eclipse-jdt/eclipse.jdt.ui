@@ -109,8 +109,6 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 	private String computeReplacementString(int baseOffset, int[] offsets, int[] lengths, IDocument document) {
 		StringBuffer buffer= new StringBuffer(getReplacementString());
 		int count= fParameterNames.length;
-		offsets= new int[count];
-		lengths= new int[count];
 		
 		buffer.append('(');
 		for (int i= 0; i != count; i++) {
