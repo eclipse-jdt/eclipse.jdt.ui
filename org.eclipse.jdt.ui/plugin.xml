@@ -2967,7 +2967,7 @@
 </extension>
 -->
 
-<extension-point name="Rename Processor" id="renameProcessor"/>
+<extension-point name="%renameProcessorExtensionPoint" id="renameProcessor"/>
 <extension-point name="%renameParticipantsExtensionPoint" id="renameParticipants"/>
 
 <extension point="org.eclipse.jdt.ui.renameProcessor">
