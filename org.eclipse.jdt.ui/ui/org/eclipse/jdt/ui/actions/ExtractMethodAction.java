@@ -80,7 +80,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canEnable(JavaTextSelection selection) {
-		return (selection.resolveInMethodBody() || selection.resolveInStaticInitializer()) && 
+		return (selection.resolveInMethodBody() || selection.resolveInClassInitializer()) && 
 			ExtractMethodRefactoring.isAvailable(selection.resolveSelectedNodes());
 	}
 	

@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -51,8 +52,8 @@ public class JavaTextSelection extends TextSelection {
 	private boolean fInMethodBodyRequested;
 	private boolean fInMethodBody;
 	
-	private boolean fInStaticInitializerRequested;
-	private boolean fInStaticInitializer;
+	private boolean fInClassInitializerRequested;
+	private boolean fInClassInitializer;
 	
 	private boolean fInVariableInitializerRequested;
 	private boolean fInVariableInitializer;
@@ -97,7 +98,7 @@ public class JavaTextSelection extends TextSelection {
 		if (! (fElement instanceof ICompilationUnit))
 			return null;
 		// long start= System.currentTimeMillis();
-		fPartialAST= JavaPlugin.getDefault().getASTProvider().getAST(fElement, true, null);
+		fPartialAST= JavaPlugin.getDefault().getASTProvider().getAST(fElement, ASTProvider.WAIT_YES, null);
 		// System.out.println("Time requesting partial AST: " + (System.currentTimeMillis() - start));
 		return fPartialAST;
 	}
@@ -148,31 +149,31 @@ public class JavaTextSelection extends TextSelection {
 		return fInMethodBody;
 	}
 	
-	public boolean resolveInStaticInitializer() {
-		if (fInStaticInitializerRequested)
-			return fInStaticInitializer;
-		fInStaticInitializerRequested= true;
+	public boolean resolveInClassInitializer() {
+		if (fInClassInitializerRequested)
+			return fInClassInitializer;
+		fInClassInitializerRequested= true;
 		resolveSelectedNodes();
 		ASTNode node= getStartNode();
 		if (node == null) {
-			fInStaticInitializer= true;
+			fInClassInitializer= true;
 		} else {
 			while (node != null) {
 				int nodeType= node.getNodeType();
 				if (node instanceof AbstractTypeDeclaration) {
-					fInStaticInitializer= false;
+					fInClassInitializer= false;
 					break;
 				} else if (nodeType == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
-					fInStaticInitializer= false;
+					fInClassInitializer= false;
 					break;
 				} else if (nodeType == ASTNode.INITIALIZER) {
-					fInStaticInitializer= true;
+					fInClassInitializer= true;
 					break;
 				}
 				node= node.getParent();
 			}
 		}
-		return fInStaticInitializer;
+		return fInClassInitializer;
 	}
 	
 	public boolean resolveInVariableInitializer() {
@@ -196,6 +197,10 @@ public class JavaTextSelection extends TextSelection {
 				break;
 			} else if (nodeType == ASTNode.SINGLE_VARIABLE_DECLARATION &&
 				       ((SingleVariableDeclaration)node).getInitializer() == last) {
+				fInVariableInitializer= true;
+				break;
+			} else if (nodeType == ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION &&
+				       ((AnnotationTypeMemberDeclaration)node).getDefault() == last) {
 				fInVariableInitializer= true;
 				break;
 			}
