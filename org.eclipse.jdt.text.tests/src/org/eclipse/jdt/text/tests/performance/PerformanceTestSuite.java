@@ -17,18 +17,18 @@ import junit.framework.TestSuite;
 /**
  * @since 3.1
  */
-public class PerformanceTestSuite {
+public class PerformanceTestSuite extends TestSuite {
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("Test for org.eclipse.jdt.text.tests.performance");
-		//$JUnit-BEGIN$
-		suite.addTestSuite(OpenEditorTestSetup.class);
-		suite.addTestSuite(RevertTextEditorTest.class);
-		suite.addTestSuite(RevertJavaEditorTest.class);
-		suite.addTestSuite(ScrollJavaEditorTest.class);
-		suite.addTestSuite(ToggleCommentTest.class);
-		suite.addTestSuite(UndoJavaEditorTest.class);
-		//$JUnit-END$
-		return suite;
+		return new PerformanceTestSuite();
+	}
+	
+	public PerformanceTestSuite() {
+		addTestSuite(OpenEditorTestSetup.class);
+		addTestSuite(RevertTextEditorTest.class);
+		addTestSuite(RevertJavaEditorTest.class);
+		addTestSuite(ScrollJavaEditorTest.class);
+		addTestSuite(ToggleCommentTest.class);
+		addTestSuite(UndoJavaEditorTest.class);
 	}
 }
