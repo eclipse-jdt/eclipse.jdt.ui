@@ -58,6 +58,8 @@ public class SourceActionLabelProvider extends LabelProvider {
 			return getTypeImageDescriptor((ITypeBinding) binding, flags);
 		else if (binding instanceof IMethodBinding) {
 			ITypeBinding type= ((IMethodBinding) binding).getDeclaringClass();
+			if (type.isEnum() && isDefaultModifier(binding.getModifiers()) && ((IMethodBinding) binding).isConstructor())
+				return JavaPluginImages.DESC_MISC_PRIVATE;
 			return getMethodImageDescriptor(type.isAnnotation() || type.isInterface(), binding.getModifiers());
 		} else if (binding instanceof IVariableBinding) {
 			ITypeBinding type= ((IVariableBinding) binding).getDeclaringClass();
@@ -312,6 +314,10 @@ public class SourceActionLabelProvider extends LabelProvider {
 			return !type.isInterface() && !type.isAnnotation();
 		}
 		return false;
+	}
+
+	static boolean isDefaultModifier(int modifiers) {
+		return !Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers) && !Modifier.isPrivate(modifiers);
 	}
 
 	static boolean isInterfaceField(IBinding binding) {
