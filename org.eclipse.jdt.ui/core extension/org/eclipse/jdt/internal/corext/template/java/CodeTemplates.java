@@ -11,9 +11,6 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -29,9 +26,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java.TemplateSet {
 
-	private static final String DEFAULT_FILE= "default-codetemplates.xml"; //$NON-NLS-1$
 	private static final String TEMPLATE_FILE= "codetemplates.xml"; //$NON-NLS-1$
-	private static final ResourceBundle fgResourceBundle= ResourceBundle.getBundle(JavaTemplateMessages.class.getName());
 
 	/** Singleton. */
 	private static CodeTemplates fgTemplates;
@@ -58,12 +53,10 @@ public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java
 	private void create() {
 		
 		try {
-//			addFromStream(getDefaultsAsStream(), false, true, fgResourceBundle);
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
-				addFromFile(templateFile, false, fgResourceBundle);
+				addFromFile(templateFile, false, null);
 			}
-//			saveToFile(templateFile);
 
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -76,36 +69,18 @@ public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java
 	 * Resets the template set.
 	 */
 	public void reset() throws CoreException {
-		clear();
-		addFromFile(getTemplateFile(), false, fgResourceBundle);
 	}
 
 	/**
 	 * Resets the template set with the default templates.
 	 */
 	public void restoreDefaults() throws CoreException {
-		clear();
-		InputStream stream= getDefaultsAsStream();
-		try {
-			addFromStream(stream, false, true, fgResourceBundle);
-		} finally {
-			try {
-				if (stream != null)
-					stream.close();
-			} catch (IOException x) {
-			}
-		}
 	}
 
 	/**
 	 * Saves the template set.
 	 */
 	public void save() throws CoreException {					
-		saveToFile(getTemplateFile());
-	}
-
-	private static InputStream getDefaultsAsStream() {
-		return CodeTemplates.class.getResourceAsStream(DEFAULT_FILE);
 	}
 
 	private static File getTemplateFile() {

@@ -11,9 +11,6 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -27,9 +24,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class Templates extends org.eclipse.jdt.internal.corext.template.java.TemplateSet {
 
-	private static final String DEFAULT_FILE= "default-templates.xml"; //$NON-NLS-1$
 	private static final String TEMPLATE_FILE= "templates.xml"; //$NON-NLS-1$
-	private static final ResourceBundle fgResourceBundle= ResourceBundle.getBundle(JavaTemplateMessages.class.getName());
 
 	/** Singleton. */
 	private static Templates fgTemplates;
@@ -59,7 +54,7 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 		try {
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
-				addFromFile(templateFile, true, fgResourceBundle);
+				addFromFile(templateFile, false, null);
 			}
 
 		} catch (CoreException e) {
@@ -75,8 +70,6 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 	 * @throws CoreException in case the reset operation fails
 	 */
 	public void reset() throws CoreException {
-		clear();
-		addFromFile(getTemplateFile(), true, fgResourceBundle);
 	}
 
 	/**
@@ -85,17 +78,6 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 	 * @throws CoreException in case the restore operation fails
 	 */
 	public void restoreDefaults() throws CoreException {
-		clear();
-		InputStream stream= getDefaultsAsStream();
-		try {
-			addFromStream(stream, true, true, fgResourceBundle);
-		} finally {
-			try {
-				if (stream != null)
-					stream.close();
-			} catch (IOException x) {
-			}
-		}
 	}
 
 	/**
@@ -104,11 +86,6 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 	 * @throws CoreException in case the save operation fails
 	 */
 	public void save() throws CoreException {					
-		saveToFile(getTemplateFile());
-	}
-
-	private static InputStream getDefaultsAsStream() {
-		return Templates.class.getResourceAsStream(DEFAULT_FILE);
 	}
 
 	private static File getTemplateFile() {
