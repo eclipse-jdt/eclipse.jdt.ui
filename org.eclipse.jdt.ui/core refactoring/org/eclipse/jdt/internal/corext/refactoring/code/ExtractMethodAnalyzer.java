@@ -393,7 +393,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		
 		int counter= 0;
 		flowContext.setComputeMode(FlowContext.ARGUMENTS);
-		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, getSelection()).perform(fEnclosingBodyDeclaration);
+		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, getSelection(), true).perform(fEnclosingBodyDeclaration);
 		IVariableBinding[] reads= argInfo.get(flowContext, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN);
 		outer: for (int i= 0; i < returnValues.length && counter <= 1; i++) {
 			IVariableBinding binding= returnValues[i];
@@ -417,7 +417,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 				return;
 		}
 		List callerLocals= new ArrayList(5);
-		IVariableBinding[] writes= argInfo.get(flowContext, FlowInfo.WRITE);
+		FlowInfo localInfo= new InputFlowAnalyzer(flowContext, getSelection(), false).perform(fEnclosingBodyDeclaration);
+		IVariableBinding[] writes= localInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN);
 		for (int i= 0; i < writes.length; i++) {
 			IVariableBinding write= writes[i];
 			if (getSelection().covers(ASTNodes.findDeclaration(write, fEnclosingBodyDeclaration)))

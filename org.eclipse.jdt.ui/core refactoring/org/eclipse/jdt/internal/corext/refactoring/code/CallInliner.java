@@ -442,7 +442,7 @@ public class CallInliner {
 			case ASTNode.INITIALIZER:
 			case ASTNode.FIELD_DECLARATION:
 			case ASTNode.METHOD_DECLARATION:
-				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform(fBodyDeclaration);
+				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection, true).perform(fBodyDeclaration);
 				break;
 			default:
 				Assert.isTrue(false, "Should not happen");			 //$NON-NLS-1$

@@ -121,12 +121,14 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 	
 	private Selection fSelection;
+	private boolean fDoLoopReentrance;
 	private LoopReentranceVisitor fLoopReentranceVisitor;
 
-	public InputFlowAnalyzer(FlowContext context, Selection selection) {
+	public InputFlowAnalyzer(FlowContext context, Selection selection, boolean doLoopReentrance) {
 		super(context);
 		fSelection= selection;
 		Assert.isNotNull(fSelection);
+		fDoLoopReentrance= doLoopReentrance;
 	}
 
 	public FlowInfo perform(BodyDeclaration node) {
@@ -166,7 +168,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 	
 	private void createLoopReentranceVisitor(ASTNode node) {
-		if (fLoopReentranceVisitor == null)
+		if (fLoopReentranceVisitor == null && fDoLoopReentrance)
 			fLoopReentranceVisitor= new LoopReentranceVisitor(fFlowContext, fSelection, node);
 	}
 	
@@ -251,7 +253,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 	
 	private void handleLoopReentrance(ASTNode node) {
-		if (!fSelection.enclosedBy(node) || fLoopReentranceVisitor.getLoopNode() != node)
+		if (!fSelection.enclosedBy(node) || fLoopReentranceVisitor == null || fLoopReentranceVisitor.getLoopNode() != node)
 			return;
 		
 		fLoopReentranceVisitor.process(node);
