@@ -50,10 +50,13 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorHoverConfigurationBlock;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
@@ -67,8 +70,6 @@ import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
 
@@ -350,21 +351,21 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 
 	public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
-		return new int[] { ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK, SWT.CTRL};
+		return new int[] { ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK, SWT.NONE, SWT.CTRL, SWT.SHIFT, SWT.CTRL | SWT.SHIFT, SWT.CTRL | SWT.ALT, SWT.ALT | SWT.SHIFT | SWT.CTRL | SWT.ALT | SWT.SHIFT };
 	}
 	
 	/*
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
 	 */
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		if (stateMask == ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK)	
-			return new JavaTextHover(getEditor());
-		if (stateMask == SWT.CTRL) {
-			IJavaEditorTextHover textHover= new JavaSourceHover();
+		boolean enabled= JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
+		if (!enabled)
+			return null;
+
+		IJavaEditorTextHover textHover= JavaEditorHoverConfigurationBlock.getTextHover(stateMask);
+		if (textHover != null)	
 			textHover.setEditor(getEditor());
-			return textHover;
-		}
-		return null;
+		return textHover;
 	}
 
 	/*

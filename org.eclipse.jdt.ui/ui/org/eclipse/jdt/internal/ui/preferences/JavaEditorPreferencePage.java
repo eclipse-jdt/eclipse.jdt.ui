@@ -1,4 +1,4 @@
-/*
+/**********************************************************************
 Copyright (c) 2000, 2002 IBM Corp. and others.
 All rights reserved. This program and the accompanying materials
 are made available under the terms of the Common Public License v1.0
@@ -204,7 +204,17 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ADD_JAVADOC_TAGS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.FORMAT_JAVADOCS),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END)
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END),
+		
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.DEFAULT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.NONE_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.CTRL_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.CTRL_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.CTRL_ALT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.CTRL_ALT_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.CTRL_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.ALT_SHIFT_HOVER),
 	};
 	
 	private final String[][] fSyntaxColorListModel= new String[][] {
@@ -240,6 +250,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	private OverlayPreferenceStore fOverlayStore;
 	private JavaTextTools fJavaTextTools;
+	private JavaEditorHoverConfigurationBlock fJavaEditorHoverConfigurationBlock;
 	
 	private Map fColorButtons= new HashMap();
 	private SelectionListener fColorButtonListener= new SelectionListener() {
@@ -443,6 +454,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.FORMAT_JAVADOCS, true);
 		
 		store.setDefault(AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END, true);
+		
+		JavaEditorHoverConfigurationBlock.initDefaults(store);
 	}
 
 	/*
@@ -479,7 +492,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		String key= fProblemIndicationColorListModel[i][1];
 		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
-		fProblemIndicationForegroundColorEditor.setColorValue(rgb);		
+		fProblemIndicationForegroundColorEditor.setColorValue(rgb);
 		
 		key= fProblemIndicationColorListModel[i][2];
 		fShowInTextCheckBox.setSelection(fOverlayStore.getBoolean(key));
@@ -813,6 +826,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return appearanceComposite;
 	}
 	
+	
 	private Control createProblemIndicationPage(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
@@ -820,7 +834,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				
 		String text= "Analyse &problems while typing";
 		addCheckBox(composite, text, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
-
+		
 		text= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
 		addCheckBox(composite, text, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
 		
@@ -889,6 +903,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			
 			public void widgetSelected(SelectionEvent e) {
 				handleProblemIndicationColorListSelection();
 			}
@@ -922,10 +937,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			
 			public void widgetSelected(SelectionEvent e) {
 				int i= fProblemIndicationList.getSelectionIndex();
 				String key= fProblemIndicationColorListModel[i][1];
-				
 				PreferenceConverter.setValue(fOverlayStore, key, fProblemIndicationForegroundColorEditor.getColorValue());
 			}
 		});
@@ -1080,6 +1095,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.behaviourTab.title")); //$NON-NLS-1$
 		item.setControl(createBehaviourPage(folder));
+
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.hoverTab.title")); //$NON-NLS-1$
+		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(fOverlayStore);
+		item.setControl(fJavaEditorHoverConfigurationBlock.createControl(folder));
 		
 		initialize();
 		
@@ -1100,9 +1120,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fSyntaxColorList.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				if (fSyntaxColorList != null && !fSyntaxColorList.isDisposed()) {
-				fSyntaxColorList.select(0);
-				handleSyntaxColorListSelection();
-			}
+					fSyntaxColorList.select(0);
+					handleSyntaxColorListSelection();
+				}
 			}
 		});
 		
@@ -1112,9 +1132,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fAppearanceColorList.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
-				fAppearanceColorList.select(0);
-				handleAppearanceColorListSelection();
-			}
+					fAppearanceColorList.select(0);
+					handleAppearanceColorListSelection();
+				}
 			}
 		});
 		
@@ -1125,8 +1145,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void run() {
 				if (fProblemIndicationList != null && !fProblemIndicationList.isDisposed()) {
 					fProblemIndicationList.select(0);
-				handleProblemIndicationColorListSelection();
-			}
+					handleProblemIndicationColorListSelection();
+				}
 			}
 		});
 	}
@@ -1170,6 +1190,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fGuessMethodArgumentsButton.setEnabled(fillMethodArguments);
 		
         updateAutoactivationControls();
+        
+		fJavaEditorHoverConfigurationBlock.initializeFields();
 	}
 	
     private void updateAutoactivationControls() {
@@ -1184,6 +1206,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 */
 	public boolean performOk() {
 		fFontEditor.store();
+		fJavaEditorHoverConfigurationBlock.performOk();
 		fOverlayStore.propagate();
 		JavaPlugin.getDefault().savePluginPreferences();
 		return true;
@@ -1198,6 +1221,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		fOverlayStore.loadDefaults();
 		initializeFields();
+
 		handleSyntaxColorListSelection();
 		handleAppearanceColorListSelection();
 		handleProblemIndicationColorListSelection();

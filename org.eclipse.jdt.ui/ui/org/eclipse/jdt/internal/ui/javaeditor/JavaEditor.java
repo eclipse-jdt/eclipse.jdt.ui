@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
@@ -27,7 +30,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.PaintEvent;
@@ -42,9 +44,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -55,6 +54,7 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITypedRegion;
@@ -66,6 +66,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.IVerticalRulerColumn;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
@@ -107,6 +108,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
@@ -118,8 +121,11 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorHoverConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
@@ -684,15 +690,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			return maxLocation;
 		}
 
-	}
+	}	
 	
 	/** Preference key for showing the line number ruler */
 	public final static String LINE_NUMBER_RULER= "lineNumberRuler"; //$NON-NLS-1$
 	/** Preference key for the foreground color of the line numbers */
 	public final static String LINE_NUMBER_COLOR= "lineNumberColor"; //$NON-NLS-1$
 	/** Preference key for the link color */
-	public final static String LINK_COLOR= "linkColor"; //$NON-NLS-1$
-	
+	public final static String LINK_COLOR= "linkColor";	
 	
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
@@ -1119,12 +1124,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 		if (fMouseListener != null) {
 			fMouseListener.uninstall();
-			fMouseListener= null;	
+			fMouseListener= null;
 		}
-
+		
 		if (fEncodingSupport != null) {
-			fEncodingSupport.dispose();
-			fEncodingSupport= null;
+				fEncodingSupport.dispose();
+				fEncodingSupport= null;
 		}
 		super.dispose();
 	}
@@ -1154,8 +1159,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		fEncodingSupport.initialize(this);
 		
 		if (fMouseListener == null) {
-			fMouseListener= new MouseClickListener();
-			fMouseListener.install();	
+				fMouseListener= new MouseClickListener();
+				fMouseListener.install();	
 		}
 	}
 	
@@ -1208,7 +1213,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					
 					initializeLineNumberRulerColumn(fLineNumberRulerColumn);
 			}
-				
+
+			if (PreferenceConstants.EDITOR_SHOW_HOVER.equals(property)) {
+				updateHoverBehavior();
+			}
+
+			if (JavaEditorHoverConfigurationBlock.isAffectedBy(property)) {
+				updateHoverBehavior();
+			}				
 			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
@@ -1395,8 +1407,38 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		if (fEncodingSupport != null)
 			fEncodingSupport.reset();
 	}
+
+	/*
+	 * Update the hovering behavior depending on the preferences.
+	 */
+	private void updateHoverBehavior() {
+		SourceViewerConfiguration configuration= getSourceViewerConfiguration();
+		String[] types= configuration.getConfiguredContentTypes(getSourceViewer());
+
+		for (int i= 0; i < types.length; i++) {
+			
+			String t= types[i];
+				
+			int[] stateMasks= configuration.getConfiguredTextHoverStateMasks(getSourceViewer(), t);
+
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer instanceof ITextViewerExtension2) {
+				if (stateMasks != null) {
+					for (int j= 0; j < stateMasks.length; j++)	{
+						int stateMask= stateMasks[j];
+						ITextHover textHover= configuration.getTextHover(sourceViewer, t, stateMask);
+						((ITextViewerExtension2)sourceViewer).setTextHover(textHover, t, stateMask);
+					}
+				} else {
+					ITextHover textHover= configuration.getTextHover(sourceViewer, t);
+					((ITextViewerExtension2)sourceViewer).setTextHover(textHover, t, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK);
+				}
+			} else
+				sourceViewer.setTextHover(configuration.getTextHover(sourceViewer, t), t);
+		}
+	}
 	
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider#getViewPartInput()
 	 */
 	public Object getViewPartInput() {
