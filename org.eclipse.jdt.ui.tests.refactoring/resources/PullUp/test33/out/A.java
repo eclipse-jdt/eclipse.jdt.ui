@@ -7,7 +7,7 @@ abstract class B extends A{
 }
 class C extends A{
 
-	/**
+	/* (non-Javadoc)
 	 * @see p.A#m()
 	 */
 	public int m() {

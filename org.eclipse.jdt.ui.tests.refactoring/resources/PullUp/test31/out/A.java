@@ -14,7 +14,7 @@ abstract class C extends A{
 }
 class D extends C{
 
-	/**
+	/* (non-Javadoc)
 	 * @see p.A#m(int[])
 	 */
 	public boolean m(int[] a) throws Exception {
@@ -23,7 +23,7 @@ class D extends C{
 }
 class D1 extends C{
 
-	/**
+	/* (non-Javadoc)
 	 * @see p.A#m(int[])
 	 */
 	public boolean m(int[] a) throws Exception {

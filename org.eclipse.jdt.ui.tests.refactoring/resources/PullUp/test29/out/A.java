@@ -10,7 +10,7 @@ class B extends A{
 }
 class C extends A{
 
-	/**
+	/* (non-Javadoc)
 	 * @see p.A#m(int[])
 	 */
 	public boolean m(int[] a) throws Exception {
