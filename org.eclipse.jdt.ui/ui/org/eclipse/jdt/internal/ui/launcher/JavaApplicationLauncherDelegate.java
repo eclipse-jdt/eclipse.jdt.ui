@@ -46,6 +46,7 @@ import org.eclipse.jdt.launching.VMRunnerResult;
 
 import org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -151,21 +152,27 @@ public class JavaApplicationLauncherDelegate implements ILauncherDelegate {
 			IRunnableWithProgress r= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					pm.beginTask(LauncherMessages.getString("javaAppLauncher.progress.startVM"), 4); //$NON-NLS-1$
-					IProject proj= jproject.getProject();
-					if (!proj.getWorkspace().isAutoBuilding()) {
-						try {
-							proj.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(pm, 3));
-						} catch (CoreException e) {
-							throw new InvocationTargetException(e);
+					try {
+						IProject proj= jproject.getProject();
+						if (!proj.getWorkspace().isAutoBuilding()) {
+							try {
+								proj.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(pm, 3));
+							} catch (CoreException e) {
+								throw new InvocationTargetException(e);
+							}
+						} else {
+							pm.worked(3);
 						}
-					} else {
-						pm.worked(3);
+						SubProgressMonitor newMonitor= new SubProgressMonitor(pm, 1);
+						newMonitor.beginTask(LauncherMessages.getString("javaAppLauncher.progress.startVM"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+						
+						result[0]= runner.run(config);
+						newMonitor.done();
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
+					} finally {
+						pm.done();
 					}
-					SubProgressMonitor newMonitor= new SubProgressMonitor(pm, 1);
-					newMonitor.beginTask(LauncherMessages.getString("javaAppLauncher.progress.startVM"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
-					result[0]= runner.run(config);
-					newMonitor.done();
-					pm.done();
 				}
 			};
 			
@@ -174,7 +181,7 @@ public class JavaApplicationLauncherDelegate implements ILauncherDelegate {
 			} catch (InterruptedException e) {
 				return true;
 			} catch (InvocationTargetException e) {
-				JavaPlugin.log(e);
+				ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), "Java Application Launcher", "Launching failed.");
 				return false;
 			}
 			if (result[0] != null) {
