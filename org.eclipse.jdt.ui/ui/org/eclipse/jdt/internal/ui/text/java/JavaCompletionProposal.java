@@ -28,6 +28,7 @@ import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
+import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -57,6 +58,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 
 public class JavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3 {
@@ -169,8 +171,11 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			if (delta > 0)
 				fReplacementLength += delta;
 			
+			boolean isSmartTrigger= trigger == ';' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_SEMICOLON)
+					|| trigger == '{' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_OPENING_BRACE);
+			
 			String string;
-			if (trigger == (char) 0) {
+			if (isSmartTrigger || trigger == (char) 0) {
 				string= fReplacementString;
 			} else {
 				StringBuffer buffer= new StringBuffer(fReplacementString);
@@ -194,6 +199,25 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			referenceOffset= referenceTracker.postReplace(document);			
 			fReplacementOffset= referenceOffset - (string == null ? 0 : string.length());
 
+			// PR 47097
+			if (isSmartTrigger) {
+				DocumentCommand cmd= new DocumentCommand() {
+				};
+				
+				cmd.offset= referenceOffset;
+				cmd.length= 0;
+				cmd.text= Character.toString(trigger);
+				cmd.doit= true;
+				cmd.shiftsCaret= true;
+				cmd.caretOffset= fReplacementOffset + fCursorPosition;
+					
+				SmartSemicolonAutoEditStrategy strategy= new SmartSemicolonAutoEditStrategy(IJavaPartitions.JAVA_PARTITIONING);
+				strategy.customizeDocumentCommand(document, cmd);
+				
+				replace(document, cmd.offset, cmd.length, cmd.text);
+				setCursorPosition(cmd.caretOffset - fReplacementOffset + cmd.text.length());
+			}
+			
 			if (fTextViewer != null && string != null) {
 				int index= string.indexOf("()"); //$NON-NLS-1$
 				if (index != -1 && index + 1 == fCursorPosition) {
