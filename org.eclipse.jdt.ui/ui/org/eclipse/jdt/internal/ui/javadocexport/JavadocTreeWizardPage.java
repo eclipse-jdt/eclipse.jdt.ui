@@ -453,7 +453,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					IJavaElement el = unit.getParent();
 					if (el instanceof IPackageFragment) {
 						IPackageFragment pack= (IPackageFragment)el;
-						if (fInputGroup.getGreyCheckedTreeItems(pack) || pack.isDefaultPackage()) {
+						if (fInputGroup.isTreeItemGreyChecked(pack) || pack.isDefaultPackage()) {
 
 							try {
 								IResource re = unit.getCorrespondingResource();
@@ -478,7 +478,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				Object element= checkedTreeElements[i];
 				if (element instanceof IPackageFragment) {
 					IPackageFragment pack= (IPackageFragment) element;
-					if (!fInputGroup.getGreyCheckedTreeItems(pack) && !pack.isDefaultPackage()) {
+					if (!fInputGroup.isTreeItemGreyChecked(pack) && !pack.isDefaultPackage()) {
 						
 						try {
 							ICompilationUnit[] units= pack.getCompilationUnits();
