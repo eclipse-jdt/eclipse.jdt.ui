@@ -57,7 +57,7 @@
                relative="org.eclipse.jdt.ui.PackageExplorer"
                visible="false"
                id="org.eclipse.jdt.junit.ResultView"
-               relationship="fast">
+               relationship="stack">
          </view>
          <newWizardShortcut
                id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
@@ -217,19 +217,28 @@
             icon="icons/full/obj16/julaunch.gif"
             helpContextId="org.eclipse.jdt.junit.launch_shortcut"
             class="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchShortcut"
-            nameFilter="*.java"
-            filterClass="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchShortcut"
             modes="run, debug"
             id="org.eclipse.jdt.junit.junitShortcut">
-        <contextLabel
-         	mode="run"
-         	label="%JUnitShortcutRun.label"/>
-  		 <contextLabel
-  		 	mode="debug"
-  		 	label="%JUnitShortcutDebug.label"/>
-         <filter
-         	name="ContextualLaunchActionFilter"
-         	value="supportsContextualLaunch"/>
+         <contextualLaunch>
+           <enablement>
+             <with variable="selection">
+               <count value="1"/>
+               <iterate>
+                 <or>
+                   <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
+                   <test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
+                 </or>
+                 <test property="org.eclipse.jdt.junit.isTest"/>
+               </iterate>
+             </with>
+           </enablement>
+           <contextLabel
+         	  mode="run"
+         	  label="%JUnitShortcutRun.label"/>
+  		   <contextLabel
+  		 	  mode="debug"
+  		 	  label="%JUnitShortcutDebug.label"/>
+  		 </contextualLaunch>
          <perspective
                id="org.eclipse.jdt.ui.JavaPerspective">
          </perspective>
@@ -266,6 +275,13 @@
             type="org.eclipse.jdt.core.IType"
             class="org.eclipse.jdt.internal.junit.ui.JavaTypeExtender"
             id="org.eclipse.jdt.junit.ITypeExtender">
+      </propertyTester>
+      <propertyTester
+      		namespace="org.eclipse.jdt.junit"
+            properties="isTest"
+            type="org.eclipse.core.resources.IResource"
+            class="org.eclipse.jdt.internal.junit.launcher.ResourceExtender"
+            id="org.eclipse.jdt.junit.IResourceExtender">
       </propertyTester>
    </extension>
    <extension point="org.eclipse.jdt.ui.renameParticipants">
