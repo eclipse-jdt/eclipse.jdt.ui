@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.IPackageFragment;
  * Contains a list of package fragments with the same name
  * but residing in different source folders of a unique Java project.
  */
-class LogicalPackage {
+public class LogicalPackage {
 
 	private Set fPackages;
 	private String fName;
