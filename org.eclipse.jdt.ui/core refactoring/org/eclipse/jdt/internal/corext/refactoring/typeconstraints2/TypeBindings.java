@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.dom.TypeRules;
 
 /**
  * Note: This class contains static helper methods to deal with
- * bindings from different clusters. They will be inlied as soon
+ * bindings from different clusters. They will be inlined as soon
  * as the compiler loop and subtyping-related queries on ITypeBindings
  * are implemented.  
  */
@@ -30,6 +30,7 @@ public class TypeBindings {
 		// no instances
 	}
 	
+	//TODO: inline with b1 == b2 when compiler loop is used
 	public static boolean equals(IBinding b1, IBinding b2) {
 		return Bindings.equals(b1, b2);
 	}

@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVa
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
@@ -118,17 +119,15 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		ConstraintVariable2 right= getConstraintVariable(rhs);
 		
 		Assignment.Operator op= node.getOperator();
-		if (op == Assignment.Operator.PLUS_ASSIGN &&
-				lhs.resolveTypeBinding().getQualifiedName().equals("java.lang.String")) { //TODO: use util
+		if (op == Assignment.Operator.PLUS_ASSIGN && TypeBindings.equals(lhs.resolveTypeBinding(), fTCModel.getStringType())) {
 			//Special handling for automatic String conversion: do nothing; the RHS can be anything.
 		} else {
 			CollectionElementVariable2 leftElement= fTCModel.getElementVariable(left);
 			CollectionElementVariable2 rightElement= fTCModel.getElementVariable(right);
-			
 			fTCModel.createEqualsConstraint(leftElement, rightElement);
 			
-			//TODO: filter?
-//			fTCFactory.createSubtypeConstraint(right, left); // left= right;  -->  [right] <= [left]
+//			if (left instanceof CollectionElementVariable2 || right instanceof CollectionElementVariable2)
+//				fTCModel.createSubtypeConstraint(right, left); // left= right;  -->  [right] <= [left]
 		}
 		//TODO: other implicit conversions: numeric promotion, autoboxing?
 		
@@ -391,35 +390,11 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		fTCModel.createEqualsConstraint(leftElement, rightElement);
 		
 		// name= initializer  -->  [initializer] <= [name]
-		//fTCFactory.createSubtypeConstraint(initializerCv, cv); //TODO: not for augment raw container clients
+//		if (initializerCv instanceof CollectionElementVariable2)
+//			fTCModel.createSubtypeConstraint(initializerCv, cv);
 	}
 	
 	//--------- private helpers ----------------//
-	
-//	private ITypeConstraint2[] getConstraintsFromFragmentList(List/*<VariableDeclarationFragment>*/ fragments, Type type) {
-//		// Constrain the types of the declared variables to be equal to one
-//		// another. Pairwise constraints between adjacent variables is enough.
-//		int size= fragments.size();
-//		ConstraintVariable2 typeVariable= fTCFactory.makeTypeVariable(type);
-//		List result= new ArrayList((size * (size - 1))/2);
-//		for (int i= 0; i < size; i++) {
-//			VariableDeclarationFragment fragment1= (VariableDeclarationFragment) fragments.get(i);
-//			SimpleName fragment1Name= fragment1.getName();
-//			ITypeConstraint2[] fragment1DefinesConstraints= fTCFactory.createEqualsConstraint(
-//					fTCFactory.makeExpressionVariable(fragment1Name),
-//					typeVariable);
-//			result.addAll(Arrays.asList(fragment1DefinesConstraints));
-//			for (int j= i + 1; j < size; j++) {
-//				VariableDeclarationFragment fragment2= (VariableDeclarationFragment) fragments.get(j);
-//				ITypeConstraint2[] fragment12equalsConstraints= fTCFactory.createEqualsConstraint(
-//						fTCFactory.makeExpressionVariable(fragment1Name),
-//						fTCFactory.makeExpressionVariable(fragment2.getName()));
-//				result.addAll(Arrays.asList(fragment12equalsConstraints));
-//			}
-//		}
-//		return (ITypeConstraint2[]) result.toArray(new ITypeConstraint2[result.size()]);
-//	}
-	
 	
 	public AugmentRawContainerClientsTCModel getTCModel() {
 		return fTCModel;

@@ -73,9 +73,10 @@ public class AugmentRawContainerClientsAnalyzer {
 		//TODO: Add container methods (from ContainerMethods)?
 		// -> still misses calls of kind myObj.takeList(myObj.getList()) in CU that doesn't import List
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(fElements, IJavaSearchScope.SOURCES);
-		
-//		analyzeInCompilerLoop(project, searchScope, pattern, new SubProgressMonitor(pm, 9), result);
-		
+
+if (false) { //TODO: doesn't work yet.
+		analyzeInCompilerLoop(project, searchScope, pattern, new SubProgressMonitor(pm, 9), result);
+} else {
 		SearchParticipant[] participants= SearchUtils.getDefaultSearchParticipants();
 		SearchRequestor requestor= new SearchRequestor() {
 			IResource fLastResource;
@@ -103,6 +104,7 @@ public class AugmentRawContainerClientsAnalyzer {
 			}
 		};
 		new SearchEngine().search(pattern, participants, searchScope, requestor, new SubProgressMonitor(pm, 9));
+}
 		
 		fTypeConstraintFactory.newCu();
 		AugmentRawContClConstraintsSolver solver= new AugmentRawContClConstraintsSolver(fTypeConstraintFactory);

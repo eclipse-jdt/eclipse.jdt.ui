@@ -125,4 +125,8 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 		performCuOK();
 	}
 	
+	public void testCuCollectionsMin() throws Exception {
+		performCuOK();
+	}
+	
 }

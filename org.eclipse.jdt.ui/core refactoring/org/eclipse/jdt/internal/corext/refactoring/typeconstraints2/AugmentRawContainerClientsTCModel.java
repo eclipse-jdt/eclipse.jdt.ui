@@ -92,12 +92,19 @@ public class AugmentRawContainerClientsTCModel {
 	private Collection fNewTypeConstraints;
 	private Collection fNewConstraintVariables; //TODO: remove?
 	
+	protected final ITypeBinding fPrimitiveBoolean;
+	protected final ITypeBinding fPrimitiveInt;
+	protected final ITypeBinding fVoid;
+	protected final ITypeBinding fObject;
+	protected final ITypeBinding fString;
 	protected final ITypeBinding fCollection;
 	protected final ITypeBinding fList;
+	protected final ITypeBinding fLinkedList;
+	protected final ITypeBinding fVector;
 	protected final ITypeBinding fIterator;
-	protected final ITypeBinding fObject;
-	protected final ITypeBinding fPrimitiveInt;
-	protected final ITypeBinding fPrimitiveBoolean;
+	protected final ITypeBinding fListIterator;
+	protected final ITypeBinding fEnumeration;
+	protected final ITypeBinding fCollections;
 
 	public AugmentRawContainerClientsTCModel(IJavaProject project) {
 		fTypeConstraints= new CustomHashtable(new TypeConstraintComparer());
@@ -111,7 +118,10 @@ public class AugmentRawContainerClientsTCModel {
 		
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		
-		String source= "class X {java.util.Collection coll; java.util.Iterator iter; java.util.List list;}"; //$NON-NLS-1$
+		String source= "class X {java.util.Collection t0; " + //$NON-NLS-1$
+				"java.util.List t1; java.util.LinkedList t2; java.util.Vector t3; " + //$NON-NLS-1$
+				"java.util.Iterator t4; java.util.ListIterator t5; java.util.Enumeration t6; " + //$NON-NLS-1$
+				"java.util.Collections t7; }"; //$NON-NLS-1$
 		parser.setSource(source.toCharArray());
 		parser.setUnitName("X.java"); //$NON-NLS-1$
 		parser.setProject(project);
@@ -120,14 +130,25 @@ public class AugmentRawContainerClientsTCModel {
 		TypeDeclaration type= (TypeDeclaration) unit.types().get(0);
 		List typeBodyDeclarations= type.bodyDeclarations();
 		//TODO: make sure this is in the compiler loop!
-		fCollection= ((FieldDeclaration) typeBodyDeclarations.get(0)).getType().resolveBinding();
-		fIterator= ((FieldDeclaration) typeBodyDeclarations.get(1)).getType().resolveBinding();
-		fList= ((FieldDeclaration) typeBodyDeclarations.get(2)).getType().resolveBinding();
-		fObject= unit.getAST().resolveWellKnownType("java.lang.Object");
 		fPrimitiveInt= unit.getAST().resolveWellKnownType("int");
 		fPrimitiveBoolean= unit.getAST().resolveWellKnownType("boolean");
+		fVoid= unit.getAST().resolveWellKnownType("void");
+		fObject= unit.getAST().resolveWellKnownType("java.lang.Object");
+		fString= unit.getAST().resolveWellKnownType("java.lang.String");
+		fCollection= getTypeBinding(typeBodyDeclarations, 0);
+		fList= getTypeBinding(typeBodyDeclarations, 1);
+		fLinkedList= getTypeBinding(typeBodyDeclarations, 2);
+		fVector= getTypeBinding(typeBodyDeclarations, 3);
+		fIterator= getTypeBinding(typeBodyDeclarations, 4);
+		fListIterator= getTypeBinding(typeBodyDeclarations, 5);
+		fEnumeration= getTypeBinding(typeBodyDeclarations, 6);
+		fCollections= getTypeBinding(typeBodyDeclarations, 7);
 	}
 	
+	private ITypeBinding getTypeBinding(List typeBodyDeclarations, int idx) {
+		return ((FieldDeclaration) typeBodyDeclarations.get(idx)).getType().resolveBinding();
+	}
+
 	/**
 	 * @param typeBinding the type binding to check
 	 * @return whether the constraint variable should <em>not</em> be created
@@ -172,22 +193,6 @@ public class AugmentRawContainerClientsTCModel {
 		return false;
 	}
 	
-	public ITypeBinding getCollectionType() {
-		return fCollection;
-	}
-	
-	public ITypeBinding getIteratorType() {
-		return fIterator;
-	}
-	
-	public ITypeBinding getListType() {
-		return fList;
-	}
-	
-	public ITypeBinding getObjectType() {
-		return fObject;
-	}
-	
 	public ITypeBinding getPrimitiveBooleanType() {
 		return fPrimitiveBoolean;
 	}
@@ -195,7 +200,51 @@ public class AugmentRawContainerClientsTCModel {
 	public ITypeBinding getPrimitiveIntType() {
 		return fPrimitiveInt;
 	}
+	
+	public ITypeBinding getVoidType() {
+		return fVoid;
+	}
 
+	public ITypeBinding getObjectType() {
+		return fObject;
+	}
+
+	public ITypeBinding getStringType() {
+		return fString;
+	}
+
+	public ITypeBinding getCollectionType() {
+		return fCollection;
+	}
+	
+	public ITypeBinding getListType() {
+		return fList;
+	}
+	
+	public ITypeBinding getLinkedListType() {
+		return fLinkedList;
+	}
+	
+	public ITypeBinding getVectorType() {
+		return fVector;
+	}
+	
+	public ITypeBinding getIteratorType() {
+		return fIterator;
+	}
+	
+	public ITypeBinding getListIteratorType() {
+		return fListIterator;
+	}
+	
+	public ITypeBinding getEnumerationType() {
+		return fEnumeration;
+	}
+	
+	public ITypeBinding getCollectionsType() {
+		return fCollections;
+	}
+	
 	/**
 	 * @param cv
 	 * @return a List of ITypeConstraint2s where cv is used
