@@ -18,6 +18,11 @@
 		<import plugin="org.eclipse.search"/>
 		<import plugin="org.eclipse.jdt.core"/>
 		<import plugin="org.eclipse.jdt.ui"/>
+		<import plugin="org.eclipse.debug.core"/>
+		<import plugin="org.eclipse.debug.ui"/>
+		<import plugin="org.eclipse.jdt.debug"/>
+		<import plugin="org.eclipse.jdt.launching"/>
+		<import plugin="org.eclipse.jdt.debug.ui"/>
 	</requires>
 
 	<extension
@@ -104,4 +109,34 @@
             default="true">
       </editor>
    </extension>
+   
+	<!-- =========================================================================== -->
+	<!-- JSP Launcnhing                                                              -->
+	<!-- =========================================================================== -->
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            name="%jspLaunchConfigurationTypeName"
+            delegate="org.eclipse.jsp.launching.JspLaunchDelegate"
+            modes="run, debug"
+            id="org.eclipse.jsp.JspConfigurationType">
+      </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            type="org.eclipse.jsp.JspConfigurationType"
+            class="org.eclipse.jsp.launching.JspTabGroup"
+            id="org.eclipse.jsp.JspTabGroup">
+      </launchConfigurationTabGroup>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            icon="icons/full/obj16/jsp_app.gif"
+            configTypeID="org.eclipse.jsp.JspConfigurationType"
+            id="org.eclipse.jsp.image.Jsp">
+      </launchConfigurationTypeImage>
+   </extension>
+   
 </plugin>

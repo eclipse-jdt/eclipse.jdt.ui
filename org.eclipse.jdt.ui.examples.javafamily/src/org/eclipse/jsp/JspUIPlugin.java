@@ -26,7 +26,9 @@ import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageRegistry;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.editors.text.TextEditorPreferenceConstants;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -159,4 +161,22 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 	protected void initializeDefaultPreferences(IPreferenceStore prefs) {
 		TextEditorPreferenceConstants.initializeDefaultValues(prefs);
 	}
+	
+	/**
+	 * Returns the standard display to be used. The method first checks, if
+	 * the thread calling this method has an associated display. If so, this
+	 * display is returned. Otherwise the method returns the default display.
+	 */
+	public static Display getStandardDisplay() {
+		Display display= Display.getCurrent();
+		if (display == null) {
+			display= Display.getDefault();
+		}
+		return display;		
+	}
+	
+	protected ImageRegistry createImageRegistry() {
+		return JspPluginImages.initializeImageRegistry();
+	}	
+		
 }
