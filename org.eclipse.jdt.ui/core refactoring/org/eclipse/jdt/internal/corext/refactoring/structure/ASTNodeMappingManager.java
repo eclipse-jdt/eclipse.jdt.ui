@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 class ASTNodeMappingManager {
 
@@ -39,7 +39,7 @@ class ASTNodeMappingManager {
 		return (ICompilationUnit)fCuNodesToCus.get(cuNode);
 	}
 	
-	private static CompilationUnit getCompilationUnitNode(ASTNode node){
+	public static CompilationUnit getCompilationUnitNode(ASTNode node){
 		if (node instanceof CompilationUnit)
 			return (CompilationUnit)node;
 		return (CompilationUnit)ASTNodes.getParent(node, CompilationUnit.class);

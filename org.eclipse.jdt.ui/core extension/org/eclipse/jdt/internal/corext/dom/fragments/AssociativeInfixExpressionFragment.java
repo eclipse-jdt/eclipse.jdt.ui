@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
-import org.eclipse.jdt.internal.corext.refactoring.code.JdtASTMatcher;
+import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 
 class AssociativeInfixExpressionFragment extends ASTFragment implements IExpressionFragment {
 	

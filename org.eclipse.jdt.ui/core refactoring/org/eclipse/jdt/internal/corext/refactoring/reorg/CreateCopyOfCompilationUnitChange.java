@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdi
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 

@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.*;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class JavaElementUtil {

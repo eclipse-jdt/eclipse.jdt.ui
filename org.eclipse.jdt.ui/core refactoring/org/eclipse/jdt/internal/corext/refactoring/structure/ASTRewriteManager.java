@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 class ASTRewriteManager {
 	private final Map fRewrites; //CompilationUnit -> ASTRewrite

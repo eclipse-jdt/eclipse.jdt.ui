@@ -2,7 +2,7 @@ package org.eclipse.jdt.internal.corext.dom.fragments;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.code.JdtASTMatcher;
+import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 
 class SimpleFragment extends ASTFragment {
 	private ASTNode fNode;
