@@ -216,7 +216,8 @@ public class CommentFormattingContext extends FormattingContext {
 	 * TODO: remove after migrating comment formatter preferences to
 	 * JDT/Core preference store
 	 * </p><p>
-	 * NOTE: the returned Map may not fully implement the Map interface
+	 * NOTE: the returned Map might not support <code>entrySet()</code>,
+	 * <code>keySet()</code> and <code>putAll(Map)</code>
 	 * </p>
 	 * 
 	 * @param preferences the JDT/Text preferences
