@@ -5,11 +5,8 @@
 package org.eclipse.jdt.internal.ui;
 
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -48,7 +45,6 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.compiler.ConfigurableOption;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.launcher.VMPreferencePage;
@@ -239,11 +235,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fJavaTextTools= new JavaTextTools(getPreferenceStore());
 		return fJavaTextTools;
 	}
-	
-	public ConfigurableOption[] getCodeFormatterOptions() {
-		return CodeFormatterPreferencePage.getCurrentOptions();
-	}
-	
+		
 	/**
 	 * Creates the Java plugin standard groups in a context menu.
 	 */

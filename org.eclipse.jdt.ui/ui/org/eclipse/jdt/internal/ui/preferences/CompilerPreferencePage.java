@@ -13,10 +13,13 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -33,48 +36,72 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
-import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /*
- * The page for setting compiler options.
+ * The page for setting the compiler options.
  */
 public class CompilerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	// Preference store keys
-	private static final String PREF_LOCAL_VARIABLE_ATTR= JavaCore.COMPILER_LOCAL_VARIABLE_ATTR;
-	private static final String PREF_LINE_NUMBER_ATTR= JavaCore.COMPILER_LINE_NUMBER_ATTR;
-	private static final String PREF_SOURCE_FILE_ATTR= JavaCore.COMPILER_SOURCE_FILE_ATTR;
-	private static final String PREF_CODEGEN_UNUSED_LOCAL= JavaCore.COMPILER_CODEGEN_UNUSED_LOCAL;
-	private static final String PREF_CODEGEN_TARGET_PLATFORM= JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM;
-	private static final String PREF_PB_UNREACHABLE_CODE= JavaCore.COMPILER_PB_UNREACHABLE_CODE;	
-	private static final String PREF_PB_INVALID_IMPORT= JavaCore.COMPILER_PB_INVALID_IMPORT;	
-	private static final String PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= JavaCore.COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD;	
-	private static final String PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= JavaCore.COMPILER_PB_METHOD_WITH_CONSTRUCTOR_NAME;
-	private static final String PREF_PB_DEPRECATION= JavaCore.COMPILER_PB_DEPRECATION;
-	private static final String PREF_PB_HIDDEN_CATCH_BLOCK= JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK;
-	private static final String PREF_PB_UNUSED_LOCAL= JavaCore.COMPILER_PB_UNUSED_LOCAL;	
-	private static final String PREF_PB_UNUSED_PARAMETER= JavaCore.COMPILER_PB_UNUSED_PARAMETER;
-	private static final String PREF_PB_SYNTHETIC_ACCESS_EMULATION= JavaCore.COMPILER_PB_SYNTHETIC_ACCESS_EMULATION;
+	// Preference store keys, see JavaCore.getOptions
+	private static final String PREF_LOCAL_VARIABLE_ATTR= "org.eclipse.jdt.core.compiler.debug.localVariable";
+	private static final String PREF_LINE_NUMBER_ATTR= "org.eclipse.jdt.core.compiler.debug.lineNumber";
+	private static final String PREF_SOURCE_FILE_ATTR= "org.eclipse.jdt.core.compiler.debug.sourceFile";
+	private static final String PREF_CODEGEN_UNUSED_LOCAL= "org.eclipse.jdt.core.compiler.codegen.unusedLocal";
+	private static final String PREF_CODEGEN_TARGET_PLATFORM= "org.eclipse.jdt.core.compiler.codegen.targetPlatform";
+	private static final String PREF_PB_UNREACHABLE_CODE= "org.eclipse.jdt.core.compiler.problem.unreachableCode";	
+	private static final String PREF_PB_INVALID_IMPORT= "org.eclipse.jdt.core.compiler.problem.invalidImport";	
+	private static final String PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= "org.eclipse.jdt.core.compiler.problem.overridingPackageDefaultMethod";	
+	private static final String PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= "org.eclipse.jdt.core.compiler.problem.methodWithConstructorName";
+	private static final String PREF_PB_DEPRECATION= "org.eclipse.jdt.core.compiler.problem.deprecation";
+	private static final String PREF_PB_HIDDEN_CATCH_BLOCK= "org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock";
+	private static final String PREF_PB_UNUSED_LOCAL= "org.eclipse.jdt.core.compiler.problem.unusedLocal";	
+	private static final String PREF_PB_UNUSED_PARAMETER= "org.eclipse.jdt.core.compiler.problem.unusedParameter";
+	private static final String PREF_PB_SYNTHETIC_ACCESS_EMULATION= "org.eclipse.jdt.core.compiler.problem.syntheticAccessEmulation";
+	private static final String PREF_PB_NON_EXTERNALIZED_STRINGS= "org.eclipse.jdt.core.compiler.problem.nonExternalizedStringLiteral";
+	private static final String PREF_PB_ASSERT_AS_IDENTIFIER= "org.eclipse.jdt.core.compiler.problem.assertIdentifier";
+	private static final String PREF_SOURCE_COMPATIBILITY= "org.eclipse.jdt.core.compiler.source";
 
-	private static final String DATA_KEY= "#ControlData"; //$NON-NLS-1$
+	// values
+	private static final String GENERATE= "generate";
+	private static final String DO_NOT_GENERATE= "do not generate";
+	
+	private static final String PRESERVE= "preserve";
+	private static final String OPTIMIZE_OUT= "optimize out";
+	
+	private static final String VERSION_1_1= "1.1";
+	private static final String VERSION_1_2= "1.2";
+	private static final String VERSION_1_3= "1.3";
+	private static final String VERSION_1_4= "1.4";
+	
+	private static final String ERROR= "error";
+	private static final String WARNING= "warning";
+	private static final String IGNORE= "ignore";	
 
+	private static String[] getAllKeys() {
+		return new String[] {
+			PREF_LOCAL_VARIABLE_ATTR, PREF_LINE_NUMBER_ATTR, PREF_SOURCE_FILE_ATTR, PREF_CODEGEN_UNUSED_LOCAL,
+			PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_UNREACHABLE_CODE, PREF_PB_INVALID_IMPORT, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
+			PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
+			PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
+			PREF_PB_ASSERT_AS_IDENTIFIER, PREF_SOURCE_COMPATIBILITY
+		};	
+	}
+
+	/**
+	 * Initializes the current options (read from preference store)
+	 */
 	public static void initDefaults(IPreferenceStore store) {
 		Hashtable hashtable= JavaCore.getDefaultOptions();
-		
-		store.setDefault(PREF_LOCAL_VARIABLE_ATTR, (String)hashtable.get(PREF_LOCAL_VARIABLE_ATTR));
-		store.setDefault(PREF_LINE_NUMBER_ATTR, (String)hashtable.get(PREF_LINE_NUMBER_ATTR));
-		store.setDefault(PREF_SOURCE_FILE_ATTR, (String)hashtable.get(PREF_SOURCE_FILE_ATTR));
-		store.setDefault(PREF_CODEGEN_UNUSED_LOCAL, (String)hashtable.get(PREF_CODEGEN_UNUSED_LOCAL));
-		store.setDefault(PREF_CODEGEN_TARGET_PLATFORM, (String)hashtable.get(PREF_CODEGEN_TARGET_PLATFORM));
-		store.setDefault(PREF_PB_UNREACHABLE_CODE, (String)hashtable.get(PREF_PB_UNREACHABLE_CODE));
-		store.setDefault(PREF_PB_INVALID_IMPORT, (String)hashtable.get(PREF_PB_INVALID_IMPORT));
-		store.setDefault(PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD, (String)hashtable.get(PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD));
-		store.setDefault(PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, (String)hashtable.get(PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME));
-		store.setDefault(PREF_PB_DEPRECATION, (String)hashtable.get(PREF_PB_DEPRECATION));
-		store.setDefault(PREF_PB_HIDDEN_CATCH_BLOCK, (String)hashtable.get(PREF_PB_HIDDEN_CATCH_BLOCK));
-		store.setDefault(PREF_PB_UNUSED_LOCAL, (String)hashtable.get(PREF_PB_UNUSED_LOCAL));
-		store.setDefault(PREF_PB_UNUSED_PARAMETER, (String)hashtable.get(PREF_PB_UNUSED_PARAMETER));
-		store.setDefault(PREF_PB_SYNTHETIC_ACCESS_EMULATION, (String)hashtable.get(PREF_PB_SYNTHETIC_ACCESS_EMULATION));		
+		String[] allKeys= getAllKeys();
+		for (int i= 0; i < allKeys.length; i++) {
+			String key= allKeys[i];
+			String value= (String) hashtable.get(key);
+			if (value != null) {
+				store.setDefault(key, value);
+			} else {
+				JavaPlugin.logErrorMessage("CodeFormatterPreferencePage: key is null: " + key);
+			}
+		}
 	}
 
 	private static class ControlData {
@@ -95,13 +122,24 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 			return fValues[index];
 		}
 		
-		public boolean getSelection(String value) {
-			return value.equals(fValues[0]);
+		public String getValue(int index) {
+			return fValues[index];
+		}		
+		
+		public int getSelection(String value) {
+			for (int i= 0; i < fValues.length; i++) {
+				if (value.equals(fValues[i])) {
+					return i;
+				}
+			}
+			throw new IllegalArgumentException();
 		}
 	}
 	
 	private Hashtable fWorkingValues;
+
 	private ArrayList fCheckBoxes;
+	private ArrayList fComboBoxes;
 	
 	private SelectionListener fSelectionListener;
 
@@ -111,12 +149,13 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	
 		fWorkingValues= JavaCore.getOptions();
 		fCheckBoxes= new ArrayList();
+		fComboBoxes= new ArrayList();
 		
 		fSelectionListener= new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {}
 
 			public void widgetSelected(SelectionEvent e) {
-				buttonControlChanged((Button)e.widget);
+				controlChanged(e.widget);
 			}
 		};
 		
@@ -134,54 +173,71 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	public void createControl(Composite parent) {
 		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.JAVA_BASE_PREFERENCE_PAGE));
+		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.COMPILER_PREFERENCE_PAGE));
 	}	
 
 	/**
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-			
 		TabFolder folder= new TabFolder(parent, SWT.NONE);
 		folder.setLayout(new TabFolderLayout());	
-		folder.setLayoutData(new GridData());
+		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		String[] generateValues= new String[] { JavaCore.GENERATE, JavaCore.DO_NOT_GENERATE };
-		String[] warningIngore= new String[] { JavaCore.WARNING, JavaCore.IGNORE };
-		String[] errorWarning= new String[] { JavaCore.ERROR, JavaCore.WARNING };
+		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
+		
+		String[] errorWarningIgnoreLabels= new String[] {
+			JavaUIMessages.getString("CompilerPreferencePage.error"), 
+			JavaUIMessages.getString("CompilerPreferencePage.warning"),
+			JavaUIMessages.getString("CompilerPreferencePage.ignore")
+		};
+			
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
 
 		Composite warningsComposite= new Composite(folder, SWT.NULL);
-		warningsComposite.setLayout(new GridLayout());
+		warningsComposite.setLayout(layout);
 
 		String label= JavaUIMessages.getString("CompilerPreferencePage.pb_unreachable_code.label"); //$NON-NLS-1$
-		addCheckBox(warningsComposite, label, PREF_PB_UNREACHABLE_CODE, errorWarning);	
+		addComboBox(warningsComposite, label, PREF_PB_UNREACHABLE_CODE, errorWarningIgnore, errorWarningIgnoreLabels);	
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_invalid_import.label"); //$NON-NLS-1$
-		addCheckBox(warningsComposite, label, PREF_PB_INVALID_IMPORT, errorWarning);
+		addComboBox(warningsComposite, label, PREF_PB_INVALID_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels);
 
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_overriding_pkg_dflt.label"); //$NON-NLS-1$
-		addCheckBox(warningsComposite, label, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD, warningIngore);			
+		addComboBox(warningsComposite, label, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD, errorWarningIgnore, errorWarningIgnoreLabels);			
 
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_method_naming.label"); //$NON-NLS-1$
-		addCheckBox(warningsComposite, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, warningIngore);			
+		addComboBox(warningsComposite, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningIgnore, errorWarningIgnoreLabels);			
 
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_deprecation.label"); //$NON-NLS-1$
-		addCheckBox(warningsComposite, label, PREF_PB_DEPRECATION, warningIngore);
+		addComboBox(warningsComposite, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels);
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_hidden_catchblock.label"); //$NON-NLS-1$
-		addCheckBox(warningsComposite, label, PREF_PB_HIDDEN_CATCH_BLOCK, warningIngore);
+		addComboBox(warningsComposite, label, PREF_PB_HIDDEN_CATCH_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels);
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_unused_local.label"); //$NON-NLS-1$
-		addCheckBox(warningsComposite, label, PREF_PB_UNUSED_LOCAL, warningIngore);
+		addComboBox(warningsComposite, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels);
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_unused_parameter.label"); //$NON-NLS-1$
-		addCheckBox(warningsComposite, label, PREF_PB_UNUSED_PARAMETER, warningIngore);
+		addComboBox(warningsComposite, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels);
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_synth_access_emul.label"); //$NON-NLS-1$
-		addCheckBox(warningsComposite, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, warningIngore);
+		addComboBox(warningsComposite, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, errorWarningIgnore, errorWarningIgnoreLabels);
+
+		label= JavaUIMessages.getString("CompilerPreferencePage.pb_non_externalized_strings.label"); //$NON-NLS-1$
+		addComboBox(warningsComposite, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels);
+		
+		label= JavaUIMessages.getString("CompilerPreferencePage.pb_assert_as_identifier.label"); //$NON-NLS-1$
+		addComboBox(warningsComposite, label, PREF_PB_ASSERT_AS_IDENTIFIER, errorWarningIgnore, errorWarningIgnoreLabels);		
+
+		String[] generateValues= new String[] { GENERATE, DO_NOT_GENERATE };
+
+		layout= new GridLayout();
+		layout.numColumns= 2;
 
 		Composite codeGenComposite= new Composite(folder, SWT.NULL);
-		codeGenComposite.setLayout(new GridLayout());
+		codeGenComposite.setLayout(layout);
 
 		label= JavaUIMessages.getString("CompilerPreferencePage.variable_attr.label"); //$NON-NLS-1$
 		addCheckBox(codeGenComposite, label, PREF_LOCAL_VARIABLE_ATTR, generateValues);
@@ -193,10 +249,27 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		addCheckBox(codeGenComposite, label, PREF_SOURCE_FILE_ATTR, generateValues);		
 
 		label= JavaUIMessages.getString("CompilerPreferencePage.codegen_unused_local.label"); //$NON-NLS-1$
-		addCheckBox(codeGenComposite, label, PREF_CODEGEN_UNUSED_LOCAL, new String[] { JavaCore.PRESERVE, JavaCore.OPTIMIZE_OUT });	
+		addCheckBox(codeGenComposite, label, PREF_CODEGEN_UNUSED_LOCAL, new String[] { PRESERVE, OPTIMIZE_OUT });	
 
+		String[] values= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4 };
+		String[] valuesLabels= new String[] {
+			JavaUIMessages.getString("CompilerPreferencePage.jvm11"), 
+			JavaUIMessages.getString("CompilerPreferencePage.jvm12"),
+			JavaUIMessages.getString("CompilerPreferencePage.jvm13"),
+			JavaUIMessages.getString("CompilerPreferencePage.jvm14")
+		};
+		
 		label= JavaUIMessages.getString("CompilerPreferencePage.codegen_targetplatform.label"); //$NON-NLS-1$
-		addCheckBox(codeGenComposite, label, PREF_CODEGEN_TARGET_PLATFORM, new String[] { JavaCore.VERSION_1_1, JavaCore.VERSION_1_2 });	
+		addComboBox(codeGenComposite, label, PREF_CODEGEN_TARGET_PLATFORM, values, valuesLabels);	
+
+		values= new String[] { VERSION_1_3, VERSION_1_4 };
+		valuesLabels= new String[] {
+			JavaUIMessages.getString("CompilerPreferencePage.version13"), 
+			JavaUIMessages.getString("CompilerPreferencePage.version14")
+		};
+		
+		label= JavaUIMessages.getString("CompilerPreferencePage.source_compatibility.label"); //$NON-NLS-1$
+		addComboBox(codeGenComposite, label, PREF_SOURCE_COMPATIBILITY, values, valuesLabels);	
 
 
 		TabItem item= new TabItem(folder, SWT.NONE);
@@ -217,21 +290,53 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	private void addCheckBox(Composite parent, String label, String key, String[] values) {
 		ControlData data= new ControlData(key, values);
 		
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(label);
-		checkBox.setData(DATA_KEY, data);
-		checkBox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		checkBox.setData(data);
+		checkBox.setLayoutData(gd);
 		checkBox.addSelectionListener(fSelectionListener);
 		
 		String currValue= (String)fWorkingValues.get(key);	
-		checkBox.setSelection(data.getSelection(currValue));
+		checkBox.setSelection(data.getSelection(currValue) == 0);
 		
 		fCheckBoxes.add(checkBox);
 	}
 	
-	private void buttonControlChanged(Button button) {
-		ControlData data= (ControlData)button.getData(DATA_KEY);
-		String newValue= data.getValue(button.getSelection());
+	private void addComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels) {
+		ControlData data= new ControlData(key, values);
+		
+		Label labelControl= new Label(parent, SWT.NONE);
+		labelControl.setText(label);
+		labelControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		GridData gd= new GridData();
+		gd.horizontalAlignment= GridData.END;
+		
+		Combo comboBox= new Combo(parent, SWT.READ_ONLY);
+		comboBox.setItems(valueLabels);
+		comboBox.setData(data);
+		comboBox.setLayoutData(gd);
+		comboBox.addSelectionListener(fSelectionListener);
+		
+		String currValue= (String)fWorkingValues.get(key);	
+		comboBox.select(data.getSelection(currValue));
+		
+		fComboBoxes.add(comboBox);
+	}	
+	
+	private void controlChanged(Widget widget) {
+		ControlData data= (ControlData) widget.getData();
+		String newValue= null;
+		if (widget instanceof Button) {
+			newValue= data.getValue(((Button)widget).getSelection());			
+		} else if (widget instanceof Combo) {
+			newValue= data.getValue(((Combo)widget).getSelectionIndex());
+		} else {
+			return;
+		}
 		fWorkingValues.put(data.getKey(), newValue);
 	}
 	
@@ -239,7 +344,13 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	 * @see IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		JavaCore.setOptions(fWorkingValues);
+		String[] allKeys= getAllKeys();
+		// other preference page can change other options
+		Hashtable actualOptions= JavaCore.getOptions();
+		for (int i= 0; i < allKeys.length; i++) {
+			actualOptions.put(allKeys[i], fWorkingValues.get(allKeys[i]));
+		}
+		JavaCore.setOptions(actualOptions);
 		return super.performOk();
 	}	
 	
@@ -256,11 +367,19 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		// update the UI
 		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
 			Button curr= (Button) fCheckBoxes.get(i);
-			ControlData data= (ControlData) curr.getData(DATA_KEY);
+			ControlData data= (ControlData) curr.getData();
 					
 			String currValue= (String) fWorkingValues.get(data.getKey());	
-			curr.setSelection(data.getSelection(currValue));			
+			curr.setSelection(data.getSelection(currValue) == 0);			
 		}
+		for (int i= fComboBoxes.size() - 1; i >= 0; i--) {
+			Combo curr= (Combo) fComboBoxes.get(i);
+			ControlData data= (ControlData) curr.getData();
+					
+			String currValue= (String) fWorkingValues.get(data.getKey());	
+			curr.select(data.getSelection(currValue));			
+		}		
+		
 	}
 
 }

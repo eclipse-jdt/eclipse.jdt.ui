@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -33,9 +34,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.compiler.ConfigurableOption;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.internal.ui.util.TypeRef;
@@ -586,8 +585,7 @@ public class StubUtility {
 	public static String codeFormat(String sourceString, int initialIndentationLevel, String lineDelim) {
 		// code formatter does not offer all options we need
 		
-		ConfigurableOption[] options= JavaPlugin.getDefault().getCodeFormatterOptions();
-		CodeFormatter formatter= new CodeFormatter(options);
+		CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
 		formatter.options.setLineSeparator(lineDelim);
 		formatter.setInitialIndentationLevel(initialIndentationLevel);
 		return formatter.formatSourceString(sourceString) + lineDelim;

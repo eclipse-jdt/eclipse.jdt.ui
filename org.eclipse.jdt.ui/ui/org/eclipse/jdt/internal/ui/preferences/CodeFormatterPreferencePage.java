@@ -8,29 +8,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.Hashtable;
 
-import org.eclipse.jdt.internal.compiler.ConfigurableOption;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -41,122 +25,403 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.SourceViewer;
+
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.formatter.CodeFormatter;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
+
+/*
+ * The page for setting code formatter options
+ */
 public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private final static int OPTION_CLEAR_ALL_NEWLINES= 3;
-	private final static int OPTION_COMPACT_ASSIGNMENT= 7;
-	private final static int OPTION_USETABS= 9;
-	private final static int OPTION_TABSIZE= 10;
+	// Preference store keys, see JavaCore.getOptions
+	private static final String PREF_NEWLINE_OPENING_BRACES= "org.eclipse.jdt.core.formatter.newline.openingBrace";
+	private static final String PREF_NEWLINE_CONTROL_STATEMENT= "org.eclipse.jdt.core.formatter.newline.controlStatement";
+	private static final String PREF_NEWLINE_CLEAR_ALL= "org.eclipse.jdt.core.formatter.newline.clearAll";
+	private static final String PREF_NEWLINE_ELSE_IF= "org.eclipse.jdt.core.formatter.newline.elseIf";
+	private static final String PREF_NEWLINE_EMPTY_BLOCK= "org.eclipse.jdt.core.formatter.newline.emptyBlock";
+	private static final String PREF_LINE_SPLIT= "org.eclipse.jdt.core.formatter.lineSplit";	
+	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= "org.eclipse.jdt.core.formatter.style.assignment";	
+	private static final String PREF_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char";	
+	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";
 
-	private static ConfigurableOption[] fgCurrentOptions;
+	// values
+	private static final String INSERT= "insert";
+	private static final String DO_NOT_INSERT= "do not insert";
 	
-	private static final String PREVIEW_FILE= "CodeFormatterPreviewCode.txt"; //$NON-NLS-1$
-	private static final String PREFERENCE_NAME= "CodeFormatterPreferencePage"; //$NON-NLS-1$
-	private static final String WIDGET_DATA_KEY= "OPTION"; //$NON-NLS-1$
+	private static final String COMPACT= "compact";
+	private static final String NORMAL= "normal";
+	
+	private static final String TAB= "tab";
+	private static final String SPACE= "space";
+	
+	private static final String CLEAR_ALL= "clear all";
+	private static final String PRESERVE_ONE= "preserve one";
+	
 
-	private String fPreviewText;
-	private Document fPreviewDocument;
-	private Button[] fCheckOptions;
-	private Text[] fTextOptions;
-	private SourceViewer fPreviewViewer;
-	private ConfigurableOption[] fNewOptions;
-
-
-	public static ConfigurableOption[] getCurrentOptions() {
-		return fgCurrentOptions;
+	private static String[] getAllKeys() {
+		return new String[] {
+			PREF_NEWLINE_OPENING_BRACES, PREF_NEWLINE_CONTROL_STATEMENT, PREF_NEWLINE_CLEAR_ALL,
+			PREF_NEWLINE_ELSE_IF, PREF_NEWLINE_EMPTY_BLOCK, PREF_LINE_SPLIT,
+			PREF_STYLE_COMPACT_ASSIGNEMENT, PREF_TAB_CHAR, PREF_TAB_SIZE
+		};	
 	}
 	
 	/**
 	 * Gets the currently configured tab size
 	 */
 	public static int getTabSize() {
-		ConfigurableOption option= findOption(OPTION_TABSIZE, fgCurrentOptions);
-		if (option != null) {
-			return option.getCurrentValueIndex();
-		}
-		return 4;
+		String string= (String) JavaCore.getOptions().get(PREF_TAB_SIZE);
+		return getIntValue(string, 4);
 	}
-
+	
 	/**
 	 * Gets the current compating assignement configuration
 	 */	
 	public static boolean isCompactingAssignment() {
-		ConfigurableOption option= findOption(OPTION_COMPACT_ASSIGNMENT, fgCurrentOptions);
-		if (option != null) {
-			return option.getCurrentValueIndex() == 0;
-		}
-		return false;
-	}
-		
-	/**
-	 * Gets the current is clearing all black lines configuration
-	 */		
-	public static boolean isClearingAllBlankLines() {
-		ConfigurableOption option= findOption(OPTION_CLEAR_ALL_NEWLINES, fgCurrentOptions);
-		if (option != null) {
-			return option.getCurrentValueIndex() == 0;
-		}
-		return false;
+		return COMPACT.equals(JavaCore.getOptions().get(PREF_STYLE_COMPACT_ASSIGNEMENT));
 	}
 	
-	private static ConfigurableOption findOption(int option, ConfigurableOption[] options) {
-		for (int i= 0; i < options.length; i++) {
-			if (options[i].getID() == option) {
-				return options[i];
-			}
+	
+	private static int getIntValue(String string, int dflt) {
+		try {
+			return Integer.parseInt(string);
+		} catch (NumberFormatException e) {
 		}
-		return null;
+		return dflt;
 	}	
+		
 	
 	/**
 	 * Initializes the current options (read from preference store)
 	 */
 	public static void initDefaults(IPreferenceStore store) {
-		fgCurrentOptions= getDefaultOptions();
-		for (int i= 0; i < fgCurrentOptions.length; i++) {
-			String preferenceID= getPreferenceID(fgCurrentOptions[i].getID());
-			if (store.contains(preferenceID))
-				fgCurrentOptions[i].setValueIndex(store.getInt(preferenceID));
-
+		Hashtable hashtable= JavaCore.getDefaultOptions();
+		String[] allKeys= getAllKeys();
+		for (int i= 0; i < allKeys.length; i++) {
+			String key= allKeys[i];
+			String value= (String) hashtable.get(key);
+			if (value != null) {
+				store.setDefault(key, value);
+			} else {
+				JavaPlugin.logErrorMessage("CodeFormatterPreferencePage: key is null: " + key);
+			}
 		}
 	}
 
-	private static ConfigurableOption[] getDefaultOptions() {
-		return CodeFormatter.getDefaultOptions(Locale.getDefault());
+	private static class ControlData {
+		private String fKey;
+		private String[] fValues;
+		
+		public ControlData(String key, String[] values) {
+			fKey= key;
+			fValues= values;
+		}
+		
+		public String getKey() {
+			return fKey;
+		}
+		
+		public String getValue(boolean selection) {
+			int index= selection ? 0 : 1;
+			return fValues[index];
+		}
+		
+		public String getValue(int index) {
+			return fValues[index];
+		}		
+		
+		public int getSelection(String value) {
+			for (int i= 0; i < fValues.length; i++) {
+				if (value.equals(fValues[i])) {
+					return i;
+				}
+			}
+			throw new IllegalArgumentException();
+		}
 	}
+	
+	private Hashtable fWorkingValues;
+
+	private ArrayList fCheckBoxes;
+	private ArrayList fTextBoxes;
+	
+	private SelectionListener fSelectionListener;
+	private ModifyListener fModifyListener;
+	
+	private String fPreviewText;
+	private IDocument fPreviewDocument;
+	
+	private Text fTabSizeTextBox;
+	
 
 	public CodeFormatterPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		fNewOptions= getDefaultOptions();
-		updateOptions(fNewOptions, fgCurrentOptions);
-		fPreviewDocument= new Document();
-		fPreviewText= loadPreviewFile(PREVIEW_FILE);
-	}
+		setDescription(JavaUIMessages.getString("CodeFormatterPreferencePage.description")); //$NON-NLS-1$
 	
+		fWorkingValues= JavaCore.getOptions();
+		fCheckBoxes= new ArrayList();
+		fTextBoxes= new ArrayList();
+		
+		fSelectionListener= new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {}
+
+			public void widgetSelected(SelectionEvent e) {
+				if (!e.widget.isDisposed()) {
+					controlChanged(e.widget);
+				}
+			}
+		};
+		
+		fModifyListener= new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				if (!e.widget.isDisposed()) {
+					textChanged(e.widget);
+				}
+			}
+		};
+		
+		fPreviewDocument= new Document();
+		fPreviewText= loadPreviewFile("CodeFormatterPreviewCode.txt");	//$NON-NLS-1$	
+	}
+
+	/**
+	 * @see IWorkbenchPreferencePage#init()
+	 */	
 	public void init(IWorkbench workbench) {
 	}
+
+	/**
+	 * @see PreferencePage#createControl(Composite)
+	 */
+	public void createControl(Composite parent) {
+		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE));
+	}	
+
+	/**
+	 * @see PreferencePage#createContents(Composite)
+	 */
+	protected Control createContents(Composite parent) {
 		
-	private static String getPreferenceID(int id) {
-		return PREFERENCE_NAME + '.' + id;
-	}	
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		
+		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setLayout(layout);
+				
+			
+		TabFolder folder= new TabFolder(composite, SWT.NONE);
+		folder.setLayout(new TabFolderLayout());	
+		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		String[] insertNotInsert= new String[] { INSERT, DO_NOT_INSERT };
+		
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		
+		Composite newlineComposite= new Composite(folder, SWT.NULL);
+		newlineComposite.setLayout(layout);
 
-	private void savePreferences(IPreferenceStore store) throws IOException {
-		for (int i= 0; i < fgCurrentOptions.length; i++) {
-			String preferenceID= getPreferenceID(fgCurrentOptions[i].getID());
-			store.setValue(preferenceID, String.valueOf(fgCurrentOptions[i].getCurrentValueIndex()));
+		String label= JavaUIMessages.getString("CodeFormatterPreferencePage.newline_opening_braces.label"); //$NON-NLS-1$
+		addCheckBox(newlineComposite, label, PREF_NEWLINE_OPENING_BRACES, insertNotInsert);	
+		
+		label= JavaUIMessages.getString("CodeFormatterPreferencePage.newline_control_statement.label"); //$NON-NLS-1$
+		addCheckBox(newlineComposite, label, PREF_NEWLINE_CONTROL_STATEMENT, insertNotInsert);	
+
+		label= JavaUIMessages.getString("CodeFormatterPreferencePage.newline_clear_lines"); //$NON-NLS-1$
+		addCheckBox(newlineComposite, label, PREF_NEWLINE_CLEAR_ALL, new String[] { CLEAR_ALL, PRESERVE_ONE } );	
+
+		label= JavaUIMessages.getString("CodeFormatterPreferencePage.newline_else_if.label"); //$NON-NLS-1$
+		addCheckBox(newlineComposite, label, PREF_NEWLINE_ELSE_IF, insertNotInsert);	
+
+		label= JavaUIMessages.getString("CodeFormatterPreferencePage.newline_empty_block.label"); //$NON-NLS-1$
+		addCheckBox(newlineComposite, label, PREF_NEWLINE_EMPTY_BLOCK, insertNotInsert);	
+		
+		layout= new GridLayout();
+		layout.numColumns= 2;	
+		
+		Composite lineSplittingComposite= new Composite(folder, SWT.NULL);
+		lineSplittingComposite.setLayout(layout);
+
+		label= JavaUIMessages.getString("CodeFormatterPreferencePage.split_line.label"); //$NON-NLS-1$
+		addTextField(lineSplittingComposite, label, PREF_LINE_SPLIT);
+
+		layout= new GridLayout();
+		layout.numColumns= 2;	
+		
+		Composite styleComposite= new Composite(folder, SWT.NULL);
+		styleComposite.setLayout(layout);
+		
+		label= JavaUIMessages.getString("CodeFormatterPreferencePage.style_compact_assignement.label"); //$NON-NLS-1$
+		addCheckBox(styleComposite, label, PREF_STYLE_COMPACT_ASSIGNEMENT, new String[] { COMPACT, NORMAL } );		
+
+		label= JavaUIMessages.getString("CodeFormatterPreferencePage.tab_char.label"); //$NON-NLS-1$
+		addCheckBox(styleComposite, label, PREF_TAB_CHAR, new String[] { TAB, SPACE } );		
+
+		label= JavaUIMessages.getString("CodeFormatterPreferencePage.tab_size.label"); //$NON-NLS-1$
+		fTabSizeTextBox= addTextField(styleComposite, label, PREF_TAB_SIZE);		
+		fTabSizeTextBox.setEnabled(!usesTabs());
+
+		TabItem item= new TabItem(folder, SWT.NONE);
+		item.setText(JavaUIMessages.getString("CodeFormatterPreferencePage.tab.newline.tabtitle")); //$NON-NLS-1$
+		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL));
+		item.setControl(newlineComposite);
+
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(JavaUIMessages.getString("CodeFormatterPreferencePage.tab.linesplit.tabtitle")); //$NON-NLS-1$
+		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CFILE));
+		item.setControl(lineSplittingComposite);
+		
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(JavaUIMessages.getString("CodeFormatterPreferencePage.tab.style.tabtitle")); //$NON-NLS-1$
+		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_REF));
+		item.setControl(styleComposite);		
+		
+		createPreview(parent);
+			
+		updatePreview();
+					
+		return composite;
+	}
+	
+	private Control createPreview(Composite parent) {
+		SourceViewer previewViewer= new SourceViewer(parent, null, SWT.V_SCROLL);
+		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+		previewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
+		previewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
+		previewViewer.setEditable(false);
+		previewViewer.setDocument(fPreviewDocument);
+		Control control= previewViewer.getControl();
+		control.setLayoutData(new GridData(GridData.FILL_BOTH));
+		return control;
+	}
+
+	
+	private Button addCheckBox(Composite parent, String label, String key, String[] values) {
+		ControlData data= new ControlData(key, values);
+		
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		
+		Button checkBox= new Button(parent, SWT.CHECK);
+		checkBox.setText(label);
+		checkBox.setData(data);
+		checkBox.setLayoutData(gd);
+		
+		String currValue= (String)fWorkingValues.get(key);	
+		checkBox.setSelection(data.getSelection(currValue) == 0);
+		checkBox.addSelectionListener(fSelectionListener);
+		
+		fCheckBoxes.add(checkBox);
+		return checkBox;
+	}
+	
+	private Text addTextField(Composite parent, String label, String key) {	
+		Label labelControl= new Label(parent, SWT.NONE);
+		labelControl.setText(label);
+		labelControl.setLayoutData(new GridData());
+				
+		Text textBox= new Text(parent, SWT.BORDER | SWT.SINGLE);
+		textBox.setData(key);
+		textBox.setLayoutData(new GridData());
+		
+		String currValue= (String)fWorkingValues.get(key);	
+		textBox.setText(String.valueOf(getIntValue(currValue, 1)));
+		textBox.setTextLimit(3);
+		textBox.addModifyListener(fModifyListener);
+
+		GridData gd= new GridData();
+		gd.widthHint= convertWidthInCharsToPixels(5);
+		textBox.setLayoutData(gd);
+
+		fTextBoxes.add(textBox);
+		return textBox;
+	}	
+	
+	private void controlChanged(Widget widget) {
+		ControlData data= (ControlData) widget.getData();
+		boolean selection= ((Button)widget).getSelection();
+		String newValue= data.getValue(selection);	
+		fWorkingValues.put(data.getKey(), newValue);
+		updatePreview();
+		
+		if (PREF_TAB_CHAR.equals(data.getKey())) {
+			fTabSizeTextBox.setEnabled(!selection);
+			updateStatus(new StatusInfo());
+			if (selection) {
+				fTabSizeTextBox.setText((String)fWorkingValues.get(PREF_TAB_SIZE));
+			}
 		}
+	}
+	
+	private void textChanged(Widget widget) {
+		Text textControl= (Text)widget;
+		String key= (String) textControl.getData();
+		String number= textControl.getText();
+		IStatus status= validatePositiveNumber(number);
+		if (!status.matches(IStatus.ERROR)) {
+			fWorkingValues.put(key, number);
+		}
+		updateStatus(status);
+		updatePreview();
+	}
+		
+	
+	/**
+	 * @see IPreferencePage#performOk()
+	 */
+	public boolean performOk() {
+		String[] allKeys= getAllKeys();
+		// preserve other options
+		Hashtable actualOptions= JavaCore.getOptions();
+		for (int i= 0; i < allKeys.length; i++) {
+			actualOptions.put(allKeys[i], fWorkingValues.get(allKeys[i]));
+		}
+		JavaCore.setOptions(actualOptions);
+		return super.performOk();
 	}	
+	
+	/**
+	 * @see PreferencePage#performDefaults()
+	 */
+	protected void performDefaults() {
+		fWorkingValues= JavaCore.getDefaultOptions();
+		updateControls();
+		super.performDefaults();
+	}
 
-	private String loadPreviewFile(String fn) {
+	private String loadPreviewFile(String filename) {
 		String separator= System.getProperty("line.separator"); //$NON-NLS-1$
 		StringBuffer btxt= new StringBuffer(512);
 		try {
-			BufferedReader rin= new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(fn)));
+			BufferedReader rin= new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(filename)));
 			String line;
 			while ((line= rin.readLine()) != null) {
 				btxt.append(line);
@@ -168,259 +433,66 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		return btxt.toString();
 	}
 
-	/**
-	 * @see PreferencePage#createContents
-	 */
-	protected Control createContents(Composite parent) {		
-		Composite composite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 1;
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
-		composite.setLayout(layout);
-		createCategoryFolders(composite);
-		createPreview(composite);
-		updateTabWidgetDependency();
-		WorkbenchHelp.setHelp(parent, new DialogPageContextComputer(this, IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE));
-		return composite;
-	}
 
-
-	/**
-	 * @see PreferencePage#performDefaults
-	 */
-	public void performDefaults() {
-		super.performDefaults();
-		updateOptions(fNewOptions, getDefaultOptions());
-		for (int i= 0; i < fCheckOptions.length; i++) {
-			ConfigurableOption option= retrieveOption(fCheckOptions[i]);
-			int defaultValue= option.getCurrentValueIndex();
-			fCheckOptions[i].setSelection(defaultValue == 0 ? true : false);
-			option.setValueIndex(defaultValue);
+	private void updatePreview() {
+		fPreviewDocument.set(CodeFormatter.format(fPreviewText, 0, fWorkingValues));
+	}	
+	
+	private void updateControls() {
+		// update the UI
+		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
+			Button curr= (Button) fCheckBoxes.get(i);
+			ControlData data= (ControlData) curr.getData();
+					
+			String currValue= (String) fWorkingValues.get(data.getKey());	
+			curr.setSelection(data.getSelection(currValue) == 0);			
 		}
-		for (int i= 0; i < fTextOptions.length; i++) {
-			ConfigurableOption option= retrieveOption(fTextOptions[i]);
-			int defaultValue= option.getCurrentValueIndex();
-			fTextOptions[i].setText(String.valueOf(defaultValue));
-			option.setValueIndex(defaultValue);
+		for (int i= fTextBoxes.size() - 1; i >= 0; i--) {
+			Text curr= (Text) fTextBoxes.get(i);
+			String key= (String) curr.getData();		
+			String currValue= (String) fWorkingValues.get(key);
+			curr.setText(currValue);
 		}
-		updateTabWidgetDependency();
-		updatePreview(fNewOptions);
+		fTabSizeTextBox.setEnabled(!usesTabs());	
 	}
 	
-	/**
-	 * @see PreferencePage#performOk
-	 */
-	public boolean performOk() {
-		updateOptions(getCurrentOptions(), fNewOptions);
-		try {
-			savePreferences(getPreferenceStore());
-		} catch (IOException io) {
-			JavaPlugin.log(io);
-		}
-		return true;
-	}
-
-	/**
-	 * @see PreferencePage#performApply
-	 */
-	public void performApply() {
-		performOk();
-		updatePreview(fNewOptions);
-	}
-
-	private void createCategoryFolders(Composite parent) {
-		List optionCategories= findCategories(fNewOptions);
-
-
-		ModifyListener textListener= new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				if (fTextOptions == null)
-					return;
-				Text source= (Text) e.widget;
-				if (checkAllTextInputs(source)) {
-					ConfigurableOption option= retrieveOption(source);
-					option.setValueIndex(parseTextInput(source.getText()));
-					updatePreview(fNewOptions);
-				}
-			}
-		};
-		
-		SelectionListener checkboxListener= new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				Button src= (Button) e.widget;
-				ConfigurableOption option= retrieveOption(src);
-				int value= (src.getSelection() == true) ? 0 : 1; // See CodeFormatter logic
-				option.setValueIndex(value);
-				if (option.getID() == OPTION_USETABS) {
-					updateTabWidgetDependency();
-				}
-				updatePreview(fNewOptions);
-			}
-		};	
-
-		ArrayList checkOptions= new ArrayList();
-		ArrayList textOptions= new ArrayList();
-
-		TabFolder folder= new TabFolder(parent, SWT.NONE);
-		folder.setLayout(new TabFolderLayout());	
-		folder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		for (int i= 0; i < optionCategories.size(); i++) {
-			String category= (String) optionCategories.get(i);
-			createSingleCategory(folder, category, textListener, checkboxListener, textOptions, checkOptions);
-		}
-
-		fCheckOptions= (Button[]) checkOptions.toArray(new Button[checkOptions.size()]);
-		fTextOptions= (Text[]) textOptions.toArray(new Text[textOptions.size()]);
-
-	}
-
-	private void createSingleCategory(TabFolder folder, String category, ModifyListener textListener, SelectionListener checkboxListener, ArrayList textControls, ArrayList checkControls) {
-
-		Composite composite= new Composite(folder, SWT.NONE);
-		composite.setLayout(new GridLayout());
-		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		for (int i= 0; i < fNewOptions.length; i++) {
-			ConfigurableOption opt= fNewOptions[i];
-			if (category.equals(opt.getCategory())) {
-				Control control= null;
-				if (opt.getPossibleValues() == ConfigurableOption.NoDiscreteValue) {
-					control= createTextOption(composite, opt, textListener, textControls);
-				} else if (opt.getPossibleValues().length == 2) {
-					control= createCheckOption(composite, opt, checkboxListener, checkControls);
-				}
-				if (control != null) {
-					GridData lgd= new GridData(GridData.FILL_HORIZONTAL);
-					control.setLayoutData(lgd);
-				}			
-			}
-		}
-		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(category);
-		item.setControl(composite);
-	}
-
-	private Control createCheckOption(Composite parent, ConfigurableOption option, SelectionListener listener, List checkControls) {
-		Button check= new Button(parent, SWT.CHECK);
-		check.setToolTipText(option.getDescription());
-		check.addSelectionListener(listener);
-		check.setData(WIDGET_DATA_KEY, option);
-		check.setText(option.getName());
-		check.setSelection(option.getCurrentValueIndex() == 0 ? true : false);
-		checkControls.add(check);
-		return check;
-	}
-
-	private Control createTextOption(Composite parent, ConfigurableOption option, ModifyListener listener, List textControls) {
-		Composite pan= new Composite(parent, SWT.NONE);
-		GridLayout gl= new GridLayout();
-		gl.numColumns= 2;
-		gl.marginWidth= 0;
-		gl.marginHeight= 0;
-		pan.setLayout(gl);
-		
-		Label flabel= new Label(pan, SWT.NONE);
-		flabel.setText(option.getName());
-		flabel.setToolTipText(option.getDescription());
-		
-		Text text= new Text(pan, SWT.BORDER | SWT.SINGLE);
-		text.setTextLimit(3); // limit to 3 digits
-		text.setToolTipText(option.getDescription());
-		text.setData(WIDGET_DATA_KEY, option);
-		text.addModifyListener(listener);
-		text.setText(String.valueOf(option.getCurrentValueIndex()));
-		GridData gd= new GridData();
-		gd.widthHint= convertWidthInCharsToPixels(5);
-		text.setLayoutData(gd);
-		
-		textControls.add(text);
-		return pan;
-	}
-
-	private void createPreview(Composite parent) {
-		SourceViewer previewViewer= new SourceViewer(parent, null, SWT.H_SCROLL | SWT.V_SCROLL);
-		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		previewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
-		previewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
-		previewViewer.setEditable(false);
-		previewViewer.setDocument(fPreviewDocument);
-		Control control= previewViewer.getControl();
-		control.setLayoutData(new GridData(GridData.FILL_BOTH));
-		updatePreview(fNewOptions);
-	}
-
-	public void updatePreview(final ConfigurableOption[] options) {
-		fPreviewDocument.set(CodeFormatter.format(fPreviewText, 0, options));
-	}
-
-	private ConfigurableOption retrieveOption(Widget widget) {
-		return (ConfigurableOption) widget.getData(WIDGET_DATA_KEY);
-	}
-
-	private int parseTextInput(String input) throws NumberFormatException {
-		if (input.equals("")) //$NON-NLS-1$
-			throw new NumberFormatException();
-		int val= Integer.parseInt(input);
-		if (val < 0)
-			throw new NumberFormatException();
-		return val;
-	}
-	
-	private boolean checkAllTextInputs(Text source) {
-		boolean valueOK= false;
-		String errorMessage= null;
-		for (int i= 0; i < fTextOptions.length; i++) {
-			int val= 0;
-			Text next= fTextOptions[i];
-			String text= next.getText();
+	private IStatus validatePositiveNumber(String number) {
+		StatusInfo status= new StatusInfo();
+		if (number.length() == 0) {
+			status.setError(JavaUIMessages.getString("CodeFormatterPreferencePage.empty_input"));
+		} else {
 			try {
-				val= parseTextInput(text);
-				if (next == source)
-					valueOK= true;
-			} catch (NumberFormatException nx) {
-				if (text.length() == 0)
-					errorMessage= JavaUIMessages.getString("CodeFormatterPreferencePage.empty_input"); //$NON-NLS-1$
-				else
-					errorMessage= JavaUIMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", text); //$NON-NLS-1$
+				int value= Integer.parseInt(number);
+				if (value < 0) {
+					status.setError(JavaUIMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number));
+				}
+			} catch (NumberFormatException e) {
+				status.setError(JavaUIMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number));
 			}
 		}
-		setErrorMessage(errorMessage);
-		setValid(errorMessage == null);
-		return valueOK;
-	}	
-
-	private void updateTabWidgetDependency() {
-		ConfigurableOption option= findOption(OPTION_USETABS, fNewOptions);
-		if (option != null) {
-			boolean tabSizeEnabled= option.getCurrentValueIndex() != 0;
-			for (int i= 0; i < fTextOptions.length; i++) {
-				if (retrieveOption(fTextOptions[i]).getID() == OPTION_TABSIZE) {
-					fTextOptions[i].setEnabled(tabSizeEnabled);
-					break;
+		return status;
+	}
+			
+	
+	private void updateStatus(IStatus status) {
+		if (!status.matches(IStatus.ERROR)) {
+			// look if there are more severe errors
+			for (int i= 0; i < fTextBoxes.size(); i++) {
+				Text curr= (Text) fTextBoxes.get(i);
+				if (!(curr == fTabSizeTextBox && usesTabs())) {
+					IStatus currStatus= validatePositiveNumber(curr.getText());
+					status= StatusTool.getMoreSevere(currStatus, status);
 				}
 			}
-		}
+		}	
+		setValid(!status.matches(IStatus.ERROR));
+		StatusTool.applyToStatusLine(this, status);
 	}
-
-	private static List findCategories(ConfigurableOption[] options) {
-		ArrayList optionCategories= new ArrayList(options.length);
-		for (int i= 0; i < options.length; i++) {
-			String category= options[i].getCategory();
-			if (!optionCategories.contains(category)) {
-				optionCategories.add(category);
-			}
-		}
-		return optionCategories;
+	
+	private boolean usesTabs() {
+		return TAB.equals(fWorkingValues.get(PREF_TAB_CHAR));
 	}
-
-
-	private static void updateOptions(ConfigurableOption[] current, ConfigurableOption[] update) {
-		for (int i= 0; i < current.length; i++) {
-			current[i].setValueIndex(update[i].getCurrentValueIndex());
-		}
-	}	
+		
 
 }
 
