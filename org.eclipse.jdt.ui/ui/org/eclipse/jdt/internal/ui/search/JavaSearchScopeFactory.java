@@ -13,6 +13,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -47,7 +49,10 @@ public class JavaSearchScopeFactory {
 	}
 
 	public IWorkingSet[] queryWorkingSets() throws JavaModelException {
-		IWorkingSetSelectionDialog dialog= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSetSelectionDialog(JavaPlugin.getActiveWorkbenchShell());
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		if (shell == null)
+			return null;
+		IWorkingSetSelectionDialog dialog= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSetSelectionDialog(shell, true);
 		if (dialog.open() == Window.OK) {
 			IWorkingSet[] workingSets= dialog.getSelection();
 			if (workingSets.length > 0)
