@@ -396,7 +396,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	}
 		
 	private void postAdd(final Object parent, final Object[] elements) {
-		if (elements.length <= 0)
+		if (elements == null || elements.length <= 0)
 			return;
 		
 		postRunnable(new Runnable() {
@@ -404,25 +404,37 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
 					ctrl.setRedraw(false);
+					Object[] newElements= getNewElements(elements);
 					if (fViewer instanceof AbstractTreeViewer) {
 						if (fViewer.testFindItem(parent) == null) {
 							Object root= ((AbstractTreeViewer)fViewer).getInput();
 							if (root != null)
-								((AbstractTreeViewer)fViewer).add(root, elements);
+								((AbstractTreeViewer)fViewer).add(root, newElements);
 						}
 						else
-							((AbstractTreeViewer)fViewer).add(parent, elements);
+							((AbstractTreeViewer)fViewer).add(parent, newElements);
 					}
 					else if (fViewer instanceof ListViewer)
-						((ListViewer)fViewer).add(elements);
+						((ListViewer)fViewer).add(newElements);
 					else if (fViewer instanceof TableViewer)
-						((TableViewer)fViewer).add(elements);
+						((TableViewer)fViewer).add(newElements);
 					if (fViewer.testFindItem(elements[0]) != null)
 						fBrowsingPart.adjustInputAndSetSelection((IJavaElement)elements[0]);
 					ctrl.setRedraw(true);
 				}
 			}
 		});
+	}
+
+	private Object[] getNewElements(Object[] elements) {
+		int elementsLength= elements.length;
+		ArrayList result= new ArrayList(elementsLength);
+		for (int i= 0; i < elementsLength; i++) {
+			Object element= elements[i];
+			if (fViewer.testFindItem(element) == null)
+				result.add(element);
+		}
+		return result.toArray();
 	}
 
 	private void postRemove(final Object element) {
