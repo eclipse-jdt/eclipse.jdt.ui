@@ -30,7 +30,6 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 public class RenameTempTests extends RefactoringTest{
 	private static final boolean BUG_checkDeclInNestedClass= true;
 	private static final boolean BUG_checkShadowing= true;
-	private static final boolean BUG_XXX= true;
 	
 	private static final Class clazz= RenameTempTests.class;
 	private static final String REFACTORING_PATH= "RenameTemp/";
@@ -72,6 +71,7 @@ public class RenameTempTests extends RefactoringTest{
 	
 	private ISourceRange getSelection(ICompilationUnit cu) throws Exception{
 		String source= cu.getSource();
+		//Warning: this *includes* the SQUARE_BRACKET_OPEN!
 		int offset= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_OPEN);
 		int end= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_CLOSE);
 		return new SourceRange(offset, end - offset);
@@ -139,10 +139,11 @@ public class RenameTempTests extends RefactoringTest{
 		failTestHelper(newName, updateReferences, cu, selection);
 	}
 
-	private void helper2(String newName, boolean updateReferences, int startLine, int startColumn, int endLine, int endColumn)  throws Exception{
+	private void failHelperNoElement(int startLine, int startColumn, int endLine, int endColumn)  throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		failTestHelper(newName, updateReferences, cu, selection);
+		IJavaElement[] elements= cu.codeSelect(selection.getOffset(), selection.getLength());
+		assertEquals(0, elements.length);
 	}
 
 	private void helper2(String newName) throws Exception{
@@ -527,12 +528,7 @@ public class RenameTempTests extends RefactoringTest{
 	// no testFail29, testFail30, testFail31
 	
 	public void testFail32() throws Exception {
-		if (BUG_XXX) {
-			printTestDisabledMessage("duplicate local variable");
-			return;
-		}
-		
 //		printTestDisabledMessage("bug#47822");
-		helper2("j", true, 6, 19, 6, 20);
+		failHelperNoElement(6, 19, 6, 20);
 	}
 }
