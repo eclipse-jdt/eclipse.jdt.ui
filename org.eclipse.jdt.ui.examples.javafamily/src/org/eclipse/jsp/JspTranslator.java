@@ -18,8 +18,6 @@ import org.eclipse.jface.text.source.ITagHandler;
 import org.eclipse.jface.text.source.ITagHandlerFactory;
 import org.eclipse.jface.text.source.ITranslator;
 
-import org.eclipse.jdt.internal.ui.examples.jspeditor.Jsp2JavaTagHandlerFactory;
-import org.eclipse.jdt.internal.ui.examples.jspeditor.JspReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.examples.jspeditor.JspTranslatorResultCollector;
 
 /**

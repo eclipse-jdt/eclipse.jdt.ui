@@ -44,13 +44,10 @@ public class RenameTypeParticipant extends RenameParticipant {
 		fType= (IType)element;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#getElement()
-	 */
-	public Object getElement() {
-		return fType;
+	public boolean operatesOn(Object element) {
+		return fType.equals(element);
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#isAvailable()
 	 */
