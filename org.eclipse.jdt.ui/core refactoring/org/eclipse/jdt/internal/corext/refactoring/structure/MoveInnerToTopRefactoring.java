@@ -96,6 +96,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -362,7 +363,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	public static MoveInnerToTopRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {
-		if (!isAvailable(type))
+		if (!RefactoringAvailabilityTester.isMoveInnerAvailable(type))
 			return null;
 		return new MoveInnerToTopRefactoring(type, codeGenerationSettings);
 	}
@@ -471,10 +472,6 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		if (results == null)
 			return new ASTNode[0];
 		return ASTNodeSearchUtil.getAstNodes(results, cuNode);
-	}
-
-	public static boolean isAvailable(IType type) throws JavaModelException {
-		return Checks.isAvailable(type) && !Checks.isAnonymous(type) && !Checks.isTopLevel(type) && !Checks.isInsideLocalType(type);
 	}
 
 	private static boolean isCorrespondingTypeBinding(ITypeBinding binding, IType type) {
@@ -650,7 +647,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		Assert.isNotNull(simpleType);
 		final AST ast= targetRewrite.getRoot().getAST();
 		if (!(simpleType.getName() instanceof QualifiedName)) {
-			targetRewrite.getASTRewrite().replace(simpleType, ast.newQualifiedType(ASTNodeFactory.newType(ast, declaring, false), ast.newSimpleName(simpleType.getName().getFullyQualifiedName())), group);
+			targetRewrite.getASTRewrite().replace(simpleType, ast.newQualifiedType(targetRewrite.getImportRewrite().addImport(declaring, ast), ast.newSimpleName(simpleType.getName().getFullyQualifiedName())), group);
 			targetRewrite.getImportRemover().registerRemovedNode(simpleType);
 		}
 	}
