@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import java.util.ArrayList;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -27,13 +26,19 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public class AddUnimplementedMethodsTest extends TestCase {
 	
@@ -105,21 +110,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		fClassD= null;
 		fInterfaceE= null;
 	}
-	
-	private IMethod[] getSelected(IType type) throws JavaModelException {
-		IMethod[] inheritedMethods= StubUtility.getOverridableMethods(type, type.newSupertypeHierarchy(null), false);
-		
-		ArrayList toImplement= new ArrayList();
-		for (int i= 0; i < inheritedMethods.length; i++) {
-			IMethod curr= inheritedMethods[i];
-			if (JdtFlags.isAbstract(curr)) {
-				toImplement.add(curr);
-			}
-		}
-		return (IMethod[]) toImplement.toArray(new IMethod[toImplement.size()]);
-	}
-	
-				
+
 	/*
 	 * basic test: extend an abstract class and an interface
 	 */
@@ -127,11 +118,10 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test1.java");
 		IType testClass= cu.createType("public class Test1 extends A implements B {\n}\n", null, true, null);
 	
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), getSelected(testClass), true, null);
-		op.run(new NullProgressMonitor());
+		testHelper(testClass);
 		
 		IMethod[] methods= testClass.getMethods();
-		checkMethods(new String[] { "a", "b", "c" }, methods);
+		checkMethods(new String[] { "a", "b", "c", "equals" }, methods);
 		
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.Vector" }, imports);	
@@ -145,11 +135,10 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test2.java");
 		IType testClass= cu.createType("public class Test2 extends C implements B {\n}\n", null, true, null);
 		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), getSelected(testClass), true, null);
-		op.run(new NullProgressMonitor());
+		testHelper(testClass);
 		
 		IMethod[] methods= testClass.getMethods();
-		checkMethods(new String[] { "d" }, methods);
+		checkMethods(new String[] { "c", "d", "equals" }, methods);
 		
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Enumeration", "java.util.Hashtable" }, imports);
@@ -163,11 +152,10 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test3.java");
 		IType testClass= cu.createType("public class Test3 extends D {\n}\n", null, true, null);
 		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), getSelected(testClass), true, null);
-		op.run(new NullProgressMonitor());
+		testHelper(testClass);
 		
 		IMethod[] methods= testClass.getMethods();
-		checkMethods(new String[] { "c", "d" }, methods);
+		checkMethods(new String[] { "c", "d", "equals" }, methods);
 		
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.Enumeration" }, imports);
@@ -181,14 +169,31 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test4.java");
 		IType testClass= cu.createType("public class Test4 implements B, E {\n}\n", null, true, null);
 		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, new CodeGenerationSettings(), getSelected(testClass), true, null);
-		op.run(new NullProgressMonitor());
+		testHelper(testClass);
 		
 		IMethod[] methods= testClass.getMethods();
-		checkMethods(new String[] { "c", "e" }, methods);
+		checkMethods(new String[] { "c", "e", "equals" }, methods);
 		
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.NoSuchElementException" }, imports);
+	}
+
+	private void testHelper(IType testClass) throws JavaModelException, CoreException {
+		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
+		CompilationUnit unit= parser.parse(testClass.getCompilationUnit(), true);
+		AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(testClass, unit);
+		assertNotNull("Could not find type declararation node", declaration);
+		ITypeBinding binding= declaration.resolveBinding();
+		assertNotNull("Binding for type declaration could not be resolved", binding);
+		IMethodBinding[] bindings= StubUtility2.getOverridableMethods(binding, false);
+		String[] keys= new String[bindings.length];
+		for (int index= 0; index < bindings.length; index++)
+			keys[index]= bindings[index].getKey();
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, null, keys, new CodeGenerationSettings(), false, true);
+		op.run(new NullProgressMonitor());
+		synchronized (testClass.getCompilationUnit()) {
+			testClass.getCompilationUnit().reconcile(ICompilationUnit.NO_AST, false, null, new NullProgressMonitor());
+		}
 	}
 	
 	private void checkMethods(String[] expected, IMethod[] methods) {
@@ -211,7 +216,6 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		}
 	}
 
-
 	private boolean nameContained(String methName, IJavaElement[] methods) {
 		for (int i= 0; i < methods.length; i++) {
 			if (methods[i].getElementName().equals(methName)) {
@@ -220,6 +224,4 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		}
 		return false;
 	}	
-
-
 }
