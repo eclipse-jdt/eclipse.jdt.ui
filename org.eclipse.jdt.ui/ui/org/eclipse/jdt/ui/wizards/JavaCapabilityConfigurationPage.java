@@ -90,10 +90,10 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * The project does not have to exist at the time of initialization, but must exist when executing the runnable
 	 * obtained by <code>getRunnable()</code>.
 	 * </p>
-	 * @param project The Java project.
-	 * @param entries The default classpath entries or <code>null</code> to let the page choose the default
-	 * @param path The folder to be taken as the default output path or <code>null</code> to let the page choose the default
-	 * @return overrideExistingClasspath If set to <code>true</code>, an existing '.classpath' file is ignored. If set to <code>false</code>
+	 * @param jproject The Java project.
+	 * @param defaultOutputLocation The default classpath entries or <code>null</code> to let the page choose the default
+	 * @param defaultEntries The folder to be taken as the default output path or <code>null</code> to let the page choose the default
+	 * @param defaultsOverrideExistingClasspath If set to <code>true</code>, an existing '.classpath' file is ignored. If set to <code>false</code>
 	 * the given default classpath and output location is only used if no '.classpath' exists.
 	 */
 	public void init(IJavaProject jproject, IPath defaultOutputLocation, IClasspathEntry[] defaultEntries, boolean defaultsOverrideExistingClasspath) {
