@@ -18,7 +18,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -33,6 +35,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -46,9 +49,12 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 
@@ -287,6 +293,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private ArrayList fAllTypes;
 		private boolean fIgnoreLowerCaseNames;
 		
+		private IJavaSearchScope fSearchScope;
+		
 		
 		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, ImportsStructure impStructure, boolean ignoreLowerCaseNames) throws JavaModelException {
 			fOldSingleImports= oldSingleImports;
@@ -305,11 +313,66 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				fAllTypes= new ArrayList(500);
 				
 				IJavaProject project= fImpStructure.getCompilationUnit().getJavaProject();
-				IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaProject[] { project });		
-				AllTypesCache.getTypes(searchScope, IJavaSearchConstants.TYPE, null, fAllTypes);
+				fSearchScope= SearchEngine.createJavaSearchScope(new IJavaProject[] { project });		
+				AllTypesCache.getTypes(fSearchScope, IJavaSearchConstants.TYPE, null, fAllTypes);
 			}
 			return fAllTypes;
 		}
+		
+		
+		private boolean isContained(ITypeBinding curr, ITypeBinding[] list) {
+			for (int i = 0; i < list.length; i++) {
+				if (curr.equals(list[i])) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		
+		private boolean needsImport(ITypeBinding typeBinding, SimpleName ref) {
+			if (!typeBinding.isTopLevel() && !typeBinding.isMember()) {
+				return false; // no imports for anonymous, local, primitive types
+			}
+			int modifiers= typeBinding.getModifiers();
+			if (Modifier.isPrivate(modifiers)) {
+				return false; // imports for privates are not required
+			}
+			TypeDeclaration currType= (TypeDeclaration) ASTNodes.getParent(ref, ASTNode.TYPE_DECLARATION);
+			if (currType == null || currType.resolveBinding() == null) {
+				return false; // not in a type
+			}
+			ITypeBinding currTypeBinding= currType.resolveBinding();
+			if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)) {
+				if (!currTypeBinding.getPackage().getName().equals(typeBinding.getPackage().getName())) {
+					return false; // not visible
+				}
+			}
+			
+			if (typeBinding.isMember()) {
+				if (isContained(typeBinding, currTypeBinding.getDeclaredTypes())) {
+					return false; // inner type of our type
+				}
+				ITypeBinding declaring= currTypeBinding.getDeclaringClass();
+				while (declaring != null) {
+					if (isContained(typeBinding, declaring.getDeclaredTypes())) {
+						return false; // inner type of the declaring type
+					}
+					declaring= declaring.getDeclaringClass();
+				}
+				
+				ITypeBinding superClass= currTypeBinding.getSuperclass();
+				while (superClass != null) {
+					if (isContained(typeBinding, superClass.getDeclaredTypes())) {
+						return false; // inner type of super type
+					}
+					superClass= superClass.getSuperclass();
+				}
+			}
+			return true;				
+		}
+		
+		
 		
 		/**
 		 * Tries to find the given type name and add it to the import structure.
@@ -324,7 +387,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						if (typeBinding.isArray()) {
 							typeBinding= typeBinding.getElementType();
 						}
-						if (typeBinding.isTopLevel() || typeBinding.isMember()) {
+						if (needsImport(typeBinding, ref)) {
 							String name= Bindings.getFullyQualifiedName(typeBinding);
 							fImpStructure.addImport(name);
 						}
@@ -384,14 +447,22 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return;
 			}
 			ArrayList allTypes= getAllTypes();
+			IPackageFragment currPackage= (IPackageFragment) fImpStructure.getCompilationUnit().getParent();
 			
 			for (int i= allTypes.size() - 1; i >= 0; i--) {
 				TypeInfo curr= (TypeInfo) allTypes.get(i);
 				if (simpleTypeName.equals(curr.getTypeName())) {
 					String fullyQualifiedName= curr.getFullyQualifiedName();
 					if (!namesFound.contains(fullyQualifiedName)) {
+						try {
+							IType type= curr.resolveType(fSearchScope);
+							if (type != null && JavaModelUtil.isVisible(type, currPackage)) {
+								typeRefsFound.add(curr);
+							}
+						} catch (JavaModelException e) {
+							JavaPlugin.log(e);
+						}
 						namesFound.add(fullyQualifiedName);
-						typeRefsFound.add(curr);
 					}
 				}
 			}

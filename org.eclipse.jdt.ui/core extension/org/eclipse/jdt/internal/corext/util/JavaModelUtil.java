@@ -233,7 +233,7 @@ public class JavaModelUtil {
 	public static boolean isVisible(IMember member, IPackageFragment pack) throws JavaModelException {
 		int otherflags= member.getFlags();
 		
-		if (Flags.isPublic(otherflags) || Flags.isProtected(otherflags)) {
+		if (Flags.isPublic(otherflags)) {
 			return true;
 		} else if (Flags.isPrivate(otherflags)) {
 			return false;

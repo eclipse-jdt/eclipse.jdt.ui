@@ -193,6 +193,13 @@ public class ASTNodes {
 		return node;
 	}
 	
+	public static ASTNode getParent(ASTNode node, int nodeType) {
+		do {
+			node= node.getParent();
+		} while (node != null && node.getNodeType() != nodeType);
+		return node;
+	}	
+	
 	public static boolean isParent(ASTNode node, ASTNode parent) {
 		Assert.isNotNull(parent);
 		do {
