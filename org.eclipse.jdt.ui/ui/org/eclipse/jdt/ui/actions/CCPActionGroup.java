@@ -137,7 +137,10 @@ public class CCPActionGroup extends ActionGroup {
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		for (int i= 0; i < fActions.length; i++) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fActions[i]);
+			SelectionDispatchAction action= fActions[i];
+			if (action == fCutAction && !fCutAction.isEnabled())
+				continue;
+			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, action);
 		}		
 	}		
 	
