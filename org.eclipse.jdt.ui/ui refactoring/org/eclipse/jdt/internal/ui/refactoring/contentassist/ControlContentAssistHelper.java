@@ -14,27 +14,22 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.contentassist.ComboContentAssistSubjectAdapter;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.contentassist.TextContentAssistSubjectAdapter;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommand;
@@ -92,7 +87,6 @@ public class ControlContentAssistHelper {
 		});
 	
 		control.addKeyListener(getContentAssistKeyAdapter(contentAssistant));
-		installContentAssistCue(control);
 		return contentAssistant;
 	}
 
@@ -140,65 +134,5 @@ public class ControlContentAssistHelper {
 					}
 				}
 			}};
-	}
-
-	/**
-	 * Installs a visual cue indicating availability of content assist on the given control.
-	 */
-	private  static void installContentAssistCue(final Control control) {
-		
-		if (!(control instanceof Text) && !(control instanceof Combo))
-			return;
-		
-		final int dx;
-		final int dy;
-		if (SWT.getPlatform().equals("carbon")) { //$NON-NLS-1$
-			if (control instanceof Combo) {
-				dx= -9; dy= 0;
-			} else {
-				dx= -5; dy= 3;
-			}
-		} else {
-			if (control instanceof Combo) {
-				dx= -7; dy= 0;
-			} else {
-				dx= -8;	dy= 0;
-			}
-		}
-		
-		class CueHandler implements FocusListener, PaintListener {
-			Image fBulb;
-			ImageDescriptor fBulbID= ImageDescriptor.createFromFile(ControlContentAssistHelper.class, "bulb.gif"); //$NON-NLS-1$
-			
-			public void paintControl(PaintEvent e) {
-				if (control.isDisposed())
-					return;
-				Point global= control.toDisplay(dx, dy);
-				Point p= ((Control) e.widget).toControl(global);
-				if (fBulb == null)
-					fBulb= fBulbID.createImage();
-				e.gc.drawImage(fBulb, p.x, p.y);
-			}
-			
-			public void focusGained(FocusEvent e) {
-				for (Control c= ((Control)e.widget).getParent(); c != null; c= c.getParent()) {
-					c.addPaintListener(this);
-					c.redraw();
-				}
-			}
-			
-			public void focusLost(FocusEvent e) {
-				for (Control c= ((Control)e.widget).getParent(); c != null; c= c.getParent()) {
-					c.removePaintListener(this);
-					c.redraw();
-				}
-				if (fBulb != null) {
-					fBulb.dispose();
-					fBulb= null;
-				}
-			}
-		}
-		
-		control.addFocusListener(new CueHandler());
 	}
 }

@@ -159,7 +159,6 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 
 	private ICompletionProposal[] internalComputeCompletionProposals(int documentOffset, String input) {
 		String cuString= CU_START + input + CU_END;
-		String prefix= input.substring(0, documentOffset);
 		ICompilationUnit cu= fPackageFragment.getCompilationUnit(CU_NAME);
 		try {
 			/*
