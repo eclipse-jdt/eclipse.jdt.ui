@@ -521,13 +521,13 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	}
 
-	private static String createIndent(int level, boolean useSpaces) {
+	private String createIndent(int level, boolean useSpaces) {
 
 		StringBuffer buffer= new StringBuffer();
 
 		if (useSpaces) {
-			int tabWidth= getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
-			int width= level * tabWidth;
+            // Fix for bug 29909 contributed by Nikolay Metchev
+			int width= level * getTabWidth();
 			for (int i= 0; i != width; ++i)
 				buffer.append(' ');
 
@@ -668,7 +668,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	
 	private int getTabWidth() {
 		if (fTabWidth == -1)
-			fTabWidth= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+			// Fix for bug 29909 contributed by Nikolay Metchev
+			fTabWidth= Integer.parseInt(((String)JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE))); 
 		return fTabWidth;
 	}
 	
