@@ -251,19 +251,10 @@ public class ImportsStructure implements IImportsStructure {
 			} else {
 				return sameMatchLenTest(newName, bestName, currName, currMatchLen);
 			}
-		} else if (matchDiff > 0) { // curr has longer match
-			if (matchDiff == 1 && bestName.length() == bestMatchLen && getCharAt(currName, bestMatchLen) == '.') {
-				// best name has a complete match with new and curr only matches longer because of the dot -> best better
-				return false;
-			}
-			return true;
-		} else { // best has longer match
-			if (matchDiff == -1 && currName.length() == currMatchLen && getCharAt(bestName, currMatchLen) == '.') {
-				// curr name has a complete match with new and best only matches longer because of the dot -> curr better
-				return true;
-			}
-			return false;
+		} else {
+			return matchDiff > 0; // curr has longer match
 		}
+
 	}
 	
 	private static int getCommonPrefixLength(String s, String t) {
