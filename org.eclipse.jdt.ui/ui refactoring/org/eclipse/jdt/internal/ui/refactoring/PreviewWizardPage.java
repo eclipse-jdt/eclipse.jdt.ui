@@ -39,6 +39,11 @@ import org.eclipse.jdt.core.ISourceReference;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ViewerPane;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -47,12 +52,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.ViewerPane;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * Presents the changes made by the refactoring.
@@ -122,25 +121,6 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		public void run() {
 			fTreeViewer.revealPrevious();
 		}
-	}
-	
-	private class ShowDetailsAction extends Action {
-		private final String SHOW_QUALIFIED_NAMES= RefactoringMessages.getString("PreviewWizardPage.show_Qualified_Names"); //$NON-NLS-1$
-		private final String HIDE_QUALIFIED_NAMES= RefactoringMessages.getString("PreviewWizardPage.hide_Qualified_Names"); //$NON-NLS-1$
-		public ShowDetailsAction() {
-			setImageDescriptor(JavaPluginImages.DESC_OBJS_PACKAGE);
-			setChecked(true);
-			setToolTipText(HIDE_QUALIFIED_NAMES);
-		}
-		public void run() {
-			boolean isChecked= isChecked();
-			if (isChecked)
-				setToolTipText(HIDE_QUALIFIED_NAMES);
-			else
-				setToolTipText(SHOW_QUALIFIED_NAMES);
-			((ChangeElementLabelProvider)fTreeViewer.getLabelProvider()).setShowQualification(isChecked);
-		}
-		
 	}
 	
 	private IChange fChange;		

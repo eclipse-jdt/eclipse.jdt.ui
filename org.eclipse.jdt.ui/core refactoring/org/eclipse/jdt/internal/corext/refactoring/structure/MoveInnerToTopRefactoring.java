@@ -251,14 +251,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return JdtFlags.isStatic(fType);
 	}
 
-	private RefactoringStatus checkInterfaceTypeName() throws JavaModelException {
-		IType type= Checks.findTypeInPackage(getInputTypePackage(), fType.getElementName());
-		if (type == null || ! type.exists())
-			return null;
-		String message= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.type_exists", new String[]{fType.getElementName(), getInputTypePackage().getElementName()}); //$NON-NLS-1$
-		return RefactoringStatus.createFatalErrorStatus(message);
-	}
-	
 	private IPackageFragment getInputTypePackage() {
 		return fType.getPackageFragment();
 	}
@@ -982,7 +974,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private static class MemberAccessNodeCollector extends ASTVisitor{
 		private final List fMethodAccesses= new ArrayList(0);
 		private final List fFieldAccesses= new ArrayList(0);
-		private final List fTypeAccesses= new ArrayList(0);
 		private final List fSimpleNames= new ArrayList(0);
 		
 		private final IType fType;

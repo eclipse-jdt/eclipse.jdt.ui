@@ -90,10 +90,6 @@ class InlineConstantInputPage extends UserInputWizardPage {
 		});		
 	}
 
-    private void updateRemoveDeclarationState() {
-        fRefactoring.setRemoveDeclaration(fRemove.getSelection());
-    }
-	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#restoreMessage()
 	 */

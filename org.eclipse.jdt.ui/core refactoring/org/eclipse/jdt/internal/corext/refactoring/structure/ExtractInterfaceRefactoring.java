@@ -708,8 +708,4 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private CompilationUnit getAST(ICompilationUnit cu){
 		return fASTMappingManager.getAST(cu);
 	}
-	
-	private ICompilationUnit getCompilationUnit(ASTNode node) {
-		return fASTMappingManager.getCompilationUnit(node);
-	}
 }

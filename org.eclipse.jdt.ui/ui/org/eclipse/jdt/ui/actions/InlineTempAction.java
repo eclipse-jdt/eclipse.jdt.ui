@@ -105,10 +105,6 @@ public class InlineTempAction extends SelectionDispatchAction {
 		return result;
 	}
 	
-	private ICompilationUnit getCompilationUnit(){
-		return SelectionConverter.getInputAsCompilationUnit(fEditor);
-	}	
-	
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */

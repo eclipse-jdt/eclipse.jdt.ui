@@ -25,9 +25,4 @@ public class PromoteTempWizard extends RefactoringWizard {
 	protected void addUserInputPages(){
 		addPage(new PromoteTempInputPage());
 	}
-	
-	private PromoteTempToFieldRefactoring getPromoteTempRefactoring(){
-		return (PromoteTempToFieldRefactoring)getRefactoring();
-	}
-	
 }

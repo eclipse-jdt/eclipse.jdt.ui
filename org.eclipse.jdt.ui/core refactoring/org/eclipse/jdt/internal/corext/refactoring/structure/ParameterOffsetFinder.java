@@ -65,10 +65,6 @@ class ParameterOffsetFinder {
 			}
 		}
 		
-		private void addNodeOffset(ASTNode node){
-			addOffset(node.getStartPosition());
-		}
-		
 		private void addOffset(int offset){
 			fOffsetsFound.add(new Integer(offset));	
 		}

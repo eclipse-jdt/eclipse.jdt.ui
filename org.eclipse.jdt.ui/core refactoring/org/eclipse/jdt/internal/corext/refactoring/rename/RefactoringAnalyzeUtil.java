@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -178,13 +177,4 @@ public class RefactoringAnalyzeUtil {
 	private static Set getOldProblems(CompilationUnit oldCuNode) {
 		return new HashSet(Arrays.asList(ASTNodes.getProblems(oldCuNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.PROBLEMS)));
 	}
-
-	private static Set getOldErrorMessages(CompilationUnit cuNode) {
-		Message[] oldMessages= ASTNodes.getMessages(cuNode, ASTNodes.INCLUDE_ALL_PARENTS);
-		Set messageSet= new HashSet(oldMessages.length);
-		for (int i= 0; i < oldMessages.length; i++) {
-			messageSet.add(oldMessages[i].getMessage());
-		}
-		return messageSet;
-	}	
 }

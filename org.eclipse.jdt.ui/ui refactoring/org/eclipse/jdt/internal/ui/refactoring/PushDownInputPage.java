@@ -13,10 +13,8 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -66,7 +64,6 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class PushDownInputPage extends UserInputWizardPage {
 	
@@ -390,14 +387,6 @@ public class PushDownInputPage extends UserInputWizardPage {
 		return (IStructuredSelection)fTableViewer.getSelection();
 	}
 	
-	private static Set createSet(int[] numbers){
-		Set result= new HashSet(numbers.length * 2);
-		for (int i= 0; i < numbers.length; i++) {
-			result.add(new Integer(numbers[i]));
-		}
-		return result;
-	}
-
 	private void updateUIElements(ISelection preserved) {
 		fTableViewer.refresh();
 		if (preserved != null){

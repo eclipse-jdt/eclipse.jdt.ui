@@ -16,7 +16,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -24,8 +23,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 
 public class ReorgActionFactory {
-	private static final String GROUP_NAME= IContextMenuConstants.GROUP_REORGANIZE;
-
 	private ReorgActionFactory(){
 	}
 	public static SelectionDispatchAction createCutAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction){

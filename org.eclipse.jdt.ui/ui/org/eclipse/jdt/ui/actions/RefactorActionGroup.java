@@ -245,10 +245,6 @@ public class RefactorActionGroup extends ActionGroup {
 		provider.addSelectionChangedListener(action);
 	};
 	
-	private boolean isEditorOwner() {
-		return fIsEditorOwner;
-	}
-	
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
 	 */

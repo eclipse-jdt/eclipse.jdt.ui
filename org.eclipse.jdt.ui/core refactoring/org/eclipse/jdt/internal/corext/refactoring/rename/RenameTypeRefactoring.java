@@ -587,14 +587,6 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		return (ICompilationUnit)imp.getParent().getParent();
 	}
 	
-	private static String getSimpleName(IImportDeclaration imp){
-		String name= imp.getElementName();
-		if (! imp.isOnDemand())
-			return name;
-		else
-			return name.substring(0, name.length() - 2); //remove the '.*' suffix
-	}
-	
 	private void analyzeImportedTypes(IType[] types, RefactoringStatus result, IImportDeclaration imp) throws JavaModelException{
 		for (int i= 0; i < types.length; i++) {
 			//could this be a problem (same package imports)?
@@ -703,21 +695,6 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private static String getFullPath(ICompilationUnit cu) throws JavaModelException{
 		Assert.isTrue(cu.exists());
 		return ResourceUtil.getResource(cu).getFullPath().toString();
-	}
-
-	/* 
-	 * all the analysis that can be done with no AST walking
-	 */
-	private RefactoringStatus analyzeCompilationUnit(ICompilationUnit cu) throws JavaModelException{
-		/* ICompilationUnit.getType expects simple name */
-		String name= fNewName;
-		if (fNewName.indexOf(".") != -1) //$NON-NLS-1$
-			name= fNewName.substring(0, fNewName.indexOf(".")); //$NON-NLS-1$
-		if (! cu.getType(name).exists())
-			return null;
-			
-		return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict2", //$NON-NLS-1$
-																		new Object[]{fNewName, ResourceUtil.getResource(cu).getFullPath()}));
 	}
 	
 	//------------- Changes ---------------

@@ -5,8 +5,6 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -131,17 +129,6 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 		}
 		
 		setPageComplete(validateTextField(text));
-	}
-	private static int getCorrespondingIStatusSeverity(int severity) {
-		if (severity == RefactoringStatus.FATAL)
-			return IStatus.ERROR;
-		if (severity == RefactoringStatus.ERROR)
-			return IStatus.WARNING;
-		if (severity == RefactoringStatus.WARNING)
-			return IStatus.WARNING;
-		if (severity == RefactoringStatus.INFO)
-			return IStatus.INFO;
-		return IStatus.OK;			
 	}
 	
 	/**

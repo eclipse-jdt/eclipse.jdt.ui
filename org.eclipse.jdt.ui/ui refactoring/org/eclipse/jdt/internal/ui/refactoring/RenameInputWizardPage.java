@@ -22,13 +22,12 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.ui.util.RowLayouter;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
-
-import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 abstract class RenameInputWizardPage extends TextInputWizardPage {
 
@@ -189,10 +188,6 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		return RefactoringMessages.getString("RenameInputWizardPage.enter_name"); //$NON-NLS-1$
 	}
 
-	private IRenameRefactoring getRenameRefactoring() {
-		return (IRenameRefactoring)getRefactoring();
-	}
-	
 	private static Button createCheckbox(Composite parent, String title, boolean value, RowLayouter layouter) {
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(title);

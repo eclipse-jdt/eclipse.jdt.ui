@@ -241,10 +241,6 @@ public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchA
 		return true;
 	}
 	
-	private  int getElementType(ISourceReference ref){
-		return ((IJavaElement)ref).getElementType();
-	}
-	
 	private  boolean canPasteAfterImportContainerOrDeclaration(int type){
 		if (type == IJavaElement.IMPORT_CONTAINER)
 			return true;

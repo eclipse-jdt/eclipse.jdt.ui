@@ -81,8 +81,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
@@ -93,7 +93,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 class UseSupertypeWherePossibleUtil {
 
@@ -756,12 +755,6 @@ class UseSupertypeWherePossibleUtil {
 
 	private IPackageFragment getInputClassPackage() {
 		return fInputClass.getPackageFragment();
-	}
-
-	private TextEdit createTypeUpdateEdit(SearchResult searchResult) {
-		int offset= searchResult.getStart();
-		int length= searchResult.getEnd() - searchResult.getStart();
-		return new UpdateTypeReferenceEdit(offset, length, fSuperTypeName, fInputClass.getElementName());
 	}
 
 	private TextEdit createTypeUpdateEdit(ISourceRange sourceRange) {

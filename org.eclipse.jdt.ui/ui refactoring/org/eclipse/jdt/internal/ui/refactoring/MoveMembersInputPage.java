@@ -20,7 +20,6 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
@@ -28,13 +27,14 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 class MoveMembersInputPage extends UserInputWizardPage {
 
@@ -130,18 +130,6 @@ class MoveMembersInputPage extends UserInputWizardPage {
 	
 	private IJavaSearchScope createWorkspaceSourceScope(){
 		return SearchEngine.createJavaSearchScope(new IJavaElement[]{getMoveRefactoring().getDeclaringType().getJavaProject()}, true);
-	}
-	
-	private static boolean canMoveToTypesDeclaredIn(IPackageFragmentRoot root) throws JavaModelException{
-		if (root.isArchive())	
-			return false;
-		if (! root.isConsistent())	
-			return false;
-		if (root.isExternal())	
-			return false;
-		if (root.isReadOnly())	
-			return false;
-		return true;
 	}
 	
 	private void openTypeSelectionDialog(){

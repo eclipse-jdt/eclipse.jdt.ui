@@ -131,7 +131,6 @@ public class RefactoringStatusViewer extends SashForm {
 	
 	private RefactoringStatus fStatus;
 	private TableViewer fTableViewer;
-	private Label fContextLabel;
 	private PageBook fContextViewerContainer;
 	private ViewerPane fContextViewerPane;
 	private Image fPaneImage;
@@ -142,8 +141,6 @@ public class RefactoringStatusViewer extends SashForm {
 	private NextProblem fNextProblem;
 	private PreviousProblem fPreviousProblem;
 	
-	private static final IDocument EMPTY_DOCUMENT= new Document(""); //$NON-NLS-1$
-		
 	public RefactoringStatusViewer(Composite parent, int style) {
 		super(parent, style | SWT.VERTICAL);
 		createContents();

@@ -28,7 +28,6 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContext;
   */
 public class CreateCompilationUnitChange extends Change {
 
-	private String fName;
 	private ICompilationUnit fCompilationUnit;
 	private boolean fIsClass;
 	private String[] fSuperTypes;

@@ -233,7 +233,6 @@ public class InlineConstantRefactoring extends Refactoring {
 				
 				//cache:
 				private Set fNamesDeclaredLocallyAtNewLocation;
-				private Boolean fInitializerInSameClassOrInterfaceAsNewLocation;
 				
 				public InitializerTraversal(Expression initializer, Expression newLocation, ICompilationUnit newLocationCU, RefactoringStatus status) {
 					fStatus= status;
@@ -284,14 +283,6 @@ public class InlineConstantRefactoring extends Refactoring {
 						return true;
 					
 					return mayBeShadowedByLocalDeclaration(memberName);
-				}
-				
-				private boolean initializerInSameClassOrInterfaceAsNewLocation() {
-					if(fInitializerInSameClassOrInterfaceAsNewLocation == null)	
-						fInitializerInSameClassOrInterfaceAsNewLocation=
-							new Boolean(areInSameClassOrInterface(fInitializer, fNewLocation));
-							
-					return fInitializerInSameClassOrInterfaceAsNewLocation.booleanValue(); 
 				}
 				
 				private static boolean areInSameClassOrInterface(ASTNode one, ASTNode other) {

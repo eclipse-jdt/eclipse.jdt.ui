@@ -29,7 +29,6 @@ public class DeleteFileChange extends Change {
 
 	private IPath fPath;
 	private String fSource;
-	private IChange fUndoChange;
 	
 	public DeleteFileChange(IFile file){
 		Assert.isNotNull(file, "file"); //$NON-NLS-1$

@@ -26,10 +26,6 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 		super(oldPackage.getHandleIdentifier(), newPackage.getHandleIdentifier(), oldPackage.getCompilationUnit(cuName).getHandleIdentifier());
 	}
 	
-	private static boolean hasCu(IPackageFragment pack, String newName){
-		return pack.getCompilationUnit(newName).exists();
-	}
-	
 	/* non java-doc
 	 * @see IChange#getName()
 	 */

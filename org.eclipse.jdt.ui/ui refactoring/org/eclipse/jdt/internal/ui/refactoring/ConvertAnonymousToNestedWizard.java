@@ -25,9 +25,4 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 	protected void addUserInputPages(){
 		addPage(new ConvertAnonymousToNestedInputPage());
 	}
-	
-	private ConvertAnonymousToNestedRefactoring getPromoteTempRefactoring(){
-		return (ConvertAnonymousToNestedRefactoring)getRefactoring();
-	}
-	
 }

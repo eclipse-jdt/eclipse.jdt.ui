@@ -502,19 +502,6 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return manager;
 	}
 	
-	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws CoreException{
-		pm.beginTask("", 2); //$NON-NLS-1$
-		TextChangeManager manager= new TextChangeManager();
-		
-		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching_text")); //$NON-NLS-1$
-		addTextMatches(manager, new SubProgressMonitor(pm, 1));
-		
-		addReferenceUpdates(manager, new SubProgressMonitor(pm, 1));
-		
-		//putting it together
-		builder.addAll(manager.getAllChanges());
-	}
-	
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", fOccurrences.length); //$NON-NLS-1$
 		for (int i= 0; i < fOccurrences.length; i++){

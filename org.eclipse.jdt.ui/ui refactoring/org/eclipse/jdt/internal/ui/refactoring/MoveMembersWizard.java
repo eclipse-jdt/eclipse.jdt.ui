@@ -25,8 +25,4 @@ public class MoveMembersWizard extends RefactoringWizard {
 		setPageTitle(RefactoringMessages.getString("MoveMembersWizard.page_title")); //$NON-NLS-1$
 		addPage(new MoveMembersInputPage());
 	}
-	
-	private MoveStaticMembersRefactoring getMoveMembersRefactoring(){
-		return (MoveStaticMembersRefactoring)getRefactoring();
-	}
 }

@@ -43,8 +43,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 public class RefactoringSaveHelper {
 
 	private boolean fFilesSaved;
-	private boolean fAutobuildState;
-	
+
 	public RefactoringSaveHelper() {
 		super();
 	}

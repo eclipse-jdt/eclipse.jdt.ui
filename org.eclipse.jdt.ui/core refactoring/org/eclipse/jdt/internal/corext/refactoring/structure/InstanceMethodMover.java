@@ -1828,10 +1828,6 @@ class InstanceMethodMover {
 			Assert.isTrue(fInlineDelegator);
 	}
 	
-	private static ICompilationUnit getCUDeclaringClass(ITypeBinding clazz, IJavaProject dependentProject) throws JavaModelException {
-		return JavaModelUtil.toWorkingCopy(getModelClass(clazz, dependentProject).getCompilationUnit());
-	}
-	
 	private static IType getModelClass(ITypeBinding clazz, IJavaProject dependentProject) throws JavaModelException {
 		Assert.isTrue(clazz.isClass());
 		IType modelClass= (IType) Binding2JavaModel.find(clazz, dependentProject);
