@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 public class PromoteTempToFieldTests extends RefactoringTest{
@@ -94,16 +95,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 		return createCU(pack, getSimpleEnablementTestFileName(), getFileContents(getEnablementTestFileName()));
 	}
 	
-    private PromoteTempToFieldRefactoring getRefactoringObject(ISourceRange selection, ICompilationUnit cu, String newName, boolean declareStatic, boolean declareFinal, int initializeIn, int accessModifier) {
-        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
-        ref.setFieldName(newName);
-        ref.setDeclareFinal(declareFinal);
-        ref.setDeclareStatic(declareStatic);
-        ref.setInitializeIn(initializeIn);
-        ref.setAccessModifier(accessModifier);
-        return ref;
-    }
-
 	private void passHelper(int startLine, int startColumn, int endLine, int endColumn, 
 						  String newName,
 						  boolean declareStatic,
@@ -113,11 +104,22 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 						  	
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);						  	
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-        PromoteTempToFieldRefactoring ref= getRefactoringObject(selection, cu, newName, declareStatic, declareFinal, initializeIn, accessModifier);
+        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
 		
-		RefactoringStatus result= performRefactoring(ref);
-		assertEquals("precondition was supposed to pass", null, result);
+		RefactoringStatus preconditionResult= ref.checkPreconditions(new NullProgressMonitor());
+		if (preconditionResult.isOK())
+			preconditionResult= null;
+		assertEquals("precondition was supposed to pass", null, preconditionResult);
 		
+        ref.setFieldName(newName);
+        ref.setDeclareFinal(declareFinal);
+        ref.setDeclareStatic(declareStatic);
+        ref.setInitializeIn(initializeIn);
+        ref.setVisibility(accessModifier);
+
+		IChange change= ref.createChange(new NullProgressMonitor());
+		performChange(change);
+        		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
@@ -135,10 +137,19 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 						  int expectedSeverity) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);						  	
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-        PromoteTempToFieldRefactoring ref= getRefactoringObject(selection, cu, newName, declareStatic, declareFinal, initializeIn, accessModifier);
+        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
 		
-		RefactoringStatus result= performRefactoring(ref);
-		assertNotNull("precondition was supposed to fail", result);
+		RefactoringStatus result= ref.checkActivation(new NullProgressMonitor());	
+        ref.setFieldName(newName);
+        ref.setDeclareFinal(declareFinal);
+        ref.setDeclareStatic(declareStatic);
+        ref.setInitializeIn(initializeIn);
+        ref.setVisibility(accessModifier);
+		result.merge(ref.checkInput(new NullProgressMonitor()));
+		if (result.isOK())
+			result= null;
+		assertNotNull("precondition was supposed to fail",result);
+
 		assertEquals("incorrect severity:", expectedSeverity, result.getSeverity());
 	}
 
@@ -155,15 +166,21 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
   						  boolean expectedCanEnableInitInConstructors) throws Exception{
 		ICompilationUnit cu= createCUfromEnablementTestFile(getPackageP());
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-        PromoteTempToFieldRefactoring ref= getRefactoringObject(selection, cu, newName, declareStatic, declareFinal, initializeIn, accessModifier);
+        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength());
 		RefactoringStatus result= ref.checkActivation(new NullProgressMonitor());
+		ref.setFieldName(newName);
+        ref.setDeclareFinal(declareFinal);
+        ref.setDeclareStatic(declareStatic);
+        ref.setInitializeIn(initializeIn);
+        ref.setVisibility(accessModifier);
+		
 		assertEquals("activation checking was supposed to pass", RefactoringStatus.OK, result.getSeverity());
 		
-		assertEquals("incorrect in-constructor enablement", expectedCanEnableInitInConstructors, ref.canEnableSettingDeclareInConstructors());
-		assertEquals("incorrect in-field enablement", expectedCanEnableInitInField, ref.canEnableSettingDeclareInFieldDeclaration());
-		assertEquals("incorrect in-method enablement", expectedCanEnableInitInMethod, ref.canEnableSettingDeclareInMethod());
-		assertEquals("incorrect static enablement", expectedCanEnableSettingStatic, ref.canEnableSettingStatic());
-		assertEquals("incorrect final enablement", expectedCanEnableSettingFinal, ref.canEnableSettingFinal());
+		assertEquals("incorrect in-constructor enablement", expectedCanEnableInitInConstructors, 	ref.canEnableSettingDeclareInConstructors());
+		assertEquals("incorrect in-field enablement", 		expectedCanEnableInitInField, 			ref.canEnableSettingDeclareInFieldDeclaration());
+		assertEquals("incorrect in-method enablement", 		expectedCanEnableInitInMethod, 			ref.canEnableSettingDeclareInMethod());
+		assertEquals("incorrect static enablement", 		expectedCanEnableSettingStatic, 		ref.canEnableSettingStatic());
+		assertEquals("incorrect final enablement", 			expectedCanEnableSettingFinal, 			ref.canEnableSettingFinal());
 	}
 	private void enablementHelper1(int startLine, int startColumn, int endLine, int endColumn,
 						  boolean expectedCanEnableSettingFinal,
@@ -271,6 +288,23 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
         boolean expectedCanEnableSettingStatic			= false;
         boolean expectedCanEnableSettingFinal			= false;
 		enablementHelper1(5, 13, 5, 14, expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
+	}
+
+	public void testEnablement8() throws Exception{
+        boolean expectedCanEnableInitInConstructors	= true;
+        boolean expectedCanEnableInitInMethod			= true;
+        boolean expectedCanEnableInitInField			= true;
+        boolean expectedCanEnableSettingStatic			= false;
+        boolean expectedCanEnableSettingFinal			= true;
+        
+        String newName= "i";
+		boolean declareStatic = false;
+	  	boolean declareFinal= false;
+	  	int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
+	  	int accessModifier= Modifier.PRIVATE;
+        
+		enablementHelper(4, 13, 4, 14, newName, declareStatic, declareFinal, initializeIn, accessModifier,
+					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 	
 	///---- test failing preconditions --------------
@@ -431,5 +465,13 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
         boolean declareFinal= false;
         boolean declareStatic= true;
 		passHelper(5, 19, 5, 20, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+
+	public void test16() throws Exception{
+        int accessModifier= Modifier.PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
+        boolean declareFinal= false;
+        boolean declareStatic= false;
+		passHelper(10, 13, 10, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 }
