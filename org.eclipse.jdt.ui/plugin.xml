@@ -76,7 +76,6 @@
 	<decorator
 		label="%OverrideIndicatorLabelDecorator.label"
 		lightweight="true"
-		quadrant="BOTTOM_RIGHT"		
 		state="true"
 		class="org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator"
 		id="org.eclipse.jdt.ui.override.decorator">
