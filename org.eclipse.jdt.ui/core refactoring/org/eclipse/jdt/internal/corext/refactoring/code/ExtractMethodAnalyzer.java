@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.List;
 
