@@ -179,7 +179,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				IDocument d= createCompilationUnitDocument(c);
 				IAnnotationModel m= createCompilationUnitAnnotationModel(element);
 				_FileSynchronizer f= new _FileSynchronizer(input);
-				f.install();
 				BufferSynchronizer b= new BufferSynchronizer(d, c);
 				b.install();
 				
@@ -331,9 +330,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					
 					fireElementContentAboutToBeReplaced(element);
 					
+					removeUnchangedElementListeners(element, info);
 					info.fDocument.set(original.getSource());
 					info.fCanBeSaved= false;
-					info.fDocument.addDocumentListener(info);
+					addUnchangedElementListeners(element, info);
 					
 					fireElementContentReplaced(element);
 					
