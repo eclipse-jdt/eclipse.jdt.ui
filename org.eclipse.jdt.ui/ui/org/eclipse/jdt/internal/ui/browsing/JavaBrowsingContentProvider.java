@@ -115,7 +115,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			List topLevelClassFile= new ArrayList();
 			for (int i= 0; i < classFiles.length; i++) {
 				IType type= classFiles[i].getType();
-				if (type != null && type.getDeclaringType() == null)
+				if (type != null && type.getDeclaringType() == null && !type.isAnonymous() && !type.isLocal())
 					topLevelClassFile.add(classFiles[i]);
 			}
 			sourceRefs= (ISourceReference[])topLevelClassFile.toArray(new ISourceReference[topLevelClassFile.size()]);
