@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -226,15 +227,25 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
     
     private void modifyConstructorCall(ASTRewrite rewrite) {
-    	rewrite.markAsReplaced(getClassInstanceCreation(), createNewClassInstanceCreation());
+    	rewrite.markAsReplaced(getClassInstanceCreation(), createNewClassInstanceCreation(rewrite));
     }
     
-    private ASTNode createNewClassInstanceCreation() {
+    private ASTNode createNewClassInstanceCreation(ASTRewrite rewrite) {
     	ClassInstanceCreation newClassCreation= getAST().newClassInstanceCreation();
     	newClassCreation.setAnonymousClassDeclaration(null);
 //    	newClassCreation.setExpression(expression);//XXX ???
 		newClassCreation.setName(getAST().newSimpleName(fClassName));
+		copyArguments(rewrite, newClassCreation);
         return newClassCreation;
+    }
+    
+    private void copyArguments(ASTRewrite rewrite, ClassInstanceCreation newClassCreation) {
+    	for (Iterator iter= getClassInstanceCreation().arguments().iterator(); iter.hasNext();) {
+            Expression arg= (Expression) iter.next();
+            Expression copy= (Expression)rewrite.createCopy(arg);
+            rewrite.markAsInserted(copy);
+            newClassCreation.arguments().add(copy);
+        }
     }
     
     private void addNestedClass(ASTRewrite rewrite) throws JavaModelException {
