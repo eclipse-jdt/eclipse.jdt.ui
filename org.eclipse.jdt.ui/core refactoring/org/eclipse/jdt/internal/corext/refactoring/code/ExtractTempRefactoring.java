@@ -35,6 +35,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -53,6 +55,7 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -260,6 +263,8 @@ public class ExtractTempRefactoring extends Refactoring {
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			
+			result.merge(checkMatchingFragments());
+			
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
 			change.addTextEdit("", getAllEdits());//$NON-NLS-1$
 			String newCuSource= change.getPreviewContent();
@@ -274,6 +279,19 @@ public class ExtractTempRefactoring extends Refactoring {
 		} catch (CoreException e){
 			throw new JavaModelException(e);	
 		} 	
+	}
+
+	private RefactoringStatus checkMatchingFragments() throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		IASTFragment[] matchingFragments= getMatchingFragments();
+		for (int i= 0; i < matchingFragments.length; i++) {
+			ASTNode node= matchingFragments[i].getAssociatedNode();
+			if (isLeftValue(node)){
+				String msg= "Selected expression is assigned to. Extracting may change the program's semantics";
+				result.addWarning(msg, JavaSourceContext.create(fCu, node));
+			}
+		}
+		return result;
 	}
 	
 	public String getTempSignaturePreview() throws JavaModelException{
@@ -552,14 +570,16 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private IASTFragment[] getFragmentsToReplace() throws JavaModelException {
+		return retainOnlyReplacableMatches(getMatchingFragments());
+	}
+	
+	private IASTFragment[] getMatchingFragments() throws JavaModelException {
 		if (fReplaceAllOccurrences){
 			IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(getSelectedMethodNode())
-			                                             .getSubFragmentsMatching(getSelectedExpression());
-			return retainOnlyReplacableMatches(allMatches);
-		} else if (canReplace(getSelectedExpression()))
+														 .getSubFragmentsMatching(getSelectedExpression());
+			return allMatches;					 
+		} else 
 			return new IASTFragment[]{getSelectedExpression()};	
-		else	
-			return new IASTFragment[0];
 	}
 
     private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
@@ -573,14 +593,31 @@ public class ExtractTempRefactoring extends Refactoring {
 
     private static boolean canReplace(IASTFragment fragment) {
     	ASTNode node= fragment.getAssociatedNode();
-    	if (node.getParent() instanceof VariableDeclarationFragment){
-    		VariableDeclarationFragment vdf= (VariableDeclarationFragment)node.getParent();
+    	ASTNode parent= node.getParent();
+		if (parent instanceof VariableDeclarationFragment){
+    		VariableDeclarationFragment vdf= (VariableDeclarationFragment)parent;
     		if (node.equals(vdf.getName()))
     			return false;
     	}
-    	if (node.getParent() instanceof ExpressionStatement)
+    	if (parent instanceof ExpressionStatement)
     		return false;	
+    	if (isLeftValue(parent))
+			return false;	
         return true;
+    }
+    
+    private static boolean isLeftValue(ASTNode node){
+		ASTNode parent= node.getParent();
+		if (parent instanceof Assignment){
+			Assignment assignment= (Assignment)parent;
+			if (assignment.getLeftHandSide() == node)
+				return true;
+		}
+		if (parent instanceof PostfixExpression)
+			return true;
+		if (parent instanceof PrefixExpression)
+			return true;
+		return false;	
     }
 		
 	private MethodDeclaration getSelectedMethodNode() throws JavaModelException {

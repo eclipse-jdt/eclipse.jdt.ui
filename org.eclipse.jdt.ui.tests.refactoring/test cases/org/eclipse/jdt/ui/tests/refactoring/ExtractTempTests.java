@@ -506,4 +506,14 @@ public class ExtractTempTests extends RefactoringTest {
 		failHelper1(4, 15, 4, 20, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 	
+	public void testFail27() throws Exception{
+//		printTestDisabledMessage("test for bug 29513");
+		failHelper1(7, 13, 7, 24, true, false, "temp", RefactoringStatus.WARNING);
+	}	
+
+	public void testFail28() throws Exception{
+//		printTestDisabledMessage("test for bug 29513");
+		failHelper1(7, 17, 7, 28, true, false, "temp", RefactoringStatus.WARNING);
+	}	
+
 }
