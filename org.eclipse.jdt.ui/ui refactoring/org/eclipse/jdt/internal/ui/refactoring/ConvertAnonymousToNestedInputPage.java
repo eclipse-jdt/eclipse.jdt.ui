@@ -49,7 +49,6 @@ public class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
 		
 		addVisibilityControl(result);
 		addFieldNameField(result);
-		addDeclareStaticCheckbox(result);
 		addDeclareFinalCheckbox(result);
 		
 		setPageComplete(false);
@@ -89,22 +88,6 @@ public class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
         visibilityComposite.setLayoutData(gd);
     }
 	
-	 public void addDeclareStaticCheckbox(Composite result) {
-        GridData gd;
-        fDeclareStaticCheckbox= new Button(result, SWT.CHECK);
-        fDeclareStaticCheckbox.setEnabled(getConvertRefactoring().canEnableSettingStatic());
-        fDeclareStaticCheckbox.setSelection(getConvertRefactoring().getDeclareStatic());
-        fDeclareStaticCheckbox.setText("D&eclare class as 'static'");
-        gd= new GridData(GridData.FILL_HORIZONTAL);
-        gd.horizontalSpan= 2;
-        fDeclareStaticCheckbox.setLayoutData(gd);
-        fDeclareStaticCheckbox.addSelectionListener(new SelectionAdapter(){
-        	public void widgetSelected(SelectionEvent e) {
-        		getConvertRefactoring().setDeclareStatic(fDeclareStaticCheckbox.getSelection());
-            }
-        });
-    }
-
 	 public void addDeclareFinalCheckbox(Composite result) {
         GridData gd;
         fDeclareFinalCheckbox= new Button(result, SWT.CHECK);
