@@ -71,6 +71,10 @@ public class ExperimentalResultCollector extends ResultCollector {
 		
 		// handle empty code completion
 		if ((completionName.length == 0) || ((completionName.length == 1) && completionName[0] == ')'))
+			return original;
+		
+		// use original code for 0-argument methods
+		if (parameterNames.length == 0)
 			return original;			
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
@@ -78,6 +82,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS)) {
 			return new ParameterGuessingProposal(
 				start, end - start, original.getImage(), original.getDisplayString(), fViewer, relevance,
+				completionName,
 				name, parameterTypePackageNames, parameterTypeNames, parameterNames, 
 				fCodeAssistOffset, fCompilationUnit);
 				
