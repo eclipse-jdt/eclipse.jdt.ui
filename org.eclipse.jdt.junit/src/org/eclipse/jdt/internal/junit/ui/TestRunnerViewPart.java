@@ -271,11 +271,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 
 	private void restoreLayoutState(IMemento memento) {
 		Integer page= memento.getInteger(TAG_PAGE);
-		fTabFolder.setSelection(page.intValue());
+		if (page != null)
+			fTabFolder.setSelection(page.intValue());
 		
 		Integer ratio= memento.getInteger(TAG_RATIO);
 		if (ratio != null) 
-			fSashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue() });
+			fSashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue()} );
 	}
 	
 	/**
