@@ -383,4 +383,13 @@ public class JavaTextTools {
 	public void setupDocument(IDocument document, String partitioning) {
 		setupJavaDocumentPartitioner(document, partitioning);
 	}
+
+	/**
+	 * Returns this text tool's preference store.
+	 * 
+	 * @return the preference store
+	 */
+	public IPreferenceStore getPreferenceStore() {
+		return fPreferenceStore;
+	}
 }
