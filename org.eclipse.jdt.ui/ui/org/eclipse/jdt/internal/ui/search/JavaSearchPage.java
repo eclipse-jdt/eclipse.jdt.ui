@@ -501,7 +501,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				return determineInitValuesFrom(element);
 			} else {
 				IWorkbenchAdapter adapter= (IWorkbenchAdapter)((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
-				return new SearchPatternData(TYPE, REFERENCES, adapter.getLabel(o), null);
+				if (adapter != null)
+					return new SearchPatternData(TYPE, REFERENCES, adapter.getLabel(o), null);
 			}
 		}
 		return null;
