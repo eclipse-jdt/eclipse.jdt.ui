@@ -164,7 +164,8 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		createSuperInterfacesControls(composite, nColumns);
 				
 		createMethodStubSelectionControls(composite, nColumns);
-		
+		createAnnotationControls(composite, nColumns, fMethodStubsButtons.getSelectionButton(2));
+
 		createCommentControls(composite, nColumns);
 		enableCommentControl(true);
 		boolean annotations= false;
@@ -198,6 +199,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		
 		Control buttonGroup= fMethodStubsButtons.getSelectionButtonsGroup(composite);
 		LayoutUtil.setHorizontalSpan(buttonGroup, nColumns - 1);	
+		DialogField.createEmptySpace(composite);
 	}
 	
 	/**
