@@ -337,6 +337,12 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		helper2("tee", "thing");
 	}
 	
+	public void test23() throws Exception{
+		fRenameGetter= true;
+		fRenameSetter= true;
+		helper2();
+	}
+	
 //--- end test 1.5 features. ---
 	
 	public void testBug5821() throws Exception{
@@ -408,6 +414,12 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		fRenameSetter= true;
 		fRenameGetter= true;
 		helper2("count", "number");
+	}
+	
+	public void testEnumField() throws Exception {
+		fRenameSetter= true;
+		fRenameGetter= true;
+		helper2("buddy", "other");
 	}
 	
 }
