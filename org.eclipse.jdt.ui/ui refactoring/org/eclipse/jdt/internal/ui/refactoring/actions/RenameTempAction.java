@@ -16,25 +16,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 
-/**
- * Extracts a new method from the text editor's text selection by using the
- * extract method refactoing.
- */
 public class RenameTempAction extends TextSelectionBasedRefactoringAction{
 
-	/**
-	 * Creates a new extract method action when used as an action delegate.
-	 */
 	public RenameTempAction() {
 		super("Rename Local Variable");
 	}
 	
-	/**
-	 * Creates a new extract method action for the given text editor. The text
-	 * editor's selection marks the set of statements to be extracted into a new
-	 * method.
-	 * @param editor the text editor.
-	 */
 	public RenameTempAction(JavaEditor editor) {
 		this();
 		setEditor(editor);
