@@ -160,6 +160,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.CASE_SENSITIVITY),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ADD_IMPORT),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.FILL_METHOD_ARGUMENTS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.GUESS_METHOD_ARGUMENTS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_STRINGS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_BRACKETS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_JAVADOCS),
@@ -240,6 +241,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fBackgroundColorButton;
 	private Button fBoldCheckBox;
 	private Button fAddJavaDocTagsButton;
+	private Button fGuessMethodArgumentsButton;
 	private SourceViewer fPreviewViewer;
 	private Color fBackgroundColor;
     private Control fAutoInsertDelayText;
@@ -356,6 +358,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
 		store.setDefault(ContentAssistPreference.ADD_IMPORT, true);
 		store.setDefault(ContentAssistPreference.FILL_METHOD_ARGUMENTS, false);
+		store.setDefault(ContentAssistPreference.GUESS_METHOD_ARGUMENTS, true);
 
 		store.setDefault(CompilationUnitEditor.CLOSE_STRINGS, true);
 		store.setDefault(CompilationUnitEditor.CLOSE_BRACKETS, true);
@@ -766,27 +769,30 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addCheckBox(composite, label, CompilationUnitEditor.SKIP_CLOSING_BRACKETS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
-		final Button button= addCheckBox(composite, label, CompilationUnitEditor.CLOSE_JAVADOCS, 1);
+		Button button= addCheckBox(composite, label, CompilationUnitEditor.CLOSE_JAVADOCS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
 		fAddJavaDocTagsButton= addCheckBox(composite, label, CompilationUnitEditor.ADD_JAVADOC_TAGS, 1);
-
-		// indent this button
+		createDependency(button, fAddJavaDocTagsButton);
+	
+		return composite;
+	}
+	
+	private static void indent(Control control) {
 		GridData gridData= new GridData();
 		gridData.horizontalIndent= 20;
-		fAddJavaDocTagsButton.setLayoutData(gridData);
-
-		final Button button2= fAddJavaDocTagsButton;
-
-		button.addSelectionListener(new SelectionListener() {
+		control.setLayoutData(gridData);		
+	}
+	
+	private static void createDependency(final Button master, final Control slave) {
+		indent(slave);
+		master.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				button2.setEnabled(button.getSelection());
+				slave.setEnabled(master.getSelection());
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {}
-		});
-		
-		return composite;
+		});		
 	}
 
 	private Control createContentAssistPage(Composite parent) {
@@ -808,7 +814,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ADD_IMPORT, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, ContentAssistPreference.FILL_METHOD_ARGUMENTS, 0);
+		Button button= addCheckBox(contentAssistComposite, label, ContentAssistPreference.FILL_METHOD_ARGUMENTS, 0);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.guessArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
+		fGuessMethodArgumentsButton= addCheckBox(contentAssistComposite, label, ContentAssistPreference.GUESS_METHOD_ARGUMENTS, 0);
+		createDependency(button, fGuessMethodArgumentsButton);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
 		final Button autoactivation= addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION, 0);
@@ -943,10 +953,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		boolean closeJavaDocs= fOverlayStore.getBoolean(CompilationUnitEditor.CLOSE_JAVADOCS);
 		fAddJavaDocTagsButton.setEnabled(closeJavaDocs);
+
+		boolean guessMethodArguments= fOverlayStore.getBoolean(ContentAssistPreference.GUESS_METHOD_ARGUMENTS);
+		fGuessMethodArgumentsButton.setEnabled(guessMethodArguments);
 		
         updateAutoactivationControls();
 	}
-
+	
     private void updateAutoactivationControls() {
         boolean autoactivation= fOverlayStore.getBoolean(ContentAssistPreference.AUTOACTIVATION);
         fAutoInsertDelayText.setEnabled(autoactivation);
