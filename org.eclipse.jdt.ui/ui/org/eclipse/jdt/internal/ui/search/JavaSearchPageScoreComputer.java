@@ -5,8 +5,6 @@ package org.eclipse.jdt.internal.ui.search;
  * WebSphere Studio Workbench
  * (c) Copyright IBM Corp 1999, 2000
  */
-import org.omg.CORBA.UNKNOWN;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 

@@ -1,4 +1,13 @@
 package org.eclipse.jdt.internal.ui.search;
+
+/*
+ * Licensed Materials - Property of IBM,
+ * WebSphere Studio Workbench
+ * (c) Copyright IBM Corp 1999, 2000
+ */
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,12 +71,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
-
-/*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
- */
 
 public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
 
@@ -380,7 +383,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 						if (fJavaElement != null)
 							return determineInitValuesFrom(fJavaElement);
 					}
-					return new SearchPatternData(TYPE, REFERENCES, ts.getText(), null);
 				}
 			}
 		}
@@ -495,8 +497,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private SearchPatternData trySimpleTextSelection(ISelection selection) {
 		SearchPatternData result= null;
 		if (selection instanceof ITextSelection) {
-			ITextSelection ts= (ITextSelection)selection;
-			result= new SearchPatternData(TYPE, REFERENCES, ts.getText(), null);
+			BufferedReader reader= new BufferedReader(new StringReader(((ITextSelection)selection).getText()));
+			String text;
+			try {
+				text= reader.readLine();
+			} catch (IOException ex) {
+				text= "";
+			}
+			result= new SearchPatternData(TYPE, REFERENCES, text, null);
 		}
 		return result;
 	}

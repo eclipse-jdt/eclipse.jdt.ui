@@ -92,7 +92,7 @@ public abstract class ElementSearchAction extends Action {
 		}
 		IWorkspaceDescription workspaceDesc= JavaPlugin.getWorkspace().getDescription();
 		boolean isAutoBuilding= workspaceDesc.isAutoBuilding();
-		if (isAutoBuilding)
+		if (isAutoBuilding) {
 			// disable auto-build during search operation
 			workspaceDesc.setAutoBuilding(false);
 			try {
@@ -100,14 +100,15 @@ public abstract class ElementSearchAction extends Action {
 			}
 			catch (CoreException ex) {
 				ExceptionHandler.handle(ex, shell, bundle, "Search.Error.setDescription.");
-			}				
+			}
+		}
 		try {
 			new ProgressMonitorDialog(shell).run(true, true, op);
 		} catch (InvocationTargetException ex) {
 			ExceptionHandler.handle(ex, shell, bundle, "Search.Error.search.");
 		} catch(InterruptedException e) {
 		} finally {
-			if (isAutoBuilding)
+			if (isAutoBuilding) {
 				// enable auto-building again
 				workspaceDesc= JavaPlugin.getWorkspace().getDescription();
 				workspaceDesc.setAutoBuilding(true);
@@ -116,7 +117,8 @@ public abstract class ElementSearchAction extends Action {
 				}
 				catch (CoreException ex) {
 					ExceptionHandler.handle(ex, shell, bundle, "Search.Error.setDescription.");
-				}				
+				}
+			}				
 		}
 	}
 
