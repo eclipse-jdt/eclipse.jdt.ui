@@ -165,11 +165,15 @@ public class QuickFixTest extends TestCase {
 
 
 	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot) {
-		return collectCorrections(cu, astRoot, 1);
+		return collectCorrections(cu, astRoot, 1, null);
+	}
+	
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) {
+		return collectCorrections(cu, astRoot, nProblems, null);
 	}
 
 
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) {
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) {
 		IProblem[] problems= astRoot.getProblems();
 		if (problems.length != nProblems) {
 			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
@@ -182,7 +186,7 @@ public class QuickFixTest extends TestCase {
 			assertTrue(buf.toString(), false);
 
 		}
-		return collectCorrections(cu, problems[0]);
+		return collectCorrections(cu, problems[0], context);
 	}
 	
 	protected static final ArrayList collectCorrections2(ICompilationUnit cu, int nProblems) throws JavaModelException {
@@ -218,16 +222,17 @@ public class QuickFixTest extends TestCase {
 			assertTrue(buf.toString(), false);
 
 		}
-		return collectCorrections(cu, problems[0]);
+		return collectCorrections(cu, problems[0], null);
 	}
-		
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, IProblem curr) {
-			
+	
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, IProblem curr, IInvocationContext context) {
 		int offset= curr.getSourceStart();
 		int length= curr.getSourceEnd() + 1 - offset;
+		if (context == null) {
+			context= new AssistContext(cu, offset, length);
+		}
 		
 		ProblemLocation problem= new ProblemLocation(offset, length, curr.getID(), curr.getArguments(), true);
-		AssistContext context= new AssistContext(cu, offset, length);
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  new ProblemLocation[] { problem }, proposals);
@@ -237,8 +242,7 @@ public class QuickFixTest extends TestCase {
 		
 		return proposals;
 	}
-
-
+	
 	protected static final ArrayList collectAssists(IInvocationContext context, Class[] filteredTypes) {
 		ArrayList proposals= new ArrayList();
 		JavaCorrectionProcessor.collectAssists(context, null, proposals);
