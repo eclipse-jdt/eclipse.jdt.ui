@@ -227,10 +227,6 @@ class InstanceMethodMover {
 			return getModelClass(getReceiverClass(), fDependentProject);
 		}
 		
-		private boolean isDeclaredInMyCU(Method method) throws JavaModelException {
-			return JavaModelUtil.toWorkingCopy(getReceiverClassCU()).equals(JavaModelUtil.toWorkingCopy(method.getDeclaringCU()));
-		}
-		
 		private TextBufferPortion getNewMethodDeclarationText(Method method, String newMethodName, String originalReceiverParameterName, List allTypesUsed) throws CoreException {
 			Method.MethodEditSession methodEditSession= method.createEditSession();
 			methodEditSession.changeMethodName(newMethodName);
