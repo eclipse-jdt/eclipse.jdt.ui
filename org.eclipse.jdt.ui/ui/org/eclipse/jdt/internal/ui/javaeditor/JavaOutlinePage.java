@@ -621,7 +621,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						IResource resource= getUnderlyingResource();
 						if (resource != null) {
 							for (int i= 0; i < changed.length; i++) {
-								if (changed[i].equals(resource)) {
+								if (changed[i] != null && changed[i].equals(resource)) {
 									// change event to a full refresh
 									event= new LabelProviderChangedEvent((IBaseLabelProvider) event.getSource());
 									break;
