@@ -8,7 +8,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	private JarPackage fJarPackage;	private IFile[] fDescriptionFiles;
 	private Shell fParentShell;
 	private Map fJavaNameToClassFilesMap;
-	private IContainer fClassFilesMapContainer;	// PR#1GEUVPU	private MultiStatus fProblems;		/**
+	private IContainer fClassFilesMapContainer;	private MultiStatus fProblems;		/**
 	 * Creates an instance of this class.
 	 *
 	 * @param	jarPackage	the JAR package specification
@@ -34,10 +34,10 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 *
 	 * @param element the resource or JavaElement to export
 	 */
-	protected void exportElement(Object element, IProgressMonitor progressMonitor) throws InterruptedException {		int leadSegmentsToRemove= 1;		IPackageFragmentRoot pkgRoot= null;		boolean isJavaElement= false;		IResource resource= null;		IJavaProject jProject= null;		if (element instanceof IJavaElement) {			isJavaElement= true;			IJavaElement je= (IJavaElement)element;			try {				resource= je.getUnderlyingResource();			} catch (JavaModelException ex) {				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.underlyingResourceNotFound", je.getElementName()), ex); //$NON-NLS-1$				return;			}			jProject= je.getJavaProject();			pkgRoot= JavaModelUtility.getPackageFragmentRoot(je);			if (pkgRoot != null)				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();		}		else			resource= (IResource)element;		if (!resource.isAccessible()) {			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.resourceNotFound", resource.getFullPath()), null); //$NON-NLS-1$			return;		}
+	protected void exportElement(Object element, IProgressMonitor progressMonitor) throws InterruptedException {		int leadSegmentsToRemove= 1;		IPackageFragmentRoot pkgRoot= null;		boolean isInJavaProject= false;		IResource resource= null;		IJavaProject jProject= null;		if (element instanceof IJavaElement) {			isInJavaProject= true;			IJavaElement je= (IJavaElement)element;			try {				resource= je.getUnderlyingResource();			} catch (JavaModelException ex) {				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.underlyingResourceNotFound", je.getElementName()), ex); //$NON-NLS-1$				return;			}			jProject= je.getJavaProject();			pkgRoot= JavaModelUtility.getPackageFragmentRoot(je);			if (pkgRoot != null)				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();		}		else			resource= (IResource)element;		if (!resource.isAccessible()) {			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.resourceNotFound", resource.getFullPath()), null); //$NON-NLS-1$			return;		}
 		if (resource.getType() == IResource.FILE) {			if (!resource.isLocal(IResource.DEPTH_ZERO))
 				try {					resource.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);				} catch (CoreException ex) {
-					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.resourceNotLocal", resource.getFullPath()), ex); //$NON-NLS-1$					return;				}			if (!isJavaElement) {				// check if it's a Java resource				try {					isJavaElement= resource.getProject().hasNature(JavaCore.NATURE_ID);				} catch (CoreException ex) {					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.projectNatureNotDeterminable", resource.getFullPath()), ex); //$NON-NLS-1$					return;				}				if (isJavaElement) {
+					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.resourceNotLocal", resource.getFullPath()), ex); //$NON-NLS-1$					return;				}			if (!isInJavaProject) {				// check if it's a Java resource				try {					isInJavaProject= resource.getProject().hasNature(JavaCore.NATURE_ID);				} catch (CoreException ex) {					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.projectNatureNotDeterminable", resource.getFullPath()), ex); //$NON-NLS-1$					return;				}				if (isInJavaProject) {
 					jProject= JavaCore.create(resource.getProject());
 					try {
 						IPackageFragment pkgFragment= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
@@ -52,12 +52,12 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
 			progressMonitor.subTask(destinationPath.toString());
 			
-			try {				// Binary Export				if (fJarPackage.areClassFilesExported() && isJavaElement && pkgRoot != null) {
+			try {				// Binary Export				if (fJarPackage.areClassFilesExported() && isInJavaProject && pkgRoot != null) {
 					// find corresponding file(s) on classpath and export
 					Iterator iter= filesOnClasspath((IFile)resource, destinationPath, jProject, progressMonitor);
 					IPath baseDestinationPath= destinationPath.removeLastSegments(1);
 					while (iter.hasNext()) {
-						IFile file= (IFile)iter.next();						if (!resource.isLocal(IResource.DEPTH_ZERO))													file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);						fJarWriter.write(file, baseDestinationPath.append(file.getName()));					}				}				// Java Files and resources				if (fJarPackage.areJavaFilesExported() && (!isJavaElement || isJavaFile(resource) || pkgRoot == null || !fJarPackage.areClassFilesExported()))					fJarWriter.write((IFile) resource, destinationPath);								} catch (IOException ex) {
+						IFile file= (IFile)iter.next();						if (!resource.isLocal(IResource.DEPTH_ZERO))													file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);						fJarWriter.write(file, baseDestinationPath.append(file.getName()));					}				}				// Java Files and resources				if (fJarPackage.areJavaFilesExported() && (!isInJavaProject || ((fJarPackage.areClassFilesExported()  && isJavaFile(resource)) || (!fJarPackage.areClassFilesExported() && !isClassFile(resource)))))					fJarWriter.write((IFile) resource, destinationPath);								} catch (IOException ex) {
 				String message= ex.getMessage();
 				if (message == null)
 					message= JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$
@@ -107,7 +107,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			if (outputContainer == null || !outputContainer.isAccessible())
 				throw new IOException(JarPackagerMessages.getString("JarFileExportOperation.outputContainerNotAccessible")); //$NON-NLS-1$		}
 		if (isJavaFile(file)) {
-			// Java CU - search files with .class ending			boolean hasErrors= fJarPackage.hasCompileErrors(file);			boolean hasWarnings= fJarPackage.hasCompileWarnings(file);			boolean canBeExported= canBeExported(hasErrors, hasWarnings);			reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);			if (!canBeExported)				return Collections.EMPTY_LIST.iterator();			IContainer classContainer= outputContainer;	// PR#1GEUVPU			if (pathInJar.segmentCount() > 1) // PR#1GEUVPU				classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));
+			// Java CU - search files with .class ending			boolean hasErrors= fJarPackage.hasCompileErrors(file);			boolean hasWarnings= fJarPackage.hasCompileWarnings(file);			boolean canBeExported= canBeExported(hasErrors, hasWarnings);			reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);			if (!canBeExported)				return Collections.EMPTY_LIST.iterator();			IContainer classContainer= outputContainer;			if (pathInJar.segmentCount() > 1)				classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));
 			if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
 				fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer);
 				fClassFilesMapContainer= classContainer;
@@ -155,8 +155,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 * Builds and returns a map that has the class files
 	 * for each java file in a given directory
 	 */
-	private Map buildJavaToClassMap(IContainer container) throws CoreException {		/*		 * PR#1GEUVPU: Changed argument from IFolder to IContainer		 */
-		if (container == null || !container.isAccessible())
+	private Map buildJavaToClassMap(IContainer container) throws CoreException {		if (container == null || !container.isAccessible())
 			return new HashMap(0);
 		/*		 * XXX Should not use internal class from JCore		 */
 		ClassFileReader cfReader;

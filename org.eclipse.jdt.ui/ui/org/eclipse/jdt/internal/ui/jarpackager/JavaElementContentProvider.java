@@ -131,7 +131,13 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 			
 			if (element instanceof IJavaProject) {
 				if (fFilterPackages)
-					return ((IJavaProject)element).getNonJavaResources();
+					/*
+					 * XXX: Workaround for 1GFM3J3: ITPJUI:WINNT - JAR Packager: Reports duplicate entries for default package 
+					 * 		Use the commented line once the PR is fixed
+					 */
+//					return (IJavaProject)element).getNonJavaResources();
+					return getNonJavaResources((IJavaProject)element);
+					
 				else
 					return getNonProjectPackageFragmentRoots((IJavaProject)element);
 			}
@@ -527,5 +533,23 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 		if (element instanceof IJavaElement)
 			return ((IJavaElement)element).getParent();
 		return null;
+	}
+	/*
+	 * XXX: Workaround for: 1GI509E: ITPJCORE:WINNT - IJavaProject.getNonJavaResources returns java and class files
+	 *		This method can be deleted once the PR is fixed
+	 */
+	private Object[] getNonJavaResources(IJavaProject jProj) {
+		try {
+			Object[] members= jProj.getNonJavaResources();
+			List nonJavaResources= new ArrayList();
+			for (int i= 0; i < members.length; i++) {
+				Object o= members[i];
+				if (!(o instanceof IFile && ("java".equals(((IFile)o).getFileExtension()) || "class".equals(((IFile)o).getFileExtension()))))
+					nonJavaResources.add(o);
+			}
+			return nonJavaResources.toArray();
+		} catch(JavaModelException e) {
+			return ArrayUtility.getEmptyArray();
+		}
 	}
 }
