@@ -2,14 +2,14 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.eclipse.jdt.ui">
 <annotation>
-   <appInfo>
-      <meta.schema plugin="org.eclipse.jdt.ui" id="classpathContainerPage" name="Classpath Container Entry Page"/>
-   </appInfo>
-   <documentation>
-      This extension point allows to add a wizard page to create or
+      <appInfo>
+         <meta.schema plugin="org.eclipse.jdt.ui" id="classpathContainerPage" name="Classpath Container Entry Page"/>
+      </appInfo>
+      <documentation>
+         This extension point allows to add a wizard page to create or
 edit a Classpath Container Entry.
-   </documentation>
-</annotation>
+      </documentation>
+   </annotation>
 
    <element name="extension">
       <complexType>
@@ -81,11 +81,11 @@ with a public 0-argument constructor.
 
 &lt;p&gt;
 &lt;pre&gt;
- &lt;extension point="org.eclipse.jdt.ui.classpathContainerPage"&gt;
+ &lt;extension point=&quot;org.eclipse.jdt.ui.classpathContainerPage&quot;&gt;
   &lt;classpathContainerPage
-   id="JRE"
-   name="JRE System Libraries"
-   class="com.example.NewJDKEntryPage"&gt;
+   id=&quot;JRE&quot;
+   name=&quot;JRE System Libraries&quot;
+   class=&quot;com.example.NewJDKEntryPage&quot;&gt;
   &lt;/classpathContainerPage&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;
@@ -117,10 +117,10 @@ with a public 0-argument constructor.
       </appInfo>
       <documentation>
          &lt;p&gt;
-&lt;a href="hglegal.htm"&gt;
- &lt;img SRC="ngibmcpy.gif"
-   ALT="Copyright (c) 2000, 2003 IBM Corporation and others. All Rights Reserved."
-   BORDER=0 height=14 width=324/&gt;&lt;/a&gt;
+&lt;a href=&quot;hglegal.htm&quot;&gt;
+ &lt;img SRC=&quot;ngibmcpy.gif&quot;
+   ALT=&quot;Copyright (c) 2000, 2003 IBM Corporation and others. All Rights Reserved.&quot;
+   BORDER=&quot;0&quot; height=&quot;14&quot; width=&quot;324&quot;&gt;&lt;/a&gt;
 &lt;/p&gt;
       </documentation>
    </annotation>

@@ -2,13 +2,13 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.eclipse.jdt.ui">
 <annotation>
-   <appInfo>
-      <meta.schema plugin="org.eclipse.jdt.ui" id="javaEditorTextHovers" name="Java Editor Text Hovers"/>
-   </appInfo>
-   <documentation>
-      This extension point is used to plug-in text hovers in a Java editor.
-   </documentation>
-</annotation>
+      <appInfo>
+         <meta.schema plugin="org.eclipse.jdt.ui" id="javaEditorTextHovers" name="Java Editor Text Hovers"/>
+      </appInfo>
+      <documentation>
+         This extension point is used to plug-in text hovers in a Java editor.
+      </documentation>
+   </annotation>
 
    <element name="extension">
       <complexType>
@@ -75,7 +75,7 @@
          <attribute name="activate" type="boolean" use="default" value="false">
             <annotation>
                <documentation>
-                  if the attribute is set to "true" it will force this plug-in to be loaded on hover activation.
+                  if the attribute is set to &quot;true&quot; it will force this plug-in to be loaded on hover activation.
                </documentation>
             </annotation>
          </attribute>
@@ -91,11 +91,11 @@
 
 &lt;p&gt;
 &lt;pre&gt;
- &lt;extension point="org.eclipse.jdt.ui.javaEditorTextHover"&gt;
+ &lt;extension point=&quot;org.eclipse.jdt.ui.javaEditorTextHover&quot;&gt;
   &lt;hover
-   id="org.eclipse.example.jdt.internal.debug.ui.JavaDebugHover"
-   class="org.eclipse.example.jdt.internal.debug.ui.JavaDebugHover"
-   label="%javaVariableHover"/&gt;
+   id=&quot;org.eclipse.example.jdt.internal.debug.ui.JavaDebugHover&quot;
+   class=&quot;org.eclipse.example.jdt.internal.debug.ui.JavaDebugHover&quot;
+   label=&quot;%javaVariableHover&quot;/&gt;
   &lt;/hover&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;
@@ -127,10 +127,10 @@
       </appInfo>
       <documentation>
          &lt;p&gt;
-&lt;a href="hglegal.htm"&gt;
- &lt;img SRC="ngibmcpy.gif"
-   ALT="Copyright (c) 2000, 2003 IBM Corporation and others. All Rights Reserved."
-   BORDER=0 height=14 width=324/&gt;&lt;/a&gt;
+&lt;a href=&quot;hglegal.htm&quot;&gt;
+ &lt;img SRC=&quot;ngibmcpy.gif&quot;
+   ALT=&quot;Copyright (c) 2000, 2003 IBM Corporation and others. All Rights Reserved.&quot;
+   BORDER=0 height=14 width=324&gt;&lt;/a&gt;
 &lt;/p&gt;
       </documentation>
    </annotation>
