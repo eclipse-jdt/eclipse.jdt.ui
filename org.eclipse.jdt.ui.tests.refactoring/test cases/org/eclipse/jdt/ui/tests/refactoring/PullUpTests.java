@@ -325,8 +325,8 @@ public class PullUpTests extends RefactoringTest {
 	}
 	
 	public void test19() throws Exception{
-		printTestDisabledMessage("bug 18438");
-//		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
+//		printTestDisabledMessage("bug 18438");
+		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 	
 	public void testFail0() throws Exception{
