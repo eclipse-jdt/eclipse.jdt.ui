@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+ 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
@@ -55,11 +57,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.wizards.NewGroup;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IPackagesViewPart;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -84,8 +88,10 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
+
 import org.eclipse.search.ui.IWorkingSet;
 import org.eclipse.search.ui.SearchUI;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -100,6 +106,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -112,6 +119,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenPerspectiveMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.actions.RefreshAction;
@@ -462,14 +470,19 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	//---- Action handling ----------------------------------------------------------
 	
 	/**
-	 * Called when the context menu is about to open.
-	 * Override to add your own context dependent menu contributions.
+	 * Called when the context menu is about to open. Override
+	 * to add your own context dependent menu contributions.
 	 */
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
 		boolean selectionHasElements= !selection.isEmpty();
 		Object element= selection.getFirstElement();
+		
+		MenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
+		menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
+		new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);
+
 		// updateActions(selection);
 		if (selection.size() == 1 && fViewer.isExpandable(element)) 
 			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
@@ -521,7 +534,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fAddBookmarkAction= new AddBookmarkAction(provider);
 		
 		fStandardGroups= new ContextMenuGroup[] {
-			new NewGroup(),
+			//new NewGroup(),
 			new BuildGroup(),
 			new ReorgGroup(),
 			new JavaSearchGroup()
