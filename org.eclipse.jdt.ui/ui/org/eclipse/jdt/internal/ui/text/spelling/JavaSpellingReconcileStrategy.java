@@ -37,8 +37,6 @@ import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 /**
  * Reconcile strategy for spell checking comments.
  * 
@@ -138,9 +136,13 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	 */
 	public void reconcile(IRegion region) {
 		if (fRequester != null) {
-			SpellingContext context= new SpellingContext();
-			context.setContentType(getContentType());
-			EditorsUI.getSpellingService().check(fDocument, context, fCollector, fProgressMonitor);
+			try {
+				SpellingContext context= new SpellingContext();
+				context.setContentType(getContentType());
+				EditorsUI.getSpellingService().check(fDocument, context, fCollector, fProgressMonitor);
+			} catch (CoreException x) {
+				// swallow exception
+			}
 		}
 	}
 
@@ -149,17 +151,14 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 	 * 
 	 * @return the content type of the underlying editor input or
 	 *         <code>null</code> if none could be determined
+	 * @throws CoreException if reading or accessing the underlying store fails
 	 */
-	private IContentType getContentType() {
+	private IContentType getContentType() throws CoreException {
 		IDocumentProvider documentProvider= fEditor.getDocumentProvider();
 		if (documentProvider instanceof IDocumentProviderExtension4) {
-			try {
-				IContentDescription desc= ((IDocumentProviderExtension4) documentProvider).getContentDescription(fEditor.getEditorInput());
-				if (desc != null)
-					return desc.getContentType();
-			} catch (CoreException x) {
-				JavaPlugin.log(x);
-			}
+			IContentDescription desc= ((IDocumentProviderExtension4) documentProvider).getContentDescription(fEditor.getEditorInput());
+			if (desc != null)
+				return desc.getContentType();
 		}
 		return null;
 	}
