@@ -94,7 +94,7 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 	}
 
 	private static String[] getResourceLocations(List resources) {
-		return Resources.getLocations((IResource[]) resources.toArray(new IResource[resources.size()]));
+		return Resources.getLocationOSStrings((IResource[]) resources.toArray(new IResource[resources.size()]));
 	}
 	
 	public void dragFinished(DragSourceEvent event) {

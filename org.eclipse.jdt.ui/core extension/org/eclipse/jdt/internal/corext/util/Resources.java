@@ -180,7 +180,7 @@ public class Resources {
 		}
 	}
 
-	public static String[] getLocations(IResource[] resources) {
+	public static String[] getLocationOSStrings(IResource[] resources) {
 		List result= new ArrayList(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			IPath location= resources[i].getLocation();

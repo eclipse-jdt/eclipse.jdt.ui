@@ -58,7 +58,7 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 			fClipboard.setContents(
 				new Object[] { 
 						resources, 
-						Resources.getLocations(resources), 
+						Resources.getLocationOSStrings(resources), 
 						getFileNamesText(resources)}, 
 				new Transfer[] { 
 						ResourceTransfer.getInstance(), 
