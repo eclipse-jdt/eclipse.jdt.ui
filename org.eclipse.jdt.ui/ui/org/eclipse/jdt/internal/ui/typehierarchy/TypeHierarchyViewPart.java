@@ -644,7 +644,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			currViewerIndex= VIEW_ID_TYPE;
 		}
 			
-		fEmptyTypesViewer= new Label(fViewerbook, SWT.LEFT);
+		fEmptyTypesViewer= new Label(fViewerbook, SWT.TOP | SWT.LEFT | SWT.WRAP);
 		
 		for (int i= 0; i < fAllViewers.length; i++) {
 			fAllViewers[i].setInput(fAllViewers[i]);
