@@ -322,34 +322,33 @@ public final class TypeConstraints {
 	
 	public static ITypeConstraint[] create(CastExpression castExpression){
 		Expression expression= castExpression.getExpression();
-		ITypeConstraint orConstraint= createOrConstraintForCastsOfInstanceof(expression, castExpression.getType());
-		ITypeConstraint definesConstraint= new DefinesConstraint(new ExpressionVariable(castExpression.getExpression()), new TypeVariable(castExpression.getType()));
-		if (orConstraint == null)
+		Type type= castExpression.getType();
+  		ITypeConstraint definesConstraint= new DefinesConstraint(new ExpressionVariable(castExpression.getExpression()), new TypeVariable(castExpression.getType()));
+  		if (TypeBindings.isClassBinding(expression.resolveTypeBinding()) && TypeBindings.isClassBinding(type.resolveBinding())){
+			ConstraintVariable expressionVariable= new ExpressionVariable(expression);
+			ConstraintVariable castExpressionVariable= new ExpressionVariable(castExpression);
+			return new ITypeConstraint[]{definesConstraint, createOrOrSubtypeConstraint(expressionVariable, castExpressionVariable)};
+		} else 
 			return new ITypeConstraint[]{definesConstraint};
-		else
-			return new ITypeConstraint[]{orConstraint, definesConstraint};
 	}
 
 	public static ITypeConstraint[] create(InstanceofExpression instanceofExpression){
 		Expression expression= instanceofExpression.getLeftOperand();
 		Type type= instanceofExpression.getRightOperand();
-		ITypeConstraint orConstraint= createOrConstraintForCastsOfInstanceof(expression, type);
-		if (orConstraint == null)
-			return null;
-		else
-			return new ITypeConstraint[]{orConstraint};
+		if (TypeBindings.isClassBinding(expression.resolveTypeBinding()) && TypeBindings.isClassBinding(type.resolveBinding())){
+			ConstraintVariable expressionVar= new ExpressionVariable(expression);
+			ConstraintVariable typeVariable= new TypeVariable(type);
+			return new ITypeConstraint[]{createOrOrSubtypeConstraint(expressionVar, typeVariable)};
+		} else
+			return new ITypeConstraint[0];
 	}
 	
-	private static ITypeConstraint createOrConstraintForCastsOfInstanceof(Expression expression, Type type) {
-		if (   expression.resolveTypeBinding() != null 	&& ! expression.resolveTypeBinding().isInterface()
-			&& type.resolveBinding() != null 			&& ! type.resolveBinding().isInterface()){
-			ITypeConstraint c1= new SubtypeConstraint(new ExpressionVariable(expression), new TypeVariable(type));
-			ITypeConstraint c2= new SubtypeConstraint(new TypeVariable(type), new ExpressionVariable(expression));
-			return new CompositeOrTypeConstraint(new ITypeConstraint[]{c1, c2});
-		} else 
-			return null;
+	private static ITypeConstraint createOrOrSubtypeConstraint(ConstraintVariable var1, ConstraintVariable var2){
+		ITypeConstraint c1= new SubtypeConstraint(var1, var2);
+		ITypeConstraint c2= new SubtypeConstraint(var2, var1);
+		return new CompositeOrTypeConstraint(new ITypeConstraint[]{c1, c2});
 	}
-
+	
 	public static ITypeConstraint[] create(FieldAccess access){
 		Expression expression= access.getExpression();
 		SimpleName name= access.getName();
