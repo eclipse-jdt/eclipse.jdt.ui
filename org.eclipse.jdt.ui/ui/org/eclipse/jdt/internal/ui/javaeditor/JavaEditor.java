@@ -54,6 +54,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -62,7 +64,10 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -70,6 +75,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -88,6 +94,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IInformationControl;
@@ -144,9 +151,11 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
@@ -154,6 +163,7 @@ import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
+import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -185,6 +195,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -200,6 +211,8 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -718,6 +731,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		private String fURLString;
 
+		/**
+		 * The NLS key if an NLS key was detected or <code>null</code> otherwise.
+		 * @since 3.1
+		 */
+		private StringLiteral fNLSKeyStringLiteral;
+
 		
 		public void deactivate() {
 			deactivate(false);
@@ -980,10 +999,28 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 				
 				IDocument document= viewer.getDocument();
-				if (elements == null || elements.length == 0)
-					return findAndSetURLText(document, offset);
-				else
+				
+				// Java element link
+				if (elements != null && elements.length > 0)
 					return selectWord(document, offset);
+				
+				// URL link
+			    	IRegion urlRegion= findAndSetURLText(document, offset);
+				if (urlRegion != null)
+					return urlRegion;
+				
+				// NLS key link
+				CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(input, ASTProvider.WAIT_NO, null);
+				if (ast == null)
+					return null;
+				
+				ASTNode node= NodeFinder.perform(ast, offset, 1);
+				if (!(node instanceof StringLiteral))
+					return null;
+				
+				fNLSKeyStringLiteral= (StringLiteral)node;
+				
+				return new Region(fNLSKeyStringLiteral.getStartPosition(), fNLSKeyStringLiteral.getLength());
 					
 			} catch (JavaModelException e) {
 				return null;	
@@ -1203,11 +1240,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		public void mouseUp(MouseEvent e) {
 
-			if (!fActive)
+			if (!fActive) {
+				fURLString= null;
+				fNLSKeyStringLiteral= null;
 				return;
+			}
 				
 			if (e.button != 1) {
 				deactivate();
+				fURLString= null;
 				return;
 			}
 			
@@ -1216,6 +1257,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			deactivate();
 
 			if (wasActive) {
+				if (fNLSKeyStringLiteral != null) {
+					openPropertiesFile(fNLSKeyStringLiteral);
+					fNLSKeyStringLiteral= null;
+					return;
+				}
+				
 				if (fURLString != null) {
 					String platform= SWT.getPlatform();
 					if ("motif".equals(platform) || "gtk".equals(platform)) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -1226,10 +1273,78 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 							program.execute(fURLString);
 					} else
 						Program.launch(fURLString);
+					fURLString= null;
+				
 				} else {
 					IAction action= getAction("OpenEditor");  //$NON-NLS-1$
 					if (action != null)
 						action.run();
+				}
+			}
+		}
+		
+		private void openPropertiesFile(StringLiteral stringLiteral) {
+
+			IJavaElement input= SelectionConverter.getInput(JavaEditor.this);
+			if (input == null)
+				return;
+
+			CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(input, ASTProvider.WAIT_ACTIVE_ONLY, null);
+			if (ast == null)
+				return;
+			
+			IRegion hoverRegion= new Region(stringLiteral.getStartPosition(), stringLiteral.getLength());
+
+			AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, hoverRegion);
+			if (ref == null)
+				return;
+			
+			IFile file= null;
+			try {
+				file= NLSHintHelper.getResourceBundleFile(input.getJavaProject(), ref.getBinding());
+			} catch (JavaModelException e) {
+				// Don't open the file
+			}
+			if (file == null) {
+				// Can't write to status line because it gets immediately cleared
+				MessageDialog.openError(JavaEditor.this.getEditorSite().getShell(),
+						"Open Properties File",
+						"Could not determine properties file.");
+				
+				return;
+			}
+			
+			IEditorPart editor;
+			try {
+				editor= IDE.openEditor(JavaEditor.this.getEditorSite().getPage(), file);
+			} catch (PartInitException e1) {
+				// Can't write to status line because it gets immediately cleared
+				MessageDialog.openError(JavaEditor.this.getEditorSite().getShell(),
+						"Open Properties File",
+						"Could not open the properties file editor for: " + file.getFullPath().toOSString());
+				
+				return;
+			}
+			
+			// Reveal the key in the properties file
+			if (editor instanceof ITextEditor) {
+				IRegion region= null;
+				// Find key in document
+				ITextFileBuffer buffer= FileBuffersPlugin.getDefault().getFileBufferManager().getTextFileBuffer(file.getFullPath());
+				if (buffer != null) {
+					FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(buffer.getDocument());
+					try {
+						region= finder.find(0, stringLiteral.getLiteralValue(), true, true, false, false);
+					} catch (BadLocationException ex) {
+					}
+				}
+				if (region != null)
+					((ITextEditor)editor).selectAndReveal(region.getOffset(), region.getLength());
+				else {
+					((ITextEditor)editor).selectAndReveal(0, 0);
+					IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);
+					if (statusLine != null)
+						statusLine.setMessage(true, "The key \"" + stringLiteral.getLiteralValue() +  "\" is not defined in this properties file.", null);
 				}
 			}
 		}
