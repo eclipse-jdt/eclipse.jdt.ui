@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
@@ -543,10 +542,8 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			return;
 		}
 		Object obj= selected.get(0);
-		if (obj instanceof IAdaptable) {
-			IJavaElement el= (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
-
-			JavadocPropertyDialog jdialog= new JavadocPropertyDialog(getShell(), el);
+		if (obj instanceof IJavaElement) {
+			JavadocPropertyDialog jdialog= new JavadocPropertyDialog(getShell(), (IJavaElement) obj);
 			jdialog.open();
 		}
 	}
@@ -560,6 +557,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			super(parent);
 			setTitle(JavadocExportMessages.getString("JavadocStandardWizardPage.javadocpropertydialog.title")); //$NON-NLS-1$
 
+			fElement= selection;
 			URL initialLocation= null;
 			try {
 				initialLocation= JavaUI.getJavadocBaseLocation(selection);
