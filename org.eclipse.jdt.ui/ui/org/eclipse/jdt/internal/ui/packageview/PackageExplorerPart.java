@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.IPreferencesConstants;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
@@ -156,7 +157,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private Action fShowTypeHierarchyAction;
 	private Action fShowNavigatorAction;
 	private Action fPropertyDialogAction;
- 	private Action fDeleteAction;
+ 	private RefactoringAction fDeleteAction;
  	private RefreshAction fRefreshAction;
  	private BackAction fBackAction;
 	private ForwardAction fForwardAction;
@@ -592,8 +593,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
  	 * Handles key events in viewer.
  	 */
 	void handleKeyPressed(KeyEvent event) {
-		if (event.character == SWT.DEL && event.stateMask == 0 && fDeleteAction.isEnabled())
-			fDeleteAction.run();
+		if (event.character == SWT.DEL && event.stateMask == 0){
+			fDeleteAction.update();
+			if (fDeleteAction.isEnabled())
+				fDeleteAction.run();
+		}	
 	}
 	
 	/**
