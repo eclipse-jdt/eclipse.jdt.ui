@@ -31,11 +31,14 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -47,6 +50,8 @@ import org.eclipse.jdt.internal.ui.actions.OpenHierarchyAction;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class OpenTypeHierarchyUtil {
 	
@@ -227,13 +232,23 @@ public class OpenTypeHierarchyUtil {
 					if (((IPackageFragment)elem).containsJavaResources())
 						return new IJavaElement[] {elem};
 					break;
+				case IJavaElement.PACKAGE_DECLARATION:
+					return new IJavaElement[] { elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT) };
+				case IJavaElement.IMPORT_DECLARATION:	
+					IImportDeclaration decl= (IImportDeclaration) elem;
+					if (decl.isOnDemand()) {
+						elem= JavaModelUtil.findTypeContainer(elem.getJavaProject(), Signature.getQualifier(elem.getElementName()));
+					} else {
+						elem= elem.getJavaProject().findType(elem.getElementName());
+					}
+					if (elem == null)
+						return null;
+					return new IJavaElement[] {elem};
+					
 				case IJavaElement.CLASS_FILE:
 					return new IJavaElement[] { ((IClassFile)input).getType() };				
 				case IJavaElement.COMPILATION_UNIT: {
-				// case IJavaElement.IMPORT_CONTAINER:
-				// case IJavaElement.IMPORT_DECLARATION:
-				// case IJavaElement.PACKAGE_DECLARATION: {
-					ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
+						ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (cu != null) {
 						IType[] types= cu.getTypes();
 						if (types.length > 0) {
