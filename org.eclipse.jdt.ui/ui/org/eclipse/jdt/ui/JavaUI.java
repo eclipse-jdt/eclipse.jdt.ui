@@ -611,7 +611,7 @@ public final class JavaUI {
 	public static IDocumentProvider getDocumentProvider() {
 		return JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 	}
-	
+		
 	/**
 	 * Sets the Javadoc location for an archive with the given path.
 	 * 
@@ -675,7 +675,7 @@ public final class JavaUI {
 	 * element's library or project. Example of a returned URL is <i>http://www.
 	 * junit. org/junit/javadoc</i>.
 	 * 
-	 * @param The element for witch the doc URL is requested.
+	 * @param The element for which the doc URL is requested.
 	 * 
 	 * @since 2.0
 	 */		
@@ -690,7 +690,7 @@ public final class JavaUI {
 	 * if no javadoc location has been attached to the element's library or
 	 * project.
 	 * 
-	 * @param The element for witch the doc URL is requested.
+	 * @param The element for which the doc URL is requested.
 	 * @param includeAnchor If set, the URL contains an anchor for member references:
 	 * <i>http://www.junit.org/junit/javadoc/junit/extensions/TestSetup.html#run(junit.framework.TestResult)</i>. Note
 	 * that this involves type resolving and is a more expensive call than without anchor.
