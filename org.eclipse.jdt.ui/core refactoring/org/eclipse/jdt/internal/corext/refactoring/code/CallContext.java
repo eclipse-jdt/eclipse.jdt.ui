@@ -12,20 +12,22 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.List;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 public class CallContext {
 
 	public String[] arguments;
 	public String receiver; 
+	public boolean receiverIsStatic;
 	public List usedCallerNames;
 	public int callMode;
+	public ImportEdit importer;
 
-	public CallContext(String[] args, String rec, List names, int cm) {
+	public CallContext(List names, int cm, ImportEdit i) {
 		super();
-		arguments= args;
-		receiver= rec;
 		usedCallerNames= names;
 		callMode= cm;
+		importer= i;
 	}
 }

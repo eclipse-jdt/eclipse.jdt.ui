@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -31,6 +33,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -87,6 +90,15 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
+		public boolean visit(ThisExpression node) {
+			if (node.getQualifier() != null) {
+				status.addFatalError(
+					"Can't inline a method that uses qualified this expressions.",
+					JavaSourceContext.create(fCUnit, node));
+				return false;
+			}
+			return true;
+		}
 		private ASTNode getLastNode() {
 			List statements= fDeclaration.getBody().statements();
 			if (statements.size() == 0)
@@ -98,7 +110,7 @@ class SourceAnalyzer  {
 		}
 	}
 	
-	private class SimpleNameCollector extends ASTVisitor {
+	private class UpdateCollector extends ASTVisitor {
 		private int fTypeCounter;
 		public boolean visit(TypeDeclaration node) {
 			if (fTypeCounter++ == 0) {
@@ -116,6 +128,24 @@ class SourceAnalyzer  {
 				if (name != null) {
 					name.addReference(node.getName());
 				}
+			}
+			return true;
+		}
+		public boolean visit(MethodInvocation node) {
+			Expression receiver= node.getExpression();
+			if (receiver == null) {
+				fImplicitReceivers.add(node);
+			} else if (receiver.getNodeType() == ASTNode.THIS_EXPRESSION) {
+				fImplicitReceivers.add(receiver);
+			}
+			return true;
+		}
+		public boolean visit(ClassInstanceCreation node) {
+			Expression receiver= node.getExpression();
+			if (receiver == null && node.resolveTypeBinding().isLocal()) {
+				fImplicitReceivers.add(node);
+			} else if (receiver.getNodeType() == ASTNode.THIS_EXPRESSION) {
+				fImplicitReceivers.add(receiver);
 			}
 			return true;
 		}
@@ -149,6 +179,7 @@ class SourceAnalyzer  {
 	private MethodDeclaration fDeclaration;
 	private Map fParameters;
 	private Map fNames;
+	private List fImplicitReceivers;
 	private boolean fInterruptedExecutionFlow;
 
 	public SourceAnalyzer(ICompilationUnit unit, MethodDeclaration declaration) {
@@ -162,6 +193,7 @@ class SourceAnalyzer  {
 			fParameters.put(element.resolveBinding(), element.getProperty(ParameterData.PROPERTY));
 		}
 		fNames= new HashMap();
+		fImplicitReceivers= new ArrayList(2);
 	}
 	
 	public boolean isExecutionFlowInterrupted() {
@@ -191,7 +223,7 @@ class SourceAnalyzer  {
 
 	public void analyzeParameters() {
 		Block body= fDeclaration.getBody();
-		body.accept(new SimpleNameCollector());
+		body.accept(new UpdateCollector());
 		
 		int numberOfLocals= LocalVariableIndex.perform(fDeclaration);
 		FlowContext context= new FlowContext(0, numberOfLocals + 1);
@@ -210,6 +242,10 @@ class SourceAnalyzer  {
 	
 	public Collection getUsedNames() {
 		return fNames.values();
+	}
+	
+	public List getImplicitReceivers() {
+		return fImplicitReceivers;
 	}
 	
 	private ASTNode[] getStatements() {

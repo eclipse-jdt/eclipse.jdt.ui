@@ -47,7 +47,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
 		ASTNode node= InlineMethodRefactoring.getTargetNode(unit, selection[0], selection[1]);
-		InlineMethodRefactoring refactoring= new InlineMethodRefactoring(
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
 			unit, (MethodInvocation)node,
 			JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setSaveChanges(true);
@@ -296,5 +296,43 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	
 	public void testForAssignmentTwo() throws Exception {
 		performControlStatementTest();
+	}
+
+	/************************ Receiver Tests ********************************/
+		
+	private void performReceiverTest() throws Exception {
+		performTest(fgTestSetup.getReceiverPackage(), getName(), COMPARE_WITH_OUTPUT, "receiver_out");
+	}
+	
+	public void testNoImplicitReceiver() throws Exception {
+		performReceiverTest();
+	}
+
+	public void testNameThisReceiver() throws Exception {
+		performReceiverTest();
+	}
+
+	public void testNameImplicitReceiver() throws Exception {
+		performReceiverTest();
+	}
+
+	public void testExpressionZeroImplicitReceiver() throws Exception {
+		performReceiverTest();
+	}
+
+	public void testExpressionOneImplicitReceiver() throws Exception {
+		performReceiverTest();
+	}
+
+	public void testExpressionTwoImplicitReceiver() throws Exception {
+		performReceiverTest();
+	}
+
+	public void testStaticReceiver() throws Exception {
+		performReceiverTest();
+	}
+
+	public void testReceiverWithStatic() throws Exception {
+		performReceiverTest();
 	}
 }

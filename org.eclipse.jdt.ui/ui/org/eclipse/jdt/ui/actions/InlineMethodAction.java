@@ -76,7 +76,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, "No method invocation selected.");
 			return;
 		}
-		InlineMethodRefactoring refactoring= new InlineMethodRefactoring(cu, (MethodInvocation)node, JavaPreferencesSettings.getCodeGenerationSettings());
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(cu, (MethodInvocation)node, JavaPreferencesSettings.getCodeGenerationSettings());
 		try {
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {

@@ -177,14 +177,14 @@ public class CallInliner {
 	}
 	
 	public TextEdit perform() throws CoreException {
-		List arguments= fInvocation.arguments();
-		String[] realArguments= new String[arguments.size()];
+		int callType= fTargetNode.getNodeType();
+		CallContext context= new CallContext(fUsedNames, callType, fImportEdit);
+		
 		List locals= new ArrayList(3);
 		
-		computeRealArguments(arguments, locals, realArguments);
-		
-		int callType= fTargetNode.getNodeType();
-		CallContext context= new CallContext(realArguments, computeReceiver(locals), fUsedNames, callType);
+		computeRealArguments(context, locals);
+		computeReceiver(context, locals);
+		 		
 		String[] blocks= fSourceProvider.getCodeBlocks(context);
 		initializeInsertionPoint(fSourceProvider.getNumberOfStatements() + locals.size());
 		
@@ -196,7 +196,9 @@ public class CallInliner {
 		return result;
 	}
 
-	private void computeRealArguments(List arguments, List locals, String[] realArguments) {
+	private void computeRealArguments(CallContext context, List locals) {
+		List arguments= fInvocation.arguments();
+		String[] realArguments= new String[arguments.size()];
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression expression= (Expression)arguments.get(i);
 			ParameterData parameter= fSourceProvider.getParameterData(i);
@@ -210,20 +212,41 @@ public class CallInliner {
 					(Expression)fRewriter.createCopy(expression)));
 			}
 		}
+		context.arguments= realArguments;
 	}
 
-	private String computeReceiver(List locals) {
-		Expression expression= fInvocation.getExpression();
-		if (expression == null)
-			return null;
-		if (ASTNodes.isLiteral(expression) || expression instanceof Name)
-			return ASTNodes.asString(expression);
-		String local= proposeName("t");
-		locals.add(createLocalDeclaration(
-			expression.resolveTypeBinding(), 
-			local, 
-			(Expression)fRewriter.createCopy(expression)));
-		return local;
+	private void computeReceiver(CallContext context, List locals) {
+		Expression receiver= fInvocation.getExpression();
+		if (receiver == null)
+			return;
+		final boolean isName= receiver instanceof Name;
+		if (isName)
+			context.receiverIsStatic= ((Name)receiver).resolveBinding() instanceof ITypeBinding;
+		if (ASTNodes.isLiteral(receiver) || isName) {
+			context.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
+			return;
+		}
+		switch(fSourceProvider.getReceiversToBeUpdated()) {
+			case 0:
+				// Make sure we evaluate the current receiver. Best is to assign to
+				// local.
+				locals.add(createLocalDeclaration(
+					receiver.resolveTypeBinding(), 
+					proposeName("r"), 
+					(Expression)fRewriter.createCopy(receiver)));
+				return;
+			case 1:
+				context.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
+				return;
+			default:
+				String local= proposeName("r");
+				locals.add(createLocalDeclaration(
+					receiver.resolveTypeBinding(), 
+					local, 
+					(Expression)fRewriter.createCopy(receiver)));
+				context.receiver= local;
+				return;
+		}
 	}
 
 	private void addNewLocals(List locals) {

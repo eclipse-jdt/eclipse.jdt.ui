@@ -38,6 +38,7 @@ public class InlineMethodTestSetup extends TestSetup {
 	private IPackageFragment fCall;
 	private IPackageFragment fExpression;
 	private IPackageFragment fControlStatement;
+	private IPackageFragment fReceiver;
 
 	public InlineMethodTestSetup(Test test) {
 		super(test);
@@ -67,6 +68,7 @@ public class InlineMethodTestSetup extends TestSetup {
 		fCall= fRoot.createPackageFragment("call_in", true, null);
 		fExpression= fRoot.createPackageFragment("expression_in", true, null);
 		fControlStatement= fRoot.createPackageFragment("controlStatement_in", true, null);
+		fReceiver= fRoot.createPackageFragment("receiver_in", true, null);
 	}
 
 	protected void tearDown() throws Exception {
@@ -101,5 +103,9 @@ public class InlineMethodTestSetup extends TestSetup {
 	
 	public IPackageFragment getControlStatementPackage() {
 		return fControlStatement;
+	}
+	
+	public IPackageFragment getReceiverPackage() {
+		return fReceiver;
 	}
 }

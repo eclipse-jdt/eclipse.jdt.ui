@@ -21,10 +21,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -32,6 +35,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
@@ -139,10 +143,15 @@ public class SourceProvider {
 		return false;
 	}
 	
+	public int getReceiversToBeUpdated() {
+		return fAnalyzer.getImplicitReceivers().size();
+	}
+	
 	public String[] getCodeBlocks(CallContext context) throws CoreException {
 		List result= new ArrayList(1);
 		
 		replaceParameterWithExpression(context.arguments);
+		updateImplicitReceivers(context);
 		makeNamesUnique(context.usedCallerNames);
 		
 		List ranges= null;
@@ -213,6 +222,35 @@ public class SourceProvider {
 				}
 			}
 		}
+	}
+	
+	private void updateImplicitReceivers(CallContext context) {
+		if (context.receiver == null)
+			return;
+		List implicitReceivers= fAnalyzer.getImplicitReceivers();
+		for (Iterator iter= implicitReceivers.iterator(); iter.hasNext();) {
+			ASTNode node= (ASTNode)iter.next();
+			if (node instanceof MethodInvocation) {
+				final MethodInvocation inv= (MethodInvocation)node;
+				inv.setExpression(createReceiver(context, (IMethodBinding)inv.getName().resolveBinding()));
+			} else if (node instanceof ClassInstanceCreation) {
+				final ClassInstanceCreation inst= (ClassInstanceCreation)node;
+				inst.setExpression(createReceiver(context, inst.resolveConstructorBinding()));
+			} else if (node instanceof Expression) {
+				fRewriter.markAsReplaced(node, fRewriter.createPlaceholder(context.receiver, ASTRewrite.EXPRESSION));
+			}
+		}
+	}
+
+	private Expression createReceiver(CallContext context, IMethodBinding method) {
+		String receiver= context.receiver;
+		if (!context.receiverIsStatic && Modifier.isStatic(method.getModifiers())) {
+			receiver= context.importer.addImport(
+				Bindings.getFullyQualifiedImportName(fDeclaration.resolveBinding().getDeclaringClass())); 
+		}
+		Expression exp= (Expression)fRewriter.createPlaceholder(receiver, ASTRewrite.EXPRESSION);
+		fRewriter.markAsInserted(exp);
+		return exp;
 	}
 	
 	private ASTNode getLastStatement() {
