@@ -213,6 +213,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null);
 	}
 
+	public void test23() throws Exception{
+//		printTestDisabledMessage("bug 24576 ");
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null);
+	}
+
 	public void test_nonstatic_0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}

@@ -742,6 +742,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private TextEdit createInsertExpressionAsParamaterEdit(ClassInstanceCreation cic) throws JavaModelException{
 		String text= createEnclosingInstanceCreationString(cic);
+		if (text == null)
+			return null;
 		if (! cic.arguments().isEmpty())
 			text += ", ";
 		return SimpleTextEdit.createInsert(computeOffsetForFirstArgument(cic), text);
@@ -749,6 +751,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private TextEdit createInsertExpressionAsParamaterEdit(SuperConstructorInvocation sci) throws JavaModelException{
 		String text= createEnclosingInstanceCreationString(sci);
+		if (text == null)
+			return null;
 		if (! sci.arguments().isEmpty())
 			text += ", ";
 		return SimpleTextEdit.createInsert(computeOffsetForFirstArgument(sci), text);
@@ -818,6 +822,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		Expression expression= cic.getExpression();
 		if (expression != null)
 			return getExpressionString(expression);
+		else if (isInputTypeStatic())
+			return null;	
 		else if (isInsideSubclassOfDeclaringType(cic))
 			return THIS_KEYWORD;
 		else if (isInsideInputType(cic))
@@ -831,6 +837,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		Expression expression= sci.getExpression();
 		if (expression != null)
 			return getExpressionString(expression);
+		else if (isInputTypeStatic())
+			return null;	
 		else if (isInsideSubclassOfDeclaringType(sci))
 			return THIS_KEYWORD;
 		else if (isInsideInputType(sci))
