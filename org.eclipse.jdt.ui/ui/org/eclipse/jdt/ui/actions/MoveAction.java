@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -19,13 +24,12 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -33,12 +37,11 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.MoveInstanceMethodAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.MoveStaticMembersAction;
-import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.ReorgMoveAction;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * This action moves Java elements to a new location. The action prompts
@@ -59,7 +62,7 @@ public class MoveAction extends SelectionDispatchAction{
 	private CompilationUnitEditor fEditor;
 	private SelectionDispatchAction fMoveInstanceMethodAction;
 	private SelectionDispatchAction fMoveStaticMembersAction;
-	private SelectionDispatchAction fJdtMoveAction;
+	private SelectionDispatchAction fReorgMoveAction;//can be null
 	
 	/**
 	 * Creates a new <code>MoveAction</code>. The action requires
@@ -73,7 +76,7 @@ public class MoveAction extends SelectionDispatchAction{
 		setText(RefactoringMessages.getString("MoveAction.text")); //$NON-NLS-1$
 		fMoveStaticMembersAction= new MoveStaticMembersAction(site);
 		fMoveInstanceMethodAction= new MoveInstanceMethodAction(site);
-		fJdtMoveAction= new JdtMoveAction(site);
+		fReorgMoveAction= new ReorgMoveAction(site);
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
 	
@@ -95,8 +98,8 @@ public class MoveAction extends SelectionDispatchAction{
 	public void selectionChanged(SelectionChangedEvent event) {
 		fMoveStaticMembersAction.selectionChanged(event);
 		fMoveInstanceMethodAction.selectionChanged(event);
-		if (fJdtMoveAction != null)
-			fJdtMoveAction.selectionChanged(event);
+		if (fReorgMoveAction != null)
+			fReorgMoveAction.selectionChanged(event);
 		setEnabled(computeEnableState());	
 	}
 
@@ -104,79 +107,126 @@ public class MoveAction extends SelectionDispatchAction{
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void run(IStructuredSelection selection) {
-		assertThatExactlyOneIsEnabled();
+		try {
+			if (fMoveInstanceMethodAction.isEnabled() && tryMoveInstanceMethod(selection)) 
+				return;
+	
+			if (fMoveStaticMembersAction.isEnabled() && tryMoveStaticMembers(selection)) 
+				return;
+	
+			if (fReorgMoveAction != null && fReorgMoveAction.isEnabled())
+				fReorgMoveAction.run();
 		
-		if (fJdtMoveAction != null && fJdtMoveAction.isEnabled())
-			fJdtMoveAction.run();
-		else if (fMoveInstanceMethodAction.isEnabled()) 
-			fMoveInstanceMethodAction.run();	
-		else if (fMoveStaticMembersAction.isEnabled())	
-			fMoveStaticMembersAction.run();
-	}
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 
-	private void assertThatExactlyOneIsEnabled() {
-		Assert.isTrue(! fMoveInstanceMethodAction.isEnabled() || ! fMoveStaticMembersAction.isEnabled());
-		if (fJdtMoveAction != null){
-			Assert.isTrue(! fJdtMoveAction.isEnabled() || ! fMoveInstanceMethodAction.isEnabled());
-			Assert.isTrue(! fJdtMoveAction.isEnabled() || ! fMoveStaticMembersAction.isEnabled());
-			Assert.isTrue(fJdtMoveAction.isEnabled() || fMoveInstanceMethodAction.isEnabled() || fMoveStaticMembersAction.isEnabled());
-		} else
-			Assert.isTrue(fMoveInstanceMethodAction.isEnabled() || fMoveStaticMembersAction.isEnabled());
 	}
 
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
-			return;
-		if (fJdtMoveAction != null && fJdtMoveAction.isEnabled()){
-			fJdtMoveAction.run();
-			return;
-		}
-		if (fMoveStaticMembersAction.isEnabled() && tryMoveStaticMembers(selection))
-			return;
-	
-		if (fMoveInstanceMethodAction.isEnabled() && tryMoveInstanceMethod(selection))
-			return;
-			
-		MessageDialog.openInformation(getShell(), RefactoringMessages.getString("MoveAction.Move"), RefactoringMessages.getString("MoveAction.select")); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	
-	private boolean tryMoveStaticMembers(ITextSelection selection) {
 		try {
-			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
-			if (element == null || !(element instanceof IMember))
-				return false;
-			IMember[] array= new IMember[]{(IMember)element};
-			if (! MoveStaticMembersRefactoring.isAvailable(array))	
-				return false;
-			MoveStaticMembersRefactoring refactoring= MoveStaticMembersRefactoring.create(array, JavaPreferencesSettings.getCodeGenerationSettings());
-			if (refactoring == null)
-				return false;
-			fMoveStaticMembersAction.run(selection);
-			return true;			
+			if (!ActionUtil.isProcessable(getShell(), fEditor))
+				return;
+			if (fMoveStaticMembersAction.isEnabled() && tryMoveStaticMembers(selection))
+				return;
+		
+			if (fMoveInstanceMethodAction.isEnabled() && tryMoveInstanceMethod(selection))
+				return;
+	
+			if (fReorgMoveAction != null && fReorgMoveAction.isEnabled()){
+				fReorgMoveAction.run();
+				return;
+			}
+			
+			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("MoveAction.Move"), RefactoringMessages.getString("MoveAction.select")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (JavaModelException e) {
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e); //this happen on selection changes in viewers - do not show ui if fails, just log
-			return false;
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
-	private boolean tryMoveInstanceMethod(ITextSelection selection) {
-			MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(
-				getCompilationUnitForTextSelection(), selection.getOffset(), selection.getLength(),
-				JavaPreferencesSettings.getCodeGenerationSettings());
-			if (refactoring == null)
-				return false;
-			fMoveInstanceMethodAction.run(selection);	
-			return true;
+	private boolean tryMoveStaticMembers(ITextSelection selection) throws JavaModelException{
+		IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+		if (element == null || !(element instanceof IMember))
+			return false;
+		IMember[] array= new IMember[]{(IMember)element};
+		if (! MoveStaticMembersRefactoring.isAvailable(array))	
+			return false;
+		MoveStaticMembersRefactoring refactoring= MoveStaticMembersRefactoring.create(array, JavaPreferencesSettings.getCodeGenerationSettings());
+		if (refactoring == null)
+			return false;
+		fMoveStaticMembersAction.run(selection);
+		return true;			
 	}
 
-	private ICompilationUnit getCompilationUnitForTextSelection() {
-		Assert.isNotNull(fEditor);
-		return SelectionConverter.getInputAsCompilationUnit(fEditor);
+	private static IMember[] getSelectedMembers(IStructuredSelection selection){
+		if (selection.isEmpty())
+			return null;
+		
+		for  (Iterator iter= selection.iterator(); iter.hasNext(); ) {
+			if (! (iter.next() instanceof IMember))
+				return null;
+		}
+		return convertToMemberArray(selection.toArray());
+	}
+
+	private static IMember[] convertToMemberArray(Object[] obj) {
+		if (obj == null)
+			return null;
+		Set memberSet= new HashSet();
+		memberSet.addAll(Arrays.asList(obj));
+		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
+	}
+
+	private boolean tryMoveStaticMembers(IStructuredSelection selection) throws JavaModelException{
+		IMember[] array= getSelectedMembers(selection);
+		if (! MoveStaticMembersRefactoring.isAvailable(array))	
+			return false;
+		MoveStaticMembersRefactoring refactoring= MoveStaticMembersRefactoring.create(array, JavaPreferencesSettings.getCodeGenerationSettings());
+		if (refactoring == null)
+			return false;
+		fMoveStaticMembersAction.run(selection);
+		return true;			
+	}
+	
+	private boolean tryMoveInstanceMethod(ITextSelection selection) throws JavaModelException{
+		IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+		if (element == null || !(element instanceof IMethod))
+			return false;
+		
+		IMethod method= (IMethod)element;
+		if (! MoveInstanceMethodRefactoring.isAvailable(method, JavaPreferencesSettings.getCodeGenerationSettings()))
+			return false;	
+		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		if (refactoring == null)
+			return false;
+		fMoveInstanceMethodAction.run(selection);	
+		return true;
+	}
+
+	private boolean tryMoveInstanceMethod(IStructuredSelection selection) throws JavaModelException{
+		IMethod method= (IMethod)getSingleSelectedMethod(selection);
+		if (method == null)
+			return false;	
+		if (! MoveInstanceMethodRefactoring.isAvailable(method, JavaPreferencesSettings.getCodeGenerationSettings()))
+			return false;	
+		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		if (refactoring == null)
+			return false;
+		fMoveInstanceMethodAction.run(selection);	
+		return true;
+	}
+
+	private static IMethod getSingleSelectedMethod(IStructuredSelection selection) {
+		if (selection.isEmpty() || selection.size() != 1) 
+			return null;
+		
+		Object first= selection.getFirstElement();
+		if (! (first instanceof IMethod))
+			return null;
+		return (IMethod) first;
 	}
 	
 	/*
@@ -185,17 +235,14 @@ public class MoveAction extends SelectionDispatchAction{
 	public void update(ISelection selection) {
 		fMoveStaticMembersAction.update(selection);
 		fMoveInstanceMethodAction.update(selection);
-		if (fJdtMoveAction != null)
-			fJdtMoveAction.update(selection);
+		if (fReorgMoveAction != null)
+			fReorgMoveAction.update(selection);
 		setEnabled(computeEnableState());
 	}
 	
 	private boolean computeEnableState(){
 		if (fMoveStaticMembersAction.isEnabled() || fMoveInstanceMethodAction.isEnabled())
 			return true;
-		else if (fJdtMoveAction == null)
-			return false;
-		else  
-			return fJdtMoveAction.isEnabled();
+		return (fReorgMoveAction != null && fReorgMoveAction.isEnabled());
 	}
 }
