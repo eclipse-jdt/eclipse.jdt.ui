@@ -40,7 +40,7 @@ public class HistoryListAction extends Action {
 		
 		private HistoryListDialog(Shell shell, IJavaElement[] elements) {
 			super(shell);
-			setTitle(TypeHierarchyMessages.getString("HistoryListDialog.title"));
+			setTitle(TypeHierarchyMessages.getString("HistoryListDialog.title")); //$NON-NLS-1$
 			
 			String[] buttonLabels= new String[] { 
 				/* 0 */ TypeHierarchyMessages.getString("HistoryListDialog.remove.button") //$NON-NLS-1$
@@ -101,7 +101,7 @@ public class HistoryListAction extends Action {
 			StatusInfo status= new StatusInfo();
 			List selected= fHistoryList.getSelectedElements();
 			if (selected.size() != 1) {
-				status.setError("");
+				status.setError(""); //$NON-NLS-1$
 				fResult= null;
 			} else {
 				fResult= (IJavaElement) selected.get(0);
@@ -125,7 +125,7 @@ public class HistoryListAction extends Action {
 	
 	public HistoryListAction(TypeHierarchyViewPart view) {
 		fView= view;
-		setText(TypeHierarchyMessages.getString("HistoryListAction.label"));
+		setText(TypeHierarchyMessages.getString("HistoryListAction.label")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
 	}
 	

@@ -158,8 +158,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE, false);
 		store.setDefault(SRCBIN_FOLDERS_IN_NEWPROJ, false);
-		store.setDefault(SRCBIN_SRCNAME, "src");
-		store.setDefault(SRCBIN_BINNAME, "bin");
+		store.setDefault(SRCBIN_SRCNAME, "src"); //$NON-NLS-1$
+		store.setDefault(SRCBIN_BINNAME, "bin"); //$NON-NLS-1$
 				
 		store.setDefault(DOUBLE_CLICK_GOES_INTO, false);		
 	}
@@ -234,11 +234,11 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
 
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR);
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.dblClick"), DOUBLE_CLICK_GOES_INTO);
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.cuChildren"), SHOW_CU_CHILDREN);
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.dblClick"), DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.cuChildren"), SHOW_CU_CHILDREN); //$NON-NLS-1$
 		
-		fFolderButton= addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.folders"), SRCBIN_FOLDERS_IN_NEWPROJ);
+		fFolderButton= addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.folders"), SRCBIN_FOLDERS_IN_NEWPROJ); //$NON-NLS-1$
 		fFolderButton.addSelectionListener(fSelectionListener);
 		
 		Composite folders= new Composite(composite, SWT.NONE);
@@ -251,26 +251,26 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		gd.horizontalIndent= convertWidthInCharsToPixels(4);
 		folders.setLayoutData(gd);
 		
-		fSrcFolderNameText= addTextControl(folders, JavaUIMessages.getString("JavaBasePreferencePage.folders.src"), SRCBIN_SRCNAME);
-		fBinFolderNameText= addTextControl(folders, JavaUIMessages.getString("JavaBasePreferencePage.folders.bin"), SRCBIN_BINNAME);
+		fSrcFolderNameText= addTextControl(folders, JavaUIMessages.getString("JavaBasePreferencePage.folders.src"), SRCBIN_SRCNAME); //$NON-NLS-1$
+		fBinFolderNameText= addTextControl(folders, JavaUIMessages.getString("JavaBasePreferencePage.folders.bin"), SRCBIN_BINNAME); //$NON-NLS-1$
 		fSrcFolderNameText.addModifyListener(fModifyListener);
 		fBinFolderNameText.addModifyListener(fModifyListener);
 		
 		new Label(composite, SWT.NONE); // spacer
-		new Label(composite, SWT.NONE).setText(JavaUIMessages.getString("JavaBasePreferencePage.typeHierarchySettings")); 
+		new Label(composite, SWT.NONE).setText(JavaUIMessages.getString("JavaBasePreferencePage.typeHierarchySettings"));  //$NON-NLS-1$
 		
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR);
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
 		
 		Label label= new Label(composite, SWT.NONE);
-		label.setText(JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy"));
+		label.setText(JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy")); //$NON-NLS-1$
 		
 		Composite radioGroup= new Composite(composite, SWT.NONE);
 		layout= new GridLayout();
 		layout.marginHeight= 0;
 		radioGroup.setLayout(layout);		
 
-		final Button perspective= addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE); 
-		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
+		final Button perspective= addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
+		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); //$NON-NLS-1$
 	
 		/* Need support from workbench for this. See http://dev.eclipse.org/bugs/show_bug.cgi?id=3962
 		final Button reuse= addCheckBox(composite, "&Reuse Type Hierarchy perspective in same window", OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE);
@@ -296,7 +296,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			String srcName= fSrcFolderNameText.getText();
 			String binName= fBinFolderNameText.getText();
 			if (srcName.length() + binName.length() == 0) {
-				updateStatus(new StatusInfo(IStatus.ERROR,  JavaUIMessages.getString("JavaBasePreferencePage.folders.error.namesempty")));
+				updateStatus(new StatusInfo(IStatus.ERROR,  JavaUIMessages.getString("JavaBasePreferencePage.folders.error.namesempty"))); //$NON-NLS-1$
 				return;
 			}
 			IWorkspace workspace= JavaPlugin.getWorkspace();
@@ -304,18 +304,18 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			if (srcName.length() != 0) {
 				status= workspace.validateName(srcName, IResource.FOLDER);
 				if (!status.isOK()) {
-					String message= JavaUIMessages.getFormattedString("JavaBasePreferencePage.folders.error.invalidsrcname", status.getMessage());
+					String message= JavaUIMessages.getFormattedString("JavaBasePreferencePage.folders.error.invalidsrcname", status.getMessage()); //$NON-NLS-1$
 					updateStatus(new StatusInfo(IStatus.ERROR, message));
 					return;
 				}
 			}
 			status= workspace.validateName(binName, IResource.FOLDER);
 			if (!status.isOK()) {
-				String message= JavaUIMessages.getFormattedString("JavaBasePreferencePage.folders.error.invalidbinname", status.getMessage());
+				String message= JavaUIMessages.getFormattedString("JavaBasePreferencePage.folders.error.invalidbinname", status.getMessage()); //$NON-NLS-1$
 				updateStatus(new StatusInfo(IStatus.ERROR, message));
 				return;
 			}
-			IProject dmy= workspace.getRoot().getProject("dmy");
+			IProject dmy= workspace.getRoot().getProject("dmy"); //$NON-NLS-1$
 			IClasspathEntry entry= JavaCore.newSourceEntry(dmy.getFullPath().append(srcName));
 			IPath outputLocation= dmy.getFullPath().append(binName);
 			status= JavaConventions.validateClasspath(JavaCore.create(dmy), new IClasspathEntry[] { entry }, outputLocation);

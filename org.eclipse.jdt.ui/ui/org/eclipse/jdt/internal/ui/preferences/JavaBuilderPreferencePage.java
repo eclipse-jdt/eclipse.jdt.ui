@@ -49,7 +49,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 	
 	private Hashtable fWorkingValues;
 
-	private static final String PREF_RESOURCE_FILTER= "org.eclipse.jdt.core.builder.resourceCopyExclusionFilter";
+	private static final String PREF_RESOURCE_FILTER= "org.eclipse.jdt.core.builder.resourceCopyExclusionFilter"; //$NON-NLS-1$
 
 	private static String[] getAllKeys() {
 		return new String[] {
@@ -72,7 +72,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		
 		fResourceFilterField= new StringDialogField();
 		fResourceFilterField.setDialogFieldListener(listener);
-		fResourceFilterField.setLabelText(JavaUIMessages.getString("JavaBuilderPreferencePage.filter.label"));
+		fResourceFilterField.setLabelText(JavaUIMessages.getString("JavaBuilderPreferencePage.filter.label")); //$NON-NLS-1$
 				
 		updateControls();				
 	}
@@ -93,7 +93,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		composite.setLayout(layout);
 
 		DialogField resourceFilterLabel= new DialogField();
-		resourceFilterLabel.setLabelText(JavaUIMessages.getString("JavaBuilderPreferencePage.filter.description"));
+		resourceFilterLabel.setLabelText(JavaUIMessages.getString("JavaBuilderPreferencePage.filter.description")); //$NON-NLS-1$
 
 		resourceFilterLabel.doFillIntoGrid(composite, 2);
 		LayoutUtil.setWidthHint(resourceFilterLabel.getLabelControl(null), convertWidthInCharsToPixels(80));
@@ -118,7 +118,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 			if (defValue != null) {
 				store.setDefault(key, defValue);
 			} else {
-				JavaPlugin.logErrorMessage("JavaBuilderPreferencePage: value is null: " + key);
+				JavaPlugin.logErrorMessage("JavaBuilderPreferencePage: value is null: " + key); //$NON-NLS-1$
 			}
 			// update the JavaCore options from the pref store
 			String val= store.getString(key);
@@ -159,8 +159,8 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		JavaCore.setOptions(actualOptions);
 		
 		if (hasChanges) {
-			String title= JavaUIMessages.getString("JavaBuilderPreferencePage.needsbuild.title");
-			String message= JavaUIMessages.getString("JavaBuilderPreferencePage.needsbuild.message");
+			String title= JavaUIMessages.getString("JavaBuilderPreferencePage.needsbuild.title"); //$NON-NLS-1$
+			String message= JavaUIMessages.getString("JavaBuilderPreferencePage.needsbuild.message"); //$NON-NLS-1$
 			if (MessageDialog.openQuestion(getShell(), title, message)) {
 				doFullBuild();
 			}
@@ -175,7 +175,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 	}
 	
 	private String[] getFilters(String text) {
-		StringTokenizer tok= new StringTokenizer(text, ",");
+		StringTokenizer tok= new StringTokenizer(text, ","); //$NON-NLS-1$
 		int nTokens= tok.countTokens();
 		String[] res= new String[nTokens];
 		for (int i= 0; i < res.length; i++) {
@@ -194,7 +194,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 			String fileName= filters[i].replace('*', 'x');
 			IStatus status= workspace.validateName(fileName, IResource.FILE);
 			if (status.matches(IStatus.ERROR)) {
-				String message= JavaUIMessages.getFormattedString("JavaBuilderPreferencePage.filter.invalidsegment.error", status.getMessage());
+				String message= JavaUIMessages.getFormattedString("JavaBuilderPreferencePage.filter.invalidsegment.error", status.getMessage()); //$NON-NLS-1$
 				return new StatusInfo(IStatus.ERROR, message);
 			}
 		}
@@ -230,8 +230,8 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		} catch (InterruptedException e) {
 			// cancelled by user
 		} catch (InvocationTargetException e) {
-			String title= JavaUIMessages.getString("JavaBuilderPreferencePage.builderror.title");
-			String message= JavaUIMessages.getString("JavaBuilderPreferencePage.builderror.message");
+			String title= JavaUIMessages.getString("JavaBuilderPreferencePage.builderror.title"); //$NON-NLS-1$
+			String message= JavaUIMessages.getString("JavaBuilderPreferencePage.builderror.message"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, getShell(), title, message);
 		}
 	}		
@@ -252,7 +252,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < filters.length; i++) {
 			if (i > 0) {
-				buf.append(", ");
+				buf.append(", "); //$NON-NLS-1$
 			}
 			buf.append(filters[i]);			
 		}

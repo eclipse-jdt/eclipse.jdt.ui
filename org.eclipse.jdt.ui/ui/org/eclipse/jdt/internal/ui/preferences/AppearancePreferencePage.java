@@ -61,7 +61,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	public static void initDefaults(IPreferenceStore prefs) {
 		prefs.setDefault(PREF_METHOD_RETURNTYPE, false);
 		prefs.setDefault(PREF_OVERRIDE_INDICATOR, true);
-		prefs.setDefault(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, "");
+		prefs.setDefault(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 	}
 	
 	private SelectionButtonDialogField fShowMethodReturnType;

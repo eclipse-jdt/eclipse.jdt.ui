@@ -105,7 +105,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 						} else {
 							IType[] roots= hierarchy.getRootClasses();
 							for (int i= 0; i < roots.length; i++) {
-								if ("java.lang.Object".equals(JavaModelUtil.getFullyQualifiedName(roots[i]))) {
+								if ("java.lang.Object".equals(JavaModelUtil.getFullyQualifiedName(roots[i]))) { //$NON-NLS-1$
 									return new Object[] { roots[i] };
 								}
 							} 

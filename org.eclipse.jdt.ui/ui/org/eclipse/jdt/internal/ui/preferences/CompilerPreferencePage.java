@@ -55,45 +55,45 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 public class CompilerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	// Preference store keys, see JavaCore.getOptions
-	private static final String PREF_LOCAL_VARIABLE_ATTR= "org.eclipse.jdt.core.compiler.debug.localVariable";
-	private static final String PREF_LINE_NUMBER_ATTR= "org.eclipse.jdt.core.compiler.debug.lineNumber";
-	private static final String PREF_SOURCE_FILE_ATTR= "org.eclipse.jdt.core.compiler.debug.sourceFile";
-	private static final String PREF_CODEGEN_UNUSED_LOCAL= "org.eclipse.jdt.core.compiler.codegen.unusedLocal";
-	private static final String PREF_CODEGEN_TARGET_PLATFORM= "org.eclipse.jdt.core.compiler.codegen.targetPlatform";
-	private static final String PREF_PB_UNREACHABLE_CODE= "org.eclipse.jdt.core.compiler.problem.unreachableCode";	
-	private static final String PREF_PB_INVALID_IMPORT= "org.eclipse.jdt.core.compiler.problem.invalidImport";	
-	private static final String PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= "org.eclipse.jdt.core.compiler.problem.overridingPackageDefaultMethod";	
-	private static final String PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= "org.eclipse.jdt.core.compiler.problem.methodWithConstructorName";
-	private static final String PREF_PB_DEPRECATION= "org.eclipse.jdt.core.compiler.problem.deprecation";
-	private static final String PREF_PB_HIDDEN_CATCH_BLOCK= "org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock";
-	private static final String PREF_PB_UNUSED_LOCAL= "org.eclipse.jdt.core.compiler.problem.unusedLocal";	
-	private static final String PREF_PB_UNUSED_PARAMETER= "org.eclipse.jdt.core.compiler.problem.unusedParameter";
-	private static final String PREF_PB_SYNTHETIC_ACCESS_EMULATION= "org.eclipse.jdt.core.compiler.problem.syntheticAccessEmulation";
-	private static final String PREF_PB_NON_EXTERNALIZED_STRINGS= "org.eclipse.jdt.core.compiler.problem.nonExternalizedStringLiteral";
-	private static final String PREF_PB_ASSERT_AS_IDENTIFIER= "org.eclipse.jdt.core.compiler.problem.assertIdentifier";
-	private static final String PREF_SOURCE_COMPATIBILITY= "org.eclipse.jdt.core.compiler.source";
-	private static final String PREF_COMPLIANCE= "org.eclipse.jdt.core.compiler.compliance";
+	private static final String PREF_LOCAL_VARIABLE_ATTR= "org.eclipse.jdt.core.compiler.debug.localVariable"; //$NON-NLS-1$
+	private static final String PREF_LINE_NUMBER_ATTR= "org.eclipse.jdt.core.compiler.debug.lineNumber"; //$NON-NLS-1$
+	private static final String PREF_SOURCE_FILE_ATTR= "org.eclipse.jdt.core.compiler.debug.sourceFile"; //$NON-NLS-1$
+	private static final String PREF_CODEGEN_UNUSED_LOCAL= "org.eclipse.jdt.core.compiler.codegen.unusedLocal"; //$NON-NLS-1$
+	private static final String PREF_CODEGEN_TARGET_PLATFORM= "org.eclipse.jdt.core.compiler.codegen.targetPlatform"; //$NON-NLS-1$
+	private static final String PREF_PB_UNREACHABLE_CODE= "org.eclipse.jdt.core.compiler.problem.unreachableCode";	 //$NON-NLS-1$
+	private static final String PREF_PB_INVALID_IMPORT= "org.eclipse.jdt.core.compiler.problem.invalidImport";	 //$NON-NLS-1$
+	private static final String PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= "org.eclipse.jdt.core.compiler.problem.overridingPackageDefaultMethod";	 //$NON-NLS-1$
+	private static final String PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= "org.eclipse.jdt.core.compiler.problem.methodWithConstructorName"; //$NON-NLS-1$
+	private static final String PREF_PB_DEPRECATION= "org.eclipse.jdt.core.compiler.problem.deprecation"; //$NON-NLS-1$
+	private static final String PREF_PB_HIDDEN_CATCH_BLOCK= "org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock"; //$NON-NLS-1$
+	private static final String PREF_PB_UNUSED_LOCAL= "org.eclipse.jdt.core.compiler.problem.unusedLocal";	 //$NON-NLS-1$
+	private static final String PREF_PB_UNUSED_PARAMETER= "org.eclipse.jdt.core.compiler.problem.unusedParameter"; //$NON-NLS-1$
+	private static final String PREF_PB_SYNTHETIC_ACCESS_EMULATION= "org.eclipse.jdt.core.compiler.problem.syntheticAccessEmulation"; //$NON-NLS-1$
+	private static final String PREF_PB_NON_EXTERNALIZED_STRINGS= "org.eclipse.jdt.core.compiler.problem.nonExternalizedStringLiteral"; //$NON-NLS-1$
+	private static final String PREF_PB_ASSERT_AS_IDENTIFIER= "org.eclipse.jdt.core.compiler.problem.assertIdentifier"; //$NON-NLS-1$
+	private static final String PREF_SOURCE_COMPATIBILITY= "org.eclipse.jdt.core.compiler.source"; //$NON-NLS-1$
+	private static final String PREF_COMPLIANCE= "org.eclipse.jdt.core.compiler.compliance"; //$NON-NLS-1$
 
-	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance";
+	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
 
 	// values
-	private static final String GENERATE= "generate";
-	private static final String DO_NOT_GENERATE= "do not generate";
+	private static final String GENERATE= "generate"; //$NON-NLS-1$
+	private static final String DO_NOT_GENERATE= "do not generate"; //$NON-NLS-1$
 	
-	private static final String PRESERVE= "preserve";
-	private static final String OPTIMIZE_OUT= "optimize out";
+	private static final String PRESERVE= "preserve"; //$NON-NLS-1$
+	private static final String OPTIMIZE_OUT= "optimize out"; //$NON-NLS-1$
 	
-	private static final String VERSION_1_1= "1.1";
-	private static final String VERSION_1_2= "1.2";
-	private static final String VERSION_1_3= "1.3";
-	private static final String VERSION_1_4= "1.4";
+	private static final String VERSION_1_1= "1.1"; //$NON-NLS-1$
+	private static final String VERSION_1_2= "1.2"; //$NON-NLS-1$
+	private static final String VERSION_1_3= "1.3"; //$NON-NLS-1$
+	private static final String VERSION_1_4= "1.4"; //$NON-NLS-1$
 	
-	private static final String ERROR= "error";
-	private static final String WARNING= "warning";
-	private static final String IGNORE= "ignore";
+	private static final String ERROR= "error"; //$NON-NLS-1$
+	private static final String WARNING= "warning"; //$NON-NLS-1$
+	private static final String IGNORE= "ignore"; //$NON-NLS-1$
 	
-	private static final String DEFAULT= "default";
-	private static final String USER= "user";	
+	private static final String DEFAULT= "default"; //$NON-NLS-1$
+	private static final String USER= "user";	 //$NON-NLS-1$
 
 	private static String[] getAllKeys() {
 		return new String[] {
@@ -118,7 +118,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 			if (defValue != null) {
 				store.setDefault(key, defValue);
 			} else {
-				JavaPlugin.logErrorMessage("CompilerPreferencePage: value is null: " + key);
+				JavaPlugin.logErrorMessage("CompilerPreferencePage: value is null: " + key); //$NON-NLS-1$
 			}
 			// update the JavaCore options from the pref store
 			String val= store.getString(key);
@@ -243,9 +243,9 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
-			JavaUIMessages.getString("CompilerPreferencePage.error"), 
-			JavaUIMessages.getString("CompilerPreferencePage.warning"),
-			JavaUIMessages.getString("CompilerPreferencePage.ignore")
+			JavaUIMessages.getString("CompilerPreferencePage.error"),  //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.warning"), //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.ignore") //$NON-NLS-1$
 		};
 			
 		GridLayout layout= new GridLayout();
@@ -327,8 +327,8 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 
 		String[] values34= new String[] { VERSION_1_3, VERSION_1_4 };
 		String[] values34Labels= new String[] {
-			JavaUIMessages.getString("CompilerPreferencePage.version13"), 
-			JavaUIMessages.getString("CompilerPreferencePage.version14")
+			JavaUIMessages.getString("CompilerPreferencePage.version13"),  //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.version14") //$NON-NLS-1$
 		};
 		
 		String label= JavaUIMessages.getString("CompilerPreferencePage.compiler_compliance.label"); //$NON-NLS-1$
@@ -342,10 +342,10 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 				
 		String[] values14= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4 };
 		String[] values14Labels= new String[] {
-			JavaUIMessages.getString("CompilerPreferencePage.version11"), 
-			JavaUIMessages.getString("CompilerPreferencePage.version12"),
-			JavaUIMessages.getString("CompilerPreferencePage.version13"),
-			JavaUIMessages.getString("CompilerPreferencePage.version14")
+			JavaUIMessages.getString("CompilerPreferencePage.version11"),  //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.version12"), //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.version13"), //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.version14") //$NON-NLS-1$
 		};
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.codegen_targetplatform.label"); //$NON-NLS-1$
@@ -357,9 +357,9 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
-			JavaUIMessages.getString("CompilerPreferencePage.error"), 
-			JavaUIMessages.getString("CompilerPreferencePage.warning"),
-			JavaUIMessages.getString("CompilerPreferencePage.ignore")
+			JavaUIMessages.getString("CompilerPreferencePage.error"),  //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.warning"), //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.ignore") //$NON-NLS-1$
 		};
 
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_assert_as_identifier.label"); //$NON-NLS-1$
@@ -462,22 +462,22 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		StatusInfo status= new StatusInfo();
 		if (checkValue(PREF_COMPLIANCE, VERSION_1_3)) {
 			if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
-				status.setError(JavaUIMessages.getString("CompilerPreferencePage.cpl13src14.error"));
+				status.setError(JavaUIMessages.getString("CompilerPreferencePage.cpl13src14.error")); //$NON-NLS-1$
 				return status;
 			} else if (checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_4)) {
-				status.setError(JavaUIMessages.getString("CompilerPreferencePage.cpl13trg14.error"));
+				status.setError(JavaUIMessages.getString("CompilerPreferencePage.cpl13trg14.error")); //$NON-NLS-1$
 				return status;
 			}
 		}
 		if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
 			if (!checkValue(PREF_PB_ASSERT_AS_IDENTIFIER, ERROR)) {
-				status.setError(JavaUIMessages.getString("CompilerPreferencePage.src14asrterr.error"));
+				status.setError(JavaUIMessages.getString("CompilerPreferencePage.src14asrterr.error")); //$NON-NLS-1$
 				return status;
 			}
 		}
 		if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
 			if (!checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_4)) {
-				status.setError(JavaUIMessages.getString("CompilerPreferencePage.src14tgt14.error"));
+				status.setError(JavaUIMessages.getString("CompilerPreferencePage.src14tgt14.error")); //$NON-NLS-1$
 				return status;
 			}
 		}		
@@ -552,8 +552,8 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		JavaCore.setOptions(actualOptions);
 		
 		if (hasChanges) {
-			String title= JavaUIMessages.getString("CompilerPreferencePage.needsbuild.title");
-			String message= JavaUIMessages.getString("CompilerPreferencePage.needsbuild.message");
+			String title= JavaUIMessages.getString("CompilerPreferencePage.needsbuild.title"); //$NON-NLS-1$
+			String message= JavaUIMessages.getString("CompilerPreferencePage.needsbuild.message"); //$NON-NLS-1$
 			if (MessageDialog.openQuestion(getShell(), title, message)) {
 				doFullBuild();
 			}
@@ -576,8 +576,8 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		} catch (InterruptedException e) {
 			// cancelled by user
 		} catch (InvocationTargetException e) {
-			String title= JavaUIMessages.getString("CompilerPreferencePage.builderror.title");
-			String message= JavaUIMessages.getString("CompilerPreferencePage.builderror.message");
+			String title= JavaUIMessages.getString("CompilerPreferencePage.builderror.title"); //$NON-NLS-1$
+			String message= JavaUIMessages.getString("CompilerPreferencePage.builderror.message"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, getShell(), title, message);
 		}
 	}		

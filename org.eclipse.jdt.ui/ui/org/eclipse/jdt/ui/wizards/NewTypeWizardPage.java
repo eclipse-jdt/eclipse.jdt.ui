@@ -1129,7 +1129,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		IJavaProject project= root.getJavaProject();
 		SuperInterfaceSelectionDialog dialog= new SuperInterfaceSelectionDialog(getShell(), getWizard().getContainer(), fSuperInterfacesDialogField, project);
-		dialog.setTitle(fIsClass ? NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.class.title") : NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.interface.title"));
+		dialog.setTitle(fIsClass ? NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.class.title") : NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.interface.title")); //$NON-NLS-1$ //$NON-NLS-2$
 		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.InterfacesDialog.message")); //$NON-NLS-1$
 		dialog.open();
 		return;
@@ -1171,9 +1171,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		String lineDelimiter= null;	
 		if (!isInnerClass) {
-			lineDelimiter= System.getProperty("line.separator", "\n");
+			lineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			
-			String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ";" + lineDelimiter + lineDelimiter;
+			String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ";" + lineDelimiter + lineDelimiter; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", packStatement, false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
 
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
@@ -1331,7 +1331,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */		
 	protected String getFileComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doFileComments()) {
-			return getTemplate("filecomment", parentCU);
+			return getTemplate("filecomment", parentCU); //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -1342,7 +1342,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */		
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doCreateComments()) {
-			return getTemplate("typecomment", parentCU);
+			return getTemplate("typecomment", parentCU); //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -1395,7 +1395,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		IMethod[] createdMethods= new IMethod[newMethods.size()];
 		for (int i= 0; i < newMethods.size(); i++) {
-			String content= (String) newMethods.get(i) + "\n";
+			String content= (String) newMethods.get(i) + "\n"; //$NON-NLS-1$
 			createdMethods[i]= type.createMethod(content, null, false, null);
 		}
 		return createdMethods;

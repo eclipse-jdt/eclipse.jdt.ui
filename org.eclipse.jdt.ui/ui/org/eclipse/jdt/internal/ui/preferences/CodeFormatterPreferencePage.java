@@ -59,28 +59,28 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	// Preference store keys, see JavaCore.getOptions
-	private static final String PREF_NEWLINE_OPENING_BRACES= "org.eclipse.jdt.core.formatter.newline.openingBrace";
-	private static final String PREF_NEWLINE_CONTROL_STATEMENT= "org.eclipse.jdt.core.formatter.newline.controlStatement";
-	private static final String PREF_NEWLINE_CLEAR_ALL= "org.eclipse.jdt.core.formatter.newline.clearAll";
-	private static final String PREF_NEWLINE_ELSE_IF= "org.eclipse.jdt.core.formatter.newline.elseIf";
-	private static final String PREF_NEWLINE_EMPTY_BLOCK= "org.eclipse.jdt.core.formatter.newline.emptyBlock";
-	private static final String PREF_LINE_SPLIT= "org.eclipse.jdt.core.formatter.lineSplit";	
-	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= "org.eclipse.jdt.core.formatter.style.assignment";	
-	private static final String PREF_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char";	
-	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";
+	private static final String PREF_NEWLINE_OPENING_BRACES= CorrectionMessages.getString("org.eclipse.jdt.core.formatter.newline.openingBrace_1"); //$NON-NLS-1$
+	private static final String PREF_NEWLINE_CONTROL_STATEMENT= CorrectionMessages.getString("org.eclipse.jdt.core.formatter.newline.controlStatement_2"); //$NON-NLS-1$
+	private static final String PREF_NEWLINE_CLEAR_ALL= "org.eclipse.jdt.core.formatter.newline.clearAll"; //$NON-NLS-1$
+	private static final String PREF_NEWLINE_ELSE_IF= "org.eclipse.jdt.core.formatter.newline.elseIf"; //$NON-NLS-1$
+	private static final String PREF_NEWLINE_EMPTY_BLOCK= "org.eclipse.jdt.core.formatter.newline.emptyBlock"; //$NON-NLS-1$
+	private static final String PREF_LINE_SPLIT= "org.eclipse.jdt.core.formatter.lineSplit";	 //$NON-NLS-1$
+	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= "org.eclipse.jdt.core.formatter.style.assignment";	 //$NON-NLS-1$
+	private static final String PREF_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char";	 //$NON-NLS-1$
+	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
 
 	// values
-	private static final String INSERT= "insert";
-	private static final String DO_NOT_INSERT= "do not insert";
+	private static final String INSERT= "insert"; //$NON-NLS-1$
+	private static final String DO_NOT_INSERT= "do not insert"; //$NON-NLS-1$
 	
-	private static final String COMPACT= "compact";
-	private static final String NORMAL= "normal";
+	private static final String COMPACT= "compact"; //$NON-NLS-1$
+	private static final String NORMAL= "normal"; //$NON-NLS-1$
 	
-	private static final String TAB= "tab";
-	private static final String SPACE= "space";
+	private static final String TAB= "tab"; //$NON-NLS-1$
+	private static final String SPACE= "space"; //$NON-NLS-1$
 	
-	private static final String CLEAR_ALL= "clear all";
-	private static final String PRESERVE_ONE= "preserve one";
+	private static final String CLEAR_ALL= "clear all"; //$NON-NLS-1$
+	private static final String PRESERVE_ONE= "preserve one"; //$NON-NLS-1$
 	
 
 	private static String[] getAllKeys() {
@@ -139,7 +139,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			if (defValue != null) {
 				store.setDefault(key, defValue);
 			} else {
-				JavaPlugin.logErrorMessage("CodeFormatterPreferencePage: value is null: " + key);
+				JavaPlugin.logErrorMessage("CodeFormatterPreferencePage: value is null: " + key); //$NON-NLS-1$
 			}
 			// update the JavaCore options from the pref store
 			String val= store.getString(key);
@@ -467,7 +467,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 
 	private void updatePreview() {
 		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(fWorkingValues);
-		fPreviewDocument.set(formatter.format(fPreviewText, 0, null, "\n"));
+		fPreviewDocument.set(formatter.format(fPreviewText, 0, null, "\n")); //$NON-NLS-1$
 	}	
 	
 	private void updateControls() {
@@ -490,15 +490,15 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private IStatus validatePositiveNumber(String number) {
 		StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
-			status.setError(JavaUIMessages.getString("CodeFormatterPreferencePage.empty_input"));
+			status.setError(JavaUIMessages.getString("CodeFormatterPreferencePage.empty_input")); //$NON-NLS-1$
 		} else {
 			try {
 				int value= Integer.parseInt(number);
 				if (value < 0) {
-					status.setError(JavaUIMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number));
+					status.setError(JavaUIMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number)); //$NON-NLS-1$
 				}
 			} catch (NumberFormatException e) {
-				status.setError(JavaUIMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number));
+				status.setError(JavaUIMessages.getFormattedString("CodeFormatterPreferencePage.invalid_input", number)); //$NON-NLS-1$
 			}
 		}
 		return status;

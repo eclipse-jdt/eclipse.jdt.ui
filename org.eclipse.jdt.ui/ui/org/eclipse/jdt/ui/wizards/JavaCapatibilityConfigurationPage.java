@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.ui.wizards;import java.lang.reflect.InvocationTargetException;
+package org.eclipse.jdt.ui.wizards;import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -86,7 +86,7 @@ public class JavaCapatibilityConfigurationPage extends NewElementWizardPage {
 	 * the default classpath is only used if no '.classpath' exists.
 	 */
 	public void setDefaultPaths(IPath outputLocation, IClasspathEntry[] entries, boolean overrideExistingClasspath) {
-		if (!overrideExistingClasspath && fJavaProject.getProject().getFile(".classpath").exists()) {
+		if (!overrideExistingClasspath && fJavaProject.getProject().getFile(".classpath").exists()) { //$NON-NLS-1$
 			entries= null;
 			outputLocation= null;
 		}

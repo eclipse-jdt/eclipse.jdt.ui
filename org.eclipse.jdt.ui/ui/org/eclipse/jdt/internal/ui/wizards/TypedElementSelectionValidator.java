@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
  */
 public class TypedElementSelectionValidator implements ISelectionValidator {
 
-	private IStatus fgErrorStatus= new StatusInfo(IStatus.ERROR, "");
+	private IStatus fgErrorStatus= new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 	private IStatus fgOKStatus= new StatusInfo();
 
 	private Class[] fAcceptedTypes;

@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ArchiveFileFilter extends ViewerFilter {
 
-	private static final String[] fgArchiveExtensions= { "jar", "zip" };
+	private static final String[] fgArchiveExtensions= { "jar", "zip" }; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private List fExcludes;
 	

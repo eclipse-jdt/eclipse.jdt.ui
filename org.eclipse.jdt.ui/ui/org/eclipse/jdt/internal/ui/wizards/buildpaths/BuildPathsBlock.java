@@ -128,7 +128,7 @@ public class BuildPathsBlock {
 		
 		fClassPathList= new CheckedListDialogField(null, buttonLabels, new CPListLabelProvider());
 		fClassPathList.setDialogFieldListener(adapter);
-		fClassPathList.setLabelText(NewWizardMessages.getString("BuildPathsBlock.classpath.label")); 
+		fClassPathList.setLabelText(NewWizardMessages.getString("BuildPathsBlock.classpath.label"));  //$NON-NLS-1$
 		fClassPathList.setUpButtonIndex(0);
 		fClassPathList.setDownButtonIndex(1);
 		fClassPathList.setCheckAllButtonIndex(3);
@@ -261,7 +261,7 @@ public class BuildPathsBlock {
 		boolean projExists= false;
 		try {
 			IProject project= fCurrJProject.getProject();
-			projExists= (project.exists() && project.getFile(".classpath").exists());
+			projExists= (project.exists() && project.getFile(".classpath").exists()); //$NON-NLS-1$
 			if  (projExists) {
 				if (outputLocation == null) {
 					outputLocation=  fCurrJProject.getOutputLocation();

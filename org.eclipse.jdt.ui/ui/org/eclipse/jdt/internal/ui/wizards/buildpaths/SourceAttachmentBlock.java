@@ -180,7 +180,7 @@ public class SourceAttachmentBlock {
 			fPrefixField.setText(""); //$NON-NLS-1$
 		}
 		
-		String jdocText= "";
+		String jdocText= ""; //$NON-NLS-1$
 		if (fOldEntry != null) {
 			IPath path= fJARPath;
 			if (path != null && fIsVariableEntry) {
@@ -249,7 +249,7 @@ public class SourceAttachmentBlock {
 		
 		Label message= new Label(composite, SWT.LEFT);
 		message.setLayoutData(gd);
-		message.setText(NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fJARPath.lastSegment()));
+		message.setText(NewWizardMessages.getFormattedString("SourceAttachmentBlock.message", fJARPath.lastSegment())); //$NON-NLS-1$
 				
 		if (fIsVariableEntry) {
 			DialogField.createEmptySpace(composite, 1);
@@ -257,7 +257,7 @@ public class SourceAttachmentBlock {
 			gd.widthHint= widthHint;
 			gd.horizontalSpan= 2;
 			Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
-			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.filename.description"));
+			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.filename.description")); //$NON-NLS-1$
 			desc.setLayoutData(gd);
 			DialogField.createEmptySpace(composite, 1);
 		}
@@ -285,7 +285,7 @@ public class SourceAttachmentBlock {
 		gd.widthHint= widthHint;
 		gd.horizontalSpan= 2;
 		Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
-		desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.description"));
+		desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.description")); //$NON-NLS-1$
 		desc.setLayoutData(gd);
 		DialogField.createEmptySpace(composite, 1);		
 		
@@ -311,7 +311,7 @@ public class SourceAttachmentBlock {
 			gd.widthHint= widthHint;
 			gd.horizontalSpan= 2;
 			desc= new Label(composite, SWT.LEFT + SWT.WRAP);
-			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.description"));
+			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.description")); //$NON-NLS-1$
 			desc.setLayoutData(gd);
 			DialogField.createEmptySpace(composite, 1);		
 
@@ -549,9 +549,9 @@ public class SourceAttachmentBlock {
 						status.setError(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.error.notafolder")); //$NON-NLS-1$
 						return status;
 					} else {
-						File packagesFile= new File(dir, "package-list");
+						File packagesFile= new File(dir, "package-list"); //$NON-NLS-1$
 						if (!packagesFile.exists()) {
-							status.setWarning(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.warning.packagelist"));
+							status.setWarning(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.warning.packagelist")); //$NON-NLS-1$
 							// only a warning, go on
 						}
 					}	

@@ -75,12 +75,12 @@ class CPListLabelProvider extends LabelProvider {
 					} else if (resource instanceof IFile) {
 						if (ArchiveFileFilter.isArchivePath(path)) {
 							String[] args= new String[] { path.lastSegment(), path.removeLastSegments(1).makeRelative().toString() };
-							return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", args);
+							return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", args); //$NON-NLS-1$
 						}
 					} else {
 						if (ArchiveFileFilter.isArchivePath(path)) {
 							String[] args= new String[] { path.lastSegment(), path.removeLastSegments(1).toOSString() };
-							return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", args);
+							return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", args); //$NON-NLS-1$
 						}
 					}
 					// should not come here

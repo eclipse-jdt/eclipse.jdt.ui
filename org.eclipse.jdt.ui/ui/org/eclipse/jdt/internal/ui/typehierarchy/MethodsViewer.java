@@ -93,7 +93,7 @@ public class MethodsViewer extends ProblemTableViewer {
 			}
 		});
 		
-		fMemberFilterActionGroup= new MemberFilterActionGroup(this, "HierarchyMethodView");
+		fMemberFilterActionGroup= new MemberFilterActionGroup(this, "HierarchyMethodView"); //$NON-NLS-1$
 		
 		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);
 		showInheritedMethods(false);

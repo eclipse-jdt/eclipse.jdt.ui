@@ -188,8 +188,8 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		if (workspace.getRoot().getProjects().length == 0) {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			String title= NewWizardMessages.getString("AbstractOpenWizardAction.noproject.title");
-			String message= NewWizardMessages.getString("AbstractOpenWizardAction.noproject.message");
+			String title= NewWizardMessages.getString("AbstractOpenWizardAction.noproject.title"); //$NON-NLS-1$
+			String message= NewWizardMessages.getString("AbstractOpenWizardAction.noproject.message"); //$NON-NLS-1$
 			if (MessageDialog.openQuestion(shell, title, message)) {
 				IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 				(new CreateProjectAction(window)).run();

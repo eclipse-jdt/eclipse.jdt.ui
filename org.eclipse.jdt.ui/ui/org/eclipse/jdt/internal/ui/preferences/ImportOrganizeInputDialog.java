@@ -65,16 +65,16 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		
 		fExistingEntries= existingEntries;
 		
-		setTitle(JavaUIMessages.getString("ImportOrganizeInputDialog.title"));
+		setTitle(JavaUIMessages.getString("ImportOrganizeInputDialog.title")); //$NON-NLS-1$
 
 		ImportOrganizeInputAdapter adapter= new ImportOrganizeInputAdapter();
 
 		fNameDialogField= new StringButtonDialogField(adapter);
-		fNameDialogField.setLabelText(JavaUIMessages.getString("ImportOrganizeInputDialog.message"));
-		fNameDialogField.setButtonLabel(JavaUIMessages.getString("ImportOrganizeInputDialog.browse.button"));
+		fNameDialogField.setLabelText(JavaUIMessages.getString("ImportOrganizeInputDialog.message")); //$NON-NLS-1$
+		fNameDialogField.setButtonLabel(JavaUIMessages.getString("ImportOrganizeInputDialog.browse.button")); //$NON-NLS-1$
 		fNameDialogField.setDialogFieldListener(adapter);
 		
-		fNameDialogField.setText("");		
+		fNameDialogField.setText("");		 //$NON-NLS-1$
 	}
 	
 	public void setInitialString(String input) {
@@ -143,14 +143,14 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		StatusInfo status= new StatusInfo();
 		String newText= fNameDialogField.getText();
 		if (newText.length() == 0) {
-			status.setError(JavaUIMessages.getString("ImportOrganizeInputDialog.error.enterName"));
+			status.setError(JavaUIMessages.getString("ImportOrganizeInputDialog.error.enterName")); //$NON-NLS-1$
 		} else {
 			IStatus val= JavaConventions.validatePackageName(newText);
 			if (val.matches(IStatus.ERROR)) {
-				status.setError(JavaUIMessages.getFormattedString("ImportOrganizeInputDialog.error.invalidName", val.getMessage()));
+				status.setError(JavaUIMessages.getFormattedString("ImportOrganizeInputDialog.error.invalidName", val.getMessage())); //$NON-NLS-1$
 			} else {
 				if (fExistingEntries.contains(newText)) {
-					status.setError(JavaUIMessages.getString("ImportOrganizeInputDialog.error.entryExists"));
+					status.setError(JavaUIMessages.getString("ImportOrganizeInputDialog.error.entryExists")); //$NON-NLS-1$
 				}
 			}
 		}
