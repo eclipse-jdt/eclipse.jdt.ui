@@ -31,6 +31,7 @@ import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 
 public class NLSSearchQuery implements ISearchQuery {
@@ -56,6 +57,11 @@ public class NLSSearchQuery implements ISearchQuery {
 	 */
 	public IStatus run(IProgressMonitor monitor) {
 		monitor.beginTask("", 5); //$NON-NLS-1$
+		if (! fWrapperClass.exists())
+			return JavaUIStatus.createError(0, NLSSearchMessages.getFormattedString("NLSSearchQuery.wrapperNotExists", fWrapperClass.getElementName()), null); //$NON-NLS-1$
+		if (! fPropertiesFile.exists())
+			return JavaUIStatus.createError(0, NLSSearchMessages.getFormattedString("NLSSearchQuery.propertiesNotExists", fPropertiesFile.getName()), null); //$NON-NLS-1$
+		
 		final AbstractTextSearchResult textResult= (AbstractTextSearchResult) getSearchResult();
 		textResult.removeAll();
 		
