@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.util;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
@@ -61,6 +63,17 @@ public class SuperTypeHierarchyCache {
 	 * @throws JavaModelException
 	 */
 	public static ITypeHierarchy getTypeHierarchy(IType type) throws JavaModelException {
+		return getTypeHierarchy(type, null);
+	}
+
+	/**
+	 * Get a hierarchy for the given type
+	 * @param type
+	 * @param progressMonitor the progress monitor
+	 * @return
+	 * @throws JavaModelException
+	 */
+	public static ITypeHierarchy getTypeHierarchy(IType type, IProgressMonitor progressMonitor) throws JavaModelException {
 		synchronized (fgHierarchyCache) {
 			ITypeHierarchy hierarchy= findTypeHierarchyInCache(type);
 			if (hierarchy == null) {
@@ -70,7 +83,7 @@ public class SuperTypeHierarchyCache {
 					entry.freeHierarchy();
 				}
 				int startTime= (int) System.currentTimeMillis();				
-				hierarchy= type.newSupertypeHierarchy(null);
+				hierarchy= type.newSupertypeHierarchy(progressMonitor);
 				int totTime= (int) System.currentTimeMillis() - startTime;
 				if (totTime > fgMaxCreationTime) {
 					fgMaxCreationTime= totTime;
