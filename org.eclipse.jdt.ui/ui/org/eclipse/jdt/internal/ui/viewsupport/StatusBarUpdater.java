@@ -42,7 +42,7 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 	}
 	
 	
-	private String formatMessage(ISelection sel) {
+	protected String formatMessage(ISelection sel) {
 		if (sel instanceof IStructuredSelection && !sel.isEmpty()) {
 			IStructuredSelection selection= (IStructuredSelection) sel;
 			
