@@ -45,8 +45,13 @@ public abstract class JDTQuickMenuAction extends QuickMenuAction {
 	private Point computeWordStart() {
 		ITextSelection selection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 		IRegion textRegion= JavaWordFinder.findWord(fEditor.getViewer().getDocument(), selection.getOffset());
+		if (textRegion == null)
+			return null;
 				
 		IRegion widgetRegion= modelRange2WidgetRange(textRegion);
+		if (widgetRegion == null)
+			return null;
+		
 		int start= widgetRegion.getOffset();
 				
 		StyledText styledText= fEditor.getViewer().getTextWidget();
