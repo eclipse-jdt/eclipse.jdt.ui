@@ -15,12 +15,16 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -44,6 +48,8 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class UseSupertypeWizard extends RefactoringWizard{
 
+	/* package */ static final String DIALOG_SETTING_SECTION= "UseSupertypeWizard"; //$NON-NLS-1$
+	
 	public UseSupertypeWizard(UseSuperTypeRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("UseSupertypeWizard.Use_Super_Type_Where_Possible")); //$NON-NLS-1$
@@ -58,39 +64,35 @@ public class UseSupertypeWizard extends RefactoringWizard{
 	
 	private static class UseSupertypeInputPage extends UserInputWizardPage{
 
+		private static final String REWRITE_INSTANCEOF= "rewriteInstanceOf";  //$NON-NLS-1$
 		public static final String PAGE_NAME= "UseSupertypeInputPage";//$NON-NLS-1$
 		private TableViewer fTableViewer; 
 		private final Map fFileCount;  //IType -> Integer
 		private final static String MESSAGE= RefactoringMessages.getString("UseSupertypeInputPage.Select_supertype"); //$NON-NLS-1$
 		private JavaElementLabelProvider fTableLabelProvider;
-
+		private IDialogSettings fSettings;
+		
 		public UseSupertypeInputPage() {
 			super(PAGE_NAME);
 			fFileCount= new HashMap(2);
 			setMessage(MESSAGE);
 		}
 
+		private void loadSettings() {
+			fSettings= getDialogSettings().getSection(UseSupertypeWizard.DIALOG_SETTING_SECTION);
+			if (fSettings == null) {
+				fSettings= getDialogSettings().addNewSection(UseSupertypeWizard.DIALOG_SETTING_SECTION);
+				fSettings.put(REWRITE_INSTANCEOF, false);
+			}
+			((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().setInstanceOf(fSettings.getBoolean(REWRITE_INSTANCEOF));
+		}	
+
 		public void createControl(Composite parent) {
+			loadSettings();
 			Composite composite= new Composite(parent, SWT.NONE);
 			setControl(composite);
 			composite.setLayout(new GridLayout());
-			
-			//XXX 39862 use supertype: cannot control whether instanceof references are updated 
 
-//			final Button checkbox= new Button(composite, SWT.CHECK);
-//			checkbox.setText(RefactoringMessages.getString("UseSupertypeInputPage.Use_in_instanceof")); //$NON-NLS-1$
-//			checkbox.setLayoutData(new GridData());
-//			checkbox.setSelection(getUseSupertypeRefactoring().getUseSupertypeInInstanceOf());
-//			checkbox.addSelectionListener(new SelectionAdapter(){
-//				public void widgetSelected(SelectionEvent e) {
-//					getUseSupertypeRefactoring().setUseSupertypeInInstanceOf(checkbox.getSelection());
-//					setMessage(MESSAGE);
-//					setPageComplete(true);
-//					fFileCount.clear();
-//					fTableViewer.refresh();
-//				}
-//			});
-		
 			Label label= new Label(composite, SWT.NONE);
 			label.setText(RefactoringMessages.getFormattedString(
 					"UseSupertypeInputPage.Select_supertype_to_use", //$NON-NLS-1$
@@ -98,6 +100,22 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			label.setLayoutData(new GridData());
 		
 			addTableComponent(composite);
+
+			final Button checkbox= new Button(composite, SWT.CHECK);
+			checkbox.setText(RefactoringMessages.getString("UseSupertypeInputPage.Use_in_instanceof")); //$NON-NLS-1$
+			checkbox.setLayoutData(new GridData());
+			checkbox.setSelection(((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().isInstanceOf());
+			checkbox.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e) {
+					((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().setInstanceOf(checkbox.getSelection());
+					fSettings.put(REWRITE_INSTANCEOF, checkbox.getSelection());
+					setMessage(MESSAGE);
+					setPageComplete(true);
+					fFileCount.clear();
+					fTableViewer.refresh();
+				}
+			});
+
 			Dialog.applyDialogFont(composite);
 		}
 
