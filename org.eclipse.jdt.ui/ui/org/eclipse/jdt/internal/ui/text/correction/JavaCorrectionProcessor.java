@@ -11,10 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,32 +48,13 @@ import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
 	private static final String QUICKFIX_PROCESSOR_CONTRIBUTION_ID= "quickFixProcessors"; //$NON-NLS-1$
 	private static final String QUICKASSIST_PROCESSOR_CONTRIBUTION_ID= "quickAssistProcessors"; //$NON-NLS-1$
-
-
-	private static class CorrectionsComparator implements Comparator {
-		
-		private static Collator fgCollator= Collator.getInstance();
-		
-		public int compare(Object o1, Object o2) {
-			if ((o1 instanceof IJavaCompletionProposal) && (o2 instanceof IJavaCompletionProposal)) {
-				IJavaCompletionProposal e1= (IJavaCompletionProposal) o1;
-				IJavaCompletionProposal e2= (IJavaCompletionProposal) o2;				
-				int del= e2.getRelevance() - e1.getRelevance();
-				if (del != 0) {
-					return del;
-				}
-				return fgCollator.compare(e1.getDisplayString(), e2.getDisplayString());
-
-			}				
-			return fgCollator.compare(((ICompletionProposal) o1).getDisplayString(), ((ICompletionProposal) o2).getDisplayString());
-		}
-	}
 		
 	private static ContributedProcessorDescriptor[] fContributedAssistProcessors= null;
 	private static ContributedProcessorDescriptor[] fContributedCorrectionProcessors= null;
@@ -202,7 +181,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		}
 		
 		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
-		Arrays.sort(res, new CorrectionsComparator());
+		Arrays.sort(res, JavaCompletionProposalComparator.getInstance());
 		return res;
 	}
 	

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 
 /**
   */
@@ -152,6 +154,8 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 						IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
 						ArrayList proposals= new ArrayList();
 						JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+						Collections.sort(proposals, JavaCompletionProposalComparator.getInstance());
+						
 						int nProposals= proposals.size();
 						IMarkerResolution[] resolutions= new IMarkerResolution[nProposals];
 						for (int i= 0; i < nProposals; i++) {
