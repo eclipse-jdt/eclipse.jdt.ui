@@ -27,11 +27,4 @@ public class MoveActionDelegate extends RefactoringActionDelegate {
 			RefactoringGroup.createMoveMembersAction(provider)
 		});
 	}
-	
-	/* (non-Javadoc)
-	 * Method declared in RefactoringActionDelegate
-	 */
-	protected boolean handleTextSelection(ITextSelection selection) {
-		return false;
-	}		
 }

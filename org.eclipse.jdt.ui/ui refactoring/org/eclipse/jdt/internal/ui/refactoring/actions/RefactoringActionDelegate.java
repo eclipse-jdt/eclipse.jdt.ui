@@ -44,9 +44,7 @@ public class RefactoringActionDelegate implements IWorkbenchWindowActionDelegate
 	}
 	
 	protected boolean handleTextSelection(ITextSelection selection) {
-		if (fWorkbenchWindow.getPartService().getActivePart() instanceof CompilationUnitEditor)
-			return ((ITextSelection)selection).getLength() > 0;
-		return false;
+		return (fWorkbenchWindow.getPartService().getActivePart() instanceof CompilationUnitEditor);
 	}
 	
 	protected boolean handleStructuredSelection(IStructuredSelection selection) {
