@@ -196,13 +196,7 @@ public class JavaElementSorter extends ViewerSorter {
 
 		if (cat1 != cat2)
 			return cat1 - cat2;
-		
-		if (cat1 == PROJECTS) {
-			IWorkbenchAdapter a1= (IWorkbenchAdapter)((IAdaptable)e1).getAdapter(IWorkbenchAdapter.class);
-			IWorkbenchAdapter a2= (IWorkbenchAdapter)((IAdaptable)e2).getAdapter(IWorkbenchAdapter.class);
-				return getCollator().compare(a1.getLabel(e1), a2.getLabel(e2));
-		}
-			
+				
 		if (cat1 == PACKAGEFRAGMENTROOTS) {
 			IPackageFragmentRoot root1= getPackageFragmentRoot(e1);
 			IPackageFragmentRoot root2= getPackageFragmentRoot(e2);
@@ -225,10 +219,16 @@ public class JavaElementSorter extends ViewerSorter {
 			e1= root1; // normalize classpath container to root
 			e2= root2;
 		}
-		// non - java resources are sorted using the label from the viewers label provider
+
 		if (cat1 == PROJECTS || cat1 == RESOURCES || cat1 == RESOURCEFOLDERS || cat1 == STORAGE || cat1 == OTHERS) {
-			return compareWithLabelProvider(viewer, e1, e2);
+			String name1= getNonJavaElementLabel(viewer, e1);
+			String name2= getNonJavaElementLabel(viewer, e2);
+			if (name1 != null && name2 != null) {
+				return getCollator().compare(name1, name2);
+			}
+			return 0; // can't compare
 		}
+		// only java elements from this point
 		
 		if (e1 instanceof IMember) {
 			if (fMemberOrderCache.isSortByVisibility()) {
@@ -297,19 +297,19 @@ public class JavaElementSorter extends ViewerSorter {
 		return JavaModelUtil.getPackageFragmentRoot((IJavaElement)element);
 	}
 	
-	private int compareWithLabelProvider(Viewer viewer, Object e1, Object e2) {
-		if (viewer == null || !(viewer instanceof ContentViewer)) {
+	private String getNonJavaElementLabel(Viewer viewer, Object element) {
+		// try to use the workbench adapter for non - java resources or if not available, use the viewers label provider
+
+		IWorkbenchAdapter adapter= (IWorkbenchAdapter) ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
+		if (adapter != null) {
+			return adapter.getLabel(element);
+		} else if (viewer instanceof ContentViewer) {
 			IBaseLabelProvider prov = ((ContentViewer) viewer).getLabelProvider();
 			if (prov instanceof ILabelProvider) {
-				ILabelProvider lprov= (ILabelProvider) prov;
-				String name1 = lprov.getText(e1);
-				String name2 = lprov.getText(e2);
-				if (name1 != null && name2 != null) {
-					return getCollator().compare(name1, name2);
-				}
+				return ((ILabelProvider) prov).getText(element);
 			}
 		}
-		return 0; // can't compare
+		return null;
 	}
 			
 	private int getClassPathIndex(IPackageFragmentRoot root) {
