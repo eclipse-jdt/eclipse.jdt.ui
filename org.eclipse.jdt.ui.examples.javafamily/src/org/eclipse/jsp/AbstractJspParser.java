@@ -189,9 +189,10 @@ public abstract class AbstractJspParser {
 					hasValue= true;
 				}
 					
-				if (ix == 0)
-					startTag(false, name.toString(), startName+pos);
-				else 
+				if (ix == 0)  {
+					startTag= name.toString();
+					startTag(false, startTag, startName+pos);
+				} else 
 					tagAttribute(name.toString(), hasValue ? value.toString() : null, startName+pos, startValue+pos);
 				ix++;
 				
