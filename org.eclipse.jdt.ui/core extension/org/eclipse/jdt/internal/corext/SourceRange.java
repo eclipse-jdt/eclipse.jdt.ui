@@ -12,8 +12,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 
 public class SourceRange implements ISourceRange{
 	
-	private int fOffset;
-	private int fLength;
+	private final int fOffset;
+	private final int fLength;
 
 	public SourceRange(int offset, int length){
 		fLength= length;
@@ -36,6 +36,14 @@ public class SourceRange implements ISourceRange{
 	 */
 	public int getOffset() {
 		return fOffset;
+	}
+	
+	public int getEndExclusive() {
+		return getOffset() + getLength();
+	}
+	
+	public int getEndInclusive() {
+		return getEndExclusive() - 1;	
 	}
 	
 	/*non java doc
@@ -73,6 +81,15 @@ public class SourceRange implements ISourceRange{
      */
     public int hashCode() {
         return fLength ^ fOffset;
+    }
+    
+    public boolean covers(ASTNode node) {
+    	return covers(new SourceRange(node));
+    }
+    
+    public boolean covers(SourceRange range) {
+    	return    getOffset() <= range.getOffset()
+    	       	&& getEndInclusive() >= range.getEndInclusive();
     }
 }
 
