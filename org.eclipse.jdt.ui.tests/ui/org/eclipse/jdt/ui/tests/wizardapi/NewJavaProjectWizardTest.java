@@ -12,7 +12,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
@@ -24,11 +23,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
-
-import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 
 public class NewJavaProjectWizardTest extends TestCase {
 	
