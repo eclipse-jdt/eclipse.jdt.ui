@@ -23,7 +23,49 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 /**
-  */
+ * Example:
+ * <code>
+ * void foo(int i, boolean b) {
+ *     doSomething(x + 7 - y);
+ * }
+ *   MethodDeclaration existingDecl
+ *   ASTRewrite rewrite= ASTRewrite(existingDecl);
+ *   AST ast= existingDecl.getAST();
+ * 
+ *   // change return type to array of float
+ *   ArrayType newReturnType= ast.newArrayType(ast.newPrimitiveType(PrimitiveType.FLOAT), 1);
+ *   rewrite.markAsReplaced(existingDecl.getReturnType(), newReturnType);
+ * 
+ *   // change name
+ *   SimpleName newName= ast.newSimpleName("work");
+ *   rewrite.markAsReplaced(existingDecl.getName(), newName);
+ *  
+ *   // remove first parameter
+ *   List parameters= existingDecl.parameters();
+ *   rewrite.markAsRemoved((ASTNode) parameters.get(0));
+ * 
+ *   // add new throws declaration
+ *   List thrownExceptions= existingDecl.thrownExceptions();
+ *   SimpleName newException= ast.newSimpleName("IOException");
+ *   thrownExceptions.add(newException);
+ *   rewrite.markAsInserted(newException);
+ * 
+ *   // move statement inside if
+ *   List statements= existingDecl.getBody().statements();
+ *   
+ *   Statement movedNode= (Statement) statements.get(0);
+ *   Statement copyTarget= (Statement) rewrite.createCopyTarget(movedNode);
+ *   
+ *   IfStatement newIfStatement= ast.newIfStatement();
+ *   newIfStatement.setExpression(ast.newSimpleName("b"));
+ *   newIfStatement.setThenStatement(copyTarget);
+ * 
+ *   rewrite.markAsReplaced(movedNode, newIfStatement);
+ * 
+ *   TextEdit resultingEdits= new MultiTextEdit();
+ *   rewrite.rewriteNode(textBuffer, resultingEdits, null);
+ *   </code>
+ */
 public class ASTRewrite {
 	
 	private static final String CHANGEKEY= "ASTChangeData";
@@ -36,10 +78,10 @@ public class ASTRewrite {
 	}
 	
 	/**
-	 * Perform rewriting: Analys ST modifications and create text edits that describe changs to the
-	 * underlying code. Edits do only change code when the corresponing node has changed. New code
+	 * Perform rewriting: Analyses AST modifications and creates text edits that describe changes to the
+	 * underlying code. Edits do only change code when the corresponding node has changed. New code
 	 * is formatted using the standard code formatter.
-	 * @param textBuffer Text buffer which is descbing the code of the AST passed in in the
+	 * @param textBuffer Text buffer which is describing the code of the AST passed in in the
 	 * constructor.
 	 * @param groupDescription All resulting GroupDescription will be added to this collection.
 	 * <code>null</code> can be passed, if no descriptions should be collected.
@@ -55,7 +97,7 @@ public class ASTRewrite {
 	
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node.
+	 * create a copy target first and insert this target node. ({@link createCopyTarget})
 	 * @param node The node to be marked as inserted.
 	 * @param node Description of the change.
 	 */
@@ -68,7 +110,7 @@ public class ASTRewrite {
 
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node.
+	 * create a copy target first and insert this target node. ({@link createCopyTarget})
 	 */
 	public final void markAsInserted(ASTNode node) {
 		markAsInserted(node, null);
