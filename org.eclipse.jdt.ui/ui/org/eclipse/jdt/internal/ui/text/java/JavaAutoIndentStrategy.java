@@ -830,7 +830,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			}
 			
 			int whiteend= findEndOfWhiteSpace(document, start, command.offset);
-			buffer.append(document.get(start, whiteend - start));
+			buffer.append(document.get(start, Math.max(whiteend - start, 0)));
 			if (getBracketCount(document, start, command.offset, true) > 0) {
 				buffer.append(createIndent(1, useSpaces()));
 			}
