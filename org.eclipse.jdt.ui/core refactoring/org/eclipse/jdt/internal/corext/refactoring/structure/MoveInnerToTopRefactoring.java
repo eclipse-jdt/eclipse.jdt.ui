@@ -461,7 +461,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		ISourceRange[] modifiesRanges= getRangesOfUnneededModifiers();
 		for (int i= 0; i < modifiesRanges.length; i++) {
 			//add 1 to remove the space after the modifier
-			TextEdit edit= SimpleTextEdit.createDelete(modifiesRanges[i].getOffset(), modifiesRanges[i].getOffset() + 1);		
+			TextEdit edit= SimpleTextEdit.createDelete(modifiesRanges[i].getOffset(), modifiesRanges[i].getLength() + 1);		
 			manager.get(getInputTypeCu()).addTextEdit("Delete Unused Modifier", edit);
 		}
 	}
