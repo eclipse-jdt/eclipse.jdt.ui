@@ -400,10 +400,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		key= fAnnotationColorListModel[i][6];
 		if (key != null) {
 			fDecorationStyleCombo.setEnabled(showInText);
-			fDecorationStyleCombo.setText(fOverlayStore.getString(key));
+			for (int j= 0; j < fAnnotationDecorationListModel.length; j++) {
+				String value= fOverlayStore.getString(key);
+				if (fAnnotationDecorationListModel[j][1].equals(value)) {
+					fDecorationStyleCombo.setText(fAnnotationDecorationListModel[j][0]);
+					break;
+				}
+			}
 		} else {
 			fDecorationStyleCombo.setEnabled(false);
-			fDecorationStyleCombo.setText(AnnotationPreference.STYLE_SQUIGGLIES); // set selection to squigglies if the key is not there (legacy support)
+			fDecorationStyleCombo.setText(fAnnotationDecorationListModel[1][0]); // set selection to squigglies if the key is not there (legacy support)
 		}
 		
 		key= fAnnotationColorListModel[i][3];
