@@ -24,6 +24,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.ConvertLineDelimitersAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -51,6 +52,10 @@ public class GenerateActionGroup extends ActionGroup {
 	private FindStringsToExternalizeAction fFindStringsToExternalize;
 	
 	private OrganizeImportsAction fOrganizeImports;
+
+	private ConvertLineDelimitersAction fConvertToDOS;
+	private ConvertLineDelimitersAction fConvertToUNIX;
+	private ConvertLineDelimitersAction fConvertToMac;
 	
 	/**
 	 * Creates a new <code>GenerateActionGroup</code>.
@@ -67,6 +72,10 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fOrganizeImports= new OrganizeImportsAction(editor);
 		fOrganizeImports.update(selection);
+
+		fConvertToDOS= new ConvertLineDelimitersAction(editor, "\r\n"); //$NON-NLS-1$
+		fConvertToUNIX= new ConvertLineDelimitersAction(editor, "\n"); //$NON-NLS-1$
+		fConvertToMac= new ConvertLineDelimitersAction(editor, "\r"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -154,6 +163,9 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.EXTERNALIZE_STRINGS, fExternalizeStrings);
 		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, fOrganizeImports);
+		actionBar.setGlobalActionHandler(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_DOS, fConvertToDOS);
+		actionBar.setGlobalActionHandler(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_UNIX, fConvertToUNIX);
+		actionBar.setGlobalActionHandler(JdtActionConstants.CONVERT_LINE_DELIMITERS_TO_MAC, fConvertToMac);
 	}
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {

@@ -978,6 +978,7 @@ JavaStructureDiffViewerCreator
          	<separator name="editGroup"/>
          	<separator name="generateGroup"/>
          	<separator name="nlsGroup"/>
+         	<separator name="convertGroup"/>
       	</menu>
       	
       	<!-- NLS Group -->
@@ -1058,6 +1059,29 @@ JavaStructureDiffViewerCreator
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%CommentAction.label"
 			retarget="true" />
+
+		<!-- convert group -->	
+		
+		<menu
+			id="convertSubMenu"
+			label="%ConvertLineDelimitersActions.label"
+			path="org.eclipse.jdt.ui.source.menu/convertGroup">
+			<separator name="group1"/>
+		</menu>
+
+		<action id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToDOS"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
+      		label="%ConvertLineDelimitersToDOSAction.label"
+			retarget="true" />
+		<action id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
+      		label="%ConvertLineDelimitersToUNIXAction.label"
+			retarget="true" />	
+		<action id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
+      		label="%ConvertLineDelimitersToMacAction.label"
+			retarget="true" />	
+
 	</actionSet>			
 </extension>
 

@@ -180,6 +180,23 @@ public class JdtActionConstants {
 	 */
 	public static final String EXTERNALIZE_STRINGS= "org.eclipse.jdt.ui.actions.ExternalizeStrings"; //$NON-NLS-1$
 	
+	/**
+	 * Source menu: name of standard Convert Line Delimiters To DOS global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertLineDelimitersToDOS"</code>).
+	 */
+	public static String CONVERT_LINE_DELIMITERS_TO_DOS= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToDOS"; //$NON-NLS-1$
+
+	/**
+	 * Source menu: name of standard Convert Line Delimiters To UNIX global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX"</code>).
+	 */
+	public static String CONVERT_LINE_DELIMITERS_TO_UNIX= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX"; //$NON-NLS-1$
+
+	/**
+	 * Source menu: name of standardConvert Line Delimiters ToMac global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"</code>).
+	 */
+	public static String CONVERT_LINE_DELIMITERS_TO_MAC= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"; //$NON-NLS-1$
 
 	// Refactor menu
 	
