@@ -296,6 +296,10 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		doVisitNode(node.getJavadoc());
 		
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			doVisitChildren(node.typeParameters());
+		}
+		
 		if (!node.isConstructor()) {
 			if (node.getAST().apiLevel() == AST.JLS2) {
 				doVisitNode(node.getReturnType());
