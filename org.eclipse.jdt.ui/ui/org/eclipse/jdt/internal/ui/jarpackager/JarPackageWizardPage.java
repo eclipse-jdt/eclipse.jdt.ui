@@ -664,6 +664,13 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		Iterator enum= fInitialSelection.iterator();
 		while (enum.hasNext()) {
 			Object selectedElement= enum.next();
+
+			if (selectedElement instanceof IResource && !((IResource)selectedElement).isAccessible())
+				continue;
+
+			if (selectedElement instanceof IJavaElement && !((IJavaElement)selectedElement).exists())
+				continue;
+			
 			if (selectedElement instanceof ICompilationUnit || selectedElement instanceof IClassFile || selectedElement instanceof IFile)
 				fInputGroup.initialCheckListItem(selectedElement);
 			else {
