@@ -7,6 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Felix Pahl (fpahl@web.de) - contributed fix for:
+ *       o introduce parameter throws NPE if there are compiler errors
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=48325)
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.corext.refactoring.code;
@@ -84,7 +87,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	private ICompilationUnit[] fAffectedCUs;
 	
 	
-	private IntroduceParameterRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws CoreException {
+	private IntroduceParameterRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		Assert.isTrue(cu != null && cu.exists());
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
@@ -101,7 +104,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return Checks.isExtractableExpression(selectedNodes, coveringNode);
 	}
 
-	public static IntroduceParameterRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws CoreException {
+	public static IntroduceParameterRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		return new IntroduceParameterRefactoring(cu, selectionStart, selectionLength, settings);
 	}
 	
@@ -150,7 +153,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		}
 	}
 	
-	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
+	private RefactoringStatus checkSelection(IProgressMonitor pm) {
 		if (fSelectedExpression == null){
 			String message= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.select");//$NON-NLS-1$
 			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fSource.root, message);
@@ -159,6 +162,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		fMethodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
 		if (fMethodDeclaration == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
+		if (fMethodDeclaration.resolveBinding() == null)
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.no_binding")); //$NON-NLS-1$
 		//TODO: check for rippleMethods -> find matching fragments, consider callers of all rippleMethods
 		
 		RefactoringStatus result= new RefactoringStatus();
@@ -181,7 +186,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return result;		
 	}
 
-	private RefactoringStatus checkExpression() throws JavaModelException {
+	private RefactoringStatus checkExpression() {
 		//TODO: adjust error messages (or generalize for all refactorings on expression-selections?)
 		Expression selectedExpression= fSelectedExpression;
 		
@@ -209,14 +214,12 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return null;
 	}
 
-	private RefactoringStatus checkExpressionBinding() throws JavaModelException{
+	private RefactoringStatus checkExpressionBinding() {
 		return checkExpressionFragmentIsRValue();
 	}
 	
 	// !! +/- same as in ExtractConstantRefactoring & ExtractTempRefactoring
-	private RefactoringStatus checkExpressionFragmentIsRValue() 
-		throws JavaModelException
-	{
+	private RefactoringStatus checkExpressionFragmentIsRValue() {
 		switch(Checks.checkExpressionIsRValue(fSelectedExpression)) {
 			case Checks.NOT_RVALUE_MISC:
 				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("IntroduceParameterRefactoring.select"), null, Corext.getPluginId(), RefactoringStatusCodes.EXPRESSION_NOT_RVALUE, null); //$NON-NLS-1$
@@ -239,18 +242,13 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	
 	/** must only be called <i>after</i> checkActivation() */
 	public String guessedParameterName() {
-		try {
-			//TODO: improve for variables, fields, method calls; cleanup
-			String candidate= guessParameterNameFromExpression(fSelectedExpression);
-			if (candidate != null)
-				return candidate;			
-		} catch (JavaModelException e) {
-			return fParameterName;
-		}
+		String candidate= guessParameterNameFromExpression(fSelectedExpression);
+		if (candidate != null)
+			return candidate;
 		return fParameterName;
 	}
 
-	private String guessParameterNameFromExpression(Expression selectedExpression) throws JavaModelException {
+	private String guessParameterNameFromExpression(Expression selectedExpression) {
 		ITypeBinding expressionBinding= selectedExpression.resolveTypeBinding();
 			
 		String packageName= getPackageName(expressionBinding);
@@ -282,7 +280,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			return typeBinding.getElementType().getQualifiedName();
 	}
 
-	private void initializeExcludedParameterNames() throws JavaModelException {
+	private void initializeExcludedParameterNames() {
 		IBinding[] bindings= new ScopeAnalyzer(fSource.root).getDeclarationsInScope(
 				fSelectedExpression.getStartPosition(), ScopeAnalyzer.VARIABLES);
 		fExcludedParameterNames= new String[bindings.length];
@@ -340,7 +338,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private void changeSource() throws CoreException {
+	private void changeSource() {
 		AST ast= fSource.root.getAST();
 
 		//replace selected expression

@@ -130,6 +130,10 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 		performInvalidSelection();
 	}
 
+	public void testInvalid_NoMethodBinding() throws Exception {
+		performInvalidSelection();
+	}
+	
 	//	---
 
 	public void testSimple_ConstantExpression1() throws Exception {
