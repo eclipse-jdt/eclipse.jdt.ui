@@ -145,7 +145,7 @@ public class UnresolvedElementsSubProcessor {
 			if (type == ASTNode.METHOD_DECLARATION || type == ASTNode.INITIALIZER) {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", simpleName.getIdentifier()); //$NON-NLS-1$
 				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-				proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.LOCAL, simpleName, null, 1, image));
+				proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.LOCAL, simpleName, null, 3, image));
 			}
 		}
 		
