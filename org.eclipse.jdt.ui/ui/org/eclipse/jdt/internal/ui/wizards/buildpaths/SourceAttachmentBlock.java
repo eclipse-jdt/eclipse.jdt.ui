@@ -438,7 +438,7 @@ public class SourceAttachmentBlock {
 					status.setWarning(message);
 					return status;
 				}
-				if (!filePath.isAbsolute()) {
+				if (!resolvedPath.isAbsolute()) {
 					String message=  NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.notabsolute", filePath.toString()); //$NON-NLS-1$
 					status.setError(message);
 					return status;
