@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractTempAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.InlineTempAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.ModifyParamatersAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.ModifyParametersAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.MoveAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.PullUpAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameAction;
@@ -90,7 +90,7 @@ public class RefactorActionGroup extends ActionGroup {
 		fExtractMethodAction= new ExtractMethodAction(editor);
 		initAction(fExtractMethodAction, editor.getSelectionProvider());
 		
-		fModifyParametersAction= new ModifyParamatersAction(editor);
+		fModifyParametersAction= new ModifyParametersAction(editor);
 		initAction(fModifyParametersAction, editor.getSelectionProvider());
 
 		fPullUpAction= new PullUpAction(editor);
@@ -105,7 +105,7 @@ public class RefactorActionGroup extends ActionGroup {
 		fRenameAction= new RenameAction(site);
 		initAction(fRenameAction, fSite.getSelectionProvider());
 		
-		fModifyParametersAction= new ModifyParamatersAction(fSite);
+		fModifyParametersAction= new ModifyParametersAction(fSite);
 		initAction(fModifyParametersAction, fSite.getSelectionProvider());
 		
 		fPullUpAction= new PullUpAction(fSite);

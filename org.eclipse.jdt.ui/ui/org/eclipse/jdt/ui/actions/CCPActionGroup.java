@@ -24,7 +24,7 @@ import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
+import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 
 /**
  * Action group that adds the copy, cut, paste actions to a view parts context
@@ -59,10 +59,10 @@ public class CCPActionGroup extends ActionGroup {
 	private CCPActionGroup(UnifiedSite site) {
 		fSite= site;
 		fActions= new SelectionDispatchAction[] {	
-			fCutAction= ReorgGroup.createCutAction(fSite, fSite.getSelectionProvider()),
-			fCopyAction= ReorgGroup.createCopyAction(fSite, fSite.getSelectionProvider()),
-			fPasteAction= ReorgGroup.createPasteAction(fSite, fSite.getSelectionProvider()),
-			fDeleteAction= ReorgGroup.createDeleteAction(fSite, fSite.getSelectionProvider()),
+			fCutAction= ReorgActionFactory.createCutAction(fSite, fSite.getSelectionProvider()),
+			fCopyAction= ReorgActionFactory.createCopyAction(fSite, fSite.getSelectionProvider()),
+			fPasteAction= ReorgActionFactory.createPasteAction(fSite, fSite.getSelectionProvider()),
+			fDeleteAction= ReorgActionFactory.createDeleteAction(fSite, fSite.getSelectionProvider()),
 		};
 	}
 	
