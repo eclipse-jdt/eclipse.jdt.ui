@@ -79,7 +79,7 @@ public class TypeCache{
 		}
 	
 		private static boolean shouldStopProcessing(IJavaElementDelta delta) {
-			int type= delta.getElement().getElementType();			if (type == IJavaElement.CLASS_FILE)				return true;
+			int type= delta.getElement().getElementType();			//fix for: 1GEUFCP			if (type == IJavaElement.CLASS_FILE)				return true;
 			if (type == IJavaElement.FIELD)
 				return true;
 			if (type == IJavaElement.METHOD)
