@@ -406,13 +406,13 @@ public class Checks {
 	 */	
 	public static SearchResultGroup[] excludeCompilationUnits(SearchResultGroup[] grouped, RefactoringStatus status) throws JavaModelException{
 		List result= new ArrayList();
-		//List unsavedFileList= Arrays.asList(unsavedFiles);
 		boolean wasEmpty= grouped.length == 0;
 		for (int i= 0; i < grouped.length; i++){	
 			IResource resource= grouped[i].getResource();
 			IJavaElement element= JavaCore.create(resource);
 			if (! (element instanceof ICompilationUnit))
 				continue;
+			//XXX this is a workaround 	for a jcore feature that shows errors in cus only when you get the original element
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
 			if (! cu.isStructureKnown()){
 				String path= AbstractRefactoringASTAnalyzer.getFullPath(cu);
