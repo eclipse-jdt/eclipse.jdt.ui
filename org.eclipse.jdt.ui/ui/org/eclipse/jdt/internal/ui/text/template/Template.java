@@ -81,11 +81,10 @@ public class Template {
 	 * Returns the image of the template.
 	 */	
 	public Image getImage() {
-		if (fContext.equals("javadoc")) {
+		if (fContext.equals("javadoc") && fName.startsWith("<")) //$NON-NLS-1$ //$NON-NLS-2$ 
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG);
-		} else {
-			return null;
-		}
+		else
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE);
 	}
 
 	/**

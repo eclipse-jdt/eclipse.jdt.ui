@@ -62,6 +62,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	private Label fDescriptionLabel;
 	private Label fContextLabel;
 	private Label fPatternLabel;
+	private Group fEditor;
 	private Text fNameText;
 	private Text fDescriptionText;
 	private Combo fContextCombo;
@@ -153,7 +154,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		
 		fAddButton= new Button(buttons, SWT.PUSH);
 		fAddButton.setLayoutData(getButtonGridData(fAddButton));
-		fAddButton.setText(TemplateMessages.getString("TemplatePreferencePage.add")); //$NON-NLS-1$
+		fAddButton.setText(TemplateMessages.getString("TemplatePreferencePage.new")); //$NON-NLS-1$
 		fAddButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
 				add();
@@ -169,16 +170,16 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			}
 		});
 
-		Group editor= new Group(parent, SWT.NULL);
-		editor.setText(TemplateMessages.getString("TemplatePreferencePage.editor")); //$NON-NLS-1$
-		editor.setLayoutData(new GridData(GridData.FILL_BOTH));
+		fEditor= new Group(parent, SWT.NULL);
+		fEditor.setText(TemplateMessages.getString("TemplatePreferencePage.editor")); //$NON-NLS-1$
+		fEditor.setLayoutData(new GridData(GridData.FILL_BOTH));
 		layout= new GridLayout();
 		layout.numColumns= 2;
-		editor.setLayout(layout);
+		fEditor.setLayout(layout);
 
-		fNameLabel= createLabel(editor, TemplateMessages.getString("TemplatePreferencePage.name")); //$NON-NLS-1$
+		fNameLabel= createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.name")); //$NON-NLS-1$
 		
-		Composite composite= new Composite(editor, SWT.NONE);
+		Composite composite= new Composite(fEditor, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		layout= new GridLayout();
 		layout.numColumns= 3;
@@ -193,40 +194,39 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 					return;
 
 				fCurrent.setName(fNameText.getText());				
-				fTableViewer.refresh();
+				fTableViewer.refresh(fCurrent);
 				updateButtons();
 			}
 		});
 
 		fContextLabel= createLabel(composite, TemplateMessages.getString("TemplatePreferencePage.context")); //$NON-NLS-1$		
-		fContextCombo= new Combo(composite, SWT.NONE); // XXX READ_ONLY does not have desired effect
-//		fContextCombo.setEditable(false); not public
-		fContextCombo.add("java"); //$NON-NLS-1$	
-		fContextCombo.add("javadoc"); //$NON-NLS-1$	
+		fContextCombo= new Combo(composite, SWT.READ_ONLY);
+		fContextCombo.setItems(new String[] {"java", "javadoc"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fContextCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				if (fCurrent == null)
 					return;
 
-				fCurrent.setContext(fContextCombo.getText());				
+				fCurrent.setContext(fContextCombo.getText());
+				fTableViewer.refresh(fCurrent);
 			}
 		});
 		
-		fDescriptionLabel= createLabel(editor, TemplateMessages.getString("TemplatePreferencePage.description")); //$NON-NLS-1$		
-		fDescriptionText= createText(editor);
+		fDescriptionLabel= createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.description")); //$NON-NLS-1$		
+		fDescriptionText= createText(fEditor);
 		fDescriptionText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				if (fCurrent == null)
 					return;
 					
 				fCurrent.setDescription(fDescriptionText.getText());
-				fTableViewer.refresh();
+				fTableViewer.refresh(fCurrent);
 			}
 		});
 
-		fPatternLabel= createLabel(editor, TemplateMessages.getString("TemplatePreferencePage.pattern")); //$NON-NLS-1$
+		fPatternLabel= createLabel(fEditor, TemplateMessages.getString("TemplatePreferencePage.pattern")); //$NON-NLS-1$
 		fPatternLabel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
-		fPatternEditor= createEditor(editor);
+		fPatternEditor= createEditor(fEditor);
 		StyledText text= fPatternEditor.getTextWidget();
 		text.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -303,26 +303,31 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		int selectionCount= ((IStructuredSelection) fTableViewer.getSelection()).size();
 		fRemoveButton.setEnabled(selectionCount > 0 && selectionCount < fTableViewer.getTable().getItemCount());
 
-		if (fCurrent != null) {
-			StatusInfo status= new StatusInfo();
-			String key= fNameText.getText();
-		
-			if (key.length() == 0)
-				status.setError(TemplateMessages.getString("TemplatePreferencePage.error.noname")); //$NON-NLS-1$
-
-			setValid(!status.matches(IStatus.ERROR));
-			StatusUtil.applyToStatusLine(this, status);			
-		}
+		StatusInfo status= new StatusInfo();
+		if ((fCurrent != null) && (fNameText.getText().length() == 0))
+			status.setError(TemplateMessages.getString("TemplatePreferencePage.error.noname")); //$NON-NLS-1$
+		setValid(!status.matches(IStatus.ERROR));
+		StatusUtil.applyToStatusLine(this, status);			
+	}
+	
+	private static int getIndex(String context) {
+		if (context.equals("java")) //$NON-NLS-1$
+			return 0;
+		else if (context.equals("javadoc")) //$NON-NLS-1$
+			return 1;
+		else
+			return -1;
 	}
 
 	private void enterEditor(Template template) {
 		fCurrent= template;
-		
+	
 		fNameText.setText(template.getName());
 		fDescriptionText.setText(template.getDescription());
-		fContextCombo.setText(template.getContext());
+		fContextCombo.select(getIndex(template.getContext()));
 		fPatternEditor.getDocument().set(template.getPattern());
 		
+		fEditor.setEnabled(true);
 		fNameLabel.setEnabled(true);
 		fDescriptionLabel.setEnabled(true);
 		fContextLabel.setEnabled(true);
@@ -336,12 +341,13 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	
 	private void leaveEditor() {
 		fCurrent= null;
-		
+
 		fNameText.setText(""); //$NON-NLS-1$
 		fDescriptionText.setText(""); //$NON-NLS-1$
-		fContextCombo.setText(""); //$NON-NLS-1$
+		fContextCombo.select(getIndex("")); //$NON-NLS-1$
 		fPatternEditor.getDocument().set(""); //$NON-NLS-1$
 
+		fEditor.setEnabled(false);
 		fNameLabel.setEnabled(false);
 		fDescriptionLabel.setEnabled(false);
 		fContextLabel.setEnabled(false);
@@ -373,8 +379,8 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			TemplateSet.getInstance().remove(template);
 		}
 
+		leaveEditor();		
 		fTableViewer.refresh();
-		leaveEditor();
 	}	
 	
 	/*
