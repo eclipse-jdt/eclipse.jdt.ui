@@ -7,12 +7,13 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.debug.core.IJavaWatchpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.ui.*;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
-public class AddWatchpointAction extends JavaUIAction implements IUpdate {
+public class AddWatchpointAction extends Action implements IUpdate {
 
 	private ISelectionProvider fSelectionProvider;
 		
