@@ -724,7 +724,7 @@ public class ClasspathModifier {
                     IJavaElement javaElement= (IJavaElement)element;
                     IPackageFragmentRoot root;
                     if (element instanceof IJavaProject)
-                        root= project.getPackageFragmentRoot(project.getUnderlyingResource());
+                        root= project.getPackageFragmentRoot(project.getResource());
                     else
                         root= (IPackageFragmentRoot)element;
                     CPListElement entry= getClasspathEntry(entries, root);
@@ -823,7 +823,7 @@ public class ClasspathModifier {
             monitor= new NullProgressMonitor();
         IJavaElement javaElem= null;
         if (resource.getFullPath().equals(project.getPath()))
-            return project.getPackageFragmentRoot(project.getUnderlyingResource());
+            return project.getPackageFragmentRoot(resource);
         IContainer container= resource.getParent();
         do {
             if (container instanceof IFolder)
@@ -837,7 +837,7 @@ public class ClasspathModifier {
                 return null;
         } while (javaElem == null || !(javaElem instanceof IPackageFragmentRoot));
         if (javaElem instanceof IJavaProject)
-            javaElem= project.getPackageFragmentRoot(project.getUnderlyingResource());
+            javaElem= project.getPackageFragmentRoot(project.getResource());
         return (IPackageFragmentRoot) javaElem;
     }
     
@@ -1100,7 +1100,7 @@ public class ClasspathModifier {
             monitor= new NullProgressMonitor();
         try {
             monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 10); //$NON-NLS-1$
-            CPListElement entry= new CPListElement(project, IClasspathEntry.CPE_SOURCE, javaElement.getPath(), javaElement.getUnderlyingResource());
+            CPListElement entry= new CPListElement(project, IClasspathEntry.CPE_SOURCE, javaElement.getPath(), javaElement.getResource());
             return entry;
         } finally {
             monitor.done();
@@ -1765,7 +1765,7 @@ public class ClasspathModifier {
                 if (outputLocation.equals(projPath)) {
                     IStatus status2= JavaConventions.validateClasspath(project, entries, outputLocation);
                     if (status2.isOK()) {
-                      if (project.isOnClasspath(project.getUnderlyingResource())) {
+                      if (project.isOnClasspath(project)) {
                           rootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceSFandOL", outputLocation.makeRelative().toString())); //$NON-NLS-1$
                       } else {
                           rootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceOL", outputLocation.makeRelative().toString())); //$NON-NLS-1$

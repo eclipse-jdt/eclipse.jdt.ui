@@ -97,7 +97,7 @@ public class EditFiltersOperation extends ClasspathModifierOperation {
         Object element= elements.get(0);
 
         if (element instanceof IJavaProject) {
-            if (!project.isOnClasspath(project.getUnderlyingResource()))
+            if (!project.isOnClasspath(project))
                 return false;
         }
         else if (!(element instanceof IPackageFragmentRoot))

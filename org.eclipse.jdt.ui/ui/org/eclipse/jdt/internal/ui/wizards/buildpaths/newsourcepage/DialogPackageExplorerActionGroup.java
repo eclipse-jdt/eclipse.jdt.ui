@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 
@@ -600,13 +601,15 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @throws JavaModelException 
      */
     private static int getFolderType(IFolder folder, IJavaProject project) throws JavaModelException {
-        if (folder.getParent().getFullPath().equals(project.getPath()))
+        IContainer folderParent= folder.getParent();
+		if (folderParent.getFullPath().equals(project.getPath()))
             return FOLDER;
-        if (ClasspathModifier.getFragment(folder.getParent()) != null)
+        if (ClasspathModifier.getFragment(folderParent) != null)
             return EXCLUDED_FOLDER;
-        if (ClasspathModifier.getFragmentRoot(folder, project, null) == null)
+        IPackageFragmentRoot fragmentRoot= ClasspathModifier.getFragmentRoot(folder, project, null);
+		if (fragmentRoot == null)
             return FOLDER;
-        if (ClasspathModifier.getFragmentRoot(folder, project, null).equals(JavaCore.create(folder.getParent())))
+        if (fragmentRoot.equals(JavaCore.create(folderParent)))
             return EXCLUDED_FOLDER;
         return FOLDER;              
     }
@@ -625,19 +628,21 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             return ARCHIVE;
         if (!file.getName().endsWith(".java")) //$NON-NLS-1$
             return FILE;
-        if (file.getParent().getFullPath().equals(project.getPath())) {
-            if (project.isOnClasspath(project.getUnderlyingResource())) //$NON-NLS-1$
+        IContainer fileParent= file.getParent();
+		if (fileParent.getFullPath().equals(project.getPath())) {
+            if (project.isOnClasspath(project)) //$NON-NLS-1$
                 return EXCLUDED_FILE;
             return FILE;
         }
-        if (ClasspathModifier.getFragmentRoot(file, project, null) == null)
+        IPackageFragmentRoot fragmentRoot= ClasspathModifier.getFragmentRoot(file, project, null);
+		if (fragmentRoot == null)
             return FILE;
-        if (ClasspathModifier.getFragmentRoot(file, project, null).isArchive())
+        if (fragmentRoot.isArchive())
             return ARCHIVE_RESOURCE;
-        if (ClasspathModifier.getFragmentRoot(file, project, null).equals(JavaCore.create(file.getParent())))
+        if (fragmentRoot.equals(JavaCore.create(fileParent)))
             return EXCLUDED_FILE;
-        if (ClasspathModifier.getFragment(file.getParent()) == null) {
-            if (ClasspathModifier.parentExcluded(file.getParent(), project))
+        if (ClasspathModifier.getFragment(fileParent) == null) {
+            if (ClasspathModifier.parentExcluded(fileParent, project))
                 return FILE;
             return EXCLUDED_FILE;
         }

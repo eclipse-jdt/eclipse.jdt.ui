@@ -113,8 +113,8 @@ public class IncludeOperation extends ClasspathModifierOperation {
      * @throws JavaModelException
      */
     private boolean isValidFolder(IResource resource, IJavaProject project) throws JavaModelException {
-        if (project.isOnClasspath(project.getUnderlyingResource()) && resource.getProjectRelativePath().segmentCount() == 1 && 
-                ClasspathModifier.getFragmentRoot(resource, project, null).equals(ClasspathModifier.getFragmentRoot(project.getCorrespondingResource(), project, null))) 
+        if (project.isOnClasspath(project) && resource.getProjectRelativePath().segmentCount() == 1 && 
+                ClasspathModifier.getFragmentRoot(resource, project, null).equals(ClasspathModifier.getFragmentRoot(project.getResource(), project, null))) 
             return true;
         return false;
     }
