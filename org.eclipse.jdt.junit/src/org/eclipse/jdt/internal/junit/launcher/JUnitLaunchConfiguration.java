@@ -15,7 +15,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.core.boot.BootLoader;
@@ -124,14 +127,25 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 		try {
 			if (BootLoader.inDevelopmentMode()) {
 				// assumption is that the output folder is called bin!
-				classPath= new String[cp.length + 4];
-				System.arraycopy(cp, 0, classPath, 4, cp.length);
-				classPath[0]= Platform.asLocalURL(new URL(url, "bin")).getFile(); //$NON-NLS-1$
-				classPath[1]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
-				classPath[2]= Platform.asLocalURL(new URL(runtimeURL, "bin")).getFile(); //$NON-NLS-1$
-				classPath[3]= Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile(); //$NON-NLS-1$
-			}
-			else {
+				List junitEntries= new ArrayList();
+				junitEntries.add(Platform.asLocalURL(new URL(url, "bin")).getFile()); //$NON-NLS-1$
+				junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "bin")).getFile()); //$NON-NLS-1$
+				
+				try {
+					junitEntries.add(Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile()); //$NON-NLS-1$
+				} catch (IOException e) {
+					// fall through
+				}			
+				try {
+					junitEntries.add(Platform.asLocalURL(new URL(runtimeURL, "junitruntime.jar")).getFile()); //$NON-NLS-1$
+				} catch (IOException e1) {
+					// fall through
+				}	
+				classPath= new String[cp.length + junitEntries.size()];
+				Object[] jea= junitEntries.toArray();
+				System.arraycopy(cp, 0, classPath, 0, cp.length);
+				System.arraycopy(jea, 0, classPath, cp.length, jea.length);
+			} else {
 				classPath= new String[cp.length + 2];
 				System.arraycopy(cp, 0, classPath, 2, cp.length);
 				classPath[0]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
