@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -45,7 +46,25 @@ public class DeleteRefactoring extends Refactoring {
 	
 	public DeleteRefactoring(List elements){
 		Assert.isNotNull(elements);
-		fElements= elements;
+		fElements= convertToInputElements(elements);
+	}
+	
+	private static List convertToInputElements(List elements){
+		List result= new ArrayList(elements.size());
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			Object each= iter.next();
+			if (each instanceof IPackageFragment && ((IPackageFragment)each).isDefaultPackage()){
+				IPackageFragment pack= (IPackageFragment)each;
+				try {
+					result.addAll(Arrays.asList(pack.getCompilationUnits()));
+				} catch(JavaModelException e) {
+					//cannot show any ui here - just skip
+				}
+			} else {
+				result.add(each);
+			}
+		}
+		return result;
 	}
 	
 	public List getElementsToDelete(){
