@@ -20,9 +20,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.CopySourceEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -45,113 +43,13 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
  */
 public class ASTRewriteAnalyzer extends ASTVisitor {
 
-	private static final String CHANGEKEY= "ASTChangeData";
-	private static final String COPYSOURCEKEY= "ASTCopySource";
-	
-	private static final String EDITNODE= "EditNode";
 
-	public static ASTNode createCopyTarget(ASTNode node) {
-		Assert.isTrue(node.getProperty(COPYSOURCEKEY) == null, "Node used as more than one copy source");
-		CopySourceEdit edit= new CopySourceEdit(node.getStartPosition(), node.getLength());
-		node.setProperty(COPYSOURCEKEY, edit);
-		return ASTWithExistingFlattener.getPlaceholder(node);
-	}
-
-	public static void markAsInserted(ASTNode node) {
-		Assert.isTrue(node.getStartPosition() == -1, "Tries to mark existing node as inserted");
-		node.setSourceRange(-1, 0);
-	}
-	
-	public static void markAsRemoved(ASTNode node) {
-		markAsReplaced(node, null);
-	}
-	
-	public static void markAsReplaced(ASTNode node, ASTNode replacingNode) {
-		ASTReplace replace= new ASTReplace();
-		replace.replacingNode= replacingNode;
-		node.setProperty(CHANGEKEY, replace);
-	}
-	
-	public static void markAsModified(ASTNode node, ASTNode modifiedNode) {
-		Assert.isTrue(node.getClass().equals(modifiedNode.getClass()), "Tries to modify with a node of different type");
-		ASTModify modify= new ASTModify();
-		modify.modifiedNode= modifiedNode;
-		node.setProperty(CHANGEKEY, modify);
-	}
-	
-	private static void setEdit(ASTNode node, TextEdit edit) {
-		Assert.isTrue(getEdit(node) == null, "Two edits added to teh same node");
-		node.setProperty(EDITNODE, edit);
-	}
-	
-	private static TextEdit getEdit(ASTNode node) {
-		return (TextEdit) node.getProperty(EDITNODE);
-	}
-	
-	/* package */ static boolean isInsertOrReplace(ASTNode node) {
-		return isInserted(node) || isReplaced(node);
-	}
-	
-	/* package */ static boolean isInsertOrRemove(ASTNode node) {
-		return isInserted(node) || isRemoved(node);
-	}
-	
-	/* package */ static boolean isInserted(ASTNode node) {
-		return node.getStartPosition() == -1;
-	}
-	
-	/* package */ static boolean isReplaced(ASTNode node) {
-		return node.getProperty(CHANGEKEY) instanceof ASTReplace;
-	}
-	
-	/* package */ static boolean isRemoved(ASTNode node) {
-		Object info= node.getProperty(CHANGEKEY);
-		return info instanceof ASTReplace && (((ASTReplace) info).replacingNode == null);
-	}	
-	
-	/* package */ static boolean isModified(ASTNode node) {
-		return node.getProperty(CHANGEKEY) instanceof ASTModify;
-	}	
-	
-	/* package */ static ASTNode getModifiedNode(ASTNode node) {
-		Object info= node.getProperty(CHANGEKEY);
-		if (info instanceof ASTModify) {
-			return ((ASTModify) info).modifiedNode;
-		}
-		return null;
-	}
-
-	/* package */ static ASTNode getReplacingNode(ASTNode node) {
-		Object info= node.getProperty(CHANGEKEY);
-		if (info instanceof ASTReplace) {
-			return ((ASTReplace) info).replacingNode;
-		}
-		return null;
-	}
-	
-	/* package */ static CopySourceEdit getCopySourceEdit(ASTNode node) {
-		return (CopySourceEdit) node.getProperty(COPYSOURCEKEY);
-	}
-	
-
-	private static final class ASTCopySource {
-		public CopySourceEdit copySource;
-	}	
-		
-	private static final class ASTReplace {
-		public ASTNode replacingNode;
-	}
-	
-	private static final class ASTModify {
-		public ASTNode modifiedNode;
-	}
 	
 	private TextBuffer fTextBuffer;
-	private CompilationUnitChange fChange;
-	
 	private TextEdit fCurrentEdit;
 	
 	private IScanner fScanner; // shared scanner
+	private ASTRewrite fRewrite;
 	
 	private final int[] MODIFIERS= new int[] { ITerminalSymbols.TokenNamepublic, ITerminalSymbols.TokenNameprotected, ITerminalSymbols.TokenNameprivate,
 		ITerminalSymbols.TokenNamestatic, ITerminalSymbols.TokenNamefinal, ITerminalSymbols.TokenNameabstract, ITerminalSymbols.TokenNamenative,
@@ -160,14 +58,44 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	/**
 	 * Constructor for ASTChangeAnalyzer.
 	 */
-	public ASTRewriteAnalyzer(TextBuffer textBuffer, CompilationUnitChange change) {
+	public ASTRewriteAnalyzer(TextBuffer textBuffer, TextEdit rootEdit, ASTRewrite rewrite) {
 		fTextBuffer= textBuffer;
-		fChange= change;
 		fScanner= null;
-		
-		fCurrentEdit= new MultiTextEdit();
-		fChange.setEdit(fCurrentEdit);
+		fRewrite= rewrite;
+		fCurrentEdit= rootEdit;
 	}
+	
+	private boolean isInsertOrReplace(ASTNode node) {
+		return isInserted(node) || isReplaced(node);
+	}
+	
+	private boolean isInsertOrRemove(ASTNode node) {
+		return isInserted(node) || isRemoved(node);
+	}
+	
+	private boolean isInserted(ASTNode node) {
+		return fRewrite.isInserted(node);
+	}
+	
+	private boolean isReplaced(ASTNode node) {
+		return fRewrite.isReplaced(node);
+	}
+	
+	private boolean isRemoved(ASTNode node) {
+		return fRewrite.isRemoved(node);
+	}	
+	
+	private boolean isModified(ASTNode node) {
+		return fRewrite.isModified(node);
+	}
+	
+	private ASTNode getModifiedNode(ASTNode node) {
+		return fRewrite.getModifiedNode(node);
+	}
+
+	private ASTNode getReplacingNode(ASTNode node) {
+		return fRewrite.getReplacingNode(node);
+	}	
 	
 	public void addInsert(int offset, String insertString, String description) {
 		fCurrentEdit.add(SimpleTextEdit.createInsert(offset, insertString));
@@ -193,7 +121,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 		
 	public void addCopy(ASTNode copiedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, String description) {
-		CopySourceEdit sourceEdit= getCopySourceEdit(copiedNode);
+		CopySourceEdit sourceEdit= fRewrite.getCopySourceEdit(copiedNode);
 		Assert.isTrue(sourceEdit != null, "Copy source not annotated" + copiedNode.toString());
 		
 		CopyIndentedTargetEdit targetEdit= new CopyIndentedTargetEdit(destOffset, sourceIndentLevel, destIndentString, tabWidth);
@@ -636,7 +564,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		TextEdit edit= getCopySourceEdit(node);
+		TextEdit edit= fRewrite.getCopySourceEdit(node);
 		if (edit != null) {
 			fCurrentEdit= fCurrentEdit.getParent();
 		}
@@ -646,7 +574,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 	 */
 	public void preVisit(ASTNode node) {
-		TextEdit edit= getCopySourceEdit(node);
+		TextEdit edit= fRewrite.getCopySourceEdit(node);
 		if (edit != null) {
 			fCurrentEdit.add(edit);
 			fCurrentEdit= edit;

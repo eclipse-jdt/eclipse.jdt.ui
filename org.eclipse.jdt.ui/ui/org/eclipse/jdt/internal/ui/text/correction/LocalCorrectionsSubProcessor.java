@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -160,6 +161,7 @@ public class LocalCorrectionsSubProcessor {
 		
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 		if (decl instanceof MethodDeclaration) {
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
 			
 			String uncaughtName= problemPos.getArguments()[0];
 			
@@ -167,11 +169,12 @@ public class LocalCorrectionsSubProcessor {
 			List exceptions= methodDecl.thrownExceptions();
 			SimpleName addedException= astRoot.getAST().newSimpleName(Signature.getSimpleName(uncaughtName));
 			exceptions.add(addedException);
-			ASTRewriteAnalyzer.markAsInserted(addedException);
+			
+			rewrite.markAsInserted(addedException);
 			
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addthrows.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, astRoot, 0, image);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
 
 // diabled until moved to enhanced
 //            addImportToProposal(cu, uncaughtName, proposal);
@@ -285,7 +288,7 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-		if (decl instanceof MethodDeclaration) {		
+		if (decl instanceof MethodDeclaration) {
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
 			if (methodDecl.getName().equals(selectedNode)) {
 				Block block= methodDecl.getBody();
@@ -293,24 +296,28 @@ public class LocalCorrectionsSubProcessor {
 					return;
 				}
 				
+				ASTRewrite rewrite= new ASTRewrite(astRoot);
+				
 				List statements= block.statements();
 				ReturnStatement returnStatement= block.getAST().newReturnStatement();
 				returnStatement.setExpression(ASTResolving.getNullExpression(methodDecl.getReturnType()));
 				statements.add(returnStatement);
-				ASTRewriteAnalyzer.markAsInserted(returnStatement);
+				rewrite.markAsInserted(returnStatement);
 				
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Add return statement", cu, astRoot, 10, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Add return statement", cu, rewrite, 10, image);
 				proposals.add(proposal);
 			} else if (selectedNode instanceof ReturnStatement) {
 				ReturnStatement returnStatement= (ReturnStatement) selectedNode;
 				if (returnStatement.getExpression() == null) {
+					ASTRewrite rewrite= new ASTRewrite(astRoot);
+					
 					Expression expression= ASTResolving.getNullExpression(methodDecl.getReturnType());
 					returnStatement.setExpression(expression);
-					ASTRewriteAnalyzer.markAsInserted(expression);
+					rewrite.markAsInserted(expression);
 					
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Change return statement", cu, astRoot, 10, image);
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Change return statement", cu, rewrite, 10, image);
 					proposals.add(proposal);
 				}
 			}

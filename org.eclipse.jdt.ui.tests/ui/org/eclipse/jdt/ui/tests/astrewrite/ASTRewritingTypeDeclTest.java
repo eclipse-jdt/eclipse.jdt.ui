@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
@@ -90,6 +90,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 		
 		{  // rename type, rename supertype, rename first interface, replace inner class with field
@@ -97,26 +98,26 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			SimpleName name= type.getName();
 			SimpleName newName= ast.newSimpleName("X");
 			
-			ASTRewriteAnalyzer.markAsReplaced(name, newName);
+			rewrite.markAsReplaced(name, newName);
 			
 			Name superClass= type.getSuperclass();
 			assertTrue("Has super type", superClass != null);
 			
 			SimpleName newSuperclass= ast.newSimpleName("Object");
-			ASTRewriteAnalyzer.markAsReplaced(superClass, newSuperclass);
+			rewrite.markAsReplaced(superClass, newSuperclass);
 
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
 			
 			SimpleName newSuperinterface= ast.newSimpleName("Cloneable");
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) superInterfaces.get(0), newSuperinterface);
+			rewrite.markAsReplaced((ASTNode) superInterfaces.get(0), newSuperinterface);
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", !members.isEmpty());
 			
 			FieldDeclaration newFieldDecl= createNewField(ast, "fCount");
 			
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), newFieldDecl);
+			rewrite.markAsReplaced((ASTNode) members.get(0), newFieldDecl);
 		}
 		{ // replace method in F, change to interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
@@ -125,14 +126,14 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
 			modifiedNode.setInterface(true); 
 			modifiedNode.setModifiers(0);
-			ASTRewriteAnalyzer.markAsModified(type, modifiedNode);				
+			rewrite.markAsModified(type, modifiedNode);				
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", members.size() == 1);
 
 			MethodDeclaration methodDecl= createNewMethod(ast, "newFoo", true);
 
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), methodDecl);
+			rewrite.markAsReplaced((ASTNode) members.get(0), methodDecl);
 		}
 		
 		{ // change to class, add supertype
@@ -142,15 +143,15 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
 			modifiedNode.setInterface(false); 
 			modifiedNode.setModifiers(0);
-			ASTRewriteAnalyzer.markAsModified(type, modifiedNode);				
+			rewrite.markAsModified(type, modifiedNode);				
 			
 			SimpleName newSuperclass= ast.newSimpleName("Object");
 			type.setSuperclass(newSuperclass);
-			ASTRewriteAnalyzer.markAsInserted(newSuperclass);
+			rewrite.markAsInserted(newSuperclass);
 		}			
 					
 
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
 		
 		proposal.apply(null);
@@ -205,6 +206,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 		{ // change to interface, remove supertype, remove first interface, remove field
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -213,25 +215,25 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
 			modifiedNode.setInterface(true); 
 			modifiedNode.setModifiers(0);
-			ASTRewriteAnalyzer.markAsModified(type, modifiedNode);				
+			rewrite.markAsModified(type, modifiedNode);				
 		
 			Name superClass= type.getSuperclass();
 			assertTrue("Has super type", superClass != null);
 			
-			ASTRewriteAnalyzer.markAsRemoved(superClass);
+			rewrite.markAsRemoved(superClass);
 
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
 			
-			ASTRewriteAnalyzer.markAsRemoved((ASTNode) superInterfaces.get(0));
+			rewrite.markAsRemoved((ASTNode) superInterfaces.get(0));
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", !members.isEmpty());
 					
-			ASTRewriteAnalyzer.markAsRemoved((ASTNode) members.get(1));
+			rewrite.markAsRemoved((ASTNode) members.get(1));
 			
 			MethodDeclaration meth= findMethodDeclaration(type, "hee");
-			ASTRewriteAnalyzer.markAsRemoved(meth);
+			rewrite.markAsRemoved(meth);
 		}
 		{ // remove superinterface & method, change to interface & final
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
@@ -240,23 +242,23 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
 			modifiedNode.setInterface(true); 
 			modifiedNode.setModifiers(Modifier.FINAL);
-			ASTRewriteAnalyzer.markAsModified(type, modifiedNode);					
+			rewrite.markAsModified(type, modifiedNode);					
 			
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
-			ASTRewriteAnalyzer.markAsRemoved((ASTNode) superInterfaces.get(0));
+			rewrite.markAsRemoved((ASTNode) superInterfaces.get(0));
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", members.size() == 1);
 
-			ASTRewriteAnalyzer.markAsRemoved((ASTNode) members.get(0));			
+			rewrite.markAsRemoved((ASTNode) members.get(0));			
 		}			
 		{ // remove class G
 			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
-			ASTRewriteAnalyzer.markAsRemoved(type);		
+			rewrite.markAsRemoved(type);		
 		}				
 
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
 		
 		proposal.apply(null);
@@ -306,6 +308,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		assertTrue("Errors in AST", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		AST ast= astRoot.getAST();
 		{ // add interface & set to final
@@ -315,14 +318,14 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
 			modifiedNode.setInterface(type.isInterface()); // no change 
 			modifiedNode.setModifiers(Modifier.PUBLIC | Modifier.FINAL);
-			ASTRewriteAnalyzer.markAsModified(type, modifiedNode);				
+			rewrite.markAsModified(type, modifiedNode);				
 		
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
 			
 			SimpleName newSuperinterface= ast.newSimpleName("Cloneable");
 			superInterfaces.add(0, newSuperinterface);
-			ASTRewriteAnalyzer.markAsInserted(newSuperinterface);
+			rewrite.markAsInserted(newSuperinterface);
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", !members.isEmpty());
@@ -333,7 +336,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 /*		bug 22161
 			SimpleName newSuperclass= ast.newSimpleName("Exception");
 			innerType.setSuperclass(newSuperclass);
-			ASTRewriteAnalyzer.markAsInserted(newSuperclass);
+			rewrite.markAsInserted(newSuperclass);
 */
 
 			FieldDeclaration newField= createNewField(ast, "fCount");
@@ -341,12 +344,12 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			List innerMembers= innerType.bodyDeclarations();
 			innerMembers.add(0, newField);
 			
-			ASTRewriteAnalyzer.markAsInserted(newField);
+			rewrite.markAsInserted(newField);
 			
 			MethodDeclaration newMethodDecl= createNewMethod(ast, "newMethod", false);
 			members.add(4, newMethodDecl);
 			
-			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);
+			rewrite.markAsInserted(newMethodDecl);
 		}
 		{ // add exception, add method
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
@@ -354,14 +357,14 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			SimpleName newSuperclass= ast.newSimpleName("Exception");
 			type.setSuperclass(newSuperclass);
 			
-			ASTRewriteAnalyzer.markAsInserted(newSuperclass);
+			rewrite.markAsInserted(newSuperclass);
 			
 			List members= type.bodyDeclarations();
 			
 			MethodDeclaration newMethodDecl= createNewMethod(ast, "newMethod", false);
 			members.add(newMethodDecl);
 			
-			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);	
+			rewrite.markAsInserted(newMethodDecl);	
 		}			
 		{ // insert interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
@@ -369,17 +372,17 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			SimpleName newInterface= ast.newSimpleName("Runnable");
 			type.superInterfaces().add(newInterface);
 			
-			ASTRewriteAnalyzer.markAsInserted(newInterface);
+			rewrite.markAsInserted(newInterface);
 			
 			List members= type.bodyDeclarations();
 			
 			MethodDeclaration newMethodDecl= createNewMethod(ast, "newMethod", true);
 			members.add(newMethodDecl);
 			
-			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);
+			rewrite.markAsInserted(newMethodDecl);
 		}			
 
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
 		
 		proposal.apply(null);
@@ -416,8 +419,8 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	}
 	
 	public void testBug22161() throws Exception {
-		System.out.println(getClass().getName()+"::" + getName() +" disabled (bug 22161)");
-	/*
+	//	System.out.println(getClass().getName()+"::" + getName() +" disabled (bug 22161)");
+	
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -430,6 +433,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);				
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		assertTrue("Errors in AST", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		AST ast= astRoot.getAST();
 		
@@ -443,7 +447,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		
 		SimpleName name= innerType.getName();
 		assertTrue("Name positions not correct", name.getStartPosition() != -1 && name.getLength() > 0);
-		*/
+		
 	}
 	
 	public void testAnonymousClassDeclaration() throws Exception {
@@ -465,6 +469,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -486,7 +491,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			MethodDeclaration newMethod= createNewMethod(ast, "newMethod", false);
 			decls.add(newMethod);
 			
-			ASTRewriteAnalyzer.markAsInserted(newMethod);
+			rewrite.markAsInserted(newMethod);
 		}
 		{	// remove body decl in AnonymousClassDeclaration
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(1);
@@ -497,7 +502,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			List decls= anonym.bodyDeclarations();
 			assertTrue("Number of bodyDeclarations not 1", decls.size() == 1);
 
-			ASTRewriteAnalyzer.markAsRemoved((ASTNode) decls.get(0));
+			rewrite.markAsRemoved((ASTNode) decls.get(0));
 		}		
 		{	// replace body decl in AnonymousClassDeclaration
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(2);
@@ -510,10 +515,10 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			MethodDeclaration newMethod= createNewMethod(ast, "newMethod", false);
 
-			ASTRewriteAnalyzer.markAsReplaced((ASTNode) decls.get(0), newMethod);
+			rewrite.markAsReplaced((ASTNode) decls.get(0), newMethod);
 		}	
 					
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
 		
 		proposal.apply(null);
@@ -551,6 +556,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Z.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 		
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -562,18 +568,18 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			ImportDeclaration imp= (ImportDeclaration) imports.get(0);
 			
 			Name name= ast.newName(new String[] { "org", "eclipse", "X" });
-			ASTRewriteAnalyzer.markAsReplaced(imp.getName(), name);
+			rewrite.markAsReplaced(imp.getName(), name);
 		}
 		{ // change to import on demand
 			ImportDeclaration imp= (ImportDeclaration) imports.get(1);
 			
 			Name name= ast.newName(new String[] { "java", "util" });
-			ASTRewriteAnalyzer.markAsReplaced(imp.getName(), name);
+			rewrite.markAsReplaced(imp.getName(), name);
 			
 			ImportDeclaration modifedNode= (ImportDeclaration) ast.newImportDeclaration();
 			modifedNode.setOnDemand(true);
 			
-			ASTRewriteAnalyzer.markAsModified(imp, modifedNode);
+			rewrite.markAsModified(imp, modifedNode);
 		}
 		{ // change to single import
 			ImportDeclaration imp= (ImportDeclaration) imports.get(2);
@@ -581,17 +587,17 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			ImportDeclaration modifedNode= (ImportDeclaration) ast.newImportDeclaration();
 			modifedNode.setOnDemand(false);
 			
-			ASTRewriteAnalyzer.markAsModified(imp, modifedNode);
+			rewrite.markAsModified(imp, modifedNode);
 		}
 		{ // rename import
 			ImportDeclaration imp= (ImportDeclaration) imports.get(3);
 			
 			Name name= ast.newName(new String[] { "org", "eclipse" });
-			ASTRewriteAnalyzer.markAsReplaced(imp.getName(), name);
+			rewrite.markAsReplaced(imp.getName(), name);
 		}		
 		
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
 		
 		proposal.apply(null);
@@ -616,6 +622,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Z.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		AST ast= astRoot.getAST();
 		
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
@@ -625,10 +632,10 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			Name name= ast.newName(new String[] { "org", "eclipse" });
 			
-			ASTRewriteAnalyzer.markAsReplaced(packageDeclaration.getName(), name);
+			rewrite.markAsReplaced(packageDeclaration.getName(), name);
 		}
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
 		
 		proposal.apply(null);
@@ -651,6 +658,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -663,10 +671,10 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(0);
 			
 			ArrayType newVarType= ast.newArrayType(ast.newPrimitiveType(PrimitiveType.FLOAT), 2);
-			ASTRewriteAnalyzer.markAsReplaced(decl.getType(), newVarType);
+			rewrite.markAsReplaced(decl.getType(), newVarType);
 			
 			Name newName= ast.newSimpleName("count");
-			ASTRewriteAnalyzer.markAsReplaced(decl.getName(), newName);
+			rewrite.markAsReplaced(decl.getName(), newName);
 		}
 /*		{
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(1);
@@ -675,7 +683,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(2);
 		}*/			
 			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
 		
 		proposal.apply(null);
@@ -701,6 +709,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		
 		AST ast= astRoot.getAST();
 		
@@ -720,19 +729,19 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(0);
 			
 			ASTNode name= ast.newSimpleName("a");
-			ASTRewriteAnalyzer.markAsReplaced(fragment.getName(), name);
+			rewrite.markAsReplaced(fragment.getName(), name);
 			
 			VariableDeclarationFragment modifierNode= ast.newVariableDeclarationFragment();
 			modifierNode.setExtraDimensions(2);
 			
-			ASTRewriteAnalyzer.markAsModified(fragment, modifierNode);
+			rewrite.markAsModified(fragment, modifierNode);
 		}
 		
 		{ // add initializer
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(1);
 			
 			Expression initializer= ast.newNumberLiteral("1");
-			ASTRewriteAnalyzer.markAsInserted(initializer);
+			rewrite.markAsInserted(initializer);
 			
 			assertTrue("Has initializer", fragment.getInitializer() == null);
 			fragment.setInitializer(initializer);
@@ -742,7 +751,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(2);
 			
 			assertTrue("Has no initializer", fragment.getInitializer() != null);
-			ASTRewriteAnalyzer.markAsRemoved(fragment.getInitializer());
+			rewrite.markAsRemoved(fragment.getInitializer());
 		}
 		{ // add dimension, add initializer
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragments.get(3);			
@@ -750,10 +759,10 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			VariableDeclarationFragment modifierNode= ast.newVariableDeclarationFragment();
 			modifierNode.setExtraDimensions(4);
 			
-			ASTRewriteAnalyzer.markAsModified(fragment, modifierNode);
+			rewrite.markAsModified(fragment, modifierNode);
 
 			Expression initializer= ast.newNullLiteral();
-			ASTRewriteAnalyzer.markAsInserted(initializer);
+			rewrite.markAsInserted(initializer);
 			
 			assertTrue("Has initializer", fragment.getInitializer() == null);
 			fragment.setInitializer(initializer);			
@@ -765,10 +774,10 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			VariableDeclarationFragment modifierNode= ast.newVariableDeclarationFragment();
 			modifierNode.setExtraDimensions(0);
 			
-			ASTRewriteAnalyzer.markAsModified(fragment, modifierNode);
+			rewrite.markAsModified(fragment, modifierNode);
 		}					
 			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
 		
 		proposal.apply(null);

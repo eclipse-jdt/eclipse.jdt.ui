@@ -7,19 +7,21 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 /**
   */
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposalEnhanced {
 
-	private CompilationUnit fAstRoot;
+	private ASTRewrite fRewrite;
 
-	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, CompilationUnit astRoot, int relevance, Image image) throws CoreException {
+	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) throws CoreException {
 		super(name, cu, relevance, image);
-		fAstRoot= astRoot;
+		fRewrite= rewrite;
 	}
 
 	/* (non-Javadoc)
@@ -30,8 +32,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposalEnhanced {
 		try {
 			buffer= TextBuffer.acquire(change.getFile());
 			
-			ASTRewriteAnalyzer analyser= new ASTRewriteAnalyzer(buffer, change); 
-			fAstRoot.accept(analyser);
+			change.addTextEdit("Root", fRewrite.rewriteNode(buffer));
 		} finally {
 			if (buffer != null) {
 				TextBuffer.release(buffer);
