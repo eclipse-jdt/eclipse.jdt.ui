@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.76 [en] (Windows NT 5.0; U) [Netscape]">
+   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
    <title>Java Tooling Release Notes</title>
 </head>
 <body>
@@ -45,63 +45,41 @@ New preference page to specify the javadoc command to be used.</li>
 from an interface have a small arrow. A filled up arrow is used for methods
 that override. If a method overrides and implements, 'override' is rendered.</li>
 
-<li>
-<b>Work in progress: VA/Java style code browsing:</b> A new perspective
-(Open -> Java Browsing) which contains four views to browse code similar
-to VA/Java. The views are not linked together and can therefore be used
-on its own and be reused in other perspectives (Perspective -> Show View
--> Others...).</li>
-
-<br>Using the Projects view as fast view results in more space but needs
-some caution: the fast view should be minimized by clicking on or inside
-the Packages view because the selection in another view might override
-the selection from the Projects view.</ul>
-
-<blockquote>Available Preferences (Workbench -> Preferences -> Java ->
-Work In Progress -> Browsing):</blockquote>
-
-<ul>
-<ul>
-<li>
-the active editor's element in all visible Java browsing views is selected
-if 'Link Java browsing views selection to active editor' is checked</li>
-
-<li>
-the content of the selected element in the active Java browsing view is
-opened in an editor if 'Open editor on single-click' checked</li>
-
-<li>
-Java browsing views can be stacked horizontally on top of the perspective
-or 'Stack the views vertically on left side' can be checked for an alternative
-layout</li>
-
-<li>
-VA/Java style browsing normally has one editor per window. More editors
-can be configured with 'Number of opened editors before reusing'</li>
-</ul>
 </ul>
 
-<blockquote>Limitations:</blockquote>
-
 <ul>
-<ul>
-<li>
-Actions based on compilation units are not available for types</li>
-
-<li>
-Keyboard shortcuts don't work</li>
-
-<li>
-Instead of the inner class in a class file the enclosing type is selected</li>
-
-<li>
-The Members view does not get filled when opening a type (e.g. F4)</li>
-
-<li>
-The preference 'Number of opened editors before reusing' is not applied
-to Java browsing perspectives which are not visible due to inplace switching
-of perspectives</li>
+  <li><b>Work in progress: VA/Java style code browsing:</b> A new perspective
+    (Open -&gt; Java Browsing) which contains four views to browse code similar
+    to VA/Java. One convenient arrangement is to use the Projects view as a fast
+    view.</li>
 </ul>
+<blockquote>
+  <p>Available Preferences (Workbench -&gt; Preferences -&gt; Java -&gt; Work In
+  Progress -&gt; Browsing):</p>
+</blockquote>
+<ul>
+  <ul>
+    <li>'Link Java browsing views selection to active editor': the active
+      editor's element in all visible Java browsing views is selected.</li>
+    <li>'Open editor on single-click' the content of the selected element in the
+      active Java browsing view is opened in an editor.</li>
+    <li>'Stack the views vertically on left side' Java browsing views can be
+      stacked horizontally or vertically.</li>
+    <li>'Number of opened editors before reusing' the number of open editors
+      before they are reused, default is one.&nbsp;</li>
+  </ul>
+</ul>
+<blockquote>
+</blockquote>
+<blockquote>
+  Limitations:
+</blockquote>
+<ul>
+  <ul>
+    <li>Actions based on compilation units are not available for types</li>
+    <li>Some Keyboard shortcuts don't work</li>
+  </ul>
+  <li>The JUnit plugin now contributes launch configurations for running tests.</li>
 </ul>
 
 <h2>
@@ -122,6 +100,9 @@ What's new in this drop</h2>
 and methods (types are not supported yet) and choose 'Move...' from the
 context menu. Then, select the destination type. All references to these
 members will be updated.</li>
+<li>
+The <b><a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/jdt-ui-home/plugins/org.eclipse.jdt.junit/index.html">JUnit</a></b>
+plugin is now part of the JDT.</li>
 </ul>
 
 <h2>
