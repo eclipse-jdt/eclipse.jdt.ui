@@ -20,9 +20,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 	
-	private static final String TITLE= "SubTypeHierarchyViewer.title";
-	private static final String TITLE_FILTERED= "SubTypeHierarchyViewer.filtered.title";
-	
 	public SubTypeHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
 		super(parent, new SubTypeHierarchyContentProvider(lifeCycle), part);
 	}
@@ -31,13 +28,12 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 	 * @see TypeHierarchyViewer#getTitle
 	 */	
 	public String getTitle() {
-		String key;
+		String title;
 		if (getHierarchyContentProvider().getMemberFilter() != null) {
-			key= TITLE_FILTERED;
+			return TypeHierarchyMessages.getString("SubTypeHierarchyViewer.filtered.title"); //$NON-NLS-1$
 		} else {
-			key= TITLE;
+			return TypeHierarchyMessages.getString("SubTypeHierarchyViewer.title"); //$NON-NLS-1$
 		}
-		return JavaPlugin.getResourceString(key);
 	}
 	
 	/**

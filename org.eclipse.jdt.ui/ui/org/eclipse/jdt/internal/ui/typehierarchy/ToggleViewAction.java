@@ -4,18 +4,16 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.ResourceBundle;
+import org.eclipse.jface.action.Action;
 
-import org.eclipse.jdt.internal.ui.actions.JavaUIAction;
-
-public class ToggleViewAction extends JavaUIAction {
+public class ToggleViewAction extends Action {
 	
 	private TypeHierarchyViewPart fViewPart;
 	private int fViewerIndex;
 	private ToggleViewAction[] fOtherActions;
 		
-	public ToggleViewAction(TypeHierarchyViewPart v, int viewerIndex, ResourceBundle bundle, String prefix) {
-		super(bundle, prefix);
+	public ToggleViewAction(TypeHierarchyViewPart v, int viewerIndex, String title) {
+		super(title);
 		fViewPart= v;
 		fViewerIndex= viewerIndex;
 	}

@@ -20,24 +20,20 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 	
-	private static final String TITLE= "SuperTypeHierarchyViewer.title";
-	private static final String TITLE_FILTERED= "SuperTypeHierarchyViewer.filtered.title";
-	
 	public SuperTypeHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
 		super(parent, new SuperTypeHierarchyContentProvider(lifeCycle), part);
 	}
 
 	/**
 	 * @see TypeHierarchyViewer#getTitle
-	 */		
+	 */	
 	public String getTitle() {
-		String key;
+		String title;
 		if (getHierarchyContentProvider().getMemberFilter() != null) {
-			key= TITLE_FILTERED;
+			return TypeHierarchyMessages.getString("SuperTypeHierarchyViewer.filtered.title"); //$NON-NLS-1$
 		} else {
-			key= TITLE;
+			return TypeHierarchyMessages.getString("SuperTypeHierarchyViewer.title"); //$NON-NLS-1$
 		}
-		return JavaPlugin.getResourceString(key);
 	}
 
 	/**

@@ -4,27 +4,28 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jface.action.Action;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.actions.JavaUIAction;
 
 /**
  * Action to show / hide inherited members in the method view
  * Depending in the action state a different label provider is installed in the viewer
  */
-public class ShowInheritedMembersAction extends JavaUIAction {
+public class ShowInheritedMembersAction extends Action {
 	
 	private MethodsViewer fMethodsViewer;
-	
-	private static final String RESOURCE_PREFIX= "ShowInheritedMembersAction.";
 	
 	/** 
 	 * Creates the action.
 	 */
 	public ShowInheritedMembersAction(MethodsViewer viewer, boolean initValue) {
-		super(JavaPlugin.getResourceBundle(), RESOURCE_PREFIX);
-		//setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_INHERITED);
-		setImageDescriptors("lcl16", "inher_co.gif");
+		super(TypeHierarchyMessages.getString("ShowInheritedMembersAction.label")); //$NON-NLS-1$
+		setDescription(TypeHierarchyMessages.getString("ShowInheritedMembersAction.description")); //$NON-NLS-1$
+		setToolTipText(TypeHierarchyMessages.getString("ShowInheritedMembersAction.tooltip")); //$NON-NLS-1$
+		
+		JavaPluginImages.setImageDescriptors(this, "lcl16", "inher_co.gif"); //$NON-NLS-1$ //$NON-NLS-2$
+
 		fMethodsViewer= viewer;
 		
 		setChecked(initValue);
@@ -47,9 +48,9 @@ public class ShowInheritedMembersAction extends JavaUIAction {
 	private void valueChanged(boolean on) {
 		fMethodsViewer.showInheritedMethods(on);
 		if (on) {
-			setToolTipText(JavaPlugin.getResourceString(RESOURCE_PREFIX + "tooltip.checked"));
+			setToolTipText(TypeHierarchyMessages.getString("ShowInheritedMembersAction.tooltip.checked")); //$NON-NLS-1$
 		} else {
-			setToolTipText(JavaPlugin.getResourceString(RESOURCE_PREFIX + "tooltip.unchecked"));
+			setToolTipText(TypeHierarchyMessages.getString("ShowInheritedMembersAction.tooltip.unchecked")); //$NON-NLS-1$
 		}
 	}
 	

@@ -77,7 +77,7 @@ public class MethodsViewerFilter extends ViewerFilter {
 				IMember member= (IMember)element;
 				int flags= member.getFlags();
 				if (Flags.isStatic(flags) && 
-					(hasFilter(FILTER_STATIC) || "<clinit>".equals(member.getElementName()))) {
+					(hasFilter(FILTER_STATIC) || "<clinit>".equals(member.getElementName()))) { //$NON-NLS-1$
 					return false;
 				}
 				if (!Flags.isPublic(flags) && !member.getDeclaringType().isInterface()) {

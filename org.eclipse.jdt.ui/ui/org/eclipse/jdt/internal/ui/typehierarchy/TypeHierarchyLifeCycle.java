@@ -26,8 +26,6 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
  */
 public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener {
 	
-	private static final String CREATE_ERROR_PREFIX= "TypeHierarchyLifeCycle.error.createhierarchy.";
-	
 	private boolean fHierarchyRefreshNeeded;
 	private ITypeHierarchy fHierarchy;
 	private boolean fIsSuperTypesOnly;

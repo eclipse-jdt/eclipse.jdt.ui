@@ -15,24 +15,20 @@ import org.eclipse.swt.widgets.Composite;import org.eclipse.ui.IWorkbenchPart;
  */
 public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	
-	private static final String TITLE= "TraditionalHierarchyViewer.title";
-	private static final String TITLE_FILTERED= "TraditionalHierarchyViewer.filtered.title";
-	
 	public TraditionalHierarchyViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
 		super(parent, new TraditionalHierarchyContentProvider(lifeCycle), part);
 	}
 	
 	/**
 	 * @see TypeHierarchyViewer#getTitle
-	 */		
+	 */	
 	public String getTitle() {
-		String key;
+		String title;
 		if (getHierarchyContentProvider().getMemberFilter() != null) {
-			key= TITLE_FILTERED;
+			return TypeHierarchyMessages.getString("TraditionalHierarchyViewer.filtered.title"); //$NON-NLS-1$
 		} else {
-			key= TITLE;
+			return TypeHierarchyMessages.getString("TraditionalHierarchyViewer.title"); //$NON-NLS-1$
 		}
-		return JavaPlugin.getResourceString(key);
 	}
 
 	/**

@@ -43,13 +43,9 @@ import org.eclipse.jdt.internal.ui.wizards.NewGroup;
 public abstract class TypeHierarchyViewer extends TreeViewer {
 	
 	private OpenSourceReferenceAction fOpen;
-
 	private ShowInPackageViewAction fShowInPackageViewAction;
-		
 	private ContextMenuGroup[] fStandardGroups;
-	
-	private static final String PREFIX_FILTER_INTERFACES= "TypeHierarchyViewer.hide_interfaces.";
-	
+
 	
 	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, IWorkbenchPart part) {
 		super(new Tree(parent, SWT.SINGLE));

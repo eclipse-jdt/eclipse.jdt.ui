@@ -4,7 +4,41 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.events.ControlAdapter;import org.eclipse.swt.events.ControlEvent;import org.eclipse.swt.events.DisposeEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.action.ToolBarManager;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.ui.IMemento;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GenerateGroup;import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ViewerSorter;
+
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkbenchPart;
+
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
+import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
+import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
+import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
@@ -13,16 +47,11 @@ import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse
  * No dependency to the type hierarchy view
  */
 public class MethodsViewer extends TableViewer {
-	
-	private static final String PREFIX_FILTER_NONPUBLIC= "MethodsViewer.hide_nonpublic.";
-	private static final String PREFIX_FILTER_FIELDS= "MethodsViewer.hide_fields.";
-	private static final String PREFIX_FILTER_STATIC= "MethodsViewer.hide_static.";
-	private static final String PREFIX_VISIBILITY_MENU= "MethodsViewer.visibilitymenu.";	
-	
-	private static final String TAG_HIDEFIELDS= "hidefields";
-	private static final String TAG_HIDESTATIC= "hidestatic";
-	private static final String TAG_HIDENONPUBLIC= "hidenonpublic";
-	private static final String TAG_SHOWINHERITED= "showinherited";		
+
+	private static final String TAG_HIDEFIELDS= "hidefields"; //$NON-NLS-1$
+	private static final String TAG_HIDESTATIC= "hidestatic"; //$NON-NLS-1$
+	private static final String TAG_HIDENONPUBLIC= "hidenonpublic"; //$NON-NLS-1$
+	private static final String TAG_SHOWINHERITED= "showinherited";		 //$NON-NLS-1$
 	
 	private MethodsViewerFilterAction fHideNonPublic;
 	private MethodsViewerFilterAction fHideFields;
@@ -50,9 +79,7 @@ public class MethodsViewer extends TableViewer {
 		MethodsContentProvider contentProvider= new MethodsContentProvider();
 		setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		setContentProvider(contentProvider);
-		
-		ResourceBundle bundle= JavaPlugin.getResourceBundle();
-		
+				
 		fOpen= new OpenSourceReferenceAction();
 		fOpen.setSelectionProvider(this);
 		
@@ -66,19 +93,30 @@ public class MethodsViewer extends TableViewer {
 				
 		fFilter= new MethodsViewerFilter();
 		
-		// fields	
-		fHideFields= new MethodsViewerFilterAction(this, fFilter,  bundle, PREFIX_FILTER_FIELDS, MethodsViewerFilter.FILTER_FIELDS, false);
-		fHideFields.setImageDescriptors("lcl16", "fields_co.gif");
+		// fields
+		String title= TypeHierarchyMessages.getString("MethodsViewer.hide_fields.title"); //$NON-NLS-1$
+		fHideFields= new MethodsViewerFilterAction(this, fFilter, title, MethodsViewerFilter.FILTER_FIELDS, false);
+		fHideFields.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.description")); //$NON-NLS-1$
+		fHideFields.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.checked")); //$NON-NLS-1$
+		fHideFields.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.unchecked")); //$NON-NLS-1$
+		JavaPluginImages.setImageDescriptors(fHideFields, "lcl16", "fields_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		// static
-		fHideStatic= new MethodsViewerFilterAction(this, fFilter, bundle, PREFIX_FILTER_STATIC, MethodsViewerFilter.FILTER_STATIC, false);
-		fHideStatic.setImageDescriptors("lcl16", "static_co.gif");
+		title= TypeHierarchyMessages.getString("MethodsViewer.hide_static.label"); //$NON-NLS-1$
+		fHideStatic= new MethodsViewerFilterAction(this, fFilter, title, MethodsViewerFilter.FILTER_STATIC, false);
+		fHideStatic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_static.description")); //$NON-NLS-1$
+		fHideStatic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.checked")); //$NON-NLS-1$
+		fHideStatic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.unchecked")); //$NON-NLS-1$
+		JavaPluginImages.setImageDescriptors(fHideStatic, "lcl16", "static_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 		
 		// non-public
-		fHideNonPublic= new MethodsViewerFilterAction(this, fFilter, bundle, PREFIX_FILTER_NONPUBLIC, MethodsViewerFilter.FILTER_NONPUBLIC, false);
-		fHideNonPublic.setImageDescriptors("lcl16", "public_co.gif");
-		
-		
+		title= TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.label"); //$NON-NLS-1$
+		fHideNonPublic= new MethodsViewerFilterAction(this, fFilter, title, MethodsViewerFilter.FILTER_NONPUBLIC, false);
+		fHideNonPublic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.description")); //$NON-NLS-1$
+		fHideNonPublic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.checked")); //$NON-NLS-1$
+		fHideNonPublic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.unchecked")); //$NON-NLS-1$
+		JavaPluginImages.setImageDescriptors(fHideNonPublic, "lcl16", "public_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
+			
 		addFilter(fFilter);
 		
 		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);		
@@ -125,7 +163,7 @@ public class MethodsViewer extends TableViewer {
 			}
 			refresh();
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getControl().getShell(), "Error", "");
+			ExceptionHandler.handle(e, getControl().getShell(), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.title"), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 	
@@ -164,9 +202,7 @@ public class MethodsViewer extends TableViewer {
 		
 		fShowInheritedMembersAction.updateState();
 	}
-		
 	
-		
 	/**
 	 * Attaches a contextmenu listener to the table
 	 */
@@ -189,8 +225,7 @@ public class MethodsViewer extends TableViewer {
 	 * Fills up the context menu with items for the method viewer
 	 * Should be called by the creator of the context menu
 	 */	
-	public void contributeToContextMenu(IMenuManager menu) {
-		
+	public void contributeToContextMenu(IMenuManager menu) {	
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);	
 		ContextMenuGroup.add(menu, fStandardGroups, this);
 	}

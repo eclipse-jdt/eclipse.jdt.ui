@@ -4,26 +4,41 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.viewers.ISelectionProvider;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 
 /**
  * Refocuses the type hierarchy on a type selection from a all types dialog.
  */
-public class FocusOnTypeAction extends JavaUIAction {
-	
-	private static final String PREFIX= "FocusOnTypeAction.";
-		
+public class FocusOnTypeAction extends Action {
+			
 	private TypeHierarchyViewPart fViewPart;
 	private ISelectionProvider fSelectionProvider;
 	
 	public FocusOnTypeAction(TypeHierarchyViewPart part) {
-		super(JavaPlugin.getResourceBundle(), PREFIX);
-		fViewPart= part;
+		super(TypeHierarchyMessages.getString("FocusOnTypeAction.label")); //$NON-NLS-1$
+		setDescription(TypeHierarchyMessages.getString("FocusOnTypeAction.description")); //$NON-NLS-1$
+		setToolTipText(TypeHierarchyMessages.getString("FocusOnTypeAction.tooltip")); //$NON-NLS-1$
 		
+		fViewPart= part;
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.FOCUS_ON_TYPE_ACTION });
 	}
 	/**
-	 *orm the action
+	 * Perform the action
 	 */
 	public void run() {
 		Shell parent= fViewPart.getSite().getWorkbenchWindow().getShell();
@@ -31,8 +46,8 @@ public class FocusOnTypeAction extends JavaUIAction {
 			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, 
 			true, true);				
 	
-		dialog.setTitle(JavaPlugin.getResourceString(PREFIX + "dialog.title"));
-		dialog.setMessage(JavaPlugin.getResourceString(PREFIX + "dialog.message"));
+		dialog.setTitle(TypeHierarchyMessages.getString("FocusOnTypeAction.dialog.title")); //$NON-NLS-1$
+		dialog.setMessage(TypeHierarchyMessages.getString("FocusOnTypeAction.dialog.message")); //$NON-NLS-1$
 		if (dialog.open() == IDialogConstants.CANCEL_ID) {
 			return;
 		}
