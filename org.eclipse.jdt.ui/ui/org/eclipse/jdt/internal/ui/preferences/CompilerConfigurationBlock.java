@@ -243,7 +243,7 @@ public class CompilerConfigurationBlock {
 		fContext= context;
 		fProject= project;
 		
-		fWorkingValues= getOptions();
+		fWorkingValues= getOptions(true);
 		fWorkingValues.put(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance());
 		
 		fCheckBoxes= new ArrayList();
@@ -304,9 +304,9 @@ public class CompilerConfigurationBlock {
 		fTaskTagsStatus= new StatusInfo();		
 	}
 	
-	private Map getOptions() {
+	private Map getOptions(boolean inheritJavaCoreOptions) {
 		if (fProject != null) {
-			return fProject.getOptions(true);
+			return fProject.getOptions(inheritJavaCoreOptions);
 		} else {
 			return JavaCore.getOptions();
 		}	
@@ -894,7 +894,7 @@ public class CompilerConfigurationBlock {
 		packTodoTasks();
 
 		String[] allKeys= getAllKeys();
-		Map actualOptions= getOptions();
+		Map actualOptions= getOptions(false);
 		
 		// preserve other options
 		boolean hasChanges= false;
