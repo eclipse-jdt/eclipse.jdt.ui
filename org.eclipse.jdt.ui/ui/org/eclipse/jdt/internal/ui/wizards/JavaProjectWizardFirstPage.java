@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.WizardPage;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -264,7 +266,9 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fStdRadio.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.LayoutGroup.option.oneFolder")); //$NON-NLS-1$
 			fStdRadio.setFont(composite.getFont());
 
-			fSrcBinRadio.setSelection(true);
+			boolean useSrcBin= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
+			fSrcBinRadio.setSelection(useSrcBin);
+			fStdRadio.setSelection(!useSrcBin);
 		}
 
 		public void update(Observable o, Object arg) {
@@ -289,13 +293,12 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		
 		public DetectGroup(Composite composite) {
 			fText= new Text(composite, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP);
-			final GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+			final GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL);
 			gd.widthHint= 0;
+			gd.heightHint= convertHeightInCharsToPixels(6);
 			fText.setLayoutData(gd);
 			fText.setFont(composite.getFont());
-			fText.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.DetectGroup.message1") //$NON-NLS-1$
-					+ NewWizardMessages.getString("JavaProjectWizardFirstPage.DetectGroup.message2") + //$NON-NLS-1$
-					NewWizardMessages.getString("JavaProjectWizardFirstPage.DetectGroup.message3")); //$NON-NLS-1$
+			fText.setText(NewWizardMessages.getString("JavaProjectWizardFirstPage.DetectGroup.message")); //$NON-NLS-1$
 			fText.setVisible(false);
 		}
 
