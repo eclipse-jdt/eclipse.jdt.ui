@@ -180,7 +180,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 			
 			protected Position createPositionFromProblem(IProblem problem) {
-				return new Position(problem.getSourceStart(), problem.getSourceEnd() + 1 - problem.getSourceStart());
+				int length= problem.getSourceEnd() - problem.getSourceStart() + 1;
+				if (length < 0) length= 0;
+				return new Position(problem.getSourceStart(), length);
 			}
 			
 			/*

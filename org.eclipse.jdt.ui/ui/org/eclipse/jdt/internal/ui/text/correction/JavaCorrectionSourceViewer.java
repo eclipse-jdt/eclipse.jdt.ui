@@ -62,7 +62,10 @@ public class JavaCorrectionSourceViewer extends SourceViewer {
 	 * @see TextViewer#handleDispose()
 	 */
 	protected void handleDispose() {
-		fCorrectionAssistant.uninstall();
+		if (fCorrectionAssistant != null) {
+			fCorrectionAssistant.uninstall();
+			fCorrectionAssistant= null;
+		}
 		super.handleDispose();
 	}
 

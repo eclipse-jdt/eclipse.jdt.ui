@@ -189,18 +189,20 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#close()
 	 */
 	public void close() {
-		if (fDocument != null) {
-			// already closed
-			return;
-		}
 		
+		// workaround for http://dev.eclipse.org/bugs/show_bug.cgi?id=12353
+		if (true)
+			return;
+		
+		if (isClosed())
+			return;
+			
 		IDocument d= fDocument;
 		fDocument= null;
 		d.removePrenotifiedDocumentListener(this);
 		
 		fireBufferChanged(new BufferChangedEvent(this, 0, 0, null));
 		fBufferListeners.clear();
-		fBufferListeners= null;
 	}
 	
 	/*

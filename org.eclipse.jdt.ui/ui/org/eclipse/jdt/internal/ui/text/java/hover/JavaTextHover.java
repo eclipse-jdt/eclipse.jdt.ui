@@ -31,6 +31,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -151,7 +152,7 @@ public class JavaTextHover implements ITextHover {
 	protected IPartListener fPartListener;
 	protected IPropertyChangeListener fPropertyChangeListener;
 	
-	protected String fCurrentPerspective;
+	protected String fCurrentPerspectiveId;
 	protected List fTextHoverSpecifications;
 	protected List fInstantiatedTextHovers;
 	protected boolean fEnabled;
@@ -204,12 +205,15 @@ public class JavaTextHover implements ITextHover {
 		IWorkbenchPage page= window.getActivePage();
 		if (page != null) {
 			
-			String newPerspective= page.getPerspective().getId();
+			IPerspectiveDescriptor perspective= page.getPerspective();
+			if (perspective != null)  {
+				String perspectiveId= perspective.getId();
 			
-			if (fCurrentPerspective == null || fCurrentPerspective != newPerspective) {
-				fCurrentPerspective= newPerspective;
-				
-				installTextHovers();					
+				if (fCurrentPerspectiveId == null || fCurrentPerspectiveId != perspectiveId) {
+					fCurrentPerspectiveId= perspectiveId;
+					
+					installTextHovers();					
+				}
 			}
 		}
 	}
