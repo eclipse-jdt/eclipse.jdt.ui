@@ -59,8 +59,8 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	// Preference store keys, see JavaCore.getOptions
-	private static final String PREF_NEWLINE_OPENING_BRACES= CorrectionMessages.getString("org.eclipse.jdt.core.formatter.newline.openingBrace_1"); //$NON-NLS-1$
-	private static final String PREF_NEWLINE_CONTROL_STATEMENT= CorrectionMessages.getString("org.eclipse.jdt.core.formatter.newline.controlStatement_2"); //$NON-NLS-1$
+	private static final String PREF_NEWLINE_OPENING_BRACES= "org.eclipse.jdt.core.formatter.newline.openingBrace"; //$NON-NLS-1$
+	private static final String PREF_NEWLINE_CONTROL_STATEMENT= "org.eclipse.jdt.core.formatter.newline.controlStatement"; //$NON-NLS-1$
 	private static final String PREF_NEWLINE_CLEAR_ALL= "org.eclipse.jdt.core.formatter.newline.clearAll"; //$NON-NLS-1$
 	private static final String PREF_NEWLINE_ELSE_IF= "org.eclipse.jdt.core.formatter.newline.elseIf"; //$NON-NLS-1$
 	private static final String PREF_NEWLINE_EMPTY_BLOCK= "org.eclipse.jdt.core.formatter.newline.emptyBlock"; //$NON-NLS-1$
