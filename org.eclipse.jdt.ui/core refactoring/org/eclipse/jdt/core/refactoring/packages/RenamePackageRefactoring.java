@@ -235,8 +235,11 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	 * Analyzes all compilation units in which type is referenced
 	 */
 	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", fOccurrences.size());
-		RefactoringStatus result= new RefactoringStatus();
+		RefactoringStatus result= Checks.excludeBrokenCompilationUnits(fOccurrences);
+		if (result.hasFatalError())
+			return result;
+		
+		pm.beginTask("", fOccurrences.size());	
 		Iterator iter= fOccurrences.iterator();
 		RenamePackageASTAnalyzer analyzer= new RenamePackageASTAnalyzer(fNewName);
 		while (iter.hasNext()){
@@ -264,7 +267,6 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		builder.addChange(new RenamePackageChange(fPackage, fNewName));
 		pm.worked(1);
 		pm.done();
-		HackFinder.fixMeSoon("maybe add dispose() method?");
 		fOccurrences= null; //to prevent memory leak
 		return builder;
 	}

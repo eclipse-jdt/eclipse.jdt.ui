@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.IChange;
 import org.eclipse.jdt.core.refactoring.RefactoringStatus;
-import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.core.refactoring.tagging.IPreactivatedRefactoring;import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.core.refactoring.text.ITextBuffer;
 import org.eclipse.jdt.core.refactoring.text.ITextBufferChange;
 import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;
@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
  * this early stage to solicit feedback from pioneering adopters on the understanding that any 
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
-public class RenameFieldRefactoring extends FieldRefactoring implements IRenameRefactoring{
+public class RenameFieldRefactoring extends FieldRefactoring implements IRenameRefactoring, IPreactivatedRefactoring{
 	
 	private String fNewName;
 	
@@ -115,12 +115,16 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	
 	// -------------- Preconditions -----------------------
 	
-	/**
-	 * @see Refactoring#checkActivation
-	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkPreactivation() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getField()));	
+		return result;
+	}
+	
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
+		if (! getField().getCompilationUnit().isStructureKnown())
+			result.addFatalError("Compilation unit that declares this field cannot be parsed correctly.");
 		return result;
 	}
 	
@@ -194,7 +198,10 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	 * Analyzes all compilation units in which type is referenced
 	 */
 	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
+		RefactoringStatus result= Checks.excludeBrokenCompilationUnits(fOccurrences);
+		if (result.hasFatalError())
+			return result;
+			
 		pm.beginTask("", fOccurrences.size());
 		Iterator iter= fOccurrences.iterator();
 		RenameFieldASTAnalyzer analyzer= new RenameFieldASTAnalyzer(fNewName, getField());
@@ -228,7 +235,7 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	}
 	
 	private SimpleReplaceTextChange createTextChange(SearchResult searchResult) {
-		return new SimpleReplaceTextChange("Field Reference Update", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), getNewName()){
+		return new SimpleReplaceTextChange("update field reference", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), getNewName()){
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String oldText= buffer.getContent(getOffset(), getLength());
 				if (oldText.startsWith("this.") && (! getText().startsWith("this."))){
@@ -244,14 +251,13 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		List grouped= getOccurrences(null);
 		for (Iterator iter= grouped.iterator(); iter.hasNext();){
 			List l= (List)iter.next();
-			ITextBufferChange change= getChangeCreator().create("Rename Field", (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource()));
+			ITextBufferChange change= getChangeCreator().create("update references to " + getField().getElementName(), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource()));
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}
 			builder.addChange(change);
 			pm.worked(1);
 		}
-		HackFinder.fixMeSoon("maybe add dispose() method?");
 		setOccurrences(null); //to prevent memory leak
 	}
 	
