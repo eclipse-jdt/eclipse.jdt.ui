@@ -1262,7 +1262,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		// add imports for superclass/interfaces, so types can be resolved correctly
 		imports.create(!isInnerClass, new SubProgressMonitor(monitor, 1));
 		
-		createTypeMembers(createdType, imports, new SubProgressMonitor(monitor, 1));
+		createTypeMembers(createdType, new ImportsManager(imports), new SubProgressMonitor(monitor, 1));
 
 		// add imports
 		imports.create(!isInnerClass, new SubProgressMonitor(monitor, 1));
@@ -1362,7 +1362,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * @deprecated Overwrite createTypeMembers(IType, IImportsManager, IProgressMonitor);
+	 * @deprecated Overwrite createTypeMembers(IType, IImportsManager, IProgressMonitor) instead
 	 */		
 	protected void createTypeMembers(IType newType, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		//deprecated
@@ -1370,7 +1370,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	/**
 	 * Called from createType to allow adding methods, fields, inner types ect for the newly created type.
-	 * Implementors can use the create methods on the new type.
+	 * Implementors can use the create methods on IType.
 	 * Formatting will be applied to the content by the createType. Imports are added after this call by the wizard
 	 * @param newType The new type to add members to
 	 * @param imports To add the needed imports to. 
@@ -1382,8 +1382,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		// default implementation does nothing
 		// example would be
-		// String mainMathod= "public static void main(String[]) {}"
+		// String mainMathod= "public void foo(Vector vec) {}"
 		// createdType.createMethod(main, null, false, null);
+		// imports.addImport("java.lang.Vector");
 	}	
 	
 		
