@@ -72,6 +72,7 @@ public class ImageDescriptorRegistry {
 			Image image= (Image)iter.next();
 			image.dispose();
 		}
+		fRegistry.clear();
 	}
 	
 	private void hookDisplay() {
