@@ -54,6 +54,7 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
@@ -194,6 +195,16 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 						return false;
 					}
 					break;
+				case IJavaElement.COMPILATION_UNIT:
+					ICompilationUnit unit= (ICompilationUnit)delta.getElement();
+					// If we change a working copy we do nothing
+					if (unit.isWorkingCopy()) {
+						// Don't examine children of a working copy but keep processing siblings.
+						return true;
+					} else {
+						codeHasChanged();
+						return false;
+					}
 				case IJavaElement.CLASS_FILE:
 					// Don't examine children of a class file but keep on examining siblings.
 					return true;
