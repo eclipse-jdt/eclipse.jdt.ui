@@ -7,12 +7,11 @@ package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.swt.layout.GridData;
 
 /**
  * Dialog field containing a label and a text control.

@@ -12,6 +12,8 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -33,8 +35,6 @@ import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 
 /**
  * A list with a button bar.

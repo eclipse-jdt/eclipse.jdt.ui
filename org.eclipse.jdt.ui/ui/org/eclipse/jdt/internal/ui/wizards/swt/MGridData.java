@@ -8,6 +8,8 @@ import org.eclipse.swt.SWT;
 
 /**
  * Copy of GridData with fixes for 1FUMNGH: SWT:ALL - GridLayout weakness
+ * @deprecated Use GridData. DialogFields now don't set the horizontal span flag anymore; it has to be
+ * set manually after doFillToGrid
  */
 public final class MGridData {
 	/**

@@ -7,12 +7,12 @@ package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.swt.layout.GridData;
 
 /**
  * Dialog Field containing a single button: e.g. radio or checkbox button.
