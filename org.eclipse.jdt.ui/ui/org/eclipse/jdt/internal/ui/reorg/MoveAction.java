@@ -168,59 +168,13 @@ public class MoveAction extends ReorgDestinationAction {
 			super.doReorg(refactoring);
 			return;
 		}	
-		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), new MoveWizard((MoveRefactoring)refactoring)).open();	
+		//XX incorrect help
+		RefactoringWizard wizard= new RefactoringWizard(refactoring, "Move", IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE);
+		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();	
 	}
 	
 	//--- static inner classes
 		
-	private static class MoveWizard extends RefactoringWizard{
-		MoveWizard(MoveRefactoring ref){
-			//XX incorrect help
-			super(ref, "Move", IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); 
-		}
-		
-		/* (non-Javadoc)
-		 * Method overridden from RefactoringWizard
-		 */
-		public void addPages() {
-			addPreviewPage();	
-			setupPageTitles();
-		}
-		
-		public void createPageControls(Composite pageContainer) {
-			super.createPageControls(pageContainer);
-			
-			//XX nasty to have to do it here
-			setChange();
-		}
-		
-		private void setChange(){
-			IChange change= null;
-			try{
-				change= computeChange(getRefactoring());
-			} catch (CoreException e){
-				JavaPlugin.log(e.getStatus());
-				return;
-			}	
-			if (change == null)
-				return;
-			setChange(change);
-		}
-		
-		private IChange computeChange(Refactoring ref) throws CoreException{
-			CreateChangeOperation op= new CreateChangeOperation(ref, CreateChangeOperation.CHECK_NONE);
-			try{
-				new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()).run(true, true, op);
-			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, "Move", "Unexpected exception. See log for details.");
-				return null;
-			} catch (InterruptedException e) {
-				//fall thru
-			}
-			return op.getChange();
-		}		
-	}
-	
 	private class MoveDestinationDialog extends ElementTreeSelectionDialog {
 		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
 		private MoveRefactoring fRefactoring;
