@@ -217,7 +217,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 			final ILaunchConfigurationDelegate delegate= configuration.getType().getDelegate(ILaunchManager.RUN_MODE);
 			if (delegate instanceof SerialVersionLaunchConfigurationDelegate) {
 				final SerialVersionLaunchConfigurationDelegate extension= (SerialVersionLaunchConfigurationDelegate) delegate;
-				configuration.launch(ILaunchManager.RUN_MODE, new SubProgressMonitor(monitor, 1), true);
+				configuration.launch(ILaunchManager.RUN_MODE, new SubProgressMonitor(monitor, 1), true, false);
 				monitor.worked(1);
 				serialVersionID= extension.getSerialVersionID();
 				final String message= extension.getErrorMessage();
