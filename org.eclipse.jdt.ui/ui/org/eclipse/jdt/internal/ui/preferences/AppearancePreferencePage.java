@@ -38,6 +38,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	public static final String PREF_COMPRESS_PACKAGE_NAMES= JavaUI.ID_PLUGIN + ".compresspackagenames"; //$NON-NLS-1$
 	public static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= "PackagesView.pkgNamePatternForPackagesView"; //$NON-NLS-1$
 	public static final String STACK_BROWSING_VIEWS_VERTICALLY= "org.eclipse.jdt.ui.browsing.stackVertically"; //$NON-NLS-1$
+	public static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= JavaUI.ID_PLUGIN + ".flatPackagesInPackageExplorer"; //$NON-NLS-1$
 
 	public static boolean stackBrowsingViewsHorizontally() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -54,6 +55,12 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 
 	public static boolean showCompilationUnitChildren() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(SHOW_CU_CHILDREN);
+	}
+
+	/**
+	 * @since 2.1	 */
+	public static boolean arePackagesFoldedInHierarchicalLayout(){
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER);	
 	}
 
 	public static String getPkgNamePatternForPackagesView() {
@@ -80,6 +87,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		prefs.setDefault(SHOW_CU_CHILDREN, true);
 		prefs.setDefault(STACK_BROWSING_VIEWS_VERTICALLY, false);
 		prefs.setDefault(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
+		prefs.setDefault(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
 	}
 	
 	private SelectionButtonDialogField fShowMethodReturnType;
@@ -88,6 +96,9 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private SelectionButtonDialogField fStackBrowsingViewsVertically;
 	private SelectionButtonDialogField fShowMembersInPackageView;
 	private StringDialogField fPackageNamePattern;
+	private SelectionButtonDialogField fFoldPackagesInPackageExplorer;
+	
+	
 
 	public AppearancePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
@@ -115,6 +126,10 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fStackBrowsingViewsVertically.setDialogFieldListener(listener);
 		fStackBrowsingViewsVertically.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.stackViewsVerticallyInTheJavaBrowsingPerspective")); //$NON-NLS-1$
 
+		fFoldPackagesInPackageExplorer= new SelectionButtonDialogField(SWT.CHECK);
+		fFoldPackagesInPackageExplorer.setDialogFieldListener(listener);
+		fFoldPackagesInPackageExplorer.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.foldEmptyPackages")); //$NON-NLS-1$
+
 		fCompressPackageNames= new SelectionButtonDialogField(SWT.CHECK);
 		fCompressPackageNames.setDialogFieldListener(listener);
 		fCompressPackageNames.setLabelText(JavaUIMessages.getString("AppearancePreferencePage.pkgNamePatternEnable.label")); //$NON-NLS-1$
@@ -133,6 +148,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fPackageNamePattern.setText(prefs.getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
 		fCompressPackageNames.setSelection(prefs.getBoolean(PREF_COMPRESS_PACKAGE_NAMES));
 		fPackageNamePattern.setEnabled(fCompressPackageNames.isSelected());
+		fFoldPackagesInPackageExplorer.setSelection(prefs.getBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER));
 	}
 	
 	/*
@@ -161,6 +177,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowMethodReturnType.doFillIntoGrid(composite, nColumns);
 		fShowOverrideIndicator.doFillIntoGrid(composite, nColumns);
 		fShowMembersInPackageView.doFillIntoGrid(composite, nColumns);				
+		fFoldPackagesInPackageExplorer.doFillIntoGrid(composite, nColumns);
 
 		new Separator().doFillIntoGrid(composite, nColumns);
 		
@@ -218,6 +235,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		prefs.setValue(STACK_BROWSING_VIEWS_VERTICALLY, fStackBrowsingViewsVertically.isSelected());
 		prefs.setValue(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, fPackageNamePattern.getText());
 		prefs.setValue(PREF_COMPRESS_PACKAGE_NAMES, fCompressPackageNames.isSelected());
+		prefs.setValue(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fFoldPackagesInPackageExplorer.isSelected());
 		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}	
@@ -233,6 +251,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fStackBrowsingViewsVertically.setSelection(prefs.getDefaultBoolean(STACK_BROWSING_VIEWS_VERTICALLY));
 		fPackageNamePattern.setText(prefs.getDefaultString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
 		fCompressPackageNames.setSelection(prefs.getDefaultBoolean(PREF_COMPRESS_PACKAGE_NAMES));
+		fFoldPackagesInPackageExplorer.setSelection(prefs.getDefaultBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER));
 		super.performDefaults();
 	}
 }
