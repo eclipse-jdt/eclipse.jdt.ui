@@ -204,7 +204,11 @@ class CPListLabelProvider extends LabelProvider {
 	private ImageDescriptor getCPListElementBaseImage(CPListElement cpentry) {
 		switch (cpentry.getEntryKind()) {
 			case IClasspathEntry.CPE_SOURCE:
-				return fFolderImage;
+				if (cpentry.getPath().segmentCount() == 1) {
+					return fProjectImage;
+				} else {
+					return fFolderImage;
+				}
 			case IClasspathEntry.CPE_LIBRARY:
 				IResource res= cpentry.getResource();
 				IPath path= (IPath) cpentry.getAttribute(CPListElement.SOURCEATTACHMENT);

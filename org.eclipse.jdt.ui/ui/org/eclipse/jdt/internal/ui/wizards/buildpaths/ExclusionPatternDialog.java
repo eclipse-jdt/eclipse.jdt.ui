@@ -139,7 +139,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 	protected void checkIfPatternValid() {
 		ArrayList res= new ArrayList();
 		String pattern= fExclusionPatternDialog.getText();
-		StringTokenizer tok= new StringTokenizer(pattern, File.pathSeparator);
+		StringTokenizer tok= new StringTokenizer(pattern, ";");
 		while (tok.hasMoreTokens()) {
 			String curr= tok.nextToken();
 			res.add(new Path(curr));
