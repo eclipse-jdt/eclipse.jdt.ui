@@ -29,6 +29,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -44,7 +47,8 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
 import org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.CreateOutputFolderOperation;
-import org.eclipse.jdt.internal.corext.buildpath.EditOperation;
+import org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation;
+import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IncludeOperation;
@@ -59,8 +63,12 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public class NewProjectWizardTest extends TestCase {
 	
@@ -87,6 +95,7 @@ public class NewProjectWizardTest extends TestCase {
         TestSuite suite= new TestSuite(THIS);
         fTestSetup= new NewProjectTestSetup(suite);
         suite.addTestSuite(NewEmptyProjectWizardTest.THIS);
+        suite.addTestSuite(NewProjectWizardOperationTest.THIS);
         return fTestSetup;
     }
     
@@ -105,7 +114,7 @@ public class NewProjectWizardTest extends TestCase {
         
         assertTrue(folder.exists());
         assertTrue(folder.getName().equals(fNormalFolder));
-        assertTrue(ClasspathModifier.getClasspathEntryFor(folder.getFullPath(), fProject) == null);
+        assertTrue(ClasspathModifier.getClasspathEntryFor(folder.getFullPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         
         validateClasspath();
     }
@@ -115,7 +124,7 @@ public class NewProjectWizardTest extends TestCase {
         
         assertTrue(root.getUnderlyingResource().exists());
         assertTrue(root.getElementName().equals(fSubFolder));
-        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         
         validateClasspath();
     }
@@ -141,7 +150,7 @@ public class NewProjectWizardTest extends TestCase {
         
         assertTrue(folder.exists());
         assertTrue(folder.getName().equals(fNormalFolder));
-        assertTrue(ClasspathModifier.getClasspathEntryFor(new Path(fNormalFolder), fProject) == null);
+        assertTrue(ClasspathModifier.getClasspathEntryFor(new Path(fNormalFolder), fProject, IClasspathEntry.CPE_SOURCE) == null);
         assertTrue(contains(new Path(fNormalFolder), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
@@ -168,7 +177,7 @@ public class NewProjectWizardTest extends TestCase {
         
         assertTrue(root.getUnderlyingResource().exists());
         assertTrue(root.getElementName().equals(fSubFolder));
-        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         assertTrue(contains(new Path(fSubFolder), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
@@ -198,7 +207,7 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(folder.exists());
         assertTrue(folder.getParent().equals(fragment));
         assertTrue(folder.getName().equals(nfFolder.lastSegment()));
-        assertTrue(ClasspathModifier.getClasspathEntryFor(folder.getFullPath(), fProject) == null);
+        assertTrue(ClasspathModifier.getClasspathEntryFor(folder.getFullPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         assertTrue(contains(folder.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
@@ -229,7 +238,7 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(root.getUnderlyingResource().exists());
         assertTrue(root.getUnderlyingResource().getParent().equals(fragment));
         assertTrue(root.getElementName().equals(srcFolder.lastSegment()));
-        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         assertTrue(contains(root.getPath().removeFirstSegments(2), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
@@ -334,8 +343,8 @@ public class NewProjectWizardTest extends TestCase {
         IPackageFragmentRoot projectRoot= getProjectRoot(fProject.getCorrespondingResource());
         IPackageFragment fragment= projectRoot.createPackageFragment("", false, null);
         
-        assertTrue(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject) == null);
-        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertTrue(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         assertTrue(fProject.findPackageFragment(normalFolder.getFullPath()) == null);
         assertTrue(fProject.findPackageFragment(fragment.getPath()) == null);
         
@@ -343,12 +352,36 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(project.equals(fProject));
         
         // project is on classpath
-        assertFalse(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         // root is on classpath and excluded on the project
-        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         assertTrue(ClasspathModifier.isExcluded(root.getUnderlyingResource(), fProject));
         assertFalse(fProject.findPackageFragment(normalFolder.getFullPath()) == null);
         assertFalse(fProject.findPackageFragment(fragment.getPath()) == null);
+        
+        validateClasspath();
+    }
+    
+    public void testAddJarFileToCP() throws InvocationTargetException, InterruptedException, CoreException {
+        IPath libraryPath= fProject.getPath().append("src2").append("archive.jar");
+        testRemoveJarFileFromCP();
+        IFile jarFile= fProject.getProject().getFile(libraryPath.removeFirstSegments(1));
+        assertTrue(jarFile.getFileExtension().equals("jar"));
+        
+        IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, jarFile, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_LIBRARY) == null);
+        
+        validateClasspath();
+    }
+    
+    public void testAddZipFileToCP() throws InvocationTargetException, InterruptedException, CoreException {
+        IPath libraryPath= fProject.getPath().append("src2").append("archive.zip");
+        testRemoveZipFileFromCP();
+        IFile zipFile= fProject.getProject().getFile(libraryPath.removeFirstSegments(1));
+        assertTrue(zipFile.getFileExtension().equals("zip"));
+        
+        IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, zipFile, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_LIBRARY) == null);
         
         validateClasspath();
     }
@@ -381,17 +414,17 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(projectRoot.equals(getProjectRoot(fProject.getCorrespondingResource())));
         
         // project is on classpath
-        assertFalse(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         // root is on classpath
-        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         assertFalse(fProject.findPackageFragment(normalFolder.getFullPath()) == null);
         assertFalse(fProject.findPackageFragment(fragment.getPath()) == null);
         
         IJavaProject jProject= (IJavaProject)executeOperation(IClasspathInformationProvider.REMOVE_FROM_BP, fProject, null, null, null, null);
         
         assertTrue(jProject.equals(fProject));
-        assertTrue(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject) == null);
-        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
+        assertTrue(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_SOURCE) == null);
         assertTrue(fProject.findPackageFragment(normalFolder.getFullPath()) == null);
         assertTrue(fProject.findPackageFragment(fragment.getPath()) == null);
         
@@ -508,6 +541,36 @@ public class NewProjectWizardTest extends TestCase {
         
         validateClasspath();
     }
+
+    public void testRemoveJarFileFromCP() throws InvocationTargetException, InterruptedException, CoreException {
+        IPath srcPath= new Path("src2");
+        IPackageFragmentRoot parentRoot= addToClasspath(srcPath);
+        IPath libraryPath= parentRoot.getPath().append("archive.jar");
+        IPackageFragmentRoot root= JavaProjectHelper.addLibrary(fProject, libraryPath);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_LIBRARY) == null);
+        IFile jarFile= (IFile)executeOperation(IClasspathInformationProvider.REMOVE_FROM_BP, root, null, null, null, null);
+        jarFile.create(null, false, null);
+        assertTrue(jarFile.getFileExtension().equals("jar"));
+        assertTrue(ClasspathModifier.isArchive(jarFile, fProject));
+        assertTrue(ClasspathModifier.getClasspathEntryFor(jarFile.getFullPath(), fProject, IClasspathEntry.CPE_LIBRARY) == null);
+        
+        validateClasspath();
+    }
+
+    public void testRemoveZipFileFromCP() throws InvocationTargetException, InterruptedException, CoreException {
+        IPath srcPath= new Path("src2");
+        IPackageFragmentRoot parentRoot= addToClasspath(srcPath);
+        IPath libraryPath= parentRoot.getPath().append("archive.zip");
+        IPackageFragmentRoot root= JavaProjectHelper.addLibrary(fProject, libraryPath);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject, IClasspathEntry.CPE_LIBRARY) == null);
+        IFile zipFile= (IFile)executeOperation(IClasspathInformationProvider.REMOVE_FROM_BP, root, null, null, null, null);
+        zipFile.create(null, false, null);
+        assertTrue(zipFile.getFileExtension().equals("zip"));
+        assertTrue(ClasspathModifier.isArchive(zipFile, fProject));
+        assertTrue(ClasspathModifier.getClasspathEntryFor(zipFile.getFullPath(), fProject, IClasspathEntry.CPE_LIBRARY) == null);
+        
+        validateClasspath();
+    }
     
     public void testEditFilters() throws CoreException, InvocationTargetException, InterruptedException {
         IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
@@ -532,14 +595,14 @@ public class NewProjectWizardTest extends TestCase {
             }
             
         };
-        root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.EDIT, root, null, null, null, query);
+        root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.EDIT_FILTERS, root, null, null, null, query);
         
         assertTrue(contains(new Path(includedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getInclusionPatterns(), null));
         assertTrue(contains(new Path(excludedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
     }
-    
+
     public void testResetFilters() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
         IFolder folder= getFolderHandle(new Path(fNormalFolder));
@@ -621,7 +684,7 @@ public class NewProjectWizardTest extends TestCase {
                 return getOutputFolderQueryInternal(fProject.getOutputLocation());
             }         
         };
-        CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(IClasspathInformationProvider.EDIT, attribute, null, query, null, null);
+        CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(IClasspathInformationProvider.EDIT_OUTPUT, attribute, null, query, null, null);
         
         IPath editedOutputPath= new Path(oldOutputPath.toString() + "3");
 
@@ -655,7 +718,7 @@ public class NewProjectWizardTest extends TestCase {
                 return NewProjectWizardTest.this.getOutputFolderQueryInternal(fProject.getOutputLocation());
             }      
         };
-        CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(IClasspathInformationProvider.EDIT, attribute, null, query, null, null);
+        CPListElementAttribute newAttribute= (CPListElementAttribute)executeOperation(IClasspathInformationProvider.EDIT_OUTPUT, attribute, null, query, null, null);
         
         assertTrue(root.getRawClasspathEntry().getOutputLocation() == null);
         assertTrue(newAttribute.getValue() == null);
@@ -932,10 +995,10 @@ public class NewProjectWizardTest extends TestCase {
                     returnValue[0]= result.get(0);
             }
 
-            public List getSelection() {
+            public ISelection getSelection() {
                 List list= new ArrayList();
                 list.add(selection);
-                return list;
+                return new StructuredSelection(list);
             }
 
             public IJavaProject getJavaProject() {
@@ -962,12 +1025,21 @@ public class NewProjectWizardTest extends TestCase {
                 // TODO Auto-generated method stub
                 return null;
             }
+            
+            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
+                // TODO Auto-generated method stub
+                return null;
+            }
 
             public void deleteCreatedResources() {
                 // TODO Auto-generated method stub
                 
             }
-            
         };
         
         ClasspathModifierOperation op= null;
@@ -979,7 +1051,8 @@ public class NewProjectWizardTest extends TestCase {
             case IClasspathInformationProvider.UNINCLUDE: op= new UnincludeOperation(null, provider); break;
             case IClasspathInformationProvider.EXCLUDE: op= new ExcludeOperation(null, provider); break;
             case IClasspathInformationProvider.UNEXCLUDE: op= new UnexcludeOperation(null, provider); break;
-            case IClasspathInformationProvider.EDIT: op= new EditOperation(null, provider); break;
+            case IClasspathInformationProvider.EDIT_FILTERS: op= new EditFiltersOperation(null, provider); break;
+            case IClasspathInformationProvider.EDIT_OUTPUT: op= new EditOutputFolderOperation(null, provider); break;
             case IClasspathInformationProvider.RESET: op= new ResetOperation(null, provider); break;
             case IClasspathInformationProvider.CREATE_OUTPUT: op= new CreateOutputFolderOperation(null, provider); break;
         }

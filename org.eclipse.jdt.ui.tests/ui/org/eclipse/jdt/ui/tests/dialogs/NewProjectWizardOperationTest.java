@@ -25,6 +25,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,30 +36,37 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
 import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
+import org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierAction;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 /**
  */
-public class NewProjectWizardOperationTest extends TestCase implements IClasspathInformationProvider{
+public class NewProjectWizardOperationTest extends TestCase implements IClasspathInformationProvider {
     
-    private static final Class THIS= NewProjectWizardOperationTest.class;
+    public static final Class THIS= NewProjectWizardOperationTest.class;
     protected IJavaProject fProject;
     protected DialogPackageExplorerActionGroup fActionGroup;
     protected List fSelection;
@@ -72,6 +82,8 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     private final int FILE= 0x06;
     private final int EXCLUDED_PACK= 0x07;
     private final int DEFAULT_PACK= 0x08;
+    private final int JAR= 0x09; // on buildpath
+    private final int ZIP= 0xA; // not on buildpath
     
     /* ### Project Structure:
      * - DummyProject
@@ -82,6 +94,8 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
      *                 |- B.java (excluded)
      *                 |- NormalFile
      *                 |- pack2 (excluded)
+     *            |- archive.jar (on buildpath)
+     *            |- archive.zip (excluded)
      *        |- NormalFolder
      */
     
@@ -157,7 +171,43 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fActionGroup.setContext(context);
         reset();
         
+        addToSelection(new int[] {PROJ, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PROJ, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
         addToSelection(new int[] {PROJ, SRC, NF});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PROJ, SRC, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PROJ, NF, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PROJ, NF, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PROJ, JAR, ZIP});
         context= createContext();
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
@@ -181,6 +231,18 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fActionGroup.setContext(context);
         reset();
         
+        addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
         addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, DEFAULT_PACK});
         context= createContext();
         addListener(new int[] {CREATE_LINK});
@@ -188,6 +250,30 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         reset();
         
         addToSelection(new int[] {PROJ, PACK, NF, CU});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PROJ, PACK, NF, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PROJ, PACK, NF, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PROJ, PACK, EXCLUDED_PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PROJ, PACK, EXCLUDED_PACK, JAR});
         context= createContext();
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
@@ -282,12 +368,18 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
+        
+        addToSelection(new int[] {PROJ, PACK, NF, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE, DEFAULT_PACK, JAR, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
     }
     
     public void testSrcWithOthers() throws JavaModelException {
         addToSelection(new int[] {SRC});
         DialogExplorerActionContext context= createContext();
-        addListener(new int[] {REMOVE_FROM_BP, EDIT, CREATE_LINK});
+        addListener(new int[] {REMOVE_FROM_BP, EDIT_FILTERS, CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
         
@@ -328,6 +420,42 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         reset();
         
         addToSelection(new int[] {SRC, DEFAULT_PACK});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {SRC, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {SRC, JAR});
+        context= createContext();
+        addListener(new int[] {REMOVE_FROM_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {SRC, JAR, NF});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {SRC, JAR, PACK});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {SRC, JAR, EXCLUDED_PACK});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {SRC, NF, PACK, CU, EXCLUDED_FILE, FILE, EXCLUDED_PACK, DEFAULT_PACK, JAR, ZIP});
         context= createContext();
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
@@ -377,6 +505,18 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fActionGroup.setContext(context);
         reset();
         
+        addToSelection(new int[] {NF, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {NF, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
         addToSelection(new int[] {NF, PACK, CU});
         context= createContext();
         addListener(new int[] {CREATE_LINK});
@@ -392,6 +532,18 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         addToSelection(new int[] {NF, PACK, EXCLUDED_PACK});
         context= createContext();
         addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {NF, PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {NF, PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
         
@@ -413,7 +565,31 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fActionGroup.setContext(context);
         reset();
         
-        addToSelection(new int[] {NF, PACK, EXCLUDED_PACK, EXCLUDED_FILE, DEFAULT_PACK});
+        addToSelection(new int[] {NF, PACK, EXCLUDED_PACK, EXCLUDED_FILE});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {NF, PACK, EXCLUDED_FILE, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {NF, PACK, EXCLUDED_FILE, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {NF, PACK, EXCLUDED_PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {NF, PACK, EXCLUDED_PACK, JAR});
         context= createContext();
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
@@ -457,13 +633,49 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fActionGroup.setContext(context);
         reset();
         
+        addToSelection(new int[] {PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
         addToSelection(new int[] {PACK, EXCLUDED_PACK, DEFAULT_PACK});
         context= createContext();
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
         
+        addToSelection(new int[] {PACK, EXCLUDED_PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PACK, EXCLUDED_PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
         addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, ZIP});
         context= createContext();
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
@@ -474,11 +686,35 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
+        
+        addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE, DEFAULT_PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE, DEFAULT_PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {PACK, EXCLUDED_PACK, CU, FILE, EXCLUDED_FILE, DEFAULT_PACK, JAR, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
     }
     
     public void testCUWithOthers() throws JavaModelException {
         addToSelection(new int[] {CU});
         DialogExplorerActionContext context= createContext();
+        addListener(new int[] {EXCLUDE, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {CU, PACK});
+        context= createContext();
         addListener(new int[] {EXCLUDE, CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
@@ -507,7 +743,49 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fActionGroup.setContext(context);
         reset();
         
+        addToSelection(new int[] {CU, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {CU, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
         addToSelection(new int[] {CU, EXCLUDED_PACK, PACK});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {CU, EXCLUDED_PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {CU, EXCLUDED_PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {CU, PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {CU, PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {CU,EXCLUDED_FILE, FILE, EXCLUDED_PACK, DEFAULT_PACK, JAR, ZIP});
         context= createContext();
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
@@ -517,6 +795,12 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     public void testExcludedFileWithOthers() throws JavaModelException {
         addToSelection(new int[] {EXCLUDED_FILE});
         DialogExplorerActionContext context= createContext();
+        addListener(new int[] {UNEXCLUDE, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK});
+        context= createContext();
         addListener(new int[] {UNEXCLUDE, CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
@@ -539,7 +823,31 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fActionGroup.setContext(context);
         reset();
         
+        addToSelection(new int[] {EXCLUDED_FILE, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {EXCLUDED_FILE, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
         addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK, DEFAULT_PACK});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {EXCLUDED_FILE, EXCLUDED_PACK, ZIP});
         context= createContext();
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
@@ -564,6 +872,24 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
+        
+        addToSelection(new int[] {FILE, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {FILE, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {FILE, EXCLUDED_PACK, JAR, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
     }
     
     public void testExcludedPackWithOthers() throws JavaModelException {
@@ -578,12 +904,171 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         addListener(new int[] {CREATE_LINK});
         fActionGroup.setContext(context);
         reset();
+        
+        addToSelection(new int[] {EXCLUDED_PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {EXCLUDED_PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {EXCLUDED_PACK, DEFAULT_PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {EXCLUDED_PACK, DEFAULT_PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {EXCLUDED_PACK, JAR, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {EXCLUDED_PACK, DEFAULT_PACK, JAR, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
     }
     
     public void testDefaultPackWithOthers() throws JavaModelException {
         addToSelection(new int[] {DEFAULT_PACK});
         DialogExplorerActionContext context= createContext();
         addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {DEFAULT_PACK, JAR});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {DEFAULT_PACK, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {DEFAULT_PACK, JAR, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+    }
+    
+    public void testDefaultJARWithOthers() throws JavaModelException {
+        addToSelection(new int[] {JAR});
+        DialogExplorerActionContext context= createContext();
+        addListener(new int[] {REMOVE_FROM_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        addToSelection(new int[] {JAR, ZIP});
+        context= createContext();
+        addListener(new int[] {CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+    }
+    
+    public void testDefaultZipWithOthers() throws JavaModelException, InvocationTargetException {
+        addToSelection(new int[] {ZIP});
+        DialogExplorerActionContext context= createContext();
+        addListener(new int[] {ADD_TO_BP, CREATE_LINK});
+        fActionGroup.setContext(context);
+        reset();
+        
+        // if the zip file is added to the buildpath, then both, the zip and the jar file 
+        // should have the option to be removed and the reset all operation additionally becomes 
+        // available as we changed the project.
+        final IPackageFragmentRoot[] addedZipArchive= {null};
+        AddToClasspathOperation operation= new AddToClasspathOperation(null, new IClasspathInformationProvider() {
+
+            public void handleResult(List resultElements, CoreException exception, int operationType) {
+                addedZipArchive[0]= (IPackageFragmentRoot)resultElements.get(0);
+            }
+
+            public ISelection getSelection() {
+                List list= new ArrayList();
+                list.add(fItems[ZIP]); 
+                return new StructuredSelection(list);
+            }
+
+            public IJavaProject getJavaProject() {
+                return fProject;
+            }
+
+            public IOutputFolderQuery getOutputFolderQuery() throws JavaModelException {
+                return new ClasspathModifierQueries.IOutputFolderQuery(fProject.getOutputLocation()) {
+                    public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
+                        return true;
+                    }
+
+                    public IPath getOutputLocation() {
+                        IPath newOutputFolder= null;
+                        try {
+                            if (fProject.isOnClasspath(fProject.getUnderlyingResource())) {
+                                String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
+                                newOutputFolder= fProject.getPath().append(outputFolderName);
+                                return newOutputFolder;
+                            }
+                        } catch (JavaModelException e) {
+                            fail();
+                        }
+                        return null;
+                    }
+                    
+                    public boolean removeProjectFromClasspath() {
+                        return true;
+                    }
+                };
+            }
+
+            public IInclusionExclusionQuery getInclusionExclusionQuery() throws JavaModelException {
+                return null;
+            }
+
+            public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
+                return null;
+            }
+
+            public IFolderCreationQuery getFolderCreationQuery() throws JavaModelException {
+                return null;
+            }
+
+            public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
+                return null;
+            }
+            
+            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
+                return null;
+            }
+
+            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
+                return null;
+            }
+
+            public void deleteCreatedResources() {
+            }
+            
+        });
+        operation.run(null);
+        
+        fSelection.add(addedZipArchive[0]);
+        fSelection.add(fItems[JAR]);
+        context= createContext();
+        addListener(new int[] {REMOVE_FROM_BP, CREATE_LINK, RESET_ALL});
         fActionGroup.setContext(context);
         reset();
     }
@@ -618,6 +1103,14 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         final IPackageFragment pack2= root.createPackageFragment("pack1.pack2", true, null);
         IPackageFragment defaultPack= root.getPackageFragment("");
         
+        IPath libraryPath= root.getPath().append("archive.jar");
+        IPackageFragmentRoot jarRoot= JavaProjectHelper.addLibrary(fProject, libraryPath);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(jarRoot.getPath(), fProject, IClasspathEntry.CPE_LIBRARY) == null);
+        
+        libraryPath= root.getPath().append("archive.zip");
+        final IPackageFragmentRoot zipRoot= JavaProjectHelper.addLibrary(fProject, libraryPath);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(zipRoot.getPath(), fProject, IClasspathEntry.CPE_LIBRARY) == null);
+        
         // two compilation units A and B in 'package'
         ICompilationUnit cuA= createICompilationUnit("A", pack1);
         final IResource excludedElements[]= {null, null}; 
@@ -629,11 +1122,11 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
                 excludedElements[1]= (IFolder)resultElements.get(1);
             }
 
-            public List getSelection() {
+            public ISelection getSelection() {
                 List list= new ArrayList();
-                list.add(cuB);
-                list.add(pack2);
-                return list;
+                list.add(cuB); // exclude compilation unit B
+                list.add(pack2); // exclude pack2
+                return new StructuredSelection(list);
             }
 
             public IJavaProject getJavaProject() {
@@ -659,6 +1152,14 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
             public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
                 return null;
             }
+            
+            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
+                return null;
+            }
+
+            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
+                return null;
+            }
 
             public void deleteCreatedResources() {
             }
@@ -668,7 +1169,59 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         IFile file= fProject.getProject().getFile(filePath);
         file.create(null, false, null);
         
-        fItems= new Object[9];
+        final IFile[] removedZipFile= {null};
+        RemoveFromClasspathOperation operation= new RemoveFromClasspathOperation(null, new IClasspathInformationProvider() {
+
+            public void handleResult(List resultElements, CoreException exception, int operationType) {
+                removedZipFile[0]= (IFile)resultElements.get(0);
+            }
+
+            public ISelection getSelection() {
+                List list= new ArrayList();
+                list.add(zipRoot); 
+                return new StructuredSelection(list);
+            }
+
+            public IJavaProject getJavaProject() {
+                return fProject;
+            }
+
+            public IOutputFolderQuery getOutputFolderQuery() throws JavaModelException {
+                return null;
+            }
+
+            public IInclusionExclusionQuery getInclusionExclusionQuery() throws JavaModelException {
+                return null;
+            }
+
+            public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
+                return null;
+            }
+
+            public IFolderCreationQuery getFolderCreationQuery() throws JavaModelException {
+                return null;
+            }
+
+            public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
+                return null;
+            }
+            
+            public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
+                return null;
+            }
+
+            public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
+                return null;
+            }
+
+            public void deleteCreatedResources() {
+            }
+            
+        });
+        operation.run(null);
+        removedZipFile[0].create(null, false, null); // create the zip file
+        
+        fItems= new Object[11];
         fItems[PROJ]= fProject;
         fItems[SRC]= root;
         fItems[NF]= folder2;
@@ -678,6 +1231,8 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
         fItems[FILE]= file;
         fItems[EXCLUDED_PACK]= excludedElements[1];
         fItems[DEFAULT_PACK]= defaultPack;
+        fItems[JAR]= jarRoot;
+        fItems[ZIP]= removedZipFile[0];
         
         return fProject;
     }
@@ -744,8 +1299,8 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider#getSelection()
      */
-    public List getSelection() {
-        return fSelection;
+    public ISelection getSelection() {
+        return new StructuredSelection(fSelection);
     }
 
     /* (non-Javadoc)
@@ -787,6 +1342,14 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
      * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider#getLinkFolderQuery()
      */
     public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
+        return null;
+    }
+    
+    public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
+        return null;
+    }
+
+    public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
         return null;
     }
 
