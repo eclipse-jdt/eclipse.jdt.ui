@@ -392,8 +392,9 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 
 		// continue only if no problems exist in this method
 		IProblem[] problems= compilationUnit.getProblems();
-		if (problems.length != 0)
-			return;
+		for (int i= 0; i != problems.length; ++i)
+			if (problems[i].getID() == IProblem.UnmatchedBracket)
+				return;
 
 		ASTNode node= NodeFinder.perform(compilationUnit, offset - delta, length);
 		if (node == null)
