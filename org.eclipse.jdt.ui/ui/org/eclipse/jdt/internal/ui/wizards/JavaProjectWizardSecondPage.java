@@ -22,12 +22,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jface.operation.IRunnableWithProgress;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * As addition to the JavaCapabilityConfigurationPage, the wizard does an
@@ -87,8 +91,8 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		try {
 			getContainer().run(false, true, op);
 		} catch (InvocationTargetException e) {
-			final String title= "New Java project";
-			final String message= "An error occurred while creating project. Check log for details.";
+			final String title= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.title"); //$NON-NLS-1$
+			final String message= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.message"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, getShell(), title, message);
 		} catch  (InterruptedException e) {
 			// cancel pressed
@@ -106,7 +110,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask("Initializing project...", 2);
+			monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.initialize"), 2); //$NON-NLS-1$
 			
 			createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 1));
 			if (initialize) {
@@ -149,7 +153,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	 */
 	public void performFinish(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		try {
-			monitor.beginTask("Creating project...", 3);
+			monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.create"), 3); //$NON-NLS-1$
 			if (fCurrProject == null) {
 				updateProject(true, new SubProgressMonitor(monitor, 1));
 			}
@@ -174,7 +178,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 					monitor= new NullProgressMonitor();
 				}
 
-				monitor.beginTask("Removing project...", 3);
+				monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.remove"), 3); //$NON-NLS-1$
 
 				try {
 					fCurrProject.delete(fCanRemoveContent, false, monitor);
@@ -191,8 +195,8 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		try {
 			getContainer().run(false, true, op);
 		} catch (InvocationTargetException e) {
-			final String title= "Error Creating Java Project";
-			final String message= "An error occurred while removing a temporary project.";
+			final String title= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.remove.title"); //$NON-NLS-1$
+			final String message= NewWizardMessages.getString("JavaProjectWizardSecondPage.error.remove.message"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, getShell(), title, message);		
 		} catch  (InterruptedException e) {
 			// cancel pressed

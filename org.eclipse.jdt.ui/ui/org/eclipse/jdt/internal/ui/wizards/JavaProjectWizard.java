@@ -15,19 +15,16 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
-
-
-
-
 
 public class JavaProjectWizard extends NewElementWizard {
-
-    
     
     private JavaProjectWizardFirstPage fFirstPage;
     private JavaProjectWizardSecondPage fSecondPage;
@@ -35,10 +32,9 @@ public class JavaProjectWizard extends NewElementWizard {
     private IConfigurationElement fConfigElement;
     
     public JavaProjectWizard() {
-        super();
         setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
         setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-        setWindowTitle(NewWizardMessages.getString("NewProjectCreationWizard.title")); //$NON-NLS-1$
+        setWindowTitle(NewWizardMessages.getString("JavaProjectWizard.title")); //$NON-NLS-1$
     }
 
     /*
@@ -62,8 +58,8 @@ public class JavaProjectWizard extends NewElementWizard {
     }
     
     protected void handleFinishException(Shell shell, InvocationTargetException e) {
-        String title= NewWizardMessages.getString("NewProjectCreationWizard.op_error.title"); //$NON-NLS-1$
-        String message= NewWizardMessages.getString("NewProjectCreationWizard.op_error_create.message");			 //$NON-NLS-1$
+        String title= NewWizardMessages.getString("JavaProjectWizard.op_error.title"); //$NON-NLS-1$
+        String message= NewWizardMessages.getString("JavaProjectWizard.op_error_create.message");			 //$NON-NLS-1$
         ExceptionHandler.handle(e, getShell(), title, message);
     }	
     

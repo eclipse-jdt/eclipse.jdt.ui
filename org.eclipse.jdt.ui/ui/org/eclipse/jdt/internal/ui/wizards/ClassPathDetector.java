@@ -213,7 +213,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		if (cu != null) {
 			ICompilationUnit workingCopy= null;
 			try {
-				workingCopy= (ICompilationUnit) cu.getWorkingCopy();
+				workingCopy= cu.getWorkingCopy(null);
 				IPath relPath= getPackagePath(workingCopy.getSource());
 				IPath packPath= file.getParent().getFullPath();
 				String cuName= file.getName();
@@ -231,7 +231,10 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 				// ignore
 			} finally {
 				if (workingCopy != null) {
-					workingCopy.destroy();
+					try {
+						workingCopy.discardWorkingCopy();
+					} catch (JavaModelException ignore) {
+					}
 				}
 			}
 		}

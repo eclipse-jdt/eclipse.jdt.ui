@@ -22,9 +22,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.wizard.WizardPage;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -41,6 +39,11 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.wizard.WizardPage;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * The first page of the <code>SimpleProjectWizard</code>.
@@ -169,7 +172,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fLocationButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					final DirectoryDialog dialog= new DirectoryDialog(fLocationField.getShell());
-					dialog.setMessage("Choose a directory for the project contents:"); //$NON-NLS-1$
+					dialog.setMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.directory.message")); //$NON-NLS-1$
 					final String directoryName = fLocationField.getText().trim();
 					if (directoryName.length() > 0) {
 						final File path = new File(directoryName);
