@@ -26,8 +26,10 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.OpenAction;
@@ -41,7 +43,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	
 	private OpenAction fOpen;
 			
-	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, TypeHierarchyLifeCycle lifeCycle,  IWorkbenchPart part) {
+	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, final TypeHierarchyLifeCycle lifeCycle,  IWorkbenchPart part) {
 		super(new Tree(parent, SWT.SINGLE));
 
 		ILabelProvider labelProvider= new HierarchyLabelProvider(lifeCycle);
@@ -56,9 +58,11 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		
 			public int category(Object element) {
 				if (element instanceof IType) {
-					try {
-						return (((IType)element).isInterface()) ? 2 : 1;
-					} catch (JavaModelException e) {
+					ITypeHierarchy hierarchy= lifeCycle.getHierarchy();
+					if (hierarchy != null && Flags.isInterface(hierarchy.getCachedFlags((IType)element))) {
+						return 2;
+					} else {
+						return 1;
 					}
 				} else if (element instanceof IMember) {
 					return 0;

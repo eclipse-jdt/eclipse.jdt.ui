@@ -18,10 +18,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaUILabelProvider extends LabelProvider {
 	
-	private JavaElementImageProvider fImageLabelProvider;
-	private StorageLabelProvider fStorageLabelProvider;
+	protected JavaElementImageProvider fImageLabelProvider;
+	protected StorageLabelProvider fStorageLabelProvider;
 	
-	private ILabelDecorator[] fLabelDecorators;
+	protected ILabelDecorator[] fLabelDecorators;
 
 	private int fImageFlags;
 	private int fTextFlags;

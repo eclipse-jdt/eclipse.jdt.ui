@@ -8,6 +8,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.ui.IWorkbenchPart;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -99,20 +100,16 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 					// opened on a region
 					return hierarchy.getRootClasses();	
 				} else {
-					try {
-						if (input.isInterface()) {
-							return new Object[] { input };
-						} else {
-							IType[] roots= hierarchy.getRootClasses();
-							for (int i= 0; i < roots.length; i++) {
-								if ("java.lang.Object".equals(JavaModelUtil.getFullyQualifiedName(roots[i]))) { //$NON-NLS-1$
-									return new Object[] { roots[i] };
-								}
-							} 
-							return roots; // a problem with the hierarchy
-						}
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
+					if (Flags.isInterface(hierarchy.getCachedFlags(input))) {
+						return new Object[] { input };
+					} else {
+						IType[] roots= hierarchy.getRootClasses();
+						for (int i= 0; i < roots.length; i++) {
+							if ("java.lang.Object".equals(JavaModelUtil.getFullyQualifiedName(roots[i]))) { //$NON-NLS-1$
+								return new Object[] { roots[i] };
+							}
+						} 
+						return roots; // a problem with the hierarchy
 					}
 				}
 			}

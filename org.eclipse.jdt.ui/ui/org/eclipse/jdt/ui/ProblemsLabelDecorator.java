@@ -122,18 +122,14 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 		try {
 			if (obj instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement) obj;
-				if (!element.exists()) {
-					return 0;
-				}
-				
 				int type= element.getElementType();
 				switch (type) {
 					case IJavaElement.JAVA_PROJECT:
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-						return getErrorTicksFromMarkers(element.getCorrespondingResource(), IResource.DEPTH_INFINITE, null);
+						return getErrorTicksFromMarkers(element.getResource(), IResource.DEPTH_INFINITE, null);
 					case IJavaElement.PACKAGE_FRAGMENT:
 					case IJavaElement.CLASS_FILE:
-						return getErrorTicksFromMarkers(element.getCorrespondingResource(), IResource.DEPTH_ONE, null);
+						return getErrorTicksFromMarkers(element.getResource(), IResource.DEPTH_ONE, null);
 					case IJavaElement.COMPILATION_UNIT:
 					case IJavaElement.PACKAGE_DECLARATION:
 					case IJavaElement.IMPORT_DECLARATION:
@@ -143,23 +139,20 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 					case IJavaElement.METHOD:
 					case IJavaElement.FIELD:
 						ICompilationUnit cu= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
-						if (cu != null && cu.exists()) {
-							// I assume that only source elements in compilation unit can have markers
-							ISourceRange range= ((ISourceReference)element).getSourceRange();
-							// working copy: look at annotation model
+						if (cu != null) {
+							ISourceReference ref= (type == IJavaElement.COMPILATION_UNIT) ? null : (ISourceReference) element;
+							// The assumption is that only source elements in compilation unit can have markers
 							if (cu.isWorkingCopy()) {
-								return getErrorTicksFromWorkingCopy((ICompilationUnit) cu.getOriginalElement(), range);
+								// working copy: look at annotation model
+								return getErrorTicksFromWorkingCopy((ICompilationUnit) cu.getOriginalElement(), ref);
 							}
-							return getErrorTicksFromMarkers(cu.getCorrespondingResource(), IResource.DEPTH_ONE, range);
+							return getErrorTicksFromMarkers(cu.getResource(), IResource.DEPTH_ONE, ref);
 						}
 						break;
 					default:
 				}
 			} else if (obj instanceof IResource) {
-				IResource resource= (IResource) obj;
-				if (resource.exists()) {
-					return getErrorTicksFromMarkers(resource, IResource.DEPTH_INFINITE, null);
-				}
+				return getErrorTicksFromMarkers((IResource) obj, IResource.DEPTH_INFINITE, null);
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -167,8 +160,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 		return 0;
 	}
 
-	private int getErrorTicksFromMarkers(IResource res, int depth, ISourceRange range) throws CoreException {
-		if (res == null) { // for elements in archives
+	private int getErrorTicksFromMarkers(IResource res, int depth, ISourceReference sourceElement) throws CoreException {
+		if (res == null || !res.exists()) {
 			return 0;
 		}
 		int info= 0;
@@ -177,7 +170,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 		if (markers != null) {
 			for (int i= 0; i < markers.length && (info != ERRORTICK_ERROR); i++) {
 				IMarker curr= markers[i];
-				if (range == null || isMarkerInRange(curr, range)) {
+				if (sourceElement == null || isMarkerInRange(curr, sourceElement)) {
 					int priority= curr.getAttribute(IMarker.SEVERITY, -1);
 					if (priority == IMarker.SEVERITY_WARNING) {
 						info= ERRORTICK_WARNING;
@@ -190,8 +183,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 		return info;
 	}
 
-	private boolean isMarkerInRange(IMarker marker, ISourceRange range) throws CoreException {
+	private boolean isMarkerInRange(IMarker marker, ISourceReference sourceElement) throws CoreException {
 		if (marker.isSubtypeOf(IMarker.TEXT)) {
+			ISourceRange range= sourceElement.getSourceRange();
 			int pos= marker.getAttribute(IMarker.CHAR_START, -1);
 			int offset= range.getOffset();
 			return (offset <= pos && offset + range.getLength() > pos);
@@ -200,7 +194,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 	}
 	
 	
-	private int getErrorTicksFromWorkingCopy(ICompilationUnit original, ISourceRange range) throws CoreException {
+	private int getErrorTicksFromWorkingCopy(ICompilationUnit original, ISourceReference sourceElement) throws CoreException {
 		int info= 0;
 		if (!original.exists()) {
 			return 0;
@@ -212,7 +206,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 			Iterator iter= model.getAnnotationIterator();
 			while ((info != ERRORTICK_ERROR) && iter.hasNext()) {
 				Annotation curr= (Annotation) iter.next();
-				IMarker marker= isAnnotationInRange(model, curr, range);
+				IMarker marker= isAnnotationInRange(model, curr, sourceElement);
 				if (marker != null) {
 					int priority= marker.getAttribute(IMarker.SEVERITY, -1);
 					if (priority == IMarker.SEVERITY_WARNING) {
@@ -226,10 +220,11 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 		return info;
 	}
 			
-	private IMarker isAnnotationInRange(IAnnotationModel model, Annotation annot, ISourceRange range) throws CoreException {
+	private IMarker isAnnotationInRange(IAnnotationModel model, Annotation annot, ISourceReference sourceElement) throws CoreException {
 		if (annot instanceof MarkerAnnotation) {
 			IMarker marker= ((MarkerAnnotation) annot).getMarker();
 			if (marker.exists() && marker.isSubtypeOf(IMarker.PROBLEM)) {
+				ISourceRange range= sourceElement.getSourceRange();
 				Position pos= model.getPosition(annot);
 				if (pos.overlapsWith(range.getOffset(), range.getLength())) {
 					return marker;
