@@ -4,7 +4,9 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
@@ -40,6 +42,7 @@ class AccessAnalyzer extends ASTVisitor {
 	private RefactoringStatus fStatus;
 	private boolean fSetterMustReturnValue;
 	private boolean fEncapsulateDeclaringClass;
+	private boolean fIsFieldFinal;
 
 	private static final String READ_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_read_access"); //$NON-NLS-1$
 	private static final String WRITE_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_write_access"); //$NON-NLS-1$
@@ -59,6 +62,11 @@ class AccessAnalyzer extends ASTVisitor {
 		fGetter= refactoring.getGetterName();
 		fSetter= refactoring.getSetterName();
 		fEncapsulateDeclaringClass= refactoring.getEncapsulateDeclaringClass();
+		try {
+			fIsFieldFinal= Flags.isFinal(refactoring.getField().getFlags());
+		} catch (JavaModelException e) {
+			// assume non final field
+		}
 		fStatus= new RefactoringStatus();
 	}
 
@@ -76,7 +84,8 @@ class AccessAnalyzer extends ASTVisitor {
 			return true;
 			
 		checkParent(node);
-		fChange.addTextEdit(WRITE_ACCESS, new EncapsulateWriteAccess(fGetter, fSetter, node));
+		if (!fIsFieldFinal)
+			fChange.addTextEdit(WRITE_ACCESS, new EncapsulateWriteAccess(fGetter, fSetter, node));
 		node.getRightHandSide().accept(this);
 		return false;
 	}

@@ -73,7 +73,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		});
 		text.setFocus();
 		
-		if (needsModifiers()) {
+		if (needsSetter()) {
 			label= new Label(result, SWT.LEFT);
 			label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.setter_name")); //$NON-NLS-1$
 			text= new Text(result, SWT.BORDER);
@@ -232,7 +232,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		setPageComplete(valid);
 	}
 	
-	private boolean needsModifiers() {
+	private boolean needsSetter() {
 		try {
 			return !JdtFlags.isFinal(fRefactoring.getField());
 		} catch(JavaModelException e) {

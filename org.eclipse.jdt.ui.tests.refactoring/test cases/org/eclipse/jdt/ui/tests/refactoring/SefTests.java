@@ -196,4 +196,8 @@ public class SefTests extends AbstractSelectionTestCase {
 	public void testCompoundWrite3() throws Exception {
 		objectTest("field");
 	}
+	
+	public void testFinalField() throws Exception {
+		objectTest("field");
+	}	
 }
