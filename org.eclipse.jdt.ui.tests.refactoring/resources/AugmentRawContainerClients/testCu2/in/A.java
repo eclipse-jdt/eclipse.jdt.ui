@@ -1,11 +1,12 @@
 package p;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.AbstractList;
 
 class A {
 	void foo() {
-		ArrayList/*<String>*/ l= new ArrayList();
+		AbstractList l= new ArrayList();
 		l.add(new String());
+		l.add("");
 	}
 }

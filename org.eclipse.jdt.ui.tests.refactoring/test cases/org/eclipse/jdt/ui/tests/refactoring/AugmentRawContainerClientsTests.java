@@ -18,7 +18,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.corext.refactoring.generics.AugmentRawContainerClientsRefactoring;
@@ -27,7 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.generics.AugmentRawContainerC
 public class AugmentRawContainerClientsTests extends RefactoringTest {
 
 	private static final Class clazz= AugmentRawContainerClientsTests.class;
-	private static final String REFACTORING_PATH= "AugmentRawContainerTypes/";
+	private static final String REFACTORING_PATH= "AugmentRawContainerClients/";
 	
 	public static Test suite() {
 		return new Java15Setup(new TestSuite(clazz));
@@ -63,6 +66,12 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 		if (status.getSeverity() == RefactoringStatus.FATAL)
 			return;
 		
+		PerformRefactoringOperation op= new PerformRefactoringOperation(
+				refactoring, CheckConditionsOperation.FINAL_CONDITIONS);
+		JavaCore.run(op, new NullProgressMonitor());
+		assertTrue("Validation check failed", !op.getValidationStatus().hasFatalError());
+		assertNotNull("No Undo", op.getUndoChange());
+			
 		String expected= getFileContents(getOutputTestFileName("A"));
 		String actual= cu.getSource();
 		assertEqualLines(expected, actual);
@@ -73,6 +82,14 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 	}
 	
 	public void testCu1() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCu2() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCu3() throws Exception {
 		performCuOK();
 	}
 	
