@@ -21,7 +21,7 @@ public class RefactoringWizardDialog extends WizardDialog {
 	 */
 	public RefactoringWizardDialog(Shell parent, IWizard wizard) {
 		super(parent, wizard);
-		setShellStyle(SWT.CLOSE | SWT.APPLICATION_MODAL | SWT.RESIZE);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 		setMinimumPageSize(600, 400);
 	}	
 }
