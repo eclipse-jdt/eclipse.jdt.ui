@@ -22,14 +22,15 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -43,8 +44,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -53,21 +52,20 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 public class NLSRefactoring extends Refactoring {
 	
@@ -632,10 +630,9 @@ public class NLSRefactoring extends Refactoring {
 	}
 	
 	private TextEdit createAddTagChange(NLSElement element){
-		int offset= element.getPosition().getOffset(); //to be changed
-		int length= 0;	
-		String text = createTagText(element);
-		return new AddNLSTagEdit(offset, length, text);
+		int offset= element.getTagPosition().getOffset(); //to be changed
+		String text= createTagText(element);
+		return SimpleTextEdit.createInsert (offset, text);
 	}
 	
 	private String createResourceGetter(String key){
@@ -686,7 +683,7 @@ public class NLSRefactoring extends Refactoring {
 		for (int i= 0; i < fNlsSubs.length; i++){
 			if (fNlsSubs[i].task == NLSSubstitution.TRANSLATE){
 				if (fNlsSubs[i].putToPropertyFile)		
-					sb.append(createEntry(fNlsSubs[i].value, fNlsSubs[i].key));
+					sb.append(createEntry(fNlsSubs[i].value, fNlsSubs[i].key).toString());
 			}	
 		}	
 		return sb.toString();
@@ -939,46 +936,5 @@ public class NLSRefactoring extends Refactoring {
 		if (pack.isDefaultPackage())
 			return fProperyFileName;
 		return pack.getElementName() + "." + fProperyFileName; //$NON-NLS-1$
-	}
-	
-	//-----------
-	
-	private final static class AddNLSTagEdit extends SimpleTextEdit{
-		
-		AddNLSTagEdit(int offset, int length, String newText){
-			super(offset, length, newText);
-		}
-		
-		private AddNLSTagEdit(TextRange range, String text) {
-			super(range, text);
-		}
-		
-		/* non Java-doc
-		 * @see TextEdit#copy0()
-		 */
-		protected TextEdit copy0(TextEditCopier copier) {
-			return new AddNLSTagEdit(getTextRange().copy(), getText());
-		}	
-		
-		/* non Java-doc
-		 * @see TextEdit#connect
-		 */
-		public void connect(TextBuffer buffer) throws CoreException {
-			TextRange range= getTextRange();
-			int offset= range.getOffset();
-			int lineEndOffset= getLineEndOffset(buffer, range.getOffset());
-			if (lineEndOffset != -1)
-				offset= lineEndOffset;
-			setTextRange(new TextRange(offset, range.getLength()));	
-		}
-		
-		private int getLineEndOffset(TextBuffer buffer, int offset){
-			int line= buffer.getLineOfOffset(offset);
-			if (line != -1){
-				TextRegion info= buffer.getLineInformation(line);
-				return info.getOffset() + info.getLength();
-			} 
-			return -1;
-		}
-	}
+	}	
 }

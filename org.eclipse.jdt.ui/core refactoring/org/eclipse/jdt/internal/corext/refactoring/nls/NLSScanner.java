@@ -20,10 +20,13 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+
 public class NLSScanner {
 
 	//no instances	
-	private NLSScanner(){
+	private NLSScanner() {
 	}
 
 	/**
@@ -54,7 +57,7 @@ public class NLSScanner {
 				case ITerminalSymbols.TokenNameStringLiteral:
 					currentLineNr= scanner.getLineNumber(scanner.getCurrentTokenStartPosition());
 					if (currentLineNr != previousLineNr) {
-						currentLine= new NLSLine(currentLineNr);
+						currentLine= new NLSLine(currentLineNr - 1);
 						lines.add(currentLine);
 						previousLineNr= currentLineNr;
 					}
@@ -70,7 +73,12 @@ public class NLSScanner {
 			}
 			token= scanner.getNextToken();
 		}
-		return (NLSLine[]) lines.toArray(new NLSLine[lines.size()]);
+		NLSLine[] result= (NLSLine[]) lines.toArray(new NLSLine[lines.size()]);
+		TextBuffer buffer= TextBuffer.create(new String(scanner.getSource()));
+		for (int i= 0; i < result.length; i++) {
+			setTagPositions(buffer, result[i]);
+		}
+		return result;
 	}
 	
 	private static void parseTags(NLSLine line, IScanner scanner) throws InvalidInputException {
@@ -97,6 +105,48 @@ public class NLSScanner {
 			}
 			pos= s.indexOf(NLSElement.TAG_PREFIX, start);
 		}
-	}	
+	}
+	
+	private static void setTagPositions(TextBuffer buffer, NLSLine line) throws JavaModelException {
+		TextRegion info= buffer.getLineInformation(line.getLineNumber());
+		int defaultValue= info.getOffset() + info.getLength();
+		NLSElement[] elements= line.getElements();
+		for (int i= 0; i < elements.length; i++) {
+			NLSElement element= elements[i];
+			if (!element.hasTag()) {
+				element.setTagPosition(computeInsertOffset(elements, i, defaultValue), 0);				
+			}
+		}
+	}
+	
+	private static int computeInsertOffset(NLSElement[] elements, int index, int defaultValue) throws JavaModelException {
+		NLSElement previousTagged= findPreviousTagged(index, elements);
+		if (previousTagged != null)
+			return previousTagged.getTagPosition().getOffset() + previousTagged.getTagPosition().getLength();
+		NLSElement nextTagged= findNextTagged(index, elements);
+		if (nextTagged != null)
+			return nextTagged.getTagPosition().getOffset();
+		return defaultValue;	
+	}
+	
+	private static NLSElement findPreviousTagged(int startIndex, NLSElement[] elements){
+		int i= startIndex - 1;
+		while (i >= 0){
+			if (elements[i].hasTag())
+				return elements[i];
+			i--;
+		}
+		return null;
+	}
+    
+	private static NLSElement findNextTagged(int startIndex, NLSElement[] elements){
+		int i= startIndex + 1;
+		while (i < elements.length){
+			if (elements[i].hasTag())
+				return elements[i];
+			i++;
+		}
+		return null;
+	}			
 }
 

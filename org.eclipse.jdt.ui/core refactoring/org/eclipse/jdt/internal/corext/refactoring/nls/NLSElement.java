@@ -50,7 +50,7 @@ public class NLSElement {
 	private TextRegion fTagPosition;
 	
 	/**
-	 * Creates a new NLS elemeht for the given string and position.
+	 * Creates a new NLS element for the given string and position.
 	 */
 	public NLSElement(String value, int start, int length) {
 		fValue= value;
@@ -101,7 +101,7 @@ public class NLSElement {
 	 * Otherwise <code>false</code> is returned.
 	 */
 	public boolean hasTag() {
-		return fTagPosition != null;
+		return fTagPosition != null && fTagPosition.getLength() > 0;
 	}
 	
 	public static String createTagText(int index){

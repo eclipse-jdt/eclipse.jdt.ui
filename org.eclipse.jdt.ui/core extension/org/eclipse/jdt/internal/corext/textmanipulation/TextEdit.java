@@ -219,13 +219,6 @@ public abstract class TextEdit {
 	}
 	
 	/**
-	 * @deprecated Use connect(TextBuffer buffer) instead
-	 */
-	public final void connect(TextBufferEditor editor) throws CoreException {
-		// does nothing
-	}
-	
-	/**
 	 * Performs the text edit. Note that this method <b>should only be called</b> 
 	 * by a <code>TextBufferEditor</code>. 
 	 * 

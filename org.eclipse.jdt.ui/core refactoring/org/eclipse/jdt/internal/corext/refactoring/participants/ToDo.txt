@@ -61,6 +61,10 @@
   is available we always check all rename processor which can be many. We need some
   other optimazations as well.
   
+- determining the participants must be delegated to the processor. Otherwise it is not
+  possible to chain processor. Nor is it possible to introduce a JavaModification object
+  (similar to ResourceModifications) since the refactoring itself can't be extended.
+  
 ======================================= UI ===============================================
   
 - UI: Label and image of preview viewer. Must be determined by the change element

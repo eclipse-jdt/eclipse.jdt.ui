@@ -27,6 +27,10 @@ public class NLSLine {
 		fElements= new ArrayList();
 	}
 	
+	public int getLineNumber() {
+		return fLineNumber;
+	}
+	
 	/**
 	 * Adds a NLS element to this line.
 	 */
