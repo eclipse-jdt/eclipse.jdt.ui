@@ -40,7 +40,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
@@ -855,7 +855,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class C {\n");
-		buf.append("    int fXoo;\n");
+		buf.append("    protected int fXoo;\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}	
@@ -1003,7 +1003,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testInvisibleTypeRequestedFromSuperClass() throws Exception {
-		if (false) {
+		if (true) {
 			System.out.println("testInvisibleTypeRequestedFromSuperClass: Waiting for release fo bug fix 24502");	
 			return;
 		}
