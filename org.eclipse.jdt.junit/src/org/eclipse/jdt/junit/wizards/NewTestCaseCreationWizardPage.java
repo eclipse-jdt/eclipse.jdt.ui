@@ -374,7 +374,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected void createTypeMembers(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		fIndexOfFirstTestMethod= 0;
 
-		createConstructor(type);
+		createConstructor(type, imports);
 
 		if (fMethodStubsButtons.isSelected(0)) 
 			createMain(type);
@@ -392,9 +392,38 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		}
 	}
 
-	protected void createConstructor(IType type) throws JavaModelException {
-		String constr= "public "+getTypeName()+"(String name) {super(name);}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
-		type.createMethod(constr, null, false, null);
+	protected void createConstructor(IType type, IImportsStructure imports) throws JavaModelException {
+		ITypeHierarchy typeHierarchy= null;
+		IType[] superTypes= null;
+		String constr;
+		IMethod methodTemplate= null;
+		if (type.exists()) {
+			typeHierarchy= type.newSupertypeHierarchy(null);
+			superTypes= typeHierarchy.getAllSuperclasses(type);
+			for (int i= 0; i < superTypes.length; i++) {
+				if (superTypes[i].exists()) {
+					IMethod constrMethod= superTypes[i].getMethod(superTypes[i].getElementName(), new String[] {"Ljava.lang.String;"});
+					if (constrMethod.exists() && constrMethod.isConstructor()) {
+						methodTemplate= constrMethod;
+						break;
+					}
+				}
+			}
+		}
+		if (methodTemplate != null) {
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+			GenStubSettings genStubSettings= new GenStubSettings(settings);
+			genStubSettings.fCallSuper= true;				
+			genStubSettings.fMethodOverwrites= true;
+			constr= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
+		} else {
+			String field="/**\n * the name of the test case\n */\n" +
+						"private String fName;\n\n";
+			type.createField(field, null, true, null);
+			constr="/**\n * Constructs a test case with the given name.\n */\n" + //$NON-NLS-1$
+				"public "+getTypeName()+"(String name) {\nfName= name;\n}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		type.createMethod(constr, null, true, null);	
 		fIndexOfFirstTestMethod++;
 	}
 
