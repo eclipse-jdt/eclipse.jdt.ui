@@ -8,12 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*
- * Created on Feb 8, 2003
- *
- * To change this generated comment go to 
- * Window>Preferences>Java>Code Generation>Code Template
- */
 package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.jdt.junit.ITestRunListener;
