@@ -11,18 +11,25 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.window.Window;
 
 
-public class LimitElementsAction extends Action {
+public class FiltersDialogAction extends Action {
 	private JavaSearchResultPage fPage;
 	
-	public LimitElementsAction(JavaSearchResultPage page) {
-		super(SearchMessages.getString("LimitElementsAction.label"), Action.AS_CHECK_BOX); //$NON-NLS-1$
+	public FiltersDialogAction(JavaSearchResultPage page) {
+		super(SearchMessages.getString("FiltersDialogAction.label")); //$NON-NLS-1$
 		fPage= page;
 	}
 
 	public void run() {
-		fPage.enableLimit(!fPage.limitElements());
+		FiltersDialog dialog = new FiltersDialog(fPage);
+
+		if (dialog.open() == Window.OK) {
+			fPage.setFilters(dialog.getEnabledFilters());
+			fPage.enableLimit(dialog.isLimitEnabled());
+			fPage.setElementLimit(dialog.getElementLimit());
+		}
 	}
 
 }

@@ -24,6 +24,7 @@ abstract class  MatchFilter {
 	public abstract boolean filters(JavaElementMatch match);
 
 	public abstract String getName();
+	public abstract String getActionLabel();
 	
 	public abstract String getDescription();
 	
@@ -48,6 +49,10 @@ class ImportFilter extends MatchFilter {
 
 	public String getName() {
 		return SearchMessages.getString("MatchFilter.ImportFilter.name"); //$NON-NLS-1$
+	}
+
+	public String getActionLabel() {
+		return SearchMessages.getString("MatchFilter.ImportFilter.actionLabel"); //$NON-NLS-1$
 	}
 
 	public String getDescription() {
@@ -94,6 +99,10 @@ class WriteFilter extends FieldFilter {
 		return SearchMessages.getString("MatchFilter.WriteFilter.name"); //$NON-NLS-1$
 	}
 
+	public String getActionLabel() {
+		return SearchMessages.getString("MatchFilter.WriteFilter.actionLabel"); //$NON-NLS-1$
+	}
+
 	public String getDescription() {
 		return SearchMessages.getString("MatchFilter.WriteFilter.description"); //$NON-NLS-1$
 	}
@@ -110,6 +119,9 @@ class ReadFilter extends FieldFilter {
 		return SearchMessages.getString("MatchFilter.ReadFilter.name"); //$NON-NLS-1$
 	}
 
+	public String getActionLabel() {
+		return SearchMessages.getString("MatchFilter.ReadFilter.actionLabel"); //$NON-NLS-1$
+	}
 	public String getDescription() {
 		return SearchMessages.getString("MatchFilter.ReadFilter.description"); //$NON-NLS-1$
 	}
@@ -126,6 +138,10 @@ class JavadocFilter extends MatchFilter {
 
 	public String getName() {
 		return SearchMessages.getString("MatchFilter.JavadocFilter.name"); //$NON-NLS-1$
+	}
+
+	public String getActionLabel() {
+		return SearchMessages.getString("MatchFilter.JavadocFilter.actionLabel"); //$NON-NLS-1$
 	}
 
 	public String getDescription() {

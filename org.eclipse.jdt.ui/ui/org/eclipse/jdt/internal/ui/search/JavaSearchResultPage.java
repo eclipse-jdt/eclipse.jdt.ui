@@ -24,9 +24,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.ui.JavaUI;
@@ -35,9 +33,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -74,12 +69,14 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public class JavaSearchResultPage extends AbstractTextSearchViewPage implements IAdaptable {
+	private static final int DEFAULT_ELEMENT_LIMIT = 1000;
 	private static final String FALSE = "FALSE"; //$NON-NLS-1$
 	private static final String TRUE = "TRUE"; //$NON-NLS-1$
 	private static final String KEY_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
 	private static final String KEY_SORTING= "org.eclipse.jdt.search.resultpage.sorting"; //$NON-NLS-1$
 	private static final String KEY_FILTERS= "org.eclipse.jdt.search.resultpage.filters"; //$NON-NLS-1$
 	private static final String KEY_LIMIT_ENABLED= "org.eclipse.jdt.search.resultpage.limit_enabled"; //$NON-NLS-1$
+	private static final String KEY_LIMIT= "org.eclipse.jdt.search.resultpage.limit"; //$NON-NLS-1$
 	
 	private static final String GROUP_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
 	private static final String GROUP_FILTERING = "org.eclipse.jdt.search.resultpage.filtering"; //$NON-NLS-1$
@@ -99,7 +96,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	private Set fMatchFilters= new HashSet();
 	private FilterAction[] fFilterActions;
-	private LimitElementsAction fLimitElementsAction;
+	private FiltersDialogAction fFilterDialogAction;
 	
 	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES , IPageLayout.ID_RES_NAV };
 	public static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
@@ -110,20 +107,13 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	private JavaSearchEditorOpener fEditorOpener= new JavaSearchEditorOpener();
 	private boolean fLimitElements= false;
-	private IPropertyChangeListener fPropertyChangeListener;
+	private int fElementLimit;
 
 	public JavaSearchResultPage() {
 		initSortActions();
 		initGroupingActions();
 		initFilterActions();
 
-		fPropertyChangeListener= new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				if (JavaBasePreferencePage.LIMIT_ROOTS_TO.equals(event.getProperty()))
-					limitChanged();
-			}
-		};
-		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 	}
 	
 	private void initFilterActions() {
@@ -133,8 +123,9 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			fFilterActions[i]= new FilterAction(this, allFilters[i]);
 			fFilterActions[i].setId("org.eclipse.jdt.search.filters."+i); //$NON-NLS-1$
 		}
-		fLimitElementsAction= new LimitElementsAction(this);
-		fLimitElementsAction.setId("org.eclipse.jdt.search.filters."+allFilters.length); //$NON-NLS-1$
+		fFilterDialogAction= new FiltersDialogAction(this);
+		fFilterDialogAction.setId("org.eclipse.jdt.search.filters."+allFilters.length); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(fFilterDialogAction, "filter_ps.gif"); //$NON-NLS-1$
 	}
 
 	private void initSortActions() {
@@ -209,13 +200,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		
 	}
 	
-	private void addFilterActions(IMenuManager viewMenu) {
-		viewMenu.appendToGroup(GROUP_FILTERING, fLimitElementsAction);		
-		for (int i= 0; i < fFilterActions.length; i++) {
-			viewMenu.appendToGroup(GROUP_FILTERING, fFilterActions[i]);
-		}
-	}
-
 	private void addSortActions(IMenuManager mgr) {
 		if (getLayout() != FLAG_LAYOUT_FLAT)
 			return;
@@ -258,7 +242,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	public void dispose() {
 		fActionGroup.dispose();
-		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 		super.dispose();
 	}
 	
@@ -328,9 +311,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		};
 	}
 	
-	private int getElementLimit() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getInt(JavaBasePreferencePage.LIMIT_ROOTS_TO);
+	int getElementLimit() {
+		return fElementLimit;
 	}
 
 	protected TableViewer createTableViewer(Composite parent) {
@@ -400,7 +382,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		IMenuManager menuManager = site.getActionBars().getMenuManager();
 		menuManager.insertBefore(IContextMenuConstants.GROUP_PROPERTIES, new Separator(GROUP_FILTERING));
 		fActionGroup.fillActionBars(site.getActionBars());
-		addFilterActions(menuManager);
+		menuManager.appendToGroup(GROUP_FILTERING, fFilterDialogAction);
 	}
 
 	/**
@@ -439,6 +421,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		String encodedFilters= getSettings().get(KEY_FILTERS);
 		restoreFilters(encodedFilters);
 		fLimitElements= !FALSE.equals(getSettings().get(KEY_LIMIT_ENABLED));
+		try {
+			fElementLimit= getSettings().getInt(KEY_LIMIT);
+		} catch (NumberFormatException e) {
+			fElementLimit= DEFAULT_ELEMENT_LIMIT;
+		}
 		if (memento != null) {
 			Integer value= memento.getInteger(KEY_GROUPING);
 			if (value != null)
@@ -449,8 +436,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			encodedFilters= memento.getString(KEY_FILTERS);
 			restoreFilters(encodedFilters);
 			fLimitElements= !FALSE.equals(memento.getString(KEY_LIMIT_ENABLED));
+			value= memento.getInteger(KEY_LIMIT);
+			if (value != null)
+				fElementLimit= value.intValue();
 		}
-		fLimitElementsAction.setChecked(fLimitElements);
 	}
 	
 	private void restoreFilters(String encodedFilters) {
@@ -487,6 +476,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			memento.putString(KEY_GROUPING, TRUE);
 		else 
 			memento.putString(KEY_LIMIT_ENABLED, FALSE);
+		memento.putInteger(KEY_LIMIT, getElementLimit());
 	}
 	
 	void addMatchFilter(MatchFilter filter) {
@@ -496,7 +486,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	void enableLimit(boolean enable) {
 		fLimitElements= enable;
-		fLimitElementsAction.setChecked(enable);
 		if (fLimitElements)
 			getSettings().put(KEY_GROUPING, TRUE);
 		else 
@@ -628,9 +617,9 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			menu.remove(fFilterActions[i].getId());
 		}
 
-		for (int i= 0; i < fFilterActions.length; i++) {
+		for (int i= fFilterActions.length-1; i >= 0 ; i--) {
 			if (shouldEnable(result, fFilterActions[i]))
-				menu.appendToGroup(GROUP_FILTERING, fFilterActions[i]);
+				menu.prependToGroup(GROUP_FILTERING, fFilterActions[i]);
 		}
 		
 		menu.updateAll(true);
@@ -746,6 +735,20 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			}
 		}
 		super.handleOpen(event);
+	}
+
+	public void setFilters(MatchFilter[] enabledFilters) {
+		fMatchFilters.clear();
+		for (int i = 0; i < enabledFilters.length; i++) {
+			fMatchFilters.add(enabledFilters[i]);
+		}
+		filtersChanged();
+	}
+
+	void setElementLimit(int elementLimit) {
+		fElementLimit= elementLimit;
+		getSettings().put(KEY_LIMIT, elementLimit);
+		limitChanged();
 	}
 	
 }

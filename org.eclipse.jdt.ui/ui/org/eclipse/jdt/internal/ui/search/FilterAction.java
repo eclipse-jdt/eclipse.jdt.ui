@@ -18,7 +18,7 @@ public class FilterAction extends Action {
 	private JavaSearchResultPage fPage;
 	
 	public FilterAction(JavaSearchResultPage page, MatchFilter filter) {
-		super(filter.getName(), Action.AS_CHECK_BOX);
+		super(filter.getActionLabel(), Action.AS_CHECK_BOX);
 		fPage= page;
 		fFilter= filter;
 	}
