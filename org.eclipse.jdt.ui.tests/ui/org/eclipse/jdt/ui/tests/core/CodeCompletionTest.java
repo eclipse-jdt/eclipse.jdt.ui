@@ -20,7 +20,6 @@ import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -34,6 +33,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -84,13 +84,11 @@ public class CodeCompletionTest extends CoreTests {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
 
-		TemplateStore codeTemplateStore= JavaPlugin.getDefault().getCodeTemplateStore();
-		codeTemplateStore.findTemplate(CodeTemplateContextType.OVERRIDECOMMENT).setPattern("/* (non-Javadoc)\n * ${see_to_overridden}\n */");	
-		codeTemplateStore.findTemplate(CodeTemplateContextType.METHODSTUB).setPattern("//TODO\n${body_statement}");
-		codeTemplateStore.findTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT).setPattern("/**\n * Constructor.\n */");
-		codeTemplateStore.findTemplate(CodeTemplateContextType.METHODCOMMENT).setPattern("/**\n * Method.\n */");
-		codeTemplateStore.findTemplate(CodeTemplateContextType.CONSTRUCTORSTUB).setPattern("//TODO\n${body_statement}");
-
+		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "/* (non-Javadoc)\n * ${see_to_overridden}\n */", null);	
+		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, "/**\n * Constructor.\n */", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODCOMMENT_ID, "/**\n * Method.\n */", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "//TODO\n${body_statement}", null);
 	}
 
 

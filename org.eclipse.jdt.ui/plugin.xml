@@ -536,6 +536,28 @@
       </page>   
       <page
             objectClass="org.eclipse.core.resources.IProject"
+            name="%codeTemplatePageName"
+            category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.CodeTemplatePreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            name="%codeTemplatePageName"
+            category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.CodeTemplatePreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>  
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
             name="%compliancePageName"
             class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage">

@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
@@ -72,10 +73,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		
 		fJProject1= ProjectTestSetup.getProject();
 		
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CATCHBLOCK).setPattern("");
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CONSTRUCTORSTUB).setPattern("");
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.METHODSTUB).setPattern("");		
-
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CATCHBLOCK_ID, "", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
+		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 

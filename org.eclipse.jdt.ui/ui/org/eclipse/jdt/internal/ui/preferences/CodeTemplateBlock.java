@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Font;
@@ -38,10 +40,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.window.Window;
-
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -49,7 +47,9 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateReaderWriter;
-import org.eclipse.jface.text.templates.persistence.TemplateStore;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
@@ -121,9 +122,8 @@ public class CodeTemplateBlock {
 
 		public void keyPressed(TreeListDialogField field, KeyEvent event) {
 		}
-	
 	}
-	
+
 	private static class CodeTemplateLabelProvider extends LabelProvider {
 	
 		/* (non-Javadoc)
@@ -142,36 +142,35 @@ public class CodeTemplateBlock {
 				return (String) element;
 			}
 			TemplatePersistenceData data= (TemplatePersistenceData) element;
-			Template template= data.getTemplate();
-			String name= template.getName();
-			if (CodeTemplateContextType.CATCHBLOCK.equals(name)) {
+			String id=data.getId();
+			if (CodeTemplateContextType.CATCHBLOCK_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.catchblock.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.METHODSTUB.equals(name)) {
+			} else if (CodeTemplateContextType.METHODSTUB_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.methodstub.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.CONSTRUCTORSTUB.equals(name)) {
+			} else if (CodeTemplateContextType.CONSTRUCTORSTUB_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.constructorstub.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.GETTERSTUB.equals(name)) {
+			} else if (CodeTemplateContextType.GETTERSTUB_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.getterstub.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.SETTERSTUB.equals(name)) {
+			} else if (CodeTemplateContextType.SETTERSTUB_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.setterstub.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.NEWTYPE.equals(name)) {
+			} else if (CodeTemplateContextType.NEWTYPE_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.newtype.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.TYPECOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.TYPECOMMENT_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.typecomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.FIELDCOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.FIELDCOMMENT_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.fieldcomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.METHODCOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.METHODCOMMENT_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.methodcomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.OVERRIDECOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.OVERRIDECOMMENT_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.overridecomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.CONSTRUCTORCOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.CONSTRUCTORCOMMENT_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.constructorcomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.GETTERCOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.GETTERCOMMENT_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.gettercomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplateContextType.SETTERCOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.SETTERCOMMENT_ID.equals(id)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.settercomment.label"); //$NON-NLS-1$
 			}
-			return template.getDescription();
+			return data.getTemplate().getDescription();
 		}
 
 	}	
@@ -190,16 +189,20 @@ public class CodeTemplateBlock {
 	
 	private SelectionButtonDialogField fCreateJavaDocComments;
 	
-	protected TemplateStore fTemplates;
+	protected ProjectTemplateStore fTemplateStore;
 	
 	private PixelConverter fPixelConverter;
 	private SourceViewer fPatternViewer;
 	private Control fSWTWidget;
 	private TemplateVariableProcessor fTemplateProcessor;
+	
+	private final IProject fProject;
 
-	public CodeTemplateBlock() {
+	public CodeTemplateBlock(IProject project) {
 		
-		fTemplates= JavaPlugin.getDefault().getCodeTemplateStore();
+		fProject= project;
+		
+		fTemplateStore= new ProjectTemplateStore(project);
 		fTemplateProcessor= new TemplateVariableProcessor();
 		
 		CodeTemplateAdapter adapter= new CodeTemplateAdapter();
@@ -228,6 +231,16 @@ public class CodeTemplateBlock {
 		
 		fCodeTemplateTree.selectFirstElement();	
 	}
+	
+	public boolean hasProjectSpecificOptions() {
+		TemplatePersistenceData[] templateData= fTemplateStore.getTemplateData();
+		for (int i= 0; i < templateData.length; i++) {
+			if (fTemplateStore.isProjectSpecific(templateData[i])) {
+				return true;
+			}
+		}
+		return false;
+	}	
 	
 	protected Control createContents(Composite parent) {
 		fPixelConverter=  new PixelConverter(parent);
@@ -295,7 +308,7 @@ public class CodeTemplateBlock {
 	
 	protected TemplatePersistenceData[] getTemplateOfCategory(boolean isComment) {
 		ArrayList res=  new ArrayList();
-		TemplatePersistenceData[] templates= fTemplates.getTemplateData(false);
+		TemplatePersistenceData[] templates= fTemplateStore.getTemplateData();
 		for (int i= 0; i < templates.length; i++) {
 			TemplatePersistenceData curr= templates[i];
 			if (isComment == curr.getTemplate().getName().endsWith(CodeTemplateContextType.COMMENT_SUFFIX)) {
@@ -386,7 +399,7 @@ public class CodeTemplateBlock {
 	}
 	
 	private void updateTemplate(TemplatePersistenceData data) {
-		TemplatePersistenceData[] datas= fTemplates.getTemplateData(true);
+		TemplatePersistenceData[] datas= fTemplateStore.getTemplateData();
 		for (int i= 0; i < datas.length; i++) {
 			String id= datas[i].getId();
 			if (id != null && id.equals(data.getId())) {
@@ -397,7 +410,7 @@ public class CodeTemplateBlock {
 	}
 	
 	private void exportAll() {
-		export(fTemplates.getTemplateData(false));	
+		export(fTemplateStore.getTemplateData());	
 	}
 	
 	private void export(List selected) {
@@ -473,7 +486,7 @@ public class CodeTemplateBlock {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		fCreateJavaDocComments.setSelection(prefs.getDefaultBoolean(PREF_JAVADOC_STUBS));
 
-		fTemplates.restoreDefaults();
+		fTemplateStore.restoreDefaults();
 		
 		// refresh
 		fCodeTemplateTree.refresh();
@@ -484,19 +497,24 @@ public class CodeTemplateBlock {
 		IPreferenceStore prefs= PreferenceConstants.getPreferenceStore();
 		prefs.setValue(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
 		JavaPlugin.getDefault().savePluginPreferences();
-		
+		if (fProject != null) {
+			TemplatePersistenceData[] templateData= fTemplateStore.getTemplateData();
+			for (int i= 0; i < templateData.length; i++) {
+				fTemplateStore.setProjectSpecific(templateData[i], enabled);
+			}
+		}
 		try {
-			fTemplates.save();
+			fTemplateStore.save();
 		} catch (IOException e) {
 			JavaPlugin.log(e);
 			openWriteErrorDialog(e);
-		}		
+		}	
 		return true;
 	}
 	
 	public void performCancel() {
 		try {
-			fTemplates.load();			
+			fTemplateStore.load();
 		} catch (IOException e) {
 			openReadErrorDialog(e);
 		}
@@ -517,6 +535,8 @@ public class CodeTemplateBlock {
 		String title= PreferencesMessages.getString("CodeTemplateBlock.error.write.title"); //$NON-NLS-1$
 		String message= PreferencesMessages.getString("CodeTemplateBlock.error.write.message"); //$NON-NLS-1$
 		MessageDialog.openError(getShell(), title, message);
-	}	
+	}
+
+
 
 }

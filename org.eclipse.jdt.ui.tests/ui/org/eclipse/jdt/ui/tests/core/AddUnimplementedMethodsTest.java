@@ -62,9 +62,6 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		}	
 	}
 	
-	/**
-	 * Creates a new test Java project.
-	 */	
 	protected void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -98,9 +95,6 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	}
 
 
-	/**
-	 * Removes the test java project.
-	 */
 	protected void tearDown () throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 		fJavaProject= null;

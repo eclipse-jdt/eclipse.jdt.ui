@@ -19,8 +19,6 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
-import org.eclipse.jface.text.templates.persistence.TemplateStore;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -32,8 +30,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 
 public class JavadocQuickFixTest extends QuickFixTest {
@@ -73,23 +71,23 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		comment.append(" * A comment.\n");
 		comment.append(" * ${tags}\n");
 		comment.append(" */");
-		TemplateStore codeTemplateStore= JavaPlugin.getDefault().getCodeTemplateStore();
-		codeTemplateStore.findTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT).setPattern(comment.toString());
-		codeTemplateStore.findTemplate(CodeTemplateContextType.METHODCOMMENT).setPattern(comment.toString());
-		codeTemplateStore.findTemplate(CodeTemplateContextType.TYPECOMMENT).setPattern(comment.toString());
+		String res= comment.toString();
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, res, null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODCOMMENT_ID, res, null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, res, null);
 		
 		comment= new StringBuffer();
 		comment.append("/**\n");
 		comment.append(" * A field comment for ${field}.\n");
 		comment.append(" */");
-		codeTemplateStore.findTemplate(CodeTemplateContextType.FIELDCOMMENT).setPattern(comment.toString());
+		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, comment.toString(), null);
 
 		comment= new StringBuffer();
 		comment.append("/**\n");
 		comment.append(" * A override comment.\n");
 		comment.append(" * ${see_to_overridden}\n");
 		comment.append(" */");
-		codeTemplateStore.findTemplate(CodeTemplateContextType.OVERRIDECOMMENT).setPattern(comment.toString());
+		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, comment.toString(), null);
 		
 		fJProject1= ProjectTestSetup.getProject();
 

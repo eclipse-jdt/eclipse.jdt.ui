@@ -30,6 +30,7 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.jdt.core.*;
 
@@ -292,8 +293,8 @@ public class StubUtility {
 	}	
 
 	public static String getMethodBodyContent(boolean isConstructor, IJavaProject project, String destTypeName, String methodName, String bodyStatement, String lineDelimiter) throws CoreException {
-		String templateName= isConstructor ? CodeTemplateContextType.CONSTRUCTORSTUB : CodeTemplateContextType.METHODSTUB;
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(templateName);
+		String templateName= isConstructor ? CodeTemplateContextType.CONSTRUCTORSTUB_ID : CodeTemplateContextType.METHODSTUB_ID;
+		Template template= getCodeTemplate(templateName, project);
 		if (template == null) {
 			return bodyStatement;
 		}
@@ -309,8 +310,8 @@ public class StubUtility {
 	}
 	
 	public static String getGetterMethodBodyContent(IJavaProject project, String destTypeName, String methodName, String fieldName, String lineDelimiter) throws CoreException {
-		String templateName= CodeTemplateContextType.GETTERSTUB;
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(templateName);
+		String templateName= CodeTemplateContextType.GETTERSTUB_ID;
+		Template template= getCodeTemplate(templateName, project);
 		if (template == null) {
 			return null;
 		}
@@ -323,8 +324,8 @@ public class StubUtility {
 	}
 	
 	public static String getSetterMethodBodyContent(IJavaProject project, String destTypeName, String methodName, String fieldName, String paramName, String lineDelimiter) throws CoreException {
-		String templateName= CodeTemplateContextType.SETTERSTUB;
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(templateName);
+		String templateName= CodeTemplateContextType.SETTERSTUB_ID;
+		Template template= getCodeTemplate(templateName, project);
 		if (template == null) {
 			return null;
 		}
@@ -339,7 +340,7 @@ public class StubUtility {
 	}
 	
 	public static String getCatchBodyContent(ICompilationUnit cu, String exceptionType, String variableName, String lineDelimiter) throws CoreException {
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CATCHBLOCK);
+		Template template= getCodeTemplate(CodeTemplateContextType.CATCHBLOCK_ID, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}
@@ -357,7 +358,7 @@ public class StubUtility {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String packDecl= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
 
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE);
+		Template template= getCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}
@@ -376,7 +377,7 @@ public class StubUtility {
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String)
 	 */		
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String lineDelim) throws CoreException {
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.TYPECOMMENT);
+		Template template= getCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}
@@ -414,6 +415,8 @@ public class StubUtility {
 		}
 		return document.get();
 	}
+
+
 
 	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
 		ITypeBinding[] typeBindings= binding.getParameterTypes();
@@ -490,13 +493,13 @@ public class StubUtility {
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, String, String[], String[], String, String[], IMethod, String)
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames, IMethod overridden, String lineDelimiter) throws CoreException {
-		String templateName= CodeTemplateContextType.METHODCOMMENT;
+		String templateName= CodeTemplateContextType.METHODCOMMENT_ID;
 		if (retTypeSig == null) {
-			templateName= CodeTemplateContextType.CONSTRUCTORCOMMENT;
+			templateName= CodeTemplateContextType.CONSTRUCTORCOMMENT_ID;
 		} else if (overridden != null) {
-			templateName= CodeTemplateContextType.OVERRIDECOMMENT;
+			templateName= CodeTemplateContextType.OVERRIDECOMMENT_ID;
 		}
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(templateName);
+		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}		
@@ -550,7 +553,7 @@ public class StubUtility {
 	}
 
 	public static String getFieldComment(ICompilationUnit cu, String typeName, String fieldName, String lineDelimiter) throws CoreException {
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.FIELDCOMMENT);
+		Template template= getCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}
@@ -567,8 +570,8 @@ public class StubUtility {
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getSetterComment(ICompilationUnit, String, String, String, String, String, String, String)
 	 */
 	public static String getSetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter) throws CoreException {
-		String templateName= CodeTemplateContextType.SETTERCOMMENT;
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(templateName);
+		String templateName= CodeTemplateContextType.SETTERCOMMENT_ID;
+		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}
@@ -589,8 +592,8 @@ public class StubUtility {
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getGetterComment(ICompilationUnit, String, String, String, String, String, String)
 	 */
 	public static String getGetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
-		String templateName= CodeTemplateContextType.GETTERCOMMENT;
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(templateName);
+		String templateName= CodeTemplateContextType.GETTERCOMMENT_ID;
+		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}		
@@ -658,13 +661,13 @@ public class StubUtility {
 	 * @throws CoreException
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isOverridden, boolean isDeprecated, String declaringClassQualifiedName, String[] parameterTypesQualifiedNames, String lineDelimiter) throws CoreException {
-		String templateName= CodeTemplateContextType.METHODCOMMENT;
+		String templateName= CodeTemplateContextType.METHODCOMMENT_ID;
 		if (decl.isConstructor()) {
-			templateName= CodeTemplateContextType.CONSTRUCTORCOMMENT;
+			templateName= CodeTemplateContextType.CONSTRUCTORCOMMENT_ID;
 		} else if (isOverridden) {
-			templateName= CodeTemplateContextType.OVERRIDECOMMENT;
+			templateName= CodeTemplateContextType.OVERRIDECOMMENT_ID;
 		}
-		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(templateName);
+		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}		
@@ -1342,4 +1345,14 @@ public class StubUtility {
 	public static boolean doAddComments(IJavaProject project) {
 		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue(); 
 	}
+	
+	public static void setCodeTemplate(String templateId, String pattern, IJavaProject project) {
+		TemplateStore codeTemplateStore= JavaPlugin.getDefault().getCodeTemplateStore();
+		codeTemplateStore.findTemplateById(templateId).setPattern(pattern);
+	}
+	
+	private static Template getCodeTemplate(String id, IJavaProject project) {
+		return JavaPlugin.getDefault().getCodeTemplateStore().findTemplateById(id);
+	}
+	
 }

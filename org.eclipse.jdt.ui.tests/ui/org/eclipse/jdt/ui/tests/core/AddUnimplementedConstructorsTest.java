@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstruc
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
@@ -75,7 +74,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/**
 	 * Creates a new test Java project.
 	 */	
-	protected void setUp() throws Exception {
+	protected void setUp() {
 		initCodeTemplates();		
 	}	
 	
@@ -91,15 +90,12 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		comment.append(" * ${tags}\n");
 		comment.append(" */");
 		
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT).setPattern(comment.toString());
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CONSTRUCTORSTUB).setPattern("${body_statement}\n// TODO");	
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, comment.toString(), null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "${body_statement}\n// TODO", null);
 		fSettings= JavaPreferencesSettings.getCodeGenerationSettings(null);
 		fSettings.createComments= true;
 	}
 
-	/**
-	 * Removes the test java project.
-	 */
 	protected void tearDown () throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 		fJavaProject= null;

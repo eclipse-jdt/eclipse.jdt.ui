@@ -27,7 +27,7 @@ public class SelectionUtil {
 	 * Returns the selected element if the selection
 	 * consists of a single element only. 
 	 *
-	 * @param selection the selection
+	 * @param s the selection
 	 * @return the selected first element or null
 	 *
 	 */

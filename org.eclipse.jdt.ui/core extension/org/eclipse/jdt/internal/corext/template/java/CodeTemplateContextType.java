@@ -12,10 +12,10 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.ArrayList;
 
-import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
@@ -47,20 +47,23 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String SETTERCOMMENT_CONTEXTTYPE= "settercomment_context"; //$NON-NLS-1$
 
 	/* templates */
+	
+	private static final String CODETEMPLATES_PREFIX= "org.eclipse.jdt.ui.text.codetemplates."; //$NON-NLS-1$
 	public static final String COMMENT_SUFFIX= "comment"; //$NON-NLS-1$
-	public static final String CATCHBLOCK= "catchblock"; //$NON-NLS-1$
-	public static final String METHODSTUB= "methodbody"; //$NON-NLS-1$	
-	public static final String NEWTYPE= "newtype"; //$NON-NLS-1$	
-	public static final String CONSTRUCTORSTUB= "constructorbody"; //$NON-NLS-1$
-	public static final String GETTERSTUB= "getterbody"; //$NON-NLS-1$
-	public static final String SETTERSTUB= "setterbody"; //$NON-NLS-1$
-	public static final String TYPECOMMENT= "type" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String FIELDCOMMENT= "field" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String METHODCOMMENT= "method" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String CONSTRUCTORCOMMENT= "constructor" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String OVERRIDECOMMENT= "override" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String GETTERCOMMENT= "getter" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String SETTERCOMMENT= "setter" + COMMENT_SUFFIX; //$NON-NLS-1$
+	
+	public static final String CATCHBLOCK_ID= CODETEMPLATES_PREFIX + "catchblock"; //$NON-NLS-1$
+	public static final String METHODSTUB_ID= CODETEMPLATES_PREFIX + "methodbody"; //$NON-NLS-1$	
+	public static final String NEWTYPE_ID= CODETEMPLATES_PREFIX + "newtype"; //$NON-NLS-1$	
+	public static final String CONSTRUCTORSTUB_ID= CODETEMPLATES_PREFIX + "constructorbody"; //$NON-NLS-1$
+	public static final String GETTERSTUB_ID= CODETEMPLATES_PREFIX + "getterbody"; //$NON-NLS-1$
+	public static final String SETTERSTUB_ID= CODETEMPLATES_PREFIX + "setterbody"; //$NON-NLS-1$
+	public static final String TYPECOMMENT_ID= CODETEMPLATES_PREFIX + "type" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String FIELDCOMMENT_ID= CODETEMPLATES_PREFIX + "field" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String METHODCOMMENT_ID= CODETEMPLATES_PREFIX + "method" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String CONSTRUCTORCOMMENT_ID= CODETEMPLATES_PREFIX + "constructor" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String OVERRIDECOMMENT_ID= CODETEMPLATES_PREFIX + "override" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String GETTERCOMMENT_ID= CODETEMPLATES_PREFIX + "getter" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String SETTERCOMMENT_ID= CODETEMPLATES_PREFIX + "setter" + COMMENT_SUFFIX; //$NON-NLS-1$
 	
 	/* resolver types */
 	public static final String EXCEPTION_TYPE= "exception_type"; //$NON-NLS-1$

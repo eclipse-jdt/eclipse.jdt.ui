@@ -15,23 +15,20 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.PreferencePage;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /*
- * The page to configure the code formatter options.
+ * The page to configure the code templates.
  */
-public class CodeTemplatePreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
+public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 
+	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage"; //$NON-NLS-1$
+	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CodeTemplatePreferencePage"; //$NON-NLS-1$
+	
 	private CodeTemplateBlock fCodeTemplateConfigurationBlock;
 
 	public CodeTemplatePreferencePage() {
@@ -40,49 +37,43 @@ public class CodeTemplatePreferencePage extends PreferencePage implements IWorkb
 		
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.getString("CodeTemplatesPreferencePage.title"));		 //$NON-NLS-1$
-		
-		fCodeTemplateConfigurationBlock= new CodeTemplateBlock();
-	}
-
-	/*
-	 * @see IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-	 */	
-	public void init(IWorkbench workbench) {
 	}
 
 	/*
 	 * @see PreferencePage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
+		fCodeTemplateConfigurationBlock= new CodeTemplateBlock(getProject());
+		
 		super.createControl(parent);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CODE_MANIPULATION_PREFERENCE_PAGE);
 	}	
 
-	/*
-	 * @see PreferencePage#createContents(Composite)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#createPreferenceContent(org.eclipse.swt.widgets.Composite)
 	 */
-	protected Control createContents(Composite parent) {
-		Control composite= fCodeTemplateConfigurationBlock.createContents(parent);
-		Dialog.applyDialogFont(composite);
-		return composite;
+	protected Control createPreferenceContent(Composite composite) {
+		return fCodeTemplateConfigurationBlock.createContents(composite);
 	}
-
+	
 	/*
 	 * @see IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		if (!fCodeTemplateConfigurationBlock.performOk(true)) {
-			return false;
-		}			
-		return super.performOk();
+		if (fCodeTemplateConfigurationBlock != null) {
+			return fCodeTemplateConfigurationBlock.performOk(useProjectSettings());
+		}
+		return true;
 	}
 	
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		fCodeTemplateConfigurationBlock.performDefaults();
 		super.performDefaults();
+		if (fCodeTemplateConfigurationBlock != null) {
+			fCodeTemplateConfigurationBlock.performDefaults();
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -97,9 +88,25 @@ public class CodeTemplatePreferencePage extends PreferencePage implements IWorkb
 	 * @see org.eclipse.jface.preference.IPreferencePage#performCancel()
 	 */
 	public boolean performCancel() {
-		fCodeTemplateConfigurationBlock.performCancel();
-		
+		if (fCodeTemplateConfigurationBlock != null) {
+			fCodeTemplateConfigurationBlock.performCancel();
+		}
 		return super.performCancel();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#hasProjectSpecificOptions()
+	 */
+	protected boolean hasProjectSpecificOptions() {
+		return fCodeTemplateConfigurationBlock.hasProjectSpecificOptions();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#openWorkspacePreferences()
+	 */
+	protected void openWorkspacePreferences() {
+		CodeTemplatePreferencePage page= new CodeTemplatePreferencePage();
+		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
 	}
 
 }

@@ -12,7 +12,11 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.osgi.service.prefs.BackingStoreException;
@@ -87,8 +91,8 @@ public abstract class OptionsConfigurationBlock {
 			return context.getNode(fQualifier).get(fKey, null);
 		}
 		
-		public String getStoredValue(IScopeContext[] lookupOrder) {
-			for (int i= 0; i < lookupOrder.length; i++) {
+		public String getStoredValue(IScopeContext[] lookupOrder, boolean ignoreTopScope) {
+			for (int i= ignoreTopScope ? 1 : 0; i < lookupOrder.length; i++) {
 				String value= getStoredValue(lookupOrder[i]);
 				if (value != null) {
 					return value;
@@ -98,11 +102,11 @@ public abstract class OptionsConfigurationBlock {
 		}
 		
 		public void setStoredValue(IScopeContext context, String value) {
-			context.getNode(fQualifier).put(fKey, value);
-		}
-		
-		public void removeFromStore(IScopeContext context) {
-			context.getNode(fQualifier).remove(fKey);
+			if (value != null) {
+				context.getNode(fQualifier).put(fKey, value);
+			} else {
+				context.getNode(fQualifier).remove(fKey);
+			}
 		}
 			
 		/* (non-Javadoc)
@@ -225,7 +229,7 @@ public abstract class OptionsConfigurationBlock {
 		Map workingValues= new HashMap();
 		for (int i= 0; i < fAllKeys.length; i++) {
 			Key curr= fAllKeys[i];
-			workingValues.put(curr, curr.getStoredValue(fLookupOrder));
+			workingValues.put(curr, curr.getStoredValue(fLookupOrder, false));
 		}
 		return workingValues;
 	}
@@ -520,80 +524,87 @@ public abstract class OptionsConfigurationBlock {
 			res[i]= tok.nextToken().trim();
 		}
 		return res;
-	}	
+	}
+	
+	private static class PropertyChange {
+		public final Key key;
+		public final String oldValue;
+		public final String newValue;
 
-	private boolean hasChanges(IScopeContext currContext, boolean enabled) {
+		public PropertyChange(Key key, String oldValue, String newValue) {
+			this.key= key;
+			this.oldValue= oldValue;
+			this.newValue= newValue;
+		}
+	}
+	
+
+	private boolean getChanges(IScopeContext currContext, boolean enabled, List changedSettings) {
+		boolean needsBuild= false;
 		for (int i= 0; i < fAllKeys.length; i++) {
 			Key key= fAllKeys[i];
 			String oldVal= key.getStoredValue(currContext);
-			String val= null;
 			if (enabled) {
-				val= getValue(key);
+				String val= getValue(key);
 				if (val != null && !val.equals(oldVal)) {
-					return true;
+					changedSettings.add(new PropertyChange(key, oldVal, val));
+					needsBuild |= (oldVal != null) || !val.equals(key.getStoredValue(fLookupOrder, true)); // if oldVal was null the needs build if new value differs from inherited value
 				}
 			} else {
+				String val= null; // clear value
 				if (oldVal != null) {
-					return true;
+					changedSettings.add(new PropertyChange(key, oldVal, val));
+					needsBuild |= !oldVal.equals(key.getStoredValue(fLookupOrder, true)); // new val is null: needs build if oldValue is different than the inherited value
 				}
 			}
 		}
-		return false;
+		return needsBuild;
 	}
 	
 	public boolean performOk(boolean enabled) {
 
 		IScopeContext currContext= fLookupOrder[0];
 	
-		boolean hasChanges= hasChanges(currContext, enabled);
-		if (!hasChanges) {
+		List /* <Change>*/ changedOptions= new ArrayList();
+		boolean needsBuild= getChanges(currContext, enabled, changedOptions);
+		if (changedOptions.isEmpty()) {
 			return true;
 		}
 		
 		boolean doBuild= false;
-		String[] strings= getFullBuildDialogStrings(fProject == null);
-		if (strings != null) {
-			MessageDialog dialog= new MessageDialog(getShell(), strings[0], null, strings[1], MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
-			int res= dialog.open();
-			if (res == 0) {
-				doBuild= true;
-			} else if (res != 1) {
-				return false; // cancel pressed
+		if (needsBuild) {
+			String[] strings= getFullBuildDialogStrings(fProject == null);
+			if (strings != null) {
+				MessageDialog dialog= new MessageDialog(getShell(), strings[0], null, strings[1], MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
+				int res= dialog.open();
+				if (res == 0) {
+					doBuild= true;
+				} else if (res != 1) {
+					return false; // cancel pressed
+				}
 			}
 		}
 		
-		MockupPreferenceStore store= JavaPlugin.getDefault().getMockupPreferenceStore();			
-		Key[] allKeys= fAllKeys;
-		ArrayList modifiedNodes= new ArrayList();
-		for (int i= 0; i < allKeys.length; i++) {
-			Key key= allKeys[i];
-			String oldVal= key.getStoredValue(currContext);
-			if (enabled) {
-				String val= getValue(key);
-				if (val != null && !val.equals(oldVal)) {
-					key.setStoredValue(currContext, val);
-					if (fProject != null) {
-						store.firePropertyChangeEvent(fProject, key.getName(), oldVal, val);
-					}
-				}
-			} else {
-				if (oldVal != null) {
-					key.removeFromStore(currContext);
-					if (fProject != null) {
-						store.firePropertyChangeEvent(fProject, key.getName(), oldVal, null);
-					}
-				}
+		Set modifiedNodes= new HashSet();
+		MockupPreferenceStore store= JavaPlugin.getDefault().getMockupPreferenceStore();
+		for (Iterator iter= changedOptions.iterator(); iter.hasNext();) {
+			PropertyChange curr= (PropertyChange) iter.next();
+			Key key= curr.key;
+			key.setStoredValue(currContext, curr.newValue);
+			if (fProject != null) {
+				store.firePropertyChangeEvent(fProject, key.getName(), curr.oldValue, curr.newValue);
 			}
 			modifiedNodes.add(key.getQualifier());
 		}
-		for (int i= 0; i < modifiedNodes.size(); i++) {
+
+		for (Iterator iter= modifiedNodes.iterator(); iter.hasNext();) {
 			try {
-				String curr= (String) modifiedNodes.get(i);
+				String curr= (String) iter.next();
 				currContext.getNode(curr).flush();
 			} catch (BackingStoreException e) {
 				JavaPlugin.log(e);
 			}
-		}		
+		}
 
 		if (doBuild) {
 			boolean res= doFullBuild();
