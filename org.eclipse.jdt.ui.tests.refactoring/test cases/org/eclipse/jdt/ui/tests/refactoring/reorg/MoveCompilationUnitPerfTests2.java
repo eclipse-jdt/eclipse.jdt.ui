@@ -13,7 +13,7 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
 public class MoveCompilationUnitPerfTests2 extends AbstractMoveCompilationUnitPrefTest {
 
@@ -24,11 +24,11 @@ public class MoveCompilationUnitPerfTests2 extends AbstractMoveCompilationUnitPr
 		suite.addTest(new MoveCompilationUnitPerfTests2("test_10_10"));
 		suite.addTest(new MoveCompilationUnitPerfTests2("test_10_100"));
 		suite.addTest(new MoveCompilationUnitPerfTests2("test_10_1000"));
-		return new AbstractRefactoringTestSetup(suite);
+		return new RefactoringPerformanceTestSetup(suite);
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new AbstractRefactoringTestSetup(someTest);
+		return new RefactoringPerformanceTestSetup(someTest);
 	}
 
 	public MoveCompilationUnitPerfTests2(String name) {

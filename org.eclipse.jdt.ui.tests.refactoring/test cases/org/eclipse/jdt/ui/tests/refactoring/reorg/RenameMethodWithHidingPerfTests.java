@@ -21,8 +21,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
@@ -36,11 +36,11 @@ public class RenameMethodWithHidingPerfTests extends RefactoringPerformanceTestC
 		TestSuite suite= new TestSuite("RenameMethodWithHidingPerfTests");
 		suite.addTest(new RenameMethodWithHidingPerfTests("testCold"));
 		suite.addTest(new RenameMethodWithHidingPerfTests("testWarm"));
-		return new AbstractRefactoringTestSetup(suite);
+		return new RefactoringPerformanceTestSetup(suite);
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new AbstractRefactoringTestSetup(someTest);
+		return new RefactoringPerformanceTestSetup(someTest);
 	}
 
 	public RenameMethodWithHidingPerfTests(String name) {

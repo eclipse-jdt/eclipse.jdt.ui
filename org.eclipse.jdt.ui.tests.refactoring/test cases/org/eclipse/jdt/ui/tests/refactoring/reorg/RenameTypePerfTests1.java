@@ -15,7 +15,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.test.performance.Dimension;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
 public class RenameTypePerfTests1 extends AbstractRenameTypePerfTest {
 
@@ -26,11 +26,11 @@ public class RenameTypePerfTests1 extends AbstractRenameTypePerfTest {
 		suite.addTest(new RenameTypePerfTests1("test_10_10"));
 		suite.addTest(new RenameTypePerfTests1("test_100_10"));
 		suite.addTest(new RenameTypePerfTests1("test_1000_10"));
-		return new AbstractRefactoringTestSetup(suite);
+		return new RefactoringPerformanceTestSetup(suite);
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new AbstractRefactoringTestSetup(someTest);
+		return new RefactoringPerformanceTestSetup(someTest);
 	}
 
 	public RenameTypePerfTests1(String name) {

@@ -36,88 +36,64 @@
   <!-- performance test target -->
   <target name="performance-suite">
     <property name="jdt-ui-refactoring-performance-folder" value="${eclipse-home}/jdt_ui_refactoring_performance_folder"/>
+    <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
+    <property name="plugin-name" value="${plugin-name}"/>
     
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.RenamePackagePerfTests1"/>
     </ant>
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.RenamePackagePerfTests2"/>
     </ant>
     
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.RenameTypePerfAcceptanceTests"/>
     </ant>
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.RenameTypePerfTests1"/>
     </ant>
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.RenameTypePerfTests2"/>
     </ant>
     
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.RenameMethodPerfTests1"/>
     </ant>
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.RenameMethodPerfTests2"/>
     </ant>
     
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.RenameMethodWithOverloadPerfTests"/>
     </ant>
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.RenameMethodWithHidingPerfTests"/>
     </ant>
     
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.MoveCompilationUnitPerfTests1"/>
     </ant>
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.MoveCompilationUnitPerfTests2"/>
     </ant>
     
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.MoveStaticMembersPerfTests1"/>
     </ant>
     <delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${jdt-ui-refactoring-performance-folder}"/>
-      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.MoveStaticMembersPerfTests2"/>
     </ant>
   </target>

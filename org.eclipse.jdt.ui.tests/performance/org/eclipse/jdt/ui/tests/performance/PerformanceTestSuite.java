@@ -14,18 +14,12 @@ package org.eclipse.jdt.ui.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest;
 import org.eclipse.jdt.ui.tests.performance.views.TypeHierarchyPerfTest;
 
 public class PerformanceTestSuite {
-
 	public static Test suite() {
 		TestSuite suite= new TestSuite("jdt.ui performance tests");
-		
 		suite.addTest(TypeHierarchyPerfTest.suite());
-		suite.addTest(PackageExplorerPerfTest.suite());
-		
 		return suite;
 	}
-	
 }

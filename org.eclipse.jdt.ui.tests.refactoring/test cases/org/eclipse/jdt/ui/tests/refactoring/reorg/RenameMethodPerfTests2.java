@@ -13,12 +13,10 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
 public class RenameMethodPerfTests2 extends AbstractRenameMethodPerfTest {
 
-	private TestProject fTestProject;
-	
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
 		TestSuite suite= new TestSuite("RenameTypePerfAcceptanceTests2");
@@ -26,25 +24,15 @@ public class RenameMethodPerfTests2 extends AbstractRenameMethodPerfTest {
 		suite.addTest(new RenameMethodPerfTests2("test_10_10"));
 		suite.addTest(new RenameMethodPerfTests2("test_10_100"));
 		suite.addTest(new RenameMethodPerfTests2("test_10_1000"));
-		return new AbstractRefactoringTestSetup(suite);
+		return new RefactoringPerformanceTestSetup(suite);
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new AbstractRefactoringTestSetup(someTest);
+		return new RefactoringPerformanceTestSetup(someTest);
 	}
 
 	public RenameMethodPerfTests2(String name) {
 		super(name);
-	}
-	
-	protected void setUp() throws Exception {
-		super.setUp();
-		fTestProject= new TestProject();
-	}
-	
-	protected void tearDown() throws Exception {
-		fTestProject.delete();
-		super.tearDown();
 	}
 	
 	public void testCold_10_10() throws Exception {

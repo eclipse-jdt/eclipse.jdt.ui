@@ -21,8 +21,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractRefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
@@ -37,11 +37,11 @@ public class RenameMethodWithOverloadPerfTests extends RefactoringPerformanceTes
 		suite.addTest(new RenameMethodWithOverloadPerfTests("test_10_10"));
 		suite.addTest(new RenameMethodWithOverloadPerfTests("test_100_10"));
 		suite.addTest(new RenameMethodWithOverloadPerfTests("test_1000_10"));
-		return new AbstractRefactoringTestSetup(suite);
+		return new RefactoringPerformanceTestSetup(suite);
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new AbstractRefactoringTestSetup(someTest);
+		return new RefactoringPerformanceTestSetup(someTest);
 	}
 
 	public RenameMethodWithOverloadPerfTests(String name) {
