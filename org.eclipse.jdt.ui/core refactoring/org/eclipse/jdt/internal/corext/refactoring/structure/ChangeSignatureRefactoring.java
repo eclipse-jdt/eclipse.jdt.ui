@@ -403,7 +403,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			  .append(CONST_ASSIGN)
 			  .append("null") //$NON-NLS-1$
 			  .append(CONST_CLOSE);
-		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser p= ASTParser.newParser(AST.JLS2);
 		p.setSource(cuBuff.toString().toCharArray());
 		CompilationUnit cu= (CompilationUnit) p.createAST(null);
 		Selection selection= Selection.createFromStartLength(offset, string.length());
@@ -444,7 +444,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		int offset= cuBuff.length();
 		cuBuff.append(trimmed)
 			  .append(CONST_CLOSE);
-		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser p= ASTParser.newParser(AST.JLS2);
 		p.setSource(cuBuff.toString().toCharArray());
 		CompilationUnit cu= (CompilationUnit) p.createAST(null);
 		Selection selection= Selection.createFromStartLength(offset, trimmed.length());
@@ -485,7 +485,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (result.hasFatalError())
 					return result;
 			}
-			fCU= new RefactoringASTParser(AST.LEVEL_2_0).parse(getCu(), true);
+			fCU= new RefactoringASTParser(AST.JLS2).parse(getCu(), true);
 			result.merge(createExceptionInfoList());
 			
 			return result;
@@ -758,7 +758,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		ICompilationUnit cu= getCu();
 		TextChange change= fChangeManager.get(cu);
 		String newCuSource= change.getPreviewContent();
-		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser p= ASTParser.newParser(AST.JLS2);
 		p.setSource(newCuSource.toCharArray());
 		p.setUnitName(cu.getElementName());
 		p.setProject(cu.getJavaProject());
@@ -947,7 +947,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (cu.equals(getCu()))
 				cuNode= fCU;
 			else
-				cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, true);
+				cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, true);
 			OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 			ImportRewrite importRewrite= new ImportRewrite(cu);
 			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuNode);

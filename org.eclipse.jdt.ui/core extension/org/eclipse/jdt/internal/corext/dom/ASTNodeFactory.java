@@ -53,7 +53,7 @@ public class ASTNodeFactory {
 		StringBuffer buffer= new StringBuffer(STATEMENT_HEADER);
 		buffer.append(content);
 		buffer.append(STATEMENT_FOOTER);
-		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser p= ASTParser.newParser(AST.JLS2);
 		p.setSource(buffer.toString().toCharArray());
 		CompilationUnit root= (CompilationUnit) p.createAST(null);
 		ASTNode result= ASTNode.copySubtree(ast, NodeFinder.perform(root, STATEMENT_HEADER.length(), content.length()));
@@ -79,7 +79,7 @@ public class ASTNodeFactory {
 		StringBuffer buffer= new StringBuffer(TYPE_HEADER);
 		buffer.append(content);
 		buffer.append(TYPE_FOOTER);
-		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser p= ASTParser.newParser(AST.JLS2);
 		p.setSource(buffer.toString().toCharArray());
 		CompilationUnit root= (CompilationUnit) p.createAST(null);
 		List list= root.types();

@@ -216,7 +216,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 		
-		CompilationUnit root= new RefactoringASTParser(AST.LEVEL_2_0).parse(fCUnit, true);
+		CompilationUnit root= new RefactoringASTParser(AST.JLS2).parse(fCUnit, true);
 		fAST= root.getAST();
 		root.accept(createVisitor());
 		

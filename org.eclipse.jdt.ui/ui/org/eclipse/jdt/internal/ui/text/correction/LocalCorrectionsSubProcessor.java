@@ -298,7 +298,7 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		
 		refactoring.setLeaveDirty(true);
-		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser parser= ASTParser.newParser(AST.JLS2);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		parser.setFocalPosition(selectedNode.getStartPosition());

@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.corext.dom.RewriteEventStore.CopySourceInfo;
  * <p>
  * <pre>
  * Document doc = new Document("import java.util.List;\nclass X {}\n");
- * ASTParser parser = ASTParser.newParser(AST.LEVEL_3_0);
+ * ASTParser parser = ASTParser.newParser(AST.JLS3);
  * parser.setSource(doc.get().toCharArray());
  * CompilationUnit cu = (CompilationUnit) parser.createAST(null);
  * AST ast = cu.getAST();

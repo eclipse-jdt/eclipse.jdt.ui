@@ -1520,7 +1520,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 	
 	private void removeUnusedImports(ICompilationUnit cu, boolean needsSave) throws CoreException {
-		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser parser= ASTParser.newParser(AST.JLS2);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		CompilationUnit root= (CompilationUnit) parser.createAST(null);
@@ -1559,7 +1559,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String content= CodeGeneration.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
 		if (content != null) {
-			ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser parser= ASTParser.newParser(AST.JLS2);
 			parser.setSource(content.toCharArray());
 			CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 			if ((pack.isDefaultPackage() || unit.getPackage() != null) && !unit.types().isEmpty()) {

@@ -114,7 +114,7 @@ public class TypeRulesTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser parser= ASTParser.newParser(AST.JLS2);
 		parser.setSource(cu1);
 		parser.setResolveBindings(true);
 		
@@ -150,7 +150,7 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
 				
-				ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+				ASTParser parser= ASTParser.newParser(AST.JLS2);
 				parser.setSource(content);
 				parser.setProject(fJProject1);
 				parser.setUnitName("F.java");
@@ -189,7 +189,7 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
 				
-				ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+				ASTParser parser= ASTParser.newParser(AST.JLS2);
 				parser.setSource(content);
 				parser.setResolveBindings(true);
 				parser.setProject(fJProject1);

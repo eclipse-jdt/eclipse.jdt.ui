@@ -42,7 +42,7 @@ public class JavaElementMapper extends GenericVisitor {
 	public static ASTNode perform(IMember member, Class type) throws JavaModelException {
 		JavaElementMapper mapper= new JavaElementMapper(member);
 		ICompilationUnit unit= member.getCompilationUnit();
-		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser parser= ASTParser.newParser(AST.JLS2);
 		parser.setSource(unit);
 		parser.setResolveBindings(true);
 		CompilationUnit node= (CompilationUnit) parser.createAST(null);

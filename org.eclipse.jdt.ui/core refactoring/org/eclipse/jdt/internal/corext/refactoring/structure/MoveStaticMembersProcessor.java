@@ -115,7 +115,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	public static class ASTData {
 		public ASTData(ICompilationUnit u, boolean resolveBindings) {
 			unit= u;
-			root= new RefactoringASTParser(AST.LEVEL_2_0).parse(unit, resolveBindings);
+			root= new RefactoringASTParser(AST.JLS2).parse(unit, resolveBindings);
 			rewriter= new OldASTRewrite(root);
 		}
 		

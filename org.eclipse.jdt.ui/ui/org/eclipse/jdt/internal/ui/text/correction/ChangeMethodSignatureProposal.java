@@ -102,7 +102,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			newMethodDecl= methodDecl;
 		} else {
 			isInDifferentCU= true;
-			ASTParser astParser= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser astParser= ASTParser.newParser(AST.JLS2);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			astRoot= (CompilationUnit) astParser.createAST(null);

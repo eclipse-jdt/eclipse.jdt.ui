@@ -762,7 +762,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	}
 
 	private CompilationUnit createAST(ICompilationUnit compilationUnit) {
-		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser parser= ASTParser.newParser(AST.JLS2);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);

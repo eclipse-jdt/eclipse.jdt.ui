@@ -197,7 +197,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private void initAST() {
-    	fCompilationUnitNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(fCu, true);
+    	fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
         fAnonymousInnerClassNode= getAnonymousInnerClass(NodeFinder.perform(fCompilationUnitNode, fSelectionStart, fSelectionLength));
         if (fAnonymousInnerClassNode != null) {
             TypeDeclaration[] nestedtypes= getTypeDeclaration().getTypes();

@@ -422,7 +422,7 @@ public final class ASTProvider {
 	 * 					insufficient, contradictory, or otherwise unsupported
 	 */
 	private CompilationUnit createAST(IJavaElement je, IProgressMonitor progressMonitor) {
-		ASTParser parser = ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser parser = ASTParser.newParser(AST.JLS2);
 		parser.setResolveBindings(true);
 		
 		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)

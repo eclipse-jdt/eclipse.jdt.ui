@@ -861,7 +861,7 @@ public class UnresolvedElementsSubProcessor {
 					return false;
 				}
 			}
-			ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser parser= ASTParser.newParser(AST.JLS2);
 			parser.setSource(targetCU);
 			parser.setFocalPosition(0);
 			parser.setResolveBindings(true);

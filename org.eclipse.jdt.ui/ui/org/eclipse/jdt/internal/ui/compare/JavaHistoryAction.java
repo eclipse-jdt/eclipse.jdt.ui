@@ -370,7 +370,7 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 			throw new IllegalArgumentException();
 		}
 		try {
-			ASTParser c= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser c= ASTParser.newParser(AST.JLS2);
 			c.setSource(unit);
 			c.setFocalPosition(position);
 			c.setResolveBindings(resolveBindings);

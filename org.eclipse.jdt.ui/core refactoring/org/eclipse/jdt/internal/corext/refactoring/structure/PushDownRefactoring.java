@@ -704,7 +704,7 @@ public class PushDownRefactoring extends Refactoring {
 			ICompilationUnit cu= groups[i].getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, false);
 			ASTNode[] refNodes= ASTNodeSearchUtil.getAstNodes(groups[i].getSearchResults(), cuNode);
 			for (int j= 0; j < refNodes.length; j++) {
 				ASTNode node= refNodes[j];
@@ -785,11 +785,11 @@ public class PushDownRefactoring extends Refactoring {
 			IType[] destinationsForAbstract= getDestinationClassesForAbstractMembers(new SubProgressMonitor(pm, 1));
 			
 			ICompilationUnit declaringCu= getDeclaringCU();
-			CompilationUnit declaringCuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(declaringCu, true);
+			CompilationUnit declaringCuNode= new RefactoringASTParser(AST.JLS2).parse(declaringCu, true);
 			ICompilationUnit[] cus= getCusToProcess(new SubProgressMonitor(pm, 1));
 			for (int i= 0; i < cus.length; i++) {
 				ICompilationUnit cu= cus[i];
-				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode: new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, true);
+				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode: new RefactoringASTParser(AST.JLS2).parse(cu, true);
 				OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 
 				if (cu.equals(declaringCu)){

@@ -753,7 +753,7 @@ public class PullUpRefactoring extends Refactoring {
 			ICompilationUnit cu= groups[i].getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, false);
 			ASTNode[] refNodes= ASTNodeSearchUtil.getAstNodes(groups[i].getSearchResults(), cuNode);
 			for (int j= 0; j < refNodes.length; j++) {
 				ASTNode node= refNodes[j];
@@ -1196,7 +1196,7 @@ public class PullUpRefactoring extends Refactoring {
 			pm.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.preview"), 4); //$NON-NLS-1$
 
 			ICompilationUnit declaringCu= getDeclaringCU();
-			CompilationUnit declaringCuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(declaringCu, true);			
+			CompilationUnit declaringCuNode= new RefactoringASTParser(AST.JLS2).parse(declaringCu, true);			
 
 			addImportsToTargetCu(new SubProgressMonitor(pm, 1), declaringCuNode);
 
@@ -1218,7 +1218,7 @@ public class PullUpRefactoring extends Refactoring {
 					subPm.worked(6);
 					continue;
 				}	
-				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode : new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, true);
+				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode : new RefactoringASTParser(AST.JLS2).parse(cu, true);
 				OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 				if (membersToDeleteMap.containsKey(cu)){
 					List members= (List) membersToDeleteMap.get(cu);
@@ -1631,7 +1631,7 @@ public class PullUpRefactoring extends Refactoring {
 		if (JdtFlags.isStatic(method))
 			return new ISourceRange[0];
 		SuperReferenceFinderVisitor visitor= new SuperReferenceFinderVisitor(method, superType);
-		new RefactoringASTParser(AST.LEVEL_2_0).parse(method.getCompilationUnit(), true).accept(visitor);
+		new RefactoringASTParser(AST.JLS2).parse(method.getCompilationUnit(), true).accept(visitor);
 		return visitor.getSuperReferenceRanges();
 	}
 	

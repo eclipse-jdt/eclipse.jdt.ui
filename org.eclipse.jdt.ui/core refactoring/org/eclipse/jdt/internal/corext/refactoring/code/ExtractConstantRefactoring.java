@@ -349,7 +349,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private void initializeAST() {
-		fCompilationUnitNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(fCu, true);
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
@@ -423,7 +423,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			TextChangeCompatibility.addTextEdit(change, "", edits); //$NON-NLS-1$
 
 			String newCuSource= change.getPreviewContent();
-			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser p= ASTParser.newParser(AST.JLS2);
 			p.setSource(newCuSource.toCharArray());
 			p.setUnitName(fCu.getElementName());
 			p.setProject(fCu.getJavaProject());

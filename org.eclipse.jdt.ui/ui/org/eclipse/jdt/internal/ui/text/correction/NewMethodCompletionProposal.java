@@ -64,7 +64,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			newTypeDecl= typeDecl;
 		} else {
 			isInDifferentCU= true;
-			ASTParser astParser= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser astParser= ASTParser.newParser(AST.JLS2);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			astRoot= (CompilationUnit) astParser.createAST(null);

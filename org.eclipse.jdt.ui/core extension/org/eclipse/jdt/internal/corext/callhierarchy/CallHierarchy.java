@@ -252,7 +252,7 @@ public class CallHierarchy {
             IClassFile classFile= member.getClassFile();
             try {
                 if (classFile != null && classFile.exists() && classFile.getSource() != null) {
-					ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+					ASTParser parser= ASTParser.newParser(AST.JLS2);
 					parser.setSource(classFile);
 					parser.setResolveBindings(resolveBindings);
 					return (CompilationUnit) parser.createAST(null);
@@ -263,7 +263,7 @@ public class CallHierarchy {
         } else {
             ICompilationUnit icu= member.getCompilationUnit();
             if (icu != null && icu.exists()) {
-				ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+				ASTParser parser= ASTParser.newParser(AST.JLS2);
 				parser.setSource(icu);
 				parser.setResolveBindings(resolveBindings);
 				return (CompilationUnit) parser.createAST(null);

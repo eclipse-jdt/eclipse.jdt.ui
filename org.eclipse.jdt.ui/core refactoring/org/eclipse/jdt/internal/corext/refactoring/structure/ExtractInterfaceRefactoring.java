@@ -287,7 +287,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			TextChangeManager manager= new TextChangeManager(true);
 			
 			typeCu= WorkingCopyUtil.getNewWorkingCopy(getInputTypeCU(), fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
-			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser p= ASTParser.newParser(AST.JLS2);
 			p.setSource(typeCu);
 			p.setResolveBindings(true);
 			p.setWorkingCopyOwner(fWorkingCopyOwner);
@@ -471,7 +471,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private String createExtractedInterfaceCUSource(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
-		CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(getInputTypeCU(), true);			
+		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(getInputTypeCU(), true);			
 		String typeComment= CodeGeneration.getTypeComment(newCu, fNewInterfaceName, getLineSeperator());//$NON-NLS-1$
 		String compilationUnitContent = CodeGeneration.getCompilationUnitContent(newCu, typeComment, createInterfaceSource(cuNode), getLineSeperator());
 		if (compilationUnitContent == null)

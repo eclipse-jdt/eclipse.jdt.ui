@@ -261,7 +261,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		
 		ASTNode newTypeDecl= astRoot.findDeclaringNode(fSenderBinding);
 		if (newTypeDecl == null) {
-			ASTParser astParser= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser astParser= ASTParser.newParser(AST.JLS2);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			astRoot= (CompilationUnit) astParser.createAST(null);

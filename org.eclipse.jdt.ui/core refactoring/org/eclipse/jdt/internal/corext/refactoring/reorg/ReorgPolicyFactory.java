@@ -915,7 +915,7 @@ class ReorgPolicyFactory {
 			try {					
 				CompilationUnit sourceCuNode= createSourceCuNode();
 				ICompilationUnit destinationCu= getDestinationCu();
-				ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+				ASTParser parser= ASTParser.newParser(AST.JLS2);
 				parser.setSource(destinationCu);
 				CompilationUnit destinationCuNode= (CompilationUnit) parser.createAST(pm);
 				OldASTRewrite rewrite= new OldASTRewrite(destinationCuNode);
@@ -934,7 +934,7 @@ class ReorgPolicyFactory {
 		private CompilationUnit createSourceCuNode(){
 			Assert.isTrue(getSourceCu() != null || getSourceClassFile() != null);
 			Assert.isTrue(getSourceCu() == null || getSourceClassFile() == null);
-			ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser parser= ASTParser.newParser(AST.JLS2);
 			if (getSourceCu() != null)
 				parser.setSource(getSourceCu());
 			else
@@ -1786,7 +1786,7 @@ class ReorgPolicyFactory {
 		}
 
 		private CompilationUnit createSourceCuNode(ICompilationUnit cu){
-			ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser parser= ASTParser.newParser(AST.JLS2);
 			parser.setSource(cu);
 			return (CompilationUnit) parser.createAST(null);
 		}

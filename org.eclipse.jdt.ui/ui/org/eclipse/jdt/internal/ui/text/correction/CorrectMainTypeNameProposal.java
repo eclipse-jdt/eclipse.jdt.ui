@@ -56,7 +56,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	protected ASTRewrite getRewrite() throws CoreException {
 		char[] content= getCompilationUnit().getBuffer().getCharacters();
 		
-		ASTParser astParser= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser astParser= ASTParser.newParser(AST.JLS2);
 		astParser.setSource(content);
 		astParser.setUnitName(fOldName + ".java"); //$NON-NLS-1$
 		astParser.setProject(getCompilationUnit().getJavaProject());

@@ -142,7 +142,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		CompilationUnit rootNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(fCUnit, true);
+		CompilationUnit rootNode= new RefactoringASTParser(AST.JLS2).parse(fCUnit, true);
 		return checkActivationBasics(rootNode);
 	}
 

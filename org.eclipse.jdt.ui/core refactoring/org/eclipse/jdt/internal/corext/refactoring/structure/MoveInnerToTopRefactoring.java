@@ -140,7 +140,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		fImportManager= new ImportRewriteManager(codeGenerationSettings);
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fMarkInstanceFieldAsFinal= true; //default
-		fDeclaringCuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(getDeclaringCu(), true);
+		fDeclaringCuNode= new RefactoringASTParser(AST.JLS2).parse(getDeclaringCu(), true);
 		fIsInstanceFieldCreationPossible= !JdtFlags.isStatic(type);
 		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
 		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
@@ -294,7 +294,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private RefactoringStatus checkConstructorParameterNames(){
 		RefactoringStatus result= new RefactoringStatus();
-		CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(getInputTypeCu(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(getInputTypeCu(), false);
 		TypeDeclaration type= findTypeDeclaration(fType, cuNode);
 		MethodDeclaration[] nodes= getConstructorDeclarationNodes(type);
 		for (int i= 0; i < nodes.length; i++) {
@@ -374,7 +374,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		TextEdit edit= getRewriteTextEdit(processedCu, rewrite);
 		TextChangeCompatibility.addTextEdit(ch, "", edit); //$NON-NLS-1$
 		String newSource= ch.getPreviewContent();
-		ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser p= ASTParser.newParser(AST.JLS2);
 		p.setSource(newSource.toCharArray());
 		CompilationUnit cuNode= (CompilationUnit) p.createAST(null);
 		TypeDeclaration td= findTypeDeclaration(fType, cuNode);
@@ -414,7 +414,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private CompilationUnit getAST(ICompilationUnit processedCu) {		
 		if (processedCu.equals(getDeclaringCu()))
 			return fDeclaringCuNode;
-		return new RefactoringASTParser(AST.LEVEL_2_0).parse(processedCu, true);
+		return new RefactoringASTParser(AST.JLS2).parse(processedCu, true);
 	}
 
 	private boolean typeHasNoConstructors() throws JavaModelException {

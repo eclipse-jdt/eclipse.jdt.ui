@@ -510,7 +510,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fNumberOfImportsAdded= 0;
 		
 		fParsingError= null;
-		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		ASTParser parser= ASTParser.newParser(AST.JLS2);
 		parser.setSource(impStructure.getCompilationUnit());
 		parser.setResolveBindings(true);
 		fASTRoot= (CompilationUnit) parser.createAST(null);

@@ -61,7 +61,7 @@ public abstract class FindOccurrencesEngine {
 			fClassFile= file;
 		}
 		protected CompilationUnit createAST() {
-			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser p= ASTParser.newParser(AST.JLS2);
 			p.setSource(fClassFile);
 			p.setResolveBindings(true);
 			return (CompilationUnit) p.createAST(null);
@@ -90,7 +90,7 @@ public abstract class FindOccurrencesEngine {
 			fCUnit= unit;
 		}
 		protected CompilationUnit createAST() {
-			ASTParser p= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser p= ASTParser.newParser(AST.JLS2);
 			p.setSource(fCUnit);
 			p.setResolveBindings(true);
 			return (CompilationUnit) p.createAST(null);

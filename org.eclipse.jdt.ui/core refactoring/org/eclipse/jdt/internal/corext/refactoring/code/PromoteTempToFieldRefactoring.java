@@ -368,7 +368,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     
 	private void initAST(){
-		fCompilationUnitNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(fCu, true);
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
 		fTempDeclarationNode= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 	}
 

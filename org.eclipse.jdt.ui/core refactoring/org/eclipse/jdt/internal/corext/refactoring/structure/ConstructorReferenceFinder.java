@@ -93,7 +93,7 @@ class ConstructorReferenceFinder {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, false);
 			SearchResult[] allSearchResults= group.getSearchResults();
 			List realConstructorReferences= new ArrayList(Arrays.asList(allSearchResults));
 			for (int j= 0; j < allSearchResults.length; j++) {
@@ -159,7 +159,7 @@ class ConstructorReferenceFinder {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, false);
 			SearchResult[] results= group.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
 				SearchResult searchResult= results[j];
@@ -203,7 +203,7 @@ class ConstructorReferenceFinder {
 	//Collection of SearchResults
 	private static Collection getAllSuperConstructorInvocations(IType type) throws JavaModelException {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
-		CompilationUnit cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(type.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS2).parse(type.getCompilationUnit(), false);
 		List result= new ArrayList(constructors.length);
 		for (int i= 0; i < constructors.length; i++) {
 			ASTNode superCall= getSuperConstructorCallNode(constructors[i], cuNode);

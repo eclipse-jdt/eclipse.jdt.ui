@@ -309,7 +309,7 @@ abstract class TargetProvider {
 		}
 	
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
-			ASTNode root= new RefactoringASTParser(AST.LEVEL_2_0).parse(unit, true);
+			ASTNode root= new RefactoringASTParser(AST.JLS2).parse(unit, true);
 			InvocationFinder finder= new InvocationFinder(fMethod.resolveBinding());
 			root.accept(finder);
 			fCurrentBodies= finder.result;

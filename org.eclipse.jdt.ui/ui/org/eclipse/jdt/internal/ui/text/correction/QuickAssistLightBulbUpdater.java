@@ -169,7 +169,7 @@ public class QuickAssistLightBulbUpdater {
 				if (cu != null) {
 					installSelectionListener();
 					Point point= fViewer.getSelectedRange();
-					ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+					ASTParser parser= ASTParser.newParser(AST.JLS2);
 					parser.setSource(cu);
 					parser.setResolveBindings(true);
 					CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);

@@ -58,7 +58,7 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		} else {
 			selectionDescription= new TextEditGroup("selection"); // in different CU, needs selection //$NON-NLS-1$
 			//setSelectionDescription(selectionDescription);
-			ASTParser astParser= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser astParser= ASTParser.newParser(AST.JLS2);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			CompilationUnit newRoot= (CompilationUnit) astParser.createAST(null);

@@ -58,7 +58,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
-			ASTParser astParser= ASTParser.newParser(AST.LEVEL_2_0);
+			ASTParser astParser= ASTParser.newParser(AST.JLS2);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			CompilationUnit newRoot= (CompilationUnit) astParser.createAST(null);

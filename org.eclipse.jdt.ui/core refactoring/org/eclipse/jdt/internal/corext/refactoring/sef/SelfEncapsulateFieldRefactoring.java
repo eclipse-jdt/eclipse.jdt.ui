@@ -196,7 +196,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fVisibility= (fField.getFlags() & (Flags.AccPublic | Flags.AccProtected | Flags.AccPrivate));
 		RefactoringStatus result=  new RefactoringStatus();
 		
-		fRoot= new RefactoringASTParser(AST.LEVEL_2_0).parse(fField.getCompilationUnit(), true);
+		fRoot= new RefactoringASTParser(AST.JLS2).parse(fField.getCompilationUnit(), true);
 		ISourceRange sourceRange= fField.getNameRange();
 		ASTNode node= NodeFinder.perform(fRoot, sourceRange.getOffset(), sourceRange.getLength());
 		if (node == null) {
@@ -308,7 +308,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				rewriter= fRewriter;
 				descriptions= ownerDescriptions;
 			} else {
-				root= new RefactoringASTParser(AST.LEVEL_2_0).parse(unit, true);
+				root= new RefactoringASTParser(AST.JLS2).parse(unit, true);
 				rewriter= new OldASTRewrite(root);
 				descriptions= new ArrayList();
 			}
