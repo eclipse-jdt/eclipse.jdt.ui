@@ -75,6 +75,12 @@ public class JavaElementUtil {
 	public static boolean isMainType(IType type) throws JavaModelException{
 		if (! type.exists())	
 			return false;
+
+		if (type.isBinary())
+			return false;
+			
+		if (type.getCompilationUnit() == null)
+			return false;
 		
 		if (type.getDeclaringType() != null)
 			return false;
