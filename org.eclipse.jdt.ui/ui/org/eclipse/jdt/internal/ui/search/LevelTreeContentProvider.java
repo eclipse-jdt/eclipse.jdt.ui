@@ -80,7 +80,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		return getChildren(inputElement);
 	}
 	
-	protected void initialize(JavaSearchResult result) {
+	protected synchronized void initialize(JavaSearchResult result) {
 		super.initialize(result);
 		fChildrenMap= new HashMap();
 		if (result != null) {
@@ -153,7 +153,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	public boolean hasChildren(Object element) {
 		return getChildren(element).length > 0;
 	}
-	public void elementsChanged(Object[] updatedElements) {
+	public synchronized void elementsChanged(Object[] updatedElements) {
 		for (int i= 0; i < updatedElements.length; i++) {
 			if (fResult.getMatchCount(updatedElements[i]) > 0)
 				insert(updatedElements[i], true);
@@ -163,7 +163,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	}
 	
 	public void clear() {
-		fChildrenMap.clear();
+		initialize(fResult);
 		fTreeViewer.refresh();
 	}
 	
