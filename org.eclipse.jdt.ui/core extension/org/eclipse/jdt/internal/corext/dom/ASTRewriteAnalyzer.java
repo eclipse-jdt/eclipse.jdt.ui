@@ -1508,9 +1508,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(QualifiedName)
 	 */
 	public boolean visit(QualifiedName node) {
-		checkNoModification(node);
-		checkNoChange(node.getName());
-		checkNoChange(node.getQualifier());
+		rewriteRequiredNode(node.getQualifier());
+		rewriteRequiredNode(node.getName());
 		return false;
 	}
 
