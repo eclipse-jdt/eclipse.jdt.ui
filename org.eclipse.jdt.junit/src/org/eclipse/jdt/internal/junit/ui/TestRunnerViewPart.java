@@ -173,8 +173,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	static final String TAG_PAGE= "page"; //$NON-NLS-1$
 	static final String TAG_RATIO= "ratio"; //$NON-NLS-1$
 	static final String TAG_TRACEFILTER= "tracefilter"; //$NON-NLS-1$
-	static final String VIEWORIENTATION= "orientation"; //$NON-NLS-1$
-
+	static final String TAG_ORIENTATION= "orientation"; //$NON-NLS-1$
+	static final String TAG_SCROLL= "scroll"; //$NON-NLS-1$
+	
 	//orientations
 	static final int VIEW_ORIENTATION_VERTICAL= 0;
 	static final int VIEW_ORIENTATION_HORIZONTAL= 1;
@@ -320,9 +321,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		Integer ratio= memento.getInteger(TAG_RATIO);
 		if (ratio != null) 
 			fSashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue()} );
-		Integer orientation= memento.getInteger(VIEWORIENTATION);
+		Integer orientation= memento.getInteger(TAG_ORIENTATION);
 		if (orientation != null)
 			setOrientation(orientation.intValue());
+		String scrollLock= memento.getString(TAG_SCROLL);
+		if (scrollLock != null)
+			fScrollLockAction.setChecked(scrollLock.equals("true"));
 	}
 	
 	/**
@@ -520,9 +524,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	    }
 	    testInfo.setTrace(trace);
 	    testInfo.setStatus(status);
-	    if (expected != null)
-	        testInfo.setExpected(expected.substring(0, expected.length()-1));
-	    if (actual != null)
+	    if (expected != null && expected.length() > 0) {
+			testInfo.setExpected(expected.substring(0, expected.length()-1));
+		}
+	    if (actual != null && actual.length() > 0)
 	        testInfo.setActual(actual.substring(0, actual.length()-1));
 	    
 	    if (status == ITestRunListener.STATUS_ERROR)
@@ -924,8 +929,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		fProgressImages= new ProgressImages();
 		WorkbenchHelp.setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
 		
-		if (fMemento != null)
+		if (fMemento != null) {
 			restoreLayoutState(fMemento);
+		}
 		fMemento= null;
 	}
 
@@ -939,11 +945,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		
 		int activePage= fTabFolder.getSelectionIndex();
 		memento.putInteger(TAG_PAGE, activePage);
-
+		memento.putString(TAG_SCROLL, fScrollLockAction.isChecked() ? "true" : "false");
 		int weigths[]= fSashForm.getWeights();
 		int ratio= (weigths[0] * 1000) / (weigths[0] + weigths[1]);
 		memento.putInteger(TAG_RATIO, ratio);
-		memento.putInteger(VIEWORIENTATION, fCurrentOrientation);
+		memento.putInteger(TAG_ORIENTATION, fCurrentOrientation);
 	}
 	
 	private void configureToolBar() {
