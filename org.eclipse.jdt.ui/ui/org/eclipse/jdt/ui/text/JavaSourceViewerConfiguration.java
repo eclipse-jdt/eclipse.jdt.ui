@@ -87,13 +87,13 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * 
 	 * @since 2.0
 	 */
-	public final static String PREFERENCE_TAB_WIDTH= "org.eclipse.jdt.ui.editor.tab.width"; //$NON-NLS-1$
+	public final static String PREFERENCE_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
 	/** 
 	 * Preference key for inserting spaces rather than tabs.
 	 * 
 	 * @since 2.0
 	 */
-	public final static String SPACES_FOR_TABS= "spacesForTabs"; //$NON-NLS-1$
+	public final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
 
 	
 	private JavaTextTools fJavaTextTools;

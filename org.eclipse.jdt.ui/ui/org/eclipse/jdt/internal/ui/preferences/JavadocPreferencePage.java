@@ -26,6 +26,8 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -42,7 +44,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	private StringButtonDialogField fJavadocSelection;
 	private Composite fComposite;
 
-	public static final String PREF_JAVADOC_COMMAND= "command"; //$NON-NLS-1$
+	public static final String PREF_JAVADOC_COMMAND= PreferenceConstants.JAVADOC_COMMAND;
 
 	private class JDocDialogFieldAdapter implements IDialogFieldListener, IStringButtonAdapter {
 		/*

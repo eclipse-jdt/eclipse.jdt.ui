@@ -17,6 +17,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -24,16 +26,16 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class RefactoringPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String FATAL_SEVERITY= "4"; //$NON-NLS-1$
-	public static final String ERROR_SEVERITY= "3"; //$NON-NLS-1$
-	public static final String WARNING_SEVERITY= "2"; //$NON-NLS-1$
-	public static final String INFO_SEVERITY= "1"; //$NON-NLS-1$
-	public static final String OK_SEVERITY= "0"; //$NON-NLS-1$
+	public static final String FATAL_SEVERITY= PreferenceConstants.REFACTOR_FATAL_SEVERITY;
+	public static final String ERROR_SEVERITY= PreferenceConstants.REFACTOR_ERROR_SEVERITY;
+	public static final String WARNING_SEVERITY= PreferenceConstants.REFACTOR_WARNING_SEVERITY;
+	public static final String INFO_SEVERITY= PreferenceConstants.REFACTOR_INFO_SEVERITY;
+	public static final String OK_SEVERITY= PreferenceConstants.REFACTOR_OK_SEVERITY;
 		
-	public static final String PREF_ERROR_PAGE_SEVERITY_THRESHOLD= "Refactoring.ErrorPage.severityThreshold"; //$NON-NLS-1$
-	public static final String PREF_JAVA_STYLE_GUIDE_CONFORM= "Refactoring.javaStyleGuideConform"; //$NON-NLS-1$
-	public static final String PREF_SAVE_ALL_EDITORS= "Refactoring.savealleditors"; //$NON-NLS-1$
+	public static final String PREF_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
+	public static final String PREF_SAVE_ALL_EDITORS= PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS;
 
+	public static final String PREF_JAVA_STYLE_GUIDE_CONFORM= "Refactoring.javaStyleGuideConform"; //$NON-NLS-1$
 
 	public RefactoringPreferencePage() {
 		super(GRID);

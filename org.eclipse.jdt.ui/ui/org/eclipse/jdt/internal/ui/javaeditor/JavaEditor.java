@@ -852,9 +852,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 	
 	/** Preference key for showing the line number ruler */
-	public final static String LINE_NUMBER_RULER= "lineNumberRuler"; //$NON-NLS-1$
+	public final static String LINE_NUMBER_RULER= PreferenceConstants.EDITOR_LINE_NUMBER_RULER;
 	/** Preference key for the foreground color of the line numbers */
-	public final static String LINE_NUMBER_COLOR= "lineNumberColor"; //$NON-NLS-1$
+	public final static String LINE_NUMBER_COLOR= PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR;
 	/** Preference key for the link color */
 	public final static String LINK_COLOR= "linkColor"; //$NON-NLS-1$
 

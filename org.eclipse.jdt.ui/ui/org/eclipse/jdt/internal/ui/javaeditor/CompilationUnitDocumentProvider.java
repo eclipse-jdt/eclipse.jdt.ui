@@ -73,6 +73,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -759,7 +760,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		
 		
 	/* Preference key for temporary problems */
-	public final static String HANDLE_TEMPORARY_PROBLEMS= "handleTemporaryProblems"; //$NON-NLS-1$
+	public final static String HANDLE_TEMPORARY_PROBLEMS= PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS;
 	
 	
 	/** The buffer factory */

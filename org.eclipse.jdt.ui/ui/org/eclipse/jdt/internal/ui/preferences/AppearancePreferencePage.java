@@ -14,7 +14,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -31,18 +31,18 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 public class AppearancePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	// used by PackageExplorerPart to listen for changes
-	public static final String SHOW_CU_CHILDREN="org.eclipse.jdt.ui.packages.cuchildren"; //$NON-NLS-1$
+	public static final String SHOW_CU_CHILDREN= PreferenceConstants.SHOW_CU_CHILDREN;
 
-	public static final String PREF_METHOD_RETURNTYPE= JavaUI.ID_PLUGIN + ".methodreturntype"; //$NON-NLS-1$
-	public static final String PREF_OVERRIDE_INDICATOR= JavaUI.ID_PLUGIN + ".overrideindicator"; //$NON-NLS-1$
-	public static final String PREF_COMPRESS_PACKAGE_NAMES= JavaUI.ID_PLUGIN + ".compresspackagenames"; //$NON-NLS-1$
-	public static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= "PackagesView.pkgNamePatternForPackagesView"; //$NON-NLS-1$
-	public static final String STACK_BROWSING_VIEWS_VERTICALLY= "org.eclipse.jdt.ui.browsing.stackVertically"; //$NON-NLS-1$
-	public static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= JavaUI.ID_PLUGIN + ".flatPackagesInPackageExplorer"; //$NON-NLS-1$
+	public static final String PREF_METHOD_RETURNTYPE= PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE;
+	public static final String PREF_OVERRIDE_INDICATOR= PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR;
+	public static final String PREF_COMPRESS_PACKAGE_NAMES= PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES;
+	public static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW;
+	public static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
+	public static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER;
 
 	public static boolean stackBrowsingViewsHorizontally() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return !store.getBoolean(AppearancePreferencePage.STACK_BROWSING_VIEWS_VERTICALLY);
+		return !store.getBoolean(STACK_BROWSING_VIEWS_VERTICALLY);
 	}
 
 	public static boolean showMethodReturnType() {

@@ -34,6 +34,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.JavaConventions;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -55,9 +56,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 public class ImportOrganizePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	// Preference store keys
-	public static final String PREF_IMPORTORDER= JavaUI.ID_PLUGIN + ".importorder"; //$NON-NLS-1$
-	public static final String PREF_ONDEMANDTHRESHOLD= JavaUI.ID_PLUGIN + ".ondemandthreshold"; //$NON-NLS-1$
-	public static final String PREF_IGNORELOWERCASE= JavaUI.ID_PLUGIN + ".ignorelowercasenames"; //$NON-NLS-1$
+	// Preference store keys
+	public static final String PREF_IMPORTORDER= PreferenceConstants.ORGIMPORTS_IMPORTORDER;
+	public static final String PREF_ONDEMANDTHRESHOLD= PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD;
+	public static final String PREF_IGNORELOWERCASE= PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE;
 	private static final String PREF_LASTLOADPATH= JavaUI.ID_PLUGIN + ".importorder.loadpath"; //$NON-NLS-1$
 	private static final String PREF_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".importorder.savepath"; //$NON-NLS-1$
 
