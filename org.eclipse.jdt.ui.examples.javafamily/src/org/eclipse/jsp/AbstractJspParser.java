@@ -202,7 +202,8 @@ public abstract class AbstractJspParser {
 				value.setLength(0);
 			}
 		} catch (StringIndexOutOfBoundsException e) {
-			JspUIPlugin.log("error while parsing attributes", e); //$NON-NLS-1$
+			// we don't log this exception because it is used
+			// as one way to exit the scanning loop
 		}
 		
 		if (name.length() > 0) {
