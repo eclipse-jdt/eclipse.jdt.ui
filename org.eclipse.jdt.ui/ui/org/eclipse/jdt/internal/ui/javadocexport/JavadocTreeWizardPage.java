@@ -551,8 +551,16 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fStore.setAccess(fVisibilitySelection);
 		fStore.setSelectedElements(getSourceElements(checkedProjects));
 		
-		fStore.setJavadocCommandHistory(fJavadocCommandText.getItems());
-		
+		ArrayList commands= new ArrayList();
+		commands.add(fJavadocCommandText.getText()); // must be first
+		String[] items= fJavadocCommandText.getItems();
+		for (int i= 0; i < items.length; i++) {
+			String curr= items[i];
+			if (!commands.contains(curr)) {
+				commands.add(curr);
+			}
+		}
+		fStore.setJavadocCommandHistory((String[]) commands.toArray(new String[commands.size()]));
 	}
 
 	public IJavaProject[] getCheckedProjects() {
