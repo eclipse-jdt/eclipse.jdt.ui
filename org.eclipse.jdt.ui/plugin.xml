@@ -538,6 +538,10 @@
 		extensions="properties"
 		class="org.eclipse.jdt.internal.ui.compare.PropertiesStructureCreator">
 	</structureCreator>
+	<structureCreator
+		extensions="java"
+		class="org.eclipse.jdt.internal.ui.compare.JavaStructureCreator">
+	</structureCreator>
 </extension>
 
 <extension

@@ -22,7 +22,7 @@ import org.eclipse.compare.*;
 import org.eclipse.compare.structuremergeviewer.*;
 
 
-class JavaStructureCreator implements IStructureCreator {
+public class JavaStructureCreator implements IStructureCreator {
 	
 	/**
 	 * Used to bail out from ProblemFactory.
