@@ -92,7 +92,7 @@ import org.eclipse.ui.progress.UIJob;
 public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, IPropertyChangeListener {
 
 	public static final String NAME= "org.eclipse.jdt.junit.ResultView"; //$NON-NLS-1$
-	public static final String ID_EXTENSION_POINT_TESTRUN_TABS= JUnitPlugin.PLUGIN_ID + "." + "internal-testRunTabs"; //$NON-NLS-1$
+	public static final String ID_EXTENSION_POINT_TESTRUN_TABS= JUnitPlugin.PLUGIN_ID + "." + "internal-testRunTabs"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	static final int REFRESH_INTERVAL= 200;
  	/**
