@@ -50,10 +50,10 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			exportResourceFiles(progressMonitor, pkgRoot, isInJavaProject, resource, destinationPath, isInOutputFolder);
 			progressMonitor.worked(1);
 			ModalContext.checkCanceled(progressMonitor);
-		} else			exportContainer(progressMonitor, resource);
+		} else if (element instanceof IPackageFragment)			exportPackageFragment(progressMonitor, (IPackageFragment)element);		else			exportContainer(progressMonitor, resource);
 	}
 
-	private void exportContainer(IProgressMonitor progressMonitor, IResource resource) throws java.lang.InterruptedException {
+	private void exportPackageFragment(IProgressMonitor progressMonitor, IPackageFragment pkgFragment) throws java.lang.InterruptedException {		Object[] children;		try {			children= pkgFragment.getChildren();			for (int i= 0; i < children.length; i++)				exportElement(children[i], progressMonitor);			children= pkgFragment.getNonJavaResources();			for (int i= 0; i < children.length; i++)				exportElement(children[i], progressMonitor);		} catch (CoreException e) {			// this should never happen because an #isAccessible check is done before #members is invoked			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorDuringExport", pkgFragment.toString()), e); //$NON-NLS-1$		}	}	private void exportContainer(IProgressMonitor progressMonitor, IResource resource) throws java.lang.InterruptedException {
 		IResource[] children= null;
 		try {
 			children= ((IContainer) resource).members();
