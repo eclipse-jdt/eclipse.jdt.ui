@@ -96,7 +96,6 @@
             adaptableType="org.eclipse.jdt.core.IJavaElement">
             
             <adapter type="org.eclipse.core.resources.IResource"/>
-            <adapter type="org.eclipse.core.resources.IProject"/>
             
             <adapter type="org.eclipse.ui.IPersistableElement"/>
             <adapter type="org.eclipse.ui.IContributorResourceAdapter"/>
@@ -113,8 +112,8 @@
 		
 		<factory 
             class="org.eclipse.jdt.internal.ui.JavaProjectAdapterFactory" 
-            adaptableType="org.eclipse.core.resources.IProject">
-            <adapter type="org.eclipse.jdt.core.IJavaProject"/>
+            adaptableType="org.eclipse.jdt.core.IJavaProject">
+            <adapter type="org.eclipse.core.resources.IProject"/>
 		</factory>
 		
 		<factory 
