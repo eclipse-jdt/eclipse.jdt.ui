@@ -436,7 +436,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			}
 		}
 		
-		if (before == 0) { // creating a new list -> insert keyword first (e.g. " throws ")
+		if (before == 0 && keyword.length() > 0) { // creating a new list -> insert keyword first (e.g. " throws ")
 			String description= getDescription((ASTNode) list.get(0)); // first node is insert
 			doTextInsert(startPos, keyword, description);
 		}
@@ -583,9 +583,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 		for (int i= 0; i < markers.length; i++) {
 			int offset= markers[i].offset;
-			
-			String insertStr= formatted.substring(currPos, offset);
-			doTextInsert(insertOffset, insertStr, description);
+			if (offset != currPos) {
+				String insertStr= formatted.substring(currPos, offset);
+				doTextInsert(insertOffset, insertStr, description);
+			}
 			String destIndentString=  Strings.getIndentString(getCurrentLine(formatted, offset), tabWidth);
 			
 			Object data= markers[i].data;
@@ -600,8 +601,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 			currPos= offset + markers[i].length;
 		}
-		String insertStr= formatted.substring(currPos);
-		doTextInsert(insertOffset, insertStr, description);
+		if (currPos < formatted.length()) {
+			String insertStr= formatted.substring(currPos);
+			doTextInsert(insertOffset, insertStr, description);
+		}
 	}
 	
 	private String getCurrentLine(String str, int pos) {

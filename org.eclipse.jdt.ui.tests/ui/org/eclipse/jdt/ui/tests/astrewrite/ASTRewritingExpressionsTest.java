@@ -978,8 +978,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 	}
 	
 	public void testParenthesizedExpression() throws Exception {
-		System.out.println(getClass().getName()+"::" + getName() +" disabled (bug 23362)");
-		/*
+		//System.out.println(getClass().getName()+"::" + getName() +" disabled (bug 23362)");
+		
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1028,7 +1028,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
-		*/
+		
 	}
 	
 	public void testPrefixExpression() throws Exception {
