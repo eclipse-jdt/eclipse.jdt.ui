@@ -498,7 +498,8 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	public void endVisit(InfixExpression node) {
 		if (skipNode(node))
 			return;
-		processSequential(node, node.getLeftOperand(), node.getRightOperand());
+		GenericSequentialFlowInfo info= processSequential(node, node.getLeftOperand(), node.getRightOperand());
+		process(info, node.extendedOperands());
 	}
 	
 	public void endVisit(Initializer node) {
