@@ -105,7 +105,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 
 		public void setFocus() {
-			fNameField.setFocus();
+			//fNameField.setFocus();
 		}
 		
 		public void setName(String name) {
@@ -541,8 +541,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	 * see @DialogPage.setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
-		super.setVisible(visible);
 		if (visible) fNameGroup.setFocus();
+		super.setVisible(visible);
 	}
 
 	
