@@ -326,7 +326,7 @@ public abstract class RefactoringTest extends TestCase {
 		return null;
 	}
 	
-	public static String getFileContents(String fileName) throws IOException {
+	public String getFileContents(String fileName) throws IOException {
 		return getContents(getFileInputStream(fileName));
 	}
 
@@ -356,7 +356,7 @@ public abstract class RefactoringTest extends TestCase {
 		return sb.toString();
 	}
 
-	public static InputStream getFileInputStream(String fileName) throws IOException {
+	public InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
 
