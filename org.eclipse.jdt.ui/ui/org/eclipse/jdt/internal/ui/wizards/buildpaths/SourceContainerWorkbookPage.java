@@ -37,8 +37,9 @@ import org.eclipse.ui.views.navigator.ResourceSorter;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -354,7 +355,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private void askForChangingBuildPathDialog() {
 		IPath outputFolder= new Path(fOutputLocationField.getText());
 		if (outputFolder.segmentCount() == 1) {
-			String outputFolderName= NewJavaProjectPreferencePage.getOutputLocationName();
+			String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
 			IPath newPath= outputFolder.append(outputFolderName);
 			String title= NewWizardMessages.getString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.title"); //$NON-NLS-1$
 			String message= NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.message", newPath); //$NON-NLS-1$

@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
@@ -58,6 +59,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
@@ -72,8 +74,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -1322,8 +1322,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			ImportsStructure imports;
 			int indent= 0;
 	
-			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
+			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
+			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);			
 			
 			String lineDelimiter= null;	
 			if (!isInnerClass) {
@@ -1525,7 +1526,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * is not desired
 	 */		
 	protected String getFileComment(ICompilationUnit parentCU) {
-		if (CodeGenerationPreferencePage.doFileComments()) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN__FILE_COMMENTS)) {
 			String template= getTemplate("filecomment", parentCU, 0); //$NON-NLS-1$
 			if (isValidComment(template)) {
 				return template;
@@ -1557,7 +1558,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * is not desired
 	 */		
 	protected String getTypeComment(ICompilationUnit parentCU) {
-		if (CodeGenerationPreferencePage.doCreateComments()) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN__JAVADOC_STUBS)) {
 			String template= getTemplate("typecomment", parentCU, 0); //$NON-NLS-1$
 			if (isValidComment(template)) {
 				return template;
