@@ -1,5 +1,5 @@
 package p;
 class A{
-	void /*[*/m/*]*/(int t){
+	void m(int t){
 	}
 }

@@ -1,2 +1,2 @@
-void /*[*/m/*]*/(int t){
+void m(int t){
 	}
