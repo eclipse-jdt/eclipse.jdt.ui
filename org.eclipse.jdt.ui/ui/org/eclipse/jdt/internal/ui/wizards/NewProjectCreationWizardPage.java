@@ -51,6 +51,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 
 	private WizardNewProjectCreationPage fMainPage;
 	private IPath fCurrProjectLocation;
+	private boolean fProjectCreated;
 
 	/**
 	 * Constructor for ProjectWizardPage.
@@ -59,6 +60,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		super();
 		fMainPage= mainPage;
 		fCurrProjectLocation= fMainPage.getLocationPath();
+		fProjectCreated= false;
 	}
 	
 	private boolean canDetectExistingClassPath(IPath projLocation) {
@@ -121,16 +123,11 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		super.setVisible(visible);
 	}
 	
-	private boolean doesProjectExist() {
-		return fMainPage.getProjectHandle().exists();
-	}
-	  
-
 	/* (non-Javadoc)
 	 * @see IWizardPage#getPreviousPage()
 	 */
 	public IWizardPage getPreviousPage() {
-		if (doesProjectExist()) {
+		if (fProjectCreated) {
 			return null;
 		}
 		return super.getPreviousPage();
@@ -164,6 +161,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		IProject project= fMainPage.getProjectHandle();
 		IPath projectLocation= fMainPage.getLocationPath();
 		BuildPathsBlock.createProject(project, projectLocation, monitor);
+		fProjectCreated= true;
 	}
 	
 	private void initFromExistingStructures(IProgressMonitor monitor) throws CoreException {
@@ -259,7 +257,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 	 * Called from the wizard on cancel.
 	 */
 	public void performCancel() {
-		if (doesProjectExist()) {
+		if (fProjectCreated) {
 			try {
 				fMainPage.getProjectHandle().delete(false, false, null);
 			} catch (CoreException e) {
