@@ -272,8 +272,8 @@ content access.</li>
   open the launch configuration dialog, and create a new "Tomcat Server" 
   launch configuration. You will notice an error message indicating that the Tomcat 
   install directory or "${catalina_home}" does not exist. To solve this 
-  problem, set the value of the <code>${catalina_home}</code> launch variable 
-  in the <b>Debug </b>&gt; <b>Launch Variables</b> preference page to the location 
+  problem, set the value of the <code>${catalina_home}</code> string variable 
+  in the <b>Run/Debug </b>&gt; <b>String Substitution</b> preference page to the location 
   of your Tomcat installation. For example, "<code>d:\jakarta-tomcat-5.0.2</code>".</p>
 <p>On the Tomcat tab, also provide the location of your web application - for 
   example "<code>JSPs\webapps\myWebApp</code>". This can also be done 
@@ -285,8 +285,8 @@ content access.</li>
 <p>The following steps must be performed to debug a JSP</p>
 <ul>
   <li>Install Tomcat 5.0.2 or higher</li>
-  <li>Set the value of <code>${catalina_home}</code> (<b>Debug</b> &gt; <b>Launch 
-    Variables</b> preference page) to point to the Tomcat installation</li>
+  <li>Set the value of <code>${catalina_home}</code> (<b>Run/Debug</b> &gt; <b>String 
+    Substitution</b> preference page) to point to the Tomcat installation</li>
   <li>Create a project (web app) in your workspace in the expanded WAR format</li>
   <li>Ensure the output location of the project is the <code>WEB-INF/classes</code> 
     folder</li>
