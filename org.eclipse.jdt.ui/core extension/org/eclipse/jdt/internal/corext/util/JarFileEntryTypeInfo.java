@@ -21,6 +21,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -32,13 +33,13 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 public class JarFileEntryTypeInfo extends TypeInfo {
 	
 	private final String fJar;
-	private final String fFile;
+	private final String fFileName;
 	private final String fExtension;
 	
-	public JarFileEntryTypeInfo(String pkg, String name, char[][] enclosingTypes, boolean isInterface, String jar, String file, String extension) {
+	public JarFileEntryTypeInfo(String pkg, String name, char[][] enclosingTypes, boolean isInterface, String jar, String fileName, String extension) {
 		super(pkg, name, enclosingTypes, isInterface);
 		fJar= jar;
-		fFile= file;
+		fFileName= fileName;
 		fExtension= extension;
 	}
 	
@@ -51,7 +52,7 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 	}
 	
 	public String getFileName() {
-		return fFile;
+		return fFileName;
 	}
 	
 	public String getExtension() {
@@ -61,14 +62,14 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 	protected IJavaElement getJavaElement(IJavaSearchScope scope) throws JavaModelException {
 		IJavaModel jmodel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 		IPath[] enclosedPaths= scope.enclosingProjectsAndJars();
-		IPath elementPath= new Path(getElementPath());
+
 		for (int i= 0; i < enclosedPaths.length; i++) {
 			IPath curr= enclosedPaths[i];
 			if (curr.segmentCount() == 1) {
 				IJavaProject jproject= jmodel.getJavaProject(curr.segment(0));
 				IPackageFragmentRoot root= jproject.getPackageFragmentRoot(fJar);
 				if (root.exists()) {
-					return jproject.findElement(elementPath);
+					return findElementInRoot(root);
 				}
 			}
 		}
@@ -79,12 +80,31 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 			if (!paths.contains(jproject.getPath())) {
 				IPackageFragmentRoot root= jproject.getPackageFragmentRoot(fJar);
 				if (root.exists()) {
-					return jproject.findElement(elementPath);
+					return findElementInRoot(root);
 				}
 			}
 		}
 		return null;
 	}
+	
+	private IJavaElement findElementInRoot(IPackageFragmentRoot root) {
+		IJavaElement res;
+		IPackageFragment frag= root.getPackageFragment(getPackageName());
+		String extension= getExtension();
+
+		if ("class".equals(extension)) { //$NON-NLS-1$
+			res=  frag.getClassFile(getFileName() + ".class"); //$NON-NLS-1$
+		} else if ("java".equals(extension)) { //$NON-NLS-1$
+			res=  frag.getCompilationUnit(getFileName() + ".java"); //$NON-NLS-1$
+		} else {
+			return null;
+		}
+		if (res.exists()) {
+			return res;
+		}
+		return null;
+	}
+	
 	
 	public IPath getPackageFragmentRootPath() {
 		return new Path(fJar);
@@ -96,20 +116,15 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 		getElementPath(result);
 		return result.toString();
 	}
-	
-	private String getElementPath() {
-		StringBuffer buffer= new StringBuffer();
-		getElementPath(buffer);
-		return buffer.toString();
-	}
-	
+		
 	private void getElementPath(StringBuffer result) {
-		if (fPackage != null && fPackage.length() > 0) {
-			result.append(fPackage.replace(TypeInfo.PACKAGE_PART_SEPARATOR, TypeInfo.SEPARATOR));
+		String pack= getPackageName();
+		if (pack != null && pack.length() > 0) {
+			result.append(pack.replace(TypeInfo.PACKAGE_PART_SEPARATOR, TypeInfo.SEPARATOR));
 			result.append(TypeInfo.SEPARATOR);
 		}
-		result.append(fFile);
+		result.append(getFileName());
 		result.append('.');
-		result.append(fExtension);
+		result.append(getExtension());
 	}
 }

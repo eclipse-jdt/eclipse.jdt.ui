@@ -22,6 +22,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -71,14 +72,7 @@ public class TypeInfoTest extends TestCase {
 		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject1));
 		
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
-		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject2));
-		
-		// add Junit source to project 2
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
-		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
-
-		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive);
-		
+		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject2));		
 	}
 
 
@@ -90,6 +84,11 @@ public class TypeInfoTest extends TestCase {
 
 
 	public void test1() throws Exception {
+		
+		// add Junit source to project 2
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
+		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive);
 	
 		// source folder
 		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -155,6 +154,12 @@ public class TypeInfoTest extends TestCase {
 	public void test2() throws Exception {	
 		ArrayList result= new ArrayList();
 		
+		// add Junit source to project 2
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
+		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", junitSrcArchive);
+		
+		
 		IJavaProject[] elements= new IJavaProject[] { fJProject2 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
@@ -188,6 +193,10 @@ public class TypeInfoTest extends TestCase {
 			}
 		}
 	}
+	
+	
+	
+	
 	
 	public void testNoSourceFolder() throws Exception {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "");
@@ -269,4 +278,39 @@ public class TypeInfoTest extends TestCase {
 		}		
 	}
 
+	public void test_bug44772() throws Exception {
+		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
+
+		JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(lib.getPath()), null, null); // as internal 
+		JavaProjectHelper.addLibrary(fJProject1, new Path(lib.getPath())); // and as external
+		
+		ArrayList result= new ArrayList();
+
+		IJavaElement[] elements= new IJavaElement[] { fJProject1 };
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
+		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
+		SearchEngine engine= new SearchEngine();
+
+		engine.searchAllTypeNames(
+			fJProject1.getJavaModel().getWorkspace(),
+			null, 
+			"Foo".toCharArray(),
+			IJavaSearchConstants.EXACT_MATCH, 
+			IJavaSearchConstants.CASE_SENSITIVE, 
+			IJavaSearchConstants.TYPE, 
+			scope, 
+			requestor, 
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
+			null); 
+		assertEquals("result size", result.size(), 2);
+		IType type1= ((TypeInfo) result.get(0)).resolveType(scope);
+		IType type2= ((TypeInfo) result.get(1)).resolveType(scope);
+		
+		assertNotNull(type1);
+		assertNotNull(type2);
+		assertFalse(type1.equals(type2));
+
+	}
+
+	
 }
