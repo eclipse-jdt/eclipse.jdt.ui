@@ -153,12 +153,46 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 		
 		createSelectButton(composite, "Se&lect All", true);
 		createSelectButton(composite, "&Deselect All", false);
+
+		Button button= new Button(composite, SWT.PUSH);
+		button.setText("&Add Required Members");
+		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(button);
+		button.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent event) {
+				PullUpInputPage1.this.checkAdditionalRequiredMembers();
+			}
+		});
+	}
+
+	private void checkAdditionalRequiredMembers() {
+		try {
+			getContainer().run(false, false, new IRunnableWithProgress() {
+				public void run(IProgressMonitor pm) throws InvocationTargetException {
+					try {
+						checkAdditionalRequiredMembers(pm);						
+					} catch (JavaModelException e) {
+						throw new InvocationTargetException(e);
+					} finally {
+						pm.done();
+					}
+				}
+			});
+		} catch(InvocationTargetException e) {
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("PullUpInputPage.pull_Up"), RefactoringMessages.getString("PullUpInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch(InterruptedException e) {
+			Assert.isTrue(false);//not cancellable
+		}
+	}
+
+	private void checkAdditionalRequiredMembers(IProgressMonitor pm) throws JavaModelException {
+		fTableViewer.setCheckedElements(getPullUpRefactoring().getRequiredPullableMembers(pm));
 	}
 	
 	private void createSelectButton(Composite composite, String label, final boolean select){
 		Button button= new Button(composite, SWT.PUSH);
 		button.setText(label);
-		button.setLayoutData(new GridData());
+		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent event) {
@@ -185,6 +219,7 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 		fTableViewer.addCheckStateListener(new ICheckStateListener(){
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				dissallowIfNothingChecked();
+				markCheckedMembersAsMembersToPullUp();
 			}
 		});
 	}
@@ -247,6 +282,10 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 	}
 	
 	private void initializeRefactoring() {
+		markCheckedMembersAsMembersToPullUp();
+	}
+
+	private void markCheckedMembersAsMembersToPullUp() {
 		getPullUpRefactoring().setElementsToPullUp(getCheckedMembers());
 	}
 

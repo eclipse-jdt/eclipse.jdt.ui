@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
@@ -214,6 +215,73 @@ public class PullUpRefactoring extends Refactoring {
 		}				
 	}
 	
+	public IMember[] getRequiredPullableMembers(IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("Calculating required members", IProgressMonitor.UNKNOWN);
+		List queue= new ArrayList(fElementsToPullUp.length);
+		queue.addAll(Arrays.asList(fElementsToPullUp));
+		int i= 0;
+		IMember current;
+		do{
+			current= (IMember)queue.get(i);
+			addAllRequiredPullableMembers(queue, current, pm);
+			i++;
+			if (queue.size() == i)
+				current= null;
+		} while(current != null);
+		return (IMember[]) queue.toArray(new IMember[queue.size()]);
+	}
+	
+	private void addAllRequiredPullableMembers(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 2);
+		addAllRequiredPullableMethods(queue, member, new SubProgressMonitor(pm, 1));
+		addAllRequiredPullableFields(queue, member, new SubProgressMonitor(pm, 1));
+		pm.done();
+	}
+	
+	private void addAllRequiredPullableFields(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
+		IField[] requiredFields= ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[]{member}, pm);
+		for (int i= 0; i < requiredFields.length; i++) {
+			IField field= requiredFields[i];
+			if (isRequiredPullableMember(queue, field))
+				queue.add(field);
+		}
+	}
+	
+	private void addAllRequiredPullableMethods(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 2);
+		IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[]{member}, new SubProgressMonitor(pm, 1));
+		SubProgressMonitor sPm= new SubProgressMonitor(pm, 1);
+		sPm.beginTask("", requiredMethods.length);
+		for (int i= 0; i < requiredMethods.length; i++) {
+			IMethod method= requiredMethods[i];
+			if (isRequiredPullableMember(queue, method) && ! isVirtualAccessibleFromNewClass(method, new SubProgressMonitor(sPm, 1)))
+				queue.add(method);
+		}
+	}
+	
+	private boolean isVirtualAccessibleFromNewClass(IMethod method, IProgressMonitor pm) throws JavaModelException {
+		return MethodChecks.isVirtual(method) && isDeclaredInNewClassOrItsSuperclass(method, pm);
+	}
+	
+	private boolean isDeclaredInNewClassOrItsSuperclass(IMethod method, IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 2);
+		boolean isConstructor= false;
+		String[] paramTypes= method.getParameterTypes();
+		String name= method.getElementName();
+		IType type= getSuperTypeOfDeclaringType(new SubProgressMonitor(pm, 1));
+		ITypeHierarchy hierarchy= getTypeHierarchyOfDeclaringClassSuperclass(new SubProgressMonitor(pm, 1));
+		pm.done();
+		IMethod first= JavaModelUtil.findMethod(name, paramTypes, isConstructor, type);
+		if (first != null && MethodChecks.isVirtual(first))
+			return true;
+		IMethod found= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, name, paramTypes, isConstructor);
+		return found != null && MethodChecks.isVirtual(found);
+	}
+	
+	private boolean isRequiredPullableMember(List queue, IMember member) throws JavaModelException {
+		return member.getDeclaringType().equals(getDeclaringType()) && ! queue.contains(member) && isPullable(member);
+	}
+		
 	//Set of IMembers
 	private Set getMatchingMembers(ITypeHierarchy hierarchy, IType type) throws JavaModelException {
 		Set result= new HashSet();
