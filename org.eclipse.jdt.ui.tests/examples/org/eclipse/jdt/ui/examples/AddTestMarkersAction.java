@@ -2,7 +2,6 @@ package org.eclipse.jdt.ui.examples;
 
 import java.util.HashMap;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 
@@ -21,8 +20,8 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 public class AddTestMarkersAction extends Action implements IActionDelegate {
