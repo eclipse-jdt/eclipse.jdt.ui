@@ -23,11 +23,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  *
  */
 public class RunInPackageAction extends SnippetAction {
+
+	public static final String PREFIX = "SnippetEditor.RunInPackageAction.";
 	
-	public RunInPackageAction(JavaSnippetEditor editor, String label) {
-		super(editor, label);
-		setToolTipText("Run in Package");
-		setDescription("Set the package in which code is run");
+	public RunInPackageAction(JavaSnippetEditor editor) {
+		super(editor, PREFIX);
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_PACKSNIPPET);
 	}
 	
@@ -41,9 +41,6 @@ public class RunInPackageAction extends SnippetAction {
 			fEditor.setPackage(result.getElementName());
 		}
 	} 
-	
-	public void snippetStateChanged(JavaSnippetEditor editor) {
-	}
 	
 	private IPackageFragment choosePackage(Shell shell) {
 		try {
@@ -59,5 +56,9 @@ public class RunInPackageAction extends SnippetAction {
 		} catch (JavaModelException e) {
 		}
 		return null;
+	}
+	
+	public void snippetStateChanged(JavaSnippetEditor editor) {
+		setEnabled(editor != null && !editor.isEvaluating());
 	}
 }

@@ -12,11 +12,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  *
  */
 public class StopAction extends SnippetAction {
+
+	public static final String PREFIX = "SnippetEditor.StopAction.";
 	
-	public StopAction(JavaSnippetEditor editor, String label) {
-		super(editor, label);
-		setDescription("Restarts the page");
-		setToolTipText("Terminate");
+	public StopAction(JavaSnippetEditor editor) {
+		super(editor, PREFIX);
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_TERMSNIPPET);
 	}
 	

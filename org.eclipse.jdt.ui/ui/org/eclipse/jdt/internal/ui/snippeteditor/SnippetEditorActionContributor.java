@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.BasicEditorActionContributor;
  */
 public class SnippetEditorActionContributor extends BasicEditorActionContributor {
 		
+	public static final String PREFIX = "SnippetEditor.";
 	
 	protected JavaSnippetEditor fSnippetEditor;
 	
@@ -99,22 +100,22 @@ public class SnippetEditorActionContributor extends BasicEditorActionContributor
 		
 		fOpenOnSelectionAction= new SnippetOpenOnSelectionAction(bundle, "Editor.OpenOnSelection.");
 
-		fDisplayAction= new DisplayAction(fSnippetEditor, "D&isplay@Ctrl+D");		
-		fRunAction= new RunAction(fSnippetEditor, "R&un@Ctrl+E");
-		fInspectAction= new InspectAction(fSnippetEditor, "I&nspect@Ctrl+I");
+		fDisplayAction= new DisplayAction(fSnippetEditor);		
+		fRunAction= new RunAction(fSnippetEditor);
+		fInspectAction= new InspectAction(fSnippetEditor);
 			
-		fStopAction= new StopAction(fSnippetEditor, "Restart Conte&xt");
+		fStopAction= new StopAction(fSnippetEditor);
 		fStopAction.setEnabled(false);
 		
-		fRunInAction= new RunInPackageAction(null, "Run in Package");
+		fRunInAction= new RunInPackageAction(null);
 	}	
 	
 	protected void updateStatus(JavaSnippetEditor editor) {
 		String message;
 		if (editor.isEvaluating())
-			message= "Evaluating...";
+			message= JavaPlugin.getResourceString(PREFIX + "evaluating");
 		else
-			message= "";
+			message= JavaPlugin.getResourceString(PREFIX + "notevaluating");
 		getActionBars().getStatusLineManager().setMessage(message);
 	}
 }

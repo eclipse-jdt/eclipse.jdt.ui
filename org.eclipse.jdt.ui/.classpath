@@ -21,6 +21,7 @@
     <classpathentry kind="lib" path="/org.eclipse.compare/compare.jar"/>
     <classpathentry kind="lib" path="/org.eclipse.search/search.jar"/>
     <classpathentry kind="lib" path="/org.eclipse.ui/workbench.jar"/>
-    <classpathentry kind="var" path="JRE_LIB" rootpath="src" sourcepath="JRE_SRC"/>
+    <classpathentry kind="var" path="JRE_LIB"/>
+    <classpathentry kind="lib" path="/org.eclipse.jdt.core/jdtcore.jar"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

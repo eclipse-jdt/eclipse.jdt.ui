@@ -17,23 +17,14 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class DisplayAction extends SnippetAction implements IUpdate {
 
-	public DisplayAction(JavaSnippetEditor editor, String label) {
-		super(editor, label);
-		setToolTipText("Display");
-		setDescription("Display the result of running the selected code");
+	public static final String PREFIX = "SnippetEditor.DisplayAction.";
+
+	public DisplayAction(JavaSnippetEditor editor) {
+		super(editor, PREFIX);
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_DISPLAYSNIPPET);
 	}
 	
 	public void run() {
 		fEditor.evalSelection(JavaSnippetEditor.RESULT_DISPLAY);
 	} 
-	
-	public void snippetStateChanged(JavaSnippetEditor editor) {
-		setEnabled(editor != null && !editor.isEvaluating());
-	}
-
-	public void update() {
-		ITextSelection selection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
-		setEnabled(selection.getLength() > 0);
-	}
 }

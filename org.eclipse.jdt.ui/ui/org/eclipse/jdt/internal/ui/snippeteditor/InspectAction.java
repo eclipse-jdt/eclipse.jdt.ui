@@ -5,22 +5,18 @@ package org.eclipse.jdt.internal.ui.snippeteditor;
  * (c) Copyright IBM Corp 1999, 2000
  */
 
-import org.eclipse.jface.text.ITextSelection;
-
-import org.eclipse.ui.texteditor.IUpdate;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.ui.texteditor.IUpdate;
 
 /**
  * Inspects a snippet
  *
  */
 public class InspectAction extends SnippetAction implements IUpdate {
+
+	public static final String PREFIX = "SnippetEditor.InspectAction.";
 	
-	public InspectAction(JavaSnippetEditor editor, String label) {
-		super(editor, label);
-		setDescription("Inspect the result of evaluating the selected code");
-		setToolTipText("Inspect the selected code");
+	public InspectAction(JavaSnippetEditor editor) {
+		super(editor, PREFIX);
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_INSPSNIPPET);
 	}
 	
@@ -30,14 +26,4 @@ public class InspectAction extends SnippetAction implements IUpdate {
 	public void run() {
 		fEditor.evalSelection(JavaSnippetEditor.RESULT_INSPECT);
 	} 
-
-	public void snippetStateChanged(JavaSnippetEditor editor) {
-		setEnabled(editor != null && !editor.isEvaluating());
-	}
-	
-	public void update() {
-		ITextSelection selection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
-		setEnabled(selection.getLength() > 0);
-	}
-
 }

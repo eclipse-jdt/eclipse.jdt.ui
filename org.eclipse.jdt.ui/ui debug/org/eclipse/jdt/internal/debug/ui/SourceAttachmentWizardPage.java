@@ -90,7 +90,7 @@ public class SourceAttachmentWizardPage extends WizardPage implements IStatusCha
 				entry= entries[index];
 			} else {
 				entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);
-			}	
+			}
 			fSourceAttachmentBlock= new SourceAttachmentBlock(jproject.getProject(), this, entry);
 			return fSourceAttachmentBlock.createControl(composite);				
 		} catch (CoreException e) {

@@ -5,11 +5,7 @@ package org.eclipse.jdt.internal.ui.snippeteditor;
  * (c) Copyright IBM Corp 1999, 2000
  */
 
-import org.eclipse.jface.text.ITextSelection;
-
-import org.eclipse.ui.texteditor.IUpdate;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.ui.texteditor.IUpdate;
 
 
 /**
@@ -17,11 +13,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  *
  */
 public class RunAction extends SnippetAction implements IUpdate {
+
+	public static final String PREFIX = "SnippetEditor.RunAction.";
 	
-	public RunAction(JavaSnippetEditor editor, String label) {
-		super(editor, label);
-		setDescription("Run the selected code");
-		setToolTipText("Run the selected code");
+	public RunAction(JavaSnippetEditor editor) {
+		super(editor, PREFIX);
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_RUNSNIPPET);
 	}
 	
@@ -31,14 +27,4 @@ public class RunAction extends SnippetAction implements IUpdate {
 	public void run() {
 		fEditor.evalSelection(JavaSnippetEditor.RESULT_RUN);
 	} 
-
-	public void snippetStateChanged(JavaSnippetEditor editor) {
-		setEnabled(editor != null && !editor.isEvaluating());
-	}
-	
-	public void update() {
-		ITextSelection selection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
-		setEnabled(selection.getLength() > 0);
-	}
-
 }

@@ -31,9 +31,12 @@ public class ScrapbookEventFilter implements IDebugUIEventFilter {
 			Object s = event.getSource();
 			if (s instanceof IJavaThread) {
 				IJavaThread jt = (IJavaThread)s;
+				if (jt.isTerminated()) {
+					return false;
+				}
 				if (jt.getLaunch() == fLaunch) {
 					IJavaStackFrame f = (IJavaStackFrame)jt.getTopStackFrame();
-					if (f.getMethodName().equals("main")) {
+					if (f == null || f.getMethodName().equals("nop")) {
 						return false;
 					}
 				}

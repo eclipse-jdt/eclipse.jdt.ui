@@ -37,18 +37,19 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	private static final String SUSPENDED_SYS= LABEL + "suspended_sys";
 	private static final String SUSPENDED_USR= LABEL + "suspended_usr";
 
-	private static final String PREFIX= "jdi_label_provider.";
+	private static final String PREFIX= "jdi_model_presentation.";
 	private static final String TERMINATED= "terminated";
-	private static final String NOT_RESPSPONDING= PREFIX + "not_responding";
+	private static final String NOT_RESPONDING= PREFIX + "not_responding";
 	private static final String LINE= "line";
 	private static final String HITCOUNT= "hitCount";
+	
+	private static final String NO_RETURN_VALUE= PREFIX + "no_return_value";
 
 	protected final static String EXCEPTION= PREFIX + "exception.";
 	protected final static String FORMAT= EXCEPTION + "format";
 	protected final static String CAUGHT= EXCEPTION + "caught";
 	protected final static String UNCAUGHT= EXCEPTION + "uncaught";
 	protected final static String BOTH= EXCEPTION + "both";
-	protected final static String DISABLED= EXCEPTION + "disabled";
 
 	protected static final String fgStringName= "java.lang.String";
 
@@ -84,7 +85,7 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 				return label;
 			}
 		} catch (DebugException e) {
-			return getResourceString(NOT_RESPSPONDING);
+			return getResourceString(NOT_RESPONDING);
 		}
 	}
 
@@ -171,6 +172,9 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		String valueString= value.getValueString();
 		boolean isString= refTypeName.equals(fgStringName);
 		String signature= value.getSignature();
+		if ("V".equals(signature)) {
+			valueString= getResourceString(NO_RETURN_VALUE);
+		}
 		boolean isObject= isObjectValue(signature);
 		boolean isArray= getArrayDimension(signature) > 0 ? true : false;
 		StringBuffer buffer= new StringBuffer();

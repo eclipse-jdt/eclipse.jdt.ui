@@ -6,30 +6,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * (c) Copyright IBM Corp 1999, 2000
  */
  
-import java.util.ResourceBundle;
-
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.texteditor.IUpdate;
-import org.eclipse.ui.texteditor.ResourceAction;
-
-import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.model.IDebugElement;
-import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.debug.core.model.IStackFrame;
-import org.eclipse.debug.core.model.IThread;
-import org.eclipse.debug.ui.IDebugUIConstants;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.debug.core.IJavaEvaluationListener;
-import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.util.ResourceBundle;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.*;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.debug.core.IJavaEvaluationListener;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.*;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.texteditor.ResourceAction;
 
 
 /**
@@ -41,6 +18,8 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 
 	JavaEditor fEditor;
 	ITextSelection fSelection;
+	
+	public static final String ERROR = "SnippetEditor.error.";
 
 	public EvaluateAction(ResourceBundle bundle, String prefix, JavaEditor editor) {
 		super(bundle, prefix);
@@ -135,29 +114,60 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 	public void run() {
 		IStackFrame stackFrame= getContext();
 		if (stackFrame == null) {
-			System.out.println("No stack frame context");
+			reportError(getErrorResourceString("nosfcontext"));
 			return;
 		}
 		
 		IJavaStackFrame adapter= (IJavaStackFrame) stackFrame.getAdapter(IJavaStackFrame.class);
 		if (adapter != null) {
 			fSelection = (ITextSelection) fEditor.getSelectionProvider().getSelection();
-			IJavaProject project = ((IJavaElement) fEditor.getJavaSourceReferenceAt(fSelection.getOffset())).getJavaProject();
-			try {
-				String eval= fSelection.getText();
-				adapter.evaluate(eval, this, project);
-
-			} catch (DebugException e) {
-				e.printStackTrace();
+			IJavaElement javaElement= (IJavaElement) fEditor.getJavaSourceReferenceAt(fSelection.getOffset());
+			if (javaElement != null) {
+				IJavaProject project = javaElement.getJavaProject();
+				try {
+					String eval= fSelection.getText();
+					adapter.evaluate(eval, this, project);
+				} catch (DebugException e) {
+					ErrorDialog.openError(getShell(), getErrorResourceString("errorevaluating"), null, e.getStatus());
+				}
+			} else {
+				reportError(getErrorResourceString("nosrccontext"));
 			}
 		} else {
-			System.out.println("No evaluation adapter");
+			reportError(getErrorResourceString("noevaladapter"));
 		}
 	}
 	/**
 	 * @see IUpdate
 	 */
 	public void update() {
-		setEnabled(getContext() != null &&  !fEditor.getSelectionProvider().getSelection().isEmpty());
+		setEnabled(getContext() != null && 
+			textHasContent(((ITextSelection)fEditor.getSelectionProvider().getSelection()).getText()));
+	}
+	
+	protected Shell getShell() {
+		return fEditor.getSite().getShell();
+	}
+	
+	protected boolean textHasContent(String text) {
+		int length= text.length();
+		if (length > 0) {
+			for (int i= 0; i < length; i++) {
+				if (Character.isLetterOrDigit(text.charAt(i))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	protected void reportError(String message) {
+		Status status=
+			new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, message, null); 
+		ErrorDialog.openError(getShell(), getErrorResourceString("errorevaluating"), null, status);
+	}
+	
+	protected String getErrorResourceString(String key) {
+		return JavaPlugin.getResourceString(ERROR + key);
 	}
 }

@@ -22,9 +22,10 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
  */
 public class ImportAction extends SnippetAction {
 
-	public ImportAction(JavaSnippetEditor editor, String label) {
-		super(editor, label);
-		setDescription("Evaluate the import statements");
+	public static final String PREFIX = "SnippetEditor.ImportAction.";
+
+	public ImportAction(JavaSnippetEditor editor) {
+		super(editor, PREFIX);
 	}
 	
 	public void run() {
