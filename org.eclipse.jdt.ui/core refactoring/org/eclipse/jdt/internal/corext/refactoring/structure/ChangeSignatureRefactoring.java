@@ -1192,8 +1192,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			List newNodes= new ArrayList();
 			for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 				ParameterInfo info= (ParameterInfo) iter.next();
-				if (info.isDeleted())
+				if (info.isDeleted()) {
+					getImportRemover().registerRemovedNode((ASTNode) nodes.get(info.getOldIndex()));
 					continue;
+				}
 				if (info.isAdded()) {
 					newNodes.add(createNewParamgument(info));
 				} else {
@@ -1209,12 +1211,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				ASTNode node= (ASTNode) nodesIter.next();
 				ASTNode newNode= (ASTNode) newIter.next();
 				listRewrite.replace(node, newNode, fDescription);
-				getImportRemover().registerRemovedNode(node);
 			}
 			while (nodesIter.hasNext()) {
 				ASTNode node= (ASTNode) nodesIter.next();
 				listRewrite.remove(node, fDescription);
-				getImportRemover().registerRemovedNode(node);
 			}
 			while (newIter.hasNext()) {
 				ASTNode node= (ASTNode) newIter.next();
