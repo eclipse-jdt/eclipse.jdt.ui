@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizardPage;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -45,11 +46,10 @@ final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 			String s= document.get(offset, length);
 			document.replace(offset, length, s);
 		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorDialog.openError(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.getString("JUnitAddLibraryProposal.title"), JUnitMessages.getString("JUnitAddLibraryProposal.cannotAdd"), e.getStatus());  //$NON-NLS-1$ //$NON-NLS-2$
+
 		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//ignore
 		}
 	}
 	/* (non-Javadoc)
