@@ -1181,7 +1181,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles) {
 		
-		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isPrefOverviewRulerVisible(), styles);
+		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles);
 		
 		StyledText text= viewer.getTextWidget();
 		text.addBidiSegmentListener(new  BidiSegmentListener() {
@@ -1213,7 +1213,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles) {
-		return new JavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isPrefOverviewRulerVisible(), styles);
+		return new JavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles);
 	}
 	
 	/*
