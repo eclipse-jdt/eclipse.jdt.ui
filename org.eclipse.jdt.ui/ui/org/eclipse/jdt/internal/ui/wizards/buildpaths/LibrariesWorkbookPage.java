@@ -185,21 +185,23 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if (lastUsedPath == null) {
 					lastUsedPath= projpath;
 				}			
-				IPath path= chooseExtJarFile(lastUsedPath.toString());
-				if (path != null) {
-					CPListElement element= findPathInList(path);
-					if (element == null) {
-						// does not exist yet
-						IFile file= fWorkspaceRoot.getFileForLocation(path);
-						if (file != null) {
-							path= file.getFullPath();  // modify path if internal
+				IPath[] paths= chooseExtJarFile(lastUsedPath.toString());
+				if (paths != null) {
+					for (int i= 0; i < paths.length; i++) {
+						IPath path= paths[i];
+						CPListElement element= findPathInList(path);
+						if (element == null) {
+							// does not exist yet
+							IFile file= fWorkspaceRoot.getFileForLocation(path);
+							if (file != null) {
+								path= file.getFullPath();  // modify path if internal
+							}
+							elementsToAdd.add(new CPListElement(fCurrJProject.newLibraryEntry(path), file));
 						}
-						elementsToAdd.add(new CPListElement(fCurrJProject.newLibraryEntry(path), file));
-					} else {
-						// select existing entry
-						fLibrariesList.postSetSelection(new StructuredSelection(element));
 					}
-					fDialogSettings.put(DIALOGSTORE_EXTJAR_PATH, path.removeLastSegments(1).toOSString());
+					if (paths.length > 0) {
+						fDialogSettings.put(DIALOGSTORE_EXTJAR_PATH, paths[0].removeLastSegments(1).toOSString());
+					}
 				}
 				break;
 			case 5: /* set source attachment */
@@ -362,8 +364,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private List getFilteredExistingContainerEntries() {
 		List res= new ArrayList();
 		try {
-			IFolder folder= fWorkspaceRoot.getFolder(fCurrJProject.getOutputLocation());
-			res.add(folder);
+			IPath outputLocation= fCurrJProject.getOutputLocation();
+			if (outputLocation != null) {
+				IResource resource= fWorkspaceRoot.findMember(outputLocation);
+				if (resource != null) {
+					res.add(resource);
+				}
+			}
 		} catch (JavaModelException e) {
 			// ignore it here
 		}	
@@ -396,13 +403,19 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		return new CPListElement(fCurrJProject.newLibraryEntry(res.getFullPath()), res);
 	};
 
-	private IPath chooseExtJarFile(String initPath) {
-		FileDialog dialog= new FileDialog(getShell(), 0);
+	private IPath[] chooseExtJarFile(String initPath) {
+		FileDialog dialog= new FileDialog(getShell(), SWT.MULTI);
 		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"});
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {
-			return new Path(res);
+			String[] fileNames= dialog.getFileNames();
+			String[] filterNames= dialog.getFilterNames();
+			IPath[] paths= new IPath[fileNames.length];
+			for (int i= 0; i < paths.length; i++) {
+				paths[i]= new Path(filterNames[i]).append(fileNames[i]);
+			}
+			return paths;
 		}
 		return null;
 	}
