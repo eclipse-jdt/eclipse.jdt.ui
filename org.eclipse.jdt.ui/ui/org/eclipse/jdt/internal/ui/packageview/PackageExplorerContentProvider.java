@@ -353,7 +353,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	private void refreshWorkingCopy(IWorkingCopy workingCopy) {
 		IJavaElement original= workingCopy.getOriginalElement();
 		if (original != null)
-			postRefresh(original);
+			postRefresh(original, false);
 	}
 
 	private boolean isWorkingCopy(IJavaElement element) {
@@ -432,17 +432,20 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	}
 	
 	private void postRefresh(final Object root) {
+		postRefresh(root, true);
+	}
+	
+	private void postRefresh(final Object root, final boolean updateLabels) {
 		postRunnable(new Runnable() {
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()){
-					fViewer.refresh(root);
+					fViewer.refresh(root, updateLabels);
 				}
 			}
 		});
 	}
-	
 	private void postAdd(final Object parent, final Object element) {
 		postRunnable(new Runnable() {
 			public void run() {
