@@ -190,7 +190,11 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			case IJavaElement.TYPE:
 				return RenameSupport.create((IType)element, newName, flags); 
 			case IJavaElement.METHOD:
-				return RenameSupport.create((IMethod)element, newName, flags); 
+				final IMethod method= (IMethod) element;
+				if (method.isConstructor())
+					return createGeneric(method.getDeclaringType(), newName, flags);
+				else
+					return RenameSupport.create((IMethod)element, newName, flags); 
 			case IJavaElement.FIELD:
 				return RenameSupport.create((IField)element, newName, flags);
 			case IJavaElement.TYPE_PARAMETER:
