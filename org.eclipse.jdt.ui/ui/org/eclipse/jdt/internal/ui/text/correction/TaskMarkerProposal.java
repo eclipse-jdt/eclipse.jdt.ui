@@ -74,23 +74,46 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 		
 		
 	private Position getUpdatedPosition(TextBuffer buffer) {
-		IScanner scanner= getSurroundingComment(buffer);
-		if (scanner == null) {
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		scanner.setSource(buffer.getContent().toCharArray());
+		
+		int token= getSurroundingComment(scanner);
+		if (token == ITerminalSymbols.TokenNameEOF) {
 			return null;
 		}
 		int commentStart= scanner.getCurrentTokenStartPosition();
 		int commentEnd= scanner.getCurrentTokenEndPosition() + 1;
+		
+		int contentStart= commentStart + 2;
+		int contentEnd= commentEnd;
+		if (token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC) {
+			contentStart= commentStart + 3;
+			contentEnd= commentEnd - 2;
+		} else if (token == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
+			contentEnd= commentEnd - 2;
+		}
+		if (hasContent(buffer, contentStart, fLocation.getOffset()) || hasContent(buffer, contentEnd, fLocation.getOffset() + fLocation.getLength())) {
+			return new Position(fLocation.getOffset(), fLocation.getLength());
+		}
+		
 		TextRegion startRegion= buffer.getLineInformationOfOffset(commentStart);
 		int start= startRegion.getOffset();
-		if (hasContent(buffer.getContent(start, fLocation.getOffset() - start))) {
-			return null;
+		boolean contentAtBegining= hasContent(buffer, start, commentStart);
+		
+		if (contentAtBegining) {
+			start= commentStart;
 		}
+		
 		int end;
-		if (buffer.getChar(commentStart) == '/' && buffer.getChar(commentStart + 1) == '/') {
-			end= commentEnd;
+		if (token == ITerminalSymbols.TokenNameCOMMENT_LINE) {
+			if (contentAtBegining) {
+				end= startRegion.getOffset() + startRegion.getLength(); // only to the end of the line
+			} else {
+				end= commentEnd; // includes new line
+			}
 		} else {
 			int endLine= buffer.getLineOfOffset(commentEnd - 1);
-			if (endLine + 1 == buffer.getNumberOfLines()) {
+			if (endLine + 1 == buffer.getNumberOfLines() || contentAtBegining) {
 				TextRegion endRegion= buffer.getLineInformation(endLine);
 				end= endRegion.getOffset() + endRegion.getLength();
 			} else {
@@ -98,19 +121,15 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 				end= endRegion.getOffset();
 			}					
 		}
-		int posEnd= fLocation.getOffset() + fLocation.getLength();
-		if (hasContent(buffer.getContent(posEnd, end - posEnd))) {
-			return null;
+		if (hasContent(buffer, commentEnd, end)) {
+			end= commentEnd;
+			start= commentStart; // only remove comment
 		}
 		return new Position(start, end - start);
 	}
 	
-	private IScanner getSurroundingComment(TextBuffer buffer) {
+	private int getSurroundingComment(IScanner scanner) {
 		try {
-			IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-			scanner.setSource(buffer.getContent().toCharArray());
-			scanner.resetTo(0, buffer.getLength() - 1);
-				
 			int start= fLocation.getOffset();
 			int end= start + fLocation.getLength();
 				
@@ -120,7 +139,7 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 					int currStart= scanner.getCurrentTokenStartPosition();
 					int currEnd= scanner.getCurrentTokenEndPosition() + 1;
 					if (currStart <= start && end <= currEnd) {
-						return scanner;
+						return token;
 					}
 				}
 				token= scanner.getNextToken();
@@ -129,13 +148,13 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 		} catch (InvalidInputException e) {
 			// ignore
 		}
-		return null;
+		return ITerminalSymbols.TokenNameEOF;
 	}	
 	
-	private boolean hasContent(String string) {
-		for (int i= 0; i < string.length(); i++) {
-			char ch= string.charAt(i);
-			if (Character.isLetter(ch)) {
+	private boolean hasContent(TextBuffer buf, int start, int end) {
+		for (int i= start; i < end; i++) {
+			char ch= buf.getChar(i);
+			if (!Character.isWhitespace(ch)) {
 				return true;
 			}
 		}
