@@ -1369,15 +1369,19 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 					String name= ((IImportDeclaration) reference).getElementName();
 					if (name != null && name.length() > 0) {
 						String content= reference.getSource();
-						offset= range.getOffset() + content.indexOf(name);
-						length= name.length();
+						if (content != null) {
+							offset= range.getOffset() + content.indexOf(name);
+							length= name.length();
+						}
 					}
 				} else if (reference instanceof IPackageDeclaration) {
 					String name= ((IPackageDeclaration) reference).getElementName();
 					if (name != null && name.length() > 0) {
 						String content= reference.getSource();
-						offset= range.getOffset() + content.indexOf(name);
-						length= name.length();
+						if (content != null) {
+							offset= range.getOffset() + content.indexOf(name);
+							length= name.length();
+						}
 					}
 				}
 				
