@@ -289,6 +289,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addEditorAction(result, "AddBlockComment"); //$NON-NLS-1$
 		added+= addEditorAction(result, "RemoveBlockComment"); //$NON-NLS-1$
 		added+= addEditorAction(result, "Format"); //$NON-NLS-1$
+		added+= addEditorAction(result, "Indent"); //$NON-NLS-1$
 		result.add(new Separator());
 		added+= addAction(result, fOrganizeImports);
 		added+= addAction(result, fAddImport);

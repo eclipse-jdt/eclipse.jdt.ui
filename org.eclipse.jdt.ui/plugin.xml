@@ -1280,7 +1280,13 @@
       		label="%SortMembersAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.sort.members"
 			retarget="true" />						
-			
+
+		<action id="org.eclipse.jdt.ui.actions.Indent"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
+      		label="%IndentAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.indent"
+			retarget="true" />
+
 		<action id="org.eclipse.jdt.ui.actions.Format"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%FormatAction.label"
@@ -2096,7 +2102,12 @@
 		command="org.eclipse.jdt.ui.edit.text.java.remove.block.comment"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-
+	<command
+		category="org.eclipse.jdt.ui.category.source"
+		id="org.eclipse.jdt.ui.edit.text.java.indent"
+		name= "%ActionDefinition.indent.name"
+		description= "%ActionDefinition.indent.description">
+	</command>
       
 <!-- refactoring -->    
 	<command

@@ -124,6 +124,14 @@ public class JdtActionConstants {
 	public static final String REMOVE_BLOCK_COMMENT= "org.eclipse.jdt.ui.actions.RemoveBlockComment"; //$NON-NLS-1$
 	
 	/**
+	 * Source menu: name of standard Indent global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.Indent"</code>).
+	 * 
+	 * @since 3.0
+	 */
+	public static final String INDENT= "org.eclipse.jdt.ui.actions.Indent"; //$NON-NLS-1$
+	
+	/**
 	 * Source menu: name of standard Shift Rightl action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ShiftRight"</code>).
 	 */

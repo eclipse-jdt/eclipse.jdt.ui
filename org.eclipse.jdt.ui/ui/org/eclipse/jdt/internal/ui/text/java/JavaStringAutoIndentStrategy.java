@@ -112,7 +112,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		IRegion line= document.getLineInformationOfOffset(offset);
 		String string= document.get(line.getOffset(), offset - line.getOffset());
 		if (string.trim().length() != 0)
-			indentation += String.valueOf('\t');
+			indentation += String.valueOf("\t\t"); //$NON-NLS-1$
 
 		command.text= getModifiedText(command.text, lineDelimiter, indentation);		
 	}

@@ -162,6 +162,9 @@ WorkInProgressPreferencePage
 		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartOpeningBrace"), PreferenceConstants.EDITOR_SMART_OPENING_BRACE); //$NON-NLS-1$
 		fSmartTypingItems.add(button);
 		
+		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartTab"), PreferenceConstants.EDITOR_SMART_TAB); //$NON-NLS-1$
+		fSmartTypingItems.add(button);
+		
 		/* line change bar */
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());

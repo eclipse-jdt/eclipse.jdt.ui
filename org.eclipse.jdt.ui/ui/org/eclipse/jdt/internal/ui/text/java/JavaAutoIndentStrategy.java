@@ -12,7 +12,6 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -54,6 +53,9 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+import org.eclipse.jdt.internal.ui.text.JavaIndenter;
+import org.eclipse.jdt.internal.ui.text.Symbols;
 
 /**
  * Auto indent strategy sensitive to brackets.
@@ -276,8 +278,10 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 	
 	private void smartIndentAfterOpeningBracket(IDocument d, DocumentCommand c) {
-		if (c.offset == -1 || d.getLength() == 0)
+		if (c.offset < 1 || d.getLength() == 0)
 			return;
+			
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
 
 		int p= (c.offset == d.getLength() ? c.offset - 1 : c.offset);
 		
@@ -287,14 +291,15 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int lineOffset= d.getLineOffset(line);
 			
 			// line of last javacode
-			int pos= firstNonWhitespaceBackward(d, p, IJavaPartitions.JAVA_PARTITIONING, -1);
+			int pos= scanner.findNonWhitespaceBackward(p, JavaHeuristicScanner.UNBOUND);
+			if (pos == -1)
+				return;
 			int lastLine= d.getLineOfOffset(pos);
-			int lastLineOffset= d.getLineOffset(lastLine);
 			
 			// only shift if the last java line is further up and is a braceless block candidate
 			if (lastLine < line) {
 			
-				if (isBracelessBlockStart(d, pos + 1, lastLineOffset)) {
+				if (scanner.isBracelessBlockStart(pos + 1, JavaHeuristicScanner.UNBOUND)) {
 					// if the last line was a braceless block candidate, we have indented 
 					// after the new line. This has to be undone as we *are* starting a block
 					// on the new line
@@ -313,6 +318,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 
 	private void smartIndentAfterNewLine(IDocument d, DocumentCommand c) {
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
+		JavaIndenter indenter= new JavaIndenter(d, scanner);
+		String indent= indenter.computeIndentation(c.offset);
+		if (indent == null)
+			indent= ""; //$NON-NLS-1$
 
 		int docLength= d.getLength();
 		if (c.offset == -1 || docLength == 0)
@@ -322,137 +332,43 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int p= (c.offset == docLength ? c.offset - 1 : c.offset);
 			int line= d.getLineOfOffset(p);
 
-			StringBuffer buf= new StringBuffer(c.text);
-			if (c.offset < docLength && d.getChar(c.offset) == '}') {
-				int indLine= findMatchingOpenBracket(d, line, c.offset, 0);
-				if (indLine == -1) {
-					indLine= line;
-				}
-				buf.append(getIndentOfLine(d, indLine));
-			} else {
-				int start= d.getLineOffset(line);
+			StringBuffer buf= new StringBuffer(c.text + indent);
 
-				ITypedRegion region= TextUtilities.getPartition(d, fPartitioning, start);
-				if (IJavaPartitions.JAVA_DOC.equals(region.getType()))
-					start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
 
-				int whiteend= findEndOfWhiteSpace(d, start, c.offset);
-				int length= whiteend - start;
-				buf.append(d.get(start, length));
-				if (getBracketCount(d, start, c.offset, true) > 0) {
-					
-					buf.append(createIndent(1, useSpaces()));
-					
-					if (closeBrace() && !isClosed(d, c.offset, c.length)) {
-						c.caretOffset= c.offset + buf.length();
-						c.shiftsCaret= false;
-						
-						// copy old content of line behind insertion point to new line
-						// unless we think we are inserting an anonymous type definition
-						IRegion reg= d.getLineInformation(line);
-						int lineEnd= reg.getOffset() + reg.getLength();
-						if (!(computeAnonymousPosition(d, c.offset - 1, fPartitioning, lineEnd) != -1)) {
-							int contentStart= findEndOfWhiteSpace(d, c.offset, lineEnd);
-							if (lineEnd - contentStart > 0) {
-								c.length=  lineEnd - c.offset;
-								buf.append(d.get(contentStart, lineEnd - contentStart).toCharArray());
-							}
-						}
-					
-						buf.append(getLineDelimiter(d));
-						buf.append(d.get(start, length));
-						buf.append('}');
+			IRegion reg= d.getLineInformation(line);
+			int lineEnd= reg.getOffset() + reg.getLength();
+
+			int contentStart= findEndOfWhiteSpace(d, c.offset, lineEnd);
+			c.length=  contentStart - c.offset;
+		
+			int start= reg.getOffset();
+			ITypedRegion region= TextUtilities.getPartition(d, fPartitioning, start);
+			if (IJavaPartitions.JAVA_DOC.equals(region.getType()))
+				start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
+				
+			if (getBracketCount(d, start, c.offset, true) > 0 && closeBrace() && !isClosed(d, c.offset, c.length)) {
+				c.caretOffset= c.offset + buf.length();
+				c.shiftsCaret= false;
+				
+				// copy old content of line behind insertion point to new line
+				// unless we think we are inserting an anonymous type definition
+				if (c.offset == 0 || !(computeAnonymousPosition(d, c.offset - 1, fPartitioning, lineEnd) != -1)) {
+					if (lineEnd - contentStart > 0) {
+						c.length=  lineEnd - c.offset;
+						buf.append(d.get(contentStart, lineEnd - contentStart).toCharArray());
 					}
-				} else if (isBracelessBlockStart(d, c.offset, start)) {
-					buf.append(createIndent(1, useSpaces()));
 				}
+			
+				buf.append(getLineDelimiter(d));
+				String reference= indenter.getReferenceIndentation(c.offset); 
+				buf.append(reference == null ? "" : reference); //$NON-NLS-1$
+				buf.append('}');
 			}
 			c.text= buf.toString();
 
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
-	}
-
-	/**
-	 * Checks if the line seems to be an open condition not followed by a block (i.e. an if, while, 
-	 * or for statement with just one following statement, see example below). 
-	 * 
-	 * <pre>
-	 * if (condition)
-	 *     doStuff();
-	 * </pre>
-	 * 
-	 * <p>Algorithm: if the last non-WS, non-Comment code on the line is an if (condition), while (condition),
-	 * for( expression), do, else, and there is no statement after that </p> 
-	 * 
-	 * @param document the document worked on
-	 * @param position the insert position of the new character
-	 * @param bound the lowest position to consider
-	 * @return <code>true</code> if the code is a conditional statement or loop without a block, <code>false</code> otherwise
-	 */
-	private boolean isBracelessBlockStart(IDocument document, int position, int bound) {
-		if (position < 1)
-			return false;
-		position= firstNonWhitespaceBackward(document, position - 1, fPartitioning, bound);
-		if (position < 1)
-			return false;
-
-		// new line after do, else without brace
-		if (looksLike(document, position, "do") //$NON-NLS-1$
-				|| looksLike(document, position, "else")) //$NON-NLS-1$
-			return true;
-			
-		try {
-			// new line after if,while,for + expression
-			if (")".equals(document.get(position, 1))) { //$NON-NLS-1$
-				position= findOpeningParenMatch(document, position, fPartitioning);
-				if (position > 0) {
-					position= firstNonWhitespaceBackward(document, position - 1, fPartitioning, -1);
-					if (position != -1) {
-						if (looksLike(document, position, "if") //$NON-NLS-1$
-								|| looksLike(document, position, "for") //$NON-NLS-1$
-								|| looksLike(document, position, "while")) //$NON-NLS-1$
-							return true;
-					}
-				}
-			}
-		} catch (BadLocationException e) {
-			// ignore and return false
-		}
-		
-		return false;
-	}
-
-	/**
-	 * Checks whether code>document</code> contains the <code>String</code> <code>like</code> such 
-	 * that its last character is at <code>position</code>. If <code>like</code> starts with a
-	 * identifier part (as determined by {@link Character.isJavaIdentifier(char)}), it is also made
-	 * sure that <code>like</code> is preceded by some non-identifier character or stands at the
-	 * document start.
-	 * 
-	 * @param document the document being modified
-	 * @param position the first character position in <code>document</code> to be considered
-	 * @param like the <code>String</code> to look for.
-	 * @return <code>true</code> if  <code>document</code> contains <code>like</code> such that it ends at <code>position</code>, <code>false</code> otherwise
-	 */
-	private static boolean looksLike(IDocument document, int position, String like) {
-		int length= like.length();
-		if (position < length - 1)
-			return false;
-
-		try {
-			if (!like.equals(document.get(position - length + 1, length)))
-				return false;
-
-			if (position >= length && Character.isJavaIdentifierPart(like.charAt(0)) && Character.isJavaIdentifierPart(document.getChar(position - length)))
-				return false;
-
-		} catch (BadLocationException e) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
@@ -469,21 +385,23 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		// find the opening parenthesis for every closing parenthesis on the current line after offset
 		// return the position behind the closing parenthesis if it looks like a method declaration
 		// or an expression for an if, while, for, catch statement
+		
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 		int pos= offset;
 		int length= max;
-		int scanTo= scanForward(document, pos, partitioning, length, '}');
+		int scanTo= scanner.scanForward(pos, length, '}');
 		if (scanTo == -1)
 			scanTo= length;
 			
-		int closingParen= findClosingParenToLeft(document, pos, partitioning) - 1;
+		int closingParen= findClosingParenToLeft(scanner, pos) - 1;
 
 		while (true) {
 			int startScan= closingParen + 1;
-			closingParen= scanForward(document, startScan, partitioning, scanTo, ')');
+			closingParen= scanner.scanForward(startScan, scanTo, ')');
 			if (closingParen == -1)
 				break;
 
-			int openingParen= findOpeningParenMatch(document, closingParen, partitioning);
+			int openingParen= scanner.findOpeningPeer(closingParen - 1, '(', ')');
 
 			// no way an expression at the beginning of the document can mean anything
 			if (openingParen < 1)
@@ -493,7 +411,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			if (openingParen > pos)
 				continue;
 
-			if (looksLikeAnonymousClassDef(document, openingParen - 1, partitioning))
+			if (looksLikeAnonymousClassDef(document, partitioning, scanner, openingParen - 1))
 				return closingParen + 1;
 
 		}
@@ -510,92 +428,13 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @param partitioning the document partitioning
 	 * @return the position of a closing parenthesis left to <code>position</code> separated only by whitespace, or <code>position</code> if no parenthesis can be found
 	 */
-	private static int findClosingParenToLeft(IDocument document, int position, String partitioning) {
-		final char CLOSING_PAREN= ')';
-		try {
-			if (position < 1)
-				return position;
+	private static int findClosingParenToLeft(JavaHeuristicScanner scanner, int position) {
+		if (position < 1)
+			return position;
 
-			int nonWS= firstNonWhitespaceBackward(document, position - 1, partitioning, -1);
-			if (nonWS != -1 && document.getChar(nonWS) == CLOSING_PAREN)
-				return nonWS;
-		} catch (BadLocationException e1) {
-		}
+		if (scanner.previousToken(position - 1, JavaHeuristicScanner.UNBOUND) == Symbols.TokenRPAREN)
+			return scanner.getPosition() + 1;
 		return position;
-	}
-
-	/**
-	 * Finds the highest position in <code>document</code> such that the position is &lt;= <code>position</code>
-	 * and &gt; <code>bound</code> and <code>Character.isWhitespace(document.getChar(pos))</code> evaluates to <code>false</code>
-	 * and the position is in the default partition.   
-	 * 
-	 * @param document the document being modified
-	 * @param position the first character position in <code>document</code> to be considered
-	 * @param partitioning the document partitioning
-	 * @param bound the first position in <code>document</code> to not consider any more, with <code>bound</code> &gt; <code>position</code>
-	 * @return the highest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
-	 */
-	private static int firstNonWhitespaceBackward(IDocument document, int position, String partitioning, int bound) {
-		Assert.isTrue(position < document.getLength());
-		Assert.isTrue(bound >= -1);
-
-		try {
-			while (position > bound) {
-				char ch= document.getChar(position);
-				if (!Character.isWhitespace(ch) && isDefaultPartition(document, position, partitioning))
-					return position;
-				position--;
-			}
-		} catch (BadLocationException e) {
-		}
-		return -1;
-	}
-
-	/**
-	 * Finds the lowest position in <code>document</code> such that the position is &gt;= <code>position</code>
-	 * and &lt; <code>bound</code> and <code>document.getChar(position) == ch</code> evaluates to <code>true</code> for at least one
-	 * ch in <code>chars</code> and the position is in the default partition.   
-	 * 
-	 * @param document the document being modified
-	 * @param position the first character position in <code>document</code> to be considered
-	 * @param partitioning the document partitioning
-	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
-	 * @param chars an array of <code>char</code> to search for
-	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>-1</code> if none can be found
-	 */
-	private static int scanForward(IDocument document, int position, String partitioning, int bound, char[] chars) {
-		Assert.isTrue(position >= 0);
-		Assert.isTrue(bound <= document.getLength());
-		
-		Arrays.sort(chars);
-		
-		try {
-			while (position < bound) {
-
-				if (Arrays.binarySearch(chars, document.getChar(position)) >= 0 && isDefaultPartition(document, position, partitioning))
-					return position;
-
-				position++;
-			}
-		} catch (BadLocationException e) {
-		}
-		return -1;
-	}
-
-	/**
-	 * Finds the lowest position in <code>document</code> such that the position is &gt;= <code>position</code>
-	 * and &lt; <code>bound</code> and <code>document.getChar(position) == ch</code> evaluates to <code>true</code>
-	 * and the position is in the default partition.   
-	 * 
-	 * @param document the document being modified
-	 * @param position the first character position in <code>document</code> to be considered
-	 * @param partitioning the document partitioning
-	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
-	 * @param ch the <code>char</code> to search for
-	 * @return the lowest position of <code>ch</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>-1</code> if none can be found
-	 */
-	private static int scanForward(IDocument document, int position, String partitioning, int bound, char ch) {
-		return scanForward(document, position, partitioning, bound, new char[] {ch});
 	}
 
 	/**
@@ -646,8 +485,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @param partitioning the document partitioning
 	 * @return <code>true</code> if the content of <code>document</code> looks like an anonymous class definition, <code>false</code> otherwise
 	 */
-	private static boolean looksLikeAnonymousClassDef(IDocument document, int position, String partitioning) {
-		int previousCommaOrParen= scanBackward(document, position - 1, partitioning, -1, new char[] {',', '('});
+	private static boolean looksLikeAnonymousClassDef(IDocument document, String partitioning, JavaHeuristicScanner scanner, int position) {
+		int previousCommaOrParen= scanner.scanBackward(position - 1, JavaHeuristicScanner.UNBOUND, new char[] {',', '('});
 		if (previousCommaOrParen == -1 || position < previousCommaOrParen + 5) // 2 for borders, 3 for "new"
 			return false;
 
@@ -679,77 +518,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return false;
 	}
 
-	/**
-	 * Finds the position of the parenthesis matching the closing parenthesis at <code>position</code>.
-	 * 
-	 * @param document the document being modified
-	 * @param position the position in <code>document</code> of a closing parenthesis
-	 * @param partitioning the document partitioning
-	 * @return the position in <code>document</code> of the matching parenthesis, or -1 if none can be found
-	 */
-	private static int findOpeningParenMatch(IDocument document, int position, String partitioning) {
-		final char CLOSING_PAREN= ')';
-		final char OPENING_PAREN= '(';
-
-		Assert.isTrue(position < document.getLength());
-		Assert.isTrue(position >= 0);
-		Assert.isTrue(isDefaultPartition(document, position, partitioning));
-
-		try {
-
-			Assert.isTrue(document.getChar(position) == CLOSING_PAREN);
-			
-			int depth= 1;
-			while (true) {
-				position= scanBackward(document, position - 1, partitioning, -1, new char[] {CLOSING_PAREN, OPENING_PAREN});
-				if (position == -1)
-					return -1;
-					
-				if (document.getChar(position) == CLOSING_PAREN)
-					depth++;
-				else
-					depth--;
-				
-				if (depth == 0)
-					return position;
-			}
-
-		} catch (BadLocationException e) {
-			return -1;
-		}
-	}
-
-	/**
-	 * Finds the highest position in <code>document</code> such that the position is &lt;= <code>position</code>
-	 * and &gt; <code>bound</code> and <code>document.getChar(position) == ch</code> evaluates to <code>true</code> for at least one
-	 * ch in <code>chars</code> and the position is in the default partition.   
-	 * 
-	 * @param document the document being modified
-	 * @param position the first character position in <code>document</code> to be considered
-	 * @param partitioning the document partitioning
-	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
-	 * @param chars an array of <code>char</code> to search for
-	 * @return the highest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
-	 */
-	private static int scanBackward(IDocument document, int position, String partitioning, int bound, char[] chars) {
-		Assert.isTrue(bound >= -1);
-		Assert.isTrue(position < document.getLength() );
-		
-		Arrays.sort(chars);
-		
-		try {
-			while (position > bound) {
-
-				if (Arrays.binarySearch(chars, document.getChar(position)) >= 0 && isDefaultPartition(document, position, partitioning))
-					return position;
-
-				position--;
-			}
-		} catch (BadLocationException e) {
-		}
-		return -1;
-	}
-	
 	private boolean isClosed(IDocument document, int offset, int length) {
 		
 		CompilationUnitInfo info= getCompilationUnitForMethod(document, offset, fPartitioning);
@@ -1272,72 +1040,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return false;
 	}
 
-	private static int searchForClosingPeer(IDocument document, int position, String partitioning, final char openingPeer, final char closingPeer) {
-		Assert.isTrue(position >= 0);
-
-		try {
-			int length= document.getLength();
-			int depth= 1;
-			position -= 1;
-			while (true) {
-				position= scanForward(document, position + 1, partitioning, length, new char[] {openingPeer, closingPeer});
-				if (position == -1)
-					return -1;
-					
-				if (document.getChar(position) == openingPeer)
-					depth++;
-				else
-					depth--;
-				
-				if (depth == 0)
-					return position;
-			}
-
-		} catch (BadLocationException e) {
-			return -1;
-		}
-	}
-
-	private static int searchForOpeningPeer(IDocument document, int position, String partitioning, final char openingPeer, final char closingPeer) {
-		Assert.isTrue(position < document.getLength());
-
-		try {
-			int depth= 1;
-			position += 1;
-			while (true) {
-				position= scanBackward(document, position - 1, partitioning, -1, new char[] {openingPeer, closingPeer});
-				if (position == -1)
-					return -1;
-					
-				if (document.getChar(position) == closingPeer)
-					depth++;
-				else
-					depth--;
-				
-				if (depth == 0)
-					return position;
-			}
-
-		} catch (BadLocationException e) {
-			return -1;
-		}
-	}
-
-	private static IRegion getSurroundingBlock(IDocument document, int offset, String partitioning) {
-		if (offset < 1 || offset >= document.getLength())
-			return null;
-			
-		int begin= searchForOpeningPeer(document, offset - 1, partitioning, '{', '}');
-		int end= searchForClosingPeer(document, offset, partitioning, '{', '}');
-		if (begin == -1 || end == -1)
-			return null;
-		return new Region(begin, end + 1 - begin);
-	}
-
 	private static CompilationUnitInfo getCompilationUnitForMethod(IDocument document, int offset, String partitioning) {
-		try {	
+		try {
+			JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 			
-			IRegion sourceRange= getSurroundingBlock(document, offset, partitioning);
+			IRegion sourceRange= scanner.findSurroundingBlock(offset);
 			if (sourceRange == null)
 				return null;
 			String source= document.get(sourceRange.getOffset(), sourceRange.getLength());
@@ -1366,9 +1073,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		int begin= offset;
 		int end= offset - 1;
 		
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+		
 		while (true) {
-			begin= searchForOpeningPeer(document, begin - 1, partitioning, '{', '}');
-			end= searchForClosingPeer(document, end + 1, partitioning, '{', '}');
+			begin= scanner.findOpeningPeer(begin - 1, '{', '}');
+			end= scanner.findClosingPeer(end + 1, '{', '}');
 			if (begin == -1 && end == -1)
 				return true;
 			if (begin == -1 || end == -1)

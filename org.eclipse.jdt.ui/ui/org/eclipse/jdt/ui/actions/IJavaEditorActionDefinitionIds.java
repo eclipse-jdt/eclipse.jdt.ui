@@ -148,6 +148,12 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String REMOVE_BLOCK_COMMENT= "org.eclipse.jdt.ui.edit.text.java.remove.block.comment"; //$NON-NLS-1$
 	
 	/**
+	 * Action definition ID of the source -> indent action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.indent"</code>).
+	 */
+	public static final String INDENT= "org.eclipse.jdt.ui.edit.text.java.indent"; //$NON-NLS-1$
+	
+	/**
 	 * Action definition ID of the source -> format action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.format"</code>).
 	 */

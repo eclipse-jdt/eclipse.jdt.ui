@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
@@ -96,6 +97,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.actions.RemoveBlockCommentAction;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
@@ -633,8 +635,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		setOutlinerContextMenuId("#CompilationUnitOutlinerContext"); //$NON-NLS-1$
 		// don't set help contextId, we install our own help context
 		fSavePolicy= null;
-		
-		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
+			
+		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);		
 	}
 	
 	/*
@@ -694,6 +696,17 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		markAsStateDependentAction("RemoveBlockComment", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("RemoveBlockComment", true); //$NON-NLS-1$		
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.REMOVE_BLOCK_COMMENT_ACTION);
+		
+		action= new IndentAction(JavaEditorMessages.getResourceBundle(), "Editor.Indent.", this); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.INDENT);		
+		setAction("Indent", action); //$NON-NLS-1$
+		markAsStateDependentAction("Indent", true); //$NON-NLS-1$
+		markAsSelectionDependentAction("Indent", true); //$NON-NLS-1$
+		
+		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
+			removeActionActivationCode(ITextEditorActionConstants.SHIFT_RIGHT);
+			setActionActivationCode("Indent", '\t', -1, SWT.NONE); //$NON-NLS-1$
+		}
 		
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
@@ -1131,6 +1144,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					else
 						stopTabConversion();
 					return;
+				}
+				
+				if (PreferenceConstants.EDITOR_SMART_TAB.equals(p)) {
+					if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
+						removeActionActivationCode(ITextEditorActionConstants.SHIFT_RIGHT);
+						setActionActivationCode("Indent", '\t', -1, SWT.NONE); //$NON-NLS-1$
+					} else {
+						removeActionActivationCode("Indent"); //$NON-NLS-1$
+						setActionActivationCode(ITextEditorActionConstants.SHIFT_RIGHT, '\t', -1, SWT.NONE);
+					}
 				}
 
 				IContentAssistant c= asv.getContentAssistant();

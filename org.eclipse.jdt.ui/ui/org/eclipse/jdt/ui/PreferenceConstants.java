@@ -1558,6 +1558,15 @@ public class PreferenceConstants {
 	public static final String EDITOR_SMART_OPENING_BRACE= "smart_opening_brace"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls the smart tab behaviour.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_SMART_TAB= "smart_tab"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if the Java code assist gets auto activated.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -2021,6 +2030,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, mod1Name);
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, SWT.MOD1);
 		
+		store.setDefault(PreferenceConstants.EDITOR_SMART_TAB, true);
 		
 		// work in progress
 		WorkInProgressPreferencePage.initDefaults(store);	
