@@ -1,3 +1,13 @@
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
+
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
 import java.io.IOException;
@@ -119,10 +129,17 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 		fTextViewer= textViewer;
 	}
 
-	private boolean isDelete(DocumentCommand command) {
+	private boolean isBackspace(DocumentCommand command) {
 		return
 			(command.text == null || command.text.length() == 0) &&
 			fSourceRegion.getOffset() == command.offset && fSourceRegion.getLength() == command.length;
+	}
+	
+	private boolean isDelete(DocumentCommand command) {
+		return 
+			(command.text == null || command.text.length() == 0) &&
+			fSourceRegion.getOffset() + fSourceRegion.getLength() == command.offset &&
+			command.length > 0;
 	}
 
 	private boolean isClosingBracket(DocumentCommand command) {
@@ -138,13 +155,26 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 		try {
 			if (!command.doit)
 				return;
-			if (fSourceRegion != null && (isDelete(command) || isClosingBracket(command))) {
-				// restore
-				command.addCommand(fUndoEvent.getOffset(), fUndoEvent.getLength(), fUndoEvent.getText(), fDocumentListener);
-				command.owner= fDocumentListener;
-				command.doit= false;
-				fSourceRegion= null;
-				fUndoEvent= null;
+			if (fSourceRegion != null) {
+				
+				if (isBackspace(command) || isClosingBracket(command)) {
+					// restore
+					command.addCommand(fUndoEvent.getOffset(), fUndoEvent.getLength(), fUndoEvent.getText(), fDocumentListener);
+					command.owner= fDocumentListener;
+					command.doit= false;
+					fSourceRegion= null;
+					fUndoEvent= null;
+				} else if (isDelete(command)) {
+					// delete magically inserted text
+					command.caretOffset= command.offset;
+					command.offset= fUndoEvent.getOffset();
+					command.length= fUndoEvent.getLength();
+					command.text= fUndoEvent.getText();
+					command.owner= fDocumentListener;
+					command.doit= false;
+					fSourceRegion= null;
+					fUndoEvent= null;
+				}
 
 			} else if (command.text != null && command.text.equals("{")) //$NON-NLS-1$
 				smartBraces(document, command);
