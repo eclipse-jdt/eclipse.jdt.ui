@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -36,8 +38,16 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
@@ -53,6 +63,8 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -72,13 +84,14 @@ public class MoveMembersWizard extends RefactoringWizard {
 	
 	private static class MoveMembersInputPage extends UserInputWizardPage {
 
-		private static final int MRU_COUNT= 10;
 		public static final String PAGE_NAME= "MoveMembersInputPage"; //$NON-NLS-1$
 		private static final int LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
 				| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 
-		private Combo fInputField;
+		private Combo fDestinationField;
+		private static final int MRU_COUNT= 10;
 		private static List fgMruDestinations= new ArrayList(MRU_COUNT);
+		private ContentAssistant fContentAssistant;
 
 		public MoveMembersInputPage() {
 			super(PAGE_NAME, true);
@@ -126,22 +139,22 @@ public class MoveMembersWizard extends RefactoringWizard {
 		}
 
 		private void addDestinationControls(Composite composite) {
-			fInputField= new Combo(composite, SWT.SINGLE | SWT.BORDER);
-			fInputField.setFocus();
-			fInputField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fInputField.setItems((String[]) fgMruDestinations.toArray(new String[fgMruDestinations.size()]));
-			fInputField.addModifyListener(new ModifyListener(){
+			fDestinationField= new Combo(composite, SWT.SINGLE | SWT.BORDER);
+			fDestinationField.setFocus();
+			fDestinationField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fDestinationField.setItems((String[]) fgMruDestinations.toArray(new String[fgMruDestinations.size()]));
+			fDestinationField.addModifyListener(new ModifyListener(){
 				public void modifyText(ModifyEvent e) {
 					handleDestinationChanged();
 				}
 				private void handleDestinationChanged() {
-					IStatus status= JavaConventions.validateJavaTypeName(fInputField.getText());
+					IStatus status= JavaConventions.validateJavaTypeName(fDestinationField.getText());
 					if (status.getSeverity() == IStatus.ERROR){
 						error(status.getMessage());
 					} else {
 						try {
-							IType resolvedType= getMoveRefactoring().getDeclaringType().getJavaProject().findType(fInputField.getText());
-							IStatus validationStatus= validateDestinationType(resolvedType, fInputField.getText());
+							IType resolvedType= getMoveRefactoring().getDeclaringType().getJavaProject().findType(fDestinationField.getText());
+							IStatus validationStatus= validateDestinationType(resolvedType, fDestinationField.getText());
 							if (validationStatus.isOK()){
 								setErrorMessage(null);
 								setPageComplete(true);
@@ -159,10 +172,12 @@ public class MoveMembersWizard extends RefactoringWizard {
 					setPageComplete(false);
 				}
 			});
-			if (fgMruDestinations.size() > 0)
-				fInputField.select(0);
-			else
+			if (fgMruDestinations.size() > 0) {
+				fDestinationField.select(0);
+			} else {
 				setPageComplete(false);
+			}
+			fContentAssistant= createContentAssistant(fDestinationField);
 			
 			Button button= new Button(composite, SWT.PUSH);
 			button.setText(RefactoringMessages.getString("MoveMembersInputPage.browse")); //$NON-NLS-1$
@@ -175,6 +190,51 @@ public class MoveMembersWizard extends RefactoringWizard {
 			});
 		}
 			
+		private ContentAssistant createContentAssistant(final Combo combo) {
+			final ContentAssistant contentAssistant= new ContentAssistant();
+						
+			IType declaringType= getMoveRefactoring().getDeclaringType();
+			IContentAssistProcessor processor= new TypeContentAssistProcessor(declaringType);
+			contentAssistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
+			
+			ContentAssistPreference.configure(contentAssistant, JavaPlugin.getDefault().getJavaTextTools().getPreferenceStore());
+			contentAssistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
+			contentAssistant.setInformationControlCreator(new IInformationControlCreator() {
+				public IInformationControl createInformationControl(Shell parent) {
+					return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true));
+				}
+			});
+
+			combo.addKeyListener(new KeyAdapter() {
+				/*
+				 * @see org.eclipse.swt.events.KeyListener#keyReleased(org.eclipse.swt.events.KeyEvent)
+				 */
+				public void keyPressed(KeyEvent e) {
+//					ICommandManager cm= ((Workbench)PlatformUI.getWorkbench()).getCommandManager();
+//					ICommand command= cm.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+//					command.getKeyBindings();
+//					System.out.println("pressed");
+
+					if (e.character == ' ' && e.stateMask == SWT.CTRL) {
+						e.doit= false;
+						String errorMessage= contentAssistant.showPossibleCompletions();
+						if (errorMessage != null)
+							setErrorMessage(errorMessage);
+					}
+					
+				}});
+			contentAssistant.install(new ComboContentAssistSubjectAdapter(combo));
+			return contentAssistant;
+		}
+
+		public void dispose() {
+			if (fContentAssistant != null) {
+				fContentAssistant.uninstall();
+				fContentAssistant= null;
+				super.dispose();
+			}
+		}
+		
 		protected boolean performFinish() {
 			initializeRefactoring();
 			return super.performFinish();
@@ -187,7 +247,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 
 		private void initializeRefactoring() {
 			try {
-				String destination= fInputField.getText();
+				String destination= fDestinationField.getText();
 				if (!fgMruDestinations.remove(destination) && fgMruDestinations.size() >= MRU_COUNT)
 					fgMruDestinations.remove(fgMruDestinations.size() - 1);
 				fgMruDestinations.add(0, destination);
@@ -240,12 +300,12 @@ public class MoveMembersWizard extends RefactoringWizard {
 			if (dialog.open() == Window.CANCEL)
 				return;
 			IType firstResult= (IType)dialog.getFirstResult();		
-			fInputField.setText(JavaModelUtil.getFullyQualifiedName(firstResult));	
+			fDestinationField.setText(JavaModelUtil.getFullyQualifiedName(firstResult));	
 		}
 
 		private String createInitialFilter() {
-			if (! fInputField.getText().trim().equals("")) //$NON-NLS-1$
-				return fInputField.getText();
+			if (! fDestinationField.getText().trim().equals("")) //$NON-NLS-1$
+				return fDestinationField.getText();
 			else
 				return getMoveRefactoring().getDeclaringType().getElementName();
 		}
