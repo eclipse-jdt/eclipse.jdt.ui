@@ -325,14 +325,17 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 	
 	private Control createPreview(Composite parent) {
-		SourceViewer previewViewer= new SourceViewer(parent, null, SWT.V_SCROLL);
+		SourceViewer previewViewer= new SourceViewer(parent, null, SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		previewViewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		previewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
 		previewViewer.setEditable(false);
 		previewViewer.setDocument(fPreviewDocument);
 		Control control= previewViewer.getControl();
-		control.setLayoutData(new GridData(GridData.FILL_BOTH));
+		GridData gdata= new GridData(GridData.FILL_BOTH);
+		gdata.widthHint= convertWidthInCharsToPixels(80);
+		gdata.heightHint= convertHeightInCharsToPixels(15);
+		control.setLayoutData(gdata);
 		return control;
 	}
 
