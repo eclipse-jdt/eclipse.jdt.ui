@@ -57,7 +57,8 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	private IStatus fCurrStatus;
 	
 	// added for 1GEUK5C, 1GEUUN9, 1GEUNW2
-	private boolean fPageVisible;	
+	private boolean fPageVisible;
+	private boolean fDefaultsChanged;
 	
 	/**
 	 * Creates a Java project wizard creation page.
@@ -84,6 +85,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 		fBuildPathsBlock= new BuildPathsBlock(root, listener, true);
 		fCurrStatus= new StatusInfo();
 		fPageVisible= false;
+		fDefaultsChanged= false;
 	}		
 	
 	/**
@@ -99,6 +101,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 */
 	public void setDefaultOutputFolder(IPath path) {
 		fBuildPathsBlock.setDefaultOutputFolder(path);
+		fDefaultsChanged= true;
 	}	
 
 	/**
@@ -122,6 +125,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 */
 	public void setDefaultClassPath(IClasspathEntry[] entries, boolean appendDefaultJRE) {
 		fBuildPathsBlock.setDefaultClassPath(entries, appendDefaultJRE);
+		fDefaultsChanged= true;
 	}
 
 	/**
@@ -165,7 +169,8 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 */	
 	public void setVisible(boolean visible) {
 		if (visible) {
-			fBuildPathsBlock.init(getProjectHandle(), false);		
+			fBuildPathsBlock.init(getProjectHandle(), fDefaultsChanged);
+			fDefaultsChanged= false;
 		}
 		super.setVisible(visible);
 		fPageVisible= visible;
@@ -214,7 +219,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 					throw new InvocationTargetException(e);
 				}
 				// create the java project
-				fBuildPathsBlock.init(project, false);
+				fBuildPathsBlock.init(project, fDefaultsChanged);
 				IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable();
 				jrunnable.run(new SubProgressMonitor(monitor, workLeft));
 				monitor.done();
