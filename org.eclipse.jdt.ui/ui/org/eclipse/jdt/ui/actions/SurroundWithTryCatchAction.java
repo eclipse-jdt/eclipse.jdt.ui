@@ -122,7 +122,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 
 	/* package */ void editorStateChanged() {
-		setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly() && getCompilationUnit() != null);
+		setEnabled(checkEditor());
 	}
 	
 	protected void selectionChanged(ITextSelection selection) {
