@@ -885,7 +885,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOf("proposals", proposals.size(), 7);
+		assertNumberOf("proposals", proposals.size(), 8);
 		assertCorrectLabels(proposals);
 
 		boolean doField= true, doParam= true, doLocal= true, doConst= true, doInterface= true, doClass= true, doEnum= true, doChange= true;
