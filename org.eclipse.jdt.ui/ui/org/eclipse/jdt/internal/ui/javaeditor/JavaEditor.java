@@ -1387,9 +1387,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				
 				if (offset < 0 || length < 0)
 					return;
-					
-				textWidget.setRedraw(false);
-				
+									
 				setHighlightRange(offset, length, moveCursor);
 
 				if (!moveCursor)
@@ -1425,16 +1423,20 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				}
 				
 				if (offset > -1 && length > 0) {
-					sourceViewer.revealRange(offset, length);
-					sourceViewer.setSelectedRange(offset, length);
+					
+					try  {
+						textWidget.setRedraw(false);
+						sourceViewer.revealRange(offset, length);
+						sourceViewer.setSelectedRange(offset, length);
+					} finally {
+						textWidget.setRedraw(true);
+					}
+					
 					markInNavigationHistory();
 				}
 				
 			} catch (JavaModelException x) {
 			} catch (IllegalArgumentException x) {
-			} finally {
-				if (textWidget != null)
-					textWidget.setRedraw(true);
 			}
 						
 		} else if (moveCursor) {
