@@ -190,8 +190,14 @@ class CompilationUnitCompletion extends CompletionRequestorAdapter {
 			return false;
 
 		IJavaProject project= fUnit.getJavaProject();
+
 		IType type0= project.findType(typeName0);
+		if (type0 == null)
+			return false;
+
 		IType type1= project.findType(typeName1);
+		if (type1 == null)
+			return false;
 
 		ITypeHierarchy hierarchy= type0.newSupertypeHierarchy(null);
 		IType[] superTypes= hierarchy.getAllSupertypes(type0);
