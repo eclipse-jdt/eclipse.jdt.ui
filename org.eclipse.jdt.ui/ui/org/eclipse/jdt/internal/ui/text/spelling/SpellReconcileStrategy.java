@@ -310,12 +310,6 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#initialReconcile()
 	 */
 	public void initialReconcile() {
-
-		final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
-		final ISpellChecker checker= engine.createSpellChecker(getLocale(), fPreferences);
-
-		if (checker != null)
-			checker.addListener(this);
 	}
 
 	/*
@@ -344,12 +338,17 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 
 				final ISpellChecker checker= engine.createSpellChecker(locale, fPreferences);
 				if (checker != null) {
-
-					for (int index= 0; index < partitions.length; index++) {
-
-						partition= partitions[index];
-						if (!partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE))
-							checker.execute(new SpellCheckIterator(fDocument, partition, locale));
+					try {
+						checker.addListener(this);
+						
+						for (int index= 0; index < partitions.length; index++) {
+							partition= partitions[index];
+							if (!partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE))
+								checker.execute(new SpellCheckIterator(fDocument, partition, locale));
+						}
+						
+					} finally {
+						checker.removeListener(this);
 					}
 				}
 			} catch (BadLocationException exception) {
