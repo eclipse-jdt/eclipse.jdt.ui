@@ -32,6 +32,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -39,14 +43,14 @@ import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplateSet;
 
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.window.Window;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+import org.eclipse.ui.texteditor.PreferencesAdapter;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
+
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
@@ -269,13 +273,15 @@ public class CodeTemplateBlock {
 		IDocument document= new Document();
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
-		viewer.configure(new TemplateEditorSourceViewerConfiguration(tools, null, fTemplateProcessor));
+		IPreferenceStore newStore= new ChainedPreferenceStore(new IPreferenceStore[] { tools.getPreferenceStore(), new PreferencesAdapter(tools.getCorePreferenceStore()) });
+		TemplateEditorSourceViewerConfiguration configuration= new TemplateEditorSourceViewerConfiguration(tools.getColorManager(), newStore, null, fTemplateProcessor);
+		viewer.configure(configuration);
 		viewer.setEditable(false);
 		viewer.setDocument(document);
 	
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
-		new JavaSourcePreviewerUpdater(viewer, tools);
+		new JavaSourcePreviewerUpdater(viewer, configuration, newStore);
 		
 		Control control= viewer.getControl();
 		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);

@@ -69,6 +69,8 @@ import org.eclipse.jface.text.templates.persistence.TemplateSet;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+import org.eclipse.ui.texteditor.PreferencesAdapter;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -400,17 +402,19 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		IDocument document= new Document();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 
-		viewer.configure(new TemplateEditorSourceViewerConfiguration(tools, null, fTemplateProcessor));
+		IPreferenceStore newStore= new ChainedPreferenceStore(new IPreferenceStore[] { tools.getPreferenceStore(), new PreferencesAdapter(tools.getCorePreferenceStore()) });
+		TemplateEditorSourceViewerConfiguration configuration= new TemplateEditorSourceViewerConfiguration(tools.getColorManager(), newStore, null, fTemplateProcessor);
+		viewer.configure(configuration);
 		viewer.setEditable(false);
 		viewer.setDocument(document);
 	
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
-		new JavaSourcePreviewerUpdater(viewer, tools);
+		new JavaSourcePreviewerUpdater(viewer, configuration, newStore);
 		
 		Control control= viewer.getControl();
 		data= new GridData(GridData.FILL_BOTH);
-        data.horizontalSpan= 2;
+		data.horizontalSpan= 2;
 		data.heightHint= convertHeightInCharsToPixels(5);
 		control.setLayoutData(data);
 		

@@ -24,7 +24,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 /**
  * Handles Java editor font changes for Java source preview viewers.
@@ -33,9 +33,17 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
  */
 class JavaSourcePreviewerUpdater {
 	
-	JavaSourcePreviewerUpdater(final SourceViewer viewer, final JavaTextTools javaTextTools) {
+	/**
+	 * Creates a Java source preview updater for the given viewer, configuration and preference store.
+	 *
+	 * @param viewer the viewer
+	 * @param configuration the configuration
+	 * @param preferenceStore the preference store
+	 */
+	JavaSourcePreviewerUpdater(final SourceViewer viewer, final JavaSourceViewerConfiguration configuration, final IPreferenceStore preferenceStore) {
 		Assert.isNotNull(viewer);
-		Assert.isNotNull(javaTextTools);
+		Assert.isNotNull(configuration);
+		Assert.isNotNull(preferenceStore);
 		final IPropertyChangeListener fontChangeListener= new IPropertyChangeListener() {
 			/*
 			 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
@@ -47,14 +55,15 @@ class JavaSourcePreviewerUpdater {
 				}
 			}
 		};
-		final IPreferenceStore preferenceStore= javaTextTools.getPreferenceStore();
 		final IPropertyChangeListener propertyChangeListener= new IPropertyChangeListener() {
 			/*
 			 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 			 */
 			public void propertyChange(PropertyChangeEvent event) {
-				if (javaTextTools.affectsBehavior(event))
+				if (configuration.affectsTextPresentation(event)) {
+					configuration.handlePropertyChangeEvent(event);
 					viewer.invalidateTextPresentation();
+				}
 			}
 		};
 		viewer.getTextWidget().addDisposeListener(new DisposeListener() {

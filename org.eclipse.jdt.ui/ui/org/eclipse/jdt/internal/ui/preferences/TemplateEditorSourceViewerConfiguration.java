@@ -89,8 +89,8 @@ public class TemplateEditorSourceViewerConfiguration extends JavaSourceViewerCon
 	
 	private final TemplateVariableProcessor fProcessor;
 
-	public TemplateEditorSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor, TemplateVariableProcessor processor) {
-		super(tools, editor, IJavaPartitions.JAVA_PARTITIONING);
+	public TemplateEditorSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore newPreferenceStore, ITextEditor editor, TemplateVariableProcessor processor) {
+		super(colorManager, newPreferenceStore, editor, IJavaPartitions.JAVA_PARTITIONING);
 		fProcessor= processor;
 	}
 	

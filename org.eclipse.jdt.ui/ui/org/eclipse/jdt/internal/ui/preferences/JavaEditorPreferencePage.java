@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
@@ -68,8 +69,10 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
+import org.eclipse.ui.texteditor.PreferencesAdapter;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -571,10 +574,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fJavaTextTools= new JavaTextTools(fOverlayStore, coreStore, false);
 		
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		fPreviewViewer.configure(new JavaSourceViewerConfiguration(fJavaTextTools, null, IJavaPartitions.JAVA_PARTITIONING));
+		IPreferenceStore newStore= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, new PreferencesAdapter(coreStore) });
+		JavaSourceViewerConfiguration configuration= new JavaSourceViewerConfiguration(fJavaTextTools.getColorManager(), newStore, null, IJavaPartitions.JAVA_PARTITIONING);
+		fPreviewViewer.configure(configuration);
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
-		new JavaSourcePreviewerUpdater(fPreviewViewer, fJavaTextTools);
+		new JavaSourcePreviewerUpdater(fPreviewViewer, configuration, newStore);
 		fPreviewViewer.setEditable(false);
 		
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt"); //$NON-NLS-1$
