@@ -425,7 +425,7 @@ public class DocumentAdapter2 implements IBuffer, IDocumentListener {
 				if (curr != null && !fLegalLineDelimiters.contains(curr)) {
 					StringBuffer buf= new StringBuffer("New line delimiter added to new code: "); //$NON-NLS-1$
 					for (int k= 0; k < curr.length(); k++) {
-						buf.append(String.valueOf((int) curr.charAt(i)));
+						buf.append(String.valueOf((int) curr.charAt(k)));
 					}
 					JavaPlugin.log(new Exception(buf.toString()));
 				}
