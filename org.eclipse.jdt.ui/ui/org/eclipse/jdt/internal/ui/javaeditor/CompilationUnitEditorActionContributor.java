@@ -31,16 +31,19 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 public class CompilationUnitEditorActionContributor extends BasicEditorActionContributor {
 	
 	/** The smart editing status item */
-	private StatusLineContributionItem fStatusItem= new StatusLineContributionItem(IJavaEditorActionConstants.STATUS_CATEGORY_SMART_TYPING);;
-	
+	private StatusLineContributionItem fStatusItem;
 	/** The smart typing toggle action */
 	private TextEditorAction fSmartTypingAction;
 	
+
 	public CompilationUnitEditorActionContributor() {
 		super();
 		fSmartTypingAction= new ToggleSmartTypingAction(JavaEditorMessages.getResourceBundle(), "ToggleSmartTypingAction.", null); //$NON-NLS-1$
 		fSmartTypingAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_SMART_TYPING);
 		WorkbenchHelp.setHelp(fSmartTypingAction, IJavaHelpContextIds.TOGGLE_SMART_TYPING_ACTION);
+		
+		fStatusItem= new StatusLineContributionItem(IJavaEditorActionConstants.STATUS_CATEGORY_SMART_TYPING);
+		fStatusItem.setActionHandler(fSmartTypingAction);
 	}
 
 	/*
