@@ -141,7 +141,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 								&& !marker.getAttribute(IJavaSearchUIConstants.ATT_IS_WORKING_COPY, false)
 								&& !marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID_CHANGED, false);
 
-			if (canUseGroupByKey)
+			if (canUseGroupByKey && entry.getGroupByKey() instanceof IJavaElement)
 				fLastJavaElement= (IJavaElement)entry.getGroupByKey();
 			else
 				fLastJavaElement= SearchUtil.getJavaElement(marker);
