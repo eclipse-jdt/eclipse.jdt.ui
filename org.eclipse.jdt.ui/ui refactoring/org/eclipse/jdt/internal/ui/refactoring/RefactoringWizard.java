@@ -21,6 +21,7 @@ public class RefactoringWizard extends Wizard {
 		setNeedsProgressMonitor(true);
 		fPageTitle= pageTitle;
 		setWindowTitle("Refactoring");
+		fErrorPageContextHelpId= errorPageContextHelpId;
 	}
 	
 	/**
