@@ -394,7 +394,7 @@ public class AddVMDialog extends StatusDialog {
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setFilterPath(fSystemLibrarySource.getText());
 		dialog.setText(LauncherMessages.getString("addVMDialog.pickJRESource")); //$NON-NLS-1$
-		dialog.setFilterExtensions(new String[] { "*.jar", "*.zip"}); //$NON-NLS-2$ //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] { "*.jar;*.zip"}); //$NON-NLS-1$
 		String newPath= dialog.open();
 		if  (newPath != null)
 			fSystemLibrarySource.setText(newPath);
