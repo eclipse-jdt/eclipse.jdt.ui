@@ -16,6 +16,17 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 public interface IContextMenuConstants {
 
 	/**
+	 * Pop-up menu: name of group for goto actions (value <code>"group.open"</code>).
+	 * <p>
+	 * Examples for open actions are:
+	 * <ul>
+	 *  <li>Go Into</li>
+	 *  <li>Go To</li>
+	 * </ul>
+	 * </p>
+	 */
+	public static final String GROUP_GOTO=		"group.goto";
+	/**
 	 * Pop-up menu: name of group for open actions (value <code>"group.open"</code>).
 	 * <p>
 	 * Examples for open actions are:

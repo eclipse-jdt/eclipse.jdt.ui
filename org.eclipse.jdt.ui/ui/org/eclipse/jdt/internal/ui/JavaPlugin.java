@@ -246,6 +246,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (!menu.isEmpty())
 			return;
 			
+		menu.add(new Separator(IContextMenuConstants.GROUP_GOTO));
 		menu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
 		menu.add(new Separator(IContextMenuConstants.GROUP_SHOW));
 		menu.add(new Separator(IContextMenuConstants.GROUP_NEW));
