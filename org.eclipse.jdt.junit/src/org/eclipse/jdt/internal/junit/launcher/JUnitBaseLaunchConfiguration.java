@@ -68,7 +68,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 			abort(MessageFormat.format(JUnitMessages.getString("JUnitBaseLaunchConfiguration.error.novmrunner"), new String[]{install.getId()}), null, IJavaLaunchConfigurationConstants.ERR_VM_RUNNER_DOES_NOT_EXIST); //$NON-NLS-1$
 		}
 		
-		int port= SocketUtil.findUnusedLocalPort("", 5000, 15000);   //$NON-NLS-1$
+		int port= SocketUtil.findFreePort();
 		VMRunnerConfiguration runConfig= launchTypes(configuration, mode, testTypes, port);
 		setDefaultSourceLocator(launch, configuration);
 		
