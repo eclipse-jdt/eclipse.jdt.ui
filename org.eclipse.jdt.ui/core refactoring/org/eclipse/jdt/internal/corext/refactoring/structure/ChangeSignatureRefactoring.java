@@ -338,6 +338,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private void checkReturnType(RefactoringStatus result) {
+		if ("".equals(fReturnTypeName.trim())) { //$NON-NLS-1$
+			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.return_type_not_empty"); //$NON-NLS-1$
+			result.addFatalError(msg);
+		}
 		if (! isValidTypeName(fReturnTypeName, true)){
 			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type", new String[]{fReturnTypeName}); //$NON-NLS-1$
 			result.addFatalError(msg);
