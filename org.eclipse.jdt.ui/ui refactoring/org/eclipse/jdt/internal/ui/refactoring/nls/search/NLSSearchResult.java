@@ -14,27 +14,32 @@ package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+
 import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.IEditorMatchAdapter;
 import org.eclipse.search.ui.text.IFileMatchAdapter;
 import org.eclipse.search.ui.text.Match;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 public class NLSSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
 	/*
@@ -47,17 +52,6 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 
 	public NLSSearchResult(NLSSearchQuery query) {
 		fQuery= query;
-	}
-	
-	//TODO: workaround for bug 58417
-	public Match[] getMatches(Object element) {
-		Match[] matches= super.getMatches(element);
-		Arrays.sort(matches, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return ((Match) o1).getOffset() - ((Match) o2).getOffset();
-			}
-		});
-		return matches;
 	}
 	
 	public void setDuplicatesGroup(FileEntry duplicatesGroup) {
