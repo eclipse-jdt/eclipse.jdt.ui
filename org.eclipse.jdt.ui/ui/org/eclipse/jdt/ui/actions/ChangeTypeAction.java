@@ -126,7 +126,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 			if (PrimitiveType.toCode(Signature.toString(returnType)) != null)
 				return null;
 			return method;
-		} else if (element instanceof IField) {
+		} else if (element instanceof IField && !JdtFlags.isEnum((IMember) element)) {
 			return (IField)element;
 		}
 		return null;
