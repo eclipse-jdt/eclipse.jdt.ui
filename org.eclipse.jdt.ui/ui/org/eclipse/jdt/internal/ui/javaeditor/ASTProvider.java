@@ -546,8 +546,6 @@ public final class ASTProvider {
 	 * @param je the Java element for which to create the AST
 	 * @param progressMonitor the progress monitor
 	 * @return AST
-	 * @throws IllegalStateException if the settings provided are
-	 * 					insufficient, contradictory, or otherwise unsupported
 	 */
 	private CompilationUnit createAST(IJavaElement je, IProgressMonitor progressMonitor) {
 		ASTParser parser = ASTParser.newParser(AST_LEVEL);
