@@ -73,6 +73,7 @@ public class CodeTemplates extends TemplateSet {
 		// TODO remove once we have a contribution mechanism
 		if (ContextTypeRegistry.getInstance().getContextType("java") == null)
 			ContextTypeRegistry.getInstance().add(new JavaContextType());
+		CodeTemplateContextType.registerContextTypes(ContextTypeRegistry.getInstance());
 		if (ContextTypeRegistry.getInstance().getContextType("javadoc") == null)
 			ContextTypeRegistry.getInstance().add(new JavaDocContextType());
 		
