@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,7 +89,6 @@ import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
@@ -102,6 +102,7 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
@@ -456,10 +457,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		} else {
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement, getSite().getWorkbenchWindow());
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+			} catch (InvocationTargetException e) {
+				ExceptionHandler.handle(e, getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				clearInput();
 				return;
+			} catch (InterruptedException e) {
+				return;				
 			}
 				
 			if (inputElement.getElementType() != IJavaElement.TYPE) {
@@ -1229,11 +1232,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		} else {
 			if (changedTypes == null) {
 				// hierarchy change
-				try {
+				try { 
 					fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement, getSite().getWorkbenchWindow());
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
+				} catch (InvocationTargetException e) {
+					ExceptionHandler.handle(e, getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.exception.message")); //$NON-NLS-1$ //$NON-NLS-2$
 					clearInput();
+					return;
+				} catch (InterruptedException e) {
 					return;
 				}
 				fMethodsViewer.refresh();

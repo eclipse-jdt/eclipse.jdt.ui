@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -95,7 +94,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 	}
 		
-	public void ensureRefreshedTypeHierarchy(final IJavaElement element, IRunnableContext context) throws JavaModelException {
+	public void ensureRefreshedTypeHierarchy(final IJavaElement element, IRunnableContext context) throws InvocationTargetException, InterruptedException {
 		if (element == null || !element.exists()) {
 			freeHierarchy();
 			return;
@@ -103,33 +102,18 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		boolean hierachyCreationNeeded= (fHierarchy == null || !element.equals(fInputElement));
 		
 		if (hierachyCreationNeeded || fHierarchyRefreshNeeded) {
+			
 			IRunnableWithProgress op= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					try {
 						doHierarchyRefresh(element, pm);
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
-					} finally {
-						if (pm != null) {
-							pm.done();
-						}
 					}
 				}
 			};
-			
-			try {
-				context.run(true, true, op);
-			} catch (InvocationTargetException e) {
-				Throwable th= e.getTargetException();
-				if (th instanceof JavaModelException) {
-					throw (JavaModelException)th;
-				} else {
-					throw new JavaModelException(th, IStatus.ERROR);
-				}
-			} catch (InterruptedException e) {
-				// Not cancelable.
-			}
-			
+			fHierarchyRefreshNeeded= true;
+			context.run(true, true, op);
 			fHierarchyRefreshNeeded= false;
 		}
 	}
@@ -143,7 +127,6 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			JavaCore.removeElementChangedListener(this);
 		}
 		if (hierachyCreationNeeded) {
-			fInputElement= element;
 			if (element.getElementType() == IJavaElement.TYPE) {
 				IType type= (IType) element;
 				if (fIsSuperTypesOnly) {
@@ -176,6 +159,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				IJavaProject jproject= element.getJavaProject();
 				fHierarchy= jproject.newTypeHierarchy(region, pm);				
 			}
+			fInputElement= element;
 		} else {
 			fHierarchy.refresh(pm);
 		}
