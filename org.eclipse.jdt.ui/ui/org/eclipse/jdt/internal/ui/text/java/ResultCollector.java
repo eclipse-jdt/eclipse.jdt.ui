@@ -49,6 +49,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	private IJavaProject fJavaProject;
 	private ICompilationUnit fCompilationUnit; // set when imports can be added
 	private int fCodeAssistOffset;
+	private int fContextOffset;
 	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	
 	private ArrayList[] fResults = new ArrayList[] {
@@ -189,7 +190,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
 		char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
 		int start, int end, int relevance) {
-			
+		
 		if (completionName == null)
 			return;
 	
@@ -204,7 +205,9 @@ public class ResultCollector extends CompletionRequestorAdapter {
 			contextInformation= new ProposalContextInformation();
 			contextInformation.setInformationDisplayString(getParameterSignature(parameterTypeNames, parameterNames));		
 			contextInformation.setContextDisplayString(proposal.getDisplayString());
-			contextInformation.setImage(proposal.getImage());		
+			contextInformation.setImage(proposal.getImage());
+			int position= (completionName.length == 0) ? fContextOffset : -1;
+			contextInformation.setContextInformationPosition(position);
 			proposal.setContextInformation(contextInformation);
 		}
 	
@@ -432,6 +435,30 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	
 	/**
 	 * Specifies the context of the code assist operation.
+	 * @param codeAssistOffset The Offset at which the code assist will be called.
+	 * Used to modify the offsets of the created proposals. ('Non Eating')
+	 * @param contextOffset The offset at which the context presumable start or -1.
+	 * @param jproject The Java project to which the underlying source belongs.
+	 * Needed to find types referred.
+	 * @param cu The compilation unit that is edited. Used to add import statements.
+	 * Can be <code>null</code> if no import statements should be added.
+	 */
+	public void reset(int codeAssistOffset, int contextOffset, IJavaProject jproject, ICompilationUnit cu) {
+		fJavaProject= jproject;
+		fCompilationUnit= cu;
+		fCodeAssistOffset= codeAssistOffset;
+		fContextOffset= contextOffset;
+		
+		fUserReplacementLength= -1;
+		
+		fLastProblem= null;
+		
+		for (int i= 0; i < fResults.length; i++)
+			fResults[i].clear();
+	}
+
+	/**
+	 * Specifies the context of the code assist operation.
 	 * @param codeAssistOffset The Offset on which the code assist will be called.
 	 * Used to modify the offsets of the created proposals. ('Non Eating')
 	 * @param jproject The Java project to which the underlying source belongs.
@@ -440,16 +467,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	 * Can be <code>null</code> if no import statements should be added.
 	 */
 	public void reset(int codeAssistOffset, IJavaProject jproject, ICompilationUnit cu) {
-		fJavaProject= jproject;
-		fCompilationUnit= cu;
-		fCodeAssistOffset= codeAssistOffset;
-		
-		fUserReplacementLength= -1;
-		
-		fLastProblem= null;
-		
-		for (int i= 0; i < fResults.length; i++)
-			fResults[i].clear();
+		reset(codeAssistOffset, -1, jproject, cu);
 	}
 	
 	/**

@@ -261,7 +261,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	}		
 	
 	private List addContextInformations(ITextViewer viewer, int offset) {
-		ICompletionProposal[] proposals= computeCompletionProposals(viewer, offset);
+		ICompletionProposal[] proposals= internalComputeCompletionProposals(viewer, offset, -1);
 
 		List result= new ArrayList();
 		for (int i= 0; i < proposals.length; i++) {
@@ -296,6 +296,11 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
+		int contextInformationPosition= guessContextInformationPosition(viewer, offset);
+		return internalComputeCompletionProposals(viewer, offset, contextInformationPosition);
+	}
+	
+	private ICompletionProposal[] internalComputeCompletionProposals(ITextViewer viewer, int offset, int contextOffset) {
 		
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 		IJavaCompletionProposal[] results;
@@ -305,7 +310,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			try {
 				if (unit != null) {
 	
-					fExperimentalCollector.reset(offset, unit.getJavaProject(), fAllowAddImports ? unit : null);
+					fExperimentalCollector.reset(offset, contextOffset, unit.getJavaProject(), fAllowAddImports ? unit : null);
 					fExperimentalCollector.setViewer(viewer);
 					
 					Point selection= viewer.getSelectedRange();
@@ -326,7 +331,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			try {
 				if (unit != null) {
 	
-					fCollector.reset(offset, unit.getJavaProject(), fAllowAddImports ? unit : null);
+					fCollector.reset(offset, contextOffset, unit.getJavaProject(), fAllowAddImports ? unit : null);
 					Point selection= viewer.getSelectedRange();
 					if (selection.y > 0)
 						fCollector.setReplacementLength(selection.y);

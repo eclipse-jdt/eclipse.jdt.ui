@@ -9,17 +9,20 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.contentassist.IContextInformationExtension;
+
 import org.eclipse.jface.util.Assert;
 
 
 /**
  * Implementation of the <code>IContextInformation</code> interface.
  */
-public final class ProposalContextInformation implements IContextInformation {
+public final class ProposalContextInformation implements IContextInformation, IContextInformationExtension {
 	
 	private String fContextDisplayString;
 	private String fInformationDisplayString;
 	private Image fImage;
+	private int fPosition;
 
 	/**
 	 * Creates a new context information.
@@ -87,5 +90,16 @@ public final class ProposalContextInformation implements IContextInformation {
 		if (fContextDisplayString != null)
 			return fContextDisplayString;
 		return fInformationDisplayString;
+	}
+	
+	/*
+	 * @see IContextInformationExtension#getContextInformationPosition()
+	 */
+	public int getContextInformationPosition() {
+		return fPosition;
+	}
+	
+	public void setContextInformationPosition(int position) {
+		fPosition= position;
 	}
 }
