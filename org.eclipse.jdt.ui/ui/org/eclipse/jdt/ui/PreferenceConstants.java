@@ -55,6 +55,16 @@ public class PreferenceConstants {
 	public static final String APPEARANCE_METHOD_RETURNTYPE= "org.eclipse.jdt.ui.methodreturntype";//$NON-NLS-1$
 
 	/**
+	 * A named preference that controls type parameter rendering of methods in the UI.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: if <code>true</code> return types
+	 * are rendered
+	 * </p>
+	 * @since 3.1
+	 */
+	public static final String APPEARANCE_METHOD_TYPEPARAMETERS= "org.eclipse.jdt.ui.methodtypeparametesr";//$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if override indicators are rendered in the UI.
 	 * <p>
 	 * Value is of type <code>Boolean</code>: if <code>true</code> override 
@@ -2614,6 +2624,7 @@ public class PreferenceConstants {
 		// AppearancePreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE, false);
+		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS, true);
 		store.setDefault(PreferenceConstants.SHOW_CU_CHILDREN, true);
 		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
