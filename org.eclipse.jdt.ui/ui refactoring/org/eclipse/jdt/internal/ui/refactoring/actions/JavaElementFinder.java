@@ -58,7 +58,7 @@ class JavaElementFinder {
 		dialog.setMessage("Select the correct element from the list");
 		dialog.setElements(openChoices.toArray());
 		if (dialog.open() == dialog.OK)
-			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
+			return (IJavaElement)dialog.getFirstResult();
 		return null;
 	}
 	
