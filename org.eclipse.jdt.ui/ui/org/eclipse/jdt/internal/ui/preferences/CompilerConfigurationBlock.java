@@ -272,7 +272,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.common.description")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
-		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
+		//gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);		
 
 		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_overriding_pkg_dflt.label"); //$NON-NLS-1$
@@ -329,7 +329,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.advanced.description")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
-		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
+		//gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 			
 		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_synth_access_emul.label"); //$NON-NLS-1$
@@ -391,7 +391,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.unused.description")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
-		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
+		//gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 		
 		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_local.label"); //$NON-NLS-1$
@@ -455,34 +455,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.getString("CompilerConfigurationBlock.private") //$NON-NLS-1$
 		};
 		int nColumns= 3;
-		
-		/*
-		 * COMPILER_PB_INVALID_JAVADOC: "ignore", "warning", "error"
-			  COMPILER_PB_INVALID_JAVADOC_TAGS: "enabled", "disabled"
-			  COMPILER_PB_INVALID_JAVADOC_TAGS_VISIBILITY: "public", "protected", "default", "private"
-			
-			COMPILER_PB_MISSING_JAVADOC_TAGS: "ignore", "warning", "error"
-			  COMPILER_PB_MISSING_JAVADOC_TAGS_VISIBILITY: "public", "protected", "default", "private"
-			  COMPILER_PB_MISSING_JAVADOC_TAGS_OVERRIDING: "enabled", "disabled"
-			
-			COMPILER_PB_MISSING_JAVADOC_COMMENTS: "ignore", "warning", "error"
-			  COMPILER_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY: "public", "protected", "default", "private"
-			  COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING: "enabled", "disabled"
-		 */
-		
-//		GridLayout layout = new GridLayout();
-//		layout.numColumns= nColumns;
-//		
-//		Composite composite= new Composite(folder, SWT.NULL);
-//		composite.setLayout(layout);
-//
-//		Label description= new Label(composite, SWT.WRAP);
-//		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.javadoc.description")); //$NON-NLS-1$
-//		GridData gd= new GridData();
-//		gd.horizontalSpan= nColumns;
-//		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
-//		description.setLayoutData(gd);
-		
+				
 		GridLayout layout = new GridLayout();
 		layout.numColumns= nColumns;
 		
@@ -493,7 +466,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.javadoc.description")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
-		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
+		//gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 			
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
