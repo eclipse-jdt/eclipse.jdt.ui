@@ -121,6 +121,7 @@ public class JUnitPreferencePage extends PreferencePage
 	protected void createListButtons(Composite composite) {
 		Composite buttonComposite= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
 		buttonComposite.setLayout(layout);	
 		GridData gridData= new GridData();
 		gridData.verticalAlignment= GridData.FILL;
