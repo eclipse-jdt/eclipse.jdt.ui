@@ -1100,9 +1100,12 @@ public class MoveTest extends RefactoringTest {
 					new MoveArguments(org.getResource(), ref.getUpdateReferences())});
 		}finally{
 			performDummySearch();
-			newCuD.delete(true, new NullProgressMonitor());
-			orgTest.delete(true, new NullProgressMonitor());
-			org.delete(true, new NullProgressMonitor());
+			if (newCuD.exists())
+				newCuD.delete(true, new NullProgressMonitor());
+			if (orgTest.exists())
+				orgTest.delete(true, new NullProgressMonitor());
+			if (org.exists())
+				org.delete(true, new NullProgressMonitor());
 			if (newOptions != null)
 				javaProject.setOptions(originalOptions);
 		}
@@ -1145,9 +1148,12 @@ public class MoveTest extends RefactoringTest {
 
 		}finally{
 			performDummySearch();
-			newCuD.delete(true, new NullProgressMonitor());
-			orgTest.delete(true, new NullProgressMonitor());
-			org.delete(true, new NullProgressMonitor());
+			if (newCuD.exists())
+				newCuD.delete(true, new NullProgressMonitor());
+			if (orgTest.exists())
+				orgTest.delete(true, new NullProgressMonitor());
+			if (org.exists())
+				org.delete(true, new NullProgressMonitor());
 			if (newOptions != null)
 				javaProject.setOptions(originalOptions);
 		}
