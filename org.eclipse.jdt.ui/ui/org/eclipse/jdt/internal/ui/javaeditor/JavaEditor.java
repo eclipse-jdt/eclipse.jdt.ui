@@ -995,7 +995,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				
 			if (sourceViewer instanceof ITextViewerExtension4)  {
 				ITextViewerExtension4 extension4= (ITextViewerExtension4) sourceViewer;
-				extension4.moveFocusToWidgetToken();
+				if (extension4.moveFocusToWidgetToken())
+					return;
 			}
 			
 			if (! (sourceViewer instanceof ITextViewerExtension2)) {
