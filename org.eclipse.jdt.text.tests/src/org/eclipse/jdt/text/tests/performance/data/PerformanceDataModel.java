@@ -27,10 +27,10 @@ public class PerformanceDataModel {
 	private Map fSessions;
 	private final String fLocation;
 	
-	public synchronized MeteringSession[] getMeteringSessions() {
+	public synchronized Sample[] getMeteringSessions() {
 		if (fSessions == null)
 			reload();
-		return (MeteringSession[]) fSessions.values().toArray(new MeteringSession[fSessions.size()]);
+		return (Sample[]) fSessions.values().toArray(new Sample[fSessions.size()]);
 	}
 	
 	public PerformanceDataModel(String location) {
@@ -39,7 +39,7 @@ public class PerformanceDataModel {
 	
 	public synchronized void reload() {
 		PerformanceFileParser parser= new PerformanceFileParser();
-		MeteringSession[] files= parser.parseLocation(fLocation);
+		Sample[] files= parser.parseLocation(fLocation);
 		Map map= new HashMap();
 		for (int i= 0; i < files.length; i++) {
 			map.put(files[i].getId(), files[i]);
@@ -61,7 +61,7 @@ public class PerformanceDataModel {
 			try {
 				String path= file.getCanonicalPath();
 				if (fSessions.containsKey(path)) {
-					MeteringSession xmlfile= parser.parse(new BufferedInputStream(new FileInputStream(file)));
+					Sample xmlfile= parser.parse(new BufferedInputStream(new FileInputStream(file)));
 					fSessions.put(xmlfile.getId(), xmlfile);
 				}
 			} catch (IOException e) {

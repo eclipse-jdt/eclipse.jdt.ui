@@ -16,11 +16,11 @@ import java.util.Map;
 /**
  * @since 3.1
  */
-public class MeteringSession {
+public class Sample {
 	Map fProperties;
 	DataPoint[] fDataPoints;
 	String fId;
-	public MeteringSession(Map properties, DataPoint[] dataPoints) {
+	public Sample(Map properties, DataPoint[] dataPoints) {
 		fProperties= properties;
 		fDataPoints= dataPoints;
 	}

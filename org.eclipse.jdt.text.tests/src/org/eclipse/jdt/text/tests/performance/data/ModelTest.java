@@ -23,7 +23,7 @@ public class ModelTest {
 	private void run() {
 		PerformanceDataModel model= new PerformanceDataModel("/home/tei/tmp/perfmsr");
 		System.out.println("there are " + model.getMeteringSessions().length + " files in the model");
-		MeteringSession session= model.getMeteringSessions()[0];
+		Sample session= model.getMeteringSessions()[0];
 		System.out.println(session);
 		DataPoint datapoint= session.getDataPoints()[0];
 		System.out.println(datapoint);

@@ -50,7 +50,7 @@ public class Performance {
 	 * @throws RuntimeException if the properties do not hold
 	 */
 	public void assertPerformance(PerformanceMeter performanceMeter) {
-		Evaluator.getDefaultEvaluator().evaluate(performanceMeter.getSessionData());
+		Evaluator.getDefaultEvaluator().evaluate(performanceMeter.getSample());
 	}
 	
 	public static PerformanceMeterFactory createPerformanceMeterFactory() {

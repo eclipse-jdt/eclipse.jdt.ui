@@ -11,7 +11,7 @@
 
 package org.eclipse.test.performance;
 
-import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
+import org.eclipse.jdt.text.tests.performance.data.Sample;
 
 /**
  * A <code>PerformanceMeter</code> is used to measure an arbitrary operation
@@ -50,5 +50,5 @@ public abstract class PerformanceMeter {
 	 */
 	public abstract void commit();
 
-	protected abstract MeteringSession getSessionData();
+	protected abstract Sample getSample();
 }

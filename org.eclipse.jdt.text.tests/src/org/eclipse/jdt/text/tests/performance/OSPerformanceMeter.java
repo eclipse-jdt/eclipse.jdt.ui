@@ -20,7 +20,7 @@ import org.eclipse.perfmsr.core.LoadValueConstants;
 import org.eclipse.perfmsr.core.PerfMsrCorePlugin;
 import org.eclipse.perfmsr.core.Upload;
 
-import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
+import org.eclipse.jdt.text.tests.performance.data.Sample;
 import org.eclipse.jdt.text.tests.performance.data.PerformanceFileParser;
 
 public class OSPerformanceMeter extends PerformanceMeter {
@@ -70,8 +70,8 @@ public class OSPerformanceMeter extends PerformanceMeter {
 		return logFile;
 	}
 
-	public MeteringSession getSessionData() {
-		MeteringSession[] parsed= new PerformanceFileParser().parseLocation(fLogFile);
+	public Sample getSample() {
+		Sample[] parsed= new PerformanceFileParser().parseLocation(fLogFile);
 		if (parsed.length > 0)
 			return parsed[0];
 		else

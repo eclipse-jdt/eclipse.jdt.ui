@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 import org.eclipse.jdt.text.tests.performance.PerfMsrConstants;
-import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
+import org.eclipse.jdt.text.tests.performance.data.Sample;
 import org.eclipse.jdt.text.tests.performance.data.PerfMsrDimensions;
 import org.eclipse.jdt.text.tests.performance.data.PerformanceDataModel;
 
@@ -45,9 +45,9 @@ public class Evaluator implements IEvaluator {
 	private Map fFilterProperties;
 	private AssertChecker[] fCheckers;
 
-	public void evaluate(MeteringSession session) {
+	public void evaluate(Sample session) {
 		Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
-		MeteringSession reference= getReferenceSession(session.getProperty(PerfMsrConstants.TESTNAME_PROPERTY), session.getProperty(PerfMsrConstants.HOSTNAME_PROPERTY));
+		Sample reference= getReferenceSession(session.getProperty(PerfMsrConstants.TESTNAME_PROPERTY), session.getProperty(PerfMsrConstants.HOSTNAME_PROPERTY));
 		Assert.assertTrue("reference metering session is null", reference != null); //$NON-NLS-1$
 		
 		StatisticsSession referenceStats= new StatisticsSession(reference);
@@ -62,16 +62,16 @@ public class Evaluator implements IEvaluator {
 		Assert.assertTrue(failMesg.toString(), pass);
 	}
 
-	private MeteringSession getReferenceSession(String testname, String hostname) {
+	private Sample getReferenceSession(String testname, String hostname) {
 		String specificHost= (String) fFilterProperties.get(PerfMsrConstants.HOSTNAME_PROPERTY);
 		boolean useSessionsHostname= true;
 		if (specificHost != null)
 			useSessionsHostname= false;
 		
 		PerformanceDataModel model= getDataModel();
-		MeteringSession[] sessions= model.getMeteringSessions();
+		Sample[] sessions= model.getMeteringSessions();
 		for (int i= 0; i < sessions.length; i++) {
-			MeteringSession session= sessions[i];
+			Sample session= sessions[i];
 			boolean match= true;
 			
 			// check filter properties

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance.eval;
 
-import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
+import org.eclipse.jdt.text.tests.performance.data.Sample;
 
 
 /**
@@ -25,7 +25,7 @@ public interface IEvaluator {
 	 * @param session the current metering session to evaluate
 	 * @throws RuntimeException when the comparison does not pass
 	 */
-	void evaluate(MeteringSession session) throws RuntimeException;
+	void evaluate(Sample session) throws RuntimeException;
 
 	/**
 	 * Sets the asserts that should be evaluated by the evaluator.

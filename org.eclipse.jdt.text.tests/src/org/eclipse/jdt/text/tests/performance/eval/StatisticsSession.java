@@ -18,7 +18,7 @@ import junit.framework.Assert;
 import org.eclipse.jdt.text.tests.performance.PerfMsrConstants;
 import org.eclipse.jdt.text.tests.performance.data.DataPoint;
 import org.eclipse.jdt.text.tests.performance.data.Dimension;
-import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
+import org.eclipse.jdt.text.tests.performance.data.Sample;
 import org.eclipse.jdt.text.tests.performance.data.Scalar;
 
 
@@ -34,14 +34,14 @@ public class StatisticsSession {
 		public double stddev;
 	}
 	
-	private final MeteringSession fSession;
+	private final Sample fSession;
 	private final Map fStatistics= new HashMap();
 
-	public StatisticsSession(MeteringSession session) {
+	public StatisticsSession(Sample session) {
 		fSession= session;
 	}
 	
-	public MeteringSession getSession() {
+	public Sample getSession() {
 		return fSession;
 	}
 

@@ -65,7 +65,7 @@ public class PerformanceFileParser {
 	
 	private static final String[] PROPERTIES= new String[] { UUID, DRIVER, DRIVERDATE, DRIVERLABEL, DRIVERSTREAM, JVM, HOST, RUN_TS, DISPLAY_RUN_TS, VERSION, TESTNAME, CMDARGS};
 	
-	public MeteringSession parse(InputSource source) throws IOException {
+	public Sample parse(InputSource source) throws IOException {
 		try {
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 			factory.setValidating(false);
@@ -114,7 +114,7 @@ public class PerformanceFileParser {
 				datapoints.add(new DataPoint(id, scalars));
 			}
 			
-			MeteringSession session= new MeteringSession(properties, (DataPoint[]) datapoints.toArray(new DataPoint[datapoints.size()]));
+			Sample session= new Sample(properties, (DataPoint[]) datapoints.toArray(new DataPoint[datapoints.size()]));
 			return session;
 			
 		} catch (ParserConfigurationException e) {
@@ -131,7 +131,7 @@ public class PerformanceFileParser {
 		return null;
 	}
 	
-	public MeteringSession parse(InputStream stream) throws IOException {
+	public Sample parse(InputStream stream) throws IOException {
 		InputStream header= new ByteArrayInputStream("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<dummy>".getBytes()); //$NON-NLS-1$
 		stream= new SequenceInputStream(header, stream); 
 		InputStream footer= new ByteArrayInputStream("</dummy>".getBytes()); //$NON-NLS-1$
@@ -139,7 +139,7 @@ public class PerformanceFileParser {
 		return parse(new InputSource(stream));
 	}
 
-	public MeteringSession[] parseLocation(String path) {
+	public Sample[] parseLocation(String path) {
 		List result= new ArrayList(); 
 		File dir= new File(path);
 		if (dir.isDirectory()) {
@@ -151,13 +151,13 @@ public class PerformanceFileParser {
 			parseOne(dir, result);
 		}
 		
-		return (MeteringSession[]) result.toArray(new MeteringSession[result.size()]);
+		return (Sample[]) result.toArray(new Sample[result.size()]);
 	}
 
 	private void parseOne(File file, List result) {
 		try {
 			InputStream stream= new BufferedInputStream(new FileInputStream(file));
-			MeteringSession parsed= parse(stream);
+			Sample parsed= parse(stream);
 			parsed.fId= file.getCanonicalPath();
 			result.add(parsed);
 		} catch (FileNotFoundException e) {
@@ -167,7 +167,7 @@ public class PerformanceFileParser {
 		}
 	}
 
-	private MeteringSession malformedInputResult() throws IOException {
+	private Sample malformedInputResult() throws IOException {
 		throw new IOException("malformed input"); //$NON-NLS-1$
 	}
 	

@@ -26,7 +26,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jdt.text.tests.performance.data.Assert;
 import org.eclipse.jdt.text.tests.performance.data.DataPoint;
-import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
+import org.eclipse.jdt.text.tests.performance.data.Sample;
 import org.eclipse.jdt.text.tests.performance.data.Scalar;
 
 public class SystemTimePerformanceMeter extends PerformanceMeter {
@@ -86,7 +86,7 @@ public class SystemTimePerformanceMeter extends PerformanceMeter {
 		return buf.toString();
 	}
 
-	public MeteringSession getSessionData() {
+	public Sample getSample() {
 		Assert.isTrue(fStartTime.size() == fStopTime.size());
 		Map properties= new HashMap();
 		properties.put(PerfMsrConstants.DRIVER_PROPERTY, getBuildId());
@@ -100,7 +100,7 @@ public class SystemTimePerformanceMeter extends PerformanceMeter {
 			data[2*i + 1]= createDataPoint(PerfMsrConstants.AFTER, DIMENSION_NAME, ((Long) fStopTime.get(i)).longValue());
 		}
 		
-		return new MeteringSession(properties, data);
+		return new Sample(properties, data);
 	}
 
 	private String getBuildId() {
