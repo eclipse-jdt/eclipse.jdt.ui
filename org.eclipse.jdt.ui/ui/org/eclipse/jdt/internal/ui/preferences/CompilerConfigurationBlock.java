@@ -914,7 +914,6 @@ public class CompilerConfigurationBlock {
 					hasChanges= true;
 				}
 			}
-			actualOptions.put(key, val);
 		}
 		
 		
