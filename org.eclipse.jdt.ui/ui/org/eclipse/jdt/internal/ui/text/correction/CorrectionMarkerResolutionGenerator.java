@@ -30,16 +30,17 @@ import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.text.java.*;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
@@ -181,7 +182,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			int id= marker.getAttribute(IJavaModelMarker.ID, -1);
 			int start= marker.getAttribute(IMarker.CHAR_START, -1);
 			int end= marker.getAttribute(IMarker.CHAR_END, -1);
-			String[] arguments= JavaModelUtil.getProblemArgumentsFromMarker(marker.getAttribute(IJavaModelMarker.ARGUMENTS, "")); //$NON-NLS-1$
+			String[] arguments= CorrectionEngine.getProblemArguments(marker);
 			if (cu != null && id != -1 && start != -1 && end != -1 && arguments != null) {
 				return new ProblemLocation(start, end - start, id, arguments);
 			}			
