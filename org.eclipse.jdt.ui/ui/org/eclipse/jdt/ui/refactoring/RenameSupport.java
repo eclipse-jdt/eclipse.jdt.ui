@@ -76,24 +76,6 @@ public class RenameSupport {
 		fSupport.rename(parent, fElement);
 	}
 	
-	/** Flag indicating that the refactoring has been performed. */
-	public static final int PERFORMED= 0;
-	
-	/** Flag indicating that the refactoring has been canceled by the user. */
-	public static final int CANCELED= 1;
-	
-	/** Flag indication that an unexpected exception has occured during the execution. */
-	public static final int EXCEPTION= 2;
-	
-	/**
-	 * Executes the rename is a quasi "headless" manner. This means that no
-	 * input dialog pops up, but if needed a saving dialog and a dialog
-	 * presenting problems collected during precondition checking is shown.
-	 */
-	public int run(Shell parent, IProgressMonitor pm, int stopSeverity) {
-		return CANCELED;
-	}
-
 	/** Flag indication that no additional update is to be performed. */
 	public static final int NONE= 0;
 	
