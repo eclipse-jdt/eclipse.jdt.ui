@@ -11,14 +11,8 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import java.io.File;
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
 
 public class OpenTextEditorTestSetup extends TestSetup {
 
@@ -27,13 +21,7 @@ public class OpenTextEditorTestSetup extends TestSetup {
 	}
 
 	protected void setUp() throws Exception {
-		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
-		String src= workspacePath + PerformanceTestSetup.PROJECT + OpenTextEditorTest.ORIG_FILE;
-		String destPrefix= workspacePath + PerformanceTestSetup.PROJECT + OpenTextEditorTest.PATH + OpenTextEditorTest.FILE_PREFIX;
-		for (int i= 0; i < OpenTextEditorTest.N_OF_COPIES; i++)
-			FileTool.copy(new File(src), new File(destPrefix + i + OpenTextEditorTest.FILE_SUFFIX));
-
-		ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(PerformanceTestSetup.PROJECT + OpenTextEditorTest.PATH)).refreshLocal(IResource.DEPTH_INFINITE, null);
+		ResourceTestHelper.replicate("/" + PerformanceTestSetup.PROJECT + OpenTextEditorTest.ORIG_FILE, "/" + PerformanceTestSetup.PROJECT + OpenTextEditorTest.PATH + OpenTextEditorTest.FILE_PREFIX, OpenTextEditorTest.FILE_SUFFIX, OpenTextEditorTest.N_OF_COPIES);
 	}
 	
 	protected void tearDown() {
