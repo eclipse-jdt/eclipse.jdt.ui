@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -178,8 +179,9 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			body.append(");"); //$NON-NLS-1$
 			methodDeclaration= body.toString();
 		}
-
-		StubUtility.genMethodDeclaration(fType.getElementName(), curr, methodDeclaration, imports, buf);
+		int flags= curr.getFlags() & ~Flags.AccSynchronized;
+		
+		StubUtility.genMethodDeclaration(fType.getElementName(), curr, flags, methodDeclaration, imports, buf);
 
 		return buf.toString();
 	}
