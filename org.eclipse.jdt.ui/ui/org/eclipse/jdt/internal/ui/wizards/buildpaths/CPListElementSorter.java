@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.core.IClasspathEntry;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.core.IClasspathEntry;
 
 public class CPListElementSorter extends ViewerSorter {
 	

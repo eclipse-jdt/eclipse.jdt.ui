@@ -83,7 +83,9 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		IMarker marker= getMarker(sourceViewer, lineNumber);
 		if (marker != null) {
 			String text= marker.getAttribute(IMarker.MESSAGE, (String) null);
-			return formatHoverText(text, sourceViewer.getTextWidget().getDisplay());
+			if (text != null) {
+				return formatHoverText(text, sourceViewer.getTextWidget().getDisplay());
+			}
 		}
 		return null;
 	}
@@ -94,6 +96,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	private String formatHoverText(String text, Display display) {
 		String lineDelim= System.getProperty("line.separator", "\n");
 		
+				
 		Reader textReader= new StringReader(text);
 		GC gc= new GC(display);
 		try {

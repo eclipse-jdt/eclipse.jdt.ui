@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.swt.graphics.Image;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.swt.graphics.Image;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 public class CPVariableElementLabelProvider extends LabelProvider {

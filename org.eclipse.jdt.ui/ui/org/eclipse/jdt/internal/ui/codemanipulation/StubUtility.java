@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
@@ -28,7 +27,7 @@ import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
 public class StubUtility {
 
 	/**
-	 * Generate a stub. Given a template method, a stub with the same signature
+	 * Generates a stub. Given a template method, a stub with the same signature
 	 * will be constructed so it can be added to a type.
 	 * @param parenttype The type to which the method will be added to
 	 * @param method A method template (method belongs to different type than the parent)
@@ -171,7 +170,7 @@ public class StubUtility {
 
 	/**
 	 * Finds a method in a type
-	 * This searchs for a method with the same name and signature. Parameter types are only
+	 * This searches for a method with the same name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done
 	 * @return The first found method or null, if nothing found
 	 */
@@ -181,7 +180,7 @@ public class StubUtility {
 
 	/**
 	 * Finds a method in a type
-	 * This searchs for a method with the same name and signature. Parameter types are only
+	 * This searches for a method with the same name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done
 	 * @return The first found method or null, if nothing found
 	 */
@@ -191,7 +190,7 @@ public class StubUtility {
 
 	/**
 	 * Finds a method by name
-	 * This searchs for a method with a name and signature. Parameter types are only
+	 * This searches for a method with a name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done
 	 * @param name The name of the method to find
 	 * @param paramTypes The parameters of the method to find
@@ -215,7 +214,7 @@ public class StubUtility {
 
 	/**
 	 * Finds a method in a list of methods
-	 * This searchs for a method with the same name and signature. Parameter types are only
+	 * This searches for a method with the same name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done
 	 * @return The found method or null, if nothing found
 	 */
@@ -238,7 +237,7 @@ public class StubUtility {
 
 	/**
 	 * Finds a method in an array of methods
-	 * This searchs for a method with the same name and signature. Parameter types are only
+	 * This searches for a method with the same name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done
 	 * @return The first found method or null, if nothing found
 	 */
@@ -248,7 +247,7 @@ public class StubUtility {
 
 	/**
 	 * Finds a method in a type's hierarchy
-	 * This searchs for a method with the same name and signature. Parameter types are only
+	 * This searches for a method with the same name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done
 	 * The input type of the hierarchy is not searched for the method
 	 * @return The first found method or null, if nothing found

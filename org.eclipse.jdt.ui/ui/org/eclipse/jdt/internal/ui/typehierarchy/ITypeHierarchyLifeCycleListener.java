@@ -1,9 +1,8 @@
-package org.eclipse.jdt.internal.ui.typehierarchy;/*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
-
+package org.eclipse.jdt.internal.ui.typehierarchy;
 
 /**
  * Used by the TypeHierarchyLifeCycle to inform listeners about a change in the

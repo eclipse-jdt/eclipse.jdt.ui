@@ -1,12 +1,34 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
 
-import java.util.ArrayList;import java.util.List;import org.eclipse.swt.widgets.Display;import org.eclipse.jface.viewers.IBasicPropertyConstants;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ArrayUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.jface.viewers.IBasicPropertyConstants;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ArrayUtility;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 /**
  * Content provider used for the method view.
@@ -119,6 +141,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IElem
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputType);
 			} catch (JavaModelException e) {
 				fInputType= null;
+				JavaPlugin.log(e.getStatus());
 			}
 		}		
 	}

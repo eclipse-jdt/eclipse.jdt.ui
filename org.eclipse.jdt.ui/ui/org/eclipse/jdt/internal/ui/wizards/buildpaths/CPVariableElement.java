@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.core.runtime.IPath;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import org.eclipse.core.runtime.IPath;
 
 
 public class CPVariableElement {

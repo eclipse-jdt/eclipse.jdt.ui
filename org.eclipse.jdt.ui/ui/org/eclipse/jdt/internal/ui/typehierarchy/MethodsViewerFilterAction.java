@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
@@ -10,12 +9,14 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.jdt.internal.ui.actions.JavaUIAction;
+import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;
 
 /**
  * Action used to enable / disable method filter properties
  */
 public class MethodsViewerFilterAction extends JavaUIAction {
+	
+	private String fPrefix;
 
 	private MethodsViewerFilter fFilter;
 	private int fFilterProperty;
@@ -27,6 +28,8 @@ public class MethodsViewerFilterAction extends JavaUIAction {
 		fFilter= filter;
 		fViewer= viewer;
 		fFilterProperty= property;
+		fPrefix= resourcePrefix;
+		
 		setChecked(initValue);
 		valueChanged(initValue);
 	}
@@ -40,9 +43,11 @@ public class MethodsViewerFilterAction extends JavaUIAction {
 	
 	private void valueChanged(boolean on) {
 		if (on) {
-			fFilter.removeFilter(fFilterProperty);
-		} else {
 			fFilter.addFilter(fFilterProperty);
+			setToolTipText(JavaPlugin.getResourceString(fPrefix + "tooltip.checked"));
+		} else {
+			fFilter.removeFilter(fFilterProperty);
+			setToolTipText(JavaPlugin.getResourceString(fPrefix + "tooltip.unchecked"));
 		}
 		fViewer.refresh();
 	}

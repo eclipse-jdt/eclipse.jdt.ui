@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.ui.wizards;import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IProjectDescription;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.Platform;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 

@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
@@ -15,21 +14,14 @@ import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse
  */
 public class MethodsViewer extends TableViewer {
 	
-	private static final String PREFIX_FILTER_PRIVATE= "MethodsViewer.show_private.";
-	private static final String PREFIX_FILTER_PROTECTED= "MethodsViewer.show_protected.";
-	private static final String PREFIX_FILTER_PUBLIC= "MethodsViewer.show_public.";
-	private static final String PREFIX_FILTER_DEFAULT= "MethodsViewer.show_default.";
-	private static final String PREFIX_FILTER_FIELDS= "MethodsViewer.show_fields.";
-	private static final String PREFIX_FILTER_STATIC= "MethodsViewer.show_static.";
+	private static final String PREFIX_FILTER_NONPUBLIC= "MethodsViewer.hide_nonpublic.";
+	private static final String PREFIX_FILTER_FIELDS= "MethodsViewer.hide_fields.";
+	private static final String PREFIX_FILTER_STATIC= "MethodsViewer.hide_static.";
 	private static final String PREFIX_VISIBILITY_MENU= "MethodsViewer.visibilitymenu.";	
 	
-	
-	private MethodsViewerFilterAction fShowPrivate;
-	private MethodsViewerFilterAction fShowProtected;
-	private MethodsViewerFilterAction fShowPublic;
-	private MethodsViewerFilterAction fShowDefault;
-	private MethodsViewerFilterAction fShowFields;
-	private MethodsViewerFilterAction fShowStatic;
+	private MethodsViewerFilterAction fHideNonPublic;
+	private MethodsViewerFilterAction fHideFields;
+	private MethodsViewerFilterAction fHideStatic;
 		
 	private OpenSourceReferenceAction fOpen;
 
@@ -68,30 +60,17 @@ public class MethodsViewer extends TableViewer {
 		MethodsViewerFilter filter= new MethodsViewerFilter();
 		
 		// fields	
-		fShowFields= new MethodsViewerFilterAction(this, filter,  bundle, PREFIX_FILTER_FIELDS, MethodsViewerFilter.FILTER_FIELDS, false);
-		//fShowFields.setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_FIELDS);
-		fShowFields.setImageDescriptors("lcl16", "fields_co.gif");
+		fHideFields= new MethodsViewerFilterAction(this, filter,  bundle, PREFIX_FILTER_FIELDS, MethodsViewerFilter.FILTER_FIELDS, false);
+		fHideFields.setImageDescriptors("lcl16", "fields_co.gif");
 		
 		// static
-		fShowStatic= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_STATIC, MethodsViewerFilter.FILTER_STATIC, true);
-		//fShowStatic.setImageDescriptor(JavaPluginImages.DESC_LCL_SHOW_STATIC);
-		fShowStatic.setImageDescriptors("lcl16", "static_co.gif");
+		fHideStatic= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_STATIC, MethodsViewerFilter.FILTER_STATIC, false);
+		fHideStatic.setImageDescriptors("lcl16", "static_co.gif");
 		
-		// private
-		fShowPrivate= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_PRIVATE, MethodsViewerFilter.FILTER_PRIVATE, true);
-		fShowPrivate.setImageDescriptor(JavaPluginImages.DESC_MISC_PRIVATE);
-		
-		// protected
-		fShowProtected= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_PROTECTED, MethodsViewerFilter.FILTER_PROTECTED, true);
-		fShowProtected.setImageDescriptor(JavaPluginImages.DESC_MISC_PROTECTED);
-
-		// default
-		fShowDefault= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_DEFAULT, MethodsViewerFilter.FILTER_DEFAULT, true);
-		fShowDefault.setImageDescriptor(JavaPluginImages.DESC_MISC_DEFAULT);
-
 		// public
-		fShowPublic= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_PUBLIC, MethodsViewerFilter.FILTER_PUBLIC, true);
-		fShowPublic.setImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC);
+		fHideNonPublic= new MethodsViewerFilterAction(this, filter, bundle, PREFIX_FILTER_NONPUBLIC, MethodsViewerFilter.FILTER_NONPUBLIC, false);
+		fHideNonPublic.setImageDescriptors("lcl16", "public_co.gif");
+		
 		
 		addFilter(filter);
 		
@@ -178,13 +157,9 @@ public class MethodsViewer extends TableViewer {
 	public void contributeToToolBar(ToolBarManager tbm) {
 		tbm.add(fShowInheritedMembersAction);
 		tbm.add(new Separator());
-		tbm.add(fShowFields);
-		tbm.add(fShowStatic);
-		tbm.add(new Separator());
-		tbm.add(fShowPublic);
-		tbm.add(fShowProtected);
-		tbm.add(fShowPrivate);
-		tbm.add(fShowDefault);
+		tbm.add(fHideFields);
+		tbm.add(fHideStatic);
+		tbm.add(fHideNonPublic);
 		//tbm.update(true);
 	}
 

@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
@@ -33,11 +32,17 @@ public class ToggleViewAction extends JavaUIAction {
 		return isChecked();
 	}
 	
+	public int getViewerIndex() {
+		return fViewerIndex;
+	}
+	
 	public void run() {
 		if (isActive()) {
 			fViewPart.setView(fViewerIndex);
 			for (int i= 0; i < fOtherActions.length; i++) {
-				fOtherActions[i].setActive(false);
+				if (fOtherActions[i] != this) {
+					fOtherActions[i].setActive(false);
+				}
 			}
 		} else {
 			setActive(true);

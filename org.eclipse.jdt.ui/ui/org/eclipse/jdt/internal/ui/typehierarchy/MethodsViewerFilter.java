@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
@@ -19,12 +18,9 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class MethodsViewerFilter extends ViewerFilter {
 	
-	public static final int FILTER_PUBLIC= 1;
-	public static final int FILTER_PRIVATE= 2;
-	public static final int FILTER_PROTECTED= 4;
-	public static final int FILTER_DEFAULT= 8;
-	public static final int FILTER_STATIC= 16;
-	public static final int FILTER_FIELDS= 32;
+	public static final int FILTER_NONPUBLIC= 1;
+	public static final int FILTER_STATIC= 2;
+	public static final int FILTER_FIELDS= 4;
 	
 	private int fFilterProperties;
 	
@@ -73,15 +69,10 @@ public class MethodsViewerFilter extends ViewerFilter {
 					(hasFilter(FILTER_STATIC) || "<clinit>".equals(member.getElementName()))) {
 					return false;
 				}
-				if (Flags.isPublic(flags) || member.getDeclaringType().isInterface()) {
-					return !hasFilter(FILTER_PUBLIC);
-				} else if (Flags.isPrivate(flags)) {
-					return !hasFilter(FILTER_PRIVATE);
-				} else if (Flags.isProtected(flags)) {
-					return !hasFilter(FILTER_PROTECTED);
-				} else {  // default(flags)
-					return !hasFilter(FILTER_DEFAULT);
-				}	
+				if (!Flags.isPublic(flags) && !member.getDeclaringType().isInterface()) {
+					return !hasFilter(FILTER_NONPUBLIC);
+				}
+				return true;	
 			}			
 		} catch (JavaModelException e) {
 			// ignore

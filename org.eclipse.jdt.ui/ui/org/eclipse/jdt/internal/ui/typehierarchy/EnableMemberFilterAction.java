@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
@@ -36,6 +35,11 @@ public class EnableMemberFilterAction extends JavaUIAction {
 	private void valueChanged(boolean on) {
 		setChecked(on);
 		fView.enableMemberFilter(on);
+		if (on) {
+			setToolTipText(JavaPlugin.getResourceString(RESOURCE_PREFIX + "tooltip.checked"));
+		} else {
+			setToolTipText(JavaPlugin.getResourceString(RESOURCE_PREFIX + "tooltip.unchecked"));
+		}
 	}
 	
 }
