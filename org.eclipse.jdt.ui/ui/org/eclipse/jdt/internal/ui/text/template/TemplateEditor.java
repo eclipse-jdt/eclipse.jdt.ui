@@ -23,13 +23,18 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jface.text.ITextListener;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextEvent;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * A popup dialog to request the user to fill the variables of the chosen template.
  */
 public class TemplateEditor implements IDocumentListener, ModifyListener, VerifyKeyListener, PaintListener {
+
+	private static Map fgActiveEditors= new HashMap();
 
 	private TemplateContext fContext;
 	private TemplateModel fModel;
@@ -51,7 +56,11 @@ public class TemplateEditor implements IDocumentListener, ModifyListener, Verify
 		
 		fCurrentIndex= 0;
 		fIndices= fModel.getEditableTexts();
-	}	
+	}
+	
+	public static boolean isEditorActive(ITextViewer viewer) {
+		return fgActiveEditors.containsKey(viewer);
+	}
 
 	public void enter() {
 		try {
@@ -62,8 +71,10 @@ public class TemplateEditor implements IDocumentListener, ModifyListener, Verify
 			IDocument document= fContext.getViewer().getDocument();
 			fOldText= document.get(offset, length);
 	
-			// insert new text			
-			document.replace(offset, length, fModel.toString());
+			// insert new text
+			IRegion region= fContext.getViewer().getVisibleRegion();
+			fText.replaceTextRange(offset - region.getOffset(),
+				length, fModel.toString());
 			fText.showSelection();
 			
 			if (fModel.getEditableCount() == 0)
@@ -74,16 +85,16 @@ public class TemplateEditor implements IDocumentListener, ModifyListener, Verify
 			fText.addVerifyKeyListener(this);
 			fText.addPaintListener(this);
 			
-//			fTemplateEngine.setEnabled(false);
-
+			fgActiveEditors.put(fContext.getViewer(), this);
+			
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 	}
 	
 	private void leave(boolean accept) {
-//		fTemplateEngine.setEnabled(true);
-		
+		fgActiveEditors.remove(fContext.getViewer());
+
 		fText.removePaintListener(this);
 		fText.removeVerifyKeyListener(this);
 		fContext.getViewer().getDocument().removeDocumentListener(this);
@@ -95,19 +106,17 @@ public class TemplateEditor implements IDocumentListener, ModifyListener, Verify
 			IRegion region= fContext.getViewer().getVisibleRegion();
 			start -= region.getOffset();
 			
-			fText.setSelection(start, start);
+			if (start <= region.getLength());
+				fText.setSelection(start, start);
 
 		} else {
 			// restore old text
-			try {
-				fContext.getViewer().getDocument().replace(fContext.getStart(),
-					fModel.getTotalSize(), fOldText);
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);	
-			}
+			IRegion region= fContext.getViewer().getVisibleRegion();
+			fText.replaceTextRange(fContext.getStart() - region.getOffset(),
+				fModel.getTotalSize(), fOldText);				
 		}
 		
-		redraw();
+		fText.redraw();
 	}
 	
 	private void next() {

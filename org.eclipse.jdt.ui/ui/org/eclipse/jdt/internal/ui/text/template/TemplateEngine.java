@@ -23,7 +23,6 @@ public class TemplateEngine {
 	private String fContextType;
 	
 	private ArrayList fProposals= new ArrayList();
-	private boolean fEnabled= true;
 
 	/**
 	 * Creates the template engine for a particular context type.
@@ -63,8 +62,8 @@ public class TemplateEngine {
 	{
 		Assert.isNotNull(viewer);
 
-		// disallow recursion
-		if (!fEnabled)
+		// prohibit recursion
+		if (TemplateEditor.isEditorActive(viewer))
 			return;
 		
 		TemplateContext context= new TemplateContext(viewer, completionPosition, sourceUnit, fContextType);
@@ -74,22 +73,6 @@ public class TemplateEngine {
 			TemplateProposal proposal= new TemplateProposal(templates[i], context);
 			fProposals.add(proposal);
 		}
-	}
-
-	/**
-	 * Enables the template engine. If disabled, the template engine
-	 * does not provide any proposals.
-	 */
-	public void setEnabled(boolean enabled) {
-		fEnabled= enabled;	
-	}
-	
-	/**
-	 * Returns <code>true</code> if the template engine is enabled, <code>false</code>
-	 * otherwise.
-	 */
-	public boolean isEnabled() {
-		return fEnabled;
 	}
 	
 }
