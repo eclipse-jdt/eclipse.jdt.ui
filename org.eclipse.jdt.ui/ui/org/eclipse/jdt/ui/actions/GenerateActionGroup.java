@@ -265,8 +265,6 @@ public class GenerateActionGroup extends ActionGroup {
 			appendToGroup(menu, fAddDelegateMethods);
 			appendToGroup(menu, fAddUnimplementedConstructors);
 			appendToGroup(menu, fAddJavaDocStub);
-			appendToGroup(menu, fSortMembers);
-			appendToGroup(menu, fAddBookmark);
 			appendToGroup(menu, fAddToClasspathAction);
 			appendToGroup(menu, fRemoveFromClasspathAction);
 		}
