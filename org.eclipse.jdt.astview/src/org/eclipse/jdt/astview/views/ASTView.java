@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -89,6 +90,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 
 public class ASTView extends ViewPart implements IShowInSource {
 	
@@ -796,20 +798,26 @@ public class ASTView extends ViewPart implements IShowInSource {
 			EditorUtility.selectInEditor(fEditor, problemNode.getOffset(), problemNode.getLength());
 			return;
 		} else if (obj instanceof JavaElement) {
-			JavaElement javaElement= (JavaElement) obj;
-			try {
-				IEditorPart editorPart= JavaUI.openInEditor(javaElement.getJavaElement());
-				if (editorPart != null)
-					JavaUI.revealInEditor(editorPart, javaElement.getJavaElement());
-			} catch (PartInitException e) {
-				IStatus status= getErrorStatus(e.getMessage(), e);
-				ASTViewPlugin.log(status);
-				ErrorDialog.openError(getSite().getShell(), "AST View", "Could not open editor.", status);  //$NON-NLS-1$//$NON-NLS-2$
-			} catch (JavaModelException e) {
-				IStatus status= getErrorStatus(e.getMessage(), e);
-				ASTViewPlugin.log(status);
-				ErrorDialog.openError(getSite().getShell(), "AST View", "Could not open editor.", status);  //$NON-NLS-1$//$NON-NLS-2$
+			IJavaElement javaElement= ((JavaElement) obj).getJavaElement();
+			if (javaElement instanceof IPackageFragment) {
+				ShowInPackageViewAction showInPackageViewAction= new ShowInPackageViewAction(getViewSite());
+				showInPackageViewAction.run(javaElement);
+			} else {
+				try {
+					IEditorPart editorPart= JavaUI.openInEditor(javaElement);
+					if (editorPart != null)
+						JavaUI.revealInEditor(editorPart, javaElement);
+				} catch (PartInitException e) {
+					IStatus status= getErrorStatus(e.getMessage(), e);
+					ASTViewPlugin.log(status);
+					ErrorDialog.openError(getSite().getShell(), "AST View", "Could not open editor.", status);  //$NON-NLS-1$//$NON-NLS-2$
+				} catch (JavaModelException e) {
+					IStatus status= getErrorStatus(e.getMessage(), e);
+					ASTViewPlugin.log(status);
+					ErrorDialog.openError(getSite().getShell(), "AST View", "Could not open editor.", status);  //$NON-NLS-1$//$NON-NLS-2$
+				}
 			}
+			return;
 		}
 		
 		if (node != null) {
