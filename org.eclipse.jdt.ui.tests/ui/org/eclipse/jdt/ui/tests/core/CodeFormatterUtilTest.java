@@ -149,7 +149,41 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("}\n");
 		String expected= buf.toString();
 		assertEqualString(formatted, expected);
-	}	
+	}
+	
+	public void testCUNewAPI2() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("/**\n");
+		buf.append(" * comment\n");
+		buf.append(" */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    Runnable run= new Runnable() {};\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+			
+		TextEdit edit= CodeFormatterUtil.format2(CodeFormatterUtil.K_COMPILATION_UNIT, contents, 0, "\n", null);
+		Document doc= new Document(contents);
+		edit.apply(doc);
+		String formatted= doc.get();
+		
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    /**\n");
+		buf.append("     * comment\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Runnable run = new Runnable() {\n");
+		buf.append("        };\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(formatted, expected);
+	}		
 	
 	public void testCUWithPos() throws Exception {
 		StringBuffer buf= new StringBuffer();
@@ -294,6 +328,76 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertEqualString(curr2, word2);
 		
 	}
+	
+	public void testJavadoc2() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("/** bar\n");
+		buf.append(" * foo\n");
+		buf.append(" */");
+		String contents= buf.toString();
+		
+		AST ast= new AST();
+		Javadoc node= ast.newJavadoc();
+		
+		String word1= "bar";
+		int start1= contents.indexOf(word1);
+		
+		String word2= "foo";
+		int start2= contents.indexOf(word2);		
+		
+		int[] positions= { start1, start1 + word1.length() - 1, start2, start2 + word2.length() - 1};
+		
+		String formatted= CodeFormatterUtil.format(node, contents, 1, positions, "\n", null);
+
+		buf= new StringBuffer();
+		buf.append("    /** bar\n");
+		buf.append("     * foo\n");
+		buf.append("     */");
+		String expected= buf.toString();
+		assertEqualString(formatted, expected);
+		
+		String curr1= formatted.substring(positions[0], positions[1] + 1);
+		assertEqualString(curr1, word1);
+		
+		String curr2= formatted.substring(positions[2], positions[3] + 1);
+		assertEqualString(curr2, word2);
+		
+	}
+	
+	public void testJavadoc3() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("/** bar\n");
+		buf.append(" * foo\n");
+		buf.append(" */");
+		String contents= buf.toString();
+		
+		AST ast= new AST();
+		Javadoc node= ast.newJavadoc();
+		
+		String word1= "bar";
+		int start1= contents.indexOf(word1);
+		
+		String word2= "foo";
+		int start2= contents.indexOf(word2);		
+		
+		int[] positions= { start1, start1 + word1.length() - 1, start2, start2 + word2.length() - 1};
+		
+		String formatted= CodeFormatterUtil.format(node, contents, 0, positions, "\r\n", null);
+
+		buf= new StringBuffer();
+		buf.append("/** bar\r\n");
+		buf.append(" * foo\r\n");
+		buf.append(" */");
+		String expected= buf.toString();
+		assertEqualString(formatted, expected);
+		
+		String curr1= formatted.substring(positions[0], positions[1] + 1);
+		assertEqualString(curr1, word1);
+		
+		String curr2= formatted.substring(positions[2], positions[3] + 1);
+		assertEqualString(curr2, word2);
+		
+	}	
 	
 	public void testCatchClause() throws Exception {
 		StringBuffer buf= new StringBuffer();
