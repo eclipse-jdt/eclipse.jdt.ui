@@ -26,6 +26,9 @@ public final class SemanticToken {
 	/** Binding */
 	private IBinding fBinding;
 	
+	/** Is the binding resolved? */
+	private boolean fIsBindingResolved;
+	
 	/** AST root */
 	private CompilationUnit fRoot;
 	
@@ -33,8 +36,10 @@ public final class SemanticToken {
 	 * @return Returns the binding, can be <code>null</code>.
 	 */
 	public IBinding getBinding() {
-		if (fBinding == null && fNode != null)
+		if (!fIsBindingResolved && fNode != null) {
 			fBinding= fNode.resolveBinding();
+			fIsBindingResolved= true;
+		}
 		
 		return fBinding;
 	}
@@ -67,6 +72,7 @@ public final class SemanticToken {
 	protected void update(SimpleName node) {
 		fNode= node;
 		fBinding= null;
+		fIsBindingResolved= false;
 		fRoot= null;
 	}
 	
@@ -79,6 +85,7 @@ public final class SemanticToken {
 	protected void clear() {
 		fNode= null;
 		fBinding= null;
+		fIsBindingResolved= false;
 		fRoot= null;
 	}
 }
