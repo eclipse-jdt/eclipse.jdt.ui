@@ -31,9 +31,13 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.swt.widgets.TreeItem;
+
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.dialogs.SaveAsDialog;
@@ -59,6 +63,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 
 /**
  *	Page 1 of the JAR Package wizard
@@ -472,6 +477,8 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 					SIZING_SELECTION_WIDGET_WIDTH,
 					SIZING_SELECTION_WIDGET_HEIGHT);
 		fInputGroup.addTreeFilter(new EmptyInnerPackageFilter());
+		fInputGroup.setTreeSorter(new JavaElementSorter());
+		fInputGroup.setListSorter(new JavaElementSorter());
 		fInputGroup.addTreeFilter(new ContainerFilter(ContainerFilter.FILTER_NON_CONTAINERS));
 		fInputGroup.addTreeFilter(new LibraryFilter());
 		fInputGroup.addListFilter(new ContainerFilter(ContainerFilter.FILTER_CONTAINERS));
@@ -614,6 +621,16 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 				fInputGroup.initialCheckListItem(selectedElement);
 			else
 				fInputGroup.initialCheckTreeItem(selectedElement);
+		}
+		
+		TreeItem[] items= fInputGroup.getTree().getItems();
+		int i= 0;
+		while (i < items.length && !items[i].getChecked())
+			i++;
+		if (i < items.length) {
+			fInputGroup.getTree().setSelection(new TreeItem[] {items[i]});
+			fInputGroup.getTree().showSelection();
+			fInputGroup.populateListViewer(items[i].getData());
 		}
 	}
 

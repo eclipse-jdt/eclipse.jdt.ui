@@ -476,6 +476,9 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *@param treeElement java.lang.Object
 	 */
 	protected void populateListViewer(final Object treeElement) {
+		if (treeElement == fCurrentTreeSelection)
+			return;
+		fCurrentTreeSelection= treeElement;
 		fListViewer.setInput(treeElement);
 		List listItemsToCheck= (List) fCheckedStateStore.get(treeElement);
 
@@ -507,12 +510,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 			fListViewer.setInput(fCurrentTreeSelection);
 			return;
 		}
-
-		// ie.- if not an item deselection
-		if (selectedElement != fCurrentTreeSelection)
-			populateListViewer(selectedElement);
-
-		fCurrentTreeSelection= selectedElement;
+		populateListViewer(selectedElement);
 	}
 	/**
 	 * Selects or deselect all of the elements in the tree depending on the value of the selection
