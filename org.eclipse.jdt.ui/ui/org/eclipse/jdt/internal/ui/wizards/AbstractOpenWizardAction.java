@@ -23,7 +23,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.IWorkbenchWizard;
-import org.eclipse.ui.actions.CreateProjectAction;
+import org.eclipse.ui.actions.NewProjectAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -192,7 +192,7 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 			String message= NewWizardMessages.getString("AbstractOpenWizardAction.noproject.message"); //$NON-NLS-1$
 			if (MessageDialog.openQuestion(shell, title, message)) {
 				IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
-				(new CreateProjectAction(window)).run();
+				(new NewProjectAction(window)).run();
 				return workspace.getRoot().getProjects().length != 0;
 			}
 			return false;

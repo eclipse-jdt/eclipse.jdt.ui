@@ -13,11 +13,9 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 
-import org.eclipse.ui.ICapabilityWizard;
+import org.eclipse.ui.ICapabilityInstallWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
-
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.wizards.JavaCapatibilityConfigurationPage;
 
@@ -25,7 +23,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class JavaCapabilityWizard extends Wizard implements ICapabilityWizard {
+public class JavaCapabilityWizard extends Wizard implements ICapabilityInstallWizard {
 
 	private JavaCapatibilityConfigurationPage fJavaPage;
 	private IProject fProject;
