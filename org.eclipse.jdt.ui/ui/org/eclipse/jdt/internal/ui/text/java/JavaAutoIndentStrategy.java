@@ -31,6 +31,8 @@ import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
  */
 public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
+	private final static String COMMENT= "//"; //$NON-NLS-1$
+
 	public JavaAutoIndentStrategy() {
 	}
 
@@ -202,7 +204,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				int whiteend= findEndOfWhiteSpace(d, start, c.offset);
 				buf.append(d.get(start, whiteend - start));
 				if (getBracketCount(d, start, c.offset, true) > 0) {
-					buf.append(getOneIndentLevel());
+					buf.append(createIndent(1));
 				}
 			}
 			c.text= buf.toString();
@@ -223,6 +225,17 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return System.getProperty("line.separator"); //$NON-NLS-1$
 	}
 
+
+	private static boolean startsWithClosingBrace(String string) {
+		final int length= string.length();
+		int i= 0;
+		while (i != length && Character.isWhitespace(string.charAt(i)))
+			++i;
+		if (i == length)
+			return false;
+		return string.charAt(i) == '}';
+	}
+
 	protected void smartPaste(IDocument document, DocumentCommand command) {
 
 		String lineDelimiter= getLineDelimiter(document);
@@ -232,35 +245,40 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			Assert.isNotNull(pastedText);
 			Assert.isTrue(pastedText.length() > 1);
 			
-			// #27512
-//			int selectionEnd= command.offset + command.length;
-//			IRegion region= document.getLineInformationOfOffset(selectionEnd);
-//			String selected= document.get(region.getOffset(), selectionEnd - region.getOffset());
-//			String notSelected= document.get(selectionEnd, region.getOffset() + region.getLength() - selectionEnd);
-//			if (selected.trim().length() == 0 && notSelected.trim().length() != 0) {
-//				pastedText += notSelected;
-//				command.length += notSelected.length();
-//			}
+			// extend selection begin if only whitespaces
+			int selectionStart= command.offset;
+			IRegion region= document.getLineInformationOfOffset(selectionStart);
+			String notSelected= document.get(region.getOffset(), selectionStart - region.getOffset());
+			String selected= document.get(selectionStart, region.getOffset() + region.getLength() - selectionStart);
+			if (notSelected.trim().length() == 0 && selected.trim().length() != 0) {
+				pastedText= notSelected + pastedText;
+				command.length += notSelected.length();
+			}
 			
-			String strippedParagraph= stripIndent(pastedText, lineDelimiter);
+			// choose smaller indent of block and preceeding non-empty line 
+			String blockIndent= getBlockIndent(document, command);
+			String insideBlockIndent= blockIndent == null ? "" : blockIndent + createIndent(1); //$NON-NLS-1$ // add one indent level
+			int insideBlockIndentSize= calculateDisplayedWidth(insideBlockIndent);
+			int previousIndentSize= getIndentSize(document, command);
+			int newIndentSize= insideBlockIndentSize < previousIndentSize
+				? insideBlockIndentSize
+				: previousIndentSize;
+
+			// indent is different if block starts with '}'				
+			if (startsWithClosingBrace(pastedText)) {
+				int outsideBlockIndentSize= blockIndent == null ? 0 : calculateDisplayedWidth(blockIndent);
+				newIndentSize = outsideBlockIndentSize;				
+			}
 
 			// check selection
 			int offset= command.offset;
 			int line= document.getLineOfOffset(offset);
 			int lineOffset= document.getLineOffset(line);
-
-			// format
 			String prefix= document.get(lineOffset, offset - lineOffset);
 
-			String blockIndent= getBlockIndent(document, command);
-			String insideBlockIndent= blockIndent == null ? "" : blockIndent + createIndent(1); //$NON-NLS-1$ // add one indent level
-			String previousIndent= getIndent(document, command);
-			String indent= calculateDisplayedWidth(insideBlockIndent) < calculateDisplayedWidth(previousIndent)
-				? insideBlockIndent
-				: previousIndent;
-
 			boolean formatFirstLine= prefix.trim().length() == 0;
-			String formattedParagraph= format(strippedParagraph, indent, lineDelimiter, formatFirstLine);
+
+			String formattedParagraph= format(pastedText, newIndentSize, lineDelimiter, formatFirstLine);
 
 			// paste
 			if (formatFirstLine) {
@@ -273,6 +291,92 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
+	}
+
+	private static String getIndentOfLine(String line) {
+		int i= 0;
+		for (; i < line.length(); i++) {
+			if (! Character.isWhitespace(line.charAt(i)))
+				break;
+		}
+		return line.substring(0, i);
+	}
+
+	/**
+	 * Returns the indent of the first non empty line.
+	 * A line is considered empty if it only consists of whitespaces or if it
+	 * begins with a single line comment followed by whitespaces only.
+	 */
+	private static int getIndentSizeOfFirstLine(String paragraph, boolean includeFirstLine) {
+		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
+			final String line= (String) iterator.next();
+			
+			if (!includeFirstLine) {
+				includeFirstLine= true;
+				continue;
+			}			
+
+			String indent= null;
+			if (line.startsWith(COMMENT)) {
+				String commentedLine= line.substring(2);
+				
+				// line is empty
+				if (commentedLine.trim().length() == 0)
+					continue;
+
+				indent= COMMENT + getIndentOfLine(commentedLine);
+				 
+			} else {
+				// line is empty
+				if (line.trim().length() == 0)
+					continue;
+
+				indent= getIndentOfLine(line);
+			}
+			
+			return calculateDisplayedWidth(indent);
+		}
+
+		return 0;		
+	}
+	
+	/**
+	 * Returns the minimal indent size of all non empty lines;
+	 */
+	private static int getMinimalIndentSize(String paragraph, boolean includeFirstLine) {
+		int minIndentSize= Integer.MAX_VALUE;
+		
+		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
+			final String line= (String) iterator.next();
+
+			if (!includeFirstLine) {
+				includeFirstLine= true;
+				continue;
+			}
+
+			String indent= null;
+			if (line.startsWith(COMMENT)) {
+				String commentedLine= line.substring(2);
+				
+				// line is empty
+				if (commentedLine.trim().length() == 0)
+					continue;
+				
+				indent= COMMENT + getIndentOfLine(commentedLine);				
+			} else {
+				// line is empty
+				if (line.trim().length() == 0)
+					continue;
+
+				indent=getIndentOfLine(line);
+			}
+
+			final int indentSize= calculateDisplayedWidth(indent);
+			if (indentSize < minIndentSize)
+				minIndentSize= indentSize;
+		}
+
+		return minIndentSize == Integer.MAX_VALUE ? 0 : minIndentSize;
 	}
 
 	/**
@@ -299,13 +403,13 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return string.trim().length() == 0;
 	}
 
-	private String getIndent(IDocument document, DocumentCommand command) {
+	private int getIndentSize(IDocument document, DocumentCommand command) {
 
-		StringBuffer buf= new StringBuffer();
+		StringBuffer buffer= new StringBuffer();
 
 		int docLength= document.getLength();
 		if (command.offset == -1 || docLength == 0)
-			return buf.toString();
+			return 0;
 
 		try {
 			
@@ -328,18 +432,23 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				ITypedRegion typedRegion= partitioner.getPartition(start);
 				if (JavaPartitionScanner.JAVA_DOC.equals(typedRegion.getType()))
 					start= document.getLineInformationOfOffset(typedRegion.getOffset()).getOffset();
+
+				else if (JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT.equals(typedRegion.getType())) {
+					buffer.append(COMMENT);
+					start += 2;
+				}
 			}
 			int whiteend= findEndOfWhiteSpace(document, start, command.offset);
-			buf.append(document.get(start, whiteend - start));
+			buffer.append(document.get(start, whiteend - start));
 			if (getBracketCount(document, start, command.offset, true) > 0) {
-				buf.append(getOneIndentLevel());
+				buffer.append(createIndent(1));
 			}
 
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 		
-		return buf.toString();
+		return calculateDisplayedWidth(buffer.toString());
 	}
 	
 	private String getBlockIndent(IDocument d, DocumentCommand c) {
@@ -352,7 +461,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			// evaluate the line with the opening bracket that matches out closing bracket
 			int indLine= findMatchingOpenBracket(d, line, c.offset, 1);
-			if (indLine != -1 && indLine != line)
+			if (indLine != -1)
 				// take the indent of the found line
 				return getIndentOfLine(d, indLine);
 
@@ -419,98 +528,97 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				buffer.append(' ');
 
 		} else {
-			buffer.append('\t');
-		}
-
-		return buffer.toString();
-	}
-
-	private static String createPrefix(int displayedWidth) {
-
-		StringBuffer buffer= new StringBuffer();
-
-		if (useSpaces()) {
-			for (int i= 0; i != displayedWidth; ++i)
-				buffer.append(' ');
-
-		} else {
-			int tabWidth= getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
-			int div= displayedWidth / tabWidth;
-			int mod= displayedWidth % tabWidth;
-
-			for (int i= 0; i != div; ++i)
+			for (int i= 0; i != level; ++i)
 				buffer.append('\t');
-
-			for (int i= 0; i != mod; ++i)
-				buffer.append(' ');
-
 		}
 
 		return buffer.toString();
 	}
 
-	private String stripIndent(String paragraph, String lineDelimiter) {
+	/**
+	 * Extends the string to match displayed width.
+	 * String is either the empty string or "//" and should not contain whites.
+	 */
+	private static String changePrefix(String string, int displayedWidth) {
+
+		// assumption: string contains no whitspaces
+		final StringBuffer buffer= new StringBuffer(string);
+		int column= calculateDisplayedWidth(buffer.toString());
+
+		if (column > displayedWidth)
+			return string;
+		
+		if (useSpaces()) {
+			while (column != displayedWidth) {
+				buffer.append(' ');
+				++column;
+			}
+			
+		} else {
+			final int tabWidth= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+
+			while (column != displayedWidth) {
+				if (column + tabWidth - (column % tabWidth) <= displayedWidth) {
+					buffer.append('\t');
+					column += tabWidth - (column % tabWidth);
+				} else {
+					buffer.append(' ');
+					++column;
+				}
+			}			
+		}
+
+		return buffer.toString();
+	}
+
+	/**
+	 * Formats a paragraph such that the first non-empty line of the paragraph
+	 * will have an indent of size newIndentSize.
+	 */
+	private String format(String paragraph, int newIndentSize, String lineDelimiter, boolean indentFirstLine) {
+
+		final int firstLineIndentSize= getIndentSizeOfFirstLine(paragraph, indentFirstLine);
+		final int minIndentSize= getMinimalIndentSize(paragraph, indentFirstLine);		
+
+		if (newIndentSize < firstLineIndentSize - minIndentSize)
+			newIndentSize= firstLineIndentSize - minIndentSize;
 
 		final StringBuffer buffer= new StringBuffer();
 
-		// determine minimum indent width
-		int minIndentWidth= Integer.MAX_VALUE;
 		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
 			String line= (String) iterator.next();
-			String trimmedLine= line.trim();
+			if (indentFirstLine) {
 
-			if (trimmedLine.length() == 0)
-				continue;
+				String lineIndent= null;
+				if (line.startsWith(COMMENT))
+					lineIndent= COMMENT + getIndentOfLine(line.substring(2));
+				else
+					lineIndent= getIndentOfLine(line);
+				String lineContent= line.substring(lineIndent.length());
+				
+				
+				if (lineContent.length() == 0) {
+					// line was empty; insert as is
+					buffer.append(line);
 
-			int index= line.indexOf(trimmedLine);
-			String indent= line.substring(0, index);
-			int width= calculateDisplayedWidth(indent);
-			minIndentWidth= Math.min(minIndentWidth, width);
-		}
+				} else {
+					int indentSize= calculateDisplayedWidth(lineIndent);
+					int deltaSize= newIndentSize - firstLineIndentSize;
+					lineIndent= changePrefix(lineIndent.trim(), indentSize + deltaSize);
+					buffer.append(lineIndent);
+					buffer.append(lineContent);			
+				}
 
-		// strip prefixes
-		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
-			String line= (String) iterator.next();
-			String trimmedLine= line.trim();
-
-			if (trimmedLine.length() != 0) {
-				int index= line.indexOf(trimmedLine);
-				String indent= line.substring(0, index);
-				int width= calculateDisplayedWidth(indent);
-				int strippedWidth= width - minIndentWidth;
-				String prefix= createPrefix(strippedWidth);
-
-				buffer.append(prefix);
-				buffer.append(trimmedLine);
+			} else {
+				indentFirstLine= true;
+				buffer.append(line);
 			}
 
 			if (iterator.hasNext())
-				buffer.append(lineDelimiter);
+				buffer.append(lineDelimiter);			
 		}
 
 		return buffer.toString();
-	}
-
-	private String format(String paragraph, String indent, String lineDelimiter, boolean indentFirstLine) {
-
-		final StringBuffer buffer= new StringBuffer();
-
-		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
-			String line= (String) iterator.next();
-			if (indentFirstLine && line.trim().length() != 0)
-				buffer.append(indent);
-			else
-				indentFirstLine= true;
-			buffer.append(line);
-			if (iterator.hasNext())
-				buffer.append(lineDelimiter);
-		}
-
-		return buffer.toString();
-	}
-
-	private String getOneIndentLevel() {
-		return String.valueOf('\t');
 	}
 
 	/**
@@ -539,7 +647,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 		return false;
 	}
-
 
 	private void smartIndentAfterBlockDelimiter(IDocument document, DocumentCommand command) {
 		if (command.text.charAt(0) == '}')
