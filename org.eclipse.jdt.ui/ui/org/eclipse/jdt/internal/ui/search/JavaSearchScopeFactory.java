@@ -179,13 +179,6 @@ public class JavaSearchScopeFactory {
 			javaProjects= new HashSet(((IStructuredSelection) selection).size());
 			while (iter.hasNext()) {
 				Object selectedElement= iter.next();
-
-				// Unpack search result view entry
-				Object oldSearchResultEntry= SearchUtil.getGroupByKeyFromPossibleSearchResultViewEntry(selectedElement);
-				if (oldSearchResultEntry != null) {
-					selectedElement= oldSearchResultEntry;
-				}
-				
 				if (selectedElement instanceof LogicalPackage)
 					// must check this first, since it's adaptable, but doesn't adapt to anything useful
 					javaProjects.add(((LogicalPackage) selectedElement).getJavaProject());
@@ -244,13 +237,6 @@ public class JavaSearchScopeFactory {
 			javaElements= new HashSet(((IStructuredSelection) selection).size());
 			while (iter.hasNext()) {
 				Object selectedElement= iter.next();
-
-				// Unpack search result view entry
-				Object oldSearchResultEntry= SearchUtil.getGroupByKeyFromPossibleSearchResultViewEntry(selectedElement);
-				if (oldSearchResultEntry != null) {
-					selectedElement= oldSearchResultEntry;
-				}
-
 				if (selectedElement instanceof IJavaElement)
 					addJavaElements(javaElements, (IJavaElement) selectedElement);
 				else if (selectedElement instanceof IResource)

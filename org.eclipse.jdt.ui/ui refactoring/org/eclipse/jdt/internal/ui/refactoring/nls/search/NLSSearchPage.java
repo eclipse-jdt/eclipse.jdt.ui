@@ -470,10 +470,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		if (o instanceof IJavaElement) {
 			fWrapperClass= (IJavaElement) o;
 			result= determineInitValuesFrom(fWrapperClass);
-		} else if (SearchUtil.isISearchResultViewEntry(o)) {
-			fWrapperClass= SearchUtil.getJavaElement(o);
-			result= determineInitValuesFrom(fWrapperClass);
-		} else if (o instanceof IAdaptable) {
+		} if (o instanceof IAdaptable) {
 			IWorkbenchAdapter element= (IWorkbenchAdapter) ((IAdaptable) o).getAdapter(IWorkbenchAdapter.class);
 			if (element != null)
 				result= new SearchPatternData(element.getLabel(o), null, ""); //$NON-NLS-1$

@@ -1062,12 +1062,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		Iterator iter= ((StructuredSelection)selection).iterator();
 		Object firstElement= iter.next();
 		if (!(firstElement instanceof IJavaElement)) {
-			if (SearchUtil.isISearchResultViewEntry(firstElement)) {
-				IJavaElement je= SearchUtil.getJavaElement(firstElement);
-				if (je != null)
-					return je;
-				firstElement= SearchUtil.getResource(firstElement);
-			}
 			if (firstElement instanceof IAdaptable) {
 				IJavaElement je= (IJavaElement)((IAdaptable)firstElement).getAdapter(IJavaElement.class);
 				if (je == null && firstElement instanceof IFile) { 
@@ -1215,7 +1209,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * Converts the given Java element to one which is suitable for this
 	 * view. It takes into account wether the view shows working copies or not.
 	 *
-	 * @param	element the Java element to be converted
+	 * @param	 element the Java element to be converted
 	 * @return	an element suitable for this view
 	 */
 	IJavaElement getSuitableJavaElement(Object obj) {

@@ -10,22 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.search.ui.NewSearchUI;
-
-import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
+
+import org.eclipse.search.ui.NewSearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -111,9 +111,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		}
 	}
 
-	private IJavaElement getJavaElement(IJavaElement o, boolean silent) {
-		if (o == null)
-			return null;
+	private IJavaElement getTypeIfPossible(IJavaElement o, boolean silent) {
 		switch (o.getElementType()) {
 			case IJavaElement.COMPILATION_UNIT:
 				if (silent)
@@ -127,27 +125,19 @@ public abstract class FindAction extends SelectionDispatchAction {
 		}
 	}
 
-	private IJavaElement getJavaElement(IMarker marker, boolean silent) {
-		return getJavaElement(SearchUtil.getJavaElement(marker), silent);
-	}
-
-
-	private IJavaElement getJavaElement(Object o, boolean silent) {
-		if (o instanceof IJavaElement)
-			return getJavaElement((IJavaElement)o, silent);
-		else if (o instanceof IMarker)
-			return getJavaElement((IMarker)o, silent);
-		else if (o instanceof ISelection)
-			return getJavaElement((IStructuredSelection)o, silent);
-		else if (SearchUtil.isISearchResultViewEntry(o))
-			return getJavaElement(SearchUtil.getJavaElement(o), silent);
-		return null;
-	}
-
 	IJavaElement getJavaElement(IStructuredSelection selection, boolean silent) {
-		if (selection.size() == 1)
-			// Selection only enabled if one element selected.
-			return getJavaElement(selection.getFirstElement(), silent);
+		if (selection.size() == 1) {
+			Object firstElement= selection.getFirstElement();
+			IJavaElement elem= null;
+			if (firstElement instanceof IJavaElement) 
+				elem= (IJavaElement) firstElement;
+			else if (firstElement instanceof IAdaptable) 
+				elem= (IJavaElement) ((IAdaptable) firstElement).getAdapter(IJavaElement.class);
+			if (elem != null) {
+				return getTypeIfPossible(elem, silent);
+			}
+			
+		}
 		return null;
 	}
 

@@ -51,7 +51,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 /**
@@ -358,13 +357,6 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		if (element == null)
 			return null;
 
-		if (SearchUtil.isISearchResultViewEntry(element)) {
-			IJavaElement je= SearchUtil.getJavaElement(element);
-			if (je != null)
-				return je;
-			element= SearchUtil.getResource(element);
-		}
-	
 		IJavaElement je= null;
 		if (element instanceof IAdaptable)
 			je= (IJavaElement)((IAdaptable)element).getAdapter(IJavaElement.class);

@@ -794,14 +794,6 @@
    
    
    <extension
-         point="org.eclipse.ui.editors.markerUpdaters">
-      <updater
-            markerType="org.eclipse.search.searchmarker"
-            class="org.eclipse.jdt.internal.ui.search.JavaSearchMarkerUpdater"
-            id="org.eclipse.jdt.ui.markerUpdaters.JavaSearchMarkerUpdater">
-      </updater>
-   </extension>
-   <extension
          point="org.eclipse.ui.editors.annotationTypes">
       <type
          name="org.eclipse.jdt.ui.error"
