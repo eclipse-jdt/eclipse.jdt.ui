@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
 
 /**
  * Type constraints creator to determine the necessary constraints to replace type occurrences by a given super type.
@@ -60,7 +59,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/** The constraint variable property */
 	private static final String PROPERTY_CONSTRAINT_VARIABLE= "cv"; //$NON-NLS-1$
-	
+
 	/** The current method declarations being processed */
 	private final Stack fCurrentMethods= new Stack();
 
@@ -68,37 +67,21 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayAccess)
 	 */
 	public final void endVisit(final ArrayAccess node) {
-		final ConstraintVariable2 first= (ConstraintVariable2) node.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		final ConstraintVariable2 second= (ConstraintVariable2) node.getArray().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		if (first instanceof TypeConstraintVariable2 && second instanceof TypeConstraintVariable2)
-			fModel.createEqualsConstraint((TypeConstraintVariable2) first, (TypeConstraintVariable2) second);
+
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayCreation)
 	 */
 	public final void endVisit(final ArrayCreation node) {
-		final ConstraintVariable2 first= (ConstraintVariable2) node.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		final ConstraintVariable2 second= (ConstraintVariable2) node.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		if (first instanceof TypeConstraintVariable2 && second instanceof TypeConstraintVariable2)
-			fModel.createEqualsConstraint((TypeConstraintVariable2) first, (TypeConstraintVariable2) second);
+
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayType)
 	 */
 	public final void endVisit(final ArrayType node) {
-		final ConstraintVariable2 first= (ConstraintVariable2) node.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		final ConstraintVariable2 second= (ConstraintVariable2) node.getComponentType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		if (first instanceof TypeConstraintVariable2 && second instanceof TypeConstraintVariable2)
-			fModel.createEqualsConstraint((TypeConstraintVariable2) first, (TypeConstraintVariable2) second);
-	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.SingleVariableDeclaration)
-	 */
-	public void endVisit(SingleVariableDeclaration node) {
-		super.endVisit(node);
 	}
 
 	/*
@@ -146,8 +129,19 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.InstanceofExpression)
 	 */
-	public void endVisit(InstanceofExpression node) {
-		super.endVisit(node);
+	public final void endVisit(final InstanceofExpression node) {
+		final Expression expression= node.getLeftOperand();
+		final Type type= node.getRightOperand();
+		final ConstraintVariable2 leftVariable= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		final ConstraintVariable2 rightVariable= (ConstraintVariable2) type.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		if (leftVariable != null && rightVariable != null) {
+			final ITypeBinding leftBinding= expression.resolveTypeBinding();
+			final ITypeBinding rightBinding= type.resolveBinding();
+			if (leftBinding != null && leftBinding.isClass() && rightBinding != null && rightBinding.isClass()) {
+
+				// return createOrOrSubtypeConstraint(leftVariable, rightVariable);
+			}
+		}
 	}
 
 	/*
@@ -158,37 +152,10 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ConditionalExpression)
-	 */
-	public void endVisit(ConditionalExpression node) {
-		super.endVisit(node);
-	}
-
-	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ConstructorInvocation)
 	 */
 	public void endVisit(ConstructorInvocation node) {
 		super.endVisit(node);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayInitializer)
-	 */
-	public final void endVisit(final ArrayInitializer node) {
-		final ITypeBinding binding= node.resolveTypeBinding();
-		if (binding != null) {
-			final ConstraintVariable2 constraint= (ConstraintVariable2) node.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-			if (constraint != null) {
-				Expression expression= null;
-				ConstraintVariable2 variable= null;
-				for (final Iterator iterator= node.expressions().iterator(); iterator.hasNext();) {
-					expression= (Expression) iterator.next();
-					variable= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-					if (variable != null)
-						fModel.createSubtypeConstraint(variable, constraint);
-				}
-			}
-		}
 	}
 
 	/*
@@ -202,6 +169,28 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 			// TODO implement
 		}
 	}
+
+	//	
+	// private ITypeConstraint[] getReturnTypeConstraint(Expression invocation, IMethodBinding methodBinding){
+	// if (methodBinding == null || methodBinding.isConstructor() || methodBinding.getReturnType().isPrimitive())
+	// return new ITypeConstraint[0];
+	// ConstraintVariable returnTypeVariable= fConstraintVariableFactory.makeReturnTypeVariable(methodBinding);
+	// ConstraintVariable invocationVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(invocation, getContext());
+	// return fTypeConstraintFactory.createDefinesConstraint(invocationVariable, returnTypeVariable);
+	// }
+	//	
+	// private ITypeConstraint[] getArgumentConstraints(List arguments, IMethodBinding methodBinding){
+	// List result= new ArrayList(arguments.size());
+	// for (int i= 0, n= arguments.size(); i < n; i++) {
+	// Expression argument= (Expression) arguments.get(i);
+	// ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(argument, getContext());
+	// ConstraintVariable parameterTypeVariable= fConstraintVariableFactory.makeParameterTypeVariable(methodBinding, i);
+	// ITypeConstraint[] argConstraint= fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
+	// result.addAll(Arrays.asList(argConstraint));
+	// }
+	// return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
+	// }
+	//	
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.MethodInvocation)
@@ -241,18 +230,42 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	public final void endVisit(final ReturnStatement node) {
 		final Expression expression= node.getExpression();
 		if (expression != null) {
-			final ConstraintVariable2 variable= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-			if (variable != null) {
+			final ConstraintVariable2 descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+			if (descendant != null) {
 				final MethodDeclaration declaration= (MethodDeclaration) fCurrentMethods.peek();
 				if (declaration != null) {
 					final IMethodBinding binding= declaration.resolveBinding();
 					if (binding != null) {
-						final ConstraintVariable2 result= fModel.createReturnTypeVariable(binding);
-						if (result != null)
-							fModel.createSubtypeConstraint(variable, result);
+						final ConstraintVariable2 ancestor= fModel.createReturnTypeVariable(binding);
+						if (ancestor != null)
+							node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
+						fModel.createSubtypeConstraint(descendant, ancestor);
 					}
 				}
 			}
+		}
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ConditionalExpression)
+	 */
+	public final void endVisit(final ConditionalExpression node) {
+		ConstraintVariable2 thenVariable= null;
+		ConstraintVariable2 elseVariable= null;
+		final Expression thenExpression= node.getThenExpression();
+		if (thenExpression != null)
+			thenVariable= (ConstraintVariable2) thenExpression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		final Expression elseExpression= node.getElseExpression();
+		if (elseExpression != null)
+			elseVariable= (ConstraintVariable2) elseExpression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		final ITypeBinding binding= node.resolveTypeBinding();
+		if (binding != null) {
+			final ConstraintVariable2 ancestor= fModel.createIndependantTypeVariable(binding);
+			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
+			if (thenVariable != null)
+				fModel.createSubtypeConstraint(thenVariable, ancestor);
+			if (elseVariable != null)
+				fModel.createSubtypeConstraint(elseVariable, ancestor);
 		}
 	}
 
@@ -266,6 +279,41 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	}
 
 	/*
+	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.SingleVariableDeclaration)
+	 */
+	public final void endVisit(final SingleVariableDeclaration node) {
+		final ConstraintVariable2 ancestor= (ConstraintVariable2) node.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		if (ancestor != null) {
+			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
+			final Expression expression= node.getInitializer();
+			if (expression != null) {
+				final ConstraintVariable2 descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+				if (descendant != null)
+					fModel.createSubtypeConstraint(descendant, ancestor);
+			}
+		}
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayInitializer)
+	 */
+	public final void endVisit(final ArrayInitializer node) {
+		final ITypeBinding binding= node.resolveTypeBinding();
+		if (binding != null) {
+			final ConstraintVariable2 ancestor= fModel.createIndependantTypeVariable(binding);
+			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
+			Expression expression= null;
+			ConstraintVariable2 descendant= null;
+			for (final Iterator iterator= node.expressions().iterator(); iterator.hasNext();) {
+				expression= (Expression) iterator.next();
+				descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+				if (descendant != null)
+					fModel.createSubtypeConstraint(descendant, ancestor);
+			}
+		}
+	}
+
+	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.ThisExpression)
 	 */
 	public final boolean visit(final ThisExpression node) {
@@ -276,11 +324,11 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.Assignment)
 	 */
 	public final void endVisit(final Assignment node) {
-		final ConstraintVariable2 left= (ConstraintVariable2) node.getLeftHandSide().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		final ConstraintVariable2 right= (ConstraintVariable2) node.getRightHandSide().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		if (left != null && right != null) {
-			fModel.createSubtypeConstraint(left, right);
-			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, left);
+		final ConstraintVariable2 ancestor= (ConstraintVariable2) node.getLeftHandSide().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		final ConstraintVariable2 descendant= (ConstraintVariable2) node.getRightHandSide().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		if (ancestor != null && descendant != null) {
+			fModel.createSubtypeConstraint(descendant, ancestor);
+			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
 		}
 	}
 
@@ -288,14 +336,12 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.CastExpression)
 	 */
 	public final void endVisit(final CastExpression node) {
-		final ConstraintVariable2 left= (ConstraintVariable2) node.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		final ConstraintVariable2 right= (ConstraintVariable2) node.getExpression().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, left);
-		if (right instanceof TypeConstraintVariable2) {
-			if (left != null)
-				fModel.createSubtypeConstraint(left, right);
-			fModel.createCastVariable(node, (TypeConstraintVariable2) right);
-		}
+		final ConstraintVariable2 descendant= (ConstraintVariable2) node.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		final ConstraintVariable2 ancestor= (ConstraintVariable2) node.getExpression().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, descendant);
+		if (descendant != null)
+			fModel.createSubtypeConstraint(descendant, ancestor);
+		fModel.createCastVariable(node, ancestor);
 	}
 
 	/*
@@ -314,21 +360,22 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 
 	/**
 	 * End of visit the variable declaration fragment list.
+	 * 
 	 * @param fragments the fragments (element type: <code>VariableDeclarationFragment</code>)
 	 * @param type the type of the fragments
 	 */
 	protected final void endVisit(final List fragments, final Type type) {
-		final ConstraintVariable2 variable= (ConstraintVariable2) type.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		if (variable != null) {
-			ConstraintVariable2 constraint= null;
+		final ConstraintVariable2 ancestor= (ConstraintVariable2) type.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		if (ancestor != null) {
+			ConstraintVariable2 descendant= null;
 			VariableDeclarationFragment fragment= null;
 			for (int index= 0; index < fragments.size(); index++) {
 				fragment= (VariableDeclarationFragment) fragments.get(index);
-				constraint= (ConstraintVariable2) fragment.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-				if (constraint != null)
-					fModel.createSubtypeConstraint(constraint, variable);
+				descendant= (ConstraintVariable2) fragment.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+				if (descendant != null)
+					fModel.createSubtypeConstraint(descendant, ancestor);
 			}
-			type.getParent().setProperty(PROPERTY_CONSTRAINT_VARIABLE, variable);
+			type.getParent().setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
 		}
 	}
 
@@ -338,7 +385,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	public final void endVisit(final VariableDeclarationFragment node) {
 		final Expression initializer= node.getInitializer();
 		if (initializer != null)
-			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE,  initializer.getProperty(PROPERTY_CONSTRAINT_VARIABLE));
+			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, initializer.getProperty(PROPERTY_CONSTRAINT_VARIABLE));
 	}
 
 	/*
