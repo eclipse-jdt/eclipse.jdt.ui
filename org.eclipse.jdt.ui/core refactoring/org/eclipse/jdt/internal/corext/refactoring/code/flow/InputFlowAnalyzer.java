@@ -101,7 +101,6 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 
 	public FlowInfo perform(MethodDeclaration method) {
-		FlowContext context= getFlowContext();
 		method.accept(this);
 		return getFlowInfo(method);
 	}

@@ -290,7 +290,6 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fUsedModifyNames= new ArrayList(0);
 		IVariableBinding binding= fFieldDeclaration.resolveBinding();
 		ITypeBinding type= binding.getType();
-		ITypeBinding booleanType= fFieldDeclaration.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
 		IMethodBinding[] methods= binding.getDeclaringClass().getDeclaredMethods();
 		for (int i= 0; i < methods.length; i++) {
 			IMethodBinding method= methods[i];
