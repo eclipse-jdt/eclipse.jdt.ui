@@ -469,6 +469,8 @@ public class JavaContext extends CompilationUnitContext {
 		context.setForceEvaluation(true);
 
 		TemplateBuffer buffer= context.evaluate(template);
+		if (buffer == null)
+			return null;
 		return buffer.getString();
 	}
 

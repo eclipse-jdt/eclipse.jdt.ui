@@ -103,6 +103,10 @@ public class TemplateProposal implements IJavaCompletionProposal {
 
 		    fContext.setReadOnly(false);
 			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
+			if (templateBuffer == null) {
+				fSelectedRegion= fRegion;
+				return;
+	    	}
 			
 			document.removePosition(position);
 			document.removePositionUpdater(updater);
@@ -179,6 +183,9 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	    try {
 		    fContext.setReadOnly(true);
 			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
+			
+			if (templateBuffer == null)
+				return null;
 
 			return textToHTML(templateBuffer.getString());
 

@@ -52,6 +52,8 @@ public class CodeTemplateContext extends TemplateContext {
 		
 		TemplateTranslator translator= new TemplateTranslator();
 		TemplateBuffer buffer= translator.translate(template.getPattern());
+		if (buffer == null)
+			return null;
 		getContextType().edit(buffer, this);
 		return buffer;
 	}

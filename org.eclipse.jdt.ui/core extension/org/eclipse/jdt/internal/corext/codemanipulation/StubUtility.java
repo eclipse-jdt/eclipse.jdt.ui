@@ -263,7 +263,10 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
 		context.setVariable(CodeTemplateContextType.BODY_STATEMENT, bodyStatement);
-		String str= context.evaluate(template).getString();
+		TemplateBuffer buffer= context.evaluate(template);
+		if (buffer == null)
+			return null;
+		String str= buffer.getString();
 		if (Strings.containsOnlyWhitespaces(str)) {
 			if (Strings.containsOnlyWhitespaces(bodyStatement)) {
 				return null;
@@ -297,7 +300,10 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment);
 		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
 		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getQualifier(cu.getElementName()));
-		String content= context.evaluate(template).getString();
+		TemplateBuffer buffer= context.evaluate(template);
+		if (buffer == null)
+			return null;
+		String content= buffer.getString();
 		if (content.length() == 0) {
 			return null;
 		}
@@ -318,7 +324,10 @@ public class StubUtility {
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, outerName);
 		context.setVariable(CodeTemplateContextType.TYPENAME, destTypeName);
-		String str= context.evaluate(template).getString();
+		TemplateBuffer buffer= context.evaluate(template);
+		if (buffer == null)
+			return null;
+		String str= buffer.getString();
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;
 		}
@@ -436,6 +445,8 @@ public class StubUtility {
 		
 		
 		TemplateBuffer buffer= context.evaluate(template);
+		if (buffer == null)
+			return null;
 		String str= buffer.getString();
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;
@@ -524,6 +535,8 @@ public class StubUtility {
 			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(declaringClassQualifiedName, methodName, parameterTypesQualifiedNames));
 		}
 		TemplateBuffer buffer= context.evaluate(template);
+		if (buffer == null)
+			return null;
 		String str= buffer.getString();
 		if (Strings.containsOnlyWhitespaces(str)) {
 			return null;
