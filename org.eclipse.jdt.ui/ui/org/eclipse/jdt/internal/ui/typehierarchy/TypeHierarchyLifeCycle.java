@@ -178,6 +178,9 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	 */
 	public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
 	 	fHierarchyRefreshNeeded= true;
+	 	if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+	 		fireChange(null);
+	 	}
 	}		
 
 	/*
@@ -192,8 +195,12 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		if (!isReconciled() && elem instanceof IWorkingCopy && ((IWorkingCopy)elem).isWorkingCopy()) {
 			return;
 		}
-		if (fHierarchyRefreshNeeded) {
-			fireChange(null);
+		if (fHierarchyRefreshNeeded ) {
+			if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
+				fireChange(null);
+			} else {
+				return;
+			}
 		} else {
 			ArrayList changedTypes= new ArrayList();
 			processDelta(event.getDelta(), changedTypes);
