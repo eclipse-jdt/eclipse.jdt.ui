@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -19,10 +20,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -61,26 +59,16 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 		if (typeBinding == null) {
 			return;
 		}
-		ASTRewrite rewrite= new ASTRewrite(expressionStatement.getParent());
-		AST ast= statement.getAST();
-		NameProposer nameProposer= new NameProposer();
-		String[] varName= nameProposer.proposeLocalVariableName(typeBinding.getName());
-
-		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
+		ICompilationUnit cu= context.getCompilationUnit();
 		
-		newDecl.setType(ASTResolving.getTypeFromTypeBinding(ast, typeBinding));
-		newDeclFrag.setName(ast.newSimpleName(varName[0]));
-		newDeclFrag.setInitializer((Expression) rewrite.createCopy(expression));
+		AssignToVariableAssistProposal localProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.LOCAL, expressionStatement, typeBinding, 2);
+		resultingCollections.add(localProposal);	
 		
-		rewrite.markAsReplaced(expressionStatement, newDecl);
-		
-		String label= CorrectionMessages.getString("QuickAssistProcessor.assigntolocal.description");
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
-		proposal.addImport(typeBinding);
-		proposal.ensureNoModifications();
-		resultingCollections.add(proposal);
+		ASTNode type= ASTResolving.findParentType(expression);
+		if (type != null) {
+			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding, 1);
+			resultingCollections.add(fieldProposal);
+		}				
 	}
 	
 	private void getCatchClauseToThrowsProposals(ICorrectionContext context, List resultingCollections) throws CoreException {

@@ -26,6 +26,10 @@ public class NameProposer {
 		fNameSuffixes= suffixes;
 	}
 	
+	public NameProposer(CodeGenerationSettings settings) {
+		this(settings.fieldPrefixes, settings.fieldSuffixes);
+	}	
+	
 	public NameProposer() {
 		this(new String[0], new String[0]);
 	}
@@ -94,25 +98,16 @@ public class NameProposer {
 			name= name.substring(0, arrIndex);
 
 		List names= new ArrayList();
-
 		for (int i= name.length() - 1; i >= 0; i--) {
-			char character= name.charAt(i);
-			if (Character.isLowerCase(character))
-				continue;
-				
-			char lowerCaseCharacter= Character.toLowerCase(character);
-			StringBuffer buffer= new StringBuffer();
-			buffer.append(lowerCaseCharacter);
-			buffer.append(name.substring(i + 1));
-			if (arrIndex != -1)
-				buffer.append('s');
-
-			String variableName= buffer.toString();
-			if (JavaConventions.validateIdentifier(variableName).isOK())
-				names.add(variableName);
+			if (Character.isUpperCase(name.charAt(i))) {
+				String variableName= getVariableName(name.substring(i), arrIndex != -1);
+				if (variableName != null) {
+					names.add(variableName);
+				}
+			}
 		}
 		
-		if (names.size() == 0)
+		if (names.isEmpty())
 			names.add(String.valueOf(Character.toLowerCase(name.charAt(0))));
 		
 		return (String[]) names.toArray(new String[names.size()]);
@@ -127,17 +122,55 @@ public class NameProposer {
 
 		char firstLetter= name.charAt(0);
 		if (Character.isUpperCase(firstLetter)) {
-			StringBuffer nameBuffer= new StringBuffer();
-			nameBuffer.append(Character.toLowerCase(firstLetter));
-			nameBuffer.append(name.substring(1));
-			if (arrIndex != -1) {
-				nameBuffer.append('s');
-			}
-			if (JavaConventions.validateFieldName(nameBuffer.toString()).isOK()) {
-				return nameBuffer.toString();
+			String variableName= getVariableName(name, arrIndex != -1);
+			if (variableName != null) {
+				return variableName;
 			}
 		}
 		return String.valueOf(Character.toLowerCase(firstLetter));
+	}
+	
+	public String proposeFieldName(String fieldType) {
+		String name= Signature.getSimpleName(fieldType);
+		String arraySuffix= "";
+		int arrIndex= name.indexOf('[');
+		if (arrIndex != -1) {
+			name= name.substring(0, arrIndex);
+			arraySuffix= "s";
+		}
+		
+		for (int i= 0; i < fNamePrefixes.length; i++) {
+			String fieldName= fNamePrefixes[i] + name + arraySuffix;
+			if (JavaConventions.validateFieldName(fieldName).isOK()) {
+				return fieldName;
+			}
+		}
+		for (int i= 0; i < fNameSuffixes.length; i++) {
+			String fieldName= Character.toLowerCase(name.charAt(0)) + name.substring(1) 
+										+ arraySuffix + fNameSuffixes[i];
+			if (JavaConventions.validateFieldName(fieldName).isOK()) {
+				return fieldName;
+			}
+		}
+		String variableName= getVariableName(name, arraySuffix.length() > 0);
+		if (variableName != null) {
+			return variableName;
+		}		
+		return String.valueOf(Character.toLowerCase(name.charAt(0)));
+	}	
+	
+	
+	private String getVariableName(String name, boolean isArray) {
+		StringBuffer nameBuffer= new StringBuffer();
+		nameBuffer.append(Character.toLowerCase(name.charAt(0)));
+		nameBuffer.append(name.substring(1));
+		if (isArray) {
+			nameBuffer.append('s');
+		}
+		if (JavaConventions.validateFieldName(nameBuffer.toString()).isOK()) {
+			return nameBuffer.toString();
+		}
+		return null;
 	}
 	
 	public String[] proposeParameterNames(String[] paramTypes) {
