@@ -359,6 +359,9 @@ public class LocalCorrectionsSubProcessor {
 	
 	public static void addNLSProposals(ICorrectionContext context, List proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
+		if (! NLSRefactoring.isAvailable(cu)){
+			return;
+		}
 		String name= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.description"); //$NON-NLS-1$
 		
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 0) {
