@@ -40,13 +40,14 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
+	private final Image fFailureTabIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
 	
 	public FailureRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
 		fRunnerViewPart= runner;
 		
 		CTabItem failureTab= new CTabItem(tabFolder, SWT.NONE);
 		failureTab.setText(getName());
-		failureTab.setImage(fFailureIcon);
+		failureTab.setImage(fFailureTabIcon);
 
 		Composite composite= new Composite(tabFolder, SWT.NONE);
 		GridLayout gridLayout= new GridLayout();
@@ -74,11 +75,9 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	}
 
 	void disposeIcons() {
-		if (fErrorIcon != null && !fErrorIcon.isDisposed()) 
-			fErrorIcon.dispose();
-			
-		if (fFailureIcon != null && !fFailureIcon.isDisposed()) 
-			fFailureIcon.dispose();
+		fErrorIcon.dispose();
+		fFailureIcon.dispose();
+		fFailureTabIcon.dispose();
 	}
 
 	private void initMenu() {

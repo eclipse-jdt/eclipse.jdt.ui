@@ -53,8 +53,13 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
 
@@ -131,9 +136,12 @@ public class TestRunnerViewPart extends ViewPart
 	final Image fStackViewIcon= TestRunnerViewPart.createImage("obj16/stackframe.gif");//$NON-NLS-1$
 	final Image fTestRunOKIcon= TestRunnerViewPart.createImage("cview16/junitsuc.gif");
 	final Image fTestRunFailIcon= TestRunnerViewPart.createImage("cview16/juniterr.gif");
+	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("cview16/junitsucq.gif");
+	final Image fTestRunFailDirtyIcon= TestRunnerViewPart.createImage("cview16/juniterrq.gif");
 	
-	Image fOriginalViewImage = null;
-
+	Image fOriginalViewImage= null;
+	IElementChangedListener fDirtyListener= null;
+	
 	private class StopAction extends Action{
 		public StopAction() {
 			setText(JUnitMessages.getString("TestRunnerViewPart.stopaction.text"));//$NON-NLS-1$
@@ -161,7 +169,52 @@ public class TestRunnerViewPart extends ViewPart
 			rerunTestRun();
 		}
 	}
-
+	
+	/**
+	 * Listen for for modifications to Java elements
+	 */
+	private class DirtyListener implements IElementChangedListener {
+		public void elementChanged(ElementChangedEvent event) {
+			processDelta(event.getDelta());				
+		}
+		
+		private boolean processDelta(IJavaElementDelta delta) {
+			int kind= delta.getKind();
+			int details= delta.getFlags();
+			int type= delta.getElement().getElementType();
+			
+			switch (type) {
+				// Consider containers for class files.
+				case IJavaElement.JAVA_MODEL:
+				case IJavaElement.JAVA_PROJECT:
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				case IJavaElement.PACKAGE_FRAGMENT:
+					// If we did some different than changing a child we flush the the undo / redo stack.
+					if (kind != IJavaElementDelta.CHANGED || details != IJavaElementDelta.F_CHILDREN) {
+						codeHasChanged();
+						return false;
+					}
+					break;
+				case IJavaElement.CLASS_FILE:
+					// Don't examine children of a class file but keep on examining siblings.
+					return true;
+				default:
+					codeHasChanged();
+					return false;	
+			}
+				
+			IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
+			if (affectedChildren == null)
+				return true;
+	
+			for (int i= 0; i < affectedChildren.length; i++) {
+				if (!processDelta(affectedChildren[i]))
+					return false;
+			}
+			return true;			
+		}
+	}
+	
 	/**
 	 * Stops the currently running test and shuts down the RemoteTestRunner
 	 */
@@ -210,6 +263,10 @@ public class TestRunnerViewPart extends ViewPart
 					handleTestSelected(fFirstFailure.fTestName);
 				}
 				updateViewIcon();
+				if (fDirtyListener == null) {
+					fDirtyListener= new DirtyListener();
+					JavaCore.addElementChangedListener(fDirtyListener);
+				}
 			}
 		});	
 	}
@@ -423,6 +480,8 @@ public class TestRunnerViewPart extends ViewPart
 		fTestRunOKIcon.dispose();
 		fTestRunFailIcon.dispose();
 		fStackViewIcon.dispose();
+		fTestRunOKDirtyIcon.dispose();
+		fTestRunFailDirtyIcon.dispose();
 	}
 
 	private void start(final int total) {
@@ -783,4 +842,22 @@ public class TestRunnerViewPart extends ViewPart
 		}
 	}
 
+	void codeHasChanged() {
+		postAsyncRunnable(new Runnable() {
+			public void run() {
+				if (isDisposed())
+					return;
+				if (fDirtyListener != null) {
+					JavaCore.removeElementChangedListener(fDirtyListener);
+					fDirtyListener= null;
+				}
+				if (fViewImage == fTestRunOKIcon) 
+					fViewImage= fTestRunOKDirtyIcon;
+				else if (fViewImage == fTestRunFailIcon)
+					fViewImage= fTestRunFailDirtyIcon;
+				firePropertyChange(IWorkbenchPart.PROP_TITLE);
+			}
+		});
+	}
+	
 }
