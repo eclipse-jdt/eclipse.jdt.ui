@@ -1052,7 +1052,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 					fConstructorVisibility= 0; // No such thing as Modifier.PACKAGE...
 
 			} catch (JavaModelException e) {
-				e.printStackTrace();
+				return RefactoringStatus.createErrorStatus(e.getMessage());
 			}
 			return new RefactoringStatus();
 		}
