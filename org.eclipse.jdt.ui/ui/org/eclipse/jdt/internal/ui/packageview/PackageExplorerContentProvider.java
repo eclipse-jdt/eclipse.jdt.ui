@@ -259,9 +259,9 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		
 		if (delta.getResourceDeltas() != null) {
 			IResourceDelta[] rd= delta.getResourceDeltas();
-			for (int i= 0; i < rd.length; i++) {
-				processResourceDelta(rd[i], element);
-			}
+				for (int i= 0; i < rd.length; i++) {
+					processResourceDelta(rd[i], element);
+				}
 		}
 
 		handleAffectedChildren(delta, element);
@@ -409,8 +409,11 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) 
+				if (ctrl != null && !ctrl.isDisposed()){
+					ctrl.setRedraw(false); 
 					fViewer.refresh(root);
+					ctrl.setRedraw(true);
+				}
 			}
 		});
 	}
@@ -420,8 +423,11 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) 
+				if (ctrl != null && !ctrl.isDisposed()){
+					ctrl.setRedraw(false); 
 					fViewer.add(parent, element);
+					ctrl.setRedraw(true);
+				}
 			}
 		});
 	}
@@ -431,8 +437,11 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) 
+				if (ctrl != null && !ctrl.isDisposed()) {
+					ctrl.setRedraw(false);
 					fViewer.remove(element);
+					ctrl.setRedraw(true);
+				}
 			}
 		});
 	}
