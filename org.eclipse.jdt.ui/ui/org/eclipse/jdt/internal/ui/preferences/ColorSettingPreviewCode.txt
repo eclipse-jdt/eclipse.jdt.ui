@@ -2,6 +2,7 @@
  * This is about <code>ClassName</code>.
  * {@link com.yourCompany.aPackage.SuperClass}
  * @author author
+ * @deprecated use <code>OtherClass</code> instead
  */
 public class ClassName extends SuperClass {
 	private static final int CONSTANT= 0;
