@@ -12,11 +12,13 @@ package org.eclipse.jdt.internal.ui.text.template;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
@@ -27,6 +29,7 @@ import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -42,8 +45,12 @@ import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
+import org.eclipse.jdt.internal.ui.text.link.ILinkedListener;
+import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
+import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
+import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.ExitFlags;
+import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.IExitPolicy;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -107,8 +114,6 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 
-		LinkedPositionManager manager= null;
-		
 		try {
 			IDocument document= viewer.getDocument();
 			
@@ -138,49 +143,52 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			document.replace(start, end - start, templateString);	
 
 			// translate positions
-			manager= new LinkedPositionManager(document);
+			LinkedEnvironment env= LinkedEnvironment.createLinkedEnvironment(document);
 			TemplatePosition[] variables= templateBuffer.getVariables();
+			boolean hasPositions= false;
 			for (int i= 0; i != variables.length; i++) {
 				TemplatePosition variable= variables[i];
 
 				if (variable.isResolved())
 					continue;
 				
+				LinkedPositionGroup group= new LinkedPositionGroup();
+				
 				int[] offsets= variable.getOffsets();
 				int length= variable.getLength();
 				
 				for (int j= 0; j != offsets.length; j++)
-					manager.addPosition(offsets[j] + start, length);
+					group.createPosition(document, offsets[j] + start, length);
+				
+				env.addGroup(group);
+				hasPositions= true;
 			}
 			
-			LinkedPositionUI editor= new LinkedPositionUI(viewer, manager);
-			editor.setFinalCaretOffset(getCaretOffset(templateBuffer) + start);
-			editor.enter();
-
-			fSelectedRegion= editor.getSelectedRegion();
+			if (hasPositions) {
+				LinkedUIControl editor= new LinkedUIControl(env, viewer);
+				editor.setExitPosition(viewer, getCaretOffset(templateBuffer) + start, 0, true);
+				editor.enter();
+				
+				fSelectedRegion= editor.getSelectedRegion();
+			} else
+				fSelectedRegion= new Region(getCaretOffset(templateBuffer) + start, 0);
 			
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 			openErrorDialog(viewer.getTextWidget().getShell(), e);		    
 			fSelectedRegion= fRegion;
 			
-			if (manager != null)
-				manager.uninstall(false);
 			
 		} catch (BadPositionCategoryException e) {    
 			JavaPlugin.log(e);
 			openErrorDialog(viewer.getTextWidget().getShell(), e);		    	
 			fSelectedRegion= fRegion;
 
-			if (manager != null)
-				manager.uninstall(false);
 
 		} catch (CoreException e) {
 			handleException(viewer.getTextWidget().getShell(), e);
 			fSelectedRegion= fRegion;
 
-			if (manager != null)
-				manager.uninstall(false);
 		}
 
 	}	

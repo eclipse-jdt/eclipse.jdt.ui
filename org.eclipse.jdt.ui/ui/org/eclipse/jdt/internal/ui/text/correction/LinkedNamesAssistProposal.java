@@ -33,8 +33,9 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
+import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
+import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
 
 /**
  * A template proposal.
@@ -60,21 +61,23 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(root, fNode.getStartPosition(), fNode.getLength());
 
 			ASTNode[] sameNodes= LinkedNodeFinder.perform(root, nameNode.resolveBinding());
-			
 			IDocument document= viewer.getDocument();
-			LinkedPositionManager manager= new LinkedPositionManager(document);
 			
+			LinkedPositionGroup group= new LinkedPositionGroup();
 			for (int i= 0; i < sameNodes.length; i++) {
 				ASTNode elem= sameNodes[i];
-				manager.addPosition(elem.getStartPosition(), elem.getLength());
+				group.createPosition(document, elem.getStartPosition(), elem.getLength(), i); // let the user iterate over all the linked fields
 			}
 			
-			LinkedPositionUI editor= new LinkedPositionUI(viewer, manager);
-			editor.setInitialOffset(offset);
-			editor.setFinalCaretOffset(offset);
-			editor.enter();
+			LinkedEnvironment enviroment= LinkedEnvironment.createLinkedEnvironment(document);
+			enviroment.addGroup(group);
 			
-			fSelectedRegion= editor.getSelectedRegion();
+			LinkedUIControl ui= new LinkedUIControl(enviroment, viewer);
+//			ui.setInitialOffset(offset);
+			ui.setExitPosition(viewer, offset, 0, false);
+			ui.enter();
+			
+			fSelectedRegion= ui.getSelectedRegion();
 		} catch (BadLocationException e) {
 		}
 	}	

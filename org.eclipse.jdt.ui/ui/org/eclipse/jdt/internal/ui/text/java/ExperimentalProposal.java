@@ -23,8 +23,9 @@ import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
+import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
+import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
 
 /**
  * An experimental proposal.
@@ -62,28 +63,31 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 		int replacementOffset= getReplacementOffset();
 		String replacementString= getReplacementString();
 
-		if (LinkedPositionManager.hasActiveManager(document)) {
+		if (LinkedEnvironment.hasEnvironment(document)) {
 			fSelectedRegion= (fPositionOffsets.length == 0)
 				? new Region(replacementOffset + replacementString.length(), 0)
 				: new Region(replacementOffset + fPositionOffsets[0], fPositionLengths[0]);
 			
-		} else {
+		} else if (fPositionOffsets.length > 0) {
 			try {
-				LinkedPositionManager manager= new LinkedPositionManager(document);
+				LinkedPositionGroup group= new LinkedPositionGroup();
 				for (int i= 0; i != fPositionOffsets.length; i++)
-					manager.addPosition(replacementOffset + fPositionOffsets[i], fPositionLengths[i]);
+					group.createPosition(document, replacementOffset + fPositionOffsets[i], fPositionLengths[i]);
 				
-				LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
-				editor.setFinalCaretOffset(replacementOffset + replacementString.length());
-				editor.enter();
+				LinkedEnvironment env= LinkedEnvironment.createLinkedEnvironment(document);
+				env.addGroup(group);
+				LinkedUIControl ui= new LinkedUIControl(env, fViewer);
+				ui.setExitPosition(fViewer, replacementOffset + replacementString.length(), 0, true);
+				ui.enter();
 	
-				fSelectedRegion= editor.getSelectedRegion();
+				fSelectedRegion= ui.getSelectedRegion();
 	
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);	
 				openErrorDialog(e);
 			}		
-		}
+		} else
+			fSelectedRegion= new Region(replacementOffset + replacementString.length(), 0);
 	}
 	
 	/*

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
@@ -157,8 +156,8 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 		if (styledText != null && !styledText.isDisposed())
 			styledText.addKeyListener(fKeyListener);
 
-		BusyIndicator.showWhile(styledText.getDisplay(), new Runnable() {
-			public void run() {
+//		BusyIndicator.showWhile(styledText.getDisplay(), new Runnable() {
+//			public void run() {
 				
 				fInvocationOffset= fViewer.getSelectedRange().x;
 				// lazily compute proposals
@@ -188,8 +187,8 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 						displayProposals();
 					}
 				}
-			}
-		});
+//			}
+//		});
 		
 		return getErrorMessage();
 	}
@@ -418,9 +417,14 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 			fContentAssistant.removeContentAssistListener(this, ContentAssistant2.PROPOSAL_SELECTOR);
 			
 			fPopupCloser.uninstall();
-			fProposalShell.setVisible(false);
-			fProposalShell.dispose();
+			// see bug 47511: setVisible may run the event loop on GTK
+			// and trigger a rentrant call - have to make sure we don't 
+			// dispose another shell that was already brought up in a
+			// reentrant call when calling setVisible()
+			Shell tempShell= fProposalShell;
 			fProposalShell= null;
+			tempShell.setVisible(false);
+			tempShell.dispose();
 		}
 	}
 	
@@ -518,11 +522,15 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
 		data.widthHint= adjustWidth ? Math.min(size.x, 300) : width;
-		data.heightHint= Math.min(getTableHeightHint(fProposalTable, fProposalTable.getItemCount() - 1), getTableHeightHint(fProposalTable, 9));
+		data.heightHint= Math.min(getTableHeightHint(fProposalTable, fProposalTable.getItemCount()), getTableHeightHint(fProposalTable, 10));
 		fProposalTable.setLayoutData(data);
 		
 		fProposalShell.layout(true);
 		fProposalShell.pack();
+		
+		if (adjustWidth) {
+			fProposalShell.setLocation(getLocation());
+		}	
 	}
 
 	/**
@@ -540,7 +548,8 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 			result+= table.getGridLineWidth() * (rows - 1);
 
 		// TODO adjustment might just work on windows
-		return result + 4;		
+//		return result + 4;		
+		return result;		
 	}
 
 	private boolean validateProposal(IDocument document, ICompletionProposal p, int offset, DocumentEvent event) {
@@ -601,6 +610,13 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 				document.addDocumentListener(fDocumentListener);
 			
 			fProposalShell.setVisible(true);
+			// see bug 47511: setVisible may run the event loop on GTK
+			// and trigger a rentrant call - have to check whether we are still
+			// visible
+			if (!Helper2.okToUse(fProposalShell))
+				return;
+			
+			
 			if (fAdditionalInfoController != null) {
 				fAdditionalInfoController.install(fProposalTable);		
 				fAdditionalInfoController.handleTableSelectionChanged();
@@ -687,7 +703,7 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 					// in linked mode: hide popup
 					// plus: don't invalidate the event in order to give LinkedUI a chance to handle it
 					case '\t':
-							hide();
+//							hide();
 							break;
 						
 					default:			

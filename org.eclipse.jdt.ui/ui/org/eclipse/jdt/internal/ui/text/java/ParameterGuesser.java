@@ -516,7 +516,7 @@ public class ParameterGuesser {
 
 		// add null proposal
 		if (!isPrimitive(typeName.toCharArray()))
-			matches.add(new Variable(typePackage, typeName, "null", Variable.LOCAL, 2, new char[0], null)); //$NON-NLS-1$		
+			matches.add(new Variable(typePackage, typeName, "null", Variable.FIELD, 2, new char[0], null)); //$NON-NLS-1$		
 				
 		return matches.isEmpty() ? null : matches;
 	}

@@ -33,8 +33,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
+import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
+import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
 
 /**
  * This is a {@link org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal} which includes templates 
@@ -51,7 +52,6 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	private final ITextViewer fViewer;
 	private IRegion fSelectedRegion; // initialized by apply()
 	private ICompletionProposal[][] fChoices; // initialized by guessParameters()
-	private static final String TYPE= "ParamterGuessingProposal_"; //$NON-NLS-1$
 		
 	/**
 	 * Creates a template proposal with a template and its context.
@@ -133,29 +133,24 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 			super.apply(document, trigger, offset);
 
 			if (parameterCount > 0) {
-				if (LinkedPositionManager.hasActiveManager(document)) {
-					fSelectedRegion= (positionOffsets.length == 0)
-						? new Region(baseOffset + replacementString.length(), 0)
-						: new Region(baseOffset + positionOffsets[0], positionLengths[0]);
-				
-				} else {
-					LinkedPositionManager manager= new LinkedPositionManager(document);
-					for (int i= 0; i != parameterCount; i++) {
-						int positionOffset= baseOffset + positionOffsets[i];
-						String type= TYPE + i;
-						if (fChoices[i].length < 2) {
-							manager.addPosition(positionOffset, positionLengths[i], type);
-						} else {
-							manager.addPosition(positionOffset, positionLengths[i], type, fChoices[i]);
-						}
+				LinkedEnvironment environment= LinkedEnvironment.createLinkedEnvironment(document);
+				for (int i= 0; i != parameterCount; i++) {
+					LinkedPositionGroup group= new LinkedPositionGroup();
+					int positionOffset= baseOffset + positionOffsets[i];
+					if (fChoices[i].length < 2) {
+						group.createPosition(document, positionOffset, positionLengths[i]);
+					} else {
+						group.createPosition(document, positionOffset, positionLengths[i], fChoices[i]);
 					}
-					
-					LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
-					editor.setFinalCaretOffset(baseOffset + replacementString.length());
-					editor.enter();
-		
-					fSelectedRegion= editor.getSelectedRegion();	
+					environment.addGroup(group);
 				}
+				
+				LinkedUIControl editor= new LinkedUIControl(environment, fViewer);
+				editor.setExitPosition(fViewer, baseOffset + replacementString.length(), 0, true);
+				editor.setCyclingMode(LinkedUIControl.CYCLE_WHEN_NO_PARENT);
+				editor.enter();
+				
+				fSelectedRegion= editor.getSelectedRegion();	
 			} else {
 				fSelectedRegion= new Region(baseOffset + replacementString.length(), 0);
 			}

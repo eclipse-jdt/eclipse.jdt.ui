@@ -11,21 +11,22 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -36,6 +37,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
@@ -44,14 +47,14 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
+import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
+import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
 
 
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
@@ -246,47 +249,64 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 					
 	private void enterLinkedMode(CompilationUnitChange change, ITextViewer viewer, GroupDescription[] linked, GroupDescription selection) throws BadLocationException {
-		LinkedPositionManager manager= new LinkedPositionManager(viewer.getDocument());
-		LinkedPositionUI editor= new LinkedPositionUI(viewer, manager);
+		IDocument document= viewer.getDocument();
+		
+		HashMap map= new HashMap();
 		
 		for (int i= 0; i < linked.length; i++) {
 			GroupDescription curr= linked[i];
 			String name= curr.getName(); // name used as key for link mode proposals & as kind for linked mode
+			LinkedPositionGroup group= (LinkedPositionGroup) map.get(name);
+			if (group == null) {
+				group= new LinkedPositionGroup();
+				map.put(name, group);
+			}
+				
 			TextEdit[] textEdits= curr.getTextEdits();
 			if (name != null && textEdits.length > 0) {
 				IRegion range= change.getNewTextRange(textEdits);
 				if (range != null) {	// all edits could be deleted
 					ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(name);
 					if (linkedModeProposals != null && linkedModeProposals.length > 1) {
-						manager.addPosition(range.getOffset(), range.getLength(), name, linkedModeProposals);
+						group.createPosition(document, range.getOffset(), range.getLength(), i, linkedModeProposals);
 					} else {
-						manager.addPosition(range.getOffset(), range.getLength(), name);
-					}
-					if (i == 0) {
-						editor.setInitialOffset(range.getOffset());
+						group.createPosition(document, range.getOffset(), range.getLength(), i);
 					}
 				}
 			}
 		}
-			
-		if (selection != null) {
-			TextEdit[] textEdits= selection.getTextEdits();
-			if (textEdits.length > 0) {
-				IRegion range= change.getNewTextRange(textEdits);
-				if (range != null)
-					editor.setFinalCaretOffset(range.getOffset() + range.getLength());
-			}					
-		} else {
-			int cursorPosition= viewer.getSelectedRange().x;
-			if (cursorPosition != 0) {
-				editor.setFinalCaretOffset(cursorPosition);
-			}
-		}	
-		editor.enter();
 		
-		IRegion region= editor.getSelectedRegion();
-		viewer.setSelectedRange(region.getOffset(), region.getLength());	
-		viewer.revealRange(region.getOffset(), region.getLength());
+		LinkedEnvironment environment= LinkedEnvironment.createLinkedEnvironment(document);
+		boolean added= false;
+		for (Iterator it= map.keySet().iterator(); it.hasNext(); ) {
+			LinkedPositionGroup group= (LinkedPositionGroup) map.get(it.next());
+			if (!group.isEmtpy()) {
+				environment.addGroup(group);
+				added= true;
+			}
+		}
+		
+		if (added) { // only set up UI if there are any positions set
+			LinkedUIControl ui= new LinkedUIControl(environment, viewer);
+			if (selection != null) {
+				TextEdit[] textEdits= selection.getTextEdits();
+				if (textEdits.length > 0) {
+					IRegion range= change.getNewTextRange(textEdits);
+					if (range != null)
+						ui.setExitPosition(viewer, range.getOffset() + range.getLength(), 0, false);
+				}					
+			} else {
+				int cursorPosition= viewer.getSelectedRange().x;
+				if (cursorPosition != 0) {
+					ui.setExitPosition(viewer, cursorPosition, 0, false);
+				}
+			}	
+			ui.enter();
+			
+			IRegion region= ui.getSelectedRegion();
+			viewer.setSelectedRange(region.getOffset(), region.getLength());	
+			viewer.revealRange(region.getOffset(), region.getLength());
+		}
 	}
 
 	/**

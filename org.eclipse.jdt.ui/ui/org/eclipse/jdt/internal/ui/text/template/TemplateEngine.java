@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
+import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
 
 public class TemplateEngine {
 
@@ -82,7 +82,7 @@ public class TemplateEngine {
 	    IDocument document= viewer.getDocument();
 	    
 		// prohibit recursion
-		if (LinkedPositionManager.hasActiveManager(document))
+		if (LinkedEnvironment.hasEnvironment(document))
 			return;
 
 		if (!(fContextType instanceof CompilationUnitContextType))

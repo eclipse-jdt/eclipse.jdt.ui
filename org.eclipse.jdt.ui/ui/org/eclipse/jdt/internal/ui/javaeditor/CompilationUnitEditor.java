@@ -44,10 +44,14 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ILineTracker;
+import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
@@ -63,17 +67,16 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
-import org.eclipse.ui.editors.text.IStorageDocumentProvider;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.eclipse.ui.editors.text.IStorageDocumentProvider;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ContentAssistAction;
-import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -103,9 +106,13 @@ import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
-import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
+import org.eclipse.jdt.internal.ui.text.link.ExclusivePositionUpdater;
+import org.eclipse.jdt.internal.ui.text.link.ILinkedListener;
+import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
+import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
+import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.ExitFlags;
+import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.IExitPolicy;
 
 
 
@@ -337,7 +344,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 	
-	private class ExitPolicy implements LinkedPositionUI.ExitPolicy {
+	private class ExitPolicy implements IExitPolicy {
 		
 		final char fExitCharacter;
 		final char fEscapeCharacter;
@@ -354,52 +361,23 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
 		 */
-		public ExitFlags doExit(LinkedPositionManager manager, VerifyEvent event, int offset, int length) {
+		public ExitFlags doExit(VerifyEvent event, int offset, int length) {
 			
 			if (event.character == fExitCharacter) {
 				
 				if (fSize == fStack.size() && !isMasked(offset)) {
-					if (manager.anyPositionIncludes(offset, length))
-						return new ExitFlags(LinkedPositionUI.COMMIT| LinkedPositionUI.UPDATE_CARET, false);
+					BracketLevel level= (BracketLevel) fStack.peek();
+					if (level.fSecondPosition.offset == offset && length == 0)
+						// don't enter the character if if its the closing peer
+						return new ExitFlags(ILinkedListener.UPDATE_CARET, false);
 					else
-						return new ExitFlags(LinkedPositionUI.COMMIT, true);
+						return new ExitFlags(ILinkedListener.UPDATE_CARET, true);
 				}
 			}
 			
-			Position p= manager.getFirstPosition();
-			int pEndOffset= p.offset + p.length;
-			
-			// if the bracket position gets deleted or replaced, take the linked UI down.
-			// 1: the event has to happen so that it occurs on or before the position end
-			if (pEndOffset >= offset) {
-				int endOffset= offset + length;
-				// 2: either it is a replace event (selection length > 0, selection extends over closing peer, character != 0)
-				// or it is a delete event right at the end of the position, with no selection
-				if (pEndOffset < endOffset && event.character != 0 || length == 0 && pEndOffset == endOffset && event.keyCode == 127)
-					return new ExitFlags(LinkedPositionUI.COMMIT, true);
-			}
-			
-			switch (event.character) {	
-			case '\b': {
-				if (p.offset == offset && p.length == length)
-					return new ExitFlags(0, false);
-				else
 					return null;
 			}
-			case '\n':
-			case '\r':
-				return new ExitFlags(LinkedPositionUI.COMMIT, true);
 			
-			case ';':
-				if (getInsertMode() == SMART_INSERT)
-					return new ExitFlags(LinkedPositionUI.COMMIT, true);
-				// else fall through
-				
-			default:
-				return null;
-			}						
-		}
-
 		private boolean isMasked(int offset) {
 			IDocument document= getSourceViewer().getDocument();
 			try {
@@ -413,14 +391,17 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private static class BracketLevel {
 		int fOffset;
 		int fLength;
-		LinkedPositionManager fManager;
-		LinkedPositionUI fEditor;
+		LinkedUIControl fEditor;
+		Position fFirstPosition;
+		Position fSecondPosition;
 	}
 	
-	private class BracketInserter implements VerifyKeyListener, LinkedPositionUI.ExitListener {
+	private class BracketInserter implements VerifyKeyListener, ILinkedListener {
 		
 		private boolean fCloseBrackets= true;
 		private boolean fCloseStrings= true;
+		private final String CATEGORY= toString();
+		private IPositionUpdater fUpdater= new ExclusivePositionUpdater(CATEGORY);
 		private Stack fBracketLevelStack= new Stack();
 
 		public void setCloseBracketsEnabled(boolean enabled) {
@@ -547,16 +528,30 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					BracketLevel level= new BracketLevel();
 					fBracketLevelStack.push(level);
 					
-					level.fManager= new LinkedPositionManager(document, true); // bracket managers can always coexist
-					level.fManager.addPosition(offset + 1, 0);
+					LinkedPositionGroup group= new LinkedPositionGroup(); 
+					group.createPosition(document, offset + 1, 0);
 
+					LinkedEnvironment env= LinkedEnvironment.createLinkedEnvironment(document);
+					env.addLinkedListener(this);
+					
+					env.addGroup(group);
 					level.fOffset= offset;
 					level.fLength= 2;
 			
-					level.fEditor= new LinkedPositionUI(sourceViewer, level.fManager);
-					level.fEditor.setCancelListener(this);
+					// set up position tracking for our magic peers
+					if (fBracketLevelStack.size() == 1) {
+						document.addPositionCategory(CATEGORY);
+						document.addPositionUpdater(fUpdater);
+					}
+					level.fFirstPosition= new Position(offset, 1);
+					level.fSecondPosition= new Position(offset + 1, 1);
+					document.addPosition(CATEGORY, level.fFirstPosition);
+					document.addPosition(CATEGORY, level.fSecondPosition);
+					
+					level.fEditor= new LinkedUIControl(env, sourceViewer);
 					level.fEditor.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
-					level.fEditor.setFinalCaretOffset(offset + 2);
+					level.fEditor.setExitPosition(sourceViewer, offset + 2, 0, true);
+					level.fEditor.setCyclingMode(LinkedUIControl.CYCLE_NEVER);
 					level.fEditor.enter();
 					
 					
@@ -566,30 +561,63 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					event.doit= false;
 
 				} catch (BadLocationException e) {
+					JavaPlugin.log(e);
+				} catch (BadPositionCategoryException e) {
+					JavaPlugin.log(e);
 				}
 				break;	
 			}
 		}
 		
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitListener#exit(boolean)
+		 * @see org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment.ILinkedListener#left(org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment, int)
 		 */
-		public void exit(boolean accept) {
+		public void left(LinkedEnvironment environment, int flags) {
 			
-			BracketLevel level= (BracketLevel) fBracketLevelStack.pop();
+			final BracketLevel level= (BracketLevel) fBracketLevelStack.pop();
 
-			if (accept)
+			if (flags != ILinkedListener.EXTERNAL_MODIFICATION)
 				return;
 
 			// remove brackets
-			try {
-								
 				final ISourceViewer sourceViewer= getSourceViewer();
-				IDocument document= sourceViewer.getDocument();	
-				document.replace(level.fOffset, level.fLength, null);
+			final IDocument document= sourceViewer.getDocument();
+			if (document instanceof IDocumentExtension) {
+				IDocumentExtension extension= (IDocumentExtension) document;
+				extension.registerPostNotificationReplace(null, new IDocumentExtension.IReplace() {
 				
+					public void perform(IDocument d, IDocumentListener owner) {
+						if ((level.fFirstPosition.isDeleted || level.fFirstPosition.length == 0) && !level.fSecondPosition.isDeleted && level.fSecondPosition.offset == level.fFirstPosition.offset) {
+							try {
+								document.replace(level.fSecondPosition.offset, level.fSecondPosition.length, null);
 			} catch (BadLocationException e) {
 			}
+		}
+						
+						if (fBracketLevelStack.size() == 0) {
+							document.removePositionUpdater(fUpdater);
+							try {
+								document.removePositionCategory(CATEGORY);
+							} catch (BadPositionCategoryException e) {
+	}
+						}
+					}
+	
+				});
+			}
+
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment.ILinkedListener#suspend(org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment)
+		 */
+		public void suspend(LinkedEnvironment environment) {
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment.ILinkedListener#resume(org.eclipse.jdt.internal.ui.text.link2.LinkedEnvironment, int)
+		 */
+		public void resume(LinkedEnvironment environment, int flags) {
 		}
 	}
 	
@@ -1327,10 +1355,25 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#isPrefQuickDiffAlwaysOn()
 	 */
 	protected boolean isPrefQuickDiffAlwaysOn() {
-		// reestablishes the behaviour from ExtendedTextEditor which was hacked by JavaEditor
-		// to disable the change bar for the class file (attached source) java editor.
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
+		if (store == null)
+			return false;
+		
+		Iterator iter= getAnnotationPreferences().getAnnotationPreferences().iterator();
+		while (iter.hasNext()) {
+			AnnotationPreference pref= (AnnotationPreference) iter.next();
+			if (QUICKDIFF_CHANGE_MARKER_PREFERENCE.equals(pref.getMarkerType()) //$NON-NLS-1$
+					|| QUICKDIFF_ADDITION_MARKER_PREFERENCE.equals(pref.getMarkerType()) //$NON-NLS-1$
+					|| QUICKDIFF_DELETION_MARKER_PREFERENCE.equals(pref.getMarkerType())) { //$NON-NLS-1$
+				if (store.getBoolean(pref.getHighlightPreferenceKey())
+						|| store.getBoolean(pref.getOverviewRulerPreferenceKey())
+						|| store.getBoolean(pref.getTextPreferenceKey())
+						|| store.getBoolean(pref.getVerticalRulerPreferenceKey()))
+					return true;
+			}
+		}
+		
+		return false;
 	}
 
 }

@@ -12,57 +12,60 @@ package org.eclipse.jdt.internal.ui.text.link;
 
 import java.util.Arrays;
 
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
-import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
-/**
- * 
- */
-public class ProposalPosition extends TypedPosition {
-	
-	/** The choices available for this position, fChoices[0] is the original type. */
-	private final ICompletionProposal[] fChoices;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 
+/**
+ * LinkedPosition with added completion proposals.
+ * 
+ * @since 3.0
+ */
+class ProposalPosition extends LinkedPosition {
+
+	/**
+	 * Da proposals
+	 */
+	private ICompletionProposal[] fProposals;
+
+	/**
+	 * @param document
+	 * @param offset
+	 * @param length
+	 * @param sequence
+	 * @param proposals
+	 */
+	public ProposalPosition(IDocument document, int offset, int length, int sequence, ICompletionProposal[] proposals) {
+		super(document, offset, length, sequence);
+		fProposals= proposals;
+	}
+	
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object o) {
 		if (o instanceof ProposalPosition) {
 			if (super.equals(o)) {
-				return Arrays.equals(fChoices, ((ProposalPosition)o).fChoices);
+				return Arrays.equals(fProposals, ((ProposalPosition)o).fProposals);
 			}
 		}
 		return false;
 	}
-	
+
 	/**
-	 * @param offset
-	 * @param length
-	 * @param type
-	 */
-	public ProposalPosition(int offset, int length, String type, ICompletionProposal[] choices) {
-		super(offset, length, type);
-		fChoices= new ICompletionProposal[choices.length]; 
-		System.arraycopy(choices, 0, fChoices, 0, choices.length);
-	}
-	
-	/**
-	 * 
 	 * @return an array of choices, including the initial one. Clients must not modify it.
 	 */
 	public ICompletionProposal[] getChoices() {
 		updateChoicePositions();
-		return fChoices;
+		return fProposals;
 	}
 
-	/**
-	 * 
-	 */
 	private void updateChoicePositions() {
-		for (int i= 0; i < fChoices.length; i++) {
-			if (fChoices[i] instanceof JavaCompletionProposal)
-				((JavaCompletionProposal)fChoices[i]).setReplacementOffset(offset);
+		for (int i= 0; i < fProposals.length; i++) {
+			if (fProposals[i] instanceof JavaCompletionProposal) {
+				((JavaCompletionProposal)fProposals[i]).setReplacementOffset(offset);
+			}
 		}
 	}
 }
