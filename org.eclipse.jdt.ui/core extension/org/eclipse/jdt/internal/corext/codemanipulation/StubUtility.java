@@ -77,7 +77,7 @@ public class StubUtility {
 	 */
 	public static String genStub(ICompilationUnit cu, String destTypeName, IMethod method, IType definingType, GenStubSettings settings, IImportsStructure imports) throws CoreException {
 		String methName= method.getElementName();
-		String[] paramNames= method.getParameterNames();
+		String[] paramNames= guessArgumentNames(method.getJavaProject(), method.getParameterNames());
 		String returnType= method.isConstructor() ? null : method.getReturnType();
 		String lineDelimiter= String.valueOf('\n'); // reformatting required
 		
@@ -111,7 +111,7 @@ public class StubUtility {
 		genMethodDeclaration(destTypeName, method, bodyContent, imports, buf);
 		return buf.toString();
 	}
-	
+
 	/**
 	 * Generates a method stub not including the method comment. Given a
 	 * template method and the body content, a stub with the same signature will
@@ -127,19 +127,37 @@ public class StubUtility {
 	 * @throws JavaModelException
 	 */
 	public static void genMethodDeclaration(String destTypeName, IMethod method, String bodyContent, IImportsStructure imports, StringBuffer buf) throws CoreException {
+		genMethodDeclaration(destTypeName, method, method.getFlags(), bodyContent, imports, buf);
+	}
+	
+	/**
+	 * Generates a method stub not including the method comment. Given a
+	 * template method and the body content, a stub with the same signature will
+	 * be constructed so it can be added to a type.
+	 * @param destTypeName The name of the type to which the method will be
+	 * added to
+	 * @param method A method template (method belongs to different type than the parent)
+	 * @param bodyContent Content of the body
+	 * @param imports Imports required by the stub are added to the imports
+	 * structure. If imports structure is <code>null</code> all type names are
+	 * qualified.
+	 * @param buf The buffer to append the gerenated code.
+	 * @throws JavaModelException
+	 */
+	public static void genMethodDeclaration(String destTypeName, IMethod method, int flags, String bodyContent, IImportsStructure imports, StringBuffer buf) throws CoreException {
 		IType parentType= method.getDeclaringType();	
 		String methodName= method.getElementName();
 		String[] paramTypes= method.getParameterTypes();
-		String[] paramNames= method.getParameterNames();
+		String[] paramNames= guessArgumentNames(parentType.getJavaProject(), method.getParameterNames());
+
 		String[] excTypes= method.getExceptionTypes();
-		
-		int flags= method.getFlags();
+
 		boolean isConstructor= method.isConstructor();
 		String retTypeSig= isConstructor ? null : method.getReturnType();
 		
 		int lastParam= paramTypes.length -1;
 		
-		if (Flags.isPublic(flags) || isConstructor || (parentType.isInterface() && bodyContent != null)) {
+		if (Flags.isPublic(flags) || (parentType.isInterface() && bodyContent != null)) {
 			buf.append("public "); //$NON-NLS-1$
 		} else if (Flags.isProtected(flags)) {
 			buf.append("protected "); //$NON-NLS-1$
@@ -207,7 +225,7 @@ public class StubUtility {
 			buf.append(";\n\n"); //$NON-NLS-1$
 		} else {
 			buf.append(" {\n\t"); //$NON-NLS-1$
-			if (bodyContent != null) {
+			if ((bodyContent != null) && (bodyContent.length() > 0)) {
 				buf.append(bodyContent);
 				buf.append('\n');
 			}
@@ -439,9 +457,10 @@ public class StubUtility {
 	 */
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
 		String retType= method.isConstructor() ? null : method.getReturnType();
+		String[] paramNames= guessArgumentNames(method.getJavaProject(), method.getParameterNames());
 		
 		return getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
-			method.getElementName(), method.getParameterNames(), method.getExceptionTypes(), retType, overridden, lineDelimiter);
+			method.getElementName(), paramNames, method.getExceptionTypes(), retType, overridden, lineDelimiter);
 	}
 
 	/**
@@ -468,7 +487,6 @@ public class StubUtility {
 		if (overridden != null) {
 			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overridden));
 		}
-		
 		
 		TemplateBuffer buffer= context.evaluate(template);
 		if (buffer == null)
@@ -566,7 +584,7 @@ public class StubUtility {
 		String[] paramNames= new String[params.size()];
 		for (int i= 0; i < params.size(); i++) {
 			SingleVariableDeclaration elem= (SingleVariableDeclaration) params.get(i);
-			paramNames[i]= elem.getName().getIdentifier();
+			paramNames[i]= guessArgumentName(cu.getJavaProject(), elem.getName().getIdentifier(), null);
 		}
 		List exceptions= decl.thrownExceptions();
 		String[] exceptionNames= new String[exceptions.size()];
@@ -988,6 +1006,14 @@ public class StubUtility {
 		return longest;
 	}
 	
-	
+	private static String[] guessArgumentNames(IJavaProject project, String[] paramNames) {
+//		String[] newNames= new String[paramNames.length];
+//		// Ensure that the codegeneration preferences are respected
+//		for (int i= 0; i < paramNames.length; i++) {
+//			newNames[i]= StubUtility.guessArgumentName(project, paramNames[i], null);			
+//		}
+//		return newNames;
+		return paramNames;
+	}	
 
 }

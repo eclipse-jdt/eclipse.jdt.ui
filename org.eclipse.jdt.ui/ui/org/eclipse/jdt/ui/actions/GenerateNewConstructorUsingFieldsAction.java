@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -374,6 +375,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			IJavaElement elementPosition= dialog.getElementPosition();
 			int superIndex= dialog.getSuperIndex();
 			AddCustomConstructorOperation op= new AddCustomConstructorOperation(type, settings, selected, false, elementPosition, dialog.getSuperConstructors()[superIndex]);
+			op.setVisbility(dialog.getVisibilityModifier());
 			// Ignore the omit super() checkbox if the default constructor is not chosen
 			if (dialog.getSuperConstructors()[dialog.getSuperIndex()].getParameterNames().length == 0)
 				op.setOmitSuper(dialog.isOmitSuper());
@@ -514,6 +516,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		
 		private final String SETTINGS_SECTION= "GenerateConstructorUsingFieldsSelectionDialog"; //$NON-NLS-1$
 		private final String OMIT_SUPER="OmitCallToSuper"; //$NON-NLS-1$
+		private Button fOmitSuperButton;
 
 		public GenerateConstructorUsingFieldsSelectionDialog(Shell parent, ILabelProvider labelProvider, GenerateConstructorUsingFieldsContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
 			super(parent, labelProvider, contentProvider, editor, type);
@@ -534,6 +537,11 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			}				
 			
 			fOmitSuper= fGenConstructorSettings.getBoolean(OMIT_SUPER);			
+		}
+		
+		protected Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
+			Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);	
+			return visibilityComposite;			
 		}
 
 		protected Control createDialogArea(Composite parent) {
@@ -607,11 +615,11 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			omitSuperComposite.setLayout(layout);
 			omitSuperComposite.setFont(composite.getFont());
 
-			Button omitSuperButton= new Button(omitSuperComposite, SWT.CHECK);
-			omitSuperButton.setText(ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.omit.super")); //$NON-NLS-1$
-			omitSuperButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+			fOmitSuperButton= new Button(omitSuperComposite, SWT.CHECK);
+			fOmitSuperButton.setText(ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.omit.super")); //$NON-NLS-1$
+			fOmitSuperButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
-			omitSuperButton.addSelectionListener(new SelectionListener() {
+			fOmitSuperButton.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					boolean isSelected= (((Button) e.widget).getSelection());
 					setOmitSuper(isSelected);
@@ -621,10 +629,12 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					widgetSelected(e);
 				}
 			});
-			omitSuperButton.setSelection(isOmitSuper());
+			fOmitSuperButton.setSelection(isOmitSuper());
+			// Disable omit super checkbox unless default constructor
+			fOmitSuperButton.setEnabled(getSuperConstructorChoice().getNumberOfParameters() == 0);
 			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 			gd.horizontalSpan= 2;
-			omitSuperButton.setLayoutData(gd);
+			fOmitSuperButton.setLayoutData(gd);
 
 			return omitSuperComposite;
 		}
@@ -688,6 +698,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 		protected Composite createEntryPtCombo(Composite composite) {
 			Composite entryComposite= super.createEntryPtCombo(composite);
+			addVisibilityAndModifiersChoices(entryComposite);
 			return entryComposite;
 		}
 
@@ -708,6 +719,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			combo.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					fSuperIndex= combo.getSelectionIndex();
+					// Disable omit super checkbox unless default constructor
+					fOmitSuperButton.setEnabled(getSuperConstructorChoice().getNumberOfParameters() == 0);
 					updateOKStatus();
 				}
 			});

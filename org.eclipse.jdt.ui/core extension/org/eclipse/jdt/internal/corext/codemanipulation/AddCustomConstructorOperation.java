@@ -50,6 +50,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	private CodeGenerationSettings fSettings;
 	private IMethod fSuperConstructor;
 	private boolean fOmitSuper;
+	private int fVisibility;
 	
 	public AddCustomConstructorOperation(IType type, CodeGenerationSettings settings, IField[] selected, boolean save, IJavaElement insertPosition, IMethod superConstructor) {
 		super();
@@ -60,6 +61,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 		fSelected= selected;
 		fInsertPosition= insertPosition;
 		fSuperConstructor= superConstructor;
+		fVisibility= 0;
 		fOmitSuper= false;
 	}
 
@@ -79,6 +81,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
 			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
+			IJavaProject project= fType.getJavaProject();
 							
 			String defaultConstructor= genOverrideConstructorStub(fSuperConstructor, fType, hierarchy, fSettings, imports, fOmitSuper);					
 			int closingBraceIndex= defaultConstructor.lastIndexOf('}'); //$NON-NLS-1$
@@ -93,7 +96,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			String[] params= new String[fSelected.length];					
 			String[] superConstructorParamNames= fSuperConstructor.getParameterNames();
 			String[] excludedNames= new String[superConstructorParamNames.length + params.length];
-
+			
 			ArrayList superNames= new ArrayList(superConstructorParamNames.length);
 			for (int i= 0; i < superConstructorParamNames.length; i++) {
 				superNames.add(superConstructorParamNames[i]);
@@ -110,7 +113,6 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			for (int i= 0; i < fSelected.length; i++) {
 				buf.append(Signature.toString(fSelected[i].getTypeSignature()));				
 				buf.append(" "); //$NON-NLS-1$
-				IJavaProject project= fSelected[i].getJavaProject();
 				String accessName= NamingConventions.removePrefixAndSuffixForFieldName(project, fSelected[i].getElementName(), fSelected[i].getFlags());
 				if (accessName.length() > 0) {
 					char first= accessName.charAt(0);
@@ -131,7 +133,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			monitor.worked(1);
 			
 			buf.append(defaultConstructor.substring(closingParenIndex, closingBraceIndex));
-			
+				
 			for (int i= 0; i < fSelected.length; i++) {
 				String fieldName= fSelected[i].getElementName();
 				boolean isStatic= Flags.isStatic(fSelected[i].getFlags());
@@ -210,7 +212,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 		StringBuffer buf= new StringBuffer();
 
 		String bodyStatement= StubUtility.getDefaultMethodBodyStatement(methName, paramNames, null, settings.callSuper);			
-		StubUtility.genMethodDeclaration(destTypeName, method, bodyStatement, imports, buf);
+		StubUtility.genMethodDeclaration(destTypeName, method, fVisibility, bodyStatement, imports, buf);
 		return buf.toString();
 	}		
 
@@ -225,4 +227,11 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 		fOmitSuper= callSuper;
 	}
 
+	public int getVisbility() {
+		return fVisibility;
+	}
+		
+	public void setVisbility(int visbility) {
+		fVisibility= visbility;
+	}
 }

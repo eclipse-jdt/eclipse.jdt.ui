@@ -432,6 +432,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);	
 			return visibilityComposite;			
 		}
+		
 		public boolean isOmitSuper() {
 			return fOmitSuper;
 		}
