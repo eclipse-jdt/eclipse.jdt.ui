@@ -118,7 +118,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		 * @see org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#evaluate(org.eclipse.jface.text.rules.ICharacterScanner, org.eclipse.jdt.internal.ui.text.CombinedWordRule.CharacterBuffer)
 		 * @since 3.0
 		 */
-		public IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word) {
+		public synchronized IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word) {
 			if (fCaseSensitive)
 				return super.evaluate(scanner, word);
 			
@@ -274,8 +274,10 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		if (fTaskTagMatcher != null && event.getProperty().equals(COMPILER_TASK_TAGS)) {
 			Object value= event.getNewValue();
 			if (value instanceof String) {
-				fTaskTagMatcher.clearWords();
-				fTaskTagMatcher.addTaskTags((String) value);
+				synchronized (fTaskTagMatcher) {
+					fTaskTagMatcher.clearWords();
+					fTaskTagMatcher.addTaskTags((String) value);
+				}
 			}
 		} else if (fTaskTagMatcher != null && event.getProperty().equals(COMPILER_TASK_CASE_SENSITIVE)) {
 			Object value= event.getNewValue();
