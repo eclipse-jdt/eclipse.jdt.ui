@@ -65,56 +65,46 @@ public class AllTypesCache {
 	private static final int INITIAL_SIZE= 2000;
 	private static final int CANCEL_POLL_INTERVAL= 300;
 	
-	static class DelegatedProgressMonitor implements IProgressMonitor {
-		private IProgressMonitor fDelegate;
+	/*
+	 * The CountingProgressMonitor tracks progress of the search method
+	 * when running in the TypeCacher thread. Any clients waiting for 
+	 * the thread to finish (in getAllTypes) poll for the progress value
+	 * and update their ProgressMonitor. This decoupling ensures that the 
+	 * ProgressMonitor passed into getAllTypes isn't touched from the wrong thread.
+	 */
+	static class CountingProgressMonitor implements IProgressMonitor {
 		private String fTaskName;
-//		private String fSubTask;
 		private int fTotalWork= IProgressMonitor.UNKNOWN;
 		private double fWorked;
+		private boolean fIsCanceled;
 		
 		public synchronized void beginTask(String name, int totalWork) {
 			fTaskName= name;
 			fTotalWork= totalWork;
-			if (fDelegate != null)
-				fDelegate.beginTask(name, totalWork);
+		    fWorked= 0.0;
+			fIsCanceled= false;
 		}
-		public void done() {
+		public synchronized void done() {
 		}
 		public synchronized void internalWorked(double work) {
 			fWorked+= work;
-			if (fDelegate != null)
-				fDelegate.internalWorked(work);
+		}
+		public synchronized double getWorked() {
+		    return fWorked;
 		}
 		public boolean isCanceled() {
-			return false;
+			return fIsCanceled;
 		}
 		public void setCanceled(boolean value) {
+		    fIsCanceled= value;
 		}
 		public synchronized void setTaskName(String name) {
 			fTaskName= name;
-			if (fDelegate != null)
-				fDelegate.setTaskName(name);
 		}
 		public synchronized void subTask(String name) {
-//			fSubTask= name;
-			if (fDelegate != null)
-				fDelegate.subTask(name);
 		}
 		public void worked(int work) {
 			internalWorked(work);
-		}
-		synchronized void setDelegate(IProgressMonitor delegate) {
-			fDelegate= delegate;
-			if (fDelegate != null) {
-				if (fTaskName != null) {
-					fDelegate.beginTask(fTaskName, fTotalWork);
-					fDelegate.internalWorked(fWorked);
-				}				
-			} else {
-				fTaskName= null;
-				fTotalWork= IProgressMonitor.UNKNOWN;
-				fWorked= 0.0;
-			}
 		}
 	}
 
@@ -227,7 +217,7 @@ public class AllTypesCache {
 	
 	
 	private static int fgNumberOfCacheFlushes;
-	private static DelegatedProgressMonitor fDelegatedProgressMonitor= new DelegatedProgressMonitor();	
+	private static CountingProgressMonitor fCountingProgressMonitor= new CountingProgressMonitor();	
 	private static TypeCacheDeltaListener fgDeltaListener;
 
 	/**
@@ -281,7 +271,7 @@ public class AllTypesCache {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		monitor.beginTask("", 10); //$NON-NLS-1$
-		SubProgressMonitor checkingMonitor = new SubProgressMonitor(monitor, 1);
+		SubProgressMonitor checkingMonitor= new SubProgressMonitor(monitor, 1);
 		SubProgressMonitor searchingMonitor= new SubProgressMonitor(monitor, 9);
 		forceDeltaComplete(checkingMonitor);
 		searchingMonitor.setTaskName(CorextMessages.getString("AllTypesCache.searching")); //$NON-NLS-1$
@@ -306,18 +296,30 @@ public class AllTypesCache {
 							fgIsLocked= false;
 						}	
 					} else {
-						fDelegatedProgressMonitor.setDelegate(searchingMonitor);
+					    	
+					    // update searchingMonitor with data from XxxProgressMonitor
+					    searchingMonitor.beginTask(fCountingProgressMonitor.fTaskName, fCountingProgressMonitor.fTotalWork);
+					    double lastWorked= fCountingProgressMonitor.getWorked();
+					    searchingMonitor.internalWorked(lastWorked);
+					    				    
 						// wait for the thread to finished
 						try {
 							while (fgTypeCache == null) {
-								fgLock.wait(CANCEL_POLL_INTERVAL);	// poll for cancel
-								if (searchingMonitor.isCanceled())
+								fgLock.wait(CANCEL_POLL_INTERVAL);	// poll for cancel and ProgressMonitor updates
+								if (searchingMonitor.isCanceled()) {
+								    fCountingProgressMonitor.setCanceled(true);
 									throw new OperationCanceledException();
+								}
+								double currentWorked= fCountingProgressMonitor.getWorked();
+								int newDelta= (int) (currentWorked - lastWorked);
+								if (newDelta > 0)
+								    searchingMonitor.worked(newDelta);
+								lastWorked= currentWorked;
 							}
 						} catch (InterruptedException e) {
 							JavaPlugin.log(e);
 						} finally {
-							fDelegatedProgressMonitor.setDelegate(null);						
+						    searchingMonitor.done();
 						}
 					}
 				}
@@ -540,7 +542,7 @@ public class AllTypesCache {
 		long start= System.currentTimeMillis();
 		try {
 			if (monitor == null)
-				monitor= fDelegatedProgressMonitor;
+				monitor= fCountingProgressMonitor;
 		
 			new SearchEngine().searchAllTypeNames(
 				null,
@@ -641,8 +643,8 @@ public class AllTypesCache {
 			fgTerminated= true;
 			fgAsyncMode= false;
 			
-			if (fDelegatedProgressMonitor != null && !fDelegatedProgressMonitor.isCanceled())
-				fDelegatedProgressMonitor.setCanceled(true);
+			if (fCountingProgressMonitor != null && !fCountingProgressMonitor.isCanceled())
+				fCountingProgressMonitor.setCanceled(true);
 			
 			if (fgTypeCacherThread != null) {
 				fgTypeCacherThread.abort();
