@@ -16,14 +16,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceRuleFactory;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -53,10 +56,6 @@ import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ImageUtilities;
 
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.ForwardingDocumentProvider;
-import org.eclipse.ui.editors.text.TextFileDocumentProvider;
-
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.AnnotationPreference;
@@ -65,6 +64,10 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
+
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.ForwardingDocumentProvider;
+import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IProblemRequestor;
@@ -890,61 +893,98 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		}
 		super.disposeFileInfo(element, info);
 	}
-	
+
+	/**
+	 * Creates and returns a new sub-progress monitor for the
+	 * given parent monitor.
+	 * 
+	 * @param monitor the parent progress monitor
+	 * @param ticks the number of work ticks allocated from the parent monitor
+	 * @return the new sub-progress monitor
+	 */
+	private IProgressMonitor getSubProgressMonitor(IProgressMonitor monitor, int ticks) {
+		if (monitor != null)
+			return new SubProgressMonitor(monitor, ticks, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+
+		return new NullProgressMonitor();
+	}
+
 	protected void commitWorkingCopy(IProgressMonitor monitor, Object element, CompilationUnitInfo info, boolean overwrite) throws CoreException {
+
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
 		
-		synchronized (info.fCopy) {
-			info.fCopy.reconcile();
-		}
-		
-		IDocument document= info.fTextFileBuffer.getDocument();
-		IResource resource= info.fCopy.getResource();
-		
-		Assert.isTrue(resource instanceof IFile);
-		if (!resource.exists()) {
-			// underlying resource has been deleted, just recreate file, ignore the rest
-			createFileFromDocument(monitor, (IFile) resource, document);
-			return;
-		}
-		
-		if (fSavePolicy != null)
-			fSavePolicy.preSave(info.fCopy);
-		
+		monitor.beginTask("", 100); //$NON-NLS-1$
+
 		try {
+			IProgressMonitor subMonitor= getSubProgressMonitor(monitor, 50);
 			
-			fIsAboutToSave= true;
-			info.fCopy.commitWorkingCopy(overwrite, monitor);
-				
-		} catch (CoreException x) {
-			// inform about the failure
-			fireElementStateChangeFailed(element);
-			throw x;
-		} catch (RuntimeException x) {
-			// inform about the failure
-			fireElementStateChangeFailed(element);
-			throw x;
-		} finally {
-			fIsAboutToSave= false;
-		}
-		
-		// If here, the dirty state of the editor will change to "not dirty".
-		// Thus, the state changing flag will be reset.
-		if (info.fModel instanceof AbstractMarkerAnnotationModel) {
-			AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
-			model.updateMarkers(document);
-		}
-		
-		if (fSavePolicy != null) {
-			ICompilationUnit unit= fSavePolicy.postSave(info.fCopy);
-			if (unit != null && info.fModel instanceof AbstractMarkerAnnotationModel) {
-				IResource r= unit.getResource();
-				IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
-				if (markers != null && markers.length > 0) {
-					AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;						
-					for (int i= 0; i < markers.length; i++)
-						model.updateMarker(document, markers[i], null);
+			try {
+				synchronized (info.fCopy) {
+					info.fCopy.reconcile(ICompilationUnit.NO_AST, false, null, subMonitor);
+				}
+			} catch (JavaModelException ex) {
+				// Ignore: save anyway
+			} finally {
+				subMonitor.done();
+			}
+
+			IDocument document= info.fTextFileBuffer.getDocument();
+			IResource resource= info.fCopy.getResource();
+			
+			Assert.isTrue(resource instanceof IFile);
+			if (!resource.exists()) {
+				// underlying resource has been deleted, just recreate file, ignore the rest
+				subMonitor= getSubProgressMonitor(monitor, 50);
+				try {
+					createFileFromDocument(subMonitor, (IFile) resource, document);
+				} finally {
+					subMonitor.done();
+				}
+				return;
+			}
+			
+			if (fSavePolicy != null)
+				fSavePolicy.preSave(info.fCopy);
+			
+			try {
+				subMonitor= getSubProgressMonitor(monitor, 50);
+				fIsAboutToSave= true;
+				info.fCopy.commitWorkingCopy(overwrite, subMonitor);
+			} catch (CoreException x) {
+				// inform about the failure
+				fireElementStateChangeFailed(element);
+				throw x;
+			} catch (RuntimeException x) {
+				// inform about the failure
+				fireElementStateChangeFailed(element);
+				throw x;
+			} finally {
+				fIsAboutToSave= false;
+				subMonitor.done();
+			}
+			
+			// If here, the dirty state of the editor will change to "not dirty".
+			// Thus, the state changing flag will be reset.
+			if (info.fModel instanceof AbstractMarkerAnnotationModel) {
+				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
+				model.updateMarkers(document);
+			}
+			
+			if (fSavePolicy != null) {
+				ICompilationUnit unit= fSavePolicy.postSave(info.fCopy);
+				if (unit != null && info.fModel instanceof AbstractMarkerAnnotationModel) {
+					IResource r= unit.getResource();
+					IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
+					if (markers != null && markers.length > 0) {
+						AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;						
+						for (int i= 0; i < markers.length; i++)
+							model.updateMarker(document, markers[i], null);
+					}
 				}
 			}
+		} finally {
+			monitor.done();
 		}
 	}
 	
