@@ -22,11 +22,13 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
+
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.ITextViewerHelper;
-import org.eclipse.jface.text.ITextViewerHelperRegistry;
+import org.eclipse.jface.text.IEditingSupport;
+import org.eclipse.jface.text.IEditingSupportRegistry;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jface.viewers.ISelection;
@@ -100,7 +102,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			final ITextSelection textSelection= (ITextSelection) selection;
 			AddImportOnSelectionAction.SelectTypeQuery query= new SelectTypeQuery(getShell());
 			AddImportsOperation op= new AddImportsOperation(cu, doc, textSelection.getOffset(), textSelection.getLength(), query);
-			ITextViewerHelper helper= createViewerHelper(textSelection, query);
+			IEditingSupport helper= createViewerHelper(textSelection, query);
 			try {
 				registerHelper(helper);
 				IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
@@ -122,33 +124,33 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		}		
 	}
 
-	private ITextViewerHelper createViewerHelper(final ITextSelection selection, final SelectTypeQuery query) {
-		return new ITextViewerHelper() {
+	private IEditingSupport createViewerHelper(final ITextSelection selection, final SelectTypeQuery query) {
+		return new IEditingSupport() {
 
-			public boolean isValidSubjectRegion(IRegion region) {
-				return region.getOffset() <= selection.getOffset() + selection.getLength() &&  selection.getOffset() <= region.getOffset() + region.getLength();
+			public boolean isOriginator(DocumentEvent event, IRegion subjectRegion) {
+				return subjectRegion.getOffset() <= selection.getOffset() + selection.getLength() &&  selection.getOffset() <= subjectRegion.getOffset() + subjectRegion.getLength();
 			}
 
-			public boolean hasShellFocus() {
+			public boolean ownsFocusShell() {
 				return query.isShowing();
 			}
 			
 		};
 	}
 	
-	private void registerHelper(ITextViewerHelper helper) {
+	private void registerHelper(IEditingSupport helper) {
 		ISourceViewer viewer= fEditor.getViewer();
-		if (viewer instanceof ITextViewerHelperRegistry) {
-			ITextViewerHelperRegistry registry= (ITextViewerHelperRegistry) viewer;
-			registry.registerHelper(helper);
+		if (viewer instanceof IEditingSupportRegistry) {
+			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
+			registry.register(helper);
 		}
 	}
 
-	private void deregisterHelper(ITextViewerHelper helper) {
+	private void deregisterHelper(IEditingSupport helper) {
 		ISourceViewer viewer= fEditor.getViewer();
-		if (viewer instanceof ITextViewerHelperRegistry) {
-			ITextViewerHelperRegistry registry= (ITextViewerHelperRegistry) viewer;
-			registry.deregisterHelper(helper);
+		if (viewer instanceof IEditingSupportRegistry) {
+			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
+			registry.unregister(helper);
 		}
 	}
 
