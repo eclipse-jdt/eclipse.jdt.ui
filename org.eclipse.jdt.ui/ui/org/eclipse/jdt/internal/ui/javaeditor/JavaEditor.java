@@ -92,6 +92,7 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ISelectionValidator;
+import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextPresentationListener;
@@ -3194,6 +3195,20 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 		}
 	}
+
+	/**
+	 * Returns the lock object for the given annotation model.
+	 * 
+	 * @param annotationModel the annotation model
+	 * @return the annotation model's lock object
+	 * @since 3.0
+	 */
+	private Object getLockObject(IAnnotationModel annotationModel) { 
+		if (annotationModel instanceof ISynchronizable)
+			return ((ISynchronizable)annotationModel).getLockObject();
+		else
+			return annotationModel;
+	}
 	
 	/**
 	 * Updates the annotation views that show the given annotation.
@@ -3320,7 +3335,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				if (isCancelled())
 					return Status.CANCEL_STATUS;
 				
-				synchronized (annotationModel) {
+				synchronized (getLockObject(annotationModel)) {
 					if (annotationModel instanceof IAnnotationModelExtension) {
 						((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
 					} else {

@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Map;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -157,6 +158,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	static final String ANNOTATION_TYPE= "org.eclipse.jdt.ui.overrideIndicator"; //$NON-NLS-1$
 
 	private IAnnotationModel fAnnotationModel;
+	private Object fAnnotationModelLockObject;
 	private Annotation[] fOverrideAnnotations;
 	private boolean fCancelled= false;
 	private IJavaElement fJavaElement;
@@ -168,8 +170,23 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		
 		fJavaElement= javaElement;
 		fAnnotationModel=annotationModel; 
+		fAnnotationModelLockObject= getLockObject(fAnnotationModel);
 
 		updateAnnotations(ast);
+	}
+
+	/**
+	 * Returns the lock object for the given annotation model.
+	 * 
+	 * @param annotationModel the annotation model
+	 * @return the annotation model's lock object
+	 * @since 3.0
+	 */
+	private Object getLockObject(IAnnotationModel annotationModel) { 
+		if (annotationModel instanceof ISynchronizable)
+			return ((ISynchronizable)annotationModel).getLockObject();
+		else
+			return annotationModel;
 	}
 
 	/**
@@ -222,7 +239,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		if (fCancelled)
 			return;
 		
-		synchronized (fAnnotationModel) {
+		synchronized (fAnnotationModelLockObject) {
 			if (fAnnotationModel instanceof IAnnotationModelExtension) {
 				((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(fOverrideAnnotations, annotationMap);
 			} else {
@@ -244,7 +261,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		if (fOverrideAnnotations == null)
 			return;
 
-		synchronized (fAnnotationModel) {
+		synchronized (fAnnotationModelLockObject) {
 			if (fAnnotationModel instanceof IAnnotationModelExtension) {
 				((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(fOverrideAnnotations, null);
 			} else {
