@@ -50,7 +50,6 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -542,7 +541,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 				continue;
 			VariableDeclaration declaration= ASTNodes.findVariableDeclaration(argument, root);
 			ParameterInfo info= new ParameterInfo(argument, getType(declaration), argument.getName(), i);
-			info.setData(argument);
 			fParameterInfos.add(info);
 		}
 	}
@@ -763,7 +761,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			ParameterInfo parameter= (ParameterInfo)iter.next();
 			if (parameter.isRenamed()) {
 				for (int n= 0; n < selectedNodes.length; n++) {
-					SimpleName[] oldNames= LinkedNodeFinder.findByBinding(selectedNodes[n], (IBinding) parameter.getData());
+					SimpleName[] oldNames= LinkedNodeFinder.findByBinding(selectedNodes[n], parameter.getOldBinding());
 					for (int i= 0; i < oldNames.length; i++) {
 						fRewriter.replace(oldNames[i], fAST.newSimpleName(parameter.getNewName()), null);
 					}
@@ -808,7 +806,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	private VariableDeclaration getVariableDeclaration(ParameterInfo parameter) {
-		return ASTNodes.findVariableDeclaration((IVariableBinding)parameter.getData(), fAnalyzer.getEnclosingBodyDeclaration());
+		return ASTNodes.findVariableDeclaration(parameter.getOldBinding(), fAnalyzer.getEnclosingBodyDeclaration());
 	}
 	
 	private VariableDeclarationStatement createDeclaration(IVariableBinding binding, Expression intilizer) {

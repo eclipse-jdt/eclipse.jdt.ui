@@ -25,7 +25,6 @@ public class ParameterInfo {
 	private String fNewTypeName;
 	private String fDefaultValue;
 	private String fNewName;
-	private Object fData;
 	private boolean fIsDeleted;
 	
 	public ParameterInfo(String type, String name, int index) {
@@ -105,16 +104,6 @@ public class ParameterInfo {
 		return fNewName;
 	}
 
-	//TODO: obsolete: use getOldBinding()
-	public Object getData() {
-		return fData;
-	}
-	
-	//TODO: obsolete: use constructor
-	public void setData(Object data) {
-		fData= data;
-	}
-	
 	public boolean isRenamed() {
 		return !fOldName.equals(fNewName);
 	}
