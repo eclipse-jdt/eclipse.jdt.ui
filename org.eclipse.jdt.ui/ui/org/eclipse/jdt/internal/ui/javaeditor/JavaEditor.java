@@ -341,7 +341,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			updateKeyModifierMask();
 			
 			IPreferenceStore preferenceStore= getPreferenceStore();
-			preferenceStore.addPropertyChangeListener(this);			
+			preferenceStore.addPropertyChangeListener(this);
+			
+			fMarkOccurrenceAnnotations= preferenceStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);			
 		}
 		
 		private void updateKeyModifierMask() {
@@ -1727,6 +1729,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @since 3.0
 	 */
 	private volatile int fComputeCount;
+	private boolean fMarkOccurrenceAnnotations;
 
 		
 	/**
@@ -2162,6 +2165,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	public void dispose() {
 		// cancel possiblle running computation
+		fOccurrenceAnnotations= null;
 		fComputeCount++;
 		
 		if (isBrowserLikeLinks())
@@ -2327,6 +2331,15 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				if (event.getNewValue() instanceof Boolean) {
 					Boolean disable= (Boolean) event.getNewValue();
 					configureInsertMode(OVERWRITE, !disable.booleanValue());
+				}
+			}
+			
+			if (PreferenceConstants.EDITOR_MARK_OCCURRENCES.equals(property)) {
+				if (event.getNewValue() instanceof Boolean) {
+					fMarkOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
+					if (!fMarkOccurrenceAnnotations) {
+						fComputeCount++;
+					}
 				}
 			}
 			
@@ -2663,6 +2676,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	protected void updateOccurrences() {
 
+		if (!fMarkOccurrenceAnnotations)
+			return;
+		
 		final int currentCount= ++fComputeCount;
 		final ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
 		

@@ -1538,6 +1538,16 @@ public class PreferenceConstants {
 	public static final String EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK= "browserLikeLinksKeyModifierMask"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether occurrences are marked in the editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public static final String EDITOR_MARK_OCCURRENCES= "markOccurrences"; //$NON-NLS-1$
+	
+	/**
 	 * A named preference that controls disabling of the overwrite mode.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
