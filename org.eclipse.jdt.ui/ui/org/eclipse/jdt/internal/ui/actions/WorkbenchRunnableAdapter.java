@@ -33,7 +33,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 	private ISchedulingRule fRule;
 	
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable) {
-		fWorkspaceRunnable= runnable;
+		this(runnable, null);
 	}
 	
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable, ISchedulingRule rule) {
@@ -49,7 +49,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 			if (fRule == null) {
 				JavaCore.run(fWorkspaceRunnable, monitor);
 			} else {
-				JavaCore.run(fWorkspaceRunnable, monitor); // to be changed
+				JavaCore.run(fWorkspaceRunnable, fRule, monitor);
 			}
 		} catch (OperationCanceledException e) {
 			throw new InterruptedException(e.getMessage());
