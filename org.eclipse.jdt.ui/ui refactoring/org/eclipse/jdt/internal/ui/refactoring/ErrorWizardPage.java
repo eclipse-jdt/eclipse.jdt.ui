@@ -342,7 +342,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 	}
 
 	private void updateTitle(RefactoringStatusEntry first) {
-		IAdaptable element= first.getContext().getCorrespondingElement();
+		IAdaptable element= getCorrespondingElement(first);
 		String title= null;
 		ImageDescriptor imageDescriptor= null;
 		if (element != null) {
@@ -363,6 +363,13 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 			fPaneImage= imageDescriptor.createImage(fContextViewerPane.getDisplay());
 			fContextViewerPane.setImage(fPaneImage);
 		}
+	}
+
+	private static IAdaptable getCorrespondingElement(RefactoringStatusEntry first){
+		if (first.getContext() == null)
+			return null;
+		else	
+			return first.getContext().getCorrespondingElement();
 	}
 
 	private void showInSourceViewer(RefactoringStatusEntry entry) {
