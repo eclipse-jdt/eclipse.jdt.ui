@@ -339,7 +339,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			else if (comboBoxIndex == 1)		// as last method
 				return null;
 			else								// method position
-				return atMethodPosition(fType, comboBoxIndex);
+				return atElementPosition(fType, comboBoxIndex);
 		} catch (JavaModelException e) {
 			return null;
 		}			
@@ -355,16 +355,18 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return null;
 	}
 
-	private IMethod atMethodPosition(IType type, int index) throws JavaModelException {
+	/* Returns the element directly following the method to insert after. Index should never 
+	 * always be > 2 since 0 means first method, and 1 means last method.
+	 */
+	private IJavaElement atElementPosition(IType type, int index) throws JavaModelException {
 		if (type != null) {
-			IMethod[] methods= type.getMethods();
-			if ((index-1) < methods.length) {
-				return methods[index-1];		// first two entries are first/last
+			IMethod[] methods= type.getMethods();			
+			IJavaElement[] elements= type.getChildren();
+			for (int i= 0; i < (elements.length-1); i++) {
+				if (methods[index-2] == elements[i])			// first two entries are first/last
+					return elements[i+1];
 			}
 		}
 		return null;
 	}
-
-
-
 }
