@@ -133,6 +133,9 @@ public class RefactoringStatus {
 		}
 	}
 
+	/*
+	 * @see RefactoringStatusCodes
+	 */
 	public static RefactoringStatus createStatus(int severity, String msg, Context context, Object data, int code) {
 		RefactoringStatus result= new RefactoringStatus(); 
 		result.fEntries.add(new RefactoringStatusEntry(msg, severity, context, data, code));
