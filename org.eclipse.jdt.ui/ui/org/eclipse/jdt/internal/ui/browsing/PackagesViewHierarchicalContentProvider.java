@@ -336,7 +336,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		Object toBeRefreshed= object;
 		if (fViewer.testFindItem(object) == null) {
 			 Object parent= getParent(object);
-			 if(parent instanceof IPackageFragmentRoot && fProjectViewState)
+			 if(parent instanceof IPackageFragmentRoot && fInputIsProject)
 			 	parent= ((IPackageFragmentRoot)parent).getJavaProject();
 			 
 			if(parent != null)
@@ -425,7 +425,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			//determin who to refresh					
 			if (parent instanceof IPackageFragmentRoot){
 				IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
-				if (fProjectViewState){
+				if (fInputIsProject){
 					postRefresh(root.getJavaProject());	
 				} else {
 					postRefresh(root);	
@@ -444,7 +444,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			//determin who to refresh
 			if (parent instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
-				if (fProjectViewState) {
+				if (fInputIsProject) {
 					postAdd(frag, root.getJavaProject());
 				} else
 					postAdd(frag, root);

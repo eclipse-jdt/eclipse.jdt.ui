@@ -38,12 +38,12 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	protected Map fMapToPackageFragments;
 	protected boolean fCompoundState;
 	protected StructuredViewer fViewer;
-	protected boolean fProjectViewState;
+	protected boolean fInputIsProject;
 	
 	public LogicalPackagesProvider(StructuredViewer viewer){
 		fViewer= viewer;
 		fCompoundState= isInCompoundState();
-		fProjectViewState= true;
+		fInputIsProject= true;
 		fMapToLogicalPackage= new HashMap();
 		fMapToPackageFragments= new HashMap();
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);	
@@ -104,7 +104,6 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 				if (lp.belongs(fragment)) {
 					lp.add(fragment);
 				}
-				newChildren.add(lp);
 			} else {
 				String key= getKey(fragment);
 				IPackageFragment frag= (IPackageFragment)fMapToPackageFragments.get(key);
@@ -169,7 +168,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 		} else {
 			JavaCore.removeElementChangedListener(this);
 		}
-		fProjectViewState= (newInput instanceof IJavaProject);
+		fInputIsProject= (newInput instanceof IJavaProject);
 		
 		if(viewer instanceof StructuredViewer)
 			fViewer= (StructuredViewer)viewer;

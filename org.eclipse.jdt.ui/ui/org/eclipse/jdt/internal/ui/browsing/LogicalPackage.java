@@ -119,8 +119,8 @@ public class LogicalPackage {
 	
 	private int getHash(IPackageFragment[] fragments, int index) {
 		if (index <= 0)
-			return fragments[0].hashCode();
-		else return fragments[index].hashCode() + getHash(fragments, index-1);
+			return fragments[0].hashCode() * 17;
+		else return fragments[index].hashCode() * 17 + getHash(fragments, index-1);
 	}
 
 }

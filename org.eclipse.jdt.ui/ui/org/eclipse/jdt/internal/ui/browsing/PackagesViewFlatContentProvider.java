@@ -151,7 +151,7 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 	//and if so refresh the viewers input element (JavaProject or PackageFragmentRoot)
 	private Object findElementToRefresh(IPackageFragment fragment) {
 		if (fViewer.testFindItem(fragment) == null) {
-			if(fProjectViewState)
+			if(fInputIsProject)
 				return fragment.getJavaProject();
 			else return fragment.getParent();
 		} 
