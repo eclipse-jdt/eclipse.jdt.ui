@@ -573,7 +573,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private IChange createCompilationUnitForMovedType(IProgressMonitor pm) throws CoreException {
 		ICompilationUnit newCuWC= null;
 		try{
-			newCuWC= (ICompilationUnit)getInputTypePackage().getCompilationUnit(getNameForNewCu()).getWorkingCopy();
+			newCuWC= WorkingCopyUtil.getNewWorkingCopy(getInputTypePackage(), getNameForNewCu());
 			String source= createSourceForNewCu(newCuWC, pm);
 			return new CreateTextFileChange(createPathForNewCu(), source, true);	
 		} finally{
