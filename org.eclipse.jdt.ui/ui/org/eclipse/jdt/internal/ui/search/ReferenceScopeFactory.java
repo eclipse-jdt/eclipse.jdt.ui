@@ -19,21 +19,19 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.launching.JavaRuntime;
 
 public class ReferenceScopeFactory {
 
@@ -42,6 +40,12 @@ public class ReferenceScopeFactory {
 	}
 
 	public static IJavaSearchScope create(IJavaElement element) throws JavaModelException {
+		if (element instanceof IMethod) {
+			// workaround for bug 52941
+			IMethod method= (IMethod) element;
+			if(!JdtFlags.isPrivate(method)) 
+				return SearchEngine.createWorkspaceScope();
+		}
 		return SearchEngine.createJavaSearchScope(getScopeElements(element), false);
 	}
 
