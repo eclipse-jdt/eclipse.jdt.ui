@@ -149,7 +149,11 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 * @see ASTVisitor#visit(ClassInstanceCreation)
 	 */
 	public boolean visit(ClassInstanceCreation node) {
-		typeRefFound(node.getName());
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			typeRefFound(node.getName());
+		} else {
+			doVisitNode(node.getType());
+		}
 		evalQualifyingExpression(node.getExpression());
 		if (node.getAnonymousClassDeclaration() != null) {
 			node.getAnonymousClassDeclaration().accept(this);
@@ -203,6 +207,10 @@ public class ImportReferencesCollector extends GenericVisitor {
 		if (!isAffected(node)) {
 			return false;
 		}
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			return true;
+		}
+		// in JLS2 super class and interfaces are names
 		doVisitNode(node.getJavadoc());
 		
 		typeRefFound(node.getSuperclass());
@@ -225,7 +233,11 @@ public class ImportReferencesCollector extends GenericVisitor {
 		doVisitNode(node.getJavadoc());
 		
 		if (!node.isConstructor()) {
-			doVisitNode(node.getReturnType());
+			if (node.getAST().apiLevel() == AST.JLS2) {
+				doVisitNode(node.getReturnType());
+			} else {
+				doVisitNode(node.getReturnType2());
+			}
 		}
 		doVisitChildren(node.parameters());
 		Iterator iter=node.thrownExceptions().iterator();
