@@ -129,6 +129,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		
 		// Checkbox
 		fEnableUserDefinedPatterns= new Button(group, SWT.CHECK);
+		fEnableUserDefinedPatterns.setFocus();
 		fEnableUserDefinedPatterns.setText(FilterMessages.getString("CustomFiltersDialog.enableUserDefinedPattern")); //$NON-NLS-1$
 		
 		// Pattern	field
