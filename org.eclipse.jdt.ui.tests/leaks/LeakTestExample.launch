@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launchConfiguration type="org.eclipse.pde.ui.JunitLaunchConfig">
 <booleanAttribute key="clearws" value="true"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.jdt.ui.leaktest.example.LeakTestExample"/>
-<stringAttribute key="vmargs" value="-Xj9 -XrunProfileNatives"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.jdt.ui.tests.leaks.JavaLeakTest"/>
+<stringAttribute key="vmargs" value="-Xj9 -XrunProfileNatives -Xmx256M"/>
 <booleanAttribute key="default" value="true"/>
 <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
 <booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>

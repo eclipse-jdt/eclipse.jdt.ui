@@ -27,7 +27,10 @@ public class ProfilerConnector {
 		return ProfileNatives.getInstanceCount(cl);
 	}
 
-
+	public int getInstanceCount(Class cl, Class[] excludedClasses) throws ProfileException {
+		return ProfileNatives.getInstanceCount(cl, excludedClasses);
+	}
+	
 	public void close() {
 	}
 	

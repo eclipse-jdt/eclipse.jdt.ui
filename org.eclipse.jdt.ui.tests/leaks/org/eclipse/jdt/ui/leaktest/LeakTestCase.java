@@ -91,5 +91,19 @@ public class LeakTestCase extends TestCase {
 		return -1;
 	}
 	
-
+	/**
+	 * Returns the number of instances of a given class that are live (not garbage).
+	 * @param cl The class of the instances to count
+	 * @return Returns the current number of instances of the given class or <code>-1</code> if
+	 * no connection is established.
+	 * @throws ProfileException ProfileException is thrown if the request failed unexpectedly.
+	 */
+	protected int getInstanceCount(Class cl, Class[] excludedClasses) throws ProfileException {
+		ProfilerConnector connection= LeakTestSetup.getProfilerConnector();
+		if (connection != null) {
+			return connection.getInstanceCount(cl, excludedClasses);
+		}
+		return -1;
+	}
+	
 }
