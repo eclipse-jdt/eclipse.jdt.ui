@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
@@ -341,13 +342,23 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				JavaPlugin.log(e);
 				// ignore this exception now
 			}
-		}			
+		}
+		
+		String typeName= ""; //$NON-NLS-1$
+		
+		ITextSelection selection= getCurrentTextSelection();
+		if (selection != null) {
+			String text= selection.getText();
+			if (JavaConventions.validateJavaTypeName(text).isOK()) {
+				typeName= text;
+			}
+		}
 
 		setPackageFragment(pack, true);
 		setEnclosingType(enclosingType, true);
 		setEnclosingTypeSelection(false, true);
 	
-		setTypeName("", true); //$NON-NLS-1$
+		setTypeName(typeName, true);
 		setSuperClass(initSuperclass, true);
 		setSuperInterfaces(initSuperinterfaces, true);
 	}		

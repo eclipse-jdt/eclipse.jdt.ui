@@ -22,12 +22,16 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
@@ -191,6 +195,25 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		}
 		return jelem;
 	}
+	
+	/**
+	 * Returns the test selection of the current editor. <code>null</code> is returned
+	 * when the current editor does not have focus or does not return a text selection. 
+	 */
+	protected ITextSelection getCurrentTextSelection() {
+		IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
+		if (part instanceof IEditorPart) {
+			ISelectionProvider selectionProvider= part.getSite().getSelectionProvider();
+			if (selectionProvider != null) {
+				ISelection selection= selectionProvider.getSelection();
+				if (selection instanceof ITextSelection) {
+					return (ITextSelection) selection;
+				}
+			}
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * Returns the recommended maximum width for text fields (in pixels). This
