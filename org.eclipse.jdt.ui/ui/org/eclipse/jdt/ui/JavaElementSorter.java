@@ -119,7 +119,7 @@ public class JavaElementSorter extends ViewerSorter {
 			String key= PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER;
 			boolean success= fillOffsetsFromPreferenceString(store.getString(key), offsets);
 			if (!success) {
-				store.setValue(key, null);
+				store.setToDefault(key);
 				fillOffsetsFromPreferenceString(store.getDefaultString(key), offsets);	
 			}
 			return offsets;
