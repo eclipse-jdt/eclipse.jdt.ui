@@ -133,7 +133,6 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 					update(true);
 				}
 				public void parameterAdded(ParameterInfo parameter) {
-					getChangeMethodSignatureRefactoring().setupNewParameterInfo(parameter);
 					update(true);
 				}
 			}, true, true, true);

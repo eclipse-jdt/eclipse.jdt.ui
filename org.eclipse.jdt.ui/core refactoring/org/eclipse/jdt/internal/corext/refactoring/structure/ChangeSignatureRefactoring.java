@@ -109,8 +109,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private static final String CONST_CLASS_DECL = "class A{";//$NON-NLS-1$
 	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
 	private static final String CONST_CLOSE = ";}";			//$NON-NLS-1$
-	private static final String DEFAULT_NEW_PARAM_TYPE= "int";//$NON-NLS-1$
-	private static final String DEFAULT_NEW_PARAM_VALUE= "0"; //$NON-NLS-1$
+//	private static final String DEFAULT_NEW_PARAM_TYPE= "int";//$NON-NLS-1$
+//	private static final String DEFAULT_NEW_PARAM_VALUE= "0"; //$NON-NLS-1$
 
 	private ChangeSignatureRefactoring(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
 		Assert.isNotNull(method);
@@ -220,31 +220,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fParameterInfos;
 	}
 	
-	public void setupNewParameterInfo(ParameterInfo parameter) {
-		parameter.setDefaultValue(DEFAULT_NEW_PARAM_VALUE);
-		parameter.setNewTypeName(DEFAULT_NEW_PARAM_TYPE);
-		parameter.setNewName(findUnusedParameterName());
-	} 
-	
-	private String findUnusedParameterName() {
-		Set usedNames= getUsedParameterNames();
-		int i= 0;
-		String prefix= "arg";  //$NON-NLS-1$
-		while(true){
-			String candidate= prefix + i++;
-			if (! usedNames.contains(candidate))
-				return candidate;
-		}
-	}
-	
-	private Set getUsedParameterNames(){
-		Set names= new HashSet(2);
-		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext();) {
-			names.add(((ParameterInfo) iter.next()).getNewName());
-		}
-		return names;
-	}
-	
 	public RefactoringStatus checkSignature() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		checkForDuplicateNames(result);
@@ -328,10 +303,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private void checkParameterType(RefactoringStatus result, ParameterInfo info) {
-		if (! info.isTypeNameChanged())
+		if (! info.isAdded() && ! info.isTypeNameChanged())
 			return;
 		if (info.getNewTypeName().trim().equals("")){ //$NON-NLS-1$
 			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_type", new String[]{info.getNewName()}); //$NON-NLS-1$
+			if (info.isAdded() && info.getNewName().trim().equals(""))
+				msg= "Enter the type for the new parameter";
 			result.addFatalError(msg);
 			return;
 		}	

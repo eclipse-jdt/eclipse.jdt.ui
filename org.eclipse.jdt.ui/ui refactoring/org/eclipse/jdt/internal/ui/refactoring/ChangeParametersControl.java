@@ -419,7 +419,6 @@ public class ChangeParametersControl extends Composite {
 					fTableViewer.setSelection(selection);
 				}
 			}
-
 			private void adjustTableCursor(int column, int row) {
 				if (column >= 0 && row >= 0) {
 					showTableCursor(true);
@@ -429,7 +428,7 @@ public class ChangeParametersControl extends Composite {
 		});
 		return button;
 	}
-
+	
 	private Button createAddButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
 		button.setText(RefactoringMessages.getString("ChangeParametersControl.buttons.add")); //$NON-NLS-1$
@@ -447,6 +446,7 @@ public class ChangeParametersControl extends Composite {
 				updateButtonsEnabledState();
 				showTableCursor(true);
 				setTableCursorSelection(row, 0);
+				editFirstSelected();
 			}
 		});	
 		return button;
