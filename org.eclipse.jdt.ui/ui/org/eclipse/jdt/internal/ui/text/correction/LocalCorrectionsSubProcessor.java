@@ -95,7 +95,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		if (selectedNode != null) {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(cu, selectedNode.getStartPosition(), selectedNode.getLength(), settings);
+			SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(cu, selectedNode.getStartPosition(), selectedNode.getLength(), settings, null);
 			refactoring.setSaveChanges(false);
 			if (refactoring.checkActivationBasics(astRoot, null).isOK()) {
 				String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.surroundwith.description"); //$NON-NLS-1$

@@ -55,7 +55,7 @@ public class CompilationUnitBuffer {
 		int result= indexOf(token, start);
 		if (result == -1)
 			return result;
-		return fScanner.getCurrentTokenEndPosition();
+		return fScanner.getCurrentTokenEndPosition() + 1;
 	}
 	
 	/**

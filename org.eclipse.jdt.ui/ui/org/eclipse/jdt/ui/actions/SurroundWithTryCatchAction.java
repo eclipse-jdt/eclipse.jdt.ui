@@ -2,9 +2,12 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
@@ -17,6 +20,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
+import org.eclipse.jdt.internal.corext.refactoring.surround.ISurroundWithTryCatchQuery;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -34,6 +38,16 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	private CompilationUnitEditor fEditor;
 	private static final String TITLE= RefactoringMessages.getString("SurroundWithTryCatchAction.title"); //$NON-NLS-1$
 
+	private static class Query implements ISurroundWithTryCatchQuery {
+		private Shell fParent;
+		public Query(Shell shell) {
+			fParent= shell;
+		}
+		public boolean catchRuntimeException() {
+			return MessageDialog.openQuestion(fParent, TITLE,  RefactoringMessages.getString("SurroundWithTryCatchAction.no_exceptions")); //$NON-NLS-1$
+		}
+	}
+
 	public SurroundWithTryCatchAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
 		setText(TITLE);
@@ -41,8 +55,9 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 
 	protected void run(ITextSelection selection) {
-		SurroundWithTryCatchRefactoring refactoring= 
-			new SurroundWithTryCatchRefactoring(getCompilationUnit(), selection, JavaPreferencesSettings.getCodeGenerationSettings());
+		SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(getCompilationUnit(), selection, 
+			JavaPreferencesSettings.getCodeGenerationSettings(),
+			new Query(getShell()));
 		try {
 			RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
 			if (status.hasFatalError()) {
@@ -55,6 +70,8 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 				}
 				return;
 			}
+			if (refactoring.stopExecution())
+				return;
 			PerformChangeOperation op= new PerformChangeOperation(refactoring.createChange(new NullProgressMonitor()));
 			op.setChangeContext(new ChangeContext(new AbortChangeExceptionHandler()));
 			new BusyIndicatorRunnableContext().run(false, false, op);

@@ -59,7 +59,7 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 					case ITerminalSymbols.TokenNameCOMMENT_LINE :
 						break;
 					default:
-						return scanner.getCurrentTokenEndPosition() +1 - getTextRange().getOffset() - scanner.getCurrentTokenSource().length;
+						return scanner.getCurrentTokenEndPosition() + 1 - getTextRange().getOffset() - scanner.getCurrentTokenSource().length;
 				}
 				token= scanner.getNextToken();
 			}

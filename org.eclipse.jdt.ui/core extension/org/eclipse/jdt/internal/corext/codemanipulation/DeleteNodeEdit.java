@@ -126,7 +126,7 @@ public final class DeleteNodeEdit extends SimpleTextEdit {
 				continue loop;
 			} else if (token == fDelimiterToken) {
 				delimiterFound= true;
-				result= startOffset + scanner.getCurrentTokenEndPosition();
+				result= startOffset + scanner.getCurrentTokenEndPosition() + 1;
 			} else {
 				if (delimiterFound)
 					result= startOffset + scanner.getCurrentTokenStartPosition();

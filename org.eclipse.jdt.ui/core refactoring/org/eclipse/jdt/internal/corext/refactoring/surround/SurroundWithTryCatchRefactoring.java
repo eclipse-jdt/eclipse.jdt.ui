@@ -67,26 +67,36 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 	private Selection fSelection;
 	private CodeGenerationSettings fSettings;
+	private ISurroundWithTryCatchQuery fQuery;
 	private SurroundWithTryCatchAnalyzer fAnalyzer;
 	private boolean fSaveChanges;
 
 	private ICompilationUnit fCUnit;
 	private AST fTargetAST;
 
-	public SurroundWithTryCatchRefactoring(ICompilationUnit cu, ITextSelection selection, CodeGenerationSettings settings) {
+	public SurroundWithTryCatchRefactoring(ICompilationUnit cu, ITextSelection selection, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
 		fCUnit= cu;
 		fSelection= Selection.createFromStartLength(selection.getOffset(), selection.getLength());
 		fSettings= settings;
+		fQuery= query;
 	}
 	
-	public SurroundWithTryCatchRefactoring(ICompilationUnit cu, int offset, int length, CodeGenerationSettings settings) {
+	public SurroundWithTryCatchRefactoring(ICompilationUnit cu, int offset, int length, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
 		fCUnit= cu;
 		fSelection= Selection.createFromStartLength(offset, length);
 		fSettings= settings;
+		fQuery= query;
 	}
 
 	public void setSaveChanges(boolean saveChanges) {
 		fSaveChanges= saveChanges;
+	}
+	
+	public boolean stopExecution() {
+		if (fAnalyzer == null)
+			return true;
+		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
+		return exceptions == null || exceptions.length == 0;
 	}
 	
 	/* non Java-doc
@@ -99,7 +109,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	public RefactoringStatus checkActivationBasics(CompilationUnit rootNode, IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 			
-		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
+		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection, fQuery);
 		rootNode.accept(fAnalyzer);
 		result.merge(fAnalyzer.getStatus());
 		return result;

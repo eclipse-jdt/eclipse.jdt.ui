@@ -127,7 +127,7 @@ public class MemberEdit extends SimpleTextEdit {
 						if (token == ITerminalSymbols.TokenNameLBRACE)
 							break;
 					}
-					offset= start+scanner.getCurrentTokenEndPosition();
+					offset= start + scanner.getCurrentTokenEndPosition() + 1;
 					// count the number of empty lines
 					while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 						switch (token) {

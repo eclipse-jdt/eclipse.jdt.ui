@@ -57,10 +57,10 @@ public class CommentAnalyzer {
 	}
 	
 	private boolean checkStart(IScanner scanner, int position) {
-		return scanner.getCurrentTokenStartPosition() < position && position < scanner.getCurrentTokenEndPosition();
+		return scanner.getCurrentTokenStartPosition() < position && position <= scanner.getCurrentTokenEndPosition();
 	}
 
 	private boolean checkEnd(IScanner scanner, int position) {
-		return scanner.getCurrentTokenStartPosition() <= position && position < scanner.getCurrentTokenEndPosition() - 1;
+		return scanner.getCurrentTokenStartPosition() <= position && position < scanner.getCurrentTokenEndPosition();
 	}
 }

@@ -22,11 +22,13 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 
 public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 
+	private ISurroundWithTryCatchQuery fQuery;
 	private ITypeBinding[] fExceptions;
 	private VariableDeclaration[] fLocals;
 
-	public SurroundWithTryCatchAnalyzer(ICompilationUnit unit, Selection selection) throws JavaModelException {
+	public SurroundWithTryCatchAnalyzer(ICompilationUnit unit, Selection selection, ISurroundWithTryCatchQuery query) throws JavaModelException {
 		super(unit, selection, false);
+		fQuery= query;
 	}
 	
 	public ITypeBinding[] getExceptions() {
@@ -38,6 +40,7 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 	}
 	
 	public void endVisit(CompilationUnit node) {
+		MethodDeclaration enclosingMethod= null;
 		superCall: {
 			if (getStatus().hasFatalError())
 				break superCall;
@@ -45,20 +48,25 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.doesNotCover")); //$NON-NLS-1$
 				break superCall;
 			}
-			MethodDeclaration enclosingMethod= (MethodDeclaration)ASTNodes.getParent(getFirstSelectedNode(), MethodDeclaration.class);
+			enclosingMethod= (MethodDeclaration)ASTNodes.getParent(getFirstSelectedNode(), MethodDeclaration.class);
 			if (enclosingMethod == null) {
 				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.doesNotContain"));  //$NON-NLS-1$
-				break superCall;
-			}
-			fExceptions= ExceptionAnalyzer.perform(enclosingMethod, getSelection());
-			if (fExceptions == null || fExceptions.length == 0) {
-				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.noUncaughtExceptions")); //$NON-NLS-1$
 				break superCall;
 			}
 			if (!onlyStatements()) {
 				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.onlyStatements")); //$NON-NLS-1$
 			}
 			fLocals= LocalDeclarationAnalyzer.perform(enclosingMethod, getSelection());
+		}
+		if (enclosingMethod != null) {
+			fExceptions= ExceptionAnalyzer.perform(enclosingMethod, getSelection());
+			if (fExceptions == null || fExceptions.length == 0) {
+				if (fQuery == null) {
+					invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.noUncaughtExceptions")); //$NON-NLS-1$
+				} else if (fQuery.catchRuntimeException()) {
+					fExceptions= new ITypeBinding[] {node.getAST().resolveWellKnownType("java.lang.RuntimeException")}; //$NON-NLS-1$
+				}
+			}
 		}
 		super.endVisit(node);
 	}
