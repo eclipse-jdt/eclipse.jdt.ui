@@ -17,8 +17,10 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
@@ -41,7 +43,7 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 
 	private static final int MEASURED_RUNS= 5;
 
-	private ITextEditor fEditor;
+	private AbstractTextEditor fEditor;
 	
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
@@ -49,7 +51,7 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(DEST_FILE), true);
+		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(DEST_FILE), true);
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}
@@ -77,16 +79,23 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 	}
 
 	private void measurePaste(int destLine, PerformanceMeter performanceMeter, int runs) throws Exception {
-		int destOffset= EditorTestHelper.getDocument(fEditor).getLineOffset(destLine);
+		IDocument document= EditorTestHelper.getDocument(fEditor);
+		int destOffset= document.getLineOffset(destLine);
 		IAction paste= fEditor.getAction(ITextEditorActionConstants.PASTE);
 		for (int i= 0; i < runs; i++) {
+			dirty(document);
 			fEditor.selectAndReveal(destOffset, 0);
+			EditorTestHelper.joinReconciler(EditorTestHelper.getSourceViewer(fEditor), 0, 10000, 100);
 			performanceMeter.start();
 			runAction(paste);
 			performanceMeter.stop();
 			EditorTestHelper.revertEditor(fEditor, true);
-			EditorTestHelper.runEventQueue(5000);
 		}
+	}
+
+	private void dirty(IDocument document) throws BadLocationException {
+		document.replace(0, 0, " ");
+		document.replace(0, 1, "");
 	}
 
 	private void runAction(IAction action) {
