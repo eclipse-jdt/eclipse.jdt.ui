@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -18,6 +19,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -42,6 +45,7 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -53,6 +57,7 @@ import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -63,6 +68,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
@@ -85,6 +91,9 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 
 	// Model
 	private JarPackage fJarPackage;
+	
+	// Cache for main types
+	private IType[] fMainTypes;
 	
 	// Widgets
 	private Composite	fManifestGroup;
@@ -355,11 +364,20 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 		fMainClassLabel.setText(JarPackagerMessages.getString("JarManifestWizardPage.mainClass.label")); //$NON-NLS-1$
 
 		// entry field
-		fMainClassText= new Text(mainClassGroup, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
+		fMainClassText= new Text(mainClassGroup, SWT.SINGLE | SWT.BORDER);
 		fMainClassText.addListener(SWT.Modify, fUntypedListener);
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
 		data.widthHint= convertWidthInCharsToPixels(40);
 		fMainClassText.setLayoutData(data);
+		fMainClassText.addKeyListener(new KeyAdapter() {
+			/*
+			 * @see KeyListener#keyReleased(KeyEvent)
+			 */
+			public void keyReleased(KeyEvent e) {
+				fJarPackage.setMainClass(findMainMethodByName(fMainClassText.getText()));
+				update();
+			}
+		});
 
 		// browse button
 		fMainClassBrowseButton= new Button(mainClassGroup, SWT.PUSH);
@@ -411,6 +429,28 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 				fManifestFileText.setText(fJarPackage.getManifestLocation().toString());
 			}
 		}
+	}
+
+	private IType findMainMethodByName(String name) {
+		if (fMainTypes == null) {
+			List resources= fJarPackage.getSelectedResources();
+			if (resources == null)
+				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.noResourceSelected")); //$NON-NLS-1$
+			IJavaSearchScope searchScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]));
+			MainMethodSearchEngine engine= new MainMethodSearchEngine();
+			try {
+				fMainTypes= engine.searchMainMethods(getContainer(), searchScope, 0);
+			} catch (InvocationTargetException ex) {
+				// null
+			} catch (InterruptedException e) {
+				// null
+			}
+		}
+		for (int i= 0; i < fMainTypes.length; i++) {
+			if (fMainTypes[i].getFullyQualifiedName().equals(name))
+			 return fMainTypes[i];
+		}
+		return null;
 	}
 
 	protected void handleMainClassBrowseButtonPressed() {
@@ -556,7 +596,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.sealedPackagesNotInSelection")); //$NON-NLS-1$
 			return false;
 		}
-		if (!fJarPackage.isMainClassValid(getContainer())) {
+		if (!fJarPackage.isMainClassValid(getContainer()) || (fJarPackage.getMainClass() == null && fMainClassText.getText().length() > 0)) {
 			setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.invalidMainClass")); //$NON-NLS-1$
 			return false;
 		}
@@ -574,6 +614,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 	 */
 	public void setPreviousPage(IWizardPage page) {
 		super.setPreviousPage(page);
+		fMainTypes= null;
 		if (getContainer() != null)
 			updatePageCompletion();
 	}
