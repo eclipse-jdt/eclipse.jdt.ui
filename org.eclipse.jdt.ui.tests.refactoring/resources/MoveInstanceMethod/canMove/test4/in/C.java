@@ -6,5 +6,5 @@ class C {
 	C() {
 		A a= new A();
 		a.mA1();
-	}	
+	}
 }

@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -1636,11 +1637,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final AST ast= rewrite.getAST();
 			final MethodInvocation invocation= (MethodInvocation) node;
 			final Expression expression= invocation.getExpression();
+			final ListRewrite rewriter= rewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
 			if (fTarget.isField()) {
 				if (expression != null)
 					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, createInlinedTargetExpression(unitRewrite, sourceDeclaration, expression, status), group);
 				else
 					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, ast.newSimpleName(fTargetName), group);
+				rewriter.insertLast(ast.newSimpleName(fTargetName), null);
 			} else {
 				final IVariableBinding[] bindings= getMethodParameters(sourceDeclaration);
 				if (bindings.length > 0) {
@@ -1652,7 +1655,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					if (index < bindings.length && arguments.size() > index) {
 						final ASTNode argument= (ASTNode) arguments.get(index);
 						rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.createCopyTarget(argument), group);
-						final ListRewrite rewriter= rewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
 						if (targetNode) {
 							if (expression != null)
 								rewriter.replace(argument, rewrite.createCopyTarget(expression), group);
@@ -1687,7 +1689,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.checking")); //$NON-NLS-1$
 			try {
 				final IType declaring= fMethod.getDeclaringType();
-				final List ancestors= Arrays.asList(declaring.newTypeHierarchy(new SubProgressMonitor(monitor, 1)).getAllSupertypes(declaring));
+				final ITypeHierarchy hierarchy= declaring.newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+				final List ancestors= Arrays.asList(hierarchy.getAllSupertypes(declaring));
+				final List descendants= new ArrayList(Arrays.asList(hierarchy.getAllSubtypes(declaring)));
+				descendants.add(declaring);
 				boolean result= true;
 				boolean binary= false;
 				SearchResultGroup[] groups= computeDelegateMethodReferences(new SubProgressMonitor(monitor, 1), status);
@@ -1740,7 +1745,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 											}
 										})));
 								result= false;
-							} else if (type != null && !ancestors.contains(type))
+							} else if (type != null && (descendants.contains(type) || !ancestors.contains(type)))
 								createMethodInlineChange(currentRewrite, sourceDeclaration, match, targetNode, status);
 						}
 						if (!fSourceRewrite.getCu().equals(currentUnit) && !targetRewrite.getCu().equals(currentUnit))

@@ -226,8 +226,8 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	
 //	// Move mA1 to field fB, inline delegator, remove delegator
 	public void test4() throws Exception {
-		printTestDisabledMessage("not implemented yet");		
-//		helper1(new String[] {"p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", true, true);
+//		printTestDisabledMessage("not implemented yet");		
+		helper1(new String[] {"p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", true, true);
 	}
 	
 	// Move mA1 to field fB, unqualified static member references are qualified
