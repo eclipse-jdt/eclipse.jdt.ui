@@ -80,7 +80,7 @@ public class ImportsStructure implements IImportsStructure {
 	
 	
 	private void addPreferenceOrderHolders(String[] preferenceOrder) {
-		if (fPackageEntries.size() == 0) {
+		if (fPackageEntries.isEmpty()) {
 			// all new: copy the elements
 			for (int i= 0; i < preferenceOrder.length; i++) {
 				PackageEntry entry= new PackageEntry(preferenceOrder[i], i);
@@ -94,15 +94,17 @@ public class ImportsStructure implements IImportsStructure {
 			for (int i= 0; i < preferenceOrder.length; i++) {
 				String curr= preferenceOrder[i];
 				int lastEntryFound= -1;
+				
+				// find an existing package entry that matches most 
 				for (int k=0; k < fPackageEntries.size(); k++) {
 					PackageEntry entry= (PackageEntry) fPackageEntries.get(k);
 					if (entry.getName().startsWith(curr)) {
-						int bestGroupId= entry.getGroupID();
-						if (bestGroupId == -1 || isBetterMatch(curr, entry, (PackageEntry) fPackageEntries.get(bestGroupId))) {
+						int bestGroupId= entry.getGroupID(); // index in the index array or -1 if not assigned
+						// compare entry name with curr and best order entry
+						if (bestGroupId == -1 || isBetterMatch(entry.getName(), curr, preferenceOrder[bestGroupId], true)) {
 							entry.setGroupID(i);
 							lastEntryFound= k;
 						}
-						
 					}
 				}
 		
@@ -202,7 +204,7 @@ public class ImportsStructure implements IImportsStructure {
 		char newChar= getCharAt(newName, matchLen);
 		char currChar= getCharAt(currName, matchLen);		
 		char bestChar= getCharAt(bestName, matchLen);
-		
+			
 		if (newChar < currChar) {
 			if (bestChar < newChar) {								// b < n < c
 				return (currChar - newChar) < (newChar - bestChar);	// -> (c - n) < (n - b)
@@ -227,37 +229,42 @@ public class ImportsStructure implements IImportsStructure {
 		
 		for (int i= 1; i < fPackageEntries.size(); i++) {
 			PackageEntry curr= (PackageEntry) fPackageEntries.get(i);
-			if (isBetterMatch(newName, curr, bestMatch)) {
-				bestMatch= curr;
+			if (!curr.isComment()) {
+				if (isBetterMatch(newName, curr.getName(), bestMatch.getName(), curr.getNumberOfImports() > bestMatch.getNumberOfImports())) {
+					bestMatch= curr;
+				}
 			}
 		}
 		return bestMatch;
 	}
 	
-	private boolean isBetterMatch(String newName, PackageEntry curr, PackageEntry bestMatch) {
-		if (curr.isComment()) {
-			return false;
-		}
-		
-		String currName= curr.getName();
-		String bestName= bestMatch.getName();
+	private boolean isBetterMatch(String newName, String currName, String bestName, boolean preferCurr) {
 		int currMatchLen= getCommonPrefixLength(currName, newName);
 		int bestMatchLen= getCommonPrefixLength(bestName, newName);
 		
-		if (currMatchLen > bestMatchLen) {
-			return true;
-		} else if (currMatchLen == bestMatchLen) {		
+		int matchDiff= currMatchLen - bestMatchLen;
+		
+		if (matchDiff == 0) {
 			if (currMatchLen == newName.length() && currMatchLen == currName.length() && currMatchLen == bestName.length()) {
 				// duplicate entry and complete match
-				return curr.getNumberOfImports() > bestMatch.getNumberOfImports();
+				return preferCurr;
 			} else {
 				return sameMatchLenTest(newName, bestName, currName, currMatchLen);
 			}
-		} else {
+		} else if (matchDiff > 0) { // curr has longer match
+			if (matchDiff == 1 && bestName.length() == bestMatchLen && getCharAt(currName, bestMatchLen) == '.') {
+				// best name has a complete match with new and curr only matches longer because of the dot -> best better
+				return false;
+			}
+			return true;
+		} else { // best has longer match
+			if (matchDiff == -1 && currName.length() == currMatchLen && getCharAt(bestName, currMatchLen) == '.') {
+				// curr name has a complete match with new and best only matches longer because of the dot -> curr better
+				return true;
+			}
 			return false;
 		}
 	}
-	
 	
 	private static int getCommonPrefixLength(String s, String t) {
 		int len= Math.min(s.length(), t.length());
