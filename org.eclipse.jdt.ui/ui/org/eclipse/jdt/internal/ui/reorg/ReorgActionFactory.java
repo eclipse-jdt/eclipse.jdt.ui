@@ -11,8 +11,6 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.dnd.Clipboard;
 
-import org.eclipse.jface.viewers.ISelectionProvider;
-
 import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.ISourceReference;
@@ -22,6 +20,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class ReorgActionFactory {
 	private static final String GROUP_NAME= IContextMenuConstants.GROUP_REORGANIZE;
@@ -29,28 +28,32 @@ public class ReorgActionFactory {
 	private ReorgActionFactory(){
 	}
 	public static SelectionDispatchAction createCutAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction){
-		SelectionDispatchAction a1= new CutSourceReferencesToClipboardAction(site, clipboard, pasteAction);
+		String helpContextID= IJavaHelpContextIds.CUT_ACTION;
+		SelectionDispatchAction a1= new CutSourceReferencesToClipboardAction(site, clipboard, pasteAction, helpContextID);
 		return a1;
 	}
 	
 	public static SelectionDispatchAction createCopyAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction){
 		SelectionDispatchAction a1= new CopyResourcesToClipboardAction(site, clipboard, pasteAction);
 		SelectionDispatchAction a2= new CopySourceReferencesToClipboardAction(site, clipboard, pasteAction);
-		SelectionDispatchAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.copy"), ReorgMessages.getString("copyAction.description"), a1, a2);//$NON-NLS-1$ //$NON-NLS-2$
+		String helpContextID= IJavaHelpContextIds.COPY_ACTION;
+		SelectionDispatchAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.copy"), ReorgMessages.getString("copyAction.description"), a1, a2, helpContextID);//$NON-NLS-1$ //$NON-NLS-2$
 		return dual;
 	}
 	
 	public static SelectionDispatchAction createPasteAction(IWorkbenchSite site, Clipboard clipboard){
 		SelectionDispatchAction a1= new PasteResourcesFromClipboardAction(site, clipboard);
 		SelectionDispatchAction a2= new PasteSourceReferencesFromClipboardAction(site, clipboard);
-		SelectionDispatchAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.paste"), ReorgMessages.getString("ReorgGroup.pasteAction.description"), a1, a2);//$NON-NLS-1$ //$NON-NLS-2$
+		String helpContextID= IJavaHelpContextIds.PASTE_ACTION;
+		SelectionDispatchAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.paste"), ReorgMessages.getString("ReorgGroup.pasteAction.description"), a1, a2, helpContextID);//$NON-NLS-1$ //$NON-NLS-2$
 		return dual;
 	}
 	
 	public static SelectionDispatchAction createDeleteAction(IWorkbenchSite site){
 		DeleteResourcesAction a1= new DeleteResourcesAction(site);
 		DeleteSourceReferencesAction a2= new DeleteSourceReferencesAction(site);
-		DualReorgAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.delete"), ReorgMessages.getString("deleteAction.description"), a1, a2); //$NON-NLS-1$ //$NON-NLS-2$
+		String helpContextID= IJavaHelpContextIds.DELETE_ACTION;
+		DualReorgAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.delete"), ReorgMessages.getString("deleteAction.description"), a1, a2, helpContextID); //$NON-NLS-1$ //$NON-NLS-2$
 		return dual;
 	}
 	

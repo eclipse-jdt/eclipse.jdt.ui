@@ -7,8 +7,11 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
@@ -31,6 +34,7 @@ public class HistoryAction extends Action {
 				
 		setDescription(TypeHierarchyMessages.getFormattedString("HistoryAction.description", elementName)); //$NON-NLS-1$
 		setToolTipText(TypeHierarchyMessages.getFormattedString("HistoryAction.tooltip", elementName)); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.HISTORY_ACTION);
 	}
 	
 	private ImageDescriptor getImageDescriptor(IJavaElement elem) {

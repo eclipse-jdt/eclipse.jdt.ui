@@ -18,11 +18,15 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.compare.*;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 
 class CompareDialog extends ResizableDialog {
@@ -97,5 +101,14 @@ class CompareDialog extends ResizableDialog {
 		String buttonLabel= JavaCompareUtilities.getString(fBundle, "buttonLabel", IDialogConstants.OK_LABEL); //$NON-NLS-1$
 		createButton(parent, IDialogConstants.CANCEL_ID, buttonLabel, false);
 	}
+
+	/*
+	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
+	 */
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.COMPARE_DIALOG);
+	}
+
 
 }

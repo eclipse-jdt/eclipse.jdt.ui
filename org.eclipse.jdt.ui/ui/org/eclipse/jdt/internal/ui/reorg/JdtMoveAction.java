@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.MoveProjectAction;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -226,5 +227,13 @@ public class JdtMoveAction extends ReorgDestinationAction {
 				return false;
 			}
 		}
+		/*
+		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
+		 */
+		protected void configureShell(Shell newShell) {
+			super.configureShell(newShell);
+			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.MOVE_DESTINATION_DIALOG);
+		}
+
 	}
 }

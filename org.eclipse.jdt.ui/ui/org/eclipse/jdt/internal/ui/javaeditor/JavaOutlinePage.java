@@ -52,6 +52,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -89,6 +90,7 @@ import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -591,7 +593,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 
 				public LexicalSortingAction() {
 					super();
-					
+					WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_OUTLINE_ACTION);
 					setText(JavaEditorMessages.getString("JavaOutlinePage.Sort.label")); //$NON-NLS-1$
 					JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
 					setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip")); //$NON-NLS-1$

@@ -20,11 +20,13 @@ import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -69,6 +71,15 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		//setDescription("Javadoc command"); //$NON-NLS-1$
 	}
+	
+	/*
+	 * @see PreferencePage#createControl(Composite)
+	 */
+	public void createControl(Composite parent) {
+		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.JAVADOC_PREFERENCE_PAGE);
+	}	
+	
 	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */

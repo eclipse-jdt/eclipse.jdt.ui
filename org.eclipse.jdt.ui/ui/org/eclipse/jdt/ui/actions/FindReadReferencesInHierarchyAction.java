@@ -11,10 +11,12 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
@@ -39,6 +41,7 @@ public class FindReadReferencesInHierarchyAction extends FindReferencesInHierarc
 	public FindReadReferencesInHierarchyAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindReadReferencesInHierarchyAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesInHierarchyAction.tooltip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
 	/**
@@ -50,6 +53,7 @@ public class FindReadReferencesInHierarchyAction extends FindReferencesInHierarc
 	public FindReadReferencesInHierarchyAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindReadReferencesInHierarchyAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesInHierarchyAction.tooltip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
 	int getLimitTo() {

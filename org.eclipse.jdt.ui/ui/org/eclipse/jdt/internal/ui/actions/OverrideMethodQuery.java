@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -30,6 +31,8 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.IOverrideMethodQuery;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -74,6 +77,13 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 			});
 			flatListButton.setSelection(fContentProvider.isShowTypes());
 			return tree;		
+		}
+		/*
+		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
+		 */
+		protected void configureShell(Shell newShell) {
+			super.configureShell(newShell);
+			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.OVERRIDE_TREE_SELECTION_DIALOG);
 		}
 	}
 

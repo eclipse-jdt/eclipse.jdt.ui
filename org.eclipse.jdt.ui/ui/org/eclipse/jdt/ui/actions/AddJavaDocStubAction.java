@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -32,6 +33,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -65,6 +68,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("AddJavaDocStubAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("AddJavaDocStubAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("AddJavaDocStubAction.tooltip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_JAVADOC_STUB_ACTION);
 	}
 
 	/**

@@ -272,7 +272,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.JAVA_BASE_PREFERENCE_PAGE);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.NEW_JAVA_PROJECT_PREFERENCE_PAGE);
 	}	
 
 

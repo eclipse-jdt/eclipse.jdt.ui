@@ -2,6 +2,8 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.text.ITextSelection;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -30,6 +32,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 		fEditor= editor;
 		fDialogMessageTitle= RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_TEMP_ACTION);
 	}
 
 	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
@@ -38,8 +41,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	}
 
 	private RefactoringWizard createWizard(Refactoring refactoring) {
-		//XXX wrong help
-		String helpId= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
+		String helpId= IJavaHelpContextIds.EXTRACT_TEMP_ERROR_WIZARD_PAGE;
 		String pageTitle= RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
 		return new ExtractTempWizard((ExtractTempRefactoring)refactoring, pageTitle, helpId);
 	}

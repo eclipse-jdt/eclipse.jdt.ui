@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
@@ -50,6 +52,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	public FindDeclarationsInWorkingSetAction(IWorkbenchSite site) {
 		super(site);
 		init();
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -72,6 +75,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	public FindDeclarationsInWorkingSetAction(JavaEditor editor) {
 		super(editor);
 		init();
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKING_SET_ACTION);
 	}
 
 	/**

@@ -17,6 +17,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.search.ui.ISearchResultView;
@@ -31,6 +32,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IPackagesViewPart;
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -41,7 +45,11 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 public class GotoMarkerAction extends Action {
 
 	private IEditorPart fEditor;
-
+	
+	public GotoMarkerAction(){
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GOTO_MARKER_ACTION);		
+	}
+	
 	public void run() {
 		ISearchResultView view= SearchUI.getSearchResultView();		
 		Object element= SelectionUtil.getSingleElement(view.getSelection());

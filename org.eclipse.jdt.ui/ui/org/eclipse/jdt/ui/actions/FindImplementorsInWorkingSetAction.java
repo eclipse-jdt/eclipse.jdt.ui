@@ -12,11 +12,13 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
@@ -47,6 +49,7 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 	public FindImplementorsInWorkingSetAction(IWorkbenchSite site) {
 		super(site);
 		init();
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -69,6 +72,7 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 	public FindImplementorsInWorkingSetAction(JavaEditor editor) {
 		super(editor);
 		init();
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION);
 	}
 
 	/**

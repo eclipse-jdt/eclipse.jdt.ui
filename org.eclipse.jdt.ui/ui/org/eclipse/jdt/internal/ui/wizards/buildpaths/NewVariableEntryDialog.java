@@ -32,9 +32,11 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
@@ -169,6 +171,7 @@ public class NewVariableEntryDialog extends Dialog {
 	protected void configureShell(Shell shell) {
 		shell.setText(fTitle);
 		super.configureShell(shell);
+		WorkbenchHelp.setHelp(shell, IJavaHelpContextIds.NEW_VARIABLE_ENTRY_DIALOG);
 	}	
 			
 	protected Control createDialogArea(Composite parent) {

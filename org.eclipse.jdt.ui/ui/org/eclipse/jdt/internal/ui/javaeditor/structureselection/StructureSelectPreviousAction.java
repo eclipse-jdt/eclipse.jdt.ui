@@ -1,10 +1,13 @@
 package org.eclipse.jdt.internal.ui.javaeditor.structureselection;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
@@ -16,6 +19,7 @@ public class StructureSelectPreviousAction extends StructureSelectionAction{
 		super(JavaEditorMessages.getString("StructureSelectPrevious.label"), editor, history); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("StructureSelectPrevious.tooltip")); //$NON-NLS-1$
 		setDescription(JavaEditorMessages.getString("StructureSelectPrevious.description")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECT_PREVIOUS_ACTION);
 	}
 	
 	/*

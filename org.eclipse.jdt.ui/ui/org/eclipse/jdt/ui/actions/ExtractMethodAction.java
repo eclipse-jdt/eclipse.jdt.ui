@@ -2,12 +2,16 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.text.ITextSelection;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -28,6 +32,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		fEditor= editor;
 		fDialogMessageTitle= RefactoringMessages.getString("ExtractMethodAction.dialog.title");//$NON-NLS-1$
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_METHOD_ACTION);
 	}
 
 	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {

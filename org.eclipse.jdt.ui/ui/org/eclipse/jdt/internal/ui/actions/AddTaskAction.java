@@ -23,9 +23,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.views.tasklist.TaskPropertiesDialog;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -35,6 +37,7 @@ public class AddTaskAction extends SelectionDispatchAction {
 	public AddTaskAction(IWorkbenchSite site) {
 		super(site);
 		setEnabled(false);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_TASK_ACTION);
 	}
 
 	protected void selectionChanged(IStructuredSelection selection) {

@@ -25,6 +25,9 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -88,6 +91,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		createAntGroup(fLowerComposite);
 
 		setControl(fLowerComposite);
+		WorkbenchHelp.setHelp(fLowerComposite, IJavaHelpContextIds.JAVADOC_SPECIFICS_PAGE);
 
 	} //end method createControl
 

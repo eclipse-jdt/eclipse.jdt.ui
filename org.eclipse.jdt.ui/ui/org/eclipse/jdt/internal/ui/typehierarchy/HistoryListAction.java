@@ -17,10 +17,13 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
@@ -119,6 +122,14 @@ public class HistoryListAction extends Action {
 			return (IJavaElement[]) elems.toArray(new IJavaElement[elems.size()]);
 		}	
 		
+		/*
+		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
+		 */
+		protected void configureShell(Shell newShell) {
+			super.configureShell(newShell);
+			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.HISTORY_LIST_DIALOG);
+		}
+
 	}
 	
 	private TypeHierarchyViewPart fView;
@@ -127,6 +138,7 @@ public class HistoryListAction extends Action {
 		fView= view;
 		setText(TypeHierarchyMessages.getString("HistoryListAction.label")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.HISTORY_LIST_ACTION);
 	}
 	
 		

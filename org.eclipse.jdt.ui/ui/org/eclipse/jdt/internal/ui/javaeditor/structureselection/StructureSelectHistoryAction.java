@@ -3,10 +3,12 @@ package org.eclipse.jdt.internal.ui.javaeditor.structureselection;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ISourceRange;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
@@ -24,6 +26,7 @@ public class StructureSelectHistoryAction extends Action implements IUpdate {
 		fHistory= history;
 		fEditor= editor;
 		update();
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECTION_HISTORY_ACTION);
 	}
 	
 	public void update() {

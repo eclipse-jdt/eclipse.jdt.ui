@@ -33,6 +33,8 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -41,6 +43,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -115,6 +119,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		createStyleSheetGroup(fUpperComposite);
 		
 		setControl(fUpperComposite);
+		WorkbenchHelp.setHelp(fUpperComposite, IJavaHelpContextIds.JAVADOC_STANDARD_PAGE);
 	}
 		private void createBasicOptionsGroup(Composite composite) {
 		
@@ -565,6 +570,12 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			fListDialogField.refresh();
 		}
 
+		/*
+		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
+		 */
+		protected void configureShell(Shell newShell) {
+			super.configureShell(newShell);
+			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.JAVADOC_PROPERTY_DIALOG);
+		}
 	}
-	
 }

@@ -17,11 +17,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -37,6 +39,7 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		setDescription(JavaUIMessages.getString("OpenTypeAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("OpenTypeAction.tooltip")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_TOOL_OPENTYPE);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_TYPE_ACTION);
 	}
 
 	public void run() {

@@ -9,6 +9,7 @@ import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IType;
 
@@ -19,12 +20,13 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 	CopySourceReferencesToClipboardAction fCopy;
 	DeleteSourceReferencesAction fDelete;
 	
-	protected CutSourceReferencesToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
+	protected CutSourceReferencesToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction, String helpContextID) {
 		super(site);
 		setText(ReorgMessages.getString("CutSourceReferencesToClipboardAction.cut")); //$NON-NLS-1$
 		fCopy= new CopySourceReferencesToClipboardAction(site, clipboard, pasteAction);
 		fDelete= new DeleteSourceReferencesAction(site);
 		update(getSelection());
+		WorkbenchHelp.setHelp(this, helpContextID);
 	}
 	
 	protected void perform(IStructuredSelection selection) throws CoreException {

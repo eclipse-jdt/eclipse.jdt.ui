@@ -7,6 +7,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -15,13 +16,14 @@ class DualReorgAction extends SelectionDispatchAction {
 	SelectionDispatchAction fResourceAction;
 	SelectionDispatchAction fSourceReferenceAction;
 	
-	protected DualReorgAction(IWorkbenchSite site, String text, String description, SelectionDispatchAction resourceAction, SelectionDispatchAction sourceReferenceAction) {
+	protected DualReorgAction(IWorkbenchSite site, String text, String description, SelectionDispatchAction resourceAction, SelectionDispatchAction sourceReferenceAction, String helpContextID) {
 		super(site);
 		setText(text);
 		setDescription(description);
 		fResourceAction= resourceAction;
 		fSourceReferenceAction= sourceReferenceAction;
 		update(getSelection());
+		WorkbenchHelp.setHelp(this, helpContextID);
 	}
 
 	/*

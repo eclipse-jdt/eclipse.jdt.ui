@@ -18,6 +18,9 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewer;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
@@ -68,4 +71,13 @@ public class ConfirmSaveModifiedResourcesDialog extends MessageDialog {
 	}
 
 	
+	/*
+	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
+	 */
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.CONFIRM_SAVE_MODIFIED_RESOURCES_DIALOG);
+	}
+
+
 }
