@@ -15,10 +15,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
 import org.eclipse.jdt.core.IPackageFragment;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -34,6 +38,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+
 import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -131,12 +136,11 @@ public class ChangeParametersControl extends Composite {
 			return null;
 		}
 		public void modify(Object element, String property, Object value) {
-			if (!(element instanceof TableItem))
+			if (element instanceof TableItem)
+				element= ((TableItem) element).getData();
+			if (!(element instanceof ParameterInfo))
 				return;
-			Object data= ((TableItem) element).getData();
-			if (!(data instanceof ParameterInfo))
-				return;
-			ParameterInfo parameterInfo= (ParameterInfo) data;
+			ParameterInfo parameterInfo= (ParameterInfo) element;
 			if (property.equals(PROPERTIES[NEWNAME_PROP])) 
 				parameterInfo.setNewName((String) value);
 			else if (property.equals(PROPERTIES[DEFAULT_PROP]))
@@ -511,15 +515,31 @@ public class ChangeParametersControl extends Composite {
 	private void addCellEditors() {
 		class UnfocusableTextCellEditor extends TextCellEditor {
 			SubjectControlContentAssistant fContentAssistant;
+			private boolean fSaveNextModification;
 			public UnfocusableTextCellEditor(Composite parent) {
 				super(parent);
 			}
 			protected void focusLost() {
-				if (fContentAssistant == null || ! fContentAssistant.hasProposalPopupFocus())
+				if (fContentAssistant != null && fContentAssistant.hasProposalPopupFocus())
+					fSaveNextModification= true;
+				else
 					super.focusLost();
 			}
-			public void setContentAssistant(SubjectControlContentAssistant assistant) {
+			public void setContentAssistant(SubjectControlContentAssistant assistant, final int property) {
 				fContentAssistant= assistant;
+				//workaround for bugs 53629, 58777:
+				text.addModifyListener(new ModifyListener() {
+					public void modifyText(ModifyEvent e) {
+						if (fSaveNextModification) {
+							fSaveNextModification= false;
+							final String newValue= text.getText();
+							fTableViewer.getCellModifier().modify(
+									((IStructuredSelection) fTableViewer.getSelection()).getFirstElement(),
+									PROPERTIES[property], newValue);
+							editColumnOrNextPossible(property);
+						}
+					}
+				});
 			}
 		}
 		
@@ -530,7 +550,7 @@ public class ChangeParametersControl extends Composite {
 		editors[DEFAULT_PROP]= new UnfocusableTextCellEditor(getTable());
 		
 		SubjectControlContentAssistant assistant= installParameterTypeContentAssist(editors[TYPE_PROP].getControl());
-		editors[TYPE_PROP].setContentAssistant(assistant);
+		editors[TYPE_PROP].setContentAssistant(assistant, TYPE_PROP);
 		
 		for (int i = 0; i < editors.length; i++) {
 			final int editorColumn= i;
