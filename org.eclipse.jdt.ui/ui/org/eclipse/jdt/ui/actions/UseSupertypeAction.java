@@ -123,14 +123,19 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 		if (elements.length != 1)
 			return false;
 
-		return (elements[0] instanceof IType) && shouldAcceptElement((IType)elements[0]);
+		return canRunOn(elements[0]);
+	}
+
+	private boolean canRunOn(IJavaElement element){
+		return (element instanceof IType)
+				&& element.exists()
+				&& shouldAcceptElement((IType)element);
 	}
 
 	private boolean shouldAcceptElement(IType type) {
-		if (type == null || !type.exists())
+		if (type == null)
 			return false;
 		try{
-			
 			fRefactoring= new UseSupertypeWherePossibleRefactoring(type, JavaPreferencesSettings.getCodeGenerationSettings());
 			return fRefactoring.checkPreactivation().isOK();
 		} catch (JavaModelException e) {

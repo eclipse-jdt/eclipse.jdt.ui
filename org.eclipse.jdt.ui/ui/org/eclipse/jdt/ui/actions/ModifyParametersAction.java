@@ -133,23 +133,24 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		IJavaElement[] elements= resolveElements();
 		if (elements.length > 1)
 			return false;
-		if (elements.length == 0){
-			try {
-				IJavaElement selected= SelectionConverter.getInputAsCompilationUnit(fEditor).getElementAt(selection.getOffset());
-				return (selected instanceof IMethod && shouldAcceptElement((IMethod)selected));
-			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-				return false;
-			}
-		}		
-
-		return (elements[0] instanceof IMethod) && shouldAcceptElement((IMethod)elements[0]);
-	}
-
-	private boolean shouldAcceptElement(IMethod method) {
-		if (method == null || ! method.exists())
+		if (elements.length == 1)
+			return canRunOn(elements[0]);
+		try {
+			IJavaElement selected= SelectionConverter.getInputAsCompilationUnit(fEditor).getElementAt(selection.getOffset());
+			return canRunOn(selected);
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
-		
+		}
+	}
+	
+	private boolean canRunOn(IJavaElement element){
+		return (element instanceof IMethod) 
+				&& element.exists()
+				&& shouldAcceptElement((IMethod)element);
+	}
+	
+	private boolean shouldAcceptElement(IMethod method) {
 		try{
 			fRefactoring= new ChangeSignatureRefactoring(method);
 			return fRefactoring.checkPreactivation().isOK();
