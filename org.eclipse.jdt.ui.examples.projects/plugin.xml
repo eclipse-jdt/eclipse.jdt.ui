@@ -1,10 +1,10 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <plugin
-    name = "Java Development Tools Example Projects"
-    id = "org.eclipse.jdt.ui.examples.projects"
-    version = "0.9"
-    provider-name = "Object Technology International, Inc."
-    class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectsPlugin">
+	name="%pluginName"
+	id = "org.eclipse.jdt.ui.examples.projects"
+	version = "0.9"
+	provider-name = "Object Technology International, Inc."
+	class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectsPlugin">
 
    <requires>
       <import plugin="org.eclipse.core.runtime"/>
