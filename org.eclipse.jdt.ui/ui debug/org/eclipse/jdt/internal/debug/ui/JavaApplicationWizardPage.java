@@ -189,16 +189,13 @@ public class JavaApplicationWizardPage extends WizardPage {
 			public void modifyText(ModifyEvent e) {
 				filter.setPattern(((Text) (e.widget)).getText());
 				fElementsList.refresh();
-				setMessage(DebugUIUtils.getResourceString(SELECT_ELEMENTS));
-				if (fFilteredElements.length == 1) {
+				if (fFilteredElements.length >= 1) {
 					fElementsList.setSelection(new StructuredSelection(fFilteredElements[0]), true);
+					setMessage(DebugUIUtils.getResourceString(SELECT_ELEMENTS));					
 					setPageComplete(true);
+					return;
 				} else {
-					fElementsList.setSelection(null);
-					// this should get done in the selection changed callback -  but it does not work
-					if (fFilteredElements.length == 0) {
-						setErrorMessage(DebugUIUtils.getResourceString(SELECT_ERROR_ELEMENTS));
-					} 
+					setMessage(DebugUIUtils.getResourceString(SELECT_ERROR_ELEMENTS));
 					setPageComplete(false);
 				}
 			}
@@ -266,19 +263,17 @@ public class JavaApplicationWizardPage extends WizardPage {
 				if (getControl().isDisposed()) {
 					return;
 				}
-				if (fElements.length == 1) {
+				if (fElements.length >= 1) {
 					fElementsList.setSelection(new StructuredSelection(fElements[0]), true);
 					setMessage(DebugUIUtils.getResourceString(SELECT_ELEMENTS));
-					setPageComplete(true);
-				} else if (fElements.length > 0) {
-					setMessage(DebugUIUtils.getResourceString(SELECT_ELEMENTS));
-					setPageComplete(false);
-				} else {
+					setPageComplete(true);				
+				} else {										
 					// no elements to select
 					setErrorMessage(DebugUIUtils.getResourceString(SELECT_ERROR_ELEMENTS));
-					setPageComplete(false);
+					setPageComplete(false);	
+								
 				}
-				fPatternText.setFocus();
+				fPatternText.setFocus();		
 			}
 		};
 
