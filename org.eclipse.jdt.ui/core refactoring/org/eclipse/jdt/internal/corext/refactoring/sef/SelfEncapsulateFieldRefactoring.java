@@ -1,7 +1,7 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2001 International Business Machines Corp. and others.
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v1.0 
+ * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
  * 
@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix 
  *       expressions into a combination of setter and getter calls.
- ******************************************************************************/
+ *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
 import java.util.ArrayList;
