@@ -30,7 +30,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
-
 public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 
 	private boolean fUpdateReferences;
@@ -86,7 +85,8 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	protected void doRename(IProgressMonitor pm) throws Exception {
 		try{
 			pm.beginTask(getName(), 2);
-			modifyClassPaths(new SubProgressMonitor(pm, 1));
+			if (fUpdateReferences)
+				modifyClassPaths(new SubProgressMonitor(pm, 1));
 			IProject project= getProject();
 			if (project != null){
 				IProjectDescription description = project.getDescription();
@@ -121,7 +121,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		pm.beginTask(RefactoringCoreMessages.getString("RenameJavaProjectChange.update"), referencing.length);	 //$NON-NLS-1$
 		for (int i= 0; i < referencing.length; i++) {
 			IJavaProject jp= JavaCore.create(referencing[i]);
-			if (jp != null){
+			if (jp != null && jp.exists()){
 				modifyClassPath(jp, new SubProgressMonitor(pm, 1));
 			}	else{
 				pm.worked(1);
