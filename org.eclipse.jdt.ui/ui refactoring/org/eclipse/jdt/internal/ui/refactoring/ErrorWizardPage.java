@@ -5,6 +5,9 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Point;
@@ -27,32 +30,28 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.jdt.core.ISourceRange;
+
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.FileContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.StringContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.refactoring.SourceContextViewer.SourceContextInput;
-
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
 /**
  * Presents the list of failed preconditions to the user
@@ -168,6 +167,11 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 						document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);
 					}
 				}
+			} else if (context instanceof StringContext){
+				StringContext sc= (StringContext)context;
+				configuration= new JavaSourceViewerConfiguration(getJavaTextTools(), null);
+				range= sc.getSourceRange();
+				document= new Document(sc.getSource());
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
