@@ -943,31 +943,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		return !Modifier.isStatic(variable.getModifiers());
 	}
 
-	/**
-	 * Is the specified name a target access?
-	 * 
-	 * @param name the name to check
-	 * @return <code>true</code> if this name is a target access, <code>false</code> otherwise
-	 */
-	protected boolean isTargetAccess(final Name name) {
-		Assert.isNotNull(name);
-		final IBinding binding= name.resolveBinding();
-		if (Bindings.equals(fTarget, binding))
-			return true;
-		final ASTNode parent= name.getParent();
-		if (parent instanceof QualifiedName) {
-			final QualifiedName qualified= (QualifiedName) parent;
-			if (qualified.getQualifier() != null)
-				return isTargetAccess(qualified.getQualifier());
-		} else if (parent instanceof FieldAccess) {
-			final FieldAccess access= (FieldAccess) parent;
-			final Expression expression= access.getExpression();
-			if (expression instanceof Name)
-				return isTargetAccess((Name) expression);
-		}
-		return false;
-	}
-
 	/** The candidate targets */
 	private IVariableBinding[] fCandidateTargets= new IVariableBinding[0];
 
@@ -1725,7 +1700,20 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				final IMethodBinding method= binding.getDeclaringMethod();
 				if (last && method != null && method.isVarargs()) {
 					variable.setVarargs(true);
-					variable.setType(ast.newSimpleType(ast.newSimpleName(type.isArray() ? type.getElementType().getName() : type.getName())));
+					String name= null;
+					if (type.isArray()) {
+						name= type.getElementType().getName();
+						if (PrimitiveType.toCode(name) != null)
+							variable.setType(ast.newPrimitiveType(PrimitiveType.toCode(name)));
+						else
+							variable.setType(ast.newSimpleType(ast.newSimpleName(name)));
+					} else {
+						name= type.getName();
+						if (PrimitiveType.toCode(name) != null)
+							variable.setType(ast.newPrimitiveType(PrimitiveType.toCode(name)));
+						else
+							variable.setType(ast.newSimpleType(ast.newSimpleName(name)));
+					}
 				} else
 					variable.setType(ASTNodeFactory.newType(ast, type, false));
 				return variable;
@@ -2458,6 +2446,31 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 */
 	public final boolean isApplicable() throws CoreException {
 		return fMethod.exists() && !fMethod.isConstructor() && !fMethod.isBinary() && !fMethod.isReadOnly() && fMethod.getCompilationUnit() != null && !JdtFlags.isStatic(fMethod) && !fMethod.getDeclaringType().isLocal();
+	}
+
+	/**
+	 * Is the specified name a target access?
+	 * 
+	 * @param name the name to check
+	 * @return <code>true</code> if this name is a target access, <code>false</code> otherwise
+	 */
+	protected boolean isTargetAccess(final Name name) {
+		Assert.isNotNull(name);
+		final IBinding binding= name.resolveBinding();
+		if (Bindings.equals(fTarget, binding))
+			return true;
+		final ASTNode parent= name.getParent();
+		if (parent instanceof QualifiedName) {
+			final QualifiedName qualified= (QualifiedName) parent;
+			if (qualified.getQualifier() != null)
+				return isTargetAccess(qualified.getQualifier());
+		} else if (parent instanceof FieldAccess) {
+			final FieldAccess access= (FieldAccess) parent;
+			final Expression expression= access.getExpression();
+			if (expression instanceof Name)
+				return isTargetAccess((Name) expression);
+		}
+		return false;
 	}
 
 	/*
