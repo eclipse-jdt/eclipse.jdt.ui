@@ -83,7 +83,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		if (!getProvideWorkingCopy() && isWorkingCopy(element))
 			return;
 
-		if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT && !element.getJavaProject().isOnClasspath(element))
+		if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT && !isOnClassPath((ICompilationUnit)element))
 			return;
 			 
 		// handle open and closing of a solution or project
@@ -195,6 +195,13 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		for (int i= 0; i < affectedChildren.length; i++) {
 			processDelta(affectedChildren[i]);
 		}
+	}
+
+	private boolean isOnClassPath(ICompilationUnit element) throws JavaModelException {
+		IJavaProject project= element.getJavaProject();
+		if (project == null || !project.exists())
+			return false;
+		return project.isOnClasspath(element);
 	}
 
 	/**

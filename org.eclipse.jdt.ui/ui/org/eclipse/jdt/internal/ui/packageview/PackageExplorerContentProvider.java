@@ -4,13 +4,33 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.internal.ui.*;
-import org.eclipse.jdt.internal.ui.viewsupport.*;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceDelta;
+
+import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.jface.viewers.IBasicPropertyConstants;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IWorkingCopy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.swt.widgets.*;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
  
 /**
  * A ContentProvider for the PackageExplorer
@@ -80,7 +100,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if (!getProvideWorkingCopy() && isWorkingCopy(element))
 			return; 
 
-		if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT && !element.getJavaProject().isOnClasspath(element))
+		if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT && !isOnClassPath((ICompilationUnit)element))
 			return;
 			 
 		// handle open and closing of a solution or project
@@ -193,6 +213,13 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		for (int i= 0; i < affectedChildren.length; i++) {
 			processDelta(affectedChildren[i]);
 		}
+	}
+
+	private boolean isOnClassPath(ICompilationUnit element) throws JavaModelException {
+		IJavaProject project= element.getJavaProject();
+		if (project == null || !project.exists())
+			return false;
+		return project.isOnClasspath(element);
 	}
 
 	/**
