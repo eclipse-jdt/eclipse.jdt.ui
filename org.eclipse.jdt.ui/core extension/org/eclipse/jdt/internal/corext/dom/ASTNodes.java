@@ -188,6 +188,16 @@ public class ASTNodes {
 		node.accept(visitor);
 		return visitor.result;		
 	}
+	
+	/**
+	 * Returns the element type. This is a convenience method that returns its 
+	 * argument if it is a simple type and the element type if the parameter is an array type.
+	 */
+	public static Type getElementType(Type type){
+		if (! type.isArrayType()) 
+			return type;
+		return ((ArrayType)type).getElementType();
+	}
         
 	public static ASTNode findDeclaration(IBinding binding, ASTNode root) {
 		root= root.getRoot();
