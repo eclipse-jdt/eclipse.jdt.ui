@@ -395,7 +395,9 @@ public class ResultCollector implements ICompletionRequestor {
 			}
 		}
 
-		Image icon= fRegistry.get(descriptor);
+		Image icon= (descriptor == null)
+			? null
+			: fRegistry.get(descriptor);
 		
 		return new JavaCompletionProposal(completion, start, length, icon, name);
 	}
