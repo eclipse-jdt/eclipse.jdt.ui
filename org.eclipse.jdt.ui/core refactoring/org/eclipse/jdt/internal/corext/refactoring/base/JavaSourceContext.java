@@ -153,7 +153,7 @@ public abstract class JavaSourceContext extends Context {
 				mr= Binding2JavaModel.find(method, resource);
 		} catch (JavaModelException e) {
 		}
-		return new MemberSourceContext(mr);
+		return create(mr);
 	}
 
 	/**
