@@ -200,7 +200,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	/*
 	 * Implements method from IJarPackageWizardPage
 	 */
-	public boolean computePageCompletion() {
+	public boolean isPageComplete() {
 		if (fJarPackage.isDescriptionSaved()){
 			if (fJarPackage.getDescriptionLocation().toString().length() == 0) {
 				setErrorMessage(null);
@@ -230,6 +230,11 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		setErrorMessage(null);		
 		return true;
 	}
+	
+	public boolean canFlipToNextPage() {
+		return fJarPackage.areClassFilesExported() && super.canFlipToNextPage();
+	}
+	
 	/*
 	 * Implements method from Listener
 	 */	
@@ -329,7 +334,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	 * Determine if the page is complete and update the page appropriately. 
 	 */
 	protected void updatePageCompletion() {
-		boolean pageComplete= computePageCompletion() && fJarPackage.areClassFilesExported();
+		boolean pageComplete= isPageComplete();
 		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported());
 		setPageComplete(pageComplete);
 		if (pageComplete) {

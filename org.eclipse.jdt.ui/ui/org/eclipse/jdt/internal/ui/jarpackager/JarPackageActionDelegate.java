@@ -4,38 +4,45 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.IOException;import java.util.Iterator;import org.eclipse.core.resources.IFile;import org.eclipse.core.runtime.CoreException;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.IAction;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWindowActionDelegate;import org.xml.sax.SAXException;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.ui.IActionDelegate;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
+import org.xml.sax.SAXException;
 
 /**
  * This abstract action delegate offers base functionality used by
  * other JAR Package based action delegates.
  * .
  */
-public abstract class JarPackageActionDelegate implements IWorkbenchWindowActionDelegate {
+public abstract class JarPackageActionDelegate implements IActionDelegate {
 
 	private IStructuredSelection fSelection;
 	private IWorkbench fWorkbench;
 	private	JarPackageReader fReader= null;
 
-	/*
-	 * @see IWorkbenchWindowActionDelegate
-	 */
-	public void dispose() {
-	}
 	/**
 	 * Returns the active shell.
 	 */
 	protected Shell getShell() {
-		return JavaPlugin.getActiveWorkbenchShell();
+		return getWorkbench().getActiveWorkbenchWindow().getShell();
 	}
+
 	/*
-	 * @see IWorkbenchWindowActionDelegate
-	 */
-	public void init(IWorkbenchWindow window) {
-		fWorkbench= window.getWorkbench();
-	}
-	/*
-	 * @see IWorkbenchActionDelegate
+	 * @see IActionDelegate
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
 		if (selection instanceof IStructuredSelection)
@@ -43,6 +50,7 @@ public abstract class JarPackageActionDelegate implements IWorkbenchWindowAction
 		else
 			fSelection= StructuredSelection.EMPTY;
 	}
+
 	/**
 	 * Returns the description file for the first description file in
 	 * the selection. Use this method if this action is only active if
@@ -51,6 +59,7 @@ public abstract class JarPackageActionDelegate implements IWorkbenchWindowAction
 	protected IFile getDescriptionFile(IStructuredSelection selection) {
 		return (IFile)selection.getFirstElement();
 	}
+
 	/**
 	 * Returns a description file for each description file in
 	 * the selection. Use this method if this action allows multiple
@@ -64,6 +73,7 @@ public abstract class JarPackageActionDelegate implements IWorkbenchWindowAction
 			files[i++]= (IFile)iter.next();
 		return files;
 	}
+
 	/**
 	 * Reads the JAR package spec from file.
 	 */
@@ -83,11 +93,7 @@ public abstract class JarPackageActionDelegate implements IWorkbenchWindowAction
 	}
 
 	protected IWorkbench getWorkbench() {
-		if (fWorkbench == null)
-			fWorkbench= JavaPlugin.getActiveWorkbenchWindow().getWorkbench();
-		if (fWorkbench == null)
-			fWorkbench= JavaPlugin.getDefault().getWorkbench();
-		return fWorkbench;
+		return PlatformUI.getWorkbench();
 	}
 
 	protected IStructuredSelection getSelection() {

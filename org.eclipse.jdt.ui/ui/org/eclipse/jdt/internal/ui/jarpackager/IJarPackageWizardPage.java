@@ -17,11 +17,4 @@ public interface IJarPackageWizardPage extends IWizardPage {
 	 * <code>internalSaveWidgetValues</code>.
 	 */
 	void saveWidgetValues();
-	/**
-	 * Computes whether this page is complete.
-	 *
-	 * @return	<code>true</code> if this page is complete,
-	 * 			<code>false</code> if it is incomplete
-	 */
-	boolean computePageCompletion();
 }

@@ -18,11 +18,16 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
 /**
  * Creates a JAR file
@@ -56,6 +61,7 @@ public class JarWriter {
 			fJarOutputStream= new JarOutputStream(new FileOutputStream(jarPackage.getJarLocation().toOSString()));
 		fJarPackage= jarPackage;
 	}
+
 	/**
 	 * Creates an instance which is used to create a JAR based
 	 * on the given JarPackage
@@ -67,15 +73,17 @@ public class JarWriter {
 	public JarWriter(JarPackage jarPackage) throws IOException, CoreException {
 		this(jarPackage, null);
 	}
+
 	/**
 	 * Does all required cleanup
 	 *
 	 * @exception java.io.IOException
 	 */
-	public void finished() throws IOException {
+	public void close() throws IOException {
 		if (fJarOutputStream != null)
 			fJarOutputStream.close();
 	}
+
 	/**
 	 * Writes the passed resource to the current archive
 	 *
@@ -93,10 +101,11 @@ public class JarWriter {
 			if (!resource.isLocal(IResource.DEPTH_ZERO))
 				throw new IOException(JarPackagerMessages.getFormattedString("JarWriter.error.fileNotAccessible", resource.getFullPath())); //$NON-NLS-1$
 			contentStream= new BufferedInputStream(resource.getContents(false));
-			int chunkSize= contentStream.available();
+			int chunkSize= 4096;
 			byte[] readBuffer= new byte[chunkSize];
-			while (contentStream.read(readBuffer, 0, chunkSize) > 0)
-				output.write(readBuffer);
+			int count;
+			while ((count= contentStream.read(readBuffer, 0, chunkSize)) > 0)
+				output.write(readBuffer, 0, count);
 		} finally {
 			if (output != null)
 				output.close();
@@ -118,9 +127,11 @@ public class JarWriter {
 			String message= JarPackagerMessages.getFormattedString("JarWriter.writeProblem", resource.getFullPath()); //$NON-NLS-1$
 			if (ex.getMessage() != null)
 				message += ": " + ex.getMessage();  //$NON-NLS-1$
-			throw new IOException(message);
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
+											JavaStatusConstants.INTERNAL_ERROR, message, ex));
 		}		
 	}
+
 	/**
 	 * Creates a new JarEntry with the passed pathname and contents, and write it
 	 * to the current archive
@@ -150,7 +161,12 @@ public class JarWriter {
 			fJarOutputStream.putNextEntry(newEntry);
 			fJarOutputStream.write(contents);
 		} finally  {
-			// Commented out, see: 1GFKT4A: ITPJUI:WINNT - NPE exporting duplicate files
+			/*
+			 * Commented out because some JREs throw an NPE if a stream
+			 * is closed twice. This works because
+			 * a) putNextEntry closes the previous entry
+			 * b) closing the stream closes the last entry
+			 */
 			// fJarOutputStream.closeEntry();
 		}
 	}

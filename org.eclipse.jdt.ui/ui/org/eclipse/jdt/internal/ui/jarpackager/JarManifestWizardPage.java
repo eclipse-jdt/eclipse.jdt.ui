@@ -155,10 +155,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		restoreWidgetValues();
 
 		setControl(composite);
-
-		updateModel();
-		updateEnableState();
-		setPageComplete(computePageCompletion());
+		update();
 
 		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.JARMANIFEST_WIZARD_PAGE));								
 			
@@ -365,7 +362,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		});
 	}
 	
-	// ----------- Event handers  -----------
+	// ----------- Event handlers  -----------
 		
 	/*
 	 * Implements method from Listener
@@ -373,10 +370,15 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	public void handleEvent(Event e) {
 		if (getControl() == null)
 			return;
+		update();
+	}
+
+	private void update() {
 		updateModel();
 		updateEnableState();
 		updatePageCompletion();
 	}
+	
 	/**
 	 *	Open an appropriate dialog so that the user can specify a manifest
 	 *	to save
@@ -512,7 +514,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	/*
 	 * Implements method from IJarPackageWizardPage
 	 */
-	public boolean computePageCompletion() {
+	public boolean isPageComplete() {
 		boolean incompleteButNotAnError= false;
 		if (fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
 			if (fJarPackage.getManifestLocation().toString().length() == 0)
@@ -676,7 +678,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	 * Determine if the page is complete and update the page appropriately. 
 	 */
 	protected void updatePageCompletion() {
-		boolean pageComplete= computePageCompletion();
+		boolean pageComplete= isPageComplete();
 		setPageComplete(pageComplete);
 		if (pageComplete) {
 			setErrorMessage(null);

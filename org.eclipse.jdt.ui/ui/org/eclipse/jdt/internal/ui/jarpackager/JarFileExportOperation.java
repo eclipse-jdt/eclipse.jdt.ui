@@ -238,7 +238,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 		} finally {
 			try {
 				if (fJarWriter != null)
-					fJarWriter.finished();
+					fJarWriter.close();
 			} catch (IOException ex) {				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.unableToCloseJarFile", ex.getMessage()); //$NON-NLS-1$
 				addError(message, ex);
 				throw new InvocationTargetException(ex, message);

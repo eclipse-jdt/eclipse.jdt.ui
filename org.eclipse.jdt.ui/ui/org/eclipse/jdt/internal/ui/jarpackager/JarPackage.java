@@ -1,24 +1,24 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.ByteArrayOutputStream;import java.io.File;import java.io.IOException;import java.io.InputStream;import java.io.OutputStream;import java.io.Serializable;import java.util.ArrayList;import java.util.HashSet;import java.util.Iterator;import java.util.List;import java.util.Set;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.ByteArrayOutputStream;import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.Collection;import java.util.Collections;import java.util.HashSet;import java.util.Iterator;import java.util.List;import java.util.Set;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Model for a JAR package. Describes a JAR package including all
  * options to regenerate the JAR.
  */
-public class JarPackage implements Serializable {
+public class JarPackage {
 
 	// Constants
 	public static final String EXTENSION= "jar"; //$NON-NLS-1$
 	public static final String DESCRIPTION_EXTENSION= "jardesc"; //$NON-NLS-1$
 
 	private String	fManifestVersion;
-	private transient boolean fIsUsedToInitialize;
+	private boolean fIsUsedToInitialize;
 	/*
 	 * What to export - internal locations
 	 * The list fExportedX is null if fExportX is false)
 	 */	
 	private boolean fExportClassFiles;		// export generated class files and resources
 	private boolean	fExportJavaFiles;		// export java files and resources
-	/*	 * Source folder hierarchy is created in the JAR if true	 */	private boolean fUseSourceFolderHierarchy;	/*	 * List which contains all the the elements (no containers) to export	 */	private List	fSelectedElements;		// internal locations	/*	 * Closure of elements and containers selected for export	 */	private transient Set fSelectedElementsClosure;
+	/*	 * Source folder hierarchy is created in the JAR if true	 */	private boolean fUseSourceFolderHierarchy;	/*	 * List which contains all the the elements (no containers) to export	 */	private List	fSelectedElements;		// internal locations	/*	 * Closure of elements and containers selected for export	 */	private Set fSelectedElementsClosure;
 
 	private IPath	fJarLocation;			// external location
 
@@ -319,7 +319,7 @@ public class JarPackage implements Serializable {
 	 */
 	public void setSelectedElements(List selectedElements) {
 		fSelectedElements= selectedElements;
-	}	/**	 * Computes and returns the selected resources.	 * The underlying resource is used for Java elements.	 * 	 * @return a List with the selected resources	 */	public List getSelectedResources() {		if (fSelectedElements == null)			return null;		List selectedResources= new ArrayList(fSelectedElements.size());		Iterator iter= fSelectedElements.iterator();		while (iter.hasNext()) {			Object element= iter.next();			if (element instanceof IJavaElement) {				try {					selectedResources.add(((IJavaElement)element).getUnderlyingResource());				} catch (JavaModelException ex) {					// ignore the resource for now				}			}			else				selectedResources.add(element);		}		return selectedResources;	}	/**
+	}	/**	 * Computes and returns the selected resources.	 * The underlying resource is used for Java elements.	 * 	 * @return a List with the selected resources	 */	public List getSelectedResources() {		if (fSelectedElements == null)			return null;		List selectedResources= new ArrayList(fSelectedElements.size());		Iterator iter= fSelectedElements.iterator();		while (iter.hasNext()) {			Object element= iter.next();			if (element instanceof IJavaElement) {				try {					selectedResources.add(((IJavaElement)element).getUnderlyingResource());				} catch (JavaModelException ex) {					ExceptionHandler.log(ex, "Failed to get underlying resource of java element"); //$NON-NLS-1$				}			}			else				selectedResources.add(element);		}		return selectedResources;	}	/**
 	 * Gets the manifestVersion
 	 * @return Returns a String
 	 */
@@ -348,25 +348,6 @@ public class JarPackage implements Serializable {
 	 */
 	public void setUsesManifest(boolean usesManifest) {
 		fUsesManifest= usesManifest;
-	}
-	/**
-	 * Returns a JAR package spec reader.
-	 * Subclasses may override to provide their own reader.
-	 * 
-	 * @param	inputStream the underlying stream
-	 * @return	a JarPackage specification reader	 * @deprecated	As of 0.114, create the  reader outside this class - will be removed
-	 */
-	protected JarPackageReader getReader(InputStream inputStream) {
-		return new JarPackageReader(inputStream);
-	}
-	/**
-	 * Returns a JAR package spec writer.
-	 * Subclasses may override to provide their own writer.
-	 * 
-	 * @param	outputStream the underlying stream
-	 * @return	a JarPackage specification writer	 * @deprecated	As of 0.114, create the  reader outside this class - will be removed	 */
-	protected JarPackageWriter getWriter(OutputStream outputStream) {
-		return new JarPackageWriter(outputStream);
 	}
 	/**	 * Gets the logErrors	 * @return Returns a boolean	 */	public boolean logErrors() {		return fLogErrors;	}	/**	 * Sets the logErrors	 * @param logErrors The logErrors to set	 */	public void setLogErrors(boolean logErrors) {		fLogErrors= logErrors;	}	/**	 * Gets the logWarnings	 * @return Returns a boolean	 */	public boolean logWarnings() {		return fLogWarnings;	}	/**	 * Sets the logWarnings	 * @param logWarnings The logWarnings to set	 */	public void setLogWarnings(boolean logWarnings) {		fLogWarnings= logWarnings;	}	/**	 * Answers if files with errors are exported	 * @return Returns a boolean	 */	public boolean exportErrors() {		return fExportErrors;	}	/**	 * Sets the exportErrors	 * @param exportErrors The exportErrors to set	 */	public void setExportErrors(boolean exportErrors) {		fExportErrors= exportErrors;	}	/**	 * Answers if files with warnings are exported	 * @return Returns a boolean	 */	public boolean exportWarnings() {		return fExportWarnings;	}	/**	 * Sets the exportWarnings	 * @param exportWarnings The exportWarnings to set	 */	public void setExportWarnings(boolean exportWarnings) {		fExportWarnings= exportWarnings;	}
 	// ----------- Utility methods -----------
@@ -403,8 +384,8 @@ public class JarPackage implements Serializable {
 	 * @return	the Set of IPackageFragments which contain all the selected resources
 	 */
 	public Set getPackagesForSelectedResources() {
-		Set packages= new HashSet();
-		for (Iterator iter= getSelectedElements().iterator(); iter.hasNext();) {			Object element= iter.next();			if (element instanceof ICompilationUnit) {				IJavaElement pack= JavaModelUtil.findParentOfKind((IJavaElement)element, org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT);				if (pack != null)					packages.add(pack);			}		}		return packages;
+		Set packages= new HashSet();		Iterator iter= getSelectedElements().iterator();
+		while (iter.hasNext()) {			Object element= iter.next();			if (element instanceof ICompilationUnit) {				IJavaElement pack= JavaModelUtil.findParentOfKind((IJavaElement)element, org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT);				if (pack != null)					packages.add(pack);			}		}		return packages;
 	}	/**	 * Tells whether the given resource (or its children) have compile errors.	 * The method acts on the current build state and does not recompile.	 * 	 * @param resource the resource to check for errors	 * @return <code>true</code> if the resource (and its children) are error free	 * @throws import org.eclipse.core.runtime.CoreException if there's a marker problem	 */	public boolean hasCompileErrors(IResource resource) throws CoreException {		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);		for (int i= 0; i < problemMarkers.length; i++) {			if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR)				return true;		}		return false;	}	/**	 * Tells whether the given resource (or its children) have compile errors.	 * The method acts on the current build state and does not recompile.	 * 	 * @param resource the resource to check for errors	 * @return <code>true</code> if the resource (and its children) are error free	 * @throws import org.eclipse.core.runtime.CoreException if there's a marker problem	 */	public boolean hasCompileWarnings(IResource resource) throws CoreException {		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);		for (int i= 0; i < problemMarkers.length; i++) {			if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_WARNING)				return true;		}		return false;	}	/**
 	 * Checks if the JAR file can be overwritten.
 	 * If the JAR package setting does not allow to overwrite the JAR
@@ -441,21 +422,16 @@ public class JarPackage implements Serializable {
 		return out.toString();
 	}
 	private boolean askToCreateDirectory(final Shell parent) {		return queryDialog(parent, JarPackagerMessages.getString("JarPackage.confirmCreate.title"), JarPackagerMessages.getString("JarPackage.confirmCreate.message")); //$NON-NLS-2$ //$NON-NLS-1$	}	private boolean askForOverwritePermission(final Shell parent, String filePath) {		if (parent == null)			return false;		return queryDialog(parent, JarPackagerMessages.getString("JarPackage.confirmReplace.title"), JarPackagerMessages.getFormattedString("JarPackage.confirmReplace.message", filePath)); //$NON-NLS-2$ //$NON-NLS-1$	}	private boolean queryDialog(final Shell parent, final String title, final String message) {
-		
-		class DialogReturnValue {
-			boolean value;
-		}
-		
 		Display display= parent.getDisplay();
 		if (display == null || display.isDisposed())
 			return false;
-		final DialogReturnValue returnValue= new DialogReturnValue();
+		final boolean[] returnValue= new boolean[1];
 		Runnable runnable= new Runnable() {
 			public void run() {
-				returnValue.value= MessageDialog.openQuestion(parent, title, message);
+				returnValue[0]= MessageDialog.openQuestion(parent, title, message);
 			}
 		};
 		display.syncExec(runnable);	
-		return returnValue.value;
+		return returnValue[0];
 	}
 	/**	 * Sets the minimal list of selected containers and elements.	 * A selected element is only in the list, if its container is	 * NOT in the list and a container is only in the list if all its	 * elements have been selected for export.	 * 	 * Note:	 * - This method is only valid during the export operation and	 * only if the JAR description is saved. <code>null</code> is returned	 * in all other cases.	 * - Only one call to this method is allowed per export operation.	 * - The same list could be computed from the list of selected	 *	 elements. This is not done because most of the information	 *	 (e.g. containers of which all elements are exported) is already	 *	 available in the JarPackageWizardPage.	 */	void setSelectedElementsClosure(Set elements) {		fSelectedElementsClosure= elements;	}	/**	 * Returns the minimal list of selected containers and elements.	 * A selected element is only in the list, if its container is	 * NOT in the list and a container is only in the list if all its	 * elements have been selected for export.	 * 	 * Note:	 * - This method is only valid during the export operation and	 * only if the JAR description is saved. <code>null</code> is returned	 * in all other cases.	 * - Only one call to this method is allowed per export operation.	 * - The same list could be computed from the list of selected	 *	 elements. This is not done because most of the information	 *	 (e.g. containers of which all elements are exported) is already	 *	 available in the JarPackageWizardPage.	 * 	 */	Iterator getSelectedElementsClosure() {		if (fSelectedElementsClosure == null)			/*			 * XXX: Should compute the closure here to be more flexible,			 *		but currently the closure is only used by the writer			 *		when the closure is known.			 */			return null;		else {			Set tmp= fSelectedElementsClosure;			fSelectedElementsClosure= null;			return tmp.iterator();		}	}}

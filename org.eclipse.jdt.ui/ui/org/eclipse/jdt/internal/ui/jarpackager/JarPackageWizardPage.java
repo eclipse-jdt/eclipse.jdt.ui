@@ -13,6 +13,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -52,7 +53,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -111,6 +111,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		fJarPackage= jarPackage;
 		fInitialSelection= selection;
 	}
+
 	/*
 	 * Method declared on IDialogPage.
 	 */
@@ -144,15 +145,12 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			setupBasedOnInitialSelections();
 
 		setControl(composite);
-
-		updateModel();
-		updateWidgetEnablements();
-		updatePageCompletion();
-
+		update();
 		giveFocusToDestination();
 		
 		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.JARPACKAGER_WIZARD_PAGE));								
 	}
+
 	/**
 	 *	Create the export options specification widgets.
 	 *
@@ -172,6 +170,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		fOverwriteCheckbox.setText(JarPackagerMessages.getString("JarPackageWizardPage.overwrite.text")); //$NON-NLS-1$
 		fOverwriteCheckbox.addListener(SWT.Selection, this);
 	}
+
 	/**
 	 *	Answer the contents of the destination specification widget. If this
 	 *	value does not have the required suffix then add it first.
@@ -185,6 +184,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			destinationText += requiredSuffix;
 	return destinationText;
 	}
+
 	/**
 	 *	Answer the string to display in self as the destination type
 	 *
@@ -193,6 +193,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	protected String getDestinationLabel() {
 		return JarPackagerMessages.getString("JarPackageWizardPage.destination.label"); //$NON-NLS-1$
 	}
+
 	/**
 	 *	Answer the suffix that files exported from this wizard must have.
 	 *	If this suffix is a file extension (which is typically the case)
@@ -203,6 +204,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	protected String getOutputSuffix() {
 		return "." + JarPackage.EXTENSION; //$NON-NLS-1$
 	}
+
 	/**
 	 * Returns an iterator over this page's collection of currently-specified 
 	 * elements to be exported. This is the primary element selection facility
@@ -213,6 +215,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	protected Iterator getSelectedResourcesIterator() {
 		return fInputGroup.getAllCheckedListItems();
 	}
+
 	/**
 	 * Persists resource specification control setting that are to be restored
 	 * in the next instance of this page. Subclasses wishing to persist
@@ -239,11 +242,13 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		// Allow subclasses to save values
 		internalSaveWidgetValues();
 	}
+
 	/**
 	 * Hook method for subclasses to persist their settings.
 	 */
 	protected void internalSaveWidgetValues() {
 	}
+
 	/**
 	 *	Hook method for restoring widget values to the values that they held
 	 *	last time this wizard was used to completion.
@@ -275,6 +280,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		fCompressCheckbox.setSelection(fJarPackage.isCompressed());
 		fOverwriteCheckbox.setSelection(fJarPackage.allowOverwrite());
 	}
+
 	/**
 	 *	Initializes the JAR package from last used wizard page values.
 	 */
@@ -297,6 +303,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			fJarPackage.setJarLocation(getPathFromString(directoryNames[0]));
 		}
 	}
+
 	/**
 	 *	Stores the widget values in the JAR package.
 	 */
@@ -320,6 +327,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	protected IPath getPathFromString(String text) {
 		return new Path(text).makeAbsolute();
 	}
+
 	/**
 	 * Returns a boolean indicating whether the passed File handle is
 	 * is valid and available for use.
@@ -341,6 +349,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		}
 		return true;
 	}
+
 	/*
 	 * Overrides method from WizardExportPage
 	 */
@@ -375,9 +384,8 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 				handleDestinationBrowseButtonPressed();
 			}
 		});
-
-	//	new Label(parent, SWT.NONE); // vertical spacer
 	}
+
 	/**
 	 *	Open an appropriate destination browser so that the user can specify a source
 	 *	to import from
@@ -394,6 +402,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			fDescriptionFileText.setText(path.toString());
 		}
 	}
+
 	/**
 	 *	Open an appropriate destination browser so that the user can specify a source
 	 *	to import from
@@ -419,6 +428,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			fDestinationNamesCombo.setText(selectedFileName);
 		}
 	}
+
 	/**
 	 * Returns the resource for the specified path.
 	 *
@@ -434,6 +444,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 			return workspace.getRoot().findMember(path);
 		return null;
 	}
+
 	/**
 	 * Creates the checkbox tree and list for selecting resources.
 	 *
@@ -461,12 +472,13 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 					SIZING_SELECTION_WIDGET_WIDTH,
 					SIZING_SELECTION_WIDGET_HEIGHT);
 		fInputGroup.addTreeFilter(new EmptyInnerPackageFilter());
-		fInputGroup.addTreeFilter(ContainerFilter.getNotContainersFilter());
+		fInputGroup.addTreeFilter(new ContainerFilter(ContainerFilter.FILTER_NON_CONTAINERS));
 		fInputGroup.addTreeFilter(new LibraryFilter());
-		fInputGroup.addListFilter(ContainerFilter.getContainersFilter());
+		fInputGroup.addListFilter(new ContainerFilter(ContainerFilter.FILTER_CONTAINERS));
 		fInputGroup.getTree().addListener(SWT.MouseUp, this);
 		fInputGroup.getTable().addListener(SWT.MouseUp, this);
 	}
+
 	/**
 	 * Creates the export type controls.
 	 *
@@ -485,28 +497,36 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		fExportJavaFilesCheckbox.setText(JarPackagerMessages.getString("JarPackageWizardPage.exportJavaFiles.text")); //$NON-NLS-1$
 		fExportJavaFilesCheckbox.addListener(SWT.Selection, this);
 	}
+
 	/**
 	 * Updates the enablements of this page's controls. Subclasses may extend.
 	 */
 	protected void updateWidgetEnablements() {
 	}
+
 	/*
 	 * Overrides method from IJarPackageWizardPage
 	 */
-	public boolean computePageCompletion() {
+	public boolean isPageComplete() {
 		setErrorMessage(null);
 		return super.determinePageCompletion();
 	}
+
 	/*
 	 * Implements method from Listener
 	 */	
 	public void handleEvent(Event e) {
 		if (getControl() == null)
 			return;
+		update();
+	}
+	
+	protected void update() {
 		updateModel();
 		updateWidgetEnablements();
 		updatePageCompletion();
 	}
+	
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
@@ -521,12 +541,14 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		}
 		return ensureTargetFileIsValid(fJarPackage.getJarLocation().toFile());
 	}
+
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
 	protected boolean validateOptionsGroup() {
 		return true;
 	}
+
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
@@ -550,12 +572,14 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		}
 		return false;
 	}
+
 	/*
 	 * Overwrides method from WizardExportPage
 	 */
 	protected IPath getResourcePath() {
 		return getPathFromText(fSourceNameField);
 	}
+
 	/**
 	 * Creates a file resource handle for the file with the given workspace path.
 	 * This method does not create the file resource; this is the responsibility
@@ -567,16 +591,18 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 */
 	protected IFile createFileHandle(IPath filePath) {
 		if (filePath.isValidPath(filePath.toString()) && filePath.segmentCount() >= 2)
-			return JavaPlugin.getWorkspace().getRoot().getFile(filePath);
+			return ResourcesPlugin.getWorkspace().getRoot().getFile(filePath);
 		else
 			return null;
 	}
+
 	/**
 	 * Set the current input focus to self's destination entry field
  	 */
 	protected void giveFocusToDestination() {
 		fDestinationNamesCombo.setFocus();
 	}
+
 	/* 
 	 * Overrides method from WizardExportResourcePage
 	 */
@@ -590,6 +616,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 				fInputGroup.initialCheckTreeItem(selectedElement);
 		}
 	}
+
 	/* 
 	 * Method declared on IWizardPage.
 	 */
@@ -660,6 +687,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		}
 		return exportedNonContainers;
 	}
+
 	/*
 	 * Create a list with the folders / projects that correspond
 	 * to the Java elements (Java project, package, package root)

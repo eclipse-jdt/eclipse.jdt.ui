@@ -24,18 +24,10 @@ public class ContainerFilter  extends PackageFilter {
 	
 	private boolean fFilterContainers;
 	
-	public static ContainerFilter getContainersFilter() {
-		return new ContainerFilter(true);
-	}
+	public static boolean FILTER_CONTAINERS= true;
+	public static boolean FILTER_NON_CONTAINERS= false;
 
-	public static ContainerFilter getNotContainersFilter() {
-		return new ContainerFilter(false);
-	}
-
-	private ContainerFilter() {
-	}
-
-	private ContainerFilter(boolean filterContainers) {
+	public ContainerFilter(boolean filterContainers) {
 		fFilterContainers= filterContainers;
 	}
 	

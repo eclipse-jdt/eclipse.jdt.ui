@@ -19,39 +19,23 @@ public class JarPackageWriter extends Object {
 	/**
 	 * Create a JarPackageWriter on the given output stream.
 	 * It is the clients responsibility to close the output stream.
-	 **/
+	 */
 	public JarPackageWriter(OutputStream outputStream) {
 		Assert.isNotNull(outputStream);
 		fOutputStream= new BufferedOutputStream(outputStream);
 	}
 
 	/**
-	 * Hook for possible subclasses
-	 **/
-	protected JarPackageWriter() {
-	}
-
-	/**
-     * Writes the specified object to the underlying stream.
-     * 
-     * @exception IOException	if writing to the underlying stream fails
-     * @deprecated As of 0.114, replaced by writeXML - will be removed
-     */
-    public void writeObject(JarPackage jarPackage) throws IOException {
-    	Assert.isNotNull(jarPackage);
-		new ObjectOutputStream(fOutputStream).writeObject(jarPackage);
-	}
-
-	/**
      * Writes a XML representation of the JAR specification
      * to to the underlying stream.
+     * 
      * @exception IOException	if writing to the underlying stream fails
      */
     public void writeXML(JarPackage jarPackage) throws IOException {
     	Assert.isNotNull(jarPackage);
     	DocumentBuilder docBuilder= null;
     	DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-    	factory.setValidating(true);
+    	factory.setValidating(false);
  		try {   	
 	    	docBuilder= factory.newDocumentBuilder();
 		} catch (ParserConfigurationException ex) {

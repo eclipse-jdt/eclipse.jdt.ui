@@ -49,33 +49,13 @@ public class JarPackageReader extends Object {
 	
 	/**
 	 * Reads a Jar Package from the underlying stream.
-	 * It is the clients responsiblity to close the stream.
-	 **/
+	 * It is the client's responsiblity to close the stream.
+	 */
 	public JarPackageReader(InputStream inputStream) {
 		Assert.isNotNull(inputStream);
 		fInputStream= new BufferedInputStream(inputStream);
 		fWarnings= new MultiStatus(JavaPlugin.getPluginId(), 0, JarPackagerMessages.getString("JarPackageReader.jarPackageReaderWarnings"), null); //$NON-NLS-1$
 	}
-
-	/**
-	 * Hook for possible subclasses
-	 **/
-	protected JarPackageReader() {
-	}
-
-	/**
-     * Reads the JAR specification from the underlying stream.
-     * 
-     * @exception IOException				if writing to the underlying stream fails
-     * @exception ClassNotFoundException	if one of the classes in the stream is not found
-     * @deprecated As of 0.114, replaced by readXML - will be removed
-     */
-    public JarPackage readObject() throws IOException, ClassNotFoundException {
-		JarPackage jarPackage= null;
-		ObjectInputStream objectInput= new ObjectInputStream(fInputStream);
-		jarPackage= (JarPackage)objectInput.readObject();
-		return jarPackage;
-    }
 
 	/**
      * Closes this stream.
@@ -89,7 +69,6 @@ public class JarPackageReader extends Object {
 	}
 
 	public JarPackage readXML() throws IOException, SAXException {
-		Element xmlJarDesc= null;
 		JarPackage jarPackage= new JarPackage();
 	  	DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
     	factory.setValidating(false);
@@ -101,7 +80,7 @@ public class JarPackageReader extends Object {
 		} finally {
 			// Note: Above code is ok since clients are responsible to close the stream
 		}
-		xmlJarDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
+		Element xmlJarDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
 		if (!xmlJarDesc.getNodeName().equals(JarPackage.DESCRIPTION_EXTENSION)) {
 			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.badFormat")); //$NON-NLS-1$
 		}

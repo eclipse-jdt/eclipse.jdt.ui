@@ -41,8 +41,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
- * Standard workbench wizard for exporting resources from the workspace
- * to a Java Archive (JAR) file.
+ * Wizard for exporting resources from the workspace to a Java Archive (JAR) file.
  * <p>
  * This class may be instantiated and used without further configuration;
  * this class is not intended to be subclassed.
@@ -84,6 +83,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 			setDialogSettings(section);
 		}
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * Method declared on IWizard.
@@ -95,16 +95,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		addPage(new JarOptionsPage(fJarPackage));
 		addPage(new JarManifestWizardPage(fJarPackage));
 	}
-	/*
-	 * (non-Javadoc)
-	 * Method declared on IWizard.
-	 */
-	public boolean canFinish() {
-		for (int i= 0; i < getPageCount(); i++)
-			if (!((IJarPackageWizardPage)getPages()[i]).computePageCompletion())
-				return false;
-		return true;
-	}	
+
 	/*
 	 * (non-Javadoc)
 	 * Method declared on IWorkbenchWizard.
@@ -119,6 +110,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
 	}
+
 	/**
 	 * Initializes this wizard from the given JAR package description.
 	 * 
@@ -136,6 +128,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * Method declared on IWizard.
@@ -167,6 +160,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		}
 		return true;
 	}
+
 	/**
 	 * Exports the JAR package.
 	 *
@@ -190,6 +184,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		}
 		return true;
 	}
+
 	/**
 	 * Gets the current workspace page selection and converts it to a valid
 	 * selection for this wizard:
@@ -210,57 +205,63 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 			Iterator iter= structuredSelection.iterator();
 			while (iter.hasNext()) {
 				Object selectedElement=  iter.next();
-				if (selectedElement instanceof IProject) {
-					try {
-						IProject project= (IProject)selectedElement;
-						if (project.hasNature(JavaCore.NATURE_ID))
-							selectedElements.add(JavaCore.create(project));
-					} catch (CoreException ex) {
-						// ignore selected element
-						continue;
-					}
-				}
-				else if (selectedElement instanceof IResource) {
-					IJavaElement je= JavaCore.create((IResource)selectedElement);
-					if (je != null && je.exists() && je.getElementType() == IJavaElement.COMPILATION_UNIT)
-						selectedElements.add(je);
-					else
-						selectedElements.add(selectedElement);
-				}
-				else if (selectedElement instanceof IJavaElement) {
-					IJavaElement je= (IJavaElement)selectedElement;
-					if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
-						selectedElements.add(je);
-					else if (je.getElementType() == IJavaElement.CLASS_FILE)
-						selectedElements.add(je);
-					else if (je.getElementType() == IJavaElement.JAVA_PROJECT)
-						selectedElements.add(je);
-					else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-						if (!((IPackageFragmentRoot)((IPackageFragment)je).getParent()).isArchive())
-							selectedElements.add(je);
-					}
-					else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-						if (!((IPackageFragmentRoot)je).isArchive())
-								selectedElements.add(je);
-					}
-					else {
-						IJavaElement cuOrCf= JavaModelUtil.findParentOfKind(je, IJavaElement.COMPILATION_UNIT);
-						if (cuOrCf instanceof ICompilationUnit) {
-							ICompilationUnit cu= (ICompilationUnit)cuOrCf;
-							if (!cu.isWorkingCopy() || (cu= (ICompilationUnit)cu.getOriginalElement()) != null)
-								selectedElements.add(cu);
-						} else {
-							cuOrCf= JavaModelUtil.findParentOfKind(je, IJavaElement.CLASS_FILE);
-							if (cuOrCf instanceof IClassFile)
-								selectedElements.add(cuOrCf.getParent());
-						}
-						
-					}
-				}
+				if (selectedElement instanceof IProject)
+					addProject(selectedElements, (IProject)selectedElement);
+				else if (selectedElement instanceof IResource)
+					addResource(selectedElements, (IResource)selectedElement);
+				else if (selectedElement instanceof IJavaElement)
+					addJavaElement(selectedElements, (IJavaElement)selectedElement);
 			}
 			return new StructuredSelection(selectedElements);
 		}
 		else
 			return StructuredSelection.EMPTY;
+	}
+
+	private void addResource(List selectedElements, IResource resource) {
+		IJavaElement je= JavaCore.create(resource);
+		if (je != null && je.exists() && je.getElementType() == IJavaElement.COMPILATION_UNIT)
+			selectedElements.add(je);
+		else
+			selectedElements.add(resource);
+	}
+
+	private void addProject(List selectedElements, IProject project) {
+		try {
+			if (project.hasNature(JavaCore.NATURE_ID))
+				selectedElements.add(JavaCore.create(project));
+		} catch (CoreException ex) {
+			// ignore selected element
+		}
+	}
+
+	private void addJavaElement(List selectedElements, IJavaElement je) {
+		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
+			selectedElements.add(je);
+		else if (je.getElementType() == IJavaElement.CLASS_FILE)
+			selectedElements.add(je);
+		else if (je.getElementType() == IJavaElement.JAVA_PROJECT)
+			selectedElements.add(je);
+		else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+			if (!((IPackageFragmentRoot)((IPackageFragment)je).getParent()).isArchive())
+				selectedElements.add(je);
+		}
+		else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+			if (!((IPackageFragmentRoot)je).isArchive())
+					selectedElements.add(je);
+		}
+		else {
+			IJavaElement cuOrCf= JavaModelUtil.findParentOfKind(je, IJavaElement.COMPILATION_UNIT);
+			if (cuOrCf instanceof ICompilationUnit) {
+				ICompilationUnit cu= (ICompilationUnit)cuOrCf;
+				if (!cu.isWorkingCopy() || (cu= (ICompilationUnit)cu.getOriginalElement()) != null)
+					selectedElements.add(cu);
+			} else {
+				cuOrCf= JavaModelUtil.findParentOfKind(je, IJavaElement.CLASS_FILE);
+				if (cuOrCf instanceof IClassFile)
+					selectedElements.add(cuOrCf.getParent());
+			}
+			
+		}
 	}
 }
