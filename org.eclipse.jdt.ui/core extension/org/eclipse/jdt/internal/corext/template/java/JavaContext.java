@@ -7,6 +7,9 @@ package org.eclipse.jdt.internal.corext.template.java;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -34,6 +37,9 @@ import org.eclipse.jdt.ui.JavaUI;
  */
 public class JavaContext extends CompilationUnitContext {
 
+	/** The platform default line delimiter. */
+	private static final String PLATFORM_LINE_DELIMITER= System.getProperty("line.separator"); //$NON-NLS-1$
+
 	/** A flag to force evaluation in head-less mode. */
 	private boolean fForceEvaluation;
 	/** A code completion requestor for guessing local variable names. */
@@ -43,14 +49,14 @@ public class JavaContext extends CompilationUnitContext {
 	 * Creates a java template context.
 	 * 
 	 * @param type   the context type.
-	 * @param string the document string.
+	 * @param document the document.
 	 * @param completionPosition the completion position within the document.
 	 * @param unit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaContext(ContextType type, String string, int completionPosition,
+	public JavaContext(ContextType type, IDocument document, int completionPosition,
 		ICompilationUnit compilationUnit)
 	{
-		super(type, string, completionPosition, compilationUnit);
+		super(type, document, completionPosition, compilationUnit);
 	}
 	
 	/*
@@ -63,12 +69,18 @@ public class JavaContext extends CompilationUnitContext {
 		TemplateTranslator translator= new TemplateTranslator();
 		TemplateBuffer buffer= translator.translate(template.getPattern());
 
-//		if (buffer == null)
-//			throw CoreException(...);
-
 		getContextType().edit(buffer, this);
 			
-		ITemplateEditor formatter= new JavaFormatter();
+		String lineDelimiter= null;
+		try {
+			lineDelimiter= getDocument().getLineDelimiter(0);
+		} catch (BadLocationException e) {
+		}
+
+		if (lineDelimiter == null)
+			lineDelimiter= PLATFORM_LINE_DELIMITER;
+		
+		ITemplateEditor formatter= new JavaFormatter(lineDelimiter);
 		formatter.edit(buffer, this);
 
 		return buffer;
@@ -92,16 +104,21 @@ public class JavaContext extends CompilationUnitContext {
 	 * @see DocumentTemplateContext#getCompletionPosition();
 	 */
 	public int getStart() {
-		String string= getString();
-		int start= getCompletionPosition();
+		IDocument document= getDocument();
+		try {
+			int start= getCompletionPosition();
+	
+			while ((start != 0) && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
+				start--;
+				
+			if ((start != 0) && Character.isUnicodeIdentifierStart(document.getChar(start - 1)))
+				start--;
+	
+			return start;
 
-		while ((start != 0) && Character.isUnicodeIdentifierPart(string.charAt(start - 1)))
-			start--;
-			
-		if ((start != 0) && Character.isUnicodeIdentifierStart(string.charAt(start - 1)))
-			start--;
-
-		return start;
+		} catch (BadLocationException e) {
+			return getCompletionPosition();	
+		}
 	}
 
 	/**
@@ -110,19 +127,23 @@ public class JavaContext extends CompilationUnitContext {
 	public char getCharacterBeforeStart() {
 		int start= getStart();
 		
-		return start == 0
-			? ' '
-			: getString().charAt(start - 1);
+		try {
+			return start == 0
+				? ' '
+				: getDocument().getChar(start - 1);
+
+		} catch (BadLocationException e) {
+			return ' ';
+		}
 	}
 
 	/**
 	 * Returns the indentation level at the position of code completion.
 	 */
 	public int getIndentationLevel() {
-		String string= getString();
 		int start= getStart();
 
-		TextBuffer textBuffer= TextBuffer.create(string);
+		TextBuffer textBuffer= TextBuffer.create(getDocument().get());
 	    String lineContent= textBuffer.getLineContentOfOffset(start);
 
 		return Strings.computeIndent(lineContent, CodeFormatterPreferencePage.getTabSize());
@@ -282,12 +303,11 @@ public class JavaContext extends CompilationUnitContext {
 		if (contextType == null)
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("JavaContext.error.message"), null)); //$NON-NLS-1$
 
-		String string= ""; //$NON-NLS-1$
-		if (compilationUnit != null && compilationUnit.exists()) {
-			string= compilationUnit.getSource();
-		}
+		IDocument document= new Document();
+		if (compilationUnit != null && compilationUnit.exists())
+			document.set(compilationUnit.getSource());
 
-		JavaContext context= new JavaContext(contextType, string, position, compilationUnit);
+		JavaContext context= new JavaContext(contextType, document, position, compilationUnit);
 		context.setForceEvaluation(true);
 
 		TemplateBuffer buffer= context.evaluate(template);

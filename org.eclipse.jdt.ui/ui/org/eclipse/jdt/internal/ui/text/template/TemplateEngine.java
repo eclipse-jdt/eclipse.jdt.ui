@@ -76,7 +76,7 @@ public class TemplateEngine {
 		if (!(fContextType instanceof CompilationUnitContextType))
 			return;
 		
-		((CompilationUnitContextType) fContextType).setContextParameters(document.get(), completionPosition, compilationUnit);		
+		((CompilationUnitContextType) fContextType).setContextParameters(document, completionPosition, compilationUnit);
 		CompilationUnitContext context= (CompilationUnitContext) fContextType.createContext();
 		int start= context.getStart();
 		int end= context.getEnd();

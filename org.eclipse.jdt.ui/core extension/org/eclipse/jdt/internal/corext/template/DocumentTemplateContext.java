@@ -4,6 +4,9 @@
  */
 package org.eclipse.jdt.internal.corext.template;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.internal.corext.Assert;
 
 /**
@@ -12,29 +15,33 @@ import org.eclipse.jdt.internal.corext.Assert;
 public abstract class DocumentTemplateContext extends TemplateContext {
 
 	/** The text of the document. */
-	private final String fString;
+	private final IDocument fDocument;
 	/** The completion position. */
 	private final int fCompletionPosition;
 
 	/**
 	 * Creates a document template context.
 	 */
-	protected DocumentTemplateContext(ContextType type, String string, int completionPosition) {
+	protected DocumentTemplateContext(ContextType type, IDocument document, int completionPosition) {
 		super(type);
 		
-		Assert.isNotNull(string);
-		Assert.isTrue(completionPosition >= 0 && completionPosition <= string.length());
+		Assert.isNotNull(document);
+		Assert.isTrue(completionPosition >= 0 && completionPosition <= document.getLength());
 		
-		fString= string;
+		fDocument= document;
 		fCompletionPosition= completionPosition;
+	}
+	
+	public IDocument getDocument() {
+		return fDocument;	
 	}
 	
 	/**
 	 * Returns the string of the context.
 	 */
-	public String getString() {
-		return fString;
-	}
+//	public String getString() {
+//		return fDocument.get();
+//	}
 	
 	/**
 	 * Returns the completion position within the string of the context.
@@ -47,7 +54,13 @@ public abstract class DocumentTemplateContext extends TemplateContext {
 	 * Returns the keyword which triggered template insertion.
 	 */
 	public String getKey() {
-		return fString.substring(getStart(), getEnd());
+		int offset= getStart();
+		int length= getEnd() - offset;
+		try {
+			return fDocument.get(offset, length);
+		} catch (BadLocationException e) {
+			return ""; //$NON-NLS-1$	
+		}
 	}
 
 	/**

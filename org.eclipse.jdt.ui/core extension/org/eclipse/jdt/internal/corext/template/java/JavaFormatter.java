@@ -31,6 +31,16 @@ import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
  */
 public class JavaFormatter implements ITemplateEditor {
 
+	/** The line delimiter to use if code formatter is not used. */
+	private final String fLineDelimiter;
+
+	/**
+	 * Creates a JavaFormatter with the target line delimiter.
+	 */
+	public JavaFormatter(String lineDelimiter) {
+		fLineDelimiter= lineDelimiter;	
+	}
+
 	/*
 	 * @see ITemplateEditor#edit(TemplateBuffer, TemplateContext)
 	 */
@@ -109,7 +119,7 @@ public class JavaFormatter implements ITemplateEditor {
 		templateBuffer.setContent(string, variables);	    
 	}
 
-	private static void indentate(TemplateBuffer templateBuffer, int indentationLevel) throws CoreException {
+	private void indentate(TemplateBuffer templateBuffer, int indentationLevel) throws CoreException {
 
 		String string= templateBuffer.getString();
 		TemplatePosition[] variables= templateBuffer.getVariables();
@@ -123,6 +133,10 @@ public class JavaFormatter implements ITemplateEditor {
 	    for (int i= 0; i < lineCount; i++) {
 	    	TextRegion region= textBuffer.getLineInformation(i);
 			multiEdit.add(SimpleTextEdit.createInsert(region.getOffset(), indentation));
+
+			String lineDelimiter= textBuffer.getLineDelimiter(i);
+			if (lineDelimiter != null)
+				multiEdit.add(SimpleTextEdit.createReplace(region.getOffset() + region.getLength(), lineDelimiter.length(), fLineDelimiter));
 	    }
 
 		string= edit(string, positions, multiEdit);

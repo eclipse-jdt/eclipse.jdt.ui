@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -19,8 +21,8 @@ import org.eclipse.jdt.internal.corext.template.TemplateVariable;
  */
 public abstract class CompilationUnitContextType extends ContextType {
 	
-	/** the document string */
-	protected String fString;
+	/** the document */
+	protected IDocument fDocument;
 
 	/** the completion position within the document string */
 	protected int fPosition;
@@ -168,8 +170,8 @@ public abstract class CompilationUnitContextType extends ContextType {
 	/**
 	 * Sets context parameters. Needs to be called before createContext().
 	 */
-	public void setContextParameters(String string, int position, ICompilationUnit compilationUnit) {
-		fString= string;
+	public void setContextParameters(IDocument document, int position, ICompilationUnit compilationUnit) {
+		fDocument= document;
 		fPosition= position;
 		fCompilationUnit= compilationUnit;
 	}

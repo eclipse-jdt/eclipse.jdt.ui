@@ -42,7 +42,7 @@ public class JavaDocContextType extends CompilationUnitContextType {
 	 * @see ContextType#createContext()
 	 */	
 	public TemplateContext createContext() {
-		return new JavaDocContext(this, fString, fPosition, fCompilationUnit);
+		return new JavaDocContext(this, fDocument, fPosition, fCompilationUnit);
 	}
 
 }

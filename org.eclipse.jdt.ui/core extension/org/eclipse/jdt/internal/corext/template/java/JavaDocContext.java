@@ -6,6 +6,9 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.template.ContextType;
@@ -28,41 +31,46 @@ public class JavaDocContext extends CompilationUnitContext {
 	 * Creates a javadoc template context.
 	 * 
 	 * @param type   the context type.
-	 * @param string the document string.
+	 * @param document the document.
 	 * @param completionPosition the completion position within the document.
 	 * @param unit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaDocContext(ContextType type, String string, int completionPosition,
+	public JavaDocContext(ContextType type, IDocument document, int completionPosition,
 		ICompilationUnit compilationUnit)
 	{
-		super(type, string, completionPosition, compilationUnit);
+		super(type, document, completionPosition, compilationUnit);
 	}
 
 	/*
 	 * @see DocumentTemplateContext#getStart()
 	 */ 
 	public int getStart() {
-		String string= getString();
-		int start= getCompletionPosition();
+		try {
+			IDocument document= getDocument();
+			int start= getCompletionPosition();
+	
+			if ((start != 0) && (document.getChar(start - 1) == HTML_TAG_END))
+				start--;
+	
+			while ((start != 0) && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
+				start--;
+			
+			if ((start != 0) && Character.isUnicodeIdentifierStart(document.getChar(start - 1)))
+				start--;
+	
+			// include html and javadoc tags
+			if ((start != 0) && (
+				(document.getChar(start - 1) == HTML_TAG_BEGIN) ||
+				(document.getChar(start - 1) == JAVADOC_TAG_BEGIN)))
+			{
+				start--;
+			}	
+	
+			return start;
 
-		if ((start != 0) && (string.charAt(start - 1) == HTML_TAG_END))
-			start--;
-
-		while ((start != 0) && Character.isUnicodeIdentifierPart(string.charAt(start - 1)))
-			start--;
-		
-		if ((start != 0) && Character.isUnicodeIdentifierStart(string.charAt(start - 1)))
-			start--;
-
-		// include html and javadoc tags
-		if ((start != 0) && (
-			(string.charAt(start - 1) == HTML_TAG_BEGIN) ||
-			(string.charAt(start - 1) == JAVADOC_TAG_BEGIN)))
-		{
-			start--;
-		}	
-
-		return start;
+		} catch (BadLocationException e) {
+			return getCompletionPosition();	
+		}
 	}
 
 	/*

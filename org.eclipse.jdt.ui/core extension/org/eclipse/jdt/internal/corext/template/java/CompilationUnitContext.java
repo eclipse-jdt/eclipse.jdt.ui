@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -25,14 +27,14 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	 * Creates a compilation unit context.
 	 * 
 	 * @param type   the context type.
-	 * @param string the document string.
+	 * @param document the document.
 	 * @param completionPosition the completion position within the document.
 	 * @param compilationUnit the compilation unit (may be <code>null</code>).
 	 */
-	protected CompilationUnitContext(ContextType type, String string, int completionPosition,
+	protected CompilationUnitContext(ContextType type, IDocument document, int completionPosition,
 		ICompilationUnit compilationUnit)
 	{
-		super(type, string, completionPosition);
+		super(type, document, completionPosition);
 		fCompilationUnit= compilationUnit;
 	}
 	

@@ -118,7 +118,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	 * @see ContextType#createContext()
 	 */	
 	public TemplateContext createContext() {
-		return new JavaContext(this, fString, fPosition, fCompilationUnit);
+		return new JavaContext(this, fDocument, fPosition, fCompilationUnit);
 	}
 
 }
