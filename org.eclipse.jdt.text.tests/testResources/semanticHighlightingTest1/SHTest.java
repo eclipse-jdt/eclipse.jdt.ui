@@ -35,4 +35,11 @@ abstract class SHTest {
 		int parentFinalField= SHTest.this.finalField;
 		int parentStaticFinalField= SHTest.staticFinalField;
 	}
+	
+	@SuppressWarnings(value="all")
+	class Generic<E extends Number> {
+		E method() {
+			return null;
+		}
+	}
 }

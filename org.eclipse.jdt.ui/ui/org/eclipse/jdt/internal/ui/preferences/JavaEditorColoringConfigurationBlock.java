@@ -697,17 +697,20 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 	private SemanticHighlightingManager.HighlightedRange[][] createPreviewerRanges() {
 		return new SemanticHighlightingManager.HighlightedRange[][] {
-			{ createHighlightedRange(6, 13, 9, SemanticHighlightings.DEPRECATED_MEMBER) },
-			{ createHighlightedRange(7, 26, 8, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(9, 20, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(9, 20, 11, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(11, 16, 5, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(13, 22, 3, SemanticHighlightings.METHOD_DECLARATION) },
-			{ createHighlightedRange(13, 30, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
-			{ createHighlightedRange(14, 2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION) },
-			{ createHighlightedRange(15, 6, 5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
-			{ createHighlightedRange(15, 16, 8, SemanticHighlightings.INHERITED_METHOD_INVOCATION) },
-			{ createHighlightedRange(16, 2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION) },
-			{ createHighlightedRange(17, 13, 5, SemanticHighlightings.LOCAL_VARIABLE) }
+			{ createHighlightedRange( 6, 13,  9, SemanticHighlightings.DEPRECATED_MEMBER) },
+			{ createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_PARAMETER) },
+			{ createHighlightedRange( 7, 26,  8, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange( 9, 20, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(9, 20, 11, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange(11,  9,  1, SemanticHighlightings.TYPE_PARAMETER) },
+			{ createHighlightedRange(11, 11,  5, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange(13, 19,  5, SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE) },
+			{ createHighlightedRange(14, 12,  3, SemanticHighlightings.METHOD_DECLARATION) },
+			{ createHighlightedRange(14, 20,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
+			{ createHighlightedRange(15,  2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION) },
+			{ createHighlightedRange(16,  6,  5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
+			{ createHighlightedRange(16, 16,  8, SemanticHighlightings.INHERITED_METHOD_INVOCATION) },
+			{ createHighlightedRange(17,  2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION) },
+			{ createHighlightedRange(18, 13,  5, SemanticHighlightings.LOCAL_VARIABLE) }
 		};
 	}
 

@@ -206,7 +206,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		 * A resettable scanner supports marking a position in a scanner and
 		 * unreading back to the marked position. 
 		 */
-		private static class ResettableScanner implements ICharacterScanner {
+		private static final class ResettableScanner implements ICharacterScanner {
 			private final ICharacterScanner fDelegate;
 			private int fReadCount;
 
@@ -319,24 +319,52 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		private IToken readAnnotation(ResettableScanner scanner) {
 			StringBuffer buffer= new StringBuffer();
 			
-			int ch= scanner.read();
-			while (fWordDetector.isWordPart((char) ch)) {
-				buffer.append((char) ch);
-				ch= scanner.read();
+			if (!readIdentifier(scanner, buffer)) {
+				scanner.reset();
+				return Token.UNDEFINED;
 			}
-			
-			if (ch != ICharacterScanner.EOF)
-				scanner.unread();
 			
 			if ("interface".equals(buffer.toString())) //$NON-NLS-1$
 				return fInterfaceToken;
 			
-			if (buffer.length() > 0)
-				return fAnnotationToken;
+			while (readSegment(new ResettableScanner(scanner))) {
+				// do nothing
+			}
+			return fAnnotationToken;
+		}
+		
+		private boolean readSegment(ResettableScanner scanner) {
+			scanner.mark();
+			if (skipWhitespace(scanner) && skipDot(scanner) && skipWhitespace(scanner) && readIdentifier(scanner, null))
+				return true;
 			
 			scanner.reset();
+			return false;
+		}
 
-			return Token.UNDEFINED;
+		private boolean skipDot(ICharacterScanner scanner) {
+			int ch= scanner.read();
+			if (ch == '.')
+				return true;
+			
+			scanner.unread();
+			return false;
+		}
+
+		private boolean readIdentifier(ICharacterScanner scanner, StringBuffer buffer) {
+			int ch= scanner.read();
+			boolean read= false;
+			while (fWordDetector.isWordPart((char) ch)) {
+				if (buffer != null)
+					buffer.append((char) ch);
+				ch= scanner.read();
+				read= true;
+			}
+
+			if (ch != ICharacterScanner.EOF)
+				scanner.unread();
+			
+			return read;
 		}
 
 		private boolean skipWhitespace(ICharacterScanner scanner) {
