@@ -23,7 +23,7 @@ public class LauncherUtil {
 			String[] cp = JavaRuntime.computeDefaultRuntimeClassPath(type.getJavaProject());
 			String[] classPath= new String[cp.length + 1];
 			System.arraycopy(cp, 0, classPath, 1, cp.length);
-			classPath[0]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getPath();
+			classPath[0]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile();
 			return classPath;
 		} catch (Exception e) {
 			throw new InvocationTargetException(e);
