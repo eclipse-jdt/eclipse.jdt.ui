@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -22,7 +21,9 @@ import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IProcessorBasedRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringParticipant;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
@@ -31,7 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.SharableParticip
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 
-public class RenameRefactoring extends Refactoring implements IAdaptable, IRenameRefactoring {
+public class RenameRefactoring extends Refactoring implements IProcessorBasedRefactoring, IRenameRefactoring {
 
 	private Object fElement;
 	private IRenameProcessor fProcessor;
@@ -56,7 +57,7 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 		return super.getAdapter(clazz);
 	}
 	
-	public IRenameProcessor getProcessor() {
+	public IRefactoringProcessor getProcessor() {
 		return fProcessor;
 	}
 	

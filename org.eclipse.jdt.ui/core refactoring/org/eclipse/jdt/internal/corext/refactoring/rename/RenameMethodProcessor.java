@@ -153,7 +153,7 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	
 	//----------- preconditions ------------------
 
-	public RefactoringStatus checkActivation() throws CoreException { 
+	public RefactoringStatus checkActivation() throws CoreException {
 		IMethod orig= getOriginalMethod(fMethod);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.deleted", //$NON-NLS-1$
@@ -161,8 +161,10 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 		fMethod= orig;
-		
-		RefactoringStatus result= Checks.checkIfCuBroken(fMethod);
+		RefactoringStatus result= Checks.checkAvailability(fMethod);
+		if (result.hasFatalError())
+				return result;
+		result.merge(Checks.checkIfCuBroken(fMethod));
 		if (JdtFlags.isNative(fMethod))
 			result.addError(RefactoringCoreMessages.getString("RenameMethodRefactoring.no_native")); //$NON-NLS-1$
 		return result;

@@ -29,9 +29,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDescriptor;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -98,22 +96,9 @@ public class DeleteAction extends SelectionDispatchAction {
 					"No refactoring available to process the selected elements.");
 				return;
 			}
-			startRefactoring(ref);
+			UserInterfaceStarter.run(ref, getShell());
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	}
-
-	private void startRefactoring(DeleteRefactoring refactoring) throws CoreException {
-		RefactoringWizardDescriptor descriptor= RefactoringWizardDescriptor.get(refactoring.getProcessor());
-		if (descriptor != null) {
-			RefactoringWizard wizard= descriptor.createWizard();	
-			wizard.initialize(refactoring);	
-			new RefactoringStarter().activate(refactoring, wizard, getShell(), "Delete", true);
-		} else {
-			MessageDialog.openInformation(getShell(), 
-				"Delete", 
-				"No refactoring available to process the selected elements.");
 		}
 	}
 

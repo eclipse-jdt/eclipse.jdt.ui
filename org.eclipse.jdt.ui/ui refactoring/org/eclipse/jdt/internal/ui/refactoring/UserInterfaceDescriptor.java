@@ -14,26 +14,32 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 
-public class RefactoringWizardDescriptor extends AbstractDescriptor {
+public class UserInterfaceDescriptor extends AbstractDescriptor {
 
-	private static final String EXT_ID= "refactoringWizards"; //$NON-NLS-1$
+	private static final String EXT_ID= "refactoringUserInterfaces"; //$NON-NLS-1$
 	
-	public RefactoringWizardDescriptor(IConfigurationElement element) {
+	public UserInterfaceDescriptor(IConfigurationElement element) {
 		super(element);
 	}
 
 	private static DescriptorManager fgDescriptions= new DescriptorManager(EXT_ID) {
 		protected AbstractDescriptor createDescriptor(IConfigurationElement element) {
-			return new RefactoringWizardDescriptor(element);
+			return new UserInterfaceDescriptor(element);
 		}
 	};
 	
-	public static RefactoringWizardDescriptor get(Object element) throws CoreException {
-		return (RefactoringWizardDescriptor)fgDescriptions.getDescriptor(element);
+	public static UserInterfaceDescriptor get(Object element) throws CoreException {
+		return (UserInterfaceDescriptor)fgDescriptions.getDescriptor(element);
 	}
 
-	public RefactoringWizard createWizard() throws CoreException {
-		return (RefactoringWizard)fConfigurationElement.createExecutableExtension(CLASS);
+	public UserInterfaceStarter create() throws CoreException {
+		String starter= fConfigurationElement.getAttribute(CLASS);
+		UserInterfaceStarter result= null;
+		if (starter != null)
+			result= (UserInterfaceStarter)fConfigurationElement.createExecutableExtension(CLASS);
+		else
+			result= new UserInterfaceStarter();
+		result.initialize(fConfigurationElement);
+		return result;
 	}
-
 }

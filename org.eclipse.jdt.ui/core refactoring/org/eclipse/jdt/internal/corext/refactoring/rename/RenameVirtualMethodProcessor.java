@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	private IMethod fOriginalMethod;
-	private RefactoringStatus fActivationStatus;
+	private boolean fActivationChecked;
 	
 	public IMethod getOriginalMethod() {
 		return fOriginalMethod;
@@ -54,34 +54,32 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	//------------ preconditions -------------
 	
 	public RefactoringStatus checkActivation() throws CoreException {
-		if (fActivationStatus != null)
-			return fActivationStatus;
+		RefactoringStatus result= super.checkActivation();
+		if (result.hasFatalError())
+			return result;
 			
-		fActivationStatus= new RefactoringStatus();
-		fActivationStatus.merge(super.checkActivation());
-		if (fActivationStatus.hasFatalError())
-			return fActivationStatus;			
-	
-		IMethod method= getMethod();
-		
-		// super check activation might change the method to be
-		// changed.
-		fOriginalMethod= method;
-		
-		if (! method.getDeclaringType().isInterface()) {
-			IMethod inInterface= MethodChecks.isDeclaredInInterface(method, new NullProgressMonitor());
-			if (inInterface != null && !inInterface.equals(method)) {
-				super.initialize(new Object[] {inInterface});
-				return fActivationStatus;	
+		if (!fActivationChecked) {
+			fActivationChecked= true;
+			
+			IMethod method= getMethod();
+			// super check activation might change the method to be changed.
+			fOriginalMethod= method;
+			
+			if (! method.getDeclaringType().isInterface()) {
+				IMethod inInterface= MethodChecks.isDeclaredInInterface(method, new NullProgressMonitor());
+				if (inInterface != null && !inInterface.equals(method)) {
+					super.initialize(new Object[] {inInterface});
+					return result;	
+				}
+			}
+			
+			IMethod overrides= MethodChecks.overridesAnotherMethod(method, new NullProgressMonitor());
+			if (overrides != null && !overrides.equals(method)) {
+				super.initialize(new Object[] {overrides});
+				return result;
 			}
 		}
-		
-		IMethod overrides= MethodChecks.overridesAnotherMethod(method, new NullProgressMonitor());
-		if (overrides != null && !overrides.equals(method)) {
-			super.initialize(new Object[] {overrides});
-			return fActivationStatus;
-		}
-		return fActivationStatus;
+		return result;
 	}
 
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {

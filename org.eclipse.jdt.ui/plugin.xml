@@ -3510,7 +3510,7 @@
 
 <extension-point name="%statusViewerExtensionPoint" id="statusContextViewers"/>
 <extension-point name="%changeViewerExtensionPoint" id="changePreviewViewers"/>
-<extension-point name="%refactoringWizardExtensionPoint" id="refactoringWizards"/>
+<extension-point name="%refactoringWizardExtensionPoint" id="refactoringUserInterfaces"/>
 
 <extension point="org.eclipse.jdt.ui.statusContextViewers">
   <statusContextViewer
@@ -3551,83 +3551,91 @@
 	</changePreviewViewer>
 </extension>
 
-<extension point="org.eclipse.jdt.ui.refactoringWizards">
-	<refactoringWizard
+<extension point="org.eclipse.jdt.ui.refactoringUserInterfaces">
+	<refactoringUserInterface
 		id="org.eclipse.jdt.renameProcessor.ui.IResource"
-		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameResourceWizard">
+		wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameResourceWizard"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter">
 		<objectState>
 			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor"/>
 		</objectState>
-	</refactoringWizard>
+	</refactoringUserInterface>
 </extension>
 	
-<extension point="org.eclipse.jdt.ui.refactoringWizards">
-	<refactoringWizard
+<extension point="org.eclipse.jdt.ui.refactoringUserInterfaces">
+	<refactoringUserInterface
 		id="org.eclipse.jdt.ui.deleteProcessor"
-		class="org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteWizard">
+		wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteWizard">
 		<objectState>
 			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor"/>
 		</objectState>
-	</refactoringWizard>
+	</refactoringUserInterface>
 	
-	<refactoringWizard
+	<refactoringUserInterface
 		id="org.eclipse.jdt.renameProcessor.ui.IJavaProject"
-		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameJavaProjectWizard">
+		wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameJavaProjectWizard"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter">
 		<objectState>
 			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor"/>
 		</objectState>
-	</refactoringWizard>
+	</refactoringUserInterface>
 	
-	<refactoringWizard
+	<refactoringUserInterface
 		id="org.eclipse.jdt.renameProcessor.ui.IPackageFragmentRoot"
-		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameSourceFolderWizard">
+		wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameSourceFolderWizard"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter">
 		<objectState>
 			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor"/>
 		</objectState>
-	</refactoringWizard>
+	</refactoringUserInterface>
 	
-	<refactoringWizard
+	<refactoringUserInterface
 		id="org.eclipse.jdt.renameProcessor.ui.IPackageFragment"
-		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenamePackageWizard">
+		wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenamePackageWizard"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter">
 		<objectState>
 			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor"/>
 		</objectState>
-	</refactoringWizard>
+	</refactoringUserInterface>
 	
-	<refactoringWizard
+	<refactoringUserInterface
 		id="org.eclipse.jdt.renameProcessor.ui.ICompilationUnit"
-		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameCuWizard">
+		wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameCuWizard"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter">
 		<objectState>
 			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor"/>
 		</objectState>
-	</refactoringWizard>
+	</refactoringUserInterface>
 	
-	<refactoringWizard
+	<refactoringUserInterface
 		id="org.eclipse.jdt.renameProcessor.ui.IType"
-		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameTypeWizard">
+		wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameTypeWizard"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter">
 		<objectState>
 			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor"/>
 		</objectState>
-	</refactoringWizard>	
+	</refactoringUserInterface>	
 	
-	<refactoringWizard
+	<refactoringUserInterface
 		id="org.eclipse.jdt.renameProcessor.ui.IField"
-		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameFieldWizard">
+		wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameFieldWizard"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter">
 		<objectState>
 			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor"/>
 		</objectState>
-	</refactoringWizard>	
+	</refactoringUserInterface>	
 	
-	<refactoringWizard
+	<refactoringUserInterface
 		id="org.eclipse.jdt.renameProcessor.ui.IMethod"
-		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameMethodWizard">
+		wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameMethodWizard"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameMethodUserInterfaceStarter">
 		<objectState>
 			<or>
 				<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor"/>
 				<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor"/>
 			</or>
 		</objectState>
-	</refactoringWizard>	
+	</refactoringUserInterface>	
 </extension>
 
 <extension point="org.eclipse.ui.views">
