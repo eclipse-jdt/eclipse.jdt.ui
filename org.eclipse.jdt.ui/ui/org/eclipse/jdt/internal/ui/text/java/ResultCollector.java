@@ -432,7 +432,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 		return (JavaCompletionProposal[]) fKeywords.toArray(new JavaCompletionProposal[fKeywords.size()]);
 	}
 
-	private StringBuffer getMethodDisplayString(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName) {
+	protected StringBuffer getMethodDisplayString(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName) {
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
 		nameBuffer.append('(');
@@ -588,7 +588,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 		return length;
 	}
 	
-	private Image getImage(ImageDescriptor descriptor) {
+	protected Image getImage(ImageDescriptor descriptor) {
 		return (descriptor == null) ? null : fRegistry.get(descriptor);
 	}
 	

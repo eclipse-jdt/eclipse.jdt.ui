@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -134,7 +139,7 @@ public final class SignatureUtil {
 	 * <code>getUpperBound</code>.
 	 * <p>
 	 * TODO this is a temporary workaround for
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=83383
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=83600
 	 * </p>
 	 * 
 	 * @param signature the method signature to convert
@@ -161,15 +166,30 @@ public final class SignatureUtil {
 		signature= sig.toString().toCharArray();
 		
 		int pos= 0;
-		// skip type declaration
+		Map methodTypeDecls= new HashMap();
 		if (signature[pos] == Signature.C_GENERIC_START) {
-			int colonPos;
+			// read type declarations
+			int nextColon= CharOperation.indexOf(Signature.C_COLON, signature, pos + 1);
 			do {
-				colonPos= CharOperation.indexOf(Signature.C_COLON, signature, pos + 1);
-				if (colonPos == -1)
-					break;
-				pos= Util.scanTypeArgumentSignature(signature, colonPos + 1);
-			} while (true);
+				int id_end= Util.scanIdentifier(signature, pos + 1);
+				String typeVar= String.valueOf(signature, pos + 1, id_end - pos);
+				methodTypeDecls.put(typeVar, new ArrayList());
+				pos= id_end;
+				while (nextColon != -1) {
+					while (CharOperation.indexOf(Signature.C_COLON, signature, nextColon + 1) == nextColon + 1)
+						nextColon++; // skip empty class bound
+					
+					int sig_end= Util.scanTypeArgumentSignature(signature, nextColon + 1);
+					String typeBound= String.valueOf(signature, nextColon + 1, sig_end - nextColon);
+					((List) methodTypeDecls.get(typeVar)).add(typeBound);
+					pos= sig_end;
+					if (CharOperation.indexOf(Signature.C_COLON, signature, pos + 1) == pos + 1)
+						nextColon= pos + 1;
+					else
+						nextColon= -1;
+				}
+				nextColon= CharOperation.indexOf(Signature.C_COLON, signature, pos + 1);
+			} while (nextColon != -1);
 			pos++;
 			if (signature[pos] != Signature.C_GENERIC_END)
 				throw new IllegalArgumentException(String.valueOf(signature));
@@ -180,6 +200,7 @@ public final class SignatureUtil {
 			throw new IllegalArgumentException(String.valueOf(signature));
 		pos++;
 		
+		// read arguments and return type
 		StringBuffer res= new StringBuffer("("); //$NON-NLS-1$
 		boolean isReturnType= false;
 		while (pos < signature.length) {
@@ -197,13 +218,13 @@ public final class SignatureUtil {
 					if (isReturnType)
 						res.append(OBJECT_SIGNATURE); // return type is at least Object
 					else
-						res.append(signature, pos + 1, end - pos);
+						res.append(replaceTypeVariableBySingleBound(signature, pos + 1, end - pos, methodTypeDecls));
 					pos= end + 1;
 					break;
 				case Signature.C_EXTENDS:
 					end= Util.scanTypeSignature(signature, pos + 1);
 					if (isReturnType)
-						res.append(signature, pos + 1, end - pos);
+						res.append(replaceTypeVariableBySingleBound(signature, pos + 1, end - pos, methodTypeDecls));
 					else
 						res.append(NULL_TYPE_SIGNATURE);
 					pos= end + 1;
@@ -215,13 +236,28 @@ public final class SignatureUtil {
 					break;
 				default:
 					end= Util.scanTypeSignature(signature, pos);
-					res.append(signature, pos, end - pos + 1);
+					String typeSig= replaceTypeVariableBySingleBound(signature, pos, end, methodTypeDecls);
+					res.append(typeSig);
 					pos= end + 1;
 					break;
 			}
 		}
 		
 		return res.toString().toCharArray();
+	}
+
+	private static String replaceTypeVariableBySingleBound(char[] signature, int pos, int end, Map methodTypeDecls) {
+		String typeSig= String.valueOf(signature, pos, end - pos + 1);
+		// don't do early resolvation for now
+		if (false && Signature.getTypeSignatureKind(typeSig) == Signature.TYPE_VARIABLE_SIGNATURE) {
+			String typeVar= Signature.getSignatureSimpleName(typeSig);
+			if (methodTypeDecls.containsKey(typeVar)) {
+				List types= (List) methodTypeDecls.get(typeVar);
+				if (types.size() == 1)
+					typeSig= (String) types.get(0); // only replace single matches - multi-matches have to be resolved later
+			}
+		}
+		return typeSig;
 	}
 
 }

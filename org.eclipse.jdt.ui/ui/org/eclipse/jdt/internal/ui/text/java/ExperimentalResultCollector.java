@@ -72,17 +72,21 @@ public class ExperimentalResultCollector extends ResultCollector {
 		
 		// handle empty code completion
 		if ((completionName.length == 0) || ((completionName.length == 1) && completionName[0] == ')'))
-			return original;
+			return super.createMethodCallCompletion(declaringTypeName, name,
+					parameterTypePackageNames, parameterTypeNames, parameterNames, returnTypeName,
+					completionName, modifiers, start, end, relevance);
 		
 		// use original code for 0-argument methods
 		if (parameterNames.length == 0)
-			return original;			
+			return super.createMethodCallCompletion(declaringTypeName, name,
+					parameterTypePackageNames, parameterTypeNames, parameterNames, returnTypeName,
+					completionName, modifiers, start, end, relevance);			
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS)) {
 			return new ParameterGuessingProposal(
-				new StringBuffer().append(name).append('(').toString(), start, end - start, original.getImage(), original.getDisplayString(), fTextViewer, relevance,
+				new StringBuffer().append(name).append('(').toString(), start, end - start, getImage(getMemberDescriptor(modifiers)), getMethodDisplayString(declaringTypeName, completionName, parameterTypeNames, parameterNames, returnTypeName).toString(), fTextViewer, relevance,
 				name, parameterTypePackageNames, parameterTypeNames, parameterNames, 
 				fCodeAssistOffset, fCompilationUnit);
 				
@@ -117,7 +121,6 @@ public class ExperimentalResultCollector extends ResultCollector {
 			}
 			
 			ExperimentalProposal experimental= new ExperimentalProposal(buffer.toString(), start, end - start, original.getImage(), original.getDisplayString(), offsets, lengths, fTextViewer, relevance);
-			experimental.setProposalInfo(original.getProposalInfo());
 			return experimental;
 		}
 	}

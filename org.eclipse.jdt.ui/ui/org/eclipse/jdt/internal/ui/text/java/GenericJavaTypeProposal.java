@@ -133,18 +133,21 @@ public class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 		}
 		
 
+		// set the generic type as replacement string
 		super.setReplacementString(buffer.toString());
+		// add import & remove package, update replacement offset
 		super.apply(document, trigger, offset);
 
 		int replacementOffset= getReplacementOffset();
 		String replacementString= getReplacementString();
+		int offsetSubtraction= buffer.length() - replacementString.length(); // due to using an import instead of package
 
 		if (offsets.length > 0 && fTextViewer != null) {
 			try {
 				LinkedModeModel model= new LinkedModeModel();
 				for (int i= 0; i != offsets.length; i++) {
 					LinkedPositionGroup group= new LinkedPositionGroup();
-					group.addPosition(new LinkedPosition(document, replacementOffset + offsets[i], lengths[i], LinkedPositionGroup.NO_STOP));
+					group.addPosition(new LinkedPosition(document, replacementOffset + offsets[i] - offsetSubtraction, lengths[i], LinkedPositionGroup.NO_STOP));
 					model.addGroup(group);
 				}
 				
