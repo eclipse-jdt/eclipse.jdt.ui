@@ -56,47 +56,34 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 			pm.beginTask("", 12); //$NON-NLS-1$
 			pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
+
 			result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
+
 			pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.checking")); //$NON-NLS-1$
+
 			if (overridesAnotherMethod(new SubProgressMonitor(pm, 2)))
 				result.addError(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.overrides_another")); //$NON-NLS-1$
+
 			pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
+
 			if (isDeclaredInInterface(new SubProgressMonitor(pm, 2)))
 				result.addError(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.from_interface", getMethod().getElementName( ))); //$NON-NLS-1$
+
 			pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
+
 			if (hierarchyDeclaresSimilarNativeMethod(new SubProgressMonitor(pm, 2)))
 				result.addError(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.requieres_renaming_native",  //$NON-NLS-1$
 																		 new String[]{getMethod().getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
+
 			pm.subTask(RefactoringCoreMessages.getString("RenameVirtualMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
+
 			if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), getMethod(), getNewName()))
 				result.addError(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.hierarchy_declares1", getNewName())); //$NON-NLS-1$
-			result.merge(analyzeCompilationUnits(new SubProgressMonitor(pm, 3)));	
+
 			return result;
 		} finally{
 			pm.done();
 		}
-	}
-	
-	private RefactoringStatus analyzeCompilationUnits(IProgressMonitor pm) throws JavaModelException{
-		SearchResultGroup[] grouped= getOccurrences(pm);
-		if (grouped.length == 0)
-			return null;
-			
-		RefactoringStatus result= new RefactoringStatus();
-		grouped= Checks.excludeCompilationUnits(grouped, getUnsavedFiles(), result);
-		if (result.hasFatalError())
-			return result;
-			
-		RenameMethodASTAnalyzer analyzer= new RenameMethodASTAnalyzer(getNewName(), getMethod());
-		for (int i= 0; i < grouped.length; i++){	
-			if (pm.isCanceled())
-				throw new OperationCanceledException();
-			
-			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(grouped[i].getResource());
-			pm.subTask(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.analyzing", cu.getElementName())); //$NON-NLS-1$
-			result.merge(analyzer.analyze(grouped[i].getSearchResults(), cu));
-		}
-		return result;
 	}
 	
 	private boolean isDeclaredInInterface(IProgressMonitor pm) throws JavaModelException {

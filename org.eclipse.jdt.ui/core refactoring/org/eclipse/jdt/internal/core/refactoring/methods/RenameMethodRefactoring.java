@@ -13,6 +13,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -188,6 +189,9 @@ public abstract class RenameMethodRefactoring extends MethodRefactoring implemen
 			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 4))));
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
 			result.merge(checkRelatedMethods(new SubProgressMonitor(pm, 1)));
+			
+			result.merge(analyzeCompilationUnits(new SubProgressMonitor(pm, 3)));	
+			
 			return result;
 		} finally{
 			pm.done();
@@ -281,9 +285,29 @@ public abstract class RenameMethodRefactoring extends MethodRefactoring implemen
 		return result;	
 	}
 	
-	/* XXX
-	 * needs rework
-	 */
+	private RefactoringStatus analyzeCompilationUnits(IProgressMonitor pm) throws JavaModelException{
+		if (fOccurrences.length == 0)
+			return null;
+			
+		RefactoringStatus result= new RefactoringStatus();
+		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, getUnsavedFiles(), result);
+		if (result.hasFatalError())
+			return result;
+		
+		result.merge(Checks.checkCompileErrorsInAffectedFiles(fOccurrences));	
+			
+		RenameMethodASTAnalyzer analyzer= new RenameMethodASTAnalyzer(getNewName(), getMethod());
+		for (int i= 0; i < fOccurrences.length; i++){	
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+			
+			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(fOccurrences[i].getResource());
+			pm.subTask(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.analyzing", cu.getElementName())); //$NON-NLS-1$
+			result.merge(analyzer.analyze(fOccurrences[i].getSearchResults(), cu));
+		}
+		return result;
+	}
+	
 	private boolean classesDeclareMethodName(ITypeHierarchy hier, List classes, IMethod method, String newName)  throws JavaModelException  {
 
 		IType type= method.getDeclaringType();
