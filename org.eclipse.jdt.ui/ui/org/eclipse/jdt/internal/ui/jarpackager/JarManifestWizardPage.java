@@ -580,11 +580,10 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 		}
 		if (!fJarPackage.isManifestGenerated() && !fJarPackage.doesManifestExist()) {
 			if (fJarPackage.getManifestLocation().toString().length() == 0)
-					incompleteButNotAnError= true;
-			else {			
+				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.noManifestFile")); //$NON-NLS-1$
+			else
 				setErrorMessage(JarPackagerMessages.getString("JarManifestWizardPage.error.invalidManifestFile")); //$NON-NLS-1$
-				return false;
-			}
+			return false;
 		}
 		if (fJarPackage.isJarSealed()
 				&& !fJarPackage.getPackagesForSelectedResources().containsAll(Arrays.asList(fJarPackage.getPackagesToUnseal()))) {
