@@ -12,7 +12,6 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -55,7 +54,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 
 /**
  * Auto indent strategy sensitive to brackets.
@@ -434,7 +432,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
 	 * @param chars an array of <code>char</code> to search for
-	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
 	private static int scanForward(IDocument document, int position, int bound, char[] chars) {
 		Assert.isTrue(position >= 0);
@@ -463,8 +461,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @param document the document being modified
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
-	 * @param chars an array of <code>char</code> to search for
-	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>scanTo</code>) that resides in a Java partition, or <code>-1</code> if none can be found
+	 * @param ch the <code>char</code> to search for
+	 * @return the lowest position of <code>ch</code> in (<code>bound</code>, <code>position</code>] that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
 	private static int scanForward(IDocument document, int position, int bound, char ch) {
 		return scanForward(document, position, bound, new char[] {ch});
@@ -616,7 +614,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}
 		return -1;
 	}
-
+	
 	private boolean isClosed(IDocument document, int offset, int length) {
 		
 		CompilationUnitInfo info= getCompilationUnitForMethod(document, offset);
@@ -1151,60 +1149,67 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return false;
 	}
 
-	private static int searchForClosingPeer(JavaCodeReader reader, int offset, int openingPeer, int closingPeer, IDocument document) throws IOException {
+	private static int searchForClosingPeer(IDocument document, int position, final char openingPeer, final char closingPeer) {
+		Assert.isTrue(position < document.getLength());
+		Assert.isTrue(position >= 0);
+		Assert.isTrue(isDefaultPartition(document, position));
 
-		reader.configureForwardReader(document, offset + 1, document.getLength(), true, true);
+		try {
+			int length= document.getLength();
+			int depth= 1;
+			position -= 1;
+			while (true) {
+				position= scanForward(document, position + 1, length, new char[] {openingPeer, closingPeer});
+				if (position == -1)
+					return -1;
+					
+				if (document.getChar(position) == openingPeer)
+					depth++;
+				else
+					depth--;
+				
+				if (depth == 0)
+					return position;
+			}
 
-		int stack= 1;
-		int c= reader.read();
-		while (c != JavaCodeReader.EOF) {
-			if (c == openingPeer && c != closingPeer)
-				stack++;
-			else if (c == closingPeer)
-				stack--;
-
-			if (stack == 0)
-				return reader.getOffset();
-
-			c= reader.read();
+		} catch (BadLocationException e) {
+			return -1;
 		}
-
-		return  -1;
 	}
 
-	private static int searchForOpeningPeer(JavaCodeReader reader, int offset, int openingPeer, int closingPeer, IDocument document) throws IOException {
+	private static int searchForOpeningPeer(IDocument document, int position, final char openingPeer, final char closingPeer) {
+		Assert.isTrue(position < document.getLength());
+		Assert.isTrue(position >= 0);
+		Assert.isTrue(isDefaultPartition(document, position));
 
-		reader.configureBackwardReader(document, offset, true, true);
+		try {
+			int depth= 1;
+			position += 1;
+			while (true) {
+				position= scanBackward(document, position - 1, -1, new char[] {openingPeer, closingPeer});
+				if (position == -1)
+					return -1;
+					
+				if (document.getChar(position) == closingPeer)
+					depth++;
+				else
+					depth--;
+				
+				if (depth == 0)
+					return position;
+			}
 
-		int stack= 1;
-		int c= reader.read();
-		while (c != JavaCodeReader.EOF) {
-			if (c == closingPeer && c != openingPeer)
-				stack++;
-			else if (c == openingPeer)
-				stack--;
-
-			if (stack == 0)
-				return reader.getOffset();
-
-			c= reader.read();
+		} catch (BadLocationException e) {
+			return -1;
 		}
-
-		return -1;
 	}
 
 	private static IRegion getSurroundingBlock(IDocument document, int offset) {
-		JavaCodeReader reader= new JavaCodeReader();
-		try {
-			int begin= searchForOpeningPeer(reader, offset, '{', '}', document);
-			int end= searchForClosingPeer(reader, offset, '{', '}', document);
-			if (begin == -1 || end == -1)
-				return null;
-			return new Region(begin, end + 1 - begin);
-			
-		} catch (IOException e) {
-			return null;	
-		}
+		int begin= searchForOpeningPeer(document, offset - 1, '{', '}');
+		int end= searchForClosingPeer(document, offset, '{', '}');
+		if (begin == -1 || end == -1)
+			return null;
+		return new Region(begin, end + 1 - begin);
 	}
 
 	private static CompilationUnitInfo getCompilationUnitForMethod(IDocument document, int offset) {
@@ -1233,22 +1238,16 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 	
 	private static boolean areBlocksConsistent(IDocument document, int offset) {
-		JavaCodeReader reader= new JavaCodeReader();
-		try { 
-			int begin= offset;
-			int end= offset;
-			
-			while (true) {
-				begin= searchForOpeningPeer(reader, begin, '{', '}', document);
-				end= searchForClosingPeer(reader, end, '{', '}', document);
-				if (begin == -1 && end == -1)
-					return true;
-				if (begin == -1 || end == -1)
-					return false;
-			}
-
-		} catch (IOException e) {
-			return false;
+		int begin= offset;
+		int end= offset - 1;
+		
+		while (true) {
+			begin= searchForOpeningPeer(document, begin - 1, '{', '}');
+			end= searchForClosingPeer(document, end + 1, '{', '}');
+			if (begin == -1 && end == -1)
+				return true;
+			if (begin == -1 || end == -1)
+				return false;
 		}		
 	}
 	
