@@ -2,8 +2,12 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.util.Iterator;
 
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -12,6 +16,8 @@ import org.eclipse.jdt.ui.actions.UnifiedSite;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -20,13 +26,21 @@ public abstract class OpenRefactoringWizardAction extends SelectionDispatchActio
 
 	private Class fActivationType;
 	private Refactoring fRefactoring;
+	private CompilationUnitEditor fEditor;
 	
 	protected OpenRefactoringWizardAction(String label, UnifiedSite site, Class activatedOnType) {
 		super(site);
 		setText(label);
 		fActivationType= activatedOnType;
 	}
-
+	
+	protected OpenRefactoringWizardAction(String label, CompilationUnitEditor editor, Class activatedOnType) {
+		super(UnifiedSite.create(editor.getEditorSite()));
+		setText(label);
+		fActivationType= activatedOnType;
+		fEditor= editor;
+	}
+	
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
@@ -98,4 +112,39 @@ public abstract class OpenRefactoringWizardAction extends SelectionDispatchActio
 	}
 	
 	protected abstract boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException;
+
+	protected void selectionChanged(ITextSelection selection) {
+		setEnabled(fEditor != null);
+	}
+
+	private boolean canRun(ITextSelection selection){
+		IJavaElement[] elements= resolveElements();
+		if (elements.length != 1)
+			return false;
+
+		if (! canOperateOnMultiSelection())
+			return fActivationType.isInstance(elements[0]) && shouldAcceptElement(elements[0]);
+		else
+			return fActivationType.isInstance(elements[0]) && shouldAcceptElement(elements);	//XXX not pretty
+	}
+	
+	private IJavaElement[] resolveElements() {
+		return SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring")); 
+	}
+	
+	protected void run(ITextSelection selection) {
+		if (! canRun(selection)){
+			Display.getDefault().beep();
+			return;
+		}
+		
+		Assert.isNotNull(fRefactoring);
+		//to be extracted
+		try{
+			new RefactoringStarter().activate(fRefactoring, createWizard(fRefactoring), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+		} catch (JavaModelException e){
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		}	
+	}
+
 }
