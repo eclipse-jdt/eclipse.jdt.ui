@@ -603,7 +603,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 						return;	
 					}
  				}
-				viewPartKeyShortcuts(event);					
 			}
 		};		
 	}
@@ -668,20 +667,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		// Note, that the transfer agents are set by the delegating drag adapter itself.
 		source.addDragListener(new DelegatingDragAdapter(dragListeners));		
 	}	
-	
-	private void viewPartKeyShortcuts(KeyEvent event) {
-		if (event.stateMask == SWT.CTRL) {
-			if (event.character == '1') {
-				setView(VIEW_ID_TYPE);
-			} else if (event.character == '2') {
-				setView(VIEW_ID_SUPER);
-			} else if (event.character == '3') {
-				setView(VIEW_ID_SUB);
-			}
-		}	
-	}
-	
-		
+			
 	/**
 	 * Returns the inner component in a workbench part.
 	 * @see IWorkbenchPart#createPartControl
