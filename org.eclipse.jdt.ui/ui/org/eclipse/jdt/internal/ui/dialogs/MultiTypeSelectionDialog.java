@@ -80,11 +80,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 		final ArrayList typesFound= new ArrayList();
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				try {
-					AllTypesCache.getTypes(fScope, fElementKinds, monitor, typesFound);
-				} catch (JavaModelException e) {
-					throw new InvocationTargetException(e);
-				}
+				AllTypesCache.getTypes(fScope, fElementKinds, monitor, typesFound);
 				if (monitor.isCanceled()) {
 					throw new InterruptedException();
 				}

@@ -182,20 +182,11 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		try {
 			if (isCacheUpToDate()) {
 				// run without progress monitor
-				try {
-					AllTypesCache.getTypes(fScope, fElementKinds, null, typeList);
-				} catch (JavaModelException e) {
-					ExceptionHandler.handle(e, JavaUIMessages.getString("TypeSelectionDialog.error2Title"), JavaUIMessages.getString("TypeSelectionDialog.error2Message")); //$NON-NLS-1$ //$NON-NLS-2$
-					return CANCEL;
-				}
+				AllTypesCache.getTypes(fScope, fElementKinds, null, typeList);
 			} else {
 				IRunnableWithProgress runnable= new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						try {
-							AllTypesCache.getTypes(fScope, fElementKinds, monitor, typeList);
-						} catch (JavaModelException e) {
-							throw new InvocationTargetException(e);
-						}
+						AllTypesCache.getTypes(fScope, fElementKinds, monitor, typeList);
 						if (monitor.isCanceled()) {
 							throw new InterruptedException();
 						}

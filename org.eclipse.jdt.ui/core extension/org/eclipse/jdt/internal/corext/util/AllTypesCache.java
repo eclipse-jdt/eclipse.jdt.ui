@@ -235,7 +235,7 @@ public class AllTypesCache {
 	 * or IJavaSearchConstants.TYPE
 	 * @param typesFound The resulting <code>TypeInfo</code> elements are added to this collection
 	 */		
-	public static void getTypes(IJavaSearchScope scope, int kind, IProgressMonitor monitor, Collection typesFound) throws JavaModelException {
+	public static void getTypes(IJavaSearchScope scope, int kind, IProgressMonitor monitor, Collection typesFound) {
 		
 		TypeInfo[] allTypes= getAllTypes(monitor);
 		
@@ -330,24 +330,20 @@ public class AllTypesCache {
 	private static void forceDeltaComplete(IProgressMonitor pm) {
 		if (pm == null)
 			pm= new NullProgressMonitor();
-		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			ICompilationUnit[] primaryWorkingCopies= JavaCore.getWorkingCopies(null);
-			pm.beginTask("", primaryWorkingCopies.length); //$NON-NLS-1$
-			pm.setTaskName(CorextMessages.getString("AllTypesCache.checking_type_cache")); //$NON-NLS-1$
-			for (int i= 0; i < primaryWorkingCopies.length; i++) {
-				ICompilationUnit curr= primaryWorkingCopies[i];
-				try {
-					JavaModelUtil.reconcile(curr);
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-				}
-				pm.worked(1);
-				if (pm.isCanceled())
-					throw new OperationCanceledException();
+
+		ICompilationUnit[] primaryWorkingCopies= JavaCore.getWorkingCopies(null);
+		pm.beginTask("", primaryWorkingCopies.length); //$NON-NLS-1$
+		pm.setTaskName(CorextMessages.getString("AllTypesCache.checking_type_cache")); //$NON-NLS-1$
+		for (int i= 0; i < primaryWorkingCopies.length; i++) {
+			ICompilationUnit curr= primaryWorkingCopies[i];
+			try {
+				JavaModelUtil.reconcile(curr);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
 			}
-		} else {
-			pm.beginTask("", 1); //$NON-NLS-1$
 			pm.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 		}
 		pm.done();
 	}
@@ -422,9 +418,6 @@ public class AllTypesCache {
 						return false;
 					}
 
-					if (((ICompilationUnit) elem).isWorkingCopy() && !JavaPlugin.USE_WORKING_COPY_OWNERS) {
-						return false;
-					}
 					if (isAddedOrRemoved || isPossibleStructuralChange(delta.getFlags())) {
 						return true;
 					}
@@ -462,7 +455,7 @@ public class AllTypesCache {
 	/**
 	 * Returns all types for a given name in the scope. The elements in the array are sorted by simple type name.
 	 */
-	public static TypeInfo[] getTypesForName(String simpleTypeName, IJavaSearchScope searchScope, IProgressMonitor monitor) throws JavaModelException {
+	public static TypeInfo[] getTypesForName(String simpleTypeName, IJavaSearchScope searchScope, IProgressMonitor monitor) {
 		Collection result= new ArrayList();
 		Set namesFound= new HashSet();
 		TypeInfo[] allTypes= AllTypesCache.getAllTypes(monitor); // all types in workspace, sorted by type name
