@@ -115,7 +115,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 		if (model == null)
 			return ;
 
-		boolean hasAssistLightbulb= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB);
+		boolean hasAssistLightbulb= fStore.getBoolean(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB);
 			
 		Iterator iter= model.getAnnotationIterator();
 		int layer= Integer.MIN_VALUE;
