@@ -122,8 +122,12 @@ public class OpenAction extends SelectionDispatchAction {
 	 */
 	protected void run(ITextSelection selection) {
 		try {
-			IJavaElement element= SelectionConverter.codeResolveOrInput(fEditor, getShell(), getDialogTitle(), 
+			IJavaElement element= SelectionConverter.codeResolve(fEditor, getShell(), getDialogTitle(), 
 				ActionMessages.getString("OpenAction.select_element"));
+			if (element == null) {
+				getShell().getDisplay().beep();
+				return;
+			}
 			IJavaElement input= SelectionConverter.getInput(fEditor);
 			int type= element.getElementType();
 			if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT || type == IJavaElement.PACKAGE_FRAGMENT)
