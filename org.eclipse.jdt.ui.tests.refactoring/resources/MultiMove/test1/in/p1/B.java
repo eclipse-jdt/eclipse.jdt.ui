@@ -1,4 +1,4 @@
-package p3;
+package p1;
 import p2.C;
 public class B{
 	C c;
