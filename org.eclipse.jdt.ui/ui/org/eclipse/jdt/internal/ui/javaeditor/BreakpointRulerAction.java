@@ -5,45 +5,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * (c) Copyright IBM Corp 1999, 2000
  */
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ResourceBundle;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.source.IVerticalRuler;
-
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
-import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.MarkerRulerAction;
-
-import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IBreakpointManager;
-import org.eclipse.debug.core.IDebugConstants;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.debug.core.JDIDebugModel;
-
-import org.eclipse.jdt.internal.debug.ui.BreakpointLocationVerifier;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.util.ArrayList;import java.util.Iterator;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.CoreException;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.debug.core.IDebugConstants;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.IJavaDebugConstants;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.debug.ui.BreakpointLocationVerifier;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.IRegion;import org.eclipse.jface.text.source.IVerticalRuler;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.MarkerRulerAction;
 
 
 /**
@@ -127,17 +89,18 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 					}
 				}
 				if (type != null) {
-					IMarker breakpoint = JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
-					breakpointManager.addBreakpoint(breakpoint);
+					if (!EditorUtility.isDuplicateBreakpoint(JDIDebugModel.getPluginIdentifier(), IJavaDebugConstants.JAVA_LINE_BREAKPOINT, type, lineNumber)) {
+							IMarker breakpoint = JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
+							DebugPlugin.getDefault().getBreakpointManager().addBreakpoint(breakpoint);
+					}
 				}
-				
 			}
 		} catch (DebugException e) {
 			Shell shell= getTextEditor().getSite().getShell();
 			String title= getString(getResourceBundle(), getResourceKeyPrefix() + "error.add.title", getResourceKeyPrefix() + "error.add.title");
 			String msg= getString(getResourceBundle(), getResourceKeyPrefix() + "error.add.message", getResourceKeyPrefix() + "error.add.message");
 			ErrorDialog.openError(shell, title, msg, e.getStatus());
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			Shell shell= getTextEditor().getSite().getShell();
 			String title= getString(getResourceBundle(), getResourceKeyPrefix() + "error.add.title", getResourceKeyPrefix() + "error.add.title");
 			String msg= getString(getResourceBundle(), getResourceKeyPrefix() + "error.add.message", getResourceKeyPrefix() + "error.add.message");

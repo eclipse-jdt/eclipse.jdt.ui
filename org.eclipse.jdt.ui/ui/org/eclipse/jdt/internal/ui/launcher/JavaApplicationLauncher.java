@@ -136,6 +136,8 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 			config.setVMArguments(JavaLaunchUtils.parseArguments(vmArgs));
 			config.setProgramArguments(JavaLaunchUtils.parseArguments(programArgs));
 			
+			final VMRunnerResult[] result= new VMRunnerResult[1];
+			
 			IRunnableWithProgress r= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					if (!p.getProject().getWorkspace().isAutoBuilding()) {
@@ -146,11 +148,7 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 						}
 					}
 					pm.beginTask(JavaLaunchUtils.getResourceString(PROGRESS_LAUNCHING), IProgressMonitor.UNKNOWN);
-					VMRunnerResult result= launcher.run(config);
-					if (result != null) {
-						Launch newLaunch= new Launch(launcherProxy, mode, mainType, getSourceLocator(),result.getProcesses(), result.getDebugTarget());
-						registerLaunch(newLaunch);
-					}
+					result[0]= launcher.run(config);
 				}
 			};
 			
@@ -161,6 +159,10 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 			} catch (InvocationTargetException e) {
 				return false;
 			}
+				if (result[0] != null) {
+					Launch newLaunch= new Launch(launcherProxy, mode, mainType, getSourceLocator(),result[0].getProcesses(), result[0].getDebugTarget());
+					registerLaunch(newLaunch);
+				}
 			return true;
 		} catch (CoreException e) {
 			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_NO_LAUNCHER_PREFIX, e.getStatus());
