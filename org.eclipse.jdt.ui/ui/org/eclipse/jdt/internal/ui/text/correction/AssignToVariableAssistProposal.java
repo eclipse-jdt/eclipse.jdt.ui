@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -156,16 +157,16 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			assignment.setLeftHandSide(accessName);
 		}
 		
-		decls.add(findFieldInsertIndex(decls, fNodeToAssign.getStartPosition()), newDecl);
-		
-		rewrite.markAsInserted(newDecl);
+		int insertIndex= findFieldInsertIndex(decls, fNodeToAssign.getStartPosition());
+		rewrite.markAsInsertInOriginal(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS, newDecl, insertIndex, null);
 
 		if (isParamToField) {
 			// assign parameter to field
-			List statements= methodDecl.getBody().statements();
+			Block body= methodDecl.getBody();
 			ExpressionStatement statement= ast.newExpressionStatement(assignment);
-			statements.add(findAssignmentInsertIndex(statements), statement);
-			rewrite.markAsInserted(statement);
+			int insertIdx=  findAssignmentInsertIndex(body.statements());
+			rewrite.markAsInsertInOriginal(body, ASTNodeConstants.STATEMENTS, statement, insertIdx, null);
+			
 		} else {			
 			rewrite.markAsReplaced(expression, assignment);
 		} 

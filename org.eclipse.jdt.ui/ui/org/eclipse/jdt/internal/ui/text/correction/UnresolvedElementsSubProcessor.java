@@ -37,6 +37,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -624,7 +625,7 @@ public class UnresolvedElementsSubProcessor {
 			} else {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addarguments.description", arg); //$NON-NLS-1$
 			}			
-			AddArgumentCorrectionProposal proposal= new AddArgumentCorrectionProposal(label, context.getCompilationUnit(), nameNode, arguments, indexSkipped, paramTypes, 8);
+			AddArgumentCorrectionProposal proposal= new AddArgumentCorrectionProposal(label, context.getCompilationUnit(), nameNode, indexSkipped, paramTypes, 8);
 			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD));
 			proposal.ensureNoModifications();
 			proposals.add(proposal);				
@@ -1006,15 +1007,16 @@ public class UnresolvedElementsSubProcessor {
 		String qualifier=  proposal.addImport(currType);
 		Name name= ASTNodeFactory.newName(ast, qualifier);
 		
+		Expression newExpression;
 		if (isInstanceMethod) {
 			ThisExpression expr= ast.newThisExpression();
 			expr.setQualifier(name);
-			invocationNode.setExpression(expr);		
+			newExpression= expr;		
 		} else {
-			invocationNode.setExpression(name);
+			newExpression= name;
 		}
 		
-		rewrite.markAsInserted(invocationNode.getExpression());
+		rewrite.markAsInsert(invocationNode, ASTNodeConstants.EXPRESSION, newExpression, null);
 	}
 	
 

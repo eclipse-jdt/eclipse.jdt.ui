@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.lang.reflect.Modifier;
-import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -22,6 +21,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -31,14 +31,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 
-	private List fArguments;
 	private int[] fInsertIndexes;
 	private ITypeBinding[] fParamTypes;
 	private ASTNode fNameNode;
 
-	public AddArgumentCorrectionProposal(String label, ICompilationUnit cu, ASTNode nameNode, List arguments, int[] insertIdx, ITypeBinding[] expectedTypes, int relevance) {
+	public AddArgumentCorrectionProposal(String label, ICompilationUnit cu, ASTNode nameNode, int[] insertIdx, ITypeBinding[] expectedTypes, int relevance) {
 		super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
-		fArguments= arguments;
 		fNameNode= nameNode;
 		fInsertIndexes= insertIdx;
 		fParamTypes= expectedTypes;
@@ -51,12 +49,12 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 		AST ast= fNameNode.getAST();
 		ASTRewrite rewrite= new ASTRewrite(fNameNode.getParent());
 
+		ASTNode callerNode= fNameNode.getParent();
 		for (int i= 0; i < fInsertIndexes.length; i++) {
 			int idx= fInsertIndexes[i];
 			String key= "newarg_" + i; //$NON-NLS-1$
 			Expression newArg= evaluateArgumentExpressions(ast, fParamTypes[idx], key);
-			rewrite.markAsInserted(newArg);
-			fArguments.add(idx, newArg);
+			rewrite.markAsInsertInNew(callerNode, ASTNodeConstants.ARGUMENTS, newArg, idx, null);
 			
 			markAsLinked(rewrite, newArg, i == 0, key); 
 		}

@@ -26,7 +26,7 @@ public class AssistContext implements IInvocationContext {
 		
 	private CompilationUnit fASTRoot;
 	
-	/**
+	/*
 	 * Constructor for CorrectionContext.
 	 */
 	public AssistContext(ICompilationUnit cu, int offset, int length) {
