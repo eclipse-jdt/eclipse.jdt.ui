@@ -41,8 +41,8 @@ public class OpenJavaContentAssistTest extends OpenQuickControlTest {
 	}
 	
 	public void test1() throws Exception {
-		PerformanceMeter coldMeter= createPerformanceMeter(getDefaultScenarioId() + "-cold");
-		PerformanceMeter warmMeter= createPerformanceMeter(getDefaultScenarioId() + "-warm");
+		PerformanceMeter coldMeter= createPerformanceMeter("-cold");
+		PerformanceMeter warmMeter= createPerformanceMeter("-warm");
 		measureOpenQuickControl(coldMeter, warmMeter);
 	}
 }

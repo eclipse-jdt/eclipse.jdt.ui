@@ -59,8 +59,8 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 	 */
 	public void testToggleComment2() {
 		measureToggleComment(getNullPerformanceMeter(), getNullPerformanceMeter(), getWarmUpRuns());
-		PerformanceMeter commentMeter= createPerformanceMeter(getDefaultScenarioId() + "-comment");
-		PerformanceMeter uncommentMeter= createPerformanceMeter(getDefaultScenarioId() + "-uncomment");
+		PerformanceMeter commentMeter= createPerformanceMeter("-comment");
+		PerformanceMeter uncommentMeter= createPerformanceMeter("-uncomment");
 		measureToggleComment(commentMeter, uncommentMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();

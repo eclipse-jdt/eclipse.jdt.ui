@@ -66,6 +66,9 @@ public class TextPerformanceTestCase extends TestCase {
 	/** {@link KeyboardProbe} singleton */
 	private static KeyboardProbe fgKeyboardProbe;
 
+	/** base scenario id */
+	private String fBaseScenarioId;
+
 	/*
 	 * @see TestCase#TestCase()
 	 */
@@ -80,25 +83,6 @@ public class TextPerformanceTestCase extends TestCase {
 		super(name);
 	}
 	
-	/**
-	 * Returns the integer value of the given string unless the string
-	 * cannot be interpreted as such, in this case the given default is
-	 * returned.
-	 * 
-	 * @param stringValue the string to be interpreted as integer
-	 * @param defaultValue the default integer value
-	 * @return the integer value
-	 */
-	private static int intValueOf(String stringValue, int defaultValue) {
-		try {
-			if (stringValue != null)
-				return Integer.valueOf(stringValue).intValue();
-		} catch (NumberFormatException e) {
-			// use default
-		}
-		return defaultValue;
-	}
-
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
@@ -155,25 +139,114 @@ public class TextPerformanceTestCase extends TestCase {
 	}
 
 	/**
-	 * Create a performance meter with a default scenario id. The
+	 * Returns the base scenario id for this test which has the default
+	 * scenario id as its default.
+	 * 
+	 * @return the base scenario id
+	 */
+	protected final String getBaseScenarioId() {
+		if (fBaseScenarioId == null)
+			fBaseScenarioId= Performance.getDefault().getDefaultScenarioId(this);
+		return fBaseScenarioId;
+	}
+
+	/**
+	 * Sets the base scenario id for this test.
+	 * 
+	 * @param baseScenarioId the base scenario id
+	 */
+	protected final void setBaseScenarioId(String baseScenarioId) {
+		fBaseScenarioId= baseScenarioId;
+	}
+
+	/**
+	 * Create a performance meter with the base scenario id. The
 	 * performance meter will be disposed on {@link #tearDown()}.
 	 * 
 	 * @return the created performance meter
 	 */
 	protected final PerformanceMeter createPerformanceMeter() {
-		return createPerformanceMeter(getDefaultScenarioId());
+		return createPerformanceMeter("");
 	}
 
 	/**
-	 * Create a performance meter with the given scenario id. The
+	 * Create a performance meter with the given sub-scenario id. The
 	 * performance meter will be disposed on {@link #tearDown()}.
 	 * 
-	 * @param scenarioId the scenario id
+	 * @param subScenarioId the sub-scenario id
 	 * @return the created performance meter
 	 */
-	protected final PerformanceMeter createPerformanceMeter(String scenarioId) {
-		PerformanceMeter performanceMeter= Performance.getDefault().createPerformanceMeter(scenarioId);
-		addPerformanceMeter(performanceMeter);
+	protected final PerformanceMeter createPerformanceMeter(String subScenarioId) {
+		return internalCreatePerformanceMeter(getBaseScenarioId() + subScenarioId);
+	}
+
+	/**
+	 * Create a performance meter with the base scenario id and mark the
+	 * scenario to be included into the component performance summary. The
+	 * summary shows the given dimension of the scenario and labels the
+	 * scenario with the short name. The performance meter will be disposed
+	 * on {@link #tearDown()}.
+	 * 
+	 * @param shortName a short (shorter than 40 characters) descriptive
+	 *                name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 * @return the created performance meter
+	 */
+	protected final PerformanceMeter createPerformanceMeterForSummary(String shortName, Dimension dimension) {
+		return createPerformanceMeterForSummary("", shortName, dimension);
+	}
+
+	/**
+	 * Create a performance meter with the given sub-scenario id and mark
+	 * the scenario to be included into the component performance summary.
+	 * The summary shows the given dimension of the scenario and labels the
+	 * scenario with the short name. The performance meter will be disposed
+	 * on {@link #tearDown()}.
+	 * 
+	 * @param subScenarioId the sub-scenario id
+	 * @param shortName a short (shorter than 40 characters) descriptive
+	 *                name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 * @return the created performance meter
+	 */
+	protected final PerformanceMeter createPerformanceMeterForSummary(String subScenarioId, String shortName, Dimension dimension) {
+		PerformanceMeter performanceMeter= createPerformanceMeter(subScenarioId);
+		Performance.getDefault().tagAsSummary(performanceMeter, shortName, dimension);
+		return performanceMeter;
+	}
+
+	/**
+	 * Create a performance meter with the base scenario id and mark the
+	 * scenario to be included into the global performance summary. The
+	 * summary shows the given dimension of the scenario and labels the
+	 * scenario with the short name. The performance meter will be disposed
+	 * on {@link #tearDown()}.
+	 * 
+	 * @param shortName a short (shorter than 40 characters) descriptive
+	 *                name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 * @return the created performance meter
+	 */
+	protected final PerformanceMeter createPerformanceMeterForGlobalSummary(String shortName, Dimension dimension) {
+		return createPerformanceMeterForGlobalSummary("", shortName, dimension);
+	}
+
+	/**
+	 * Create a performance meter with the given sub-scenario id and mark
+	 * the scenario to be included into the global performance summary. The
+	 * summary shows the given dimension of the scenario and labels the
+	 * scenario with the short name. The performance meter will be disposed
+	 * on {@link #tearDown()}.
+	 * 
+	 * @param subScenarioId the sub-scenario id
+	 * @param shortName a short (shorter than 40 characters) descriptive
+	 *                name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 * @return the created performance meter
+	 */
+	protected final PerformanceMeter createPerformanceMeterForGlobalSummary(String subScenarioId, String shortName, Dimension dimension) {
+		PerformanceMeter performanceMeter= createPerformanceMeter(subScenarioId);
+		Performance.getDefault().tagAsGlobalSummary(performanceMeter, shortName, dimension);
 		return performanceMeter;
 	}
 
@@ -186,103 +259,22 @@ public class TextPerformanceTestCase extends TestCase {
 	 * @return the created performance meter
 	 */
 	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(Method[] methods) {
-		return createInvocationCountPerformanceMeter(getDefaultScenarioId(), methods);
+		return createInvocationCountPerformanceMeter("", methods);
 	}
 
 	/**
 	 * Create an invocation counting performance meter with the given
-	 * scenario id. The performance meter will count the number of
+	 * sub-scenario id. The performance meter will count the number of
 	 * invocations of the given methods. The performance meter will be
 	 * disposed on {@link #tearDown()}.
 	 * 
-	 * @param scenarioId the scenario id
+	 * @param subScenarioId the sub-scenario id
 	 * @param methods the methods whose invocations will be counted
 	 * @return the created performance meter
 	 */
-	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(String scenarioId, Method[] methods) {
-		InvocationCountPerformanceMeter performanceMeter= new InvocationCountPerformanceMeter(scenarioId, methods);
+	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(String subScenarioId, Method[] methods) {
+		InvocationCountPerformanceMeter performanceMeter= new InvocationCountPerformanceMeter(getBaseScenarioId() + subScenarioId, methods);
 		addPerformanceMeter(performanceMeter);
-		return performanceMeter;
-	}
-
-	/**
-	 * Add the given performance meter to the managed performance meters.
-	 * 
-	 * @param performanceMeter the performance meter
-	 */
-	private void addPerformanceMeter(PerformanceMeter performanceMeter) {
-		if (fPerformanceMeters == null)
-			fPerformanceMeters= new ArrayList();
-		fPerformanceMeters.add(performanceMeter);
-	}
-
-	/**
-	 * Create a performance meter with a default scenario id and mark the
-	 * scenario to be included into the component performance summary. The
-	 * summary shows the given dimension of the scenario and labels the
-	 * scenario with the short name. The performance meter will be disposed
-	 * on {@link #tearDown()}.
-	 * 
-	 * @param shortName a short (shorter than 40 characters) descriptive
-	 *                name of the scenario
-	 * @param dimension the dimension to show in the summary
-	 * @return the created performance meter
-	 */
-	protected final PerformanceMeter createPerformanceMeterForSummary(String shortName, Dimension dimension) {
-		return createPerformanceMeterForSummary(getDefaultScenarioId(), shortName, dimension);
-	}
-
-	/**
-	 * Create a performance meter with the given scenario id and mark the
-	 * scenario to be included into the component performance summary. The
-	 * summary shows the given dimension of the scenario and labels the
-	 * scenario with the short name. The performance meter will be disposed
-	 * on {@link #tearDown()}.
-	 * 
-	 * @param scenarioId the scenario id
-	 * @param shortName a short (shorter than 40 characters) descriptive
-	 *                name of the scenario
-	 * @param dimension the dimension to show in the summary
-	 * @return the created performance meter
-	 */
-	protected final PerformanceMeter createPerformanceMeterForSummary(String scenarioId, String shortName, Dimension dimension) {
-		PerformanceMeter performanceMeter= createPerformanceMeter(scenarioId);
-		Performance.getDefault().tagAsSummary(performanceMeter, shortName, dimension);
-		return performanceMeter;
-	}
-
-	/**
-	 * Create a performance meter with a default scenario id and mark the
-	 * scenario to be included into the global performance summary. The
-	 * summary shows the given dimension of the scenario and labels the
-	 * scenario with the short name. The performance meter will be disposed
-	 * on {@link #tearDown()}.
-	 * 
-	 * @param shortName a short (shorter than 40 characters) descriptive
-	 *                name of the scenario
-	 * @param dimension the dimension to show in the summary
-	 * @return the created performance meter
-	 */
-	protected final PerformanceMeter createPerformanceMeterForGlobalSummary(String shortName, Dimension dimension) {
-		return createPerformanceMeterForGlobalSummary(getDefaultScenarioId(), shortName, dimension);
-	}
-
-	/**
-	 * Create a performance meter with the given scenario id and mark the
-	 * scenario to be included into the global performance summary. The
-	 * summary shows the given dimension of the scenario and labels the
-	 * scenario with the short name. The performance meter will be disposed
-	 * on {@link #tearDown()}.
-	 * 
-	 * @param scenarioId the scenario id
-	 * @param shortName a short (shorter than 40 characters) descriptive
-	 *                name of the scenario
-	 * @param dimension the dimension to show in the summary
-	 * @return the created performance meter
-	 */
-	protected final PerformanceMeter createPerformanceMeterForGlobalSummary(String scenarioId, String shortName, Dimension dimension) {
-		PerformanceMeter performanceMeter= createPerformanceMeter(scenarioId);
-		Performance.getDefault().tagAsGlobalSummary(performanceMeter, shortName, dimension);
 		return performanceMeter;
 	}
 
@@ -340,5 +332,48 @@ public class TextPerformanceTestCase extends TestCase {
 			fgKeyboardProbe.initialize();
 		}
 		return fgKeyboardProbe;
+	}
+
+	/**
+	 * Create a performance meter with the given scenario id. The
+	 * performance meter will be disposed on {@link #tearDown()}.
+	 * 
+	 * @param scenarioId the scenario id
+	 * @return the created performance meter
+	 */
+	private PerformanceMeter internalCreatePerformanceMeter(String scenarioId) {
+		PerformanceMeter performanceMeter= Performance.getDefault().createPerformanceMeter(scenarioId);
+		addPerformanceMeter(performanceMeter);
+		return performanceMeter;
+	}
+
+	/**
+	 * Add the given performance meter to the managed performance meters.
+	 * 
+	 * @param performanceMeter the performance meter
+	 */
+	private void addPerformanceMeter(PerformanceMeter performanceMeter) {
+		if (fPerformanceMeters == null)
+			fPerformanceMeters= new ArrayList();
+		fPerformanceMeters.add(performanceMeter);
+	}
+
+	/**
+	 * Returns the integer value of the given string unless the string
+	 * cannot be interpreted as such, in this case the given default is
+	 * returned.
+	 * 
+	 * @param stringValue the string to be interpreted as integer
+	 * @param defaultValue the default integer value
+	 * @return the integer value
+	 */
+	private static int intValueOf(String stringValue, int defaultValue) {
+		try {
+			if (stringValue != null)
+				return Integer.valueOf(stringValue).intValue();
+		} catch (NumberFormatException e) {
+			// use default
+		}
+		return defaultValue;
 	}
 }

@@ -62,8 +62,8 @@ public class OpenQuickOutlineTest extends OpenQuickControlTest {
 	}
 
 	public void testOpenQuickOutline1() throws Exception {
-		PerformanceMeter coldMeter= createPerformanceMeterForSummary(getDefaultScenarioId() + "-cold", SHORT_NAME_COLD, Dimension.ELAPSED_PROCESS);
-		PerformanceMeter warmMeter= createPerformanceMeter(getDefaultScenarioId() + "-warm");
+		PerformanceMeter coldMeter= createPerformanceMeterForSummary("-cold", SHORT_NAME_COLD, Dimension.ELAPSED_PROCESS);
+		PerformanceMeter warmMeter= createPerformanceMeter("-warm");
 		measureOpenQuickControl(coldMeter, warmMeter);
 	}
 }
