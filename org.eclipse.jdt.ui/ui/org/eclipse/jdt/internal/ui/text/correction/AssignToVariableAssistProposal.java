@@ -231,7 +231,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		
 		String name= ASTResolving.getBaseNameFromExpression(project, expression);
 		if (name != null) {
-			String[] argname= StubUtility.getLocalNameSuggestions(project, name, binding.getDimensions(), excludedNames);
+			String[] argname= StubUtility.getLocalNameSuggestions(project, name, 0, excludedNames); // pass 0 as dimension, base name already contains plural.
 			for (int i= 0; i < argname.length; i++) {
 				String curr= argname[i];
 				if (!res.contains(curr)) {
@@ -263,7 +263,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		
 		String name= ASTResolving.getBaseNameFromExpression(project, expression);
 		if (name != null) {
-			String[] argname= StubUtility.getFieldNameSuggestions(project, name, modifiers, excludedNames);
+			String[] argname= StubUtility.getFieldNameSuggestions(project, name, 0, modifiers, excludedNames); // base name already contains dimension
 			for (int i= 0; i < argname.length; i++) {
 				String curr= argname[i];
 				if (!res.contains(curr)) {

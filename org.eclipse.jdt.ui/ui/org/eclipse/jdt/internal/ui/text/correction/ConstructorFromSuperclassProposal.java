@@ -183,7 +183,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		
 		SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 		var.setType(ASTNodeFactory.newType(ast, paramTypeName));
-		String[] enclosingArgNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), enclosingInstance.getName(), paramNames);
+		String[] enclosingArgNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), enclosingInstance.getName(), 0, paramNames);
 		String firstName= enclosingArgNames[0];
 		var.setName(ast.newSimpleName(firstName));
 		parameters.add(var);

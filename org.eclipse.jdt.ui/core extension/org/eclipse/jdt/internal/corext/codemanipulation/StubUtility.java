@@ -1089,16 +1089,12 @@ public class StubUtility {
 	/*
 	 * Workarounds for bug 38111
 	 */
-	public static String[] getArgumentNameSuggestions(IJavaProject project, String baseName, String[] excluded) {
+	public static String[] getArgumentNameSuggestions(IJavaProject project, String baseName, int dimensions, String[] excluded) {
 		String name= workaround38111(baseName);
-		String[] res= NamingConventions.suggestArgumentNames(project, "", name, 0, excluded); //$NON-NLS-1$
+		String[] res= NamingConventions.suggestArgumentNames(project, "", name, dimensions, excluded); //$NON-NLS-1$
 		return sortByLength(res); // longest first
 	}
-	
-	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int modifiers, String[] excluded) {
-		return getFieldNameSuggestions(project, baseName, 0, modifiers, excluded);
-	}	
-	 
+		 
 	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int dimensions, int modifiers, String[] excluded) {
 		String name= workaround38111(baseName);
 		String[] res= NamingConventions.suggestFieldNames(project, "", name, dimensions, modifiers, excluded); //$NON-NLS-1$
@@ -1130,14 +1126,11 @@ public class StubUtility {
 			new String[] {"boolean", "byte", "char", "double", "float", "int", "long", "short"});  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 
 	public static String suggestArgumentName(IJavaProject project, String baseName, String[] excluded) {
-		String[] argnames= getArgumentNameSuggestions(project, baseName, excluded);
-		String longest= null;
-		for (int i= 0; i < argnames.length; i++) {
-			if (longest == null || argnames[i].length() > longest.length()) {
-				longest= argnames[i];
-			}
+		String[] argnames= getArgumentNameSuggestions(project, baseName, 0, excluded);
+		if (argnames.length > 0) {
+			return argnames[0];
 		}
-		return longest;
+		return baseName;
 	}
 	
 	public static String[] suggestArgumentNames(IJavaProject project, String[] paramNames) {

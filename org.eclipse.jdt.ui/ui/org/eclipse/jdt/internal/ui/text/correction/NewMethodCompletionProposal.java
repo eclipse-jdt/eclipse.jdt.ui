@@ -241,7 +241,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 		HashSet namesTaken= new HashSet();
 		String baseName= ASTResolving.getBaseNameFromExpression(project, argNode);
 		if (baseName != null) {
-			String[] suggestions= StubUtility.getArgumentNameSuggestions(project, baseName, excludedNames);
+			String[] suggestions= StubUtility.getArgumentNameSuggestions(project, baseName, 0, excludedNames);
 			if (suggestions.length > 0) {
 				favourite= suggestions[0];
 			}
