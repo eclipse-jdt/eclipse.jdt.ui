@@ -1731,7 +1731,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		{ // replace while statement with comment, insert new statement
 			WhileStatement whileStatement= (WhileStatement) statements.get(0);
 			String comment= "//hello";
-			ASTNode placeHolder= rewrite.createPlaceholder(comment, whileStatement);
+			ASTNode placeHolder= rewrite.createPlaceholder(comment, ASTRewrite.STATEMENT);
 			
 			rewrite.markAsReplaced(whileStatement, placeHolder);
 			
@@ -1740,7 +1740,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			buf1.append("    System.beep();\n");
 			buf1.append("}");
 			
-			ASTNode placeHolder2= rewrite.createPlaceholder(buf1.toString(), whileStatement);
+			ASTNode placeHolder2= rewrite.createPlaceholder(buf1.toString(), ASTRewrite.STATEMENT);
 			rewrite.markAsInserted(placeHolder2);
 			
 			statements.add(placeHolder2);
