@@ -159,7 +159,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * Acts like character match, but skips all scopes introduced by parenthesis, brackets, and 
 	 * braces. 
 	 */
-	private class SkippingScopeMatch extends CharacterMatch {
+	protected class SkippingScopeMatch extends CharacterMatch {
 		private char fOpening, fClosing;
 		private int fDepth= 0;
 		
