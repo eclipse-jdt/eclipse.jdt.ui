@@ -661,4 +661,15 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			((ClassFileDocumentProvider) documentProvider).removeInputChangeListener(this);
 		super.dispose();
 	}
+
+	/*
+	 * @see org.eclipse.ui.IWorkbenchPart#setFocus()
+	 */
+	public void setFocus() {
+		super.setFocus();
+
+		if (fSourceAttachmentForm != null && !fSourceAttachmentForm.isDisposed())
+			fSourceAttachmentForm.setFocus();
+	}
+
 }
