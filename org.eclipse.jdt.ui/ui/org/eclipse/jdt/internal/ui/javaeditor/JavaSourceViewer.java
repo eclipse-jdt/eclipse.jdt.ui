@@ -11,12 +11,10 @@
 
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
@@ -31,11 +29,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
 
 
 public class JavaSourceViewer extends SourceViewer {
-
 
 	/**
 	 * Text operation code for requesting the outline for the current input.
@@ -66,21 +64,12 @@ public class JavaSourceViewer extends SourceViewer {
 	 */
 	public IFormattingContext createFormattingContext() {
 
-		final IFormattingContext context= super.createFormattingContext();
+		final IFormattingContext context= new CommentFormattingContext();
 		if (context != null) {
-
-			final Map map= JavaCore.getOptions();
-
-			final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-			final String[] preferences= PreferenceConstants.getFormatterKeys();
-
-			boolean preference= false;
-			for (int i= 0; i < preferences.length; i++) {
-
-				preference= store.getBoolean(preferences[i]);
-				map.put(preferences[i], preference ? IPreferenceStore.TRUE : IPreferenceStore.FALSE);
-			}
-
+			
+			final Map map= new Hashtable(JavaCore.getOptions());
+			
+			context.storeToMap(PreferenceConstants.getPreferenceStore(), map, false);
 			context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, map);
 		}
 		return context;

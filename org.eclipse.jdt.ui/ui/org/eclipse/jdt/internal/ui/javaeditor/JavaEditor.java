@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-
-
 import java.text.CollationElementIterator;
 import java.text.Collator;
 import java.text.RuleBasedCollator;
@@ -26,45 +24,34 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICodeAssist;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
-import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
-import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BidiSegmentEvent;
+import org.eclipse.swt.custom.BidiSegmentListener;
+import org.eclipse.swt.custom.ST;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -73,6 +60,16 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.IPostSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
@@ -104,41 +101,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BidiSegmentEvent;
-import org.eclipse.swt.custom.BidiSegmentListener;
-import org.eclipse.swt.custom.ST;
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPageLayout;
@@ -171,6 +134,48 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.tasklist.TaskList;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICodeAssist;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
 /**
  * Java specific text editor.
@@ -1545,75 +1550,96 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	protected class QuickFormatAction extends Action {
 
+		/**
+		 * Formats the range of the source viewer document.
+		 * 
+		 * @param viewer The source viewer to operate on
+		 * @param offset The offset of the range to be formatted
+		 * @param length The length of the range to be formatted
+		 * @param normalize <code>true</code> iff the region should be block normalized, <code>false</code> otherwise
+		 */
+		protected void format(final JavaSourceViewer viewer, int offset, int length, boolean normalize) {
+
+			final IDocument document= viewer.getDocument();
+
+			final Point selection= viewer.getSelectedRange();
+			viewer.saveSelection(selection.x, selection.y);
+
+			if (normalize) {
+
+				try {
+
+					final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset);
+					if (region.getType() != IDocument.DEFAULT_CONTENT_TYPE) {
+
+						final int delta= region.getOffset() + region.getLength() - offset + 2;
+						offset += delta;
+						length -= delta;
+					}
+
+					final IRegion line= document.getLineInformationOfOffset(offset);
+					final int delta= offset - line.getOffset();
+					offset -= delta;
+					length += delta;
+
+				} catch (BadLocationException exception) {
+					// Should not happen
+				}
+			}
+
+			viewer.setSelectedRange(offset, length);
+			viewer.doOperation(ISourceViewer.FORMAT);
+
+			viewer.restoreSelection();
+		}
+
 		/*
 		 * @see org.eclipse.jface.action.IAction#run()
 		 */
 		public void run() {
 
 			final JavaSourceViewer viewer= (JavaSourceViewer)getSourceViewer();
-			final StyledText text= viewer.getTextWidget();
-
-			if (text != null && !text.isDisposed() && viewer.isEditable()) {
+			if (viewer.isEditable()) {
 
 				final IDocument document= viewer.getDocument();
-				final int caret= widgetOffset2ModelOffset(viewer, text.getCaretOffset());
+				final Point selection= viewer.getSelectedRange();
 
-				final String type;
 				try {
+					if (selection.y == 0) {
 
-					type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, caret);
-					if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT) || type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
+						final String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, selection.x);
+						if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT) || type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
 
-						final ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, caret);
-						final int offset= partition.getOffset();
+							final ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, selection.x);
 
-						viewer.setSelectedRange(offset, partition.getLength());
-						viewer.doOperation(ISourceViewer.FORMAT);
-						viewer.setSelectedRange(offset, 0);
+							format(viewer, partition.getOffset(), partition.getLength(), false);
 
-					} else if (type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+						} else if (type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 
-						try {
+							try {
 
-							final IJavaElement element= getElementAt(caret, true);
-							if (element != null && element.exists()) {
+								final IJavaElement element= getElementAt(selection.x, true);
+								if (element != null && element.exists()) {
 
-								ISourceRange range= null;
-								final int kind= element.getElementType();
+									ISourceRange range= null;
+									final int kind= element.getElementType();
 
-								if (kind == IJavaElement.TYPE || kind == IJavaElement.METHOD || kind == IJavaElement.INITIALIZER) {
+									if (kind == IJavaElement.TYPE || kind == IJavaElement.METHOD || kind == IJavaElement.INITIALIZER) {
 
-									final ISourceReference reference= (ISourceReference)element;
-									range= reference.getSourceRange();
-								}
-
-								if (range != null) {
-
-									int offset= range.getOffset();
-									int length= range.getLength();
-
-									final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset);
-									if (region.getType() != IDocument.DEFAULT_CONTENT_TYPE) {
-
-										final int delta= region.getOffset() + region.getLength() - offset + 2;
-										offset += delta;
-										length -= delta;
+										final ISourceReference reference= (ISourceReference)element;
+										range= reference.getSourceRange();
 									}
-									
-									final IRegion line= document.getLineInformationOfOffset(offset);
-									final int delta= offset - line.getOffset();
-									offset -= delta;
-									length += delta;
-						
-									viewer.setSelectedRange(offset, length);
-									viewer.doOperation(ISourceViewer.FORMAT);
-									viewer.setSelectedRange(offset, 0);
+
+									if (range != null)
+										format(viewer, range.getOffset(), range.getLength(), true);
 								}
+							} catch (JavaModelException exception) {
+								// Should not happen
 							}
-						} catch (JavaModelException exception) {
-							// Should not happen
 						}
-					}
+					} else
+						format(viewer, selection.x, selection.y, true);
+
 				} catch (BadLocationException exception) {
 					// Should not happen
 				}

@@ -11,8 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.text.comment;
 
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jface.text.TypedPosition;
+
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 /**
  * Factory for comment related objects.

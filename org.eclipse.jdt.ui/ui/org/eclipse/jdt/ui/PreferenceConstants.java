@@ -87,20 +87,6 @@ public class PreferenceConstants {
 	 */	
 	public static final String APPEARANCE_COMPRESS_PACKAGE_NAMES= "org.eclipse.jdt.ui.compresspackagenames";//$NON-NLS-1$
 
-	public static String FORMATTER_COMMENT_FORMATSOURCE= "format_source";
-
-	public static String FORMATTER_COMMENT_INDENTPARAMDESC= "indent_param_desc";
-
-	public static String FORMATTER_COMMENT_FORMATHEADER= "format_header";
-	
-	public static String FORMATTER_COMMENT_INDENTROOTTAGS= "indent_root_tags";
-
-	public static String FORMATTER_COMMENT_FORMAT= "comment_format";
-
-	public static String FORMATTER_COMMENT_NEWLINEPARAM= "new_line_param";
-
-	public static String FORMATTER_COMMENT_SEPARATEROOTTAGS= "separate_root_tags";
-	
 	/**
 	 * A named preference that controls if empty inner packages are folded in
 	 * the hierarchical mode of the package explorer.
@@ -1591,6 +1577,93 @@ public class PreferenceConstants {
 	public static final String EDITOR_SMART_TAB= "smart_tab"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether code snippets are formatted
+	 * in Javadoc comments.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public final static String FORMATTER_COMMENT_FORMATSOURCE= "org.eclipse.jdt.internal.ui.text.comment.FormatSource"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls whether description of Javadoc
+	 * parameters are indented.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public final static String FORMATTER_COMMENT_INDENTPARAMDESC= "org.eclipse.jdt.internal.ui.text.comment.IndentParamDesc"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the header comment of
+	 * a Java source file is formatted.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public final static String FORMATTER_COMMENT_FORMATHEADER= "org.eclipse.jdt.internal.ui.text.comment.FormatHeader"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether Javadoc root tags
+	 * are indented.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public final static String FORMATTER_COMMENT_INDENTROOTTAGS= "org.eclipse.jdt.internal.ui.text.comment.IndentRootTags"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls whether Javadoc comments
+	 * are formatted by the content formatter.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public final static String FORMATTER_COMMENT_FORMAT= "org.eclipse.jdt.internal.ui.text.comment.FormatComments"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether a new line is inserted
+	 * after Javadoc root tag parameters.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public final static String FORMATTER_COMMENT_NEWLINEPARAM= "org.eclipse.jdt.internal.ui.text.comment.NewLineParam"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether an empty line is inserted before
+	 * the Javadoc root tag block.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public final static String FORMATTER_COMMENT_SEPARATEROOTTAGS= "org.eclipse.jdt.internal.ui.text.comment.SeparateRootTags"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls the line length of comments.
+	 * <p>
+	 * Value is of type <code>Integer</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public final static String FORMATTER_COMMENT_SPLITLINE= "org.eclipse.jdt.internal.ui.text.comment.SplitLine"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if the Java code assist gets auto activated.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -2057,6 +2130,15 @@ public class PreferenceConstants {
 		
 		store.setDefault(PreferenceConstants.EDITOR_SMART_TAB, true);
 		
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMAT, true);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, false);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE, true);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMDESC, true);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS, true);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_NEWLINEPARAM, true);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS, true);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_SPLITLINE, 80);
+
 		// work in progress
 		WorkInProgressPreferencePage.initDefaults(store);	
 
@@ -2123,20 +2205,5 @@ public class PreferenceConstants {
 	public static IClasspathEntry[] getDefaultJRELibrary() {
 		return NewJavaProjectPreferencePage.getDefaultJRELibrary();
 	}
-
-	/**
-	 * @return
-	 */
-	public static String[] getFormatterKeys() {
-		return new String[] {
-			FORMATTER_COMMENT_FORMATSOURCE,
-			FORMATTER_COMMENT_INDENTPARAMDESC,
-			FORMATTER_COMMENT_FORMATHEADER,
-			FORMATTER_COMMENT_INDENTROOTTAGS,
-			FORMATTER_COMMENT_FORMAT,
-			FORMATTER_COMMENT_NEWLINEPARAM,
-			FORMATTER_COMMENT_SEPARATEROOTTAGS
-		};
-	}		
 }
 

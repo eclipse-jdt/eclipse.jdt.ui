@@ -15,7 +15,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.GC;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.ConfigurableLineTracker;
@@ -28,8 +30,8 @@ import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.graphics.GC;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Comment region in a source code document.
@@ -206,14 +208,14 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 * 
 	 * @param indentation Indentation of the formatted comment region
 	 */
-	public void format(final String indentation) {
+	public void format(String indentation) {
 
 		final IDocument document= getDocument();
 		final Map preferences= getStrategy().getPreferences();
 
 		int margin= 80;
 		try {
-			margin= Integer.parseInt(preferences.get(JavaCore.FORMATTER_LINE_SPLIT).toString());
+			margin= Integer.parseInt(preferences.get(PreferenceConstants.FORMATTER_COMMENT_SPLITLINE).toString());
 		} catch (Exception exception) {
 			// Do nothing
 		}

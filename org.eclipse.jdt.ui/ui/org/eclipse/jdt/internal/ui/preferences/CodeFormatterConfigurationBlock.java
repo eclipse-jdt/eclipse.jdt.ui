@@ -53,7 +53,9 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -69,7 +71,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_NEWLINE_CLEAR_ALL= JavaCore.FORMATTER_CLEAR_BLANK_LINES;
 	private static final String PREF_NEWLINE_ELSE_IF= JavaCore.FORMATTER_NEWLINE_ELSE_IF;
 	private static final String PREF_NEWLINE_EMPTY_BLOCK= JavaCore.FORMATTER_NEWLINE_EMPTY_BLOCK;
-	private static final String PREF_LINE_SPLIT= JavaCore.FORMATTER_LINE_SPLIT;
+	private static final String PREF_CODE_SPLIT= JavaCore.FORMATTER_LINE_SPLIT;
 	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= JavaCore.FORMATTER_COMPACT_ASSIGNMENT;
 	private static final String PREF_TAB_CHAR= JavaCore.FORMATTER_TAB_CHAR;
 	private static final String PREF_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
@@ -81,6 +83,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_COMMENT_FORMAT= PreferenceConstants.FORMATTER_COMMENT_FORMAT;
 	private static final String PREF_COMMENT_NEWLINEPARAM= PreferenceConstants.FORMATTER_COMMENT_NEWLINEPARAM;
 	private static final String PREF_COMMENT_SEPARATEROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS;
+	private static final String PREF_COMMENT_SPLIT= PreferenceConstants.FORMATTER_COMMENT_SPLITLINE;
 
 	// values
 	private static final String INSERT=  JavaCore.INSERT;
@@ -105,7 +108,8 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 
 	private PixelConverter fPixelConverter;
 	
-	private IStatus fLineLengthStatus;
+	private IStatus fCodeLengthStatus;
+	private IStatus fCommentLengthStatus;
 	private IStatus fTabSizeStatus;	
 	
 	public CodeFormatterConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
@@ -117,12 +121,13 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		fPreviewDocument= new Document(fPreviewText);
 		fTextTools.setupJavaDocumentPartitioner(fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);
 
-		fLineLengthStatus= new StatusInfo();
+		fCodeLengthStatus= new StatusInfo();
+		fCommentLengthStatus= new StatusInfo();
 		fTabSizeStatus= new StatusInfo();
 	}
 	
 	protected String[] getAllKeys() {
-		return new String[] { PREF_NEWLINE_OPENING_BRACES, PREF_NEWLINE_CONTROL_STATEMENT, PREF_NEWLINE_CLEAR_ALL, PREF_NEWLINE_ELSE_IF, PREF_NEWLINE_EMPTY_BLOCK, PREF_LINE_SPLIT, PREF_STYLE_COMPACT_ASSIGNEMENT, PREF_TAB_CHAR, PREF_TAB_SIZE, PREF_SPACE_CASTEXPRESSION };
+		return new String[] { PREF_NEWLINE_OPENING_BRACES, PREF_NEWLINE_CONTROL_STATEMENT, PREF_NEWLINE_CLEAR_ALL, PREF_NEWLINE_ELSE_IF, PREF_NEWLINE_EMPTY_BLOCK, PREF_CODE_SPLIT, PREF_STYLE_COMPACT_ASSIGNEMENT, PREF_TAB_CHAR, PREF_TAB_SIZE, PREF_SPACE_CASTEXPRESSION };
 	}
 
 	protected Control createContents(Composite parent) {
@@ -173,8 +178,11 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		Composite lineSplittingComposite= new Composite(folder, SWT.NULL);
 		lineSplittingComposite.setLayout(layout);
 
-		label= PreferencesMessages.getString("CodeFormatterPreferencePage.split_line.label"); //$NON-NLS-1$
-		addTextField(lineSplittingComposite, label, PREF_LINE_SPLIT, 0, textWidth);
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.split_code.label"); //$NON-NLS-1$
+		addTextField(lineSplittingComposite, label, PREF_CODE_SPLIT, 0, textWidth);
+
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.split_comment.label"); //$NON-NLS-1$
+		addTextField(lineSplittingComposite, label, PREF_COMMENT_SPLIT, 0, textWidth);
 
 		layout= new GridLayout();
 		layout.numColumns= nColumns;	
@@ -281,7 +289,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 
 	private SourceViewer createPreview(Composite parent) {
 		
-		SourceViewer previewViewer= new SourceViewer(parent, null, SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		SourceViewer previewViewer= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		previewViewer.configure(fViewerConfiguration);
 		previewViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 		previewViewer.getTextWidget().setTabs(getPositiveIntValue((String) fWorkingValues.get(PREF_TAB_SIZE), 0));
@@ -296,16 +304,23 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		return previewViewer;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
 	 */
 	protected void validateSettings(String changedKey, String newValue) {
-		if (changedKey == null || PREF_LINE_SPLIT.equals(changedKey)) {
-			String lineNumber= (String) fWorkingValues.get(PREF_LINE_SPLIT);
-			fLineLengthStatus= validatePositiveNumber(lineNumber, 4);
+
+		if (changedKey == null || PREF_CODE_SPLIT.equals(changedKey)) {
+			String lineNumber= (String)fWorkingValues.get(PREF_CODE_SPLIT);
+			fCodeLengthStatus= validatePositiveNumber(lineNumber, 4);
 		}
+
+		if (changedKey == null || PREF_COMMENT_SPLIT.equals(changedKey)) {
+			String lineNumber= (String)fWorkingValues.get(PREF_COMMENT_SPLIT);
+			fCommentLengthStatus= validatePositiveNumber(lineNumber, 4);
+		}
+
 		if (changedKey == null || PREF_TAB_SIZE.equals(changedKey)) {
-			String tabSize= (String) fWorkingValues.get(PREF_TAB_SIZE);
+			String tabSize= (String)fWorkingValues.get(PREF_TAB_SIZE);
 			fTabSizeStatus= validatePositiveNumber(tabSize, 0);
 			int oldTabSize= fSourceViewer.getTextWidget().getTabs();
 			if (fTabSizeStatus.matches(IStatus.ERROR)) {
@@ -314,15 +329,14 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 				fSourceViewer.getTextWidget().setTabs(getPositiveIntValue(tabSize, 0));
 			}
 		}
-		
-		final IStatus status= StatusUtil.getMoreSevere(fLineLengthStatus, fTabSizeStatus); 
+
+		final IStatus status= StatusUtil.getMostSevere(new IStatus[] { fCodeLengthStatus, fCommentLengthStatus, fTabSizeStatus });
 		fContext.statusChanged(status);
-		
+
 		if (!status.matches(IStatus.ERROR))
 			updatePreview();
-	}	
-	
-		
+	}
+
 	private String loadPreviewFile(String filename) {
 		String separator= System.getProperty("line.separator"); //$NON-NLS-1$
 		StringBuffer btxt= new StringBuffer(512);
@@ -349,33 +363,29 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	private void updatePreview() {
 
 		fSourceViewer.setRedraw(false);
+		fPreviewDocument.set(fPreviewText);
 
-		final Point selection= fSourceViewer.getSelectedRange();
-
+		final IFormattingContext context= new CommentFormattingContext();
 		try {
-
-			fPreviewDocument.set(fPreviewText);
 
 			final IContentFormatter formatter= fViewerConfiguration.getContentFormatter(fSourceViewer);
 			if (formatter instanceof IContentFormatterExtension2) {
+
 				final IContentFormatterExtension2 extension= (IContentFormatterExtension2)formatter;
 
-				final IFormattingContext context= fSourceViewer.createFormattingContext();
-				try {
-					context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, fWorkingValues);
-					context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.valueOf(true));
-					extension.format(fPreviewDocument, context);
-				} finally {
-					context.dispose();
-				}
+				context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, fWorkingValues);
+				context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.valueOf(true));
 
-			} else {
+				extension.format(fPreviewDocument, context);
+
+			} else
 				formatter.format(fPreviewDocument, new Region(0, fPreviewDocument.getLength()));
-			}
-			
+
 		} finally {
 
-			fSourceViewer.setSelectedRange(selection.x, 0);
+			fSourceViewer.setSelectedRange(0, 0);
+			context.dispose();
+
 			fSourceViewer.setRedraw(true);
 		}
 	}
@@ -408,7 +418,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		return dflt;
 	}		
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getFullBuildDialogStrings(boolean)
 	 */
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
@@ -422,15 +432,9 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 
 		final Map map= super.getDefaultOptions();
 
-		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		final String[] preferences= PreferenceConstants.getFormatterKeys();
+		final IFormattingContext context= new CommentFormattingContext();
+		context.storeToMap(PreferenceConstants.getPreferenceStore(), map, true);
 
-		boolean preference= false;
-		for (int i= 0; i < preferences.length; i++) {
-
-			preference= store.getDefaultBoolean(preferences[i]);
-			map.put(preferences[i], preference ? IPreferenceStore.TRUE : IPreferenceStore.FALSE);
-		}
 		return map;
 	}
 
@@ -441,15 +445,9 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 
 		final Map map= super.getOptions(inheritJavaCoreOptions);
 
-		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		final String[] preferences= PreferenceConstants.getFormatterKeys();
+		final IFormattingContext context= new CommentFormattingContext();
+		context.storeToMap(PreferenceConstants.getPreferenceStore(), map, false);
 
-		boolean preference= false;
-		for (int i= 0; i < preferences.length; i++) {
-
-			preference= store.getBoolean(preferences[i]);
-			map.put(preferences[i], preference ? IPreferenceStore.TRUE : IPreferenceStore.FALSE);
-		}
 		return map;
 	}
 
@@ -460,16 +458,9 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 
 		if (super.performOk(enabled)) {
 
-			final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-			final String[] preferences= PreferenceConstants.getFormatterKeys();
+			final IFormattingContext context= new CommentFormattingContext();
+			context.mapToStore(fWorkingValues, PreferenceConstants.getPreferenceStore());
 
-			String preference= null;
-			for (int i= 0; i < preferences.length; i++) {
-
-				preference= (String)fWorkingValues.get(preferences[i]);
-				if (preference != null)
-					store.setValue(preferences[i], preference.equals(IPreferenceStore.TRUE));
-			}
 			return true;
 		}
 		return false;

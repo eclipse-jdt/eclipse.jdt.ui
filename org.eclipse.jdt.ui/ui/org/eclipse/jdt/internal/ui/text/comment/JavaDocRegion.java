@@ -27,7 +27,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.ContentFormatter;
-import org.eclipse.jface.text.formatter.FormattingContext;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
@@ -97,7 +96,7 @@ public class JavaDocRegion extends CommentRegion implements IJavaDocAttributes, 
 					int begin= 0;
 					int end= 0;
 
-					final IFormattingContext context= new FormattingContext();
+					final IFormattingContext context= new CommentFormattingContext();
 					context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.valueOf(false));
 					context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, getStrategy().getPreferences());
 

@@ -13,31 +13,12 @@ package org.eclipse.jdt.ui.text;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
-import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
-import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
-import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
-import org.eclipse.jdt.internal.ui.text.JavaReconciler;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
-import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
-import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
-import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
-import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IAutoIndentStrategy;
@@ -63,9 +44,34 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
+import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
+import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
+import org.eclipse.jdt.internal.ui.text.JavaReconciler;
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
+import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
+import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
 
 
 /**
