@@ -13,10 +13,5 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 
 final class TreeTermination {
-    public static final TreeTermination MAX_CALL_DEPTH_NODE = new TreeTermination();
-    public static final TreeTermination RECURSION_NODE = new TreeTermination();
-    
-    final Object[] getObjectArray() {
-        return new Object[] { this };
-    }
+    public static final Object SEARCH_CANCELED = new Object();
 }

@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class CallHierarchyContentProvider implements ITreeContentProvider {
     private final static Object[] EMPTY_ARRAY = new Object[0];
@@ -71,10 +72,10 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
                 try {
                     context.run(true, true, runnable);
                 } catch (InvocationTargetException e) {
-                    JavaPlugin.log(e);
+                    ExceptionHandler.handle(e, CallHierarchyMessages.getString("CallHierarchyContentProvider.searchError.title"), CallHierarchyMessages.getString("CallHierarchyContentProvider.searchError.message"));  //$NON-NLS-1$ //$NON-NLS-2$
                     return EMPTY_ARRAY;
                 } catch (InterruptedException e) {
-                    return EMPTY_ARRAY;
+                    return new Object[] { TreeTermination.SEARCH_CANCELED };
                 }
 
                 return runnable.getCalls();
@@ -115,7 +116,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
      * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
      */
     public boolean hasChildren(Object element) {
-        if (element == TreeRoot.EMPTY_ROOT) {
+        if (element == TreeRoot.EMPTY_ROOT || element == TreeTermination.SEARCH_CANCELED) {
             return false;
         }
         // Only methods can have subelements, so there's no need to fool the user into believing that there is more
