@@ -39,11 +39,11 @@ public class ImportOrganizeTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("test5"));
+			suite.addTest(new ImportOrganizeTest("test_bug25773"));
 			return suite;
 		}	
 	}
@@ -1028,4 +1028,145 @@ public class ImportOrganizeTest extends TestCase {
 		
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void test_bug25773() throws Exception {
+
+		String[] types= new String[] {
+			"java.util.Vector",
+			"java.util.Map",
+			"java.util.Set",
+			"org.eclipse.gef.X1",
+			"org.eclipse.gef.X2",
+			"org.eclipse.gef.X3",						
+			"org.eclipse.core.runtime.IAdaptable",
+			"org.eclipse.draw2d.IFigure",
+			"org.eclipse.draw2d.LayoutManager",			
+			"org.eclipse.draw2d.geometry.Point",
+			"org.eclipse.draw2d.geometry.Rectangle",
+			"org.eclipse.swt.accessibility.ACC",
+			"org.eclipse.swt.accessibility.AccessibleControlEvent"
+		};
+		
+		String[] order= new String[] { "java", "org.eclipse", "org.eclipse.gef", "org.eclipse.draw2d", "org.eclipse.gef.examples" };
+		int threshold= 3;
+
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		for (int i= 0; i < types.length; i++) {
+			String pack= Signature.getQualifier(types[i]);
+			if (!pack.startsWith("java.")) {
+				String name= Signature.getSimpleName(types[i]);
+	
+				IPackageFragment pack2= sourceFolder.createPackageFragment(pack, false, null);
+				StringBuffer buf= new StringBuffer();
+				buf.append("package "); buf.append(pack); buf.append(";\n");
+				buf.append("public class "); buf.append(name); buf.append(" {\n");
+				buf.append("}\n");
+				pack2.createCompilationUnit(name + ".java", buf.toString(), false, null);
+			}
+		}
+
+		StringBuffer body= new StringBuffer();
+		body.append("public class C {\n");
+		for (int i= 0; i < types.length; i++) {
+			String name= Signature.getSimpleName(types[i]);
+			body.append(name); body.append(" a"); body.append(i); body.append(";\n");
+		}
+		body.append("}\n");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append(body.toString());
+
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, threshold, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.core.runtime.IAdaptable;\n");
+		buf.append("import org.eclipse.swt.accessibility.ACC;\n");
+		buf.append("import org.eclipse.swt.accessibility.AccessibleControlEvent;\n");
+		buf.append("\n");		
+		buf.append("import org.eclipse.gef.*;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.draw2d.IFigure;\n");
+		buf.append("import org.eclipse.draw2d.LayoutManager;\n");
+		buf.append("import org.eclipse.draw2d.geometry.Point;\n");
+		buf.append("import org.eclipse.draw2d.geometry.Rectangle;\n");
+		buf.append("\n");
+		buf.append(body.toString());
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void test_bug25113() throws Exception {
+
+		String[] types= new String[] {
+			"com.mycompany.Class1",
+			"com.foreigncompany.Class2",
+			"com.foreigncompany.Class3",
+			"com.mycompany.Class4",
+			"com.misc.Class5"
+		};
+
+		String[] order= new String[] { "com", "com.foreigncompany", "com.mycompany" };
+		int threshold= 99;
+
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		for (int i= 0; i < types.length; i++) {
+			String pack= Signature.getQualifier(types[i]);
+			if (!pack.startsWith("java.")) {
+				String name= Signature.getSimpleName(types[i]);
+
+				IPackageFragment pack2= sourceFolder.createPackageFragment(pack, false, null);
+				StringBuffer buf= new StringBuffer();
+				buf.append("package "); buf.append(pack); buf.append(";\n");
+				buf.append("public class "); buf.append(name); buf.append(" {\n");
+				buf.append("}\n");
+				pack2.createCompilationUnit(name + ".java", buf.toString(), false, null);
+			}
+		}
+
+		StringBuffer body= new StringBuffer();
+		body.append("public class C {\n");
+		for (int i= 0; i < types.length; i++) {
+			String name= Signature.getSimpleName(types[i]);
+			body.append(name); body.append(" a"); body.append(i); body.append(";\n");
+		}
+		body.append("}\n");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append(body.toString());
+
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, threshold, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import com.misc.Class5;\n");
+		buf.append("\n");
+		buf.append("import com.foreigncompany.Class2;\n");
+		buf.append("import com.foreigncompany.Class3;\n");
+		buf.append("\n");
+		buf.append("import com.mycompany.Class1;\n");
+		buf.append("import com.mycompany.Class4;\n");
+		buf.append("\n");
+		buf.append(body.toString());
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+		
 }

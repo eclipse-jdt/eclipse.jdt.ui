@@ -102,46 +102,52 @@ public class ImportsStructure implements IImportsStructure {
 		if (fPackageEntries.isEmpty()) {
 			// all new: copy the elements
 			for (int i= 0; i < preferenceOrder.length; i++) {
-				PackageEntry entry= new PackageEntry(preferenceOrder[i], i);
+				PackageEntry entry= new PackageEntry(preferenceOrder[i]);
 				fPackageEntries.add(entry);
 			}
 		} else {
 			// match the preference order entries to existing imports
 			// entries not found are appended after the last successfully matched entry
-			int currAppendIndex= 0; 
 			
-			for (int i= 0; i < preferenceOrder.length; i++) {
-				String curr= preferenceOrder[i];
-				int lastEntryFound= -1;
-				PackageMatcher matcher= new PackageMatcher();
-				
-				
-				// find an existing package entry that matches most 
-				for (int k=0; k < fPackageEntries.size(); k++) {
-					PackageEntry entry= (PackageEntry) fPackageEntries.get(k);
-					if (entry.getName().startsWith(curr)) {
-						int bestGroupId= entry.getGroupID(); // index in the index array or -1 if not assigned
-						// compare entry name with curr and best order entry
-						if (bestGroupId != -1) {
-							matcher.initialize(entry.getName(), preferenceOrder[bestGroupId]);
-							if (matcher.isBetterMatch(curr, true)) {
-								entry.setGroupID(i);
-								lastEntryFound= k;
+			PackageEntry[] lastAssigned= new PackageEntry[preferenceOrder.length];
+			
+			// find an existing package entry that matches most
+			for (int k= 0; k < fPackageEntries.size(); k++) {
+				PackageEntry entry= (PackageEntry) fPackageEntries.get(k);
+				if (!entry.isComment()) {
+					String currName= entry.getName();
+					int currNameLen= currName.length();
+					int bestGroupIndex= -1;
+					int bestGroupLen= -1;
+					for (int i= 0; i < preferenceOrder.length; i++) {
+						String currPrefEntry= preferenceOrder[i];
+						int currPrefLen= currPrefEntry.length();
+						if (currName.startsWith(currPrefEntry) && currPrefLen >= bestGroupLen) {
+							if (currPrefLen == currNameLen || currName.charAt(currPrefLen) == '.') {
+								if (bestGroupIndex == -1 || currPrefLen > bestGroupLen) {
+									bestGroupLen= currPrefLen;
+									bestGroupIndex= i;
+								}
 							}
-						} else {
-							entry.setGroupID(i);
-							lastEntryFound= k;
 						}
 					}
+					if (bestGroupIndex != -1) {
+						entry.setGroupID(preferenceOrder[bestGroupIndex]);
+						lastAssigned[bestGroupIndex]= entry; // remember last entry 
+					}
 				}
-		
-				if (lastEntryFound == -1) {
-					PackageEntry newEntry= new PackageEntry(curr, i);
+			}
+			// fill in not-assigned categories, keep partial order
+			int currAppendIndex= 0;
+			for (int i= 0; i < lastAssigned.length; i++) {
+				PackageEntry entry= lastAssigned[i];
+				if (entry == null) {
+					PackageEntry newEntry= new PackageEntry(preferenceOrder[i]);
 					fPackageEntries.add(currAppendIndex, newEntry);
 					currAppendIndex++;
 				} else {
-					currAppendIndex= lastEntryFound + 1;
-				}			
+					currAppendIndex= fPackageEntries.indexOf(entry) + 1;
+				}
 			}
 		}
 	}
@@ -164,7 +170,7 @@ public class ImportsStructure implements IImportsStructure {
 				
 			String packName= Signature.getQualifier(name);
 			if (currPackage == null || !packName.equals(currPackage.getName())) {
-				currPackage= new PackageEntry(packName, -1);
+				currPackage= new PackageEntry(packName, null);
 				fPackageEntries.add(currPackage);
 			}
 
@@ -199,7 +205,7 @@ public class ImportsStructure implements IImportsStructure {
 		String name= curr.getElementName();
 		String packName= Signature.getQualifier(name);
 		if (currPackage == null || !packName.equals(currPackage.getName())) {
-			currPackage= new PackageEntry(packName, -1);
+			currPackage= new PackageEntry(packName, null);
 			fPackageEntries.add(currPackage);
 		}
 		ISourceRange range= curr.getSourceRange();			
@@ -318,19 +324,19 @@ public class ImportsStructure implements IImportsStructure {
 		if (fPackageEntries.isEmpty()) {
 			return null;
 		}
-		int groupId= -1;
+		String groupId= null;
 		int longestPrefix= -1;
 		for (int i= 0; i < fPackageEntries.size(); i++) {
 			PackageEntry curr= (PackageEntry) fPackageEntries.get(i);
-			String name= curr.getName();
-			if (newName.startsWith(name)) {
-				int prefixLen= name.length();
+			String currGroup= curr.getGroupID();
+			if (currGroup != null && newName.startsWith(currGroup)) {
+				int prefixLen= currGroup.length();
 				if (prefixLen == newName.length()) {
 					return curr;
 				}
 				if ((newName.charAt(prefixLen) == '.') && prefixLen > longestPrefix) {
 					longestPrefix= prefixLen;
-					groupId= curr.getGroupID();
+					groupId= currGroup;
 				}
 			}
 		}
@@ -340,8 +346,8 @@ public class ImportsStructure implements IImportsStructure {
 		for (int i= 0; i < fPackageEntries.size(); i++) {
 			PackageEntry curr= (PackageEntry) fPackageEntries.get(i);
 			if (!curr.isComment()) {
-				if (groupId == -1 || curr.getGroupID() == groupId) {
-					boolean preferrCurr= bestMatch == null || curr.getNumberOfImports() > bestMatch.getNumberOfImports();
+				if (groupId == null || groupId.equals(curr.getGroupID())) {
+					boolean preferrCurr= (bestMatch == null) || (curr.getNumberOfImports() > bestMatch.getNumberOfImports());
 					if (matcher.isBetterMatch(curr.getName(), preferrCurr)) {
 						bestMatch= curr;
 					}
@@ -437,7 +443,7 @@ public class ImportsStructure implements IImportsStructure {
 			
 		PackageEntry bestMatch= findBestMatch(typeContainerName);
 		if (bestMatch == null) {
-			PackageEntry packEntry= new PackageEntry(typeContainerName, -1);
+			PackageEntry packEntry= new PackageEntry(typeContainerName, null);
 			packEntry.add(decl);
 			fPackageEntries.add(0, packEntry);
 		} else {
@@ -446,13 +452,13 @@ public class ImportsStructure implements IImportsStructure {
 				bestMatch.sortIn(decl);
 			} else {
 				// create a new packageentry
-				int groupId= bestMatch.getGroupID();
-				if (groupId != -1) {
-					if (getCommonPrefixLength(typeContainerName, bestMatch.getName()) == 0) {
-						groupId= -1;
+				String group= bestMatch.getGroupID();
+				if (group != null) {
+					if (!typeContainerName.startsWith(group)) {
+						group= null;
 					}
 				}
-				PackageEntry packEntry= new PackageEntry(typeContainerName, groupId);
+				PackageEntry packEntry= new PackageEntry(typeContainerName, group);
 				packEntry.add(decl);
 				int index= fPackageEntries.indexOf(bestMatch);
 				if (cmp < 0) { 	// insert ahead of best match
@@ -598,7 +604,7 @@ public class ImportsStructure implements IImportsStructure {
 			}
 			
 			// add a space between two different groups by looking at the two adjacent imports
-			if (lastPackage != null && !pack.isComment() && pack.getGroupID() != lastPackage.getGroupID()) {
+			if (lastPackage != null && !pack.isComment() && !pack.isSameGroup(lastPackage)) {
 				ImportDeclEntry last= lastPackage.getImportAt(lastPackage.getNumberOfImports() - 1);
 				ImportDeclEntry first= pack.getImportAt(0);
 				if (!lastPackage.isComment() && (last.isNew() || first.isNew())) {
@@ -762,15 +768,21 @@ public class ImportsStructure implements IImportsStructure {
 	private static class PackageEntry {
 		private String fName;
 		private ArrayList fImportEntries;
-		private int fGroup;
+		private String fGroup;
 	
 		/**
 		 * Comment package entry
 		 */
 		public PackageEntry() {
-			this("!", -1); //$NON-NLS-1$
+			this("!", null); //$NON-NLS-1$
 		}
-	
+		
+		/**
+		 * Comment group place holder entry (name equals group)
+		 */
+		public PackageEntry(String name) {
+			this(name, name); //$NON-NLS-1$
+		}	
 	
 		/**
 		 * @param name Name of the package entry. e.g. org.eclipse.jdt.ui, containing imports like
@@ -778,7 +790,7 @@ public class ImportsStructure implements IImportsStructure {
 		 * @param group The index of the preference order entry assigned
 		 *    different group ids will result in spacers between the entries
 		 */
-		public PackageEntry(String name, int group) {
+		public PackageEntry(String name, String group) {
 			fName= name;
 			fImportEntries= new ArrayList(5);
 			fGroup= group;
@@ -886,13 +898,21 @@ public class ImportsStructure implements IImportsStructure {
 			return fName;
 		}
 		
-		public int getGroupID() {
+		public String getGroupID() {
 			return fGroup;
 		}
 		
-		public void setGroupID(int groupID) {
+		public void setGroupID(String groupID) {
 			fGroup= groupID;
 		}
+		
+		public boolean isSameGroup(PackageEntry other) {
+			if (fGroup == null) {
+				return other.getGroupID() == null;
+			} else {
+				return fGroup.equals(other.getGroupID());
+			}
+		}		
 				
 		public ImportDeclEntry getLast() {
 			int nImports= getNumberOfImports();
