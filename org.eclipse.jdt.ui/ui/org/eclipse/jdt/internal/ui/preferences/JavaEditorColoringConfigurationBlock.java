@@ -35,7 +35,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -317,11 +316,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 	 * @since 3.1
 	 */
 	private IColorManager fColorManager;
-	private ColorEditor fBackgroundColorEditor;
-	private Button fBackgroundDefaultRadioButton;
-	private Button fBackgroundCustomRadioButton;
-	private Button fBackgroundColorButton;
-	private Color fBackgroundColor;
 	private Map fColorButtons= new HashMap();
 	
 	private Map fCheckBoxes= new HashMap();
@@ -357,7 +351,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 		
 		ArrayList overlayKeys= new ArrayList();
-
+		
 		for (int i= 0; i < fSyntaxColorListModel.length; i++) {
 			String colorKey= fSyntaxColorListModel[i][1];
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, colorKey));
@@ -469,14 +463,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 			String key= (String) fCheckBoxes.get(b);
 			b.setSelection(fStore.getBoolean(key));
 		}
-		
-		RGB rgb= PreferenceConverter.getColor(fStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR);
-		fBackgroundColorEditor.setColorValue(rgb);		
-		
-		boolean default_= fStore.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR);
-		fBackgroundDefaultRadioButton.setSelection(default_);
-		fBackgroundCustomRadioButton.setSelection(!default_);
-		fBackgroundColorButton.setEnabled(!default_);
 	}
 
 	public void performOk() {
@@ -528,8 +514,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 	public void dispose() {
 		fColorManager.dispose();
 		uninstallSemanticHighlighting();
-		if (fBackgroundColor != null && !fBackgroundColor.isDisposed())
-			fBackgroundColor.dispose();
 	}
 
 
@@ -597,32 +581,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		colorComposite.setLayout(layout);
-	
-		Group backgroundComposite= new Group(colorComposite, SWT.SHADOW_ETCHED_IN);
-		layout= new GridLayout();
-		layout.numColumns= 3;
-		backgroundComposite.setLayout(layout);
-		backgroundComposite.setText(PreferencesMessages.getString("JavaEditorPreferencePage.backgroundColor"));//$NON-NLS-1$
-	
-		SelectionListener backgroundSelectionListener= new SelectionListener() {
-			public void widgetSelected(SelectionEvent e) {				
-				boolean custom= fBackgroundCustomRadioButton.getSelection();
-				fBackgroundColorButton.setEnabled(custom);
-				fStore.setValue(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR, !custom);
-			}
-			public void widgetDefaultSelected(SelectionEvent e) {}
-		};
-	
-		fBackgroundDefaultRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
-		fBackgroundDefaultRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.systemDefault")); //$NON-NLS-1$
-		fBackgroundDefaultRadioButton.addSelectionListener(backgroundSelectionListener);
-	
-		fBackgroundCustomRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
-		fBackgroundCustomRadioButton.setText(PreferencesMessages.getString("JavaEditorPreferencePage.custom")); //$NON-NLS-1$
-		fBackgroundCustomRadioButton.addSelectionListener(backgroundSelectionListener);
-		
-		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
-		fBackgroundColorButton= fBackgroundColorEditor.getButton();
 	
 		addCheckBox(colorComposite, PreferencesMessages.getString("JavaEditorPreferencePage.semanticHighlighting.option"), PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, 0); //$NON-NLS-1$
 		
@@ -710,15 +668,6 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				PreferenceConverter.setValue(fStore, item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
-			}
-		});
-	
-		fBackgroundColorButton.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// do nothing
-			}
-			public void widgetSelected(SelectionEvent e) {
-				PreferenceConverter.setValue(fStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR, fBackgroundColorEditor.getColorValue());					
 			}
 		});
 	

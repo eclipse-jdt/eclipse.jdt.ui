@@ -219,9 +219,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 //		}
 	}
 	
-
+	private void makeScrollableCompositeAware(Control control) {
+		ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(control);
+		if (parentScrolledComposite != null) {
+			parentScrolledComposite.adaptChild(control);
+		}
+	}
 	
-	private Composite createTypingPage2(Composite parent) {
+	private Composite createExpandableList(Composite parent) {
 		final ScrolledPageContent content = new ScrolledPageContent(parent);
 		class StyleSectionManager {
 			private Set fSections= new HashSet();
@@ -562,7 +567,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		createHBar(contents);
 
-		Composite expandableSection= createTypingPage2(contents);
+		Composite expandableSection= createExpandableList(contents);
 		expandableSection.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		initialize();
@@ -727,6 +732,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		gd.horizontalSpan= 2;
 		checkBox.setLayoutData(gd);
 		checkBox.addSelectionListener(fCheckBoxListener);
+		makeScrollableCompositeAware(checkBox);
 		
 		fCheckBoxes.put(checkBox, key);
 		
@@ -774,6 +780,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		} else {
 			textControl.addModifyListener(fTextFieldListener);
 		}
+		
+		makeScrollableCompositeAware(textControl);
 			
 		return new Control[]{labelControl, textControl};
 	}

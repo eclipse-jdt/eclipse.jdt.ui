@@ -39,6 +39,7 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -199,9 +200,9 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			StyledText styledText= getTextWidget();
 			
 			// ----------- foreground color --------------------
-			Color color= fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR)
+			Color color= fPreferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT)
 			? null
-			: createColor(fPreferenceStore, PreferenceConstants.EDITOR_FOREGROUND_COLOR, styledText.getDisplay());
+			: createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, styledText.getDisplay());
 			styledText.setForeground(color);
 			
 			if (fForegroundColor != null)
@@ -210,9 +211,9 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fForegroundColor= color;
 			
 			// ---------- background color ----------------------
-			color= fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR)
+			color= fPreferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT)
 			? null
-			: createColor(fPreferenceStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR, styledText.getDisplay());
+			: createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, styledText.getDisplay());
 			styledText.setBackground(color);
 			
 			if (fBackgroundColor != null)
@@ -324,10 +325,10 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		String property = event.getProperty();
-		if (PreferenceConstants.EDITOR_FOREGROUND_COLOR.equals(property)
-				|| PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR.equals(property)
-				|| PreferenceConstants.EDITOR_BACKGROUND_COLOR.equals(property)
-				|| PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR.equals(property)
+		if (AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND.equals(property)
+				|| AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT.equals(property)
+				|| AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND.equals(property)
+				|| AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT.equals(property)
 				|| AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR.equals(property)
 				|| AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR.equals(property)
 				|| AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR.equals(property)

@@ -132,7 +132,6 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 	 */
 	public Control createControl(Composite parent) {
 		initializeDialogUnits(parent);
-		initializeDefaultColors(parent);
 
 		return createAppearancePage(parent);
 	}
@@ -349,30 +348,6 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 		
 	}
 
-
-	private void initializeDefaultColors(Control control) {	
-		if (!fStore.contains(PreferenceConstants.EDITOR_BACKGROUND_COLOR)) {
-			RGB rgb= control.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND).getRGB();
-			PreferenceConverter.setDefault(fStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR, rgb);
-			PreferenceConverter.setDefault(fStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR, rgb);
-		}
-		if (!fStore.contains(PreferenceConstants.EDITOR_FOREGROUND_COLOR)) {
-			RGB rgb= control.getDisplay().getSystemColor(SWT.COLOR_LIST_FOREGROUND).getRGB();
-			PreferenceConverter.setDefault(fStore, PreferenceConstants.EDITOR_FOREGROUND_COLOR, rgb);
-			PreferenceConverter.setDefault(fStore, PreferenceConstants.EDITOR_FOREGROUND_COLOR, rgb);
-		}
-		if (!fStore.contains(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR)) {
-			RGB rgb= control.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION).getRGB();
-			PreferenceConverter.setDefault(fStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, rgb);
-			PreferenceConverter.setDefault(fStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, rgb);
-		}
-		if (!fStore.contains(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR)) {
-			RGB rgb= control.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION_TEXT).getRGB();
-			PreferenceConverter.setDefault(fStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, rgb);
-			PreferenceConverter.setDefault(fStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, rgb);
-		}
-	}
-	
 	public void performOk() {
 	}
 
