@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -80,8 +79,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.tasklist.TaskList;
-import sun.security.krb5.internal.x;
-import sun.security.krb5.internal.crypto.t;
 
 import org.eclipse.help.IHelp;
 import org.eclipse.jdt.core.ICompilationUnit;
