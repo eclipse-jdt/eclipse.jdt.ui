@@ -1217,6 +1217,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		expressionTest();
 	}
 	
+	public void test620() throws Exception {
+		expressionTest();
+	}
+	
 	//---- Test nested methods and constructor
 	
 	public void test650() throws Exception {

@@ -78,6 +78,11 @@ public class ExtractMethodTestSetup extends TestSetup {
 			"A.java", 
 			"package expression_in; import java.io.File; class A { public File getFile() { return null; } public void useFile(File file) { } }",
 			true, null);
+			
+		cu= fExpressionPackage.createCompilationUnit(
+			"B.java", 
+			"package expression_in; import java.util.List; public class B { public List[] foo() { return null; } }",
+			true, null);
 		cu.save(null, true);
 	}
 
