@@ -244,9 +244,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, fSearchScope, monitor);
 			for (int i= 0; i < infos.length; i++) {
 				TypeInfo curr= infos[i];
-				IType type= curr.resolveType(fSearchScope);
-				if (type != null && JavaModelUtil.isVisible(type, fCurrPackage)) {
-					typeRefsFound.add(curr);
+				if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
+					IType type= curr.resolveType(fSearchScope);
+					if (type != null && JavaModelUtil.isVisible(type, fCurrPackage)) {
+						typeRefsFound.add(curr);
+					}
 				}
 			}
 		}
