@@ -52,16 +52,15 @@ public class DialogsTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite(AddUnimplementedMethodsTest.class.getName());
+//		suite.addTest(new DialogsTest("testElementListSelectionDialog2"));
 		suite.addTest(new DialogsTest("testElementListSelectionDialog"));
 		suite.addTest(new DialogsTest("testMultiElementSelectionDialog"));
 		suite.addTest(new DialogsTest("testTwoPaneSelectionDialog"));
-
 		suite.addTest(new DialogsTest("testElementTreeSelectionDialog"));
 		suite.addTest(new DialogsTest("testElementListSelectionDialog"));
 		suite.addTest(new DialogsTest("testAddExceptionDialog"));
 		return suite;
 	}
-
 
 	public DialogsTest(String name) {
 		super(name);
@@ -121,7 +120,7 @@ public class DialogsTest extends TestCase {
 		assert(list.size() > 15);
 		TypeInfo[][] refs= new TypeInfo[][] { getRefs(list, 0, 3), getRefs(list, 4, 6), getRefs(list, 10, 5) };
 		dialog.setElements(refs);
-		dialog.setInitialSelections(new String[refs.length]);
+		dialog.setInitialSelections(new Object[refs.length]);
 		
 		DialogCheck.assertDialog(dialog, this);
 		
@@ -164,9 +163,8 @@ public class DialogsTest extends TestCase {
 		dialog.setIgnoreCase(false);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.ChoosePackageDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.description")); //$NON-NLS-1$
-		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$
-		
-		dialog.setElements(Arrays.asList(elements));
+		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$		
+		dialog.setElements(elements);
 		
 		DialogCheck.assertDialog(dialog, this);
 		
@@ -184,6 +182,41 @@ public class DialogsTest extends TestCase {
 		JavaProjectHelper.delete(jproject);	
 	}
 
+	private static class TestLabelProvider extends LabelProvider {
+		public Image getImage(Object element) {
+			return null;
+		}
+		
+		public String getText(Object element) {
+			Integer i= (Integer) element;			
+			return "e-" + i.toString();
+		}
+	}
+
+	public void testElementListSelectionDialog2() throws Exception {
+		Object[] elements= new Integer[] {
+			new Integer(0),
+			new Integer(1),
+			new Integer(2),
+			new Integer(7),
+			new Integer(12),
+			new Integer(42)			
+		};
+
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new TestLabelProvider());
+		dialog.setIgnoreCase(false);
+		dialog.setTitle(NewWizardMessages.getString("TypePage.ChoosePackageDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.description")); //$NON-NLS-1$
+		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$		
+		dialog.setElements(elements);
+		dialog.setInitialSelections(new Object[] {new Integer(7)});
+		
+		DialogCheck.assertDialog(dialog, this);
+		
+		Object[] results= dialog.getResult();
+		assert(results.length == 1);
+		assertEquals(new Integer(7), results[0]);
+	}
 
 }
 
