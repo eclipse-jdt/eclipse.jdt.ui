@@ -1,13 +1,24 @@
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
+
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
+
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
-
-
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -81,12 +92,26 @@ public class OverviewRuler {
 	 */
 	class FilterIterator implements Iterator {
 		
-		private Iterator fIterator;
-		private int fType;
-		private Annotation fNext;
+		private final static int IGNORE= 0;
+		private final static int TEMPORARY= 1;
+		private final static int PERSISTENT= 2;
 		
-		public FilterIterator(int type) {
+		private Iterator fIterator;
+		private AnnotationType fType;
+		private IProblemAnnotation fNext;
+		private int fTemporary;
+		
+		public FilterIterator(AnnotationType type) {
+			this(type, IGNORE);
+		}
+		
+		public FilterIterator(AnnotationType type, boolean temporary) {
+			this(type, temporary ? TEMPORARY : PERSISTENT);
+		}
+		
+		private FilterIterator(AnnotationType type, int temporary) {
 			fType= type;
+			fTemporary= temporary;
 			if (fModel != null) {
 				fIterator= fModel.getAnnotationIterator();
 				skip();
@@ -95,10 +120,16 @@ public class OverviewRuler {
 		
 		private void skip() {
 			while (fIterator.hasNext()) {
-				fNext= (Annotation) fIterator.next();
-				int type= getType(fNext);
-				if ((fType == ALL && type != UNKNOWN) || fType == type)
-					return;
+				Object next= fIterator.next();
+				if (next instanceof IProblemAnnotation) {
+					fNext= (IProblemAnnotation) next;
+					AnnotationType type= fNext.getAnnotationType();
+					if (fType == AnnotationType.ALL || fType == type) {
+						if (fTemporary == IGNORE) return;
+						if (fTemporary == TEMPORARY && fNext.isTemporary()) return;
+						if (fTemporary == PERSISTENT && !fNext.isTemporary()) return;
+					}
+				}
 			}
 			fNext= null;
 		}
@@ -128,37 +159,10 @@ public class OverviewRuler {
 		}
 	};
 	
-	
-	
-	/** Problem types */
-	private static final int ALL= -1;
-	private static final int PERMANENT_WARNING= 0;
-	private static final int PERMANENT_ERROR= 1;
-	private static final int PERMANENT_MARKER= 2;
-	private static final int TEMPORARY_WARNING= 3;
-	private static final int TEMPORARY_ERROR= 4;
-	private static final int TEMPORARY_MARKER= 5;
-	private static final int UNKNOWN= 6;
-	
-	/** Color table */
-	private static final RGB[][] COLORS= new RGB[][] {
-															/* fill */						/* stroke */
-		/* permanent warning */	{ new RGB(248, 218, 114),	new RGB(139, 109, 7) },
-		/* permanent error */		{ new RGB(255, 140, 140),	new RGB(255, 0, 0) },
-		/* permanent marker */		{ new RGB(0, 128, 255),		new RGB(176, 216 , 255) },
-		/* temporary warning */ 	{ new RGB(255, 255, 206),	new RGB(244, 200, 45) },
-		/* temporary error */		{ new RGB(240, 230, 230),	new RGB(200, 100, 100) },
-		/* temporary marker */		{ new RGB(159, 207, 255),	new RGB(255, 255, 255) }
-	};
-	
-	/** drawing layers */
-	private static final int[] LAYERS= new int[] { PERMANENT_MARKER, TEMPORARY_MARKER, PERMANENT_WARNING, TEMPORARY_WARNING, PERMANENT_ERROR, TEMPORARY_ERROR };
-	
 	private static final int INSET= 2;
 	private static final int PROBLEM_HEIGHT_MIN= 4;
 	private static boolean PROBLEM_HEIGHT_SCALABLE= false;
-
-
+	
 	
 	/** The model of the overview ruler */
 	private IAnnotationModel fModel;
@@ -176,13 +180,10 @@ public class OverviewRuler {
 	private Cursor fHitDetectionCursor;
 	/** The last cursor */
 	private Cursor fLastCursor;
-	/** Flag indicating the presentation of errors */
-	private boolean fShowErrors= false;
-	/** Flag indicating the presentation of warnings */
-	private boolean fShowWarnings= false;
-	/** Flag indicating the presentation of markers */
-	private boolean fShowMarkers= false;
 	
+	private Set fAnnotationSet= new HashSet();
+	private Map fLayers= new HashMap();
+	private Map fColorTable= new HashMap();
 	
 	/**
 	 * Constructs a vertical ruler with the given width.
@@ -190,7 +191,7 @@ public class OverviewRuler {
 	 * @param width the width of the vertical ruler
 	 */
 	public OverviewRuler(int width) {
-		fWidth= width;
+		fWidth= width;		
 	}
 	
 	public Control getControl() {
@@ -199,29 +200,6 @@ public class OverviewRuler {
 	
 	public int getWidth() {
 		return fWidth;
-	}
-	
-	private int getType(Annotation annotation) {
-		if (annotation instanceof IProblemAnnotation) {
-			IProblemAnnotation pa= (IProblemAnnotation) annotation;
-			
-			if (!pa.isRelevant())
-				return UNKNOWN;
-			
-			if (pa.isProblem()) {
-				
-				if (pa.isError())
-					return pa.isTemporary() ? TEMPORARY_ERROR : PERMANENT_ERROR;
-				
-				if (pa.isWarning())
-					return pa.isTemporary() ? TEMPORARY_WARNING : PERMANENT_WARNING;
-			
-			} else {
-				return pa.isTemporary() ? TEMPORARY_MARKER : PERMANENT_MARKER;
-			}
-		}
-		
-		return UNKNOWN;
 	}
 	
 	public void setModel(IAnnotationModel model) {
@@ -300,6 +278,10 @@ public class OverviewRuler {
 			fHitDetectionCursor.dispose();
 			fHitDetectionCursor= null;
 		}
+		
+		fAnnotationSet.clear();
+		fLayers.clear();
+		fColorTable.clear();
 	}
 
 	/**
@@ -334,11 +316,6 @@ public class OverviewRuler {
 		dest.drawImage(fBuffer, 0, 0);
 	}
 	
-	private Color getColor(RGB rgb) {
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		return textTools.getColorManager().getColor(rgb);
-	}
-	
 	private void doPaint(GC gc) {
 		
 		if (fTextViewer == null)
@@ -359,60 +336,69 @@ public class OverviewRuler {
 		if (size.y > writable)
 			size.y= writable;
 		
-		for (int l= 0 ; l < LAYERS.length; l++) {
+		
+		List indices= new ArrayList(fLayers.keySet());
+		Collections.sort(indices);
+		
+		for (Iterator iterator= indices.iterator(); iterator.hasNext();) {
+			Object layer= iterator.next();
+			AnnotationType annotationType= (AnnotationType) fLayers.get(layer);
 			
-			if (skipLayer(LAYERS[l]))
+			if (skip(annotationType))
 				continue;
 			
-			Iterator e= new FilterIterator(LAYERS[l]);
-			Color fill= getColor(COLORS[LAYERS[l]][0]);
-			Color stroke= getColor(COLORS[LAYERS[l]][1]);
+			boolean[] temporary= new boolean[] { false, true };
+			for (int t=0; t < temporary.length; t++) {
 			
-			for (int i= 0; e.hasNext(); i++) {
+				Iterator e= new FilterIterator(annotationType, temporary[t]);
+				Color fill= getFillColor(annotationType, temporary[t]);
+				Color stroke= getStrokeColor(annotationType, temporary[t]);
 				
-				Annotation a= (Annotation) e.next();
-				Position p= fModel.getPosition(a);
-				
-				if (p == null || !p.overlapsWith(visible.getOffset(), visible.getLength()))
-					continue;
+				for (int i= 0; e.hasNext(); i++) {
 					
-				int problemOffset= Math.max(p.getOffset(), visible.getOffset());
-				int problemEnd= Math.min(p.getOffset() + p.getLength(), visible.getOffset() + visible.getLength());
-				int problemLength= problemEnd - problemOffset;				
-				
-				try {
+					Annotation a= (Annotation) e.next();
+					Position p= fModel.getPosition(a);
 					
-					int startLine= textWidget.getLineAtOffset(problemOffset - visible.getOffset());
-					yy= (startLine * size.y) / maxLines;
-					
-					if (PROBLEM_HEIGHT_SCALABLE) {
-						int numbersOfLines= document.getNumberOfLines(problemOffset, problemLength);
-						hh= (numbersOfLines * size.y) / maxLines;
-						if (hh < PROBLEM_HEIGHT_MIN)
-							hh= PROBLEM_HEIGHT_MIN;
-					}
+					if (p == null || !p.overlapsWith(visible.getOffset(), visible.getLength()))
+						continue;
 						
-					if (fill != null) {
-						gc.setBackground(fill);
-						gc.fillRectangle(INSET, yy, size.x-(2*INSET), hh);
-					}
+					int problemOffset= Math.max(p.getOffset(), visible.getOffset());
+					int problemEnd= Math.min(p.getOffset() + p.getLength(), visible.getOffset() + visible.getLength());
+					int problemLength= problemEnd - problemOffset;				
 					
-					if (stroke != null) {
-						gc.setForeground(stroke);
-						r.x= INSET;
-						r.y= yy;
-						r.width= size.x - (2 * INSET) - 1;
-						r.height= hh;
-						gc.setLineWidth(1);
-						gc.drawRectangle(r);
+					try {
+						
+						int startLine= textWidget.getLineAtOffset(problemOffset - visible.getOffset());
+						yy= (startLine * size.y) / maxLines;
+						
+						if (PROBLEM_HEIGHT_SCALABLE) {
+							int numbersOfLines= document.getNumberOfLines(problemOffset, problemLength);
+							hh= (numbersOfLines * size.y) / maxLines;
+							if (hh < PROBLEM_HEIGHT_MIN)
+								hh= PROBLEM_HEIGHT_MIN;
+						}
+							
+						if (fill != null) {
+							gc.setBackground(fill);
+							gc.fillRectangle(INSET, yy, size.x-(2*INSET), hh);
+						}
+						
+						if (stroke != null) {
+							gc.setForeground(stroke);
+							r.x= INSET;
+							r.y= yy;
+							r.width= size.x - (2 * INSET) - 1;
+							r.height= hh;
+							gc.setLineWidth(1);
+							gc.drawRectangle(r);
+						}
+					} catch (BadLocationException x) {
 					}
-				} catch (BadLocationException x) {
 				}
 			}
 		}
 	}
-	
-		
+
 	/**
 	 * Thread-safe implementation.
 	 * Can be called from any thread.
@@ -481,7 +467,7 @@ public class OverviewRuler {
 			line= d.getLineInformation(lineNumbers[lineNumbers.length - 1]);
 			int end= line.getOffset() + line.getLength();
 			
-			Iterator e= new FilterIterator(ALL);
+			Iterator e= new FilterIterator(AnnotationType.ALL);
 			while (e.hasNext()) {
 				Annotation a= (Annotation) e.next();
 				Position p= fModel.getPosition(a);
@@ -521,25 +507,86 @@ public class OverviewRuler {
 		}				
 	}
 	
-	public void showErrors(boolean showErrors) {
-		fShowErrors= showErrors;
+	public void showAnnotation(AnnotationType annotationType, boolean show) {
+		if (show)
+			fAnnotationSet.add(annotationType);
+		else
+			fAnnotationSet.remove(annotationType);
 	}
 	
-	public void showWarnings(boolean showWarnings) {
-		fShowWarnings= showWarnings;
+	public void setLayer(AnnotationType annotationType, int layer) {
+		if (layer >= 0)
+			fLayers.put(new Integer(layer), annotationType);
+		else {
+			Iterator e= fLayers.keySet().iterator();
+			while (e.hasNext()) {
+				Object key= e.next();
+				if (annotationType.equals(fLayers.get(key))) {
+					fLayers.remove(key);
+					return;
+				}
+			}
+		}
 	}
 	
-	public void showMarkers(boolean showTasks) {
-		fShowMarkers= showTasks;
+	public void setColor(AnnotationType annotationType, Color color) {
+		if (color != null)
+			fColorTable.put(annotationType, color);
+		else
+			fColorTable.remove(annotationType);
 	}
 	
-	private boolean skipLayer(int layer) {
-		if (!fShowErrors && (layer == TEMPORARY_ERROR || layer == PERMANENT_ERROR))
-			return true;
-		if (!fShowWarnings && (layer == TEMPORARY_WARNING || layer == PERMANENT_WARNING))
-			return true;
-		if (!fShowMarkers && (layer == TEMPORARY_MARKER || layer == PERMANENT_MARKER))
-			return true;
-		return false;
+	private boolean skip(AnnotationType annotationType) {
+		return !fAnnotationSet.contains(annotationType);
+	}
+	
+	
+	private static RGB interpolate(RGB fg, RGB bg, double scale) {
+		return new RGB(
+			(int) ((1.0-scale) * fg.red + scale * bg.red),
+			(int) ((1.0-scale) * fg.green + scale * bg.green),
+			(int) ((1.0-scale) * fg.blue + scale * bg.blue)
+		);
+	}
+	
+	private static double greyLevel(RGB rgb) {
+		if (rgb.red == rgb.green && rgb.green == rgb.blue)
+			return rgb.red;
+		return  (0.299 * rgb.red + 0.587 * rgb.green + 0.114 * rgb.blue + 0.5);
+	}
+	
+	private static boolean isDark(RGB rgb) {
+		return greyLevel(rgb) > 128;
+	}
+	
+	private static Color getColor(RGB rgb) {
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		return textTools.getColorManager().getColor(rgb);
+	}
+	
+	private Color getColor(AnnotationType annotationType, double scale) {
+		Color base= (Color) fColorTable.get(annotationType);
+		if (base == null)
+			return null;
+			
+		RGB baseRGB= base.getRGB();
+		RGB background= fCanvas.getBackground().getRGB();
+		
+		boolean darkBase= isDark(baseRGB);
+		boolean darkBackground= isDark(background);
+		if (darkBase && darkBackground)
+			background= new RGB(255, 255, 255);
+		else if (!darkBase && !darkBackground)
+			background= new RGB(0, 0, 0);
+		
+		return getColor(interpolate(baseRGB, background, scale));
+	}
+	
+	private Color getStrokeColor(AnnotationType annotationType, boolean temporary) {
+		return getColor(annotationType, temporary ? 0.5 : 0.2);
+	}
+	
+	private Color getFillColor(AnnotationType annotationType, boolean temporary) {
+		return getColor(annotationType, temporary ? 0.9 : 0.6);
 	}
 }

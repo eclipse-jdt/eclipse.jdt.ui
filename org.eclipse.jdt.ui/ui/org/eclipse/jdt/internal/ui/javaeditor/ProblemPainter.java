@@ -13,8 +13,12 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.PaintEvent;
@@ -54,19 +58,14 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	private boolean fIsPainting= false;
 	private boolean fIsSettingModel= false;
 	
-	private Color fErrorColor;
-	private Color fWarningColor;
-	private Color fMarkerColor;
-	
-	private boolean fPaintErrors= false;
-	private boolean fPaintWarnings= false;
-	private boolean fPaintMarkers= false;
-	
 	private ITextEditor fTextEditor;
 	private ISourceViewer fSourceViewer;
 	private StyledText fTextWidget;
 	private IAnnotationModel fModel;
 	private List fProblemPositions= new ArrayList();
+	
+	private Map fColorTable= new HashMap();
+	private Set fAnnotationSet= new HashSet();
 
 	
 	
@@ -124,20 +123,15 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 					Annotation a= (Annotation) pa;
 					
 					Color color= null;
-					if (pa.isProblem()) {
-						if (pa.isWarning() && fPaintWarnings)
-							color= fWarningColor;
-						else if (pa.isError() && fPaintErrors)
-							color= fErrorColor;
-					} else if (fPaintMarkers) {
-						color= fMarkerColor;
-					}
-					
+					AnnotationType type= pa.getAnnotationType();
+					if (fAnnotationSet.contains(type))
+						color= (Color) fColorTable.get(type);
+										
 					if (color != null) {
 						ProblemPosition pp= new ProblemPosition();
 						pp.fPosition= fModel.getPosition(a);
 						pp.fColor= color;
-						pp.fMultiLine= pa.isTask();
+						pp.fMultiLine= true;
 						fProblemPositions.add(pp);
 					}
 				}
@@ -173,37 +167,37 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		}
 	}
 	
-	public void setErrorHighlightColor(Color color) {
-		fErrorColor= color;
+	public void setColor(AnnotationType annotationType, Color color) {
+		if (color != null)
+			fColorTable.put(annotationType, color);
+		else
+			fColorTable.remove(annotationType);
 	}
 	
-	public void setWarningHighlightColor(Color color) {
-		fWarningColor= color;
+	public void paintAnnotations(AnnotationType annotationType, boolean paint) {
+		if (paint)
+			fAnnotationSet.add(annotationType);
+		else
+			fAnnotationSet.remove(annotationType);
 	}
 	
-	public void setMarkerHighlightColor(Color color) {
-		fMarkerColor= color;
-	}
-	
-	public void paintErrors(boolean paintErrors) {
-		fPaintErrors= paintErrors;
-	}
-	
-	public void paintWarnings(boolean paintWarnings) {
-		fPaintWarnings= paintWarnings;
-	}
-	
-	public void paintMarkers(boolean paintMarkers) {
-		fPaintMarkers= paintMarkers;
+	public boolean isPaintingAnnotations() {
+		return !fAnnotationSet.isEmpty();
 	}
 	
 	/*
 	 * @see IPainter#dispose()
 	 */
 	public void dispose() {
-		fErrorColor= null;
-		fWarningColor= null;
-		fMarkerColor= null;
+		
+		if (fColorTable != null)	
+			fColorTable.clear();
+		fColorTable= null;
+		
+		if (fAnnotationSet != null)
+			fAnnotationSet.clear();
+		fAnnotationSet= null;
+		
 		fTextWidget= null;
 		fModel= null;
 		fProblemPositions= null;
@@ -358,7 +352,8 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 			fIsActive= true;
 			IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 			setModel(provider.getAnnotationModel(fTextEditor.getEditorInput()));
-		}
+		} else if (CONFIGURATION == reason || INTERNAL == reason)
+			updatePainting();
 	}
 
 	/*

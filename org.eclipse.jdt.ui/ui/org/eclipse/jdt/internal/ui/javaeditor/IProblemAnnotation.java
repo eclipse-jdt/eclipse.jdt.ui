@@ -16,9 +16,9 @@ import org.eclipse.swt.widgets.Display;
  */
 public interface IProblemAnnotation {
 	
-	boolean isProblem();
+	AnnotationType getAnnotationType();
 	
-	boolean isTask();
+	boolean isTemporary();
 	
 	String getMessage();
 	
@@ -27,23 +27,35 @@ public interface IProblemAnnotation {
 	int getId();
 	
 	
-	boolean isTemporary();
-	
-	boolean isWarning();
-	
-	boolean isError();
-	
-	
 	Image getImage(Display display);
 	
 	boolean isRelevant();
 	
 	boolean hasOverlay();
 	
-	
 	Iterator getOverlaidIterator();
 	
 	void addOverlaid(IProblemAnnotation annotation);
 	
 	void removeOverlaid(IProblemAnnotation annotation);
+	
+	
+	/**
+	 * @deprecated	 */
+	boolean isProblem();
+	
+	/**
+	 * @deprecated
+	 */
+	boolean isTask();
+	
+	/**
+	 * @deprecated
+	 */
+	boolean isWarning();
+	
+	/**
+	 * @deprecated
+	 */
+	boolean isError();
 }

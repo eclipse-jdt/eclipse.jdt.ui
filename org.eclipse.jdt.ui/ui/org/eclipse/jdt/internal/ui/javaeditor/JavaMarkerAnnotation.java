@@ -35,15 +35,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAnnotation {		
-	
-	private static final int UNKNOWN= 0;
-	private static final int PROBLEM= 1;
-	private static final int TASK= 2;
-	
+		
 	private IDebugModelPresentation fPresentation;
 	private IProblemAnnotation fOverlay;
 	private boolean fNotRelevant= false;
-	private int fType;
+	private AnnotationType fType;
 	
 	
 	public JavaMarkerAnnotation(IMarker marker) {
@@ -73,19 +69,34 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 			setLayer(4);
 			setImage(fPresentation.getImage(marker));					
 			
-			fType= UNKNOWN;
+			fType= AnnotationType.UNKNOWN;
 			
 		} else {
 			
-			fType= UNKNOWN;
+			fType= AnnotationType.UNKNOWN;
 			try {
-				if (marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER))
-					fType= PROBLEM;
-				else if (marker.isSubtypeOf(IMarker.TASK))
-					fType= TASK;
+				
+				if (marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER)) {
+					int severity= marker.getAttribute(IMarker.SEVERITY, -1);
+					switch (severity) {
+						case IMarker.SEVERITY_ERROR:
+							fType= AnnotationType.ERROR;
+							break;
+						case IMarker.SEVERITY_WARNING:
+							fType= AnnotationType.WARNING;
+							break;
+					}
+				} else if (marker.isSubtypeOf(IMarker.TASK))
+					fType= AnnotationType.TASK;
+				else if (marker.isSubtypeOf("org.eclipse.search.searchmarker")) 
+					fType= AnnotationType.SEARCH_RESULT;
+				else if (marker.isSubtypeOf(IMarker.BOOKMARK))
+					fType= AnnotationType.BOOKMARK;
+					
 			} catch(CoreException e) {
 				JavaPlugin.log(e);
 			}
+			
 			super.initialize();
 		
 		}
@@ -104,22 +115,14 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 * @see IProblemAnnotation#isError()
 	 */
 	public boolean isError() {
-		if (isProblem()) {
-			int markerSeverity= getMarker().getAttribute(IMarker.SEVERITY, -1);
-			return (markerSeverity == IMarker.SEVERITY_ERROR);
-		}
-		return false;
+		return fType == AnnotationType.ERROR;
 	}
 
 	/*
 	 * @see IProblemAnnotation#isWarning()
 	 */
 	public boolean isWarning() {
-		if (isProblem()) {
-			int markerSeverity= getMarker().getAttribute(IMarker.SEVERITY, -1);
-			return (markerSeverity == IMarker.SEVERITY_WARNING);
-		}
-		return false;
+		return fType == AnnotationType.WARNING;
 	}
 	
 	/*
@@ -151,14 +154,14 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 * @see IProblemAnnotation#isProblem()
 	 */
 	public boolean isProblem() {
-		return fType == PROBLEM;
+		return isWarning() || isError();
 	}
 	
 	/*
 	 * @see IProblemAnnotation#isTask()
 	 */
 	public boolean isTask() {
-		return fType ==TASK;
+		return fType ==AnnotationType.TASK;
 	}	
 	
 	/*
@@ -218,5 +221,12 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	public Iterator getOverlaidIterator() {
 		// not supported
 		return null;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation#getAnnotationType()
+	 */
+	public AnnotationType getAnnotationType() {
+		return fType;
 	}
 }

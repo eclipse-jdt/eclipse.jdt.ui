@@ -124,11 +124,20 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private IProblem fProblem;
 			private Image fImage;
 			private boolean fImageInitialized= false;
+			private AnnotationType fType;
 			
 			
 			public ProblemAnnotation(IProblem problem) {
+				
 				fProblem= problem;
 				setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
+				
+				if (IProblem.Task == fProblem.getID())
+					fType= AnnotationType.TASK;
+				else if (fProblem.isWarning())
+					fType= AnnotationType.WARNING;
+				else
+					fType= AnnotationType.ERROR;			
 			}
 			
 			private void initializeImage() {
@@ -180,14 +189,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemAnnotation#isWarning()
 			 */
 			public boolean isWarning() {
-				return isProblem() && fProblem.isWarning();
+				return fType == AnnotationType.WARNING;
 			}
 
 			/*
 			 * @see IProblemAnnotation#isError()
 			 */
 			public boolean isError() {
-				return isProblem() && fProblem.isError();
+				return fType == AnnotationType.ERROR;
 			}
 			
 			/*
@@ -208,14 +217,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemAnnotation#isProblem()
 			 */
 			public boolean isProblem() {
-				return !isTask();
+				return isWarning() || isError();
 			}
 			
 			/*
 			 * @see IProblemAnnotation#isTask()
 			 */
 			public boolean isTask() {
-				return IProblem.Task == fProblem.getID();
+				return fType == AnnotationType.TASK;
 			}
 			
 			/*
@@ -259,6 +268,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				if (fOverlaids != null)
 					return fOverlaids.iterator();
 				return null;
+			}
+			
+			public AnnotationType getAnnotationType() {
+				return fType;
 			}
 		};
 		
@@ -891,12 +904,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			info.fCopy.reconcile();
 			
 			ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
-			IResource resource= null;
-			try {
-				resource= original.getUnderlyingResource();
-			} catch (JavaModelException x) {
-				// workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=14940
-			}
+			IResource resource= original.getResource();
 			
 			if (resource == null) {
 				// underlying resource has been deleted, just recreate file, ignore the rest
@@ -940,7 +948,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			if (fSavePolicy != null) {
 				ICompilationUnit unit= fSavePolicy.postSave(original);
 				if (unit != null) {
-					IResource r= unit.getUnderlyingResource();
+					IResource r= unit.getResource();
 					IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
 					if (markers != null && markers.length > 0) {
 						for (int i= 0; i < markers.length; i++)
@@ -1008,7 +1016,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			try {
 				
 				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
-				IResource resource= original.getUnderlyingResource();
+				IResource resource= original.getResource();
 				if (resource instanceof IFile) {
 					
 					IFile file= (IFile) resource;

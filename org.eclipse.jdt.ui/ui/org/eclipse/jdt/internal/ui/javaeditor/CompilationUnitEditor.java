@@ -1,15 +1,23 @@
-package org.eclipse.jdt.internal.ui.javaeditor;
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
 
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
+
+package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -456,16 +464,28 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String SPACES_FOR_TABS= JavaSourceViewerConfiguration.SPACES_FOR_TABS;
 	/** Preference key for error indication */
 	public final static String ERROR_INDICATION= "problemIndication"; //$NON-NLS-1$
-	/** Preference key for error highlight color */
+	/** Preference key for error color */
 	public final static String ERROR_INDICATION_COLOR= "problemIndicationColor"; //$NON-NLS-1$
 	/** Preference key for warning indication */
 	public final static String WARNING_INDICATION= "warningIndication"; //$NON-NLS-1$
-	/** Preference key for warning highlight color */
+	/** Preference key for warning color */
 	public final static String WARNING_INDICATION_COLOR= "warningIndicationColor"; //$NON-NLS-1$
-	/** Preference key for marker indication */
-	public final static String MARKER_INDICATION= "markerIndication"; //$NON-NLS-1$
-	/** Preference key for marker highlight color */
-	public final static String MARKER_INDICATION_COLOR= "markerIndicationColor"; //$NON-NLS-1$
+	/** Preference key for task indication */
+	public final static String TASK_INDICATION= "taskIndication"; //$NON-NLS-1$
+	/** Preference key for task color */
+	public final static String TASK_INDICATION_COLOR= "taskIndicationColor"; //$NON-NLS-1$
+	/** Preference key for bookmark indication */
+	public final static String BOOKMARK_INDICATION= "bookmarkIndication"; //$NON-NLS-1$
+	/** Preference key for bookmark color */
+	public final static String BOOKMARK_INDICATION_COLOR= "bookmarkIndicationColor"; //$NON-NLS-1$
+	/** Preference key for search result indication */
+	public final static String SEARCH_RESULT_INDICATION= "searchResultIndication"; //$NON-NLS-1$
+	/** Preference key for search result color */
+	public final static String SEARCH_RESULT_INDICATION_COLOR= "searchResultIndicationColor"; //$NON-NLS-1$
+	/** Preference key for unknown annotation indication */
+	public final static String UNKNOWN_INDICATION= "othersIndication"; //$NON-NLS-1$
+	/** Preference key for unknown annotation color */
+	public final static String UNKNOWN_INDICATION_COLOR= "othersIndicationColor"; //$NON-NLS-1$
 	/** Preference key for linked position color */
 	public final static String LINKED_POSITION_COLOR= "linkedPositionColor"; //$NON-NLS-1$
 	/** Preference key for shwoing the overview ruler */
@@ -474,8 +494,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String ERROR_INDICATION_IN_OVERVIEW_RULER= "errorIndicationInOverviewRuler"; //$NON-NLS-1$
 	/** Preference key for warning indication in overview ruler */
 	public final static String WARNING_INDICATION_IN_OVERVIEW_RULER= "warningIndicationInOverviewRuler"; //$NON-NLS-1$
-	/** Preference key for marker indication in overview ruler */
-	public final static String MARKER_INDICATION_IN_OVERVIEW_RULER= "markerIndicationInOverviewRuler"; //$NON-NLS-1$
+	/** Preference key for task indication in overview ruler */
+	public final static String TASK_INDICATION_IN_OVERVIEW_RULER= "taskIndicationInOverviewRuler"; //$NON-NLS-1$
+	/** Preference key for bookmark indication in overview ruler */
+	public final static String BOOKMARK_INDICATION_IN_OVERVIEW_RULER= "bookmarkIndicationInOverviewRuler"; //$NON-NLS-1$
+	/** Preference key for search result indication in overview ruler */
+	public final static String SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER= "searchResultIndicationInOverviewRuler"; //$NON-NLS-1$
+	/** Preference key for unknown annotation indication in overview ruler */
+	public final static String UNKNOWN_INDICATION_IN_OVERVIEW_RULER= "othersIndicationInOverviewRuler"; //$NON-NLS-1$
 	/** Preference key for automatically closing strings */
 	public final static String CLOSE_STRINGS= "closeStrings"; //$NON-NLS-1$
 	/** Preference key for automatically wrapping Java strings */
@@ -488,7 +514,66 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String ADD_JAVADOC_TAGS= "addJavaDocTags"; //$NON-NLS-1$
 	/** Preference key for automatically formatting javadocs */
 	public final static String FORMAT_JAVADOCS= "formatJavaDocs"; //$NON-NLS-1$
+	
+	
+	private final static class AnnotationInfo {
+		public String fColorPreference;
+		public String fOverviewRulerPreference;
+		public String fEditorPreference;
+	};
+	
+	private final static Map ANNOTATION_MAP;
+	static {
+		
+		AnnotationInfo info;
+		ANNOTATION_MAP= new HashMap();
 
+		info= new AnnotationInfo();
+		info.fColorPreference= TASK_INDICATION_COLOR;
+		info.fOverviewRulerPreference= TASK_INDICATION_IN_OVERVIEW_RULER;
+		info.fEditorPreference= TASK_INDICATION;
+		ANNOTATION_MAP.put(AnnotationType.TASK, info);
+		
+		info= new AnnotationInfo();
+		info.fColorPreference= ERROR_INDICATION_COLOR;
+		info.fOverviewRulerPreference= ERROR_INDICATION_IN_OVERVIEW_RULER;
+		info.fEditorPreference= ERROR_INDICATION;
+		ANNOTATION_MAP.put(AnnotationType.ERROR, info);
+		
+		info= new AnnotationInfo();
+		info.fColorPreference= WARNING_INDICATION_COLOR;
+		info.fOverviewRulerPreference= WARNING_INDICATION_IN_OVERVIEW_RULER;
+		info.fEditorPreference= WARNING_INDICATION;
+		ANNOTATION_MAP.put(AnnotationType.WARNING, info);
+		
+		info= new AnnotationInfo();
+		info.fColorPreference= BOOKMARK_INDICATION_COLOR;
+		info.fOverviewRulerPreference=  BOOKMARK_INDICATION_IN_OVERVIEW_RULER;
+		info.fEditorPreference=  BOOKMARK_INDICATION;
+		ANNOTATION_MAP.put(AnnotationType.BOOKMARK, info);
+		
+		info= new AnnotationInfo();
+		info.fColorPreference= SEARCH_RESULT_INDICATION_COLOR;
+		info.fOverviewRulerPreference=  SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER;
+		info.fEditorPreference=  SEARCH_RESULT_INDICATION;
+		ANNOTATION_MAP.put(AnnotationType.SEARCH_RESULT, info);
+		
+		info= new AnnotationInfo();
+		info.fColorPreference= UNKNOWN_INDICATION_COLOR;
+		info.fOverviewRulerPreference=  UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
+		info.fEditorPreference=  UNKNOWN_INDICATION;
+		ANNOTATION_MAP.put(AnnotationType.UNKNOWN, info);
+	};
+	
+	private final static AnnotationType[] ANNOTATION_LAYERS= new AnnotationType[] {
+		AnnotationType.UNKNOWN,
+		AnnotationType.BOOKMARK,
+		AnnotationType.TASK,
+		AnnotationType.SEARCH_RESULT,
+		AnnotationType.WARNING,
+		AnnotationType.ERROR
+	};
+		
 	
 	/** The editor's save policy */
 	protected ISavePolicy fSavePolicy;
@@ -1088,116 +1173,68 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return store.getBoolean(PRINT_MARGIN);
 	}
 	
-	private void startErrorIndication() {
+	private void startAnnotationIndication(AnnotationType annotationType) {
 		if (fProblemPainter == null) {
 			fProblemPainter= new ProblemPainter(this, getSourceViewer());
 			fPaintManager.addPainter(fProblemPainter);
 		}
-		fProblemPainter.setErrorHighlightColor(getColor(ERROR_INDICATION_COLOR));
-		fProblemPainter.paintErrors(true);
+		fProblemPainter.setColor(annotationType, getColor(annotationType));
+		fProblemPainter.paintAnnotations(annotationType, true);
+		fProblemPainter.paint(IPainter.CONFIGURATION);
 	}
 	
-	private void startWarningIndication() {
-		if (fProblemPainter == null) {
-			fProblemPainter= new ProblemPainter(this, getSourceViewer());
-			fPaintManager.addPainter(fProblemPainter);
-		}
-		fProblemPainter.setWarningHighlightColor(getColor(WARNING_INDICATION_COLOR));
-		fProblemPainter.paintWarnings(true);
-	}
-
-	private void startMarkerIndication() {
-		if (fProblemPainter == null) {
-			fProblemPainter= new ProblemPainter(this, getSourceViewer());
-			fPaintManager.addPainter(fProblemPainter);
-		}
-		fProblemPainter.setMarkerHighlightColor(getColor(MARKER_INDICATION_COLOR));
-		fProblemPainter.paintMarkers(true);
-	}
-	
-	private void shutdownProblemIndication() {
-		if ( !(isWarningIndicationEnabled() || isMarkerIndicationEnabled() || isErrorIndicationEnabled())) {
-			fPaintManager.removePainter(fProblemPainter);
-			fProblemPainter.deactivate(true);
-			fProblemPainter.dispose();
-			fProblemPainter= null;
-		}	
-	}
-	
-	private void stopErrorIndication() {
+	private void shutdownAnnotationIndication() {
 		if (fProblemPainter != null) {
-			fProblemPainter.paintErrors(false);
-			shutdownProblemIndication();
-		}
-	}
-	
-	private void stopWarningIndication() {
-		if (fProblemPainter != null) {
-			fProblemPainter.paintWarnings(false);
-			shutdownProblemIndication();
+			
+			if (!fProblemPainter.isPaintingAnnotations()) {
+				fPaintManager.removePainter(fProblemPainter);
+				fProblemPainter.deactivate(true);
+				fProblemPainter.dispose();
+				fProblemPainter= null;
+			} else {
+				fProblemPainter.paint(IPainter.CONFIGURATION);
+			}
 		}
 	}
 
-	private void stopMarkerIndication() {
+	private void stopAnnotationIndication(AnnotationType annotationType) {
 		if (fProblemPainter != null) {
-			fProblemPainter.paintMarkers(false);
-			shutdownProblemIndication();
+			fProblemPainter.paintAnnotations(annotationType, false);
+			shutdownAnnotationIndication();
 		}
 	}
-
-	private boolean isErrorIndicationEnabled() {
+	
+	private boolean isAnnotationIndicationEnabled(AnnotationType annotationType) {
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(ERROR_INDICATION);
+		AnnotationInfo info= (AnnotationInfo) ANNOTATION_MAP.get(annotationType);
+		if (info != null)
+			return store.getBoolean(info.fEditorPreference);
+		return false;
 	}
 	
-	private boolean isWarningIndicationEnabled() {
+	private boolean isAnnotationIndicationInOverviewRulerEnabled(AnnotationType annotationType) {
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(WARNING_INDICATION);
+		AnnotationInfo info= (AnnotationInfo) ANNOTATION_MAP.get(annotationType);
+		if (info != null)
+			return store.getBoolean(info.fOverviewRulerPreference);
+		return false;
 	}
 	
-	private boolean isMarkerIndicationEnabled() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(MARKER_INDICATION);
-	}
-	
-	private boolean isErrorIndicationInOverviewRulerEnabled() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(ERROR_INDICATION_IN_OVERVIEW_RULER);
-	}
-	
-	private boolean isWarningIndicationInOverviewRulerEnabled() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(WARNING_INDICATION_IN_OVERVIEW_RULER);
-	}
-	
-	private boolean isMarkerIndicationInOverviewRulerEnabled() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(MARKER_INDICATION_IN_OVERVIEW_RULER);
-	}
-	
-	private void showErrorIndicationInOverviewRuler(boolean show) {
+	private void showAnnotationIndicationInOverviewRuler(AnnotationType annotationType, boolean show) {
 		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 		OverviewRuler ruler= asv.getOverviewRuler();
 		if (ruler != null) {
-			ruler.showErrors(show);
-			ruler.update();
-		}
-	}
-	
-	private void showWarningIndicationInOverviewRuler(boolean show) {
-		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-		OverviewRuler ruler= asv.getOverviewRuler();
-		if (ruler != null) {
-			ruler.showWarnings(show);
+			ruler.setColor(annotationType, getColor(annotationType));
+			ruler.showAnnotation(annotationType, show);
 			ruler.update();
 		}
 	}
 
-	private void showMarkerIndicationInOverviewRuler(boolean show) {
+	private void setColorInOverviewRuler(AnnotationType annotationType, Color color) {
 		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 		OverviewRuler ruler= asv.getOverviewRuler();
 		if (ruler != null) {
-			ruler.showMarkers(show);
+			ruler.setColor(annotationType, color);
 			ruler.update();
 		}
 	}
@@ -1248,12 +1285,15 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 		asv.showOverviewRuler();
 		
-		if (isErrorIndicationInOverviewRulerEnabled())
-			showErrorIndicationInOverviewRuler(true);
-		if (isWarningIndicationInOverviewRulerEnabled())
-			showWarningIndicationInOverviewRuler(true);
-		if (isMarkerIndicationInOverviewRulerEnabled())
-			showMarkerIndicationInOverviewRuler(true);
+		OverviewRuler overviewRuler= asv.getOverviewRuler();
+		if (overviewRuler != null) {
+			for (int i= 0; i < ANNOTATION_LAYERS.length; i++) {
+				AnnotationType type= ANNOTATION_LAYERS[i];
+				overviewRuler.setLayer(type, i);	
+				if (isAnnotationIndicationInOverviewRulerEnabled(type))
+					showAnnotationIndicationInOverviewRuler(type, true);
+			}
+		}
 	}
 	
 	private void hideOverviewRuler() {
@@ -1274,6 +1314,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private Color getColor(RGB rgb) {
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		return textTools.getColorManager().getColor(rgb);
+	}
+	
+	private Color getColor(AnnotationType annotationType) {
+		AnnotationInfo info= (AnnotationInfo) ANNOTATION_MAP.get(annotationType);
+		if (info != null)
+			return getColor(info.fColorPreference);
+		return null;
 	}
 	
 	/*
@@ -1328,17 +1375,21 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			startLineHighlighting();
 		if (isPrintMarginVisible())
 			showPrintMargin();
-		if (isErrorIndicationEnabled())
-			startErrorIndication();
-		if (isWarningIndicationEnabled())
-			startWarningIndication();
-		if (isMarkerIndicationEnabled())
-			startMarkerIndication();
+		
+		
+		Iterator e= ANNOTATION_MAP.keySet().iterator();
+		while (e.hasNext()) {
+			AnnotationType type= (AnnotationType) e.next();
+			if (isAnnotationIndicationEnabled(type))
+				startAnnotationIndication(type);
+		}
+			
 		if (isTabConversionEnabled())
 			startTabConversion();
 		if (isOverviewRulerVisible())
 			showOverviewRuler();
-
+			
+			
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 		preferences.addPropertyChangeListener(fPropertyChangeListener);			
 		
@@ -1527,9 +1578,22 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 	}
 	
+	protected AnnotationType getAnnotationType(String preferenceKey) {
+		Iterator e= ANNOTATION_MAP.keySet().iterator();
+		while (e.hasNext()) {
+			AnnotationType type= (AnnotationType) e.next();
+			AnnotationInfo info= (AnnotationInfo) ANNOTATION_MAP.get(type);
+			if (info != null) {
+				if (preferenceKey.equals(info.fColorPreference) || preferenceKey.equals(info.fEditorPreference) || preferenceKey.equals(info.fOverviewRulerPreference)) 
+					return type;
+			}
+		}
+		return null;
+	}
+	
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
-		 */
+	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 		
 		try {
@@ -1607,48 +1671,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
-				if (ERROR_INDICATION.equals(p)) {
-					if (isErrorIndicationEnabled())
-						startErrorIndication();
-					else
-						stopErrorIndication();
-					return;
-				}
-				
-				if (ERROR_INDICATION_COLOR.equals(p)) {
-					if (fProblemPainter != null)
-						fProblemPainter.setErrorHighlightColor(getColor(ERROR_INDICATION_COLOR));
-					return;
-				}
-				
-				if (WARNING_INDICATION.equals(p)) {
-					if (isWarningIndicationEnabled())
-						startWarningIndication();
-					else
-						stopWarningIndication();
-					return;
-				}
-				
-				if (WARNING_INDICATION_COLOR.equals(p)) {
-					if (fProblemPainter != null)
-						fProblemPainter.setWarningHighlightColor(getColor(WARNING_INDICATION_COLOR));
-					return;
-				}
-				
-				if (MARKER_INDICATION.equals(p)) {
-					if (isMarkerIndicationEnabled())
-						startMarkerIndication();
-					else
-						stopMarkerIndication();
-					return;
-				}
-				
-				if (ERROR_INDICATION_COLOR.equals(p)) {
-					if (fProblemPainter != null)
-						fProblemPainter.setErrorHighlightColor(getColor(ERROR_INDICATION_COLOR));
-					return;
-				}
-				
 				if (OVERVIEW_RULER.equals(p))  {
 					if (isOverviewRulerVisible())
 						showOverviewRuler();
@@ -1657,31 +1679,37 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
-				if (ERROR_INDICATION_IN_OVERVIEW_RULER.equals(p)) {
-					if (isErrorIndicationInOverviewRulerEnabled())
-						showErrorIndicationInOverviewRuler(true);
-					else
-						showErrorIndicationInOverviewRuler(false);
-					return;
-				}
-				
-				if (WARNING_INDICATION_IN_OVERVIEW_RULER.equals(p)) {
-					if (isWarningIndicationInOverviewRulerEnabled())
-						showWarningIndicationInOverviewRuler(true);
-					else
-						showWarningIndicationInOverviewRuler(false);
-					return;
-				}
-				
-				if (MARKER_INDICATION_IN_OVERVIEW_RULER.equals(p)) {
-					if (isMarkerIndicationInOverviewRulerEnabled())
-						showMarkerIndicationInOverviewRuler(true);
-					else
-						showMarkerIndicationInOverviewRuler(false);
-					return;
+				AnnotationType type= getAnnotationType(p);
+				if (type != null) {
+					
+					AnnotationInfo info= (AnnotationInfo) ANNOTATION_MAP.get(type);
+					if (info.fColorPreference.equals(p)) {
+						Color color= getColor(type);
+						if (fProblemPainter != null) {
+							fProblemPainter.setColor(type, color);
+							fProblemPainter.paint(IPainter.CONFIGURATION);
+						}
+						setColorInOverviewRuler(type, color);
+						return;
+					}
+					
+					if (info.fEditorPreference.equals(p)) {
+						if (isAnnotationIndicationEnabled(type))
+							startAnnotationIndication(type);
+						else
+							stopAnnotationIndication(type);
+						return;
+					}
+					
+					if (info.fOverviewRulerPreference.equals(p)) {
+						if (isAnnotationIndicationInOverviewRulerEnabled(type))
+							showAnnotationIndicationInOverviewRuler(type, true);
+						else
+							showAnnotationIndicationInOverviewRuler(type, false);
+						return;
+					}
 				}
 
-				
 				IContentAssistant c= asv.getContentAssistant();
 				if (c instanceof ContentAssistant)
 					ContentAssistPreference.changeConfiguration((ContentAssistant) c, getPreferenceStore(), event);
@@ -1717,7 +1745,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		String p= event.getProperty();
 		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || CURRENT_LINE_COLOR.equals(p) || 
-									ERROR_INDICATION_COLOR.equals(p) || WARNING_INDICATION_COLOR.equals(p) || MARKER_INDICATION_COLOR.equals(p);
+									ERROR_INDICATION_COLOR.equals(p) || WARNING_INDICATION_COLOR.equals(p) || TASK_INDICATION_COLOR.equals(p);
 		return affects ? affects : super.affectsTextPresentation(event);
 	}
 	

@@ -14,6 +14,7 @@ public interface IPainter {
 	int KEY_STROKE=		2;
 	int MOUSE_BUTTON= 4;
 	int INTERNAL=			8;
+	int CONFIGURATION= 16;
 	
 	
 	void dispose();

@@ -1,7 +1,14 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
+
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
+
 package org.eclipse.jdt.internal.ui.preferences;
 
 
@@ -139,12 +146,24 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.WARNING_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WARNING_INDICATION),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.MARKER_INDICATION_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.MARKER_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.TASK_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.TASK_INDICATION),
 		
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.BOOKMARK_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.BOOKMARK_INDICATION),
+
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.SEARCH_RESULT_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SEARCH_RESULT_INDICATION),
+
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.UNKNOWN_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.UNKNOWN_INDICATION),
+
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.BOOKMARK_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.UNKNOWN_INDICATION_IN_OVERVIEW_RULER),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE),
@@ -209,9 +228,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private final String[][] fProblemIndicationColorListModel= new String[][] {
-		{"Errors", CompilationUnitEditor.ERROR_INDICATION_COLOR},
-		{"Warnings", CompilationUnitEditor.WARNING_INDICATION_COLOR},
-		{"Markers", CompilationUnitEditor.MARKER_INDICATION_COLOR}
+		{"Errors", CompilationUnitEditor.ERROR_INDICATION_COLOR, CompilationUnitEditor.ERROR_INDICATION, CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER },
+		{"Warnings", CompilationUnitEditor.WARNING_INDICATION_COLOR, CompilationUnitEditor.WARNING_INDICATION, CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER },
+		{"Tasks", CompilationUnitEditor.TASK_INDICATION_COLOR, CompilationUnitEditor.TASK_INDICATION, CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER },
+		{"Search Results", CompilationUnitEditor.SEARCH_RESULT_INDICATION_COLOR, CompilationUnitEditor.SEARCH_RESULT_INDICATION, CompilationUnitEditor.SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER },
+		{"Bookmarks", CompilationUnitEditor.BOOKMARK_INDICATION_COLOR, CompilationUnitEditor.BOOKMARK_INDICATION, CompilationUnitEditor.BOOKMARK_INDICATION_IN_OVERVIEW_RULER },
+		{"Others", CompilationUnitEditor.UNKNOWN_INDICATION_COLOR, CompilationUnitEditor.UNKNOWN_INDICATION, CompilationUnitEditor.UNKNOWN_INDICATION_IN_OVERVIEW_RULER }
 	};
 	
 	private OverlayPreferenceStore fOverlayStore;
@@ -255,7 +277,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private WorkbenchChainedTextFontFieldEditor fFontEditor;
 	private List fSyntaxColorList;
 	private List fAppearanceColorList;
-	private List fProblemIndicationColorList;
+	private List fProblemIndicationList;
 	private ColorEditor fSyntaxForegroundColorEditor;
 	private ColorEditor fAppearanceForegroundColorEditor;
 	private ColorEditor fProblemIndicationForegroundColorEditor;
@@ -271,6 +293,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
     private Control fAutoInsertDelayText;
     private Control fAutoInsertJavaTriggerText;
     private Control fAutoInsertJavaDocTriggerText;
+	private Button fShowInTextCheckBox;
+	private Button fShowInOverviewRulerCheckBox;
 	
 	public JavaEditorPreferencePage() {
 		setDescription(JavaUIMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
@@ -315,16 +339,27 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		store.setDefault(CompilationUnitEditor.ERROR_INDICATION, true);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.ERROR_INDICATION_COLOR, new RGB(255, 0 , 128));
+		store.setDefault(CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER, true);
 		
 		store.setDefault(CompilationUnitEditor.WARNING_INDICATION, true);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.WARNING_INDICATION_COLOR, new RGB(244, 200 , 45));
-		
-		store.setDefault(CompilationUnitEditor.MARKER_INDICATION, true);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.MARKER_INDICATION_COLOR, new RGB(0, 128, 255));
-		
-		store.setDefault(CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER, true);
 		store.setDefault(CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER, true);
-		store.setDefault(CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER, false);
+		
+		store.setDefault(CompilationUnitEditor.TASK_INDICATION, false);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.TASK_INDICATION_COLOR, new RGB(0, 128, 255));
+		store.setDefault(CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER, false);
+		
+		store.setDefault(CompilationUnitEditor.BOOKMARK_INDICATION, false);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.BOOKMARK_INDICATION_COLOR, new RGB(34, 164, 99));
+		store.setDefault(CompilationUnitEditor.BOOKMARK_INDICATION_IN_OVERVIEW_RULER, false);
+		
+		store.setDefault(CompilationUnitEditor.SEARCH_RESULT_INDICATION, false);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.SEARCH_RESULT_INDICATION_COLOR, new RGB(192, 192, 192));
+		store.setDefault(CompilationUnitEditor.SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER, false);
+		
+		store.setDefault(CompilationUnitEditor.UNKNOWN_INDICATION, false);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.UNKNOWN_INDICATION_COLOR, new RGB(0, 0, 0));
+		store.setDefault(CompilationUnitEditor.UNKNOWN_INDICATION_IN_OVERVIEW_RULER, false);
 		
 		store.setDefault(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, true);
 		store.setDefault(JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
@@ -437,10 +472,17 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	}
 	
 	private void handleProblemIndicationColorListSelection() {
-		int i= fProblemIndicationColorList.getSelectionIndex();
+		int i= fProblemIndicationList.getSelectionIndex();
+		
 		String key= fProblemIndicationColorListModel[i][1];
 		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
-		fProblemIndicationForegroundColorEditor.setColorValue(rgb);		
+		fProblemIndicationForegroundColorEditor.setColorValue(rgb);
+		
+		key= fProblemIndicationColorListModel[i][2];
+		fShowInTextCheckBox.setSelection(fOverlayStore.getBoolean(key));
+		
+		key= fProblemIndicationColorListModel[i][3];
+		fShowInOverviewRulerCheckBox.setSelection(fOverlayStore.getBoolean(key));				
 	}
 	
 	private Control createSyntaxPage(Composite parent) {
@@ -768,46 +810,29 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return appearanceComposite;
 	}
 	
+	
 	private Control createProblemIndicationPage(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		composite.setLayout(layout);
 				
-		String label= "Analyse problems while &typing";
-		addCheckBox(composite, label, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
-
-		label= "Highlight &errors in text";
-		addCheckBox(composite, label, CompilationUnitEditor.ERROR_INDICATION, 0);
+		String text= "Analyse &problems while typing";
+		addCheckBox(composite, text, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
 		
-		label= "Show e&rrors in overview ruler";
-		addCheckBox(composite, label, CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER, 0);
+		text= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
+		addCheckBox(composite, text, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
 		
-		label= "Highlight &warnings in text";
-		addCheckBox(composite, label, CompilationUnitEditor.WARNING_INDICATION, 0);
-		
-		label= "Show warnin&gs in overview ruler";
-		addCheckBox(composite, label, CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER, 0);
-		
-		label= "Highlight &markers in text";
-		addCheckBox(composite, label, CompilationUnitEditor.MARKER_INDICATION, 0);
-
-		label= "Show mar&kers in overview ruler";
-		addCheckBox(composite, label, CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER, 0);
-		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
-		addCheckBox(composite, label, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
-		
-		Label l= new Label(composite, SWT.LEFT );
+		Label label= new Label(composite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
-		l.setLayoutData(gd);
+		label.setLayoutData(gd);
 		
-		l= new Label(composite, SWT.LEFT);
-		l.setText("Color options for text highlighting:");
+		label= new Label(composite, SWT.LEFT);
+		label.setText("&Marker presentation options:");
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
-		l.setLayoutData(gd);
+		label.setLayoutData(gd);
 
 		Composite editorComposite= new Composite(composite, SWT.NONE);
 		layout= new GridLayout();
@@ -819,57 +844,91 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		gd.horizontalSpan= 2;
 		editorComposite.setLayoutData(gd);		
 
-		fProblemIndicationColorList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+		fProblemIndicationList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.heightHint= convertHeightInCharsToPixels(5);
-		fProblemIndicationColorList.setLayoutData(gd);
+		fProblemIndicationList.setLayoutData(gd);
 						
-		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
+		Composite optionsComposite= new Composite(editorComposite, SWT.NONE);
 		layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
-		stylesComposite.setLayout(layout);
-		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		optionsComposite.setLayout(layout);
+		optionsComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		l= new Label(stylesComposite, SWT.LEFT);
-		l.setText("Color:");
+		fShowInTextCheckBox= new Button(optionsComposite, SWT.CHECK);
+        fShowInTextCheckBox.setText("Show in &text");
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+        gd.horizontalSpan= 2;
+		fShowInTextCheckBox.setLayoutData(gd);
+		
+		fShowInOverviewRulerCheckBox= new Button(optionsComposite, SWT.CHECK);
+        fShowInOverviewRulerCheckBox.setText("Show in overview &ruler");
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+        gd.horizontalSpan= 2;
+		fShowInOverviewRulerCheckBox.setLayoutData(gd);
+		
+		label= new Label(optionsComposite, SWT.LEFT);
+		label.setText("C&olor:");
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
-		l.setLayoutData(gd);
+		label.setLayoutData(gd);
 
-		fProblemIndicationForegroundColorEditor= new ColorEditor(stylesComposite);
+		fProblemIndicationForegroundColorEditor= new ColorEditor(optionsComposite);
 		Button foregroundColorButton= fProblemIndicationForegroundColorEditor.getButton();
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		foregroundColorButton.setLayoutData(gd);
 
-		fProblemIndicationColorList.addSelectionListener(new SelectionListener() {
+		fProblemIndicationList.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			
 			public void widgetSelected(SelectionEvent e) {
 				handleProblemIndicationColorListSelection();
 			}
 		});
+		
+		fShowInTextCheckBox.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			
+			public void widgetSelected(SelectionEvent e) {
+				int i= fProblemIndicationList.getSelectionIndex();
+				String key= fProblemIndicationColorListModel[i][2];
+				fOverlayStore.setValue(key, fShowInTextCheckBox.getSelection());
+			}
+		});
+		
+		fShowInOverviewRulerCheckBox.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			
+			public void widgetSelected(SelectionEvent e) {
+				int i= fProblemIndicationList.getSelectionIndex();
+				String key= fProblemIndicationColorListModel[i][3];
+				fOverlayStore.setValue(key, fShowInOverviewRulerCheckBox.getSelection());
+			}
+		});
+		
 		foregroundColorButton.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			
 			public void widgetSelected(SelectionEvent e) {
-				int i= fProblemIndicationColorList.getSelectionIndex();
+				int i= fProblemIndicationList.getSelectionIndex();
 				String key= fProblemIndicationColorListModel[i][1];
-				
 				PreferenceConverter.setValue(fOverlayStore, key, fProblemIndicationForegroundColorEditor.getColorValue());
 			}
 		});
 		
-		Label note= new Label(composite, SWT.NONE);
-		note.setText(JavaUIMessages.getString("JavaEditorPreferencePage.updatesOnNextChangeIinEditor.label")); //$NON-NLS-1$
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalSpan= 2;
-		note.setLayoutData(gd);
-			
 		return composite;
 	}
 
@@ -1059,12 +1118,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		for (int i= 0; i < fProblemIndicationColorListModel.length; i++)
-			fProblemIndicationColorList.add(fProblemIndicationColorListModel[i][0]);
+			fProblemIndicationList.add(fProblemIndicationColorListModel[i][0]);
 			
-		fProblemIndicationColorList.getDisplay().asyncExec(new Runnable() {
+		fProblemIndicationList.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				if (fProblemIndicationColorList != null && !fProblemIndicationColorList.isDisposed()) {
-					fProblemIndicationColorList.select(0);
+				if (fProblemIndicationList != null && !fProblemIndicationList.isDisposed()) {
+					fProblemIndicationList.select(0);
 					handleProblemIndicationColorListSelection();
 				}
 			}
