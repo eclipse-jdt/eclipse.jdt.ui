@@ -53,13 +53,20 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		result.setLayout(layout);
 		
 		Label label= new Label(result, SWT.NONE);
-		label.setText("Interface name:");
+		label.setText("&Interface name:");
 		
 		Text text= createTextInputField(result);
 		text.selectAll();
 		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				
 		addReplaceAllCheckbox(result);
+
+		Label tableLabel= new Label(result, SWT.NONE);
+		tableLabel.setText("Members to declare in the interface:");
+		GridData gd= new GridData();
+		gd.horizontalSpan= 2;
+		tableLabel.setLayoutData(gd);
+		
 		addMemberListComposite(result);
 	}
 
@@ -93,7 +100,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		buttonComposite.setLayoutData(gd);
 		
 		Button selectAll= new Button(buttonComposite, SWT.PUSH);
-		selectAll.setText("Select All");
+		selectAll.setText("&Select All");
 		selectAll.setLayoutData(new GridData());
 		SWTUtil.setButtonDimensionHint(selectAll);
 		selectAll.addSelectionListener(new SelectionAdapter(){
@@ -103,7 +110,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		});
 
 		Button deSelectAll= new Button(buttonComposite, SWT.PUSH);
-		deSelectAll.setText("Deselect All");
+		deSelectAll.setText("&Deselect All");
 		deSelectAll.setLayoutData(new GridData());
 		SWTUtil.setButtonDimensionHint(deSelectAll);
 		deSelectAll.addSelectionListener(new SelectionAdapter(){
@@ -126,7 +133,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 	}
 
 	private void addReplaceAllCheckbox(Composite result) {
-		String key= "Change references to the class ''{0}'' into references to the interface (where possible)"; 
+		String key= "&Change references to the class ''{0}'' into references to the interface (where possible)"; 
 		String title= MessageFormat.format(key, new String[]{getExtractInterfaceRefactoring().getInputClass().getElementName()});
 		boolean defaultValue= getExtractInterfaceRefactoring().isReplaceOccurrences();
 		fReplaceAllCheckbox= createCheckbox(result,  title, defaultValue);
@@ -193,4 +200,14 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 		List checked= Arrays.asList(fTableViewer.getCheckedElements());
 		getExtractInterfaceRefactoring().setExtractedMembers((IMember[]) checked.toArray(new IMember[checked.size()]));
 	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.IDialogPage#dispose()
+	 */
+	public void dispose() {
+		fReplaceAllCheckbox= null;
+		fTableViewer= null;
+		super.dispose();
+	}
+
 }
