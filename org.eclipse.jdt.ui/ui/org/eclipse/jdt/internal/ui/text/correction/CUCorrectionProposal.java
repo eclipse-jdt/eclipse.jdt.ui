@@ -216,6 +216,9 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				if (page != null && part != null) {
 					page.bringToTop(part);
 				}
+				if (part != null) {
+					part.setFocus();
+				}
 			}
 			
 			super.apply(document);
