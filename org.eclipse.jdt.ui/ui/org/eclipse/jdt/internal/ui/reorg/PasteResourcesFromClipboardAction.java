@@ -117,6 +117,6 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 	}
 
 	private static CopyRefactoring createCopyRefactoring(IResource[] resourceData) {
-		return new CopyRefactoring(ClipboardActionUtil.getConvertedResources(resourceData));
+		return new CopyRefactoring(ClipboardActionUtil.getConvertedResources(resourceData), new CopyQueries());
 	}
 }

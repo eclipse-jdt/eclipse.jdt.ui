@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.reorg.CopyQueries;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 import org.eclipse.jdt.internal.ui.reorg.MockWorkbenchSite;
@@ -255,7 +256,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			return DND.DROP_COPY;
 		
 		if (fCopyRefactoring == null)
-			fCopyRefactoring= new CopyRefactoring(fElements);
+			fCopyRefactoring= new CopyRefactoring(fElements, new CopyQueries());
 		
 		if (!canCopyElements())
 			return DND.DROP_NONE;	
