@@ -152,7 +152,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			markAsSelection(rewrite, newDecl); // end position
 
 			return rewrite;
-		} else if (isForStatementInit(dominantStatement, node)) {
+		} else if ((dominant != dominantStatement) && isForStatementInit(dominantStatement, node)) {
 			//	for (x = 1;;) ->for (int x = 1;;)
 			
 			Assignment assignment= (Assignment) node.getParent();
@@ -180,7 +180,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
 		newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
 		newDecl.setType(evaluateVariableType(ast));
-		newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
+//		newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
 
 		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
 		markAsLinked(rewrite, node, true, KEY_NAME); 

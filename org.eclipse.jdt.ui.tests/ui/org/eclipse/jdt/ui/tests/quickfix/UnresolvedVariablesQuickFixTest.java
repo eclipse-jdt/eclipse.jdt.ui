@@ -181,56 +181,48 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 		
-		boolean doField= true, doParam= true, doLocal= true;
-		for (int i= 0; i < proposals.size(); i++) {
-			NewVariableCompletionProposal proposal= (NewVariableCompletionProposal) proposals.get(i);
-			String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int i;\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (i= 0;;) {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();	
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (int i = 0;;) {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
 
-			if (proposal.getVariableKind() == NewVariableCompletionProposal.FIELD) {
-				assertTrue("2 field proposals", doField);
-				doField= false;
-				
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("    private int i;\n");
-				buf.append("\n");
-				buf.append("    void foo() {\n");
-				buf.append("        for (i= 0;;) {\n");
-				buf.append("        }\n");		
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-			} else if (proposal.getVariableKind() == NewVariableCompletionProposal.LOCAL) {
-				assertTrue("2 local proposals", doLocal);
-				doLocal= false;
-				
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("    void foo() {\n");
-				buf.append("        for (int i = 0;;) {\n");
-				buf.append("        }\n");		
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-			} else if (proposal.getVariableKind() == NewVariableCompletionProposal.PARAM) {
-				assertTrue("2 param proposals", doParam);
-				doParam= false;
-				
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class E {\n");
-				buf.append("    void foo(int i) {\n");
-				buf.append("        for (i= 0;;) {\n");
-				buf.append("        }\n");		
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-			} else {
-				assertTrue("unknown type", false);
-			}
-		}
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int i) {\n");
+		buf.append("        for (i= 0;;) {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });	
 	}	
 	
 	
@@ -683,7 +675,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 					buf.append("import java.io.File;\n");
 					buf.append("public class F {\n");
 					buf.append("    void foo() {\n");
-					buf.append("        Object Fixe = null;\n");					
+					buf.append("        Object Fixe;\n");					
 					buf.append("        char ch= Fixe.pathSeparatorChar;\n");
 					buf.append("    }\n");
 					buf.append("}\n");
@@ -909,6 +901,130 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
 	
+	public void testVarMultipleOccurances1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (i= 0; i > 9; i++) {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot, 3);
+		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal localProposal= null;
+		for (int i = 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (curr instanceof NewVariableCompletionProposal && ((NewVariableCompletionProposal) curr).getVariableKind() == NewVariableCompletionProposal.LOCAL) {
+				localProposal= (CUCorrectionProposal) curr;
+			}
+		}
+		assertNotNull(localProposal);
+		
+		String preview= localProposal.getCompilationUnitChange().getPreviewContent();
+		buf= new StringBuffer();	
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (int i = 0; i > 9; i++) {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualString(preview, expected);	
+	}	
+	
+	public void testVarMultipleOccurances2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (i= 0; i > 9;) {\n");
+		buf.append("            i++;\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot, 3);
+		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal localProposal= null;
+		for (int i = 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (curr instanceof NewVariableCompletionProposal && ((NewVariableCompletionProposal) curr).getVariableKind() == NewVariableCompletionProposal.LOCAL) {
+				localProposal= (CUCorrectionProposal) curr;
+			}
+		}
+		assertNotNull(localProposal);
+		
+		String preview= localProposal.getCompilationUnitChange().getPreviewContent();
+		buf= new StringBuffer();	
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (int i = 0; i > 9;) {\n");
+		buf.append("            i++;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualString(preview, expected);	
+	}
+	
+	public void testVarMultipleOccurances3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        for (i = 0; i > 9;) {\n");
+		buf.append("        }\n");
+		buf.append("        i= 9;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot, 3);
+		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal localProposal= null;
+		for (int i = 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (curr instanceof NewVariableCompletionProposal && ((NewVariableCompletionProposal) curr).getVariableKind() == NewVariableCompletionProposal.LOCAL) {
+				localProposal= (CUCorrectionProposal) curr;
+			}
+		}
+		assertNotNull(localProposal);
+		
+		String preview= localProposal.getCompilationUnitChange().getPreviewContent();
+		buf= new StringBuffer();	
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        for (i = 0; i > 9;) {\n");
+		buf.append("        }\n");
+		buf.append("        i= 9;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualString(preview, expected);	
+	}	
 
 	
 
