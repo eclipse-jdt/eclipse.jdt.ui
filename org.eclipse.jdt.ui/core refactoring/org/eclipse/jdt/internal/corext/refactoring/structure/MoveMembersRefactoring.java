@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
@@ -99,8 +98,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private IType resolveType(String fullyQualifiedTypeName) throws JavaModelException{
-		IJavaProject jproject= getDeclaringType().getJavaProject();
-		return JavaModelUtil.findType(jproject, fullyQualifiedTypeName);
+		return getDeclaringType().getJavaProject().findType(fullyQualifiedTypeName);
 	}
 
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
