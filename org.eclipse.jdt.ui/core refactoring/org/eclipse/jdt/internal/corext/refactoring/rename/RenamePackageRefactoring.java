@@ -191,6 +191,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		RefactoringStatus result= Checks.checkPackageName(newName);
 		if (Checks.isAlreadyNamed(fPackage, newName))
 			result.addFatalError(RefactoringCoreMessages.getString("RenamePackageRefactoring.another_name")); //$NON-NLS-1$
+		else if (fPackage.getElementName().equalsIgnoreCase(newName))	
+			result.addFatalError("A resource exists with a different case.");
 		result.merge(checkPackageInCurrentRoot(newName));
 		return result;
 	}
