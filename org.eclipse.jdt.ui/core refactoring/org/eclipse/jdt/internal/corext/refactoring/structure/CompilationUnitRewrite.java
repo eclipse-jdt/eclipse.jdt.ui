@@ -33,20 +33,20 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 public class CompilationUnitRewrite {
+	//TODO: add RefactoringStatus fStatus;?
 	private ICompilationUnit fCu;
 	private CompilationUnit fRoot;
 	private List/*<TextEditGroup>*/ fTextEditGroups;
 	
 	private OldASTRewrite fRewrite; // lazily initialized
 	private ImportRewrite fImportRewrite; // lazily initialized
-	
+//	private ImportRemover fImportRemover;
 //	private List/*<String>*/ fAddedImports;
 //	private List/*<ASTNode>*/ fRemovedNodes;
 	
@@ -113,7 +113,7 @@ public class CompilationUnitRewrite {
 	}
 	
 	private static IFile getFile(ICompilationUnit cu) {
-		return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
+		return (IFile) cu.getPrimary().getResource();
 	}
 
 	public ICompilationUnit getCu() {

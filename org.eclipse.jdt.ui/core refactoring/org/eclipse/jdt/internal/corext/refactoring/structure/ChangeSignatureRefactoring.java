@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -91,7 +91,6 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
@@ -101,7 +100,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -120,7 +118,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private final List fParameterInfos;
 
-	private CompilationUnit fCU;
+	private CompilationUnitRewrite fBaseCuRewrite;
 	private List fExceptionInfos;
 	private TextChangeManager fChangeManager;
 	private IMethod fMethod;
@@ -487,9 +485,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			
-			fCU= new RefactoringASTParser(AST.JLS2).parse(getCu(), true, new SubProgressMonitor(pm, 2));
+			fBaseCuRewrite= new CompilationUnitRewrite(getCu());
+			pm.worked(1);
 			result.merge(createExceptionInfoList());
-			
+			pm.worked(1);			
 			return result;
 		} finally{
 			pm.done();
@@ -500,7 +499,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		fExceptionInfos= new ArrayList(0);
 		try {
 			IJavaProject project= fMethod.getJavaProject();
-			ASTNode nameNode= NodeFinder.perform(fCU, fMethod.getNameRange());
+			ASTNode nameNode= NodeFinder.perform(fBaseCuRewrite.getRoot(), fMethod.getNameRange());
 			if (nameNode == null || ! (nameNode instanceof Name) || ! (nameNode.getParent() instanceof MethodDeclaration))
 				return null;
 			MethodDeclaration methodDeclaration= (MethodDeclaration) nameNode.getParent();
@@ -766,7 +765,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		p.setProject(cu.getJavaProject());
 		p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(cu));
 		CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
-		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCU);
+		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fBaseCuRewrite.getRoot());
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
@@ -947,39 +946,36 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode;
+			CompilationUnitRewrite cuRewrite;
 			if (cu.equals(getCu()))
-				cuNode= fCU;
+				cuRewrite= fBaseCuRewrite;
 			else
-				cuNode= new RefactoringASTParser(AST.JLS2).parse(cu, true);
-			ASTRewrite rewrite= ASTRewrite.create(cuNode.getAST());
-			ImportRewrite importRewrite= new ImportRewrite(cu);
-			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuNode);
+				cuRewrite= new CompilationUnitRewrite(cu);
+			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuRewrite.getRoot());
 			for (int j= 0; j < nodes.length; j++) {
 				//TODO: collect removed type references (SimpleNames) -> do it in CompilationUnitRewrite
-				createOccurrenceUpdate(nodes[j], rewrite, importRewrite, result).updateNode();
+				createOccurrenceUpdate(nodes[j], cuRewrite, result).updateNode();
 			}
-			//TODO: create ImportRemover which looks for other occurrences of removed type references
-			// and removes the import iff none found and no unresolved ref with that name found.
-			// Don't consider refs in javadocs!
 			if (isNoArgConstructor && namedSubclassMapping.containsKey(cu)){
 				//only non-anonymous subclasses may have noArgConstructors to modify - see bug 43444
 				Set subtypes= (Set)namedSubclassMapping.get(cu);
 				for (Iterator iter= subtypes.iterator(); iter.hasNext();) {
 					IType subtype= (IType) iter.next();
-					TypeDeclaration subtypeNode= ASTNodeSearchUtil.getTypeDeclarationNode(subtype, cuNode);
+					TypeDeclaration subtypeNode= ASTNodeSearchUtil.getTypeDeclarationNode(subtype, cuRewrite.getRoot());
 					if (subtypeNode != null)
-						modifyImplicitCallsToNoArgConstructor(subtypeNode, rewrite);
+						modifyImplicitCallsToNoArgConstructor(subtypeNode, cuRewrite);
 				}
 			}
-			addTextEditFromRewrite(manager, cu, rewrite);
-			addImportEdit(manager, cu, importRewrite);
+			//TODO: create ImportRemover which looks for other occurrences of removed type references
+			// and removes the import iff none found and no unresolved ref with that name found.
+			// Don't consider refs in javadocs!
+			manager.manage(cu, cuRewrite.createChange());
 		}
 		
 		pm.done();
 		return manager;
 	}
-
+	
 	//Map<ICompilationUnit, Set<IType>>
 	private Map createNamedSubclassMapping(IProgressMonitor pm) throws JavaModelException{
 		IType[] subclasses= getSubclasses(pm);
@@ -996,23 +992,25 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private void modifyImplicitCallsToNoArgConstructor(TypeDeclaration subclass, ASTRewrite rewrite) {
+	private void modifyImplicitCallsToNoArgConstructor(TypeDeclaration subclass, CompilationUnitRewrite cuRewrite) {
 		MethodDeclaration[] constructors= getAllConstructors(subclass);
 		if (constructors.length == 0){
-			addNewConstructorToSubclass(subclass, rewrite);
+			addNewConstructorToSubclass(subclass, cuRewrite);
 		} else {
 			for (int i= 0; i < constructors.length; i++) {
 				if (! containsImplicitCallToSuperConstructor(constructors[i]))
 					continue;
-				addExplicitSuperConstructorCall(constructors[i], rewrite);
+				addExplicitSuperConstructorCall(constructors[i], cuRewrite);
 			}
 		}
 	}
 	
-	private void addExplicitSuperConstructorCall(MethodDeclaration constructor, ASTRewrite rewrite) {
+	private void addExplicitSuperConstructorCall(MethodDeclaration constructor, CompilationUnitRewrite cuRewrite) {
 		SuperConstructorInvocation superCall= constructor.getAST().newSuperConstructorInvocation();
-		addArgumentsToNewSuperConstructorCall(superCall, rewrite);
-		rewrite.getListRewrite(constructor.getBody(), Block.STATEMENTS_PROPERTY).insertFirst(superCall, null);
+		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite.getASTRewrite());
+		String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.add_super_call"); //$NON-NLS-1$
+		TextEditGroup description= cuRewrite.createGroupDescription(msg);
+		cuRewrite.getASTRewrite().getListRewrite(constructor.getBody(), Block.STATEMENTS_PROPERTY).insertFirst(superCall, description);
 	}
 	
 	private void addArgumentsToNewSuperConstructorCall(SuperConstructorInvocation superCall, ASTRewrite rewrite) {
@@ -1037,7 +1035,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return true;
 	}
 	
-	private void addNewConstructorToSubclass(TypeDeclaration subclass, ASTRewrite rewrite) {
+	private void addNewConstructorToSubclass(TypeDeclaration subclass, CompilationUnitRewrite cuRewrite) {
 		AST ast= subclass.getAST();
 		MethodDeclaration newConstructor= ast.newMethodDeclaration();
 		newConstructor.setName(ast.newSimpleName(subclass.getName().getIdentifier()));
@@ -1049,9 +1047,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		Block body= ast.newBlock();
 		newConstructor.setBody(body);
 		SuperConstructorInvocation superCall= ast.newSuperConstructorInvocation();
-		addArgumentsToNewSuperConstructorCall(superCall, rewrite);
+		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite.getASTRewrite());
 		body.statements().add(superCall);
-		rewrite.getListRewrite(subclass, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertFirst(newConstructor, null);
+		
+		String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.add_constructor"); //$NON-NLS-1$
+		TextEditGroup description= cuRewrite.createGroupDescription(msg);
+		cuRewrite.getASTRewrite().getListRewrite(subclass, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertFirst(newConstructor, description);
 	}
 	
 	private static int getAccessModifier(TypeDeclaration subclass) {
@@ -1084,25 +1085,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0;
 	}
 	
-	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
-		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
-		TextEdit resultingEdits= rewrite.rewriteAST(textBuffer.getDocument(), null);
-
-		if (resultingEdits.hasChildren()) { //TODO: is this cool?
-		    TextChange textChange= manager.get(cu);
-		    TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
-		}
-	}
-	
-	private void addImportEdit(TextChangeManager manager, ICompilationUnit cu, ImportRewrite importRewrite) throws CoreException {
-		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
-		TextEdit resultingEdits= importRewrite.createEdit(textBuffer.getDocument());
-		if (! importRewrite.isEmpty()) {
-		    TextChange textChange= manager.get(cu);
-		    TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ChangeSignatureRefactoring.add_imports"), resultingEdits); //$NON-NLS-1$
-		}
-	}
-	
 	private static Expression createNewExpression(ASTRewrite rewrite, ParameterInfo info) {
 		return (Expression) rewrite.createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
 	}
@@ -1129,19 +1111,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return info.getNewTypeName() + " " + info.getNewName(); //$NON-NLS-1$
 	}
 
-	private OccurrenceUpdate createOccurrenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
+	private OccurrenceUpdate createOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
 		if (isReferenceNode(node))
-			return new ReferenceUpdate(node, rewrite, importRewrite, result);
+			return new ReferenceUpdate(node, cuRewrite, result);
 		
 		else if (node instanceof SimpleName && node.getParent() instanceof MethodDeclaration)
-			return new DeclarationUpdate((MethodDeclaration) node.getParent(), rewrite, importRewrite, result);
+			return new DeclarationUpdate((MethodDeclaration) node.getParent(), cuRewrite, result);
 		
 		else if (node instanceof SimpleName && 
 				(node.getParent() instanceof MemberRef || node.getParent() instanceof MethodRef))
-			return new DocReferenceUpdate(node.getParent(), rewrite, importRewrite, result);
+			return new DocReferenceUpdate(node.getParent(), cuRewrite, result);
 		
 		else
-			return new NullOccurrenceUpdate(node, rewrite, importRewrite, result);
+			return new NullOccurrenceUpdate(node, cuRewrite, result);
 	}
 
 	private static boolean isReferenceNode(ASTNode node){
@@ -1159,15 +1141,24 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	abstract class OccurrenceUpdate {
-		protected /*Old*/ASTRewrite fRewrite;
-		protected ImportRewrite fImportRewrite;
-		protected OccurrenceUpdate(ASTRewrite rewrite, ImportRewrite importRewrite) {
-			fRewrite= rewrite;
-			fImportRewrite= importRewrite;
+		protected final CompilationUnitRewrite fCuRewrite;
+		protected final TextEditGroup fDescription;
+		
+		protected OccurrenceUpdate(CompilationUnitRewrite cuRewrite, TextEditGroup description) {
+			fCuRewrite= cuRewrite;
+			fDescription= description;
 		}
 		
+		protected final ASTRewrite getASTRewrite() {
+			return fCuRewrite.getASTRewrite();
+		}
+
+		protected final ImportRewrite getImportRewrite() {
+			return fCuRewrite.getImportRewrite();
+		}
+
 		protected final ICompilationUnit getOccurrenceCu() {
-			return fImportRewrite.getCompilationUnit();
+			return getImportRewrite().getCompilationUnit();
 		}
 		
 		public abstract void updateNode() throws JavaModelException;
@@ -1187,7 +1178,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					newNodes.add(createNewParamgument(info));
 				} else {
 					ASTNode oldNode= (ASTNode) nodes.get(info.getOldIndex());
-					ASTNode movedNode= fRewrite.createMoveTarget(oldNode); //node must be one of ast
+					ASTNode movedNode= getASTRewrite().createMoveTarget(oldNode); //node must be one of ast
 					newNodes.add(movedNode);
 				}
 			}
@@ -1197,16 +1188,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			while (nodesIter.hasNext() && newIter.hasNext()) {
 				ASTNode node= (ASTNode) nodesIter.next();
 				ASTNode newNode= (ASTNode) newIter.next();
-				listRewrite.replace(node, newNode, null);
+				listRewrite.replace(node, newNode, fDescription);
 			}
 			while (nodesIter.hasNext()) {
-				listRewrite.remove((ASTNode) nodesIter.next(), null);
+				listRewrite.remove((ASTNode) nodesIter.next(), fDescription);
 			}
 			while (newIter.hasNext()) {
-				listRewrite.insertLast((ASTNode) newIter.next(), null);
+				listRewrite.insertLast((ASTNode) newIter.next(), fDescription);
 			}
 		}
 		
+		/**
+		 * @return ListRewrite of parameters or arguments
+		 */
 		protected abstract ListRewrite getParamgumentsRewrite();
 		
 		protected final void changeParamguments() {
@@ -1233,15 +1227,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 		protected final void replaceTypeNode(Type typeNode, String newTypeName){
 			Type newTypeNode= createNewTypeNode(newTypeName);
-			fRewrite.replace(typeNode, newTypeNode, null);
+			getASTRewrite().replace(typeNode, newTypeNode, fDescription);
 		}
 	
-		private void deleteExcessiveElements(ASTNode[] nodes) {
-			for (int i= getNotDeletedInfos().size(); i < nodes.length; i++) {
-				fRewrite.remove(nodes[i], null);
-			}
-		}
-
 		protected abstract ASTNode createNewParamgument(ParameterInfo info);
 
 		protected abstract SimpleName getMethodNameNode();
@@ -1250,18 +1238,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (! isMethodNameSameAsInitial()) {
 				SimpleName nameNode= getMethodNameNode();
 				SimpleName newNameNode= nameNode.getAST().newSimpleName(fMethodName);
-				fRewrite.replace(nameNode, newNameNode, null);
+				getASTRewrite().replace(nameNode, newNameNode, fDescription);
 			}
 		}
 
 		protected final Type createNewTypeNode(String newTypeName) {
 			String elementTypeName= getElementTypeName(newTypeName);
-			String importedTypeName= fImportRewrite.addImport(elementTypeName);
+			String importedTypeName= getImportRewrite().addImport(elementTypeName);
 			int dimensions= getArrayDimensions(newTypeName);
 			
-			Type newTypeNode= (Type) fRewrite.createStringPlaceholder(importedTypeName, ASTNode.SIMPLE_TYPE);
+			Type newTypeNode= (Type) getASTRewrite().createStringPlaceholder(importedTypeName, ASTNode.SIMPLE_TYPE);
 			if (dimensions != 0)
-				newTypeNode= fRewrite.getAST().newArrayType(newTypeNode, dimensions);
+				newTypeNode= getASTRewrite().getAST().newArrayType(newTypeNode, dimensions);
 			return newTypeNode;
 		}
 
@@ -1279,8 +1267,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		/** isReferenceNode(fNode) */
 		private ASTNode fNode;
 
-		protected ReferenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
-			super(rewrite, importRewrite);
+		protected ReferenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
+			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.update_reference"))); //$NON-NLS-1$
 			fNode= node; //holds: Assert.isTrue(isReferenceNode(node));
 		}
 
@@ -1290,40 +1278,21 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 		
 		/** @return {@inheritDoc} (element type: Expression) */
-		protected List getParamguments() {
-			if (fNode instanceof MethodInvocation)	
-				return ((MethodInvocation) fNode).arguments();
-				
-			if (fNode instanceof SuperMethodInvocation)	
-				return ((SuperMethodInvocation) fNode).arguments();
-				
-			if (fNode instanceof ClassInstanceCreation)	
-				return ((ClassInstanceCreation) fNode).arguments();
-				
-			if (fNode instanceof ConstructorInvocation)	
-				return ((ConstructorInvocation) fNode).arguments();
-				
-			if (fNode instanceof SuperConstructorInvocation)	
-				return ((SuperConstructorInvocation) fNode).arguments();
-				
-			return new ArrayList(0);
-		}
-		
 		protected ListRewrite getParamgumentsRewrite() {
 			if (fNode instanceof MethodInvocation)	
-				return fRewrite.getListRewrite(fNode, MethodInvocation.ARGUMENTS_PROPERTY);
+				return getASTRewrite().getListRewrite(fNode, MethodInvocation.ARGUMENTS_PROPERTY);
 				
 			if (fNode instanceof SuperMethodInvocation)	
-				return fRewrite.getListRewrite(fNode, SuperMethodInvocation.ARGUMENTS_PROPERTY);
+				return getASTRewrite().getListRewrite(fNode, SuperMethodInvocation.ARGUMENTS_PROPERTY);
 				
 			if (fNode instanceof ClassInstanceCreation)	
-				return fRewrite.getListRewrite(fNode, ClassInstanceCreation.ARGUMENTS_PROPERTY);
+				return getASTRewrite().getListRewrite(fNode, ClassInstanceCreation.ARGUMENTS_PROPERTY);
 				
 			if (fNode instanceof ConstructorInvocation)	
-				return fRewrite.getListRewrite(fNode, ConstructorInvocation.ARGUMENTS_PROPERTY);
+				return getASTRewrite().getListRewrite(fNode, ConstructorInvocation.ARGUMENTS_PROPERTY);
 				
 			if (fNode instanceof SuperConstructorInvocation)	
-				return fRewrite.getListRewrite(fNode, SuperConstructorInvocation.ARGUMENTS_PROPERTY);
+				return getASTRewrite().getListRewrite(fNode, SuperConstructorInvocation.ARGUMENTS_PROPERTY);
 			
 			return null;
 		}
@@ -1332,11 +1301,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (isRecursiveReference())
 				return createNewExpressionRecursive(info);
 			else
-				return createNewExpression(fRewrite, info);
+				return createNewExpression(getASTRewrite(), info);
 		}
 
 		private Expression createNewExpressionRecursive(ParameterInfo info) {
-			return (Expression) fRewrite.createStringPlaceholder(info.getNewName(), ASTNode.METHOD_INVOCATION);
+			return (Expression) getASTRewrite().createStringPlaceholder(info.getNewName(), ASTNode.METHOD_INVOCATION);
 		}
 
 		protected SimpleName getMethodNameNode() {
@@ -1400,8 +1369,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		private MethodDeclaration fMethDecl;
 		private RefactoringStatus fResult;
 
-		protected DeclarationUpdate(MethodDeclaration decl, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
-			super(rewrite, importRewrite);
+		protected DeclarationUpdate(MethodDeclaration decl, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
+			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.change_signature"))); //$NON-NLS-1$
 			fMethDecl= decl;
 			fResult= result;
 		}
@@ -1425,25 +1394,23 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 		
 		/** @return {@inheritDoc} (element type: SingleVariableDeclaration) */
-		protected List getParamguments() {
-			return fMethDecl.parameters();
-		}
-		
 		protected ListRewrite getParamgumentsRewrite() {
-			return fRewrite.getListRewrite(fMethDecl, MethodDeclaration.PARAMETERS_PROPERTY);
+			return getASTRewrite().getListRewrite(fMethDecl, MethodDeclaration.PARAMETERS_PROPERTY);
 		}
 
 		protected void changeParamgumentName(ParameterInfo info) {
 			SingleVariableDeclaration param= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
 			if (! info.getOldName().equals(param.getName().getIdentifier()))
 				return; //don't change if original parameter name != name in rippleMethod
-
+			
+			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.update_parameter_references"); //$NON-NLS-1$
+			TextEditGroup description= fCuRewrite.createGroupDescription(msg);
 			TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(param, false);
 			analyzer.perform();
 			SimpleName[] paramOccurrences= analyzer.getReferenceAndDeclarationNodes(); // @param tags are updated in changeJavaDocTags()
 			for (int j= 0; j < paramOccurrences.length; j++) {
 				SimpleName occurence= paramOccurrences[j];
-				fRewrite.set(occurence, SimpleName.IDENTIFIER_PROPERTY, info.getNewName(), null);
+				getASTRewrite().set(occurence, SimpleName.IDENTIFIER_PROPERTY, info.getNewName(), description);
 			}
 		}
 		
@@ -1462,7 +1429,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 		private void removeExtraDimensions(SingleVariableDeclaration oldParam) {
 			if (oldParam.getExtraDimensions() != 0) {		
-				fRewrite.set(oldParam, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
+				getASTRewrite().set(oldParam, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), fDescription);
 			}
 		}
 	
@@ -1481,7 +1448,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		
 		private void changeVisibility() {
 			int newModifiers= JdtFlags.clearAccessModifiers(fMethDecl.getModifiers()) | fVisibility;
-			fRewrite.set(fMethDecl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), null);
+			getASTRewrite().set(fMethDecl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), fDescription);
 		}
 	
 		private void changeExceptions() {
@@ -1492,7 +1459,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (info.isDeleted())
 					removeExceptionFromNodeList(info, fMethDecl.thrownExceptions());
 				else
-					addExceptionToNodeList(info, fRewrite.getListRewrite(fMethDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY));
+					addExceptionToNodeList(info, getASTRewrite().getListRewrite(fMethDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY));
 			}
 		}
 		
@@ -1512,7 +1479,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (currentType == null)
 					continue; // newly added or unresolvable type
 				if (Bindings.equals(typeToRemove, currentType))
-					fRewrite.remove(currentName, null);
+					getASTRewrite().remove(currentName, fDescription);
 			}
 		}
 	
@@ -1527,9 +1494,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (typeBinding.getQualifiedName().equals(fullyQualified))
 					return; // don't add it again
 			}
-			String simple= fImportRewrite.addImport(JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType()));
-			ASTNode exNode= fRewrite.createStringPlaceholder(simple, ASTNode.SIMPLE_NAME);
-			exceptionListRewrite.insertLast(exNode, null);
+			String simple= getImportRewrite().addImport(JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType()));
+			ASTNode exNode= getASTRewrite().createStringPlaceholder(simple, ASTNode.SIMPLE_NAME);
+			exceptionListRewrite.insertLast(exNode, fDescription);
 		}
 		
 		private void changeJavadocTags() throws JavaModelException {
@@ -1550,14 +1517,14 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			//TODO: should have preference for adding tags in (overriding) methods (with template: todo, inheritDoc, ...)
 			
 			List tags= javadoc.tags(); // List of TagElement
-			ListRewrite tagsRewrite= fRewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
+			ListRewrite tagsRewrite= getASTRewrite().getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 
 			if (! isReturnTypeSameAsInitial()) {
 				if (PrimitiveType.VOID.toString().equals(fReturnTypeName)) {
 					for (int i = 0; i < tags.size(); i++) {
 						TagElement tag= (TagElement) tags.get(i);
 						if (TagElement.TAG_RETURN.equals(tag.getTagName()))
-							fRewrite.remove(tag, null);
+							getASTRewrite().remove(tag, fDescription);
 					}
 				} else if (isTopOfRipple && Signature.SIG_VOID.equals(fMethod.getReturnType())){
 					TagElement returnNode= createReturnTag();
@@ -1583,11 +1550,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 						ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
 						if (identifier.equals(info.getOldName())) {
 							if (info.isDeleted()) {
-								fRewrite.remove(tag, null);
+								getASTRewrite().remove(tag, fDescription);
 								removed= true;
 							} else if (info.isRenamed()) {
 								SimpleName newName= simpleName.getAST().newSimpleName(info.getNewName());
-								fRewrite.replace(simpleName, newName, null);
+								getASTRewrite().replace(simpleName, newName, fDescription);
 							}
 							break;
 						}
@@ -1617,7 +1584,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 								SimpleName tagName= (SimpleName) tag.fragments().get(0);
 								if (oldName.equals(tagName.getIdentifier())) {
 									tagIter.remove();
-									TagElement movedTag= (TagElement) fRewrite.createMoveTarget(tag);
+									TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
 									insertTag(movedTag, previousTag, tagsRewrite);
 									previousTag= movedTag;
 								}
@@ -1627,7 +1594,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					// params with bad names:
 					for (Iterator iter= paramTags.iterator(); iter.hasNext();) {
 						TagElement tag= (TagElement) iter.next();
-						TagElement movedTag= (TagElement) fRewrite.createMoveTarget(tag);
+						TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
 						insertTag(movedTag, previousTag, tagsRewrite);
 						previousTag= movedTag;
 					}
@@ -1648,7 +1615,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					for (int j= 0; j < fExceptionInfos.size(); j++) {
 						ExceptionInfo info= (ExceptionInfo) fExceptionInfos.get(j);
 						if (info.isDeleted() && Bindings.equals(info.getTypeBinding(), name.resolveTypeBinding())) {
-							fRewrite.remove(tag, null);
+							getASTRewrite().remove(tag, fDescription);
 							break;
 						}
 						exceptionTags.add(tag);
@@ -1672,7 +1639,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 							Name tagName= (Name) tag.fragments().get(0);
 							if (Bindings.equals(info.getTypeBinding(), tagName.resolveTypeBinding())) {
 								tagIter.remove();
-								TagElement movedTag= (TagElement) fRewrite.createMoveTarget(tag);
+								TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
 								insertTag(movedTag, previousTag, tagsRewrite);
 								previousTag= movedTag;
 							}
@@ -1682,7 +1649,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				// exceptions with bad names:
 				for (Iterator iter= exceptionTags.iterator(); iter.hasNext();) {
 					TagElement tag= (TagElement) iter.next();
-					TagElement movedTag= (TagElement) fRewrite.createMoveTarget(tag);
+					TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);
 					insertTag(movedTag, previousTag, tagsRewrite);
 					previousTag= movedTag;
 				}
@@ -1690,10 +1657,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 
 		private TagElement createReturnTag() {
-			TagElement returnNode= fRewrite.getAST().newTagElement();
+			TagElement returnNode= getASTRewrite().getAST().newTagElement();
 			returnNode.setTagName(TagElement.TAG_RETURN);
 			
-			TextElement textElement= fRewrite.getAST().newTextElement();
+			TextElement textElement= getASTRewrite().getAST().newTextElement();
 			String text= StubUtility.getTodoTaskTag(getOccurrenceCu().getJavaProject());
 			if (text != null)
 				textElement.setText(text); //TODO: use template with {@todo} ...
@@ -1703,13 +1670,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 
 		private TagElement createParamTag(String name) {
-			TagElement paramNode= fRewrite.getAST().newTagElement();
+			TagElement paramNode= getASTRewrite().getAST().newTagElement();
 			paramNode.setTagName(TagElement.TAG_PARAM);
 
-			SimpleName simpleName= fRewrite.getAST().newSimpleName(name);
+			SimpleName simpleName= getASTRewrite().getAST().newSimpleName(name);
 			paramNode.fragments().add(simpleName);
 
-			TextElement textElement= fRewrite.getAST().newTextElement();
+			TextElement textElement= getASTRewrite().getAST().newTextElement();
 			String text= StubUtility.getTodoTaskTag(getOccurrenceCu().getJavaProject());
 			if (text != null)
 				textElement.setText(text); //TODO: use template with {@todo} ...
@@ -1719,13 +1686,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 
 		private TagElement createExceptionTag(String simpleName) {
-			TagElement excptNode= fRewrite.getAST().newTagElement();
+			TagElement excptNode= getASTRewrite().getAST().newTagElement();
 			excptNode.setTagName(TagElement.TAG_THROWS);
 
-			SimpleName nameNode= fRewrite.getAST().newSimpleName(simpleName);
+			SimpleName nameNode= getASTRewrite().getAST().newSimpleName(simpleName);
 			excptNode.fragments().add(nameNode);
 
-			TextElement textElement= fRewrite.getAST().newTextElement();
+			TextElement textElement= getASTRewrite().getAST().newTextElement();
 			String text= StubUtility.getTodoTaskTag(getOccurrenceCu().getJavaProject());
 			if (text != null)
 				textElement.setText(text); //TODO: use template with {@todo} ...
@@ -1736,9 +1703,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 		private void insertTag(TagElement tag, TagElement previousTag, ListRewrite tagsRewrite) {
 			if (previousTag == null)
-				tagsRewrite.insertFirst(tag, null);
+				tagsRewrite.insertFirst(tag, fDescription);
 			else
-				tagsRewrite.insertAfter(tag, previousTag, null);
+				tagsRewrite.insertAfter(tag, previousTag, fDescription);
 		}
 
 		/**
@@ -1808,8 +1775,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	
 		private SingleVariableDeclaration createNewSingleVariableDeclaration(ParameterInfo info) {
-			SingleVariableDeclaration newP= fRewrite.getAST().newSingleVariableDeclaration();
-			newP.setName(fRewrite.getAST().newSimpleName(info.getNewName()));
+			SingleVariableDeclaration newP= getASTRewrite().getAST().newSingleVariableDeclaration();
+			newP.setName(getASTRewrite().getAST().newSimpleName(info.getNewName()));
 			newP.setType(createNewTypeNode(info.getNewTypeName()));
 			return newP;
 		}
@@ -1824,8 +1791,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		/** instanceof MemberRef || MethodRef */
 		private ASTNode fNode;
 
-		protected DocReferenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
-			super(rewrite, importRewrite);
+		protected DocReferenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
+			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.update_javadoc_reference"))); //$NON-NLS-1$
 			fNode= node;
 		}
 
@@ -1843,13 +1810,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 		
 		private MethodRefParameter createNewMethodRefParameter(ParameterInfo info) {
-			MethodRefParameter newP= fRewrite.getAST().newMethodRefParameter();
+			MethodRefParameter newP= getASTRewrite().getAST().newMethodRefParameter();
 			
 			// only add name iff first parameter already has a name:
 			List parameters= getParamgumentsRewrite().getOriginalList();
 			if (parameters.size() > 0)
 				if (((MethodRefParameter) parameters.get(0)).getName() != null)
-					newP.setName(fRewrite.getAST().newSimpleName(info.getNewName()));
+					newP.setName(getASTRewrite().getAST().newSimpleName(info.getNewName()));
 			
 			newP.setType(createNewTypeNode(info.getNewTypeName()));
 			return newP;
@@ -1865,8 +1832,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return null;	
 		}
 		
+		/** @return {@inheritDoc} (element type: MethodRefParameter) */
 		protected ListRewrite getParamgumentsRewrite() {
-			return fRewrite.getListRewrite(fNode, MethodRef.PARAMETERS_PROPERTY);
+			return getASTRewrite().getListRewrite(fNode, MethodRef.PARAMETERS_PROPERTY);
 		}
 
 		protected void changeParamgumentName(ParameterInfo info) {
@@ -1876,7 +1844,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			MethodRefParameter oldParam= (MethodRefParameter) ((MethodRef) fNode).parameters().get(info.getOldIndex());
 			SimpleName oldParamName= oldParam.getName();
 			if (oldParamName != null)
-				fRewrite.set(oldParamName, SimpleName.IDENTIFIER_PROPERTY, info.getNewName(), null);
+				getASTRewrite().set(oldParamName, SimpleName.IDENTIFIER_PROPERTY, info.getNewName(), fDescription);
 		}
 		
 		protected void changeParamgumentType(ParameterInfo info) {
@@ -1891,8 +1859,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	class NullOccurrenceUpdate extends OccurrenceUpdate {
 		private ASTNode fNode;
 		private RefactoringStatus fResult;
-		protected NullOccurrenceUpdate(ASTNode node, ASTRewrite rewrite, ImportRewrite importRewrite, RefactoringStatus result) {
-			super(rewrite, importRewrite);
+		protected NullOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
+			super(cuRewrite, null);
 			fNode= node;
 			fResult= result;
 		}
@@ -1903,9 +1871,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					+ fNode.toString() + "[" + start + ", " + length + "]";  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 			JavaPlugin.log(new Exception(msg + ":\n" + getOccurrenceCu().getSource().substring(start, start + length))); //$NON-NLS-1$
 			fResult.addError(msg, JavaStatusContext.create(getOccurrenceCu(), fNode));
-		}
-		protected List getParamguments() {
-			return new ArrayList(0);
 		}
 		protected ListRewrite getParamgumentsRewrite() {
 			return null;
