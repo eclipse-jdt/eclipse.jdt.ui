@@ -150,7 +150,14 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayCreation)
 	 */
 	public final void endVisit(final ArrayCreation node) {
-		node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, node.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE));
+		final ConstraintVariable2 ancestor= (ConstraintVariable2) node.getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+		node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
+		final ArrayInitializer initializer= node.getInitializer();
+		if (initializer != null) {
+			final ConstraintVariable2 descendant= (ConstraintVariable2) initializer.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+			if (descendant != null)
+				fModel.createSubtypeConstraint(descendant, ancestor);
+		}
 	}
 
 	/*
@@ -158,8 +165,8 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 */
 	public final void endVisit(final ArrayInitializer node) {
 		final ITypeBinding binding= node.resolveTypeBinding();
-		if (binding != null) {
-			final ConstraintVariable2 ancestor= fModel.createIndependentTypeVariable(binding);
+		if (binding != null && binding.isArray()) {
+			final ConstraintVariable2 ancestor= fModel.createIndependentTypeVariable(binding.getElementType());
 			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
 			Expression expression= null;
 			ConstraintVariable2 descendant= null;
@@ -177,7 +184,12 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.ArrayType)
 	 */
 	public final void endVisit(final ArrayType node) {
-		final Type component= node.getComponentType();
+		ArrayType array= null;
+		Type component= node.getComponentType();
+		while (component instanceof ArrayType) {
+			array= (ArrayType) component;
+			component= array.getComponentType();
+		}
 		final ConstraintVariable2 variable= fModel.createTypeVariable(component);
 		if (variable != null) {
 			component.setProperty(PROPERTY_CONSTRAINT_VARIABLE, variable);
