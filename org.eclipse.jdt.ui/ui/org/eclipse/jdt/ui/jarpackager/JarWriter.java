@@ -55,6 +55,9 @@ public class JarWriter {
 	 * on the given JarPackage.
 	 *
 	 * @param jarPackage		the JAR specification
+	 * @param parent			the shell used to display question dialogs,
+	 *				 			or <code>null</code> if "false/no/cancel" is the answer
+	 * 							and no dialog should be shown
 	 * @throws	CoreException	to signal any other unusal termination.
 	 * 								This can also be used to return information
 	 * 								in the status object.
