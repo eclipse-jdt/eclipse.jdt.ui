@@ -101,7 +101,6 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 				excludedNames[i]= ""; //$NON-NLS-1$
 			}
 			
-			
 			ArrayList superNames= new ArrayList(superConstructorParamNames.length);
 			for (int i= 0; i < superConstructorParamNames.length; i++) {
 				superNames.add(superConstructorParamNames[i]);
@@ -116,6 +115,9 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 				if (k > 0) {
 					buf.append(", "); //$NON-NLS-1$	
 				}
+				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=42341
+				if (Flags.isFinal(fSelected[i].getFlags()))
+					buf.append("final "); //$NON-NLS-1$
 				buf.append(Signature.toString(fSelected[i].getTypeSignature()));				
 				buf.append(' ');
 				String accessName= NamingConventions.removePrefixAndSuffixForFieldName(project, fSelected[i].getElementName(), fSelected[i].getFlags());
