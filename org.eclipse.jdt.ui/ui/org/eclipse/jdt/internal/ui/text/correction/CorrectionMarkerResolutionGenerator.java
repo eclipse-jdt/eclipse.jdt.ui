@@ -164,7 +164,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return new IMarkerResolution[0]; 
+		return NO_RESOLUTIONS; 
 	}
 
 	private ICompilationUnit getCompilationUnit(IMarker marker) {
