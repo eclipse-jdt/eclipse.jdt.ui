@@ -1650,7 +1650,7 @@ JavaStructureDiffViewerCreator
 		name= "%HideEmptyPackages.label"
 		viewId= "org.eclipse.jdt.ui.PackagesView"
 		class= "org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter"
-		enabled= "true">
+		enabled= "false">
 	</filter>
 	<filter
 		id= "org.eclipse.jdt.internal.ui.PackagesView.EmptyInnerPackageFilter"
