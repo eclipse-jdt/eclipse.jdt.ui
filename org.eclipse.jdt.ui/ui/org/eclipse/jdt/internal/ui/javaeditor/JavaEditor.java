@@ -2568,10 +2568,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see AbstractTextEditor#doSetInput
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
-		if (fEncodingSupport != null)
-			fEncodingSupport.reset();
-		setOutlinePageInput(fOutlinePage, input);
-		
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (!(sourceViewer instanceof ISourceViewerExtension2)) {
 			setNewPreferenceStore(createNewPreferenceStore(input));
@@ -2594,6 +2590,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			enableBrowserLikeLinks();
 		
 		super.doSetInput(input);
+		if (fEncodingSupport != null)
+			fEncodingSupport.reset();
+		setOutlinePageInput(fOutlinePage, input);
 	}
 
 	/**
