@@ -439,15 +439,15 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 			IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(getEditor());
 			assistant.setContentAssistProcessor(javaProcessor, IDocument.DEFAULT_CONTENT_TYPE);
 			
-			// Register the same processor for strings and single line comments to get code completion at the start of those partitions.
+			// Register the java processor for single line comments to get the NLS template working inside comments
 			IContentAssistProcessor wordProcessor= new WordCompletionProcessor();
 			CompoundContentAssistProcessor compoundProcessor= new CompoundContentAssistProcessor();
 			compoundProcessor.add(javaProcessor);
 			compoundProcessor.add(wordProcessor);
 			
-			assistant.setContentAssistProcessor(compoundProcessor, IJavaPartitions.JAVA_STRING);
 			assistant.setContentAssistProcessor(compoundProcessor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 			
+			assistant.setContentAssistProcessor(wordProcessor, IJavaPartitions.JAVA_STRING);
 			assistant.setContentAssistProcessor(wordProcessor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 
 			assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), IJavaPartitions.JAVA_DOC);
