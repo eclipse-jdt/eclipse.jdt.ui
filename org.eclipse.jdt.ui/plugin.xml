@@ -404,12 +404,14 @@
 	   	class="org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher"
 	  	modes="run, debug"
 	  	labelProvider="org.eclipse.jdt.internal.ui.launcher.LauncherLabelProvider"
+		description="Launch a local Java program"
 	  	wizard="org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard"
  	  	label= "Java Application"/>
    <launcher
 		id="org.eclipse.jdt.ui.launcher.JDIAttachLauncher"
 		class="org.eclipse.jdt.internal.debug.ui.JDIAttachLauncher"
 		label="Remote Java Application"
+		description="Attach to a remote Java program"
 		wizard="org.eclipse.jdt.internal.debug.ui.JDIAttachLauncherWizard"
    		modes="debug" />
    	<launcher
