@@ -68,10 +68,16 @@ public class ImportEdit extends SimpleTextEdit {
 			return;
 		if ("java.lang".equals(qualifiedTypeName.substring(0, index)))
 			return;
+		if (fAddedImports.contains(qualifiedTypeName))	//do not add twice
+			return;
+			
 		fAddedImports.add(qualifiedTypeName);
 	}
 	
 	public void removeImport(String qualifiedTypeName) {
+		if (fRemovedImports.contains(qualifiedTypeName))	//do not remove twice
+			return;
+		
 		fRemovedImports.add(qualifiedTypeName);
 	}
 	
