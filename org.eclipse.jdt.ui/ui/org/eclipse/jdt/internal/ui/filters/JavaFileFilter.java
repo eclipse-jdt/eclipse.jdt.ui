@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * Filters out all compilation units and class files elements.
  */
-public class CuAndClassFileFilter  extends AbstractFilter {
+public class JavaFileFilter  extends AbstractFilter {
 	
 	private boolean fFilterContainers;
 	

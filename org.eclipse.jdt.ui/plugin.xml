@@ -1635,7 +1635,7 @@ JavaStructureDiffViewerCreator
 		id= "org.eclipse.jdt.ui.PackageExplorer.CuAndClassFileFilter"
 		name= "%HideJavaFiles.label"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
-		class= "org.eclipse.jdt.internal.ui.filters.CuAndClassFileFilter"
+		class= "org.eclipse.jdt.internal.ui.filters.JavaFileFilter"
 		enabled= "false">
 	</filter>
 
