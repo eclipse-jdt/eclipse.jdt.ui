@@ -40,7 +40,7 @@ public class JavaIndenter {
 
 	/** The document being scanned. */
 	private IDocument fDocument;
-	/** The indentation accumulated by <code>findPreviousIndenationUnit</code>. */
+	/** The indentation accumulated by <code>findReferencePosition</code>. */
 	private int fIndent;
 	/**
 	 * The absolute (character-counted) indentation offset for special cases
@@ -394,7 +394,7 @@ public class JavaIndenter {
 						if (isFirstTokenOnLine)
 							matchParen= true;
 						break;
-					}
+				}
 			} catch (BadLocationException e) {
 			}
 		} else {
@@ -572,6 +572,11 @@ public class JavaIndenter {
 	 * @return the reference offset of the start of the statement 
 	 */
 	private int skipToStatementStart(boolean danglingElse, boolean isInBlock) {
+		final int NOTHING= 0;
+		final int READ_PARENS= 1;
+		final int READ_IDENT= 2;
+		int mayBeMethodBody= NOTHING;
+		boolean isTypeBody= false;
 		while (true) {
 			nextToken();
 			
@@ -580,9 +585,7 @@ public class JavaIndenter {
 					// exit on all block introducers
 					case Symbols.TokenIF:
 					case Symbols.TokenELSE:
-					case Symbols.TokenSYNCHRONIZED:
 					case Symbols.TokenCOLON:
-					case Symbols.TokenSTATIC:
 					case Symbols.TokenCATCH:
 					case Symbols.TokenDO:
 					case Symbols.TokenWHILE:
@@ -590,6 +593,23 @@ public class JavaIndenter {
 					case Symbols.TokenFOR:
 					case Symbols.TokenTRY:
 						return fPosition;
+					
+					case Symbols.TokenSTATIC:
+						mayBeMethodBody= READ_IDENT; // treat static blocks like methods
+						break;
+					
+					case Symbols.TokenSYNCHRONIZED:
+						// if inside a method declaration, use body indentation
+						// else use block indentation.
+						if (mayBeMethodBody != READ_IDENT)
+							return fPosition;
+						break;
+					
+					case Symbols.TokenCLASS:
+					case Symbols.TokenINTERFACE:
+					case Symbols.TokenENUM:
+						isTypeBody= true;
+						break;
 						
 					case Symbols.TokenSWITCH:
 						fIndent= prefCaseIndent();
@@ -606,6 +626,9 @@ public class JavaIndenter {
 				case Symbols.TokenLBRACKET:
 				case Symbols.TokenSEMICOLON:
 				case Symbols.TokenEOF:
+					if (isInBlock)
+						fIndent= getBlockIndent(mayBeMethodBody == READ_IDENT, isTypeBody);
+					// else: fIndent set by previous calls
 					return fPreviousPos;
 					
 				case Symbols.TokenCOLON:
@@ -618,13 +641,18 @@ public class JavaIndenter {
 					// RBRACE is a little tricky: it can be the end of an array definition, but
 					// usually it is the end of a previous block
 					pos= fPreviousPos; // store state
-					if (skipScope() && looksLikeArrayInitializerIntro())
+					if (skipScope() && looksLikeArrayInitializerIntro()) {
 						continue; // it's an array
-					else
+					} else {
+						if (isInBlock)
+							fIndent= getBlockIndent(mayBeMethodBody == READ_IDENT, isTypeBody);
 						return pos; // it's not - do as with all the above
+					}
 					
 				// scopes: skip them
 				case Symbols.TokenRPAREN:
+					if (isInBlock)
+						mayBeMethodBody= READ_PARENS;
 				case Symbols.TokenRBRACKET:
 					pos= fPreviousPos;
 					if (skipScope())
@@ -664,6 +692,11 @@ public class JavaIndenter {
 						fPosition= pos;
 						break;
 					}
+				case Symbols.TokenIDENT:
+					if (mayBeMethodBody == READ_PARENS)
+						mayBeMethodBody= READ_IDENT;
+					break;
+					
 				default:
 					// keep searching
 					
@@ -672,6 +705,15 @@ public class JavaIndenter {
 		}
 	}
 	
+	private int getBlockIndent(boolean isMethodBody, boolean isTypeBody) {
+		if (isTypeBody)
+			return prefTypeIndent() + (prefIndentBracesForTypes() ? 1 : 0);
+		else if (isMethodBody)
+			return prefMethodBodyIndent() + (prefIndentBracesForMethods() ? 1 : 0);
+		else
+			return fIndent;
+	}
+
 	/**
 	 * Returns true if the colon at the current position is part of a conditional
 	 * (ternary) expression, false otherwise.
@@ -836,7 +878,7 @@ public class JavaIndenter {
 	 * 
 	 * @param bound the bound for the search for the first token after the scope 
 	 * introduction.
-	 * @return
+	 * @return the indent
 	 */
 	private int handleScopeIntroduction(int bound) {
 		switch (fToken) {
@@ -1065,6 +1107,7 @@ public class JavaIndenter {
 		if (fToken == Symbols.TokenIDENT) { // method name
 			do nextToken();
 			while (skipBrackets()); // optional brackets for array valued return types
+			// [1.5] TODO also need to skip angular brackets for generic return types
 			return fToken == Symbols.TokenIDENT; // type name
 			
 		}
@@ -1316,6 +1359,35 @@ public class JavaIndenter {
 	}
 
 	private int prefBlockIndent() {
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BLOCK);
+			if (option.equals(DefaultCodeFormatterConstants.FALSE))
+				return 0;
+		}
+		
+		return 1; // sensible default
+	}
+	
+	private int prefMethodBodyIndent() {
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BODY);
+			if (option.equals(DefaultCodeFormatterConstants.FALSE))
+				return 0;
+		}
+		
+		return 1; // sensible default
+	}
+	
+	private int prefTypeIndent() {
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER);
+			if (option.equals(DefaultCodeFormatterConstants.FALSE))
+				return 0;
+		}
+		
 		return 1; // sensible default
 	}
 	
@@ -1343,6 +1415,16 @@ public class JavaIndenter {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
 			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION);
+			return option.equals(DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED);
+		}
+		
+		return false; // sensible default
+	}
+	
+	private boolean prefIndentBracesForTypes() {
+		Plugin plugin= JavaCore.getPlugin();
+		if (plugin != null) {
+			String option= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION);
 			return option.equals(DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED);
 		}
 		
