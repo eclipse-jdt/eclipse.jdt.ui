@@ -1682,8 +1682,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					return;				
 				}
 
-				// Check whether right hand character of caret is valid identifier start
-				if (Character.isJavaIdentifierStart(document.getChar(position))) {
+				// Check whether right hand character of caret is valid identifier part
+				if (Character.isJavaIdentifierPart(document.getChar(position))) {
 
 					int offset= 0;
 					int order= CollationElementIterator.NULLORDER;
@@ -1698,8 +1698,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					do {
 						// Check whether we reached end of word
 						offset= iterator.getOffset();
-						if (!Character.isJavaIdentifierPart(document.getChar(position + offset)))
-							throw new BadLocationException();
+						if (!Character.isJavaIdentifierPart(document.getChar(position + offset))) {
+							if (offset > 0)
+								setCaretPosition(position + offset - 1);
+							super.run();
+							return;
+						}
 
 						// Test next characters
 						order= iterator.next();
@@ -1711,14 +1715,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 					} while (order != CollationElementIterator.NULLORDER);
 
-					// Check for leading underscores				
 					position += offset;
-					if (Character.getType(document.getChar(position - 1)) != Character.CONNECTOR_PUNCTUATION) {
-						setCaretPosition(position);
-						getTextWidget().showSelection();
-						fireSelectionChanged();
-						return;
-					}
+					setCaretPosition(position);
+					getTextWidget().showSelection();
+					fireSelectionChanged();
+					return;
 				}
 			} catch (BadLocationException exception) {
 				// Use default behavior
@@ -1887,9 +1888,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						// Check whether we reached begin of word or single upper-case start
 						offset= iterator.getOffset();
 						character= document.getChar(region.getOffset() + offset);
-						if (!Character.isJavaIdentifierPart(character))
-							throw new BadLocationException();
-						else if (Character.isUpperCase(character)) {
+						if (!Character.isJavaIdentifierPart(character)) {
+							int caret= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+							int current= region.getOffset() + offset + 2;
+							if (caret > current)
+								setCaretPosition(current);
+							super.run();
+							return;
+						} else if (Character.isUpperCase(character)) {
 							++offset;
 							break;
 						}
