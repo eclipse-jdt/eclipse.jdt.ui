@@ -31,7 +31,7 @@ public class ProjectRenameParticipant extends JUnitRenameParticipant {
 	 * {@inheritDoc}
 	 */
 	public String getName() {
-		return JUnitMessages.getString("Project Rename Participant");  //$NON-NLS-1$
+		return JUnitMessages.getString("TypeRenameParticipant.name");  //$NON-NLS-1$
 	}
 
 	protected void createChangeForConfigs(List changes, ILaunchConfiguration[] configs) throws CoreException {
