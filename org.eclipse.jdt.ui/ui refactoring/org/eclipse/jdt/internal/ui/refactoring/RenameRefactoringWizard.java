@@ -17,7 +17,10 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
@@ -60,6 +63,16 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	
 	private IRenameRefactoring getRenameRefactoring(){
 		return (IRenameRefactoring)getRefactoring();	
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#hasPreviewPage()
+	 */
+	protected boolean hasPreviewPage() {
+		Refactoring refactoring= getRefactoring();
+		return (refactoring instanceof IReferenceUpdatingRefactoring ||
+				refactoring instanceof ITextUpdatingRefactoring ||
+				refactoring instanceof IQualifiedNameUpdatingRefactoring);
 	}
 	
 	protected RefactoringStatus validateNewName(String newName){
