@@ -601,7 +601,7 @@ public class ExtractTempRefactoring extends Refactoring {
     	}
     	if (parent instanceof ExpressionStatement)
     		return false;	
-    	if (isLeftValue(parent))
+    	if (isLeftValue(node))
 			return false;	
         return true;
     }
