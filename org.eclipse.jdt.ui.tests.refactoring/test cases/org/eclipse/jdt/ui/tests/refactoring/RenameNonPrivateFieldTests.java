@@ -230,8 +230,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 
 	public void test16() throws Exception{
-		printTestDisabledMessage("text for bug 20693");
-//		helper2();
+//		printTestDisabledMessage("text for bug 20693");
+		helper2();
 	}
 	
 	public void testBug5821() throws Exception{
