@@ -809,7 +809,16 @@ public class PushDownRefactoring extends Refactoring {
 		ASTRewrite rewrite= getRewriteFor(typeDeclaration);
 		MethodDeclaration newMethod= createNewMethodDeclarationNode(info, rewrite);
 		rewrite.markAsInserted(newMethod);
-		typeDeclaration.bodyDeclarations().add(newMethod);
+		int index= computeIndexForNewMethodDeclaration(typeDeclaration);
+		typeDeclaration.bodyDeclarations().add(index, newMethod);
+	}
+	
+	private static int computeIndexForNewMethodDeclaration(TypeDeclaration typeDeclaration) {
+		int index= getIndexOfLastBodyDeclarationOfKind(typeDeclaration, ASTNode.METHOD_DECLARATION);
+		if (index == -1)
+			return 1 + getIndexOfLastBodyDeclarationOfKind(typeDeclaration, ASTNode.FIELD_DECLARATION);
+		else	
+			return 1 + index;
 	}
 
 	private MethodDeclaration createNewMethodDeclarationNode(MemberActionInfo info, ASTRewrite rewrite) throws JavaModelException {
@@ -884,9 +893,23 @@ public class PushDownRefactoring extends Refactoring {
 		ASTRewrite rewrite= getRewriteFor(typeDeclaration);
 		FieldDeclaration newField= createNewFieldDeclarationNode(info,rewrite);
 		rewrite.markAsInserted(newField);
-		typeDeclaration.bodyDeclarations().add(newField);
+		int index= computeIndexForNewFieldDeclaration(typeDeclaration);
+		typeDeclaration.bodyDeclarations().add(index, newField);
 	}
 	
+	private static int computeIndexForNewFieldDeclaration(TypeDeclaration typeDeclaration) {
+		return 1 + getIndexOfLastBodyDeclarationOfKind(typeDeclaration, ASTNode.FIELD_DECLARATION);
+	}
+	
+	private static int getIndexOfLastBodyDeclarationOfKind(TypeDeclaration typeDeclaration, int nodeType) {
+		List list= typeDeclaration.bodyDeclarations();
+		for (int i= list.size() - 1; i >= 0; i--) {
+			if (((BodyDeclaration)list.get(i)).getNodeType() == nodeType)
+				return i;
+		}
+		return -1;
+	}
+
 	private FieldDeclaration createNewFieldDeclarationNode(MemberActionInfo info, ASTRewrite rewrite) throws JavaModelException {
 		Assert.isTrue(info.isFieldInfo());
 		IField field= (IField)info.getMember();
