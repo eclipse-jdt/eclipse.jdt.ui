@@ -59,6 +59,11 @@ public class NLSRefactoring extends Refactoring {
 	public static final String PROPERTY_FILE_EXT= ".properties"; //$NON-NLS-1$
 	private static final String fgLineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-2$ //$NON-NLS-1$
 
+	/*
+	 * see JavaCore::getDefaultOptions
+	 */
+	private static final String FORMATTER_LINE_LENGTH_OPTION= "org.eclipse.jdt.core.formatter.lineSplit";//$NON-NLS-1$
+
 	private String fAccessorClassName= "Messages";  //$NON-NLS-1$
 	
 	private boolean fCreateAccessorClass= true;
@@ -727,13 +732,23 @@ public class NLSRefactoring extends Refactoring {
 	
 	//--bundle class source creation
 	private String createAccessorCUSource() throws JavaModelException{
-		StringBuffer buff= new StringBuffer();
-		buff.append(createPackageDeclaration())
+		return new CodeFormatter(getFormatterOptions()).format(getUnformattedSource());
+	}
+
+	private String getUnformattedSource() throws JavaModelException {
+		return new StringBuffer()
+			.append(createPackageDeclaration())
 			.append(fgLineDelimiter)
 			.append(createImports())
 			.append(fgLineDelimiter)
-			.append(createClass());
-		return new CodeFormatter((Map)null).format(buff.toString());
+			.append(createClass())
+			.toString();
+	}
+
+	private static Map getFormatterOptions() {
+		Map formatterOptions= JavaCore.getOptions();
+		formatterOptions.put(FORMATTER_LINE_LENGTH_OPTION, "0");
+		return formatterOptions;
 	}
 	
 	private StringBuffer createPackageDeclaration(){
