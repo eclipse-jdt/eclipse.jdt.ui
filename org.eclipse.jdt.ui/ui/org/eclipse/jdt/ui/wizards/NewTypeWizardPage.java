@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -1233,6 +1234,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", packStatement, false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
 
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
+			// add an import that will be removed again. Having this import solves 14661
+			imports.addImport(pack.getElementName(), getTypeName());
 			
 			String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, parentCU);
 			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 3));
@@ -1248,6 +1251,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 			ICompilationUnit parentCU= enclosingType.getCompilationUnit();
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, true);
+
+			// add an import that will be removed again. Having this import solves 14661
+			imports.addImport(parentCU.getParent().getElementName(), Signature.getQualifier(parentCU.getElementName()));
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
 			String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, parentCU);
@@ -1343,7 +1349,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			buf.append(typeComment);
 			buf.append(lineDelimiter);
 		}
-		
+			
 		int modifiers= getModifiers();
 		buf.append(Flags.toString(modifiers));
 		if (modifiers != 0) {
