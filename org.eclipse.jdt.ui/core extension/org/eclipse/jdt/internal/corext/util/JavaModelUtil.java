@@ -533,6 +533,13 @@ public final class JavaModelUtil {
 	}
 	
 	/**
+	 * @return <code>true</code> iff the type is an interface or an annotation
+	 */
+	public static boolean isInterfaceOrAnnotation(IType type) throws JavaModelException {
+		return type.isInterface() || type.isAnnotation();
+	}
+	
+	/**
 	 * Returns true if the element is on the build path of the given project
 	 * @deprecated Use jproject.isOnClasspath(element);
 	 */	

@@ -383,7 +383,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	private static boolean isInstanceField(IField field) throws CoreException{
-		if (field.getDeclaringType().isInterface())
+		if (JavaModelUtil.isInterfaceOrAnnotation(field.getDeclaringType()))
 			return false;
 		else 
 			return ! JdtFlags.isStatic(field);

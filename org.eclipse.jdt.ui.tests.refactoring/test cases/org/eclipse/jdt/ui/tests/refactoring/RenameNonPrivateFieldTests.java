@@ -422,4 +422,12 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		helper2("buddy", "other");
 	}
 	
+	public void testAnnotation1() throws Exception {
+		helper2("ZERO", "ZORRO");
+	}
+	
+	public void testAnnotation2() throws Exception {
+		helper2("ZERO", "ZORRO");
+	}
+	
 }
