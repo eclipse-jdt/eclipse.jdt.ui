@@ -174,8 +174,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 	private static IPath getCorrespondingPath(Object element) {
 		if (element instanceof IJavaElement) {
 			IJavaElement elem= (IJavaElement) element;
-			IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-			if (root != null && !root.isArchive()) {
+			if (!elem.isReadOnly()) { // only modifieable elements can get error ticks
 				return elem.getPath();
 			}
 			return null;
