@@ -31,10 +31,10 @@ public class WorkspaceReferenceTest extends TestCase {
 	}
 	
 	public void testSimpleMethodRef() throws Exception {
-		assertEquals(9, SearchTest.countMethodRefs("junit.framework.Test", "countTestCases", new String[0]));
+		assertEquals(9, SearchTestHelper.countMethodRefs("junit.framework.Test", "countTestCases", new String[0]));
 	}
 
 	public void testFindOverridden() throws Exception {
-		assertEquals(6, SearchTest.countMethodRefs("junit.framework.TestCase", "countTestCases", new String[0]));
+		assertEquals(6, SearchTestHelper.countMethodRefs("junit.framework.TestCase", "countTestCases", new String[0]));
 	}
 }

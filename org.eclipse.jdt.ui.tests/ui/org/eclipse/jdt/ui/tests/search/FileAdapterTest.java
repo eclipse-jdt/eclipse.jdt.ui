@@ -37,7 +37,7 @@ public class FileAdapterTest extends TestCase {
 	}
 	
 	public void testGetFile() throws Exception {
-		JavaSearchQuery query= SearchTest.runTypeRefQuery("junit.framework.Test");
+		JavaSearchQuery query= SearchTestHelper.runTypeRefQuery("junit.framework.Test");
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
 		IFileMatchAdapter adapter= result.getFileMatchAdapter();
 		Object[] elements= result.getElements();

@@ -131,10 +131,14 @@ public class TreeContentProviderTest extends TestCase {
 		fProvider.inputChanged(null, null, fResult);
 	}
 	
+	protected void tearDown() throws Exception {
+		super.tearDown();
+	}
+	
 	public void testSimpleAdd() throws Exception {
-		IMethod method= SearchTest.getMethod("junit.framework.TestCase", "getName", new String[0]);
+		IMethod method= SearchTestHelper.getMethod("junit.framework.TestCase", "getName", new String[0]);
 		addMatch(new Match(method, 0, 1));
-		IType type= SearchTest.getType("junit.framework.TestCase");
+		IType type= SearchTestHelper.getType("junit.framework.TestCase");
 		IPackageFragment pkg= type.getPackageFragment();
 		IJavaProject project= pkg.getJavaProject();
 		IPackageFragmentRoot root= (IPackageFragmentRoot) pkg.getParent();
@@ -157,7 +161,7 @@ public class TreeContentProviderTest extends TestCase {
 	}
 	
 	public void testRemove() throws Exception {
-		IMethod method= SearchTest.getMethod("junit.framework.TestCase", "getName", new String[0]);
+		IMethod method= SearchTestHelper.getMethod("junit.framework.TestCase", "getName", new String[0]);
 		IType type= method.getDeclaringType();
 		IPackageFragment pkg= type.getPackageFragment();
 		Match match= new Match(method, 0, 1);
@@ -177,7 +181,7 @@ public class TreeContentProviderTest extends TestCase {
 	}
 	
 	public void testRemoveParentFirst() throws Exception {
-		IMethod method= SearchTest.getMethod("junit.framework.TestCase", "getName", new String[0]);
+		IMethod method= SearchTestHelper.getMethod("junit.framework.TestCase", "getName", new String[0]);
 		IType type= method.getDeclaringType();
 		IPackageFragment pkg= type.getPackageFragment();
 		
@@ -200,7 +204,7 @@ public class TreeContentProviderTest extends TestCase {
 	}
 
 	public void testRemoveParentLast() throws Exception {
-		IMethod method= SearchTest.getMethod("junit.framework.TestCase", "getName", new String[0]);
+		IMethod method= SearchTestHelper.getMethod("junit.framework.TestCase", "getName", new String[0]);
 		IType type= method.getDeclaringType();
 		IPackageFragment pkg= type.getPackageFragment();
 		

@@ -36,8 +36,8 @@ public class SearchLeakTest extends LeakTestCase {
 	}
 	
 	public void testRemoveSearchQueries() throws Exception {
-		JavaSearchQuery query1= SearchTest.runMethodRefQuery("junit.framework.Test", "countTestCases", new String[0]);
-		JavaSearchQuery query2= SearchTest.runMethodRefQuery("junit.framework.TestCase", "countTestCases", new String[0]);
+		JavaSearchQuery query1= SearchTestHelper.runMethodRefQuery("junit.framework.Test", "countTestCases", new String[0]);
+		JavaSearchQuery query2= SearchTestHelper.runMethodRefQuery("junit.framework.TestCase", "countTestCases", new String[0]);
 		InternalSearchUI.getInstance().removeQuery(query1);
 		InternalSearchUI.getInstance().removeQuery(query2);	
 		query1= null;
@@ -45,8 +45,8 @@ public class SearchLeakTest extends LeakTestCase {
 		assertEquals(0, getInstanceCount(JavaSearchResult.class));
 	}
 	public void testRemoveAllQueries() throws Exception {
-		SearchTest.runMethodRefQuery("junit.framework.Test", "countTestCases", new String[0]);
-		SearchTest.runMethodRefQuery("junit.framework.TestCase", "countTestCases", new String[0]);
+		SearchTestHelper.runMethodRefQuery("junit.framework.Test", "countTestCases", new String[0]);
+		SearchTestHelper.runMethodRefQuery("junit.framework.TestCase", "countTestCases", new String[0]);
 		InternalSearchUI.getInstance().removeAllQueries();
 		assertEquals(0, getInstanceCount(JavaSearchResult.class));
 	}

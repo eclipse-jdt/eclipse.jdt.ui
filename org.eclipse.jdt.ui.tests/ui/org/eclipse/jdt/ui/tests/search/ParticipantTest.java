@@ -72,7 +72,7 @@ public class ParticipantTest extends TestCase {
 	}
 	
 	public void testSimpleParticipant() throws Exception {
-		JavaSearchQuery query= SearchTest.runMethodRefQuery("frufru", new String[0]);
+		JavaSearchQuery query= SearchTestHelper.runMethodRefQuery("frufru", new String[0]);
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
 		assertEquals(20, result.getMatchCount());
 		
