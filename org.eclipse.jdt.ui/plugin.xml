@@ -264,7 +264,8 @@
 <extension
 	point= "org.eclipse.ui.markerUpdaters">
 	<updater id="org.eclipse.jdt.ui.markerUpdaters.JavaSearchMarkerUpdater"
-		class="org.eclipse.jdt.internal.ui.search.JavaSearchMarkerUpdater">
+		class="org.eclipse.jdt.internal.ui.search.JavaSearchMarkerUpdater"
+		markerType="org.eclipse.search.searchmarker">
 	</updater>
 </extension>
 
