@@ -31,12 +31,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -118,12 +114,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 					fTableViewer.refresh();
 				}
 			});
-			try {
-				fTableViewer.setInput(getUseSupertypeRefactoring().getSuperTypes());
-			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, RefactoringMessages.getString("UseSupertypeInputPage.Use_Supertype"), RefactoringMessages.getString("UseSupertypeInputPage.Internal_Error")); //$NON-NLS-1$ //$NON-NLS-2$
-				fTableViewer.setInput(new IType[0]);
-			}
+			fTableViewer.setInput(getUseSupertypeRefactoring().getSuperTypes());
 			fTableViewer.getTable().setSelection(0);
 		}
 	
@@ -134,15 +125,10 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		 * @see org.eclipse.jface.wizard.IWizardPage#getNextPage()
 		 */
 		public IWizardPage getNextPage() {
-			try {
-				initializeRefactoring();
-				IWizardPage nextPage= super.getNextPage();
-				updateUpdateLabels();
-				return nextPage;
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				return null;
-			}
+			initializeRefactoring();
+			IWizardPage nextPage= super.getNextPage();
+			updateUpdateLabels();
+			return nextPage;
 		}
 
 		private void updateUpdateLabels() {
@@ -180,24 +166,19 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
 		 */
 		public boolean performFinish(){
-			try {
-				initializeRefactoring();
-				boolean superFinish= super.performFinish();
-				if (! superFinish)
-					return false;
-				IChange c= getRefactoringWizard().getChange();
-				if (c instanceof CompositeChange && ((CompositeChange)c).getChildren().length == 0) {
-					updateUpdateLabels();
-					return false;
-				}
-				return superFinish;
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+			initializeRefactoring();
+			boolean superFinish= super.performFinish();
+			if (! superFinish)
+				return false;
+			IChange c= getRefactoringWizard().getChange();
+			if (c instanceof CompositeChange && ((CompositeChange)c).getChildren().length == 0) {
+				updateUpdateLabels();
 				return false;
 			}
+			return superFinish;
 		}
 
-		private void initializeRefactoring() throws JavaModelException {
+		private void initializeRefactoring() {
 			StructuredSelection ss= (StructuredSelection)fTableViewer.getSelection();
 			getUseSupertypeRefactoring().setSuperTypeToUse((IType)ss.getFirstElement());
 		}
