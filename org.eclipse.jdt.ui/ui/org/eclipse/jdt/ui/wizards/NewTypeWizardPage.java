@@ -58,13 +58,13 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -91,6 +91,55 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * @since 2.0
  */
 public abstract class NewTypeWizardPage extends NewContainerWizardPage {
+
+	/**
+	 * Class used in stub creation routines to add imports needed in the created stubs.
+	 */
+	public static class ImportsManager {
+
+		private IImportsStructure fImportsStructure;
+
+		/**
+		 * For internal use only. Package visible.
+		 */
+		ImportsManager(IImportsStructure structure) {
+			fImportsStructure= structure;
+		}
+
+		/**
+		 * For internal use only. Package visible.
+		 */	
+		IImportsStructure getImportsStructure() {
+			return fImportsStructure;
+		}
+				
+		/**
+		 * Adds a new import declaration that is sorted in the existing imports.
+		 * If an import already exists or the import would conflict with another import
+		 * of an other type with the same simple name  the import is not added.
+		 * @param qualifiedTypeName The fully qualified name of the type to import
+		 *        (dot separated)
+		 * @return Retuns the simple type name that can be used in the code or the
+		 * fully qualified type name if an import conflict prevented the import.
+		 */				
+		public String addImport(String qualifiedTypeName) {
+			return fImportsStructure.addImport(qualifiedTypeName);
+		}
+
+
+	}
+	
+	/**
+	 * Flags used in setModifiers and getModifiers (compatible with
+	 * org.eclipse.jdt.core.Flags)
+	 */
+	public int F_PUBLIC = IConstants.AccPublic;
+	public int F_PRIVATE = IConstants.AccPrivate;
+	public int F_PROTECTED = IConstants.AccProtected;
+	public int F_STATIC = IConstants.AccStatic;
+	public int F_FINAL = IConstants.AccFinal;
+	public int F_ABSTRACT = IConstants.AccAbstract;
+
 	
 	private final static String PAGE_NAME= "NewTypeWizardPage"; //$NON-NLS-1$
 	
@@ -653,28 +702,30 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public int getModifiers() {
 		int mdf= 0;
 		if (fAccMdfButtons.isSelected(PUBLIC_INDEX)) {
-			mdf+= IConstants.AccPublic;
+			mdf+= F_PUBLIC;
 		} else if (fAccMdfButtons.isSelected(PRIVATE_INDEX)) {
-			mdf+= IConstants.AccPrivate;
+			mdf+= F_PRIVATE;
 		} else if (fAccMdfButtons.isSelected(PROTECTED_INDEX)) {	
-			mdf+= IConstants.AccProtected;
+			mdf+= F_PROTECTED;
 		}
 		if (fOtherMdfButtons.isSelected(ABSTRACT_INDEX) && (fStaticMdfIndex != 0)) {	
-			mdf+= IConstants.AccAbstract;
+			mdf+= F_ABSTRACT;
 		}
 		if (fOtherMdfButtons.isSelected(FINAL_INDEX)) {	
-			mdf+= IConstants.AccFinal;
+			mdf+= F_FINAL;
 		}
 		if (fOtherMdfButtons.isSelected(fStaticMdfIndex)) {	
-			mdf+= IConstants.AccStatic;
+			mdf+= F_STATIC;
 		}
 		return mdf;
 	}
 
 	/**
 	 * Sets the modifiers.
+	 * @param modifiers F_PUBLIC, F_PRIVATE, F_PROTECTED, F_ABSTRACT, F_FINAL
+	 * or  F_STATIC or a valid combination.
 	 * @param canBeModified Selects if the modifiers can be changed by the user
-	 * @see IConstants 
+	 * @see Flags 
 	 */		
 	public void setModifiers(int modifiers, boolean canBeModified) {
 		if (Flags.isPublic(modifiers)) {
@@ -699,7 +750,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fAccMdfButtons.setEnabled(canBeModified);
 		fOtherMdfButtons.setEnabled(canBeModified);
 	}
-	
+		
 	/**
 	 * Gets the content of the super class text field.
 	 */
@@ -1183,7 +1234,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
 			
-			String content= constructTypeStub(imports, lineDelimiter, parentCU);
+			String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, parentCU);
 			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 3));
 		} else {
 			IType enclosingType= getEnclosingType();
@@ -1199,7 +1250,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, true);
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
-			String content= constructTypeStub(imports, lineDelimiter, parentCU);
+			String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, parentCU);
 			IJavaElement[] elems= enclosingType.getChildren();
 			IJavaElement sibling= elems.length > 0 ? elems[0] : null;
 			
@@ -1253,7 +1304,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	// ---- construct cu body----------------
 		
-	private void writeSuperClass(StringBuffer buf, IImportsStructure imports) {
+	private void writeSuperClass(StringBuffer buf, ImportsManager imports) {
 		String typename= getSuperClass();
 		if (fIsClass && typename.length() > 0 && !"java.lang.Object".equals(typename)) { //$NON-NLS-1$
 			buf.append(" extends "); //$NON-NLS-1$
@@ -1263,7 +1314,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 	}
 	
-	private void writeSuperInterfaces(StringBuffer buf, IImportsStructure imports) {
+	private void writeSuperInterfaces(StringBuffer buf, ImportsManager imports) {
 		List interfaces= getSuperInterfaces();
 		int last= interfaces.size() - 1;
 		if (last >= 0) {
@@ -1285,7 +1336,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/*
 	 * Called from createType to construct the source for this type
 	 */		
-	private String constructTypeStub(IImportsStructure imports, String lineDelimiter, ICompilationUnit parentCU) {	
+	private String constructTypeStub(ImportsManager imports, String lineDelimiter, ICompilationUnit parentCU) {	
 		StringBuffer buf= new StringBuffer();
 		String typeComment= getTypeComment(parentCU);
 		if (typeComment != null && typeComment.length() > 0) {
@@ -1311,20 +1362,31 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Called from createType to allow adding methods, fielse, inner types ect for the newly created type.
+	 * @deprecated Overwrite createTypeMembers(IType, IImportsManager, IProgressMonitor);
+	 */		
+	protected void createTypeMembers(IType newType, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+		//deprecated
+	}
+	
+	/**
+	 * Called from createType to allow adding methods, fields, inner types ect for the newly created type.
 	 * Implementors can use the create methods on the new type.
-	 * Formatting will be applied to the content by the createType
+	 * Formatting will be applied to the content by the createType. Imports are added after this call by the wizard
 	 * @param newType The new type to add members to
 	 * @param imports To add the needed imports to. 
 	 * @param monitor Progress monitor
 	 */		
-	protected void createTypeMembers(IType newType, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+	protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
+		// call for compatibility
+		createTypeMembers(newType, ((ImportsManager)imports).getImportsStructure(), monitor);
+		
 		// default implementation does nothing
 		// example would be
 		// String mainMathod= "public static void main(String[]) {}"
 		// createdType.createMethod(main, null, false, null);
-	}
+	}	
 	
+		
 	/**
 	 * Called from createType to get a file comment. By default the content of template
 	 * 'filecomment' is taken.
@@ -1363,11 +1425,20 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		return null;
 	}	
 	
+
+	/**
+	 * @deprecated Use createInheritedMethods(IType,boolean,boolean,IImportsManager,IProgressMonitor)
+	 */
+	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+		return createInheritedMethods(type, doConstructors, doUnimplementedMethods, new ImportsManager(imports), monitor);
+	}
+
+
 	/**
 	 * Creates the bodies of all unimplemented methods or/and all constructors and adds them to the type
 	 * Can be used by implementors of NewTypeWizardPage to add method stub checkboxes.
 	 */
-	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
+	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		ArrayList newMethods= new ArrayList();
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(monitor);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
@@ -1375,7 +1446,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (doConstructors) {
 			IType superclass= hierarchy.getSuperclass(type);
 			if (superclass != null) {
-				String[] constructors= StubUtility.evalConstructors(type, superclass, settings, imports);
+				String[] constructors= StubUtility.evalConstructors(type, superclass, settings, imports.getImportsStructure());
 				if (constructors != null) {
 					for (int i= 0; i < constructors.length; i++) {
 						newMethods.add(constructors[i]);
@@ -1385,7 +1456,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		}
 		if (doUnimplementedMethods) {
-			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, null, imports);
+			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, null, imports.getImportsStructure());
 			if (unimplemented != null) {
 				for (int i= 0; i < unimplemented.length; i++) {
 					newMethods.add(unimplemented[i]);					
@@ -1420,6 +1491,5 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		};
 	}	
-		
-			
+
 }
