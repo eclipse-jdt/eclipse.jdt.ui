@@ -49,7 +49,58 @@ public class TypeRules {
 	 * @return boolean Returns true if definedType = typeToAssign is true
 	 */
 	public static boolean canAssign(ITypeBinding typeToAssign, ITypeBinding definedType) {
-		return typeToAssign.isAssignmentCompatible(definedType);
+		//see bug 80715 
+		
+		// definedType = typeToAssign;
+		
+		String voidName= PrimitiveType.VOID.toString();
+		if (voidName.equals(typeToAssign.getName()) || voidName.equals(definedType.getName())) {
+			return false;
+		}
+
+		if (typeToAssign.isNullType()) {
+			return !definedType.isPrimitive();
+		}
+		if (definedType.isArray()) {
+			if (!typeToAssign.isArray()) {
+				return false; // can not assign a non-array type to an array
+			}
+			int definedDim= definedType.getDimensions();
+			int toAssignDim= typeToAssign.getDimensions();
+			if (definedDim == toAssignDim) {
+				definedType= definedType.getElementType();
+				typeToAssign= typeToAssign.getElementType();
+				if (typeToAssign.isPrimitive() && typeToAssign != definedType) {
+					return false; // can't assign arrays of different primitive types to each other
+				}
+				// fall through
+			} else if (definedDim < toAssignDim) {
+				return isArrayCompatible(definedType.getElementType());
+			} else {
+				return false;
+			}
+		}
+
+		if (typeToAssign.isPrimitive()) {
+			if (!definedType.isPrimitive()) {
+				return false;
+			}
+			PrimitiveType.Code toAssignCode= PrimitiveType.toCode(typeToAssign.getName());
+			PrimitiveType.Code definedTypeCode= PrimitiveType.toCode(definedType.getName());
+			return canAssignPrimitive(toAssignCode, definedTypeCode);
+		} else {
+			if (definedType.isPrimitive()) {
+				return false;
+			}
+
+			if (typeToAssign.isArray()) {
+				return isArrayCompatible(definedType);
+			}
+			if (isJavaLangObject(definedType)) { //$NON-NLS-1$
+				return true;
+			}
+			return Bindings.isSuperType(definedType, typeToAssign);
+		}
 	}
 
 	private static int getTypeOrder(Code type) {
@@ -93,7 +144,62 @@ public class TypeRules {
 	 * @return boolean Returns true if (castType) bindingToCast is a valid cast expression (can be unnecessary, but not invalid).
 	 */
 	public static boolean canCast(ITypeBinding castType, ITypeBinding bindingToCast) {
-		return bindingToCast.isCastCompatible(castType);
+		//see bug 80715 
+		
+		String voidName= PrimitiveType.VOID.toString();
+		
+		if (castType.isAnonymous() || castType.isNullType() || voidName.equals(castType.getName())) {
+			throw new IllegalArgumentException();
+		}
+		
+		if (castType == bindingToCast) {
+			return true;
+		}
+		
+		if (voidName.equals(bindingToCast.getName())) {
+			return false;
+		}
+		
+		if (bindingToCast.isArray()) {
+			if (!castType.isArray()) {
+				return isArrayCompatible(castType); // can not cast an arraytype to a non array type (except to Object, Serializable...)
+			}
+
+			int toCastDim= bindingToCast.getDimensions();
+			int castTypeDim= castType.getDimensions();
+			if (toCastDim == castTypeDim) {
+				bindingToCast= bindingToCast.getElementType();
+				castType= castType.getElementType();
+				if (castType.isPrimitive() && castType != bindingToCast) {
+					return false; // can't assign arrays of different primitive types to each other
+				}
+				// fall through
+			} else if (toCastDim < castTypeDim) {
+				return isArrayCompatible(bindingToCast.getElementType());
+			} else {
+				return isArrayCompatible(castType.getElementType());
+			}
+		}
+		if (castType.isPrimitive()) {
+			if (!bindingToCast.isPrimitive()) {
+				return false;
+			}
+			String boolName= PrimitiveType.BOOLEAN.toString();
+			return (!boolName.equals(castType.getName()) && !boolName.equals(bindingToCast.getName()));
+		} else {
+			if (bindingToCast.isPrimitive()) {
+				return false;
+			}
+			if (castType.isArray()) {
+				return isArrayCompatible(bindingToCast);
+			}
+			
+			if (castType.isInterface() || bindingToCast.isInterface() || isJavaLangObject(castType)) {
+				return true;
+			}
+			
+			return Bindings.isSuperType(bindingToCast, castType) || Bindings.isSuperType(castType, bindingToCast);
+		}
 	}
 	
 }
