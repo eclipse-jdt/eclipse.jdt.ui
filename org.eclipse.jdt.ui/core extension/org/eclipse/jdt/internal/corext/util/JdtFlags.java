@@ -151,6 +151,10 @@ public class JdtFlags {
 		return Flags.isSynthetic(member.getFlags());
 	}
 
+	public static boolean isAnnotation(IMember member) throws JavaModelException{
+		return Flags.isAnnotation(member.getFlags());
+	}
+
 	public static boolean isEnum(IMember member) throws JavaModelException{
 		return Flags.isEnum(member.getFlags());
 	}
