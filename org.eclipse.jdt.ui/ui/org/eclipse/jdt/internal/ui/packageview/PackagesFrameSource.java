@@ -8,10 +8,10 @@ package org.eclipse.jdt.internal.ui.packageview;
 import org.eclipse.ui.views.internal.framelist.TreeFrame;
 import org.eclipse.ui.views.internal.framelist.TreeViewerFrameSource;
 
-public class PackagesFrameSource extends TreeViewerFrameSource {
+class PackagesFrameSource extends TreeViewerFrameSource {
 	private PackageExplorerPart fPackagesExplorer;
 	
-	public PackagesFrameSource(PackageExplorerPart explorer) {
+	PackagesFrameSource(PackageExplorerPart explorer) {
 		super(explorer.getViewer());
 		fPackagesExplorer= explorer;
 	}

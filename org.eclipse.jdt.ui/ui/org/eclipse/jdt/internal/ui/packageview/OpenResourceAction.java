@@ -34,9 +34,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  * Open a resource (ClassFile, CompilationUnit, or ordinary resource) 
  * from the PackageViewer
  */
-public class OpenResourceAction extends SelectionProviderAction implements ISelectionChangedListener {	
+class OpenResourceAction extends SelectionProviderAction implements ISelectionChangedListener {	
 	
-	public OpenResourceAction(ISelectionProvider provider) {
+	OpenResourceAction(ISelectionProvider provider) {
 		super(provider, PackagesMessages.getString("OpenResource.action.label")); //$NON-NLS-1$
 		setDescription(PackagesMessages.getString("OpenResource.action.description")); //$NON-NLS-1$
 	}
@@ -46,20 +46,18 @@ public class OpenResourceAction extends SelectionProviderAction implements ISele
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		
 		while (iter.hasNext()) {
-			
 			Object element= iter.next();
-			
 			try {				
 				EditorUtility.openInEditor(element);			
-			} catch (JavaModelException x) {
+			} catch (JavaModelException e) {
 				
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-					JavaStatusConstants.INTERNAL_ERROR, PackagesMessages.getString("OpenResource.error.message"), x)); //$NON-NLS-1$
+					JavaStatusConstants.INTERNAL_ERROR, PackagesMessages.getString("OpenResource.error.message"), e)); //$NON-NLS-1$
 				
 				ErrorDialog.openError(shell, 
 					PackagesMessages.getString("OpenResource.error.title"), //$NON-NLS-1$
 					PackagesMessages.getString("OpenResource.error.messageProblems"),  //$NON-NLS-1$
-					x.getStatus());
+					e.getStatus());
 			
 			} catch (PartInitException x) {
 								
@@ -92,10 +90,6 @@ public class OpenResourceAction extends SelectionProviderAction implements ISele
 			return;
 		}		
 		Iterator resources= selection.iterator();
-		if (resources == null) {
-			setEnabled(false);
-			return;
-		}
 		while (resources.hasNext()) {
 			Object element= resources.next();
 			if (canOpen(element)) {
@@ -115,6 +109,7 @@ public class OpenResourceAction extends SelectionProviderAction implements ISele
 		try {
 			return (EditorUtility.getEditorInput(o) != null);
 		} catch (JavaModelException x) {
+			// fall through
 		}
 		return false;
 	}

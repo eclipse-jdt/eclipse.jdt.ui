@@ -51,11 +51,11 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
  * Drag support class to allow dragging of files and folder from
  * the packages view to another application.
  */
-public class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
+class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 	
 	private ISelectionProvider fProvider;
 	
-	public FileTransferDragAdapter(ISelectionProvider provider) {
+	FileTransferDragAdapter(ISelectionProvider provider) {
 		fProvider= provider;
 		Assert.isNotNull(fProvider);
 	}
@@ -149,19 +149,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	}
 	
 	private  void handleRefresh(DragSourceEvent event) {
-		final List elements= getResources();
-		final Set roots= new HashSet(10);
-
-		Iterator iter= elements.iterator();
-		while (iter.hasNext()) {
-			IResource resource= (IResource)iter.next();
-			IResource parent= resource.getParent();
-			if (parent == null) {
-				roots.add(resource);
-			} else {
-				roots.add(parent);
-			}
-		}
+		final Set roots= collectRoots(getResources());
 		
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor monitor) throws CoreException {
@@ -188,12 +176,27 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		
 		runOperation(op, true, false);
 	}
+
+	protected Set collectRoots(final List elements) {
+		final Set roots= new HashSet(10);
+		
+		Iterator iter= elements.iterator();
+		while (iter.hasNext()) {
+			IResource resource= (IResource)iter.next();
+			IResource parent= resource.getParent();
+			if (parent == null) {
+				roots.add(resource);
+			} else {
+				roots.add(parent);
+			}
+		}
+		return roots;
+	}
 	
 	private List getResources() {
 		ISelection s= fProvider.getSelection();
-		if (!(s instanceof IStructuredSelection)) {
+		if (!(s instanceof IStructuredSelection)) 
 			return null;
-		}
 		
 		List result= new ArrayList(10);
 		Iterator iter= ((IStructuredSelection)s).iterator();

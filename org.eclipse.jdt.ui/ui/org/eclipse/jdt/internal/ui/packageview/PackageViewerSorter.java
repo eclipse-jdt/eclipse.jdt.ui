@@ -37,8 +37,7 @@ public class PackageViewerSorter extends ViewerSorter {
 		fClassPath= null;
 		
 		try {
-			int size= property.length;
-			if (size < 2)
+			if (property.length < 2)
 				return;
 			
 			fIsClassPathSortOrder= isClassPathSortOrder(property);
@@ -49,20 +48,20 @@ public class PackageViewerSorter extends ViewerSorter {
 	}
 
 	boolean isClassPathSortOrder(Object[] property) {
-		int rootCount= 0;
-		int packageCount= 0;
+		boolean rootCount= false;
+		boolean packageCount= false;
 		for (int i= 0; i < property.length; i++) {
 			if ((property[i] instanceof IPackageFragmentRoot))
-				rootCount++;
+				rootCount= true;
 			else if ((property[i] instanceof IPackageFragment))
-				packageCount++;
+				packageCount= true;
 		}
-		return (rootCount > 0 || packageCount > 0);
+		return (rootCount || packageCount);
 	}
 	
 	public int compare(Viewer v, Object e1, Object e2) {
 		// show resources after Java elements
-		// we have to handle both IStorage and IResource separetly...
+		// we have to handle both IStorage and IResource separately
 		IResource r1= null;
 		IResource r2= null;
 		if (e1 instanceof IResource)

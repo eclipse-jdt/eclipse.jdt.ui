@@ -45,15 +45,7 @@ public class ShowInNavigatorAction extends SelectionProviderAction {
 	 * Perform the action
 	 */
 	public void run() {
-		Iterator elements= getStructuredSelection().iterator();
-		List v= new ArrayList();
-		while (elements.hasNext()) {
-			Object o= elements.next();
-			if (o instanceof IAdaptable) 
-				v.add(((IAdaptable)o).getAdapter(IResource.class));
-			if (o instanceof IResource)
-				v.add(o);
-		}
+		List v= collectResources();
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		try {
 			IViewPart view= page.showView(IPageLayout.ID_RES_NAV);
@@ -63,7 +55,21 @@ public class ShowInNavigatorAction extends SelectionProviderAction {
 			}
 		} catch (PartInitException e) {
 			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), PackagesMessages.getString("ShowInNavigator.error"), e.getMessage()); //$NON-NLS-1$
+			JavaPlugin.log(e);
 		}
+	}
+
+	protected List collectResources() {
+		Iterator elements= getStructuredSelection().iterator();
+		List v= new ArrayList();
+		while (elements.hasNext()) {
+			Object o= elements.next();
+			if (o instanceof IAdaptable) 
+				v.add(((IAdaptable)o).getAdapter(IResource.class));
+			if (o instanceof IResource)
+				v.add(o);
+		}
+		return v;
 	}
 		
 	public void selectionChanged(IStructuredSelection selection) {

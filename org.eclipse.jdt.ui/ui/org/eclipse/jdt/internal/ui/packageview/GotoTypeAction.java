@@ -26,11 +26,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
-public class GotoTypeAction extends Action {
+class GotoTypeAction extends Action {
 	
 	private PackageExplorerPart fPackageExplorer;
 	
-	public GotoTypeAction(PackageExplorerPart part) {
+	GotoTypeAction(PackageExplorerPart part) {
 		super();
 		setText(PackagesMessages.getString("GotoType.action.label")); //$NON-NLS-1$
 		setDescription(PackagesMessages.getString("GotoType.action.description")); //$NON-NLS-1$
@@ -66,7 +66,6 @@ public class GotoTypeAction extends Action {
 	private void gotoType(IType type) {
 		ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.findParentOfKind(type, IJavaElement.COMPILATION_UNIT);
 		IJavaElement element= null;
-		
 		if (cu != null) {
 			if (cu.isWorkingCopy())
 				element= cu.getOriginalElement();

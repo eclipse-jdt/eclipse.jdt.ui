@@ -9,13 +9,11 @@ import java.util.HashSet;import java.util.Iterator;import org.eclipse.core.re
 
 public class BuildGroup extends ContextMenuGroup {
 
-	public static final String GROUP_NAME= IContextMenuConstants.GROUP_BUILD;
-
 	private BuildAction fBuildAction;
 	private BuildAction fFullBuildAction;
 
 	public void fill(IMenuManager manager, GroupContext context) {
-		if (! shouldContribute(context))
+		if (!shouldContribute(context))
 			return;
 			
 		if (fBuildAction == null) {
@@ -26,7 +24,7 @@ public class BuildGroup extends ContextMenuGroup {
 		
 		
 		fBuildAction.selectionChanged(convertSelectionToProjects((IStructuredSelection)context.getSelection()));
-		manager.appendToGroup(GROUP_NAME, fBuildAction);
+		manager.appendToGroup(IContextMenuConstants.GROUP_BUILD, fBuildAction);
 		
 		if (fFullBuildAction == null) {
 			fFullBuildAction= new BuildAction(JavaPlugin.getActiveWorkbenchShell(),
@@ -35,7 +33,7 @@ public class BuildGroup extends ContextMenuGroup {
 		}
 		
 		fFullBuildAction.selectionChanged(convertSelectionToProjects((IStructuredSelection)context.getSelection()));
-		manager.appendToGroup(GROUP_NAME, fFullBuildAction);
+		manager.appendToGroup(IContextMenuConstants.GROUP_BUILD, fFullBuildAction);
 	}
 	
 	private boolean shouldContribute(GroupContext context) {
@@ -44,31 +42,8 @@ public class BuildGroup extends ContextMenuGroup {
 			return false;
 			
 		IStructuredSelection selection= convertSelectionToProjects((IStructuredSelection)s);
-		if (selection.isEmpty())
-			return false;
-			
-		/*Iterator iter= selection.iterator();
-		while (iter.hasNext()) {
-			IResource res= getResourceFor(iter.next());
-			if (!(res instanceof IProject))
-				return false;
-		}*/
-		return true;
+		return !(selection.isEmpty());
 	}
-	
-	private IResource getResourceFor(Object element) {
-		if (element instanceof IJavaElement) {
-			try {
-				element= ((IJavaElement)element).getCorrespondingResource();
-			} catch (JavaModelException e) {
-				return null;
-			}
-		}
-		if (!(element instanceof IResource) || ((IResource)element).isPhantom()) {
-			return null;
-		}
-		return (IResource)element;
-	}		
 	
 	private IStructuredSelection convertSelectionToProjects(IStructuredSelection selection) {
 		HashSet result= new HashSet();

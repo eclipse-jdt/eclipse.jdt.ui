@@ -7,12 +7,12 @@ package org.eclipse.jdt.internal.ui.packageview;
 import java.util.ArrayList;import java.util.HashSet;import java.util.List;import java.util.Set;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.dialogs.SelectionDialog;
 
-public class GotoPackageAction extends Action {
+class GotoPackageAction extends Action {
 	
 	private PackageExplorerPart fPackageExplorer;
 	private EmptyInnerPackageFilter fFilter;
 	
-	public GotoPackageAction(PackageExplorerPart part) {
+	GotoPackageAction(PackageExplorerPart part) {
 		super(PackagesMessages.getString("GotoPackage.action.label")); //$NON-NLS-1$
 		setDescription(PackagesMessages.getString("GotoPackage.action.description")); //$NON-NLS-1$
 		fPackageExplorer= part;
@@ -34,6 +34,14 @@ public class GotoPackageAction extends Action {
 	}
 	
 	SelectionDialog createAllPackagesDialog(Shell shell) throws JavaModelException{
+		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER;
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
+		dialog.setIgnoreCase(false);
+		dialog.setElements(collectPackages()); // XXX inefficient
+		return dialog;
+	}
+	
+	Object[] collectPackages() throws JavaModelException {
 		IWorkspaceRoot wsroot= JavaPlugin.getWorkspace().getRoot();
 		IJavaModel model= JavaCore.create(wsroot);
 		IJavaProject[] projects= model.getJavaProjects();
@@ -52,11 +60,7 @@ public class GotoPackageAction extends Action {
 				}
 			}
 		}
-		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER;
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
-		dialog.setIgnoreCase(false);
-		dialog.setElements(allPackages.toArray()); // XXX inefficient
-		return dialog;
+		return allPackages.toArray();
 	}
 	
 	void appendPackages(List all, IJavaElement[] packages) {
@@ -69,7 +73,6 @@ public class GotoPackageAction extends Action {
 		
 	void gotoPackage(IPackageFragment p) {
 		fPackageExplorer.selectReveal(new StructuredSelection(p));
-		return;
 	}
 	
 	boolean showLibraries()  {

@@ -12,16 +12,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
- * filters out all package fragments that have subpackages
+ * Filters empty non-leaf package fragments
  */
 public class EmptyInnerPackageFilter extends PackageFilter {
 
-	/**
-	 * Returns the result of this filter, when applied to the
-	 * given inputs.
-	 *
-	 * @param inputs the set of elements to 
-	 * @return Returns true if element should be included in filtered set
+	/*
+	 * @see ViewerFilter
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IPackageFragment) {

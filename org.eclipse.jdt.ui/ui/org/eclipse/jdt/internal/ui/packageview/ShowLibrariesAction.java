@@ -5,7 +5,6 @@
 class ShowLibrariesAction extends SelectionProviderAction {
 
 	private PackageExplorerPart fPackagesView; 
-	private Shell fShell;
 	
 	/**
 	 * Create a new filter action
@@ -13,22 +12,20 @@ class ShowLibrariesAction extends SelectionProviderAction {
 	 * @param packages the PackagesExplorerPart
 	 * @param label the label for the action
 	 */
-	public ShowLibrariesAction(Shell shell, PackageExplorerPart packagesView, String label) {
+	public ShowLibrariesAction(PackageExplorerPart packagesView, String label) {
 		super(packagesView.getViewer(), label);
 		fPackagesView= packagesView;
 		LibraryFilter filter= fPackagesView.getLibraryFilter();
 		setChecked(filter.getShowLibraries());		
 		updateToolTipText();
 		setEnabled(true);
-		fShell= shell;
 	}
 	
 	/**
 	 * Implementation of method defined on <code>IAction</code>.
 	 */
 	public void run() {
-		LibraryFilter filter= fPackagesView.getLibraryFilter();
-		filter.setShowLibraries(isChecked());
+		fPackagesView.getLibraryFilter().setShowLibraries(isChecked());
 		updateToolTipText();
 		saveInPreferences();
 		
@@ -38,8 +35,7 @@ class ShowLibrariesAction extends SelectionProviderAction {
 	}
 	
 	private void updateToolTipText() {
-		LibraryFilter filter= fPackagesView.getLibraryFilter();
-		if (filter.getShowLibraries())
+		if (fPackagesView.getLibraryFilter().getShowLibraries())
 			setToolTipText(PackagesMessages.getString("ShowLibraries.hideReferencedLibs")); //$NON-NLS-1$
 		else 
 			setToolTipText(PackagesMessages.getString("ShowLibraries.showReferencedLibs")); //$NON-NLS-1$
@@ -50,11 +46,8 @@ class ShowLibrariesAction extends SelectionProviderAction {
 	 * They are saved in the format patern,pattern,.
 	 */
 	private void saveInPreferences() {
-		JavaPlugin plugin= JavaPlugin.getDefault();
-	
-		plugin.getPreferenceStore().setValue(
+		JavaPlugin.getDefault().getPreferenceStore().setValue(
 			PackageExplorerPart.TAG_SHOWLIBRARIES,
 			fPackagesView.getLibraryFilter().getShowLibraries());
-		boolean b= fPackagesView.getLibraryFilter().getShowLibraries();
 	}
 }

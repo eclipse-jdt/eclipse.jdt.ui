@@ -181,7 +181,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 
 	public PackageExplorerPart() {
-		super();		
 	}
 
 	/* (non-Javadoc)
@@ -346,17 +345,15 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Returns the tool tip text for the given element.
 	 */
 	String getToolTipText(Object element) {
-		if (element instanceof IResource) {
-			IPath path= ((IResource) element).getFullPath();
-			if (path.isRoot()) {
-				return PackagesMessages.getString("PackageExplorer.title"); //$NON-NLS-1$
-			}
-			else {
-				return path.makeRelative().toString();
-			}
+		if (!(element instanceof IResource))
+			return ((ILabelProvider) getViewer().getLabelProvider()).getText(element);
+		
+		IPath path= ((IResource) element).getFullPath();
+		if (path.isRoot()) {
+			return PackagesMessages.getString("PackageExplorer.title"); //$NON-NLS-1$
 		}
 		else {
-			return ((ILabelProvider) getViewer().getLabelProvider()).getText(element);
+			return path.makeRelative().toString();
 		}
 	}
 	
@@ -413,13 +410,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		addOpenToMenu(menu, selection);
 		addRefactoring(menu);
-		
-		// if (fShowTypeHierarchyAction.canActionBeAdded())
-		//	menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowTypeHierarchyAction);
-			
-		// if (selectionHasElements)
-		//	menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowNavigatorAction);
-		
+				
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
 		
 		if (fAddBookmarkAction.canOperateOnSelection())
@@ -463,7 +454,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fDeleteAction= new DeleteAction(StructuredSelectionProvider.createFrom(provider));
 		fRefreshAction= new RefreshAction(getShell());
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
-		fShowLibrariesAction = new ShowLibrariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
+		fShowLibrariesAction = new ShowLibrariesAction(this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
 		fShowBinariesAction = new ShowBinariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.binaryProjects")); //$NON-NLS-1$
 		
 		fBackAction= new BackAction(fFrameList);
@@ -591,7 +582,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 		if (fOpenCUAction.isEnabled()) {
 			fOpenCUAction.run();
-			return;
 		}
 	}
 
@@ -653,26 +643,27 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		Object obj= selection.getFirstElement();
 		Object element= null;
 
-		if (selection.size() == 1) {
-			if (obj instanceof ICompilationUnit) 
-				element= getResourceFor(obj);
-			else if (obj instanceof IClassFile) 
-				element= obj;
-			else if (obj instanceof IFile)
-				element= obj;
-				
-			if (element == null)
-				return;
+		if (selection.size() != 1)
+			return;
 
-			IWorkbenchPage page= getSite().getPage();
-			IEditorPart editorArray[]= page.getEditors();
-			for (int i= 0; i < editorArray.length; ++i) {
-				IEditorPart editor= editorArray[i];
-				Object input= getElementOfInput(editor.getEditorInput());					
-				if (input != null && input.equals(element)) {
-					page.bringToTop(editor);
-					return;
-				}
+		if (obj instanceof ICompilationUnit) 
+			element= getResourceFor(obj);
+		else if (obj instanceof IClassFile) 
+			element= obj;
+		else if (obj instanceof IFile)
+			element= obj;
+			
+		if (element == null)
+			return;
+
+		IWorkbenchPage page= getSite().getPage();
+		IEditorPart editorArray[]= page.getEditors();
+		for (int i= 0; i < editorArray.length; i++) {
+			IEditorPart editor= editorArray[i];
+			Object input= getElementOfInput(editor.getEditorInput());					
+			if (element.equals(input)) {
+				page.bringToTop(editor);
+				return;
 			}
 		}
 	}
@@ -698,49 +689,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				memento.putMemento(fMemento);
 			return;
 		}
-		Tree tree= fViewer.getTree();
-		Object expandedElements[]= fViewer.getExpandedElements();
-		if (expandedElements.length > 0) {
-			IMemento expandedMem= memento.createChild(TAG_EXPANDED);
-			for (int i= 0; i < expandedElements.length; i++) {
-				IMemento elementMem= expandedMem.createChild(TAG_ELEMENT);
-				// we can only persist JavaElements for now
-				Object o= expandedElements[i];
-				if (o instanceof IJavaElement)
-					elementMem.putString(TAG_PATH, ((IJavaElement) expandedElements[i]).getHandleIdentifier());
-			}
-		}
-		Object elements[]= ((IStructuredSelection) fViewer.getSelection()).toArray();
-		if (elements.length > 0) {
-			IMemento selectionMem= memento.createChild(TAG_SELECTION);
-			for (int i= 0; i < elements.length; i++) {
-				IMemento elementMem= selectionMem.createChild(TAG_ELEMENT);
-				// we can only persist JavaElements for now
-				Object o= elements[i];
-				if (o instanceof IJavaElement)
-					elementMem.putString(TAG_PATH, ((IJavaElement) elements[i]).getHandleIdentifier());
-			}
-		}
+		saveExpansionState(memento);
+		saveSelectionState(memento);
+		saveScrollState(memento, fViewer.getTree());
+		savePatternFilterState(memento);
+		saveFilterState(memento);
+	}
 
-		//save vertical position
-		ScrollBar bar= tree.getVerticalBar();
-		int position= bar != null ? bar.getSelection() : 0;
-		memento.putString(TAG_VERTICAL_POSITION, String.valueOf(position));
-		//save horizontal position
-		bar= tree.getHorizontalBar();
-		position= bar != null ? bar.getSelection() : 0;
-		memento.putString(TAG_HORIZONTAL_POSITION, String.valueOf(position));
-
-		//save filters
-		String filters[] = getPatternFilter().getPatterns();
-		if(filters.length > 0) {
-			IMemento filtersMem = memento.createChild(TAG_FILTERS);
-			for (int i = 0; i < filters.length; i++){
-				IMemento child = filtersMem.createChild(TAG_FILTER);
-				child.putString(TAG_ELEMENT,filters[i]);
-			}
-		}
-		//save library filter
+	protected void saveFilterState(IMemento memento) {
 		boolean showLibraries= getLibraryFilter().getShowLibraries();
 		String show= "true"; //$NON-NLS-1$
 		if (!showLibraries)
@@ -753,35 +709,64 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (!showBinaries)
 			showBinString= "false"; //$NON-NLS-1$
 		memento.putString(TAG_SHOWBINARIES, showBinString);
-	
+	}
+
+	protected void savePatternFilterState(IMemento memento) {
+		String filters[] = getPatternFilter().getPatterns();
+		if(filters.length > 0) {
+			IMemento filtersMem = memento.createChild(TAG_FILTERS);
+			for (int i = 0; i < filters.length; i++){
+				IMemento child = filtersMem.createChild(TAG_FILTER);
+				child.putString(TAG_ELEMENT,filters[i]);
+			}
+		}
+	}
+
+	protected void saveScrollState(IMemento memento, Tree tree) {
+		ScrollBar bar= tree.getVerticalBar();
+		int position= bar != null ? bar.getSelection() : 0;
+		memento.putString(TAG_VERTICAL_POSITION, String.valueOf(position));
+		//save horizontal position
+		bar= tree.getHorizontalBar();
+		position= bar != null ? bar.getSelection() : 0;
+		memento.putString(TAG_HORIZONTAL_POSITION, String.valueOf(position));
+	}
+
+	protected void saveSelectionState(IMemento memento) {
+		Object elements[]= ((IStructuredSelection) fViewer.getSelection()).toArray();
+		if (elements.length > 0) {
+			IMemento selectionMem= memento.createChild(TAG_SELECTION);
+			for (int i= 0; i < elements.length; i++) {
+				IMemento elementMem= selectionMem.createChild(TAG_ELEMENT);
+				// we can only persist JavaElements for now
+				Object o= elements[i];
+				if (o instanceof IJavaElement)
+					elementMem.putString(TAG_PATH, ((IJavaElement) elements[i]).getHandleIdentifier());
+			}
+		}
+	}
+
+	protected void saveExpansionState(IMemento memento) {
+		Object expandedElements[]= fViewer.getExpandedElements();
+		if (expandedElements.length > 0) {
+			IMemento expandedMem= memento.createChild(TAG_EXPANDED);
+			for (int i= 0; i < expandedElements.length; i++) {
+				IMemento elementMem= expandedMem.createChild(TAG_ELEMENT);
+				// we can only persist JavaElements for now
+				Object o= expandedElements[i];
+				if (o instanceof IJavaElement)
+					elementMem.putString(TAG_PATH, ((IJavaElement) expandedElements[i]).getHandleIdentifier());
+			}
+		}
 	}
 
 	void restoreState(IMemento memento) {
-		// restore expansion state
-		IMemento childMem= memento.getChild(TAG_EXPANDED);
-		if (childMem != null) {
-			ArrayList elements= new ArrayList();
-			IMemento[] elementMem= childMem.getChildren(TAG_ELEMENT);
-			for (int i= 0; i < elementMem.length; i++) {
-				Object element= JavaCore.create(elementMem[i].getString(TAG_PATH));
-				elements.add(element);
-			}
-			fViewer.setExpandedElements(elements.toArray());
-		}
-		// restoreSelection
-		childMem= memento.getChild(TAG_SELECTION);
-		if (childMem != null) {
-			ArrayList list= new ArrayList();
-			IMemento[] elementMem= childMem.getChildren(TAG_ELEMENT);
-			for (int i= 0; i < elementMem.length; i++) {
-				Object element= JavaCore.create(elementMem[i].getString(TAG_PATH));
-				list.add(element);
-			}
-			fViewer.setSelection(new StructuredSelection(list));
-		}
+		restoreExpansionState(memento);
+		restoreSelectionState(memento);
+		restoreScrollState(memento, fViewer.getTree());
+	}
 
-		Tree tree= fViewer.getTree();
-		//save vertical position
+	protected void restoreScrollState(IMemento memento, Tree tree) {
 		ScrollBar bar= tree.getVerticalBar();
 		if (bar != null) {
 			try {
@@ -790,6 +775,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				position= new Integer(posStr).intValue();
 				bar.setSelection(position);
 			} catch (NumberFormatException e) {
+				// ignore, don't set scrollposition
 			}
 		}
 		bar= tree.getHorizontalBar();
@@ -800,7 +786,35 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				position= new Integer(posStr).intValue();
 				bar.setSelection(position);
 			} catch (NumberFormatException e) {
+				// ignore don't set scroll position
 			}
+		}
+	}
+
+	protected void restoreSelectionState(IMemento memento) {
+		IMemento childMem;
+		childMem= memento.getChild(TAG_SELECTION);
+		if (childMem != null) {
+			ArrayList list= new ArrayList();
+			IMemento[] elementMem= childMem.getChildren(TAG_ELEMENT);
+			for (int i= 0; i < elementMem.length; i++) {
+				Object element= JavaCore.create(elementMem[i].getString(TAG_PATH));
+				list.add(element);
+			}
+			fViewer.setSelection(new StructuredSelection(list));
+		}
+	}
+
+	protected void restoreExpansionState(IMemento memento) {
+		IMemento childMem= memento.getChild(TAG_EXPANDED);
+		if (childMem != null) {
+			ArrayList elements= new ArrayList();
+			IMemento[] elementMem= childMem.getChildren(TAG_ELEMENT);
+			for (int i= 0; i < elementMem.length; i++) {
+				Object element= JavaCore.create(elementMem[i].getString(TAG_PATH));
+				elements.add(element);
+			}
+			fViewer.setExpandedElements(elements.toArray());
 		}
 	}
 	

@@ -27,7 +27,7 @@ class FiltersContentProvider implements IStructuredContentProvider {
 	 * Create a FiltersContentProvider using the selections from the suppliec
 	 * resource filter.
 	 */
-	public FiltersContentProvider(JavaElementPatternFilter filter) {
+	FiltersContentProvider(JavaElementPatternFilter filter) {
 		fJavaFilter= filter;
 	}
 	/**
@@ -82,22 +82,23 @@ class FiltersContentProvider implements IStructuredContentProvider {
 		fgDefinedFilters = new ArrayList();
 		fgDefaultFilters = new ArrayList();
 		JavaPlugin plugin = JavaPlugin.getDefault();
-		if (plugin != null) {
-			IExtensionPoint extension = plugin.getDescriptor().getExtensionPoint(JavaElementPatternFilter.FILTERS_TAG);
-			if (extension != null) {
-				IExtension[] extensions =  extension.getExtensions();
-				for(int i = 0; i < extensions.length; i++){
-					IConfigurationElement [] configElements = extensions[i].getConfigurationElements();
-					for(int j = 0; j < configElements.length; j++){
-						String pattern = configElements[j].getAttribute("pattern"); //$NON-NLS-1$
-						if (pattern != null)
-							fgDefinedFilters.add(pattern);
-						String selected = configElements[j].getAttribute("selected"); //$NON-NLS-1$
-						if (selected != null && selected.equalsIgnoreCase("true")) //$NON-NLS-1$
-							fgDefaultFilters.add(pattern);
-					}
+		if (plugin == null)
+			return;
+
+		IExtensionPoint extension = plugin.getDescriptor().getExtensionPoint(JavaElementPatternFilter.FILTERS_TAG);
+		if (extension != null) {
+			IExtension[] extensions =  extension.getExtensions();
+			for(int i = 0; i < extensions.length; i++){
+				IConfigurationElement [] configElements = extensions[i].getConfigurationElements();
+				for(int j = 0; j < configElements.length; j++){
+					String pattern = configElements[j].getAttribute("pattern"); //$NON-NLS-1$
+					if (pattern != null)
+						fgDefinedFilters.add(pattern);
+					String selected = configElements[j].getAttribute("selected"); //$NON-NLS-1$
+					if (selected != null && selected.equalsIgnoreCase("true")) //$NON-NLS-1$
+						fgDefaultFilters.add(pattern);
 				}
-			}		
+			}	
 		}
 	}
 }

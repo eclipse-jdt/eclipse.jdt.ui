@@ -9,13 +9,6 @@ class LibraryFilter extends ViewerFilter {
 	private boolean fShowLibraries;
 
 	/**
-	 * Creates a new library filter.
-	 */
-	public LibraryFilter() {
-		super();
-	}
-	
-	/**
 	 * Returns whether libraries are shown.
 	 */
 	public boolean getShowLibraries() {
@@ -39,16 +32,15 @@ class LibraryFilter extends ViewerFilter {
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
 			if (root.isArchive()) {
 				// don't filter out JARs contained in the project itself
-				IResource resource= null;
 				try {
-					resource= root.getUnderlyingResource();
+					IResource resource= root.getUnderlyingResource();
 					if (resource != null) {
 						IProject jarProject= resource.getProject();
 						IProject container= root.getJavaProject().getProject();
 						return container.equals(jarProject);
 					}
 				} catch (JavaModelException e) {
-					// fall through
+					return false;
 				}
 				return false;
 			}

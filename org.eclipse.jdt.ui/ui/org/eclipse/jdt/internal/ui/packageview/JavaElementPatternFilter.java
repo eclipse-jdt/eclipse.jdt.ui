@@ -12,12 +12,6 @@ class JavaElementPatternFilter extends ViewerFilter {
 	static String COMMA_SEPARATOR = ","; //$NON-NLS-1$
 	static String FILTERS_TAG= "javaElementFilters"; //$NON-NLS-1$
 	
-	/**
-	 * Creates a new resource pattern filter.
-	 */
-	public JavaElementPatternFilter() {
-		super();
-	}
 	
 	/**
 	 * Return the currently configured StringMatchers. If there aren't any look

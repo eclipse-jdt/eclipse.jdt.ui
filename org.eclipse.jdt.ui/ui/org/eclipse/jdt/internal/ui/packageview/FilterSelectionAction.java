@@ -16,7 +16,7 @@ class FilterSelectionAction extends SelectionProviderAction {
 	 * @param packages the PackagesExplorerPart
 	 * @param label the label for the action
 	 */
-	public FilterSelectionAction(Shell shell, PackageExplorerPart packagesView, String label) {
+	FilterSelectionAction(Shell shell, PackageExplorerPart packagesView, String label) {
 		super(packagesView.getViewer(), label);
 		setToolTipText(PackagesMessages.getString("FilterSelectionAction.apply.toolTip")); //$NON-NLS-1$
 		setEnabled(true);
