@@ -82,4 +82,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	public void test4() throws Exception{
 		helper("A", "I", true);
 	}
+
+	public void test5() throws Exception{
+		helper("A", "I", true);
+	}
 }
