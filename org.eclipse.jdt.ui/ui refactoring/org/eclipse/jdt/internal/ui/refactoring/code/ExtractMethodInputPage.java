@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeParametersControl;
-import org.eclipse.jdt.internal.ui.refactoring.ParameterChangeListener;
+import org.eclipse.jdt.internal.ui.refactoring.ParameterListChangeListener;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
@@ -107,14 +107,14 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 		}
 		layouter.perform(label, group, 1);
 		
-		ChangeParametersControl cp= new ChangeParametersControl(result, SWT.NULL, "Parameters", new ParameterChangeListener() {
+		ChangeParametersControl cp= new ChangeParametersControl(result, SWT.NULL, "Parameters", new ParameterListChangeListener() {
 			public void parameterChanged(ParameterInfo parameter) {
 				updatePreview(getText());
 			}
-			public void parameterReordered() {
+			public void parameterListChanged() {
 				updatePreview(getText());
 			}
-		}, false);
+		}, false, false);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		cp.setLayoutData(gd);
