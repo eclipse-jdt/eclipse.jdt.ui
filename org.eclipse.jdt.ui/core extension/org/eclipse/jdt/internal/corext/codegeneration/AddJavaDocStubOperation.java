@@ -14,8 +14,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.eclipse.jface.text.BadLocationException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,7 +26,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**

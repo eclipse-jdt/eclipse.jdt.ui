@@ -17,9 +17,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
-import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-
 /**
  * Evaluates all unimplemented methods and creates them.
  * If the type is open in an editor, be sure to pass over the types working working copy.

@@ -24,7 +24,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jface.text.DefaultLineTracker;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add

@@ -7,9 +7,6 @@ public class CodeGenerationSettings {
 	
 	public String[] importOrder;
 	public int importThreshold;
-	
-	public String[] getterSetterPrefixes;
-	public String[] getterSetterSuffixes;
 
 }
 
