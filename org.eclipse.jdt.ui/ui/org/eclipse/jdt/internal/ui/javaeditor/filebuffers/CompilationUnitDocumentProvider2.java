@@ -924,6 +924,9 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 		final FileInfo info= getFileInfo(element);
 		if (info instanceof CompilationUnitInfo) {
 			return new DocumentProviderOperation() {
+				/*
+				 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.DocumentProviderOperation#execute(org.eclipse.core.runtime.IProgressMonitor)
+				 */
 				protected void execute(IProgressMonitor monitor) throws CoreException {
 					commitWorkingCopy(monitor, element, (CompilationUnitInfo) info, overwrite);
 				}
@@ -932,7 +935,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				 */
 				public ISchedulingRule getSchedulingRule() {
 					if (info.fElement instanceof IFileEditorInput) {
-						IFile file= ((IFileEditorInput)info.fElement).getFile();
+						IFile file= ((IFileEditorInput) info.fElement).getFile();
 						IResourceRuleFactory ruleFactory= ResourcesPlugin.getWorkspace().getRuleFactory();
 						if (file == null || !file.exists())
 							return ruleFactory.createRule(file);
