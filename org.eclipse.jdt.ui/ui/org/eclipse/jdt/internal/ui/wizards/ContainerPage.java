@@ -131,18 +131,20 @@ public abstract class ContainerPage extends NewElementWizardPage {
 				initFields(jelem);
 			} else {
 				IResource resource= (IResource) adaptable.getAdapter(IResource.class);
-				IProject proj= resource.getProject();
-				if (proj != null) {
-					IJavaProject jproject= JavaCore.create(proj);
-					IJavaElement root= findFirstPackageFragmentRoot(jproject);
-					if (root != null) {
-						initFields(root);
+				if (resource != null) {
+					IProject proj= resource.getProject();
+					if (proj != null) {
+						IJavaProject jproject= JavaCore.create(proj);
+						IJavaElement root= findFirstPackageFragmentRoot(jproject);
+						if (root != null) {
+							initFields(root);
+						} else {
+							setDefaultAttributes();
+							fContainerDialogField.setText(proj.getFullPath().toString());
+						}
 					} else {
 						setDefaultAttributes();
-						fContainerDialogField.setText(proj.getFullPath().toString());
 					}
-				} else {
-					setDefaultAttributes();
 				}
 			}
 		} else {			

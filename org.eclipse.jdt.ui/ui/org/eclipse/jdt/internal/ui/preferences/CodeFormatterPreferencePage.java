@@ -210,7 +210,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	//BUG in JavaPlugin : initDefaults(store) is not called on startup
 	
 	public static void initDefaults(IPreferenceStore store) {
-		System.out.println("initDefaults");
 		CodeFormatterUIModel.init(store);		
 	}
 		
@@ -237,9 +236,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 
 	public Control createContents(Composite parent) {
-		
-		
-		System.out.println("done createContents");
 		fMainPanel= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
@@ -454,7 +450,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 				else
 					;
 		}
-		System.out.println("ok");
 		fCheckOptions= (Button[]) checkOptions.toArray(new Button[checkOptions.size()]);
 		fTextOptions= (Text[]) textOptions.toArray(new Text[textOptions.size()]);
 	}
