@@ -54,7 +54,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -434,7 +433,7 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 				
 		public void create() {
 			super.create();
-			fBuildPathsBlock.init(fCurrJProject.getProject(), false);
+			fBuildPathsBlock.init(fCurrJProject, null, null);
 		}		
 				
 		protected Control createDialogArea(Composite parent) {

@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
@@ -48,14 +49,12 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
@@ -64,6 +63,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -86,14 +86,9 @@ public class BuildPathsBlock {
 	
 	private StatusInfo fClassPathStatus;
 	private StatusInfo fBuildPathStatus;
-	
-	private IProject fCurrProject;
+
 	private IJavaProject fCurrJProject;
 		
-	private IPath fBuildPathDefault;
-	private IClasspathEntry[] fClassPathDefault;
-	private boolean fAddJDKToDefault;
-	
 	private IPath fOutputLocationPath;
 	
 	private IStatusChangeListener fContext;
@@ -137,12 +132,7 @@ public class BuildPathsBlock {
 		fBuildPathStatus= new StatusInfo();
 		fClassPathStatus= new StatusInfo();
 		
-		fBuildPathDefault= null;
-		fCurrProject= null;
 		fCurrJProject= null;
-		
-		fClassPathDefault= null;
-		fAddJDKToDefault= true;
 	}
 	
 	// -------- UI creation ---------
@@ -242,130 +232,145 @@ public class BuildPathsBlock {
 		//return Utilities.getFocusShell(Display.getCurrent());
 		return null;
 	}
-		
-	// -------- Initialization ---------
-		
-	public void init(IProject project, boolean force) {
-		if (!project.equals(fCurrProject) || force) {
-			fCurrProject= project;
-			fCurrJProject= JavaCore.create(fCurrProject);			
-			try {
-				if (fCurrProject.hasNature(JavaCore.NATURE_ID)) {
-					IPath outputDir= fCurrJProject.getOutputLocation();
-					if (outputDir != null) {
-						fBuildPathDialogField.setText(outputDir.toString());
-					} else {
-						fBuildPathDialogField.setText(""); //$NON-NLS-1$
-					}
-					
-					List newClassPath= new ArrayList();
-					IClasspathEntry[] cp= fCurrJProject.getRawClasspath();
-					for (int i= 0; i < cp.length; i++) {
-						IClasspathEntry curr= cp[i];
-						int entryKind= curr.getEntryKind();
-						IPath path= curr.getPath();
-						// get the resource
-						IResource res= null;
-						boolean isMissing= false;
-						
-						if (entryKind != IClasspathEntry.CPE_VARIABLE) {
-							res= fWorkspaceRoot.findMember(path);
-							if (res == null) {
-								isMissing= entryKind != IClasspathEntry.CPE_LIBRARY || !path.toFile().isFile();
-							}
-						} else {
-							IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
-							isMissing= (resolvedPath == null) || !resolvedPath.toFile().isFile();
-						}												
-						CPListElement elem= new CPListElement(entryKind, path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath());
-						elem.setIsMissing(isMissing);
-						newClassPath.add(elem);			
-					}
-					fClassPathList.setElements(newClassPath);
-				} else {
-					setDefaultAttributes(fCurrProject);
+	
+	
+	/**
+	 * Initializes the classpath for the given project. Multiple calls to init are allowed,
+	 * but all existing settings will be cleared and replace by the given or default paths.
+	 * @param project The java project to configure. Does not have to exist.
+	 * @param outputLocation The output location to be set in the page. If <code>null</code>
+	 * is passed, jdt default settings are used, or - if the project is an existing Java project - the
+	 * output location of the existing project 
+	 * @param classpathEntries The classpath entries to be set in the page. If <code>null</code>
+	 * is passed, jdt default settings are used, or - if the project is an existing Java project - the
+	 * classpath entries of the existing project
+	 */	
+	public void init(IJavaProject jproject, IPath outputLocation, IClasspathEntry[] classpathEntries) {
+		fCurrJProject= jproject;
+		boolean projExists= false;
+		try {
+			IProject project= fCurrJProject.getProject();
+			projExists= (project.exists() && project.hasNature(JavaCore.NATURE_ID));
+			if  (projExists) {
+				if (outputLocation == null) {
+					outputLocation=  fCurrJProject.getOutputLocation();
 				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
-				setDefaultAttributes(fCurrProject);			
-			} catch (CoreException e) {
-				// must be a new (not created) project
-				setDefaultAttributes(fCurrProject);
+				if (classpathEntries == null) {
+					classpathEntries=  fCurrJProject.getRawClasspath();
+				}
 			}
-			if (fSourceContainerPage != null) {
-				fSourceContainerPage.init(fCurrJProject);
-				fProjectsPage.init(fCurrJProject);
-				fLibrariesPage.init(fCurrJProject);
+		} catch (CoreException e) {
+			JavaPlugin.log(e.getStatus());
+		}
+		if (outputLocation == null) {
+			outputLocation= getDefaultBuildPath(jproject);
+		}
+		
+		List newClassPath;
+		if (classpathEntries == null) {
+			newClassPath= getDefaultClassPath(jproject);
+		} else {
+			newClassPath= new ArrayList();
+			for (int i= 0; i < classpathEntries.length; i++) {
+				IClasspathEntry curr= classpathEntries[i];
+				int entryKind= curr.getEntryKind();
+				IPath path= curr.getPath();
+				// get the resource
+				IResource res= null;
+				boolean isMissing= false;
+				
+				if (entryKind != IClasspathEntry.CPE_VARIABLE) {
+					res= fWorkspaceRoot.findMember(path);
+					if (res == null) {
+						isMissing= (entryKind != IClasspathEntry.CPE_LIBRARY || !path.toFile().isFile());
+					}
+				} else {
+					IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
+					isMissing= (resolvedPath == null) || !resolvedPath.toFile().isFile();
+				}												
+				CPListElement elem= new CPListElement(entryKind, path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath());
+				if (projExists) {
+					elem.setIsMissing(isMissing);
+				}
+				newClassPath.add(elem);
 			}
-			
-		}	
+		}
+		
+		// inits the dialog field
+		fBuildPathDialogField.setText(outputLocation.toString());
+		fClassPathList.setElements(newClassPath);
+
+		if (fSourceContainerPage != null) {
+			fSourceContainerPage.init(fCurrJProject);
+			fProjectsPage.init(fCurrJProject);
+			fLibrariesPage.init(fCurrJProject);
+		}
+
 		
 		doStatusLineUpdate();
 	}	
 	
 	// -------- public api --------
 	
-	public void setDefaultOutputFolder(IPath outputPath) {
-		fBuildPathDefault= outputPath;
-	}
-	
-	public void setDefaultClassPath(IClasspathEntry[] entries, boolean appendDefaultJDK) {
-		fClassPathDefault= entries;
-		fAddJDKToDefault= appendDefaultJDK;
-	}
-	
+	/**
+	 * Returns the Java project. Can return <code>null<code> if the page has not
+	 * been initialized.
+	 */
 	public IJavaProject getJavaProject() {
 		return fCurrJProject;
-	}	
-	
-	// -------- default settings --------
-	
-	private List getClassPathDefault(IProject project) {
-		List vec= new ArrayList();
-		if (fClassPathDefault == null) {
-			IResource srcFolder;
-			if (JavaBasePreferencePage.useSrcAndBinFolders()) {
-				srcFolder= project.getFolder("src"); //$NON-NLS-1$
-			} else {
-				srcFolder= project;
-			}
-			vec.add(new CPListElement(IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder));
-		} else {
-			for (int i= 0; i < fClassPathDefault.length; i++) {
-				IClasspathEntry entry= fClassPathDefault[i];
-				IResource res= fWorkspaceRoot.findMember(entry.getPath());			
-				vec.add(new CPListElement(entry.getEntryKind(), entry.getPath(), res, entry.getSourceAttachmentPath(), entry.getSourceAttachmentRootPath()));
-			}
-		}
-		
-		if (fAddJDKToDefault || fClassPathDefault == null) {
-			IPath libPath= new Path(ClasspathVariablesPreferencePage.JRELIB_VARIABLE);
-			IPath attachPath= new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);
-			IPath attachRoot= new Path(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
-			CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, libPath, null, attachPath, attachRoot);
-			vec.add(elem);
-		}
-		return vec;
 	}
 	
-	private IPath getBuildPathDefault(IProject project) {
-		if (fBuildPathDefault != null) {
-			return fBuildPathDefault;
+	/**
+	 * Returns the current output location. Note that the path returned must not be valid.
+	 */	
+	public IPath getOutputLocation() {
+		return new Path(fBuildPathDialogField.getText());
+	}
+	
+	/**
+	 * Returns the current class path (raw). Note that the entries returned must not be valid.
+	 */	
+	public IClasspathEntry[] getRawClassPath() {
+		List elements=  fClassPathList.getElements();
+		int nElements= elements.size();
+		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
+
+		for (int i= 0; i < nElements; i++) {
+			CPListElement currElement= (CPListElement) elements.get(i);
+			entries[i]= currElement.getClasspathEntry();
+		}
+		return entries;
+	}	
+	
+	
+	// -------- evaluate default settings --------
+	
+	private List getDefaultClassPath(IJavaProject jproj) {
+		List list= new ArrayList();
+		IResource srcFolder;
+		if (JavaBasePreferencePage.useSrcAndBinFolders()) {
+			srcFolder= jproj.getProject().getFolder("src"); //$NON-NLS-1$
 		} else {
-			if (JavaBasePreferencePage.useSrcAndBinFolders()) {
-				return project.getFullPath().append("bin"); //$NON-NLS-1$
-			} else {
-				return project.getFullPath();
-			}
+			srcFolder= jproj.getProject();
+		}
+		list.add(new CPListElement(IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder));
+
+		IPath libPath= new Path(ClasspathVariablesPreferencePage.JRELIB_VARIABLE);
+		IPath attachPath= new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);
+		IPath attachRoot= new Path(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
+		CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, libPath, null, attachPath, attachRoot);
+		list.add(elem);
+
+		return list;
+	}
+	
+	private IPath getDefaultBuildPath(IJavaProject jproj) {
+		if (JavaBasePreferencePage.useSrcAndBinFolders()) {
+			return jproj.getProject().getFullPath().append("bin"); //$NON-NLS-1$
+		} else {
+			return jproj.getProject().getFullPath();
 		}
 	}	
-
-	private void setDefaultAttributes(IProject project) {
-		fClassPathList.setElements(getClassPathDefault(project));
-		IPath outputDir= getBuildPathDefault(project);
-		fBuildPathDialogField.setText(outputDir.toString());
-	}
-
 		
 	private class BuildPathAdapter implements IStringButtonAdapter, IDialogFieldListener {
 
@@ -457,7 +462,7 @@ public class BuildPathsBlock {
 		} else {
 			// allows the build path to be in a different project, but must exists and be open
 			IPath projPath= path.uptoSegment(1);
-			if (!projPath.equals(fCurrProject.getFullPath())) {
+			if (!projPath.equals(fCurrJProject.getProject().getFullPath())) {
 				IProject proj= (IProject)fWorkspaceRoot.findMember(projPath);
 				if (proj == null || !proj.isOpen()) {
 					fBuildPathStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.BuildPathProjNotExists")); //$NON-NLS-1$
@@ -488,7 +493,7 @@ public class BuildPathsBlock {
 	
 	public IRunnableWithProgress getRunnable() {
 		final List classPathEntries= fClassPathList.getElements();
-		final IPath path= new Path(fBuildPathDialogField.getText());
+		final IPath path= getOutputLocation();
 		
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
@@ -508,17 +513,19 @@ public class BuildPathsBlock {
 	}		
 	
 	private void setJavaProjectProperties(List classPathEntries, IPath buildPath, IProgressMonitor monitor) throws CoreException {
-		if (!fCurrProject.exists()) {
-			fCurrProject.create(null);
+		IProject project= fCurrJProject.getProject();
+		
+		if (!project.exists()) {
+			project.create(null);
 		}
 		
-		if (!fCurrProject.isOpen()) {
-			fCurrProject.open(null);
+		if (!project.isOpen()) {
+			project.open(null);
 		}
 		
 		// create java nature
-		if (!fCurrProject.hasNature(JavaCore.NATURE_ID)) {
-			CoreUtility.addNatureToProject(fCurrProject, JavaCore.NATURE_ID, null);
+		if (!project.hasNature(JavaCore.NATURE_ID)) {
+			addNatureToProject(project, JavaCore.NATURE_ID, null);
 		}
 		monitor.worked(1);
 		
@@ -553,6 +560,19 @@ public class BuildPathsBlock {
 		
 	}
 	
+	/**
+	 * Adds a nature to a project
+	 */
+	private static void addNatureToProject(IProject proj, String natureId, IProgressMonitor monitor) throws CoreException {
+		IProjectDescription description = proj.getDescription();
+		String[] prevNatures= description.getNatureIds();
+		String[] newNatures= new String[prevNatures.length + 1];
+		System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
+		newNatures[prevNatures.length]= natureId;
+		description.setNatureIds(newNatures);
+		proj.setDescription(description, monitor);
+	}	
+	
 	// ---------- util method ------------
 		
 	private IContainer chooseContainer() {
@@ -560,8 +580,9 @@ public class BuildPathsBlock {
 		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 		IProject[] allProjects= fWorkspaceRoot.getProjects();
 		ArrayList rejectedElements= new ArrayList(allProjects.length);
+		IProject currProject= fCurrJProject.getProject();
 		for (int i= 0; i < allProjects.length; i++) {
-			if (!allProjects[i].equals(fCurrProject)) {
+			if (!allProjects[i].equals(currProject)) {
 				rejectedElements.add(allProjects[i]);
 			}
 		}

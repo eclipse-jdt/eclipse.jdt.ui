@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -32,9 +33,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
@@ -50,15 +52,17 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	private static final String PAGE_NAME= "NewJavaProjectWizardPage"; //$NON-NLS-1$
 
 	private WizardNewProjectCreationPage fMainPage;
-	private IPath fCurrProjectPath;
+	
+	private IPath fOutputLocation;
+	private IClasspathEntry[] fClasspathEntries;
+	private boolean fAddJRE;
 	
 	private BuildPathsBlock fBuildPathsBlock;
 
 	private IStatus fCurrStatus;
 	
-	// added for 1GEUK5C, 1GEUUN9, 1GEUNW2
 	private boolean fPageVisible;
-	private boolean fDefaultsChanged;
+	private boolean fProjectModified;
 	
 	/**
 	 * Creates a Java project wizard creation page.
@@ -85,7 +89,11 @@ public class NewJavaProjectWizardPage extends WizardPage {
 		fBuildPathsBlock= new BuildPathsBlock(root, listener, true);
 		fCurrStatus= new StatusInfo();
 		fPageVisible= false;
-		fDefaultsChanged= false;
+		
+		fProjectModified= true;
+		fOutputLocation= null;
+		fClasspathEntries= null;
+		fAddJRE= false;
 	}		
 	
 	/**
@@ -96,12 +104,17 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 * <p>
 	 * The wizard will create this folder if required.
 	 * </p>
+	 * <p>
+	 * The default class path will be applied when <code>initBuildPaths</code> is
+	 * called. This is done automatically when the page becomes visible and
+	 * the project or the default paths have changed.
+	 * </p>
 	 *
 	 * @param path the folder to be taken as the default output path
 	 */
 	public void setDefaultOutputFolder(IPath path) {
-		fBuildPathsBlock.setDefaultOutputFolder(path);
-		fDefaultsChanged= true;
+		fOutputLocation= path;
+		setProjectModified();
 	}	
 
 	/**
@@ -109,23 +122,40 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 * <p>
 	 * The caller of this method is responsible for creating the classpath entries 
 	 * for the <code>IJavaProject</code> that corresponds to created the project.
-	 * Secondary source for JAR files have to be set manually, after the wizard
-	 * has finished. The caller is also responsible for creating any new folders 
-	 * that might be mentioned on the classpath.
+	 * The caller is responsible for creating any new folders that might be mentioned
+	 * on the classpath.
 	 * </p>
 	 * <p>
-	 * [Issue: It is slightly unfortunate to make appeal to a preference in an API 
-	 *  method but not expose that preference as API.
-	 * ]
+	 * The default output location will be applied when <code>initBuildPaths</code> is
+	 * called. This is done automatically when the page becomes visible and
+	 * the project or the default paths have changed.
 	 * </p>
 	 *
 	 * @param entries the default classpath entries
-	 * @param appendDefaultJRE <code>true</code> if the standard Java library 
-	 *    specified in the preferences should be added to the classpath
+	 * @param appendDefaultJRE <code>true</code> a variable entry for the
+	 *  default JRE (specified in the preferences) will be added to the classpath.
 	 */
 	public void setDefaultClassPath(IClasspathEntry[] entries, boolean appendDefaultJRE) {
-		fBuildPathsBlock.setDefaultClassPath(entries, appendDefaultJRE);
-		fDefaultsChanged= true;
+		if (entries != null && appendDefaultJRE) {
+			IClasspathEntry[] newEntries= new IClasspathEntry[entries.length + 1];
+			System.arraycopy(entries, 0, newEntries, 0, entries.length);
+			IPath libPath= new Path(ClasspathVariablesPreferencePage.JRELIB_VARIABLE);
+			IPath attachPath= new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);
+			IPath attachRoot= new Path(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
+
+			newEntries[entries.length]= JavaCore.newVariableEntry(libPath, attachPath, attachRoot);
+			entries= newEntries;
+		}
+		fClasspathEntries= entries;
+		fAddJRE= appendDefaultJRE;
+		setProjectModified();
+	}
+	
+	/**
+	 * Sets the project to modified. This will initialize the page when becomes visible.
+	 */
+	public void setProjectModified() {
+		fProjectModified= true;
 	}
 
 	/**
@@ -162,20 +192,58 @@ public class NewJavaProjectWizardPage extends WizardPage {
 		setControl(control);
 		
 		WorkbenchHelp.setHelp(control, new DialogPageContextComputer(this, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE));
-	}	
+	}
+	
+	/**
+	 * Forces the initialization of the Java project page. Default classpath or buildpath
+	 * will be used if set. The initialization should only be performed when the project
+	 * changed or default paths have changed. Toggeling back and forward the
+	 * pages without changes should not re-initialize the page, as changes
+	 * from the user will be overwritten.
+	 */
+	protected void initBuildPaths() {
+		fBuildPathsBlock.init(getNewJavaProject(), fOutputLocation, fClasspathEntries);
+	} 
 
 	/**
 	 * Extend this method to set a user defined default class path or output location.
+	 * <code>initBuildPaths</code> is called when the page becomes visible the first time
+	 * or the project or the default paths have changed.
 	 */	
 	public void setVisible(boolean visible) {
 		if (visible) {
-			fBuildPathsBlock.init(getProjectHandle(), fDefaultsChanged);
-			fDefaultsChanged= false;
+			// evaluate if a initialization is required
+			if (fProjectModified || isNewProjectHandle()) {
+				// only initialize the project when needed
+				initBuildPaths();
+				fProjectModified= false;
+			}
 		}
 		super.setVisible(visible);
 		fPageVisible= visible;
 		updateStatus(fCurrStatus);
 	}
+	
+	private boolean isNewProjectHandle() {
+		IProject oldProject= fBuildPathsBlock.getJavaProject().getProject();
+		return !oldProject.equals(getProjectHandle());
+	}
+	
+	
+	/**
+	 * Returns the currently configured output location. Note that the returned path must not be valid.
+	 */
+	public IPath getOutputLocation() {
+		return fBuildPathsBlock.getOutputLocation();
+	}
+
+	/**
+	 * Returns the currently configured class path. Note that the class path must not be valid.
+	 */	
+	public IClasspathEntry[] getRawClassPath() {
+		return fBuildPathsBlock.getRawClassPath();
+	}
+	
 
 	/**
 	 * Returns the runnable that will create the Java project. 
@@ -219,7 +287,9 @@ public class NewJavaProjectWizardPage extends WizardPage {
 					throw new InvocationTargetException(e);
 				}
 				// create the java project
-				fBuildPathsBlock.init(project, fDefaultsChanged);
+				if (fProjectModified || isNewProjectHandle()) {
+					initBuildPaths();
+				}
 				IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable();
 				jrunnable.run(new SubProgressMonitor(monitor, workLeft));
 				monitor.done();
