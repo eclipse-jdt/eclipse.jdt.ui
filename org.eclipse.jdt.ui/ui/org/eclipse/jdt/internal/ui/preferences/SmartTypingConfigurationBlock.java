@@ -387,7 +387,7 @@ class SmartTypingConfigurationBlock implements IPreferenceConfigurationBlock {
 		Composite description= new Composite(contents, SWT.NONE);
 		RowLayout rowLayout= new RowLayout(SWT.HORIZONTAL);
 		rowLayout.justify= false;
-		rowLayout.fill= false;
+		rowLayout.fill= true;
 		rowLayout.marginBottom= 0;
 		rowLayout.marginHeight= 0;
 		rowLayout.marginLeft= 0;
