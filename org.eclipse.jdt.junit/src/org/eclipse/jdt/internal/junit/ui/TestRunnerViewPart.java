@@ -181,7 +181,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	private Action fNextAction;
 	private Action fPreviousAction;
 	
-	private class StopAction extends Action{
+	private class StopAction extends Action {
 		public StopAction() {
 			setText(JUnitMessages.getString("TestRunnerViewPart.stopaction.text"));//$NON-NLS-1$
 			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.stopaction.tooltip"));//$NON-NLS-1$
@@ -195,7 +195,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		}
 	}
 
-	private class RerunLastAction extends Action{
+	private class RerunLastAction extends Action {
 		public RerunLastAction() {
 			setText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
 			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.tooltip")); //$NON-NLS-1$

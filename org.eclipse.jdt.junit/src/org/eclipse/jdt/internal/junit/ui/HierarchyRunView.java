@@ -16,9 +16,11 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -64,6 +66,8 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			fTestCount= testCount;
 		}
 	}
+	
+	
 	/**
 	 * Vector of SuiteInfo items
 	 */
@@ -85,6 +89,16 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	private final Image fTestIcon= TestRunnerViewPart.createImage("obj16/test.gif"); //$NON-NLS-1$
 	private final Image fTestRunningIcon= TestRunnerViewPart.createImage("obj16/testrun.gif"); //$NON-NLS-1$
 		
+	private class ExpandAllAction extends Action {
+		public ExpandAllAction() {
+			setText(JUnitMessages.getString("ExpandAllAction.text"));  //$NON-NLS-1$
+			setToolTipText(JUnitMessages.getString("ExpandAllAction.tooltip"));  //$NON-NLS-1$
+		}
+		
+		public void run(){
+			expandAll();
+		}
+	}
 	public HierarchyRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
 		fTestRunnerPart= runner;
 		
@@ -345,6 +359,8 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 				manager.add(new OpenTestAction(fTestRunnerPart, getClassName(), getTestMethod()));
 				manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), getTestMethod()));
 			}
+			manager.add(new Separator());
+			manager.add(new ExpandAllAction());
 		}
 	}	
 	
@@ -557,5 +573,22 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 				return item2;
 		}
 		return null;
+	}
+	
+	protected void expandAll() {
+		TreeItem[] treeItems= fTree.getSelection();
+		fTree.setRedraw(false);
+		for (int i= 0; i < treeItems.length; i++) {
+			expandAll(treeItems[i]);
+		}
+		fTree.setRedraw(true);
+	}
+	
+	private void expandAll(TreeItem item) {
+		item.setExpanded(true);
+		TreeItem[] items= item.getItems();
+		for (int i= 0; i < items.length; i++) {
+			expandAll(items[i]);
+		}
 	}
 }
