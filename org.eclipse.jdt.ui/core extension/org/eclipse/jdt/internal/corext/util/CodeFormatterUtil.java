@@ -114,18 +114,18 @@ public class CodeFormatterUtil {
 	}
 
 	public static void removeIndentation(String[] lines, int tabWidth) {
-		int l;
 		// find indentation common to all lines
 		int minIndent= Integer.MAX_VALUE; // very large
-		for (l= 0; l < lines.length; l++) {
-			int indent= getIndent(lines[l], tabWidth);
+		for (int i= 0; i < lines.length; i++) {
+			String line= lines[i];
+			int indent= getIndent(line, tabWidth);
 			if (indent < minIndent)
 				minIndent= indent;
 		}
 		if (minIndent > 0)
 			// remove this indent from all lines
-			for (l= 0; l < lines.length; l++)
-				lines[l]= removeIndent(lines[l], minIndent, tabWidth);
+			for (int i= 0; i < lines.length; i++)
+				lines[i]= removeIndent(lines[i], minIndent, tabWidth);
 	}
 	
 	/**

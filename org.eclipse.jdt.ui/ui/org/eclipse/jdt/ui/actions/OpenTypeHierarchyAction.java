@@ -17,6 +17,8 @@ import java.util.List;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -48,7 +50,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public OpenTypeHierarchyAction(UnifiedSite site) {
+	public OpenTypeHierarchyAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("OpenTypeHierarchyAction.label")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("OpenTypeHierarchyAction.tooltip")); //$NON-NLS-1$
@@ -62,7 +64,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 * </p>
 	 */
 	public OpenTypeHierarchyAction(JavaEditor editor) {
-		this(UnifiedSite.create(editor.getEditorSite()));
+		this(editor.getEditorSite());
 		fEditor= editor;
 	}
 	

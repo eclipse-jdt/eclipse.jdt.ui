@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
@@ -51,7 +52,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 public class OpenViewActionGroup extends ActionGroup {
 
 	private boolean fEditorIsOwner;
-	private UnifiedSite fSite;
+	private IWorkbenchSite fSite;
 	private IMenuManager fNavigateMenu;
 
 	private OpenSuperImplementationAction fOpenSuperImplementation;
@@ -65,7 +66,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public OpenViewActionGroup(Page page) {
-		createSiteActions(UnifiedSite.create(page.getSite()));
+		createSiteActions(page.getSite());
 	}
 	
 	/**
@@ -74,7 +75,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public OpenViewActionGroup(IViewPart part) {
-		createSiteActions(UnifiedSite.create(part.getSite()));
+		createSiteActions(part.getSite());
 	}
 	
 	/**
@@ -91,7 +92,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		initialize(part.getEditorSite().getSelectionProvider());
 	}
 
-	private void createSiteActions(UnifiedSite site) {
+	private void createSiteActions(IWorkbenchSite site) {
 		fSite= site;
 		fOpenSuperImplementation= new OpenSuperImplementationAction(site);
 		fOpenExternalJavadoc= new OpenExternalJavadocAction(site);

@@ -4,6 +4,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.Clipboard;
 
@@ -21,7 +23,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -36,7 +37,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class PasteSourceReferencesFromClipboardAction	extends SelectionDispatchAction {
 
-	protected PasteSourceReferencesFromClipboardAction(UnifiedSite site) {
+	protected PasteSourceReferencesFromClipboardAction(IWorkbenchSite site) {
 		super(site);
 	}
 

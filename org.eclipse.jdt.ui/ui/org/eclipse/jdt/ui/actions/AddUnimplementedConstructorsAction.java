@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IMethod;
@@ -54,7 +55,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public AddUnimplementedConstructorsAction(UnifiedSite site) {
+	public AddUnimplementedConstructorsAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("AddUnimplementedConstructorsAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("AddUnimplementedConstructorsAction.description")); //$NON-NLS-1$

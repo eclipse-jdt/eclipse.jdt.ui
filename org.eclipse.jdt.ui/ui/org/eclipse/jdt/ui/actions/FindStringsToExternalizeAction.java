@@ -21,6 +21,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -84,7 +86,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public FindStringsToExternalizeAction(UnifiedSite site) {
+	public FindStringsToExternalizeAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("FindStringsToExternalizeAction.label")); //$NON-NLS-1$
 		fElements= new NonNLSElement[0];

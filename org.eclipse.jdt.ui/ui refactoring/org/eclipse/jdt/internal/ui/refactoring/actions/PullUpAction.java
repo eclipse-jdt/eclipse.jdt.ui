@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
@@ -24,7 +24,7 @@ public class PullUpAction extends OpenRefactoringWizardAction {
 		super(TITLE, editor, IMember.class);
 	}
 
-	public PullUpAction(UnifiedSite site) {
+	public PullUpAction(IWorkbenchSite site) {
 		super(TITLE, site, IMember.class);
 	}
 

@@ -5,13 +5,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.jdt.ui.actions.UnifiedSite;
-
-public class MockUnifiedSite extends UnifiedSite {
+public class MockWorkbenchSite implements IWorkbenchSite {
+	
 	private ISelectionProvider fProvider;
-	public MockUnifiedSite(Object[] elements){
+	public MockWorkbenchSite(Object[] elements){
 		fProvider= new MockSelectionProvider(elements);
 	}
 	public IWorkbenchPage getPage() {
@@ -30,4 +30,7 @@ public class MockUnifiedSite extends UnifiedSite {
 		return null;
 	}
 
+	public void setSelectionProvider(ISelectionProvider provider) {
+		fProvider= provider;
+	}
 }

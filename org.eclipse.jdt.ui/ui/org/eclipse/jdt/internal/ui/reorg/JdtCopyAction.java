@@ -4,9 +4,8 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.CopyProjectAction;
-
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
@@ -14,7 +13,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JdtCopyAction extends ReorgDestinationAction {
 
-	protected JdtCopyAction(UnifiedSite site) {
+	protected JdtCopyAction(IWorkbenchSite site) {
 		super(site);
 	}
 

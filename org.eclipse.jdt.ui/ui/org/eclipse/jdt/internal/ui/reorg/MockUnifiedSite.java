@@ -7,20 +7,18 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkbenchWindow;
-
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class MockUnifiedSite extends UnifiedSite {
+public class MockUnifiedSite implements IWorkbenchSite {
 	
 	private ISelectionProvider fProvider;
 	
 	public MockUnifiedSite(ISelectionProvider provider){
-		Assert.isNotNull(provider);
-		fProvider= provider;		
+		setSelectionProvider(provider);
 	}
 	
 	public MockUnifiedSite(Object[] elements){
@@ -46,5 +44,9 @@ public class MockUnifiedSite extends UnifiedSite {
 	public IWorkbenchWindow getWorkbenchWindow() {
 		return null;
 	}
-
+	
+	public void setSelectionProvider(ISelectionProvider provider) {
+		Assert.isNotNull(provider);
+		fProvider= provider;
+	}
 }

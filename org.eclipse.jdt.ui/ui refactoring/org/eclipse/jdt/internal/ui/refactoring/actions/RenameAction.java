@@ -5,8 +5,9 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -18,7 +19,7 @@ public class RenameAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	
-	public RenameAction(UnifiedSite site) {
+	public RenameAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("RenameAction.text")); //$NON-NLS-1$
 		fRenameJavaElement= new RenameJavaElementAction(site);
@@ -26,7 +27,7 @@ public class RenameAction extends SelectionDispatchAction {
 	}
 	
 	public RenameAction(CompilationUnitEditor editor) {
-		this(UnifiedSite.create(editor.getEditorSite()));
+		this(editor.getEditorSite());
 		fEditor= editor;
 		fRenameTemp= new RenameTempAction(fEditor);
 		fRenameJavaElement= new RenameJavaElementAction(editor);

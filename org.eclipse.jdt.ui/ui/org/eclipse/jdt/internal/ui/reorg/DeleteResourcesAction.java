@@ -17,13 +17,13 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.DeleteResourceAction;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class DeleteResourcesAction extends SelectionDispatchAction {
 
-	protected DeleteResourcesAction(UnifiedSite site) {
+	protected DeleteResourcesAction(IWorkbenchSite site) {
 		super(site);
 	}
 

@@ -19,6 +19,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
@@ -52,7 +53,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public AddJavaDocStubAction(UnifiedSite site) {
+	public AddJavaDocStubAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("AddJavaDocStubAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("AddJavaDocStubAction.description")); //$NON-NLS-1$

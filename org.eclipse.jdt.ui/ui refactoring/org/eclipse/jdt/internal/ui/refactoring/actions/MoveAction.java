@@ -6,13 +6,14 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
@@ -27,7 +28,7 @@ public class MoveAction extends SelectionDispatchAction{
 	private SelectionDispatchAction fMoveMembersAction;
 	private SelectionDispatchAction fJdtMoveAction;
 	
-	public MoveAction(UnifiedSite site) {
+	public MoveAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("MoveAction.text")); //$NON-NLS-1$
 		fMoveMembersAction= MoveAction.createMoveMembersAction(site);
@@ -62,7 +63,7 @@ public class MoveAction extends SelectionDispatchAction{
 		setEnabled(fMoveMembersAction.isEnabled() || fJdtMoveAction.isEnabled());
 	}
 
-	private static OpenRefactoringWizardAction createMoveMembersAction(UnifiedSite site) {
+	private static OpenRefactoringWizardAction createMoveMembersAction(IWorkbenchSite site) {
 		String label= RefactoringMessages.getString("RefactoringGroup.move_label"); //$NON-NLS-1$
 		return new OpenRefactoringWizardAction(label, site, IMember.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){

@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -63,7 +64,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public AddGetterSetterAction(UnifiedSite site) {
+	public AddGetterSetterAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("AddGetterSetterAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("AddGetterSetterAction.description")); //$NON-NLS-1$

@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.jdt.core.ISourceReference;
@@ -16,7 +18,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 
@@ -25,13 +26,13 @@ public class ReorgActionFactory {
 
 	private ReorgActionFactory(){
 	}
-	public static SelectionDispatchAction createCutAction(UnifiedSite site, ISelectionProvider p){
+	public static SelectionDispatchAction createCutAction(IWorkbenchSite site, ISelectionProvider p){
 		SelectionDispatchAction a1= new CutSourceReferencesToClipboardAction(site);
 		p.addSelectionChangedListener(a1);
 		return a1;
 	}
 	
-	public static SelectionDispatchAction createCopyAction(UnifiedSite site, ISelectionProvider p){
+	public static SelectionDispatchAction createCopyAction(IWorkbenchSite site, ISelectionProvider p){
 		SelectionDispatchAction a1= new CopyResourcesToClipboardAction(site);
 		SelectionDispatchAction a2= new CopySourceReferencesToClipboardAction(site);
 		SelectionDispatchAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.copy"), ReorgMessages.getString("copyAction.description"), a1, a2);//$NON-NLS-1$ //$NON-NLS-2$
@@ -39,7 +40,7 @@ public class ReorgActionFactory {
 		return dual;
 	}
 	
-	public static SelectionDispatchAction createPasteAction(UnifiedSite site, ISelectionProvider p){
+	public static SelectionDispatchAction createPasteAction(IWorkbenchSite site, ISelectionProvider p){
 		SelectionDispatchAction a1= new PasteResourcesFromClipboardAction(site);
 		SelectionDispatchAction a2= new PasteSourceReferencesFromClipboardAction(site);
 		SelectionDispatchAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.paste"), ReorgMessages.getString("ReorgGroup.pasteAction.description"), a1, a2);//$NON-NLS-1$ //$NON-NLS-2$
@@ -47,7 +48,7 @@ public class ReorgActionFactory {
 		return dual;
 	}
 	
-	public static SelectionDispatchAction createDeleteAction(UnifiedSite site, ISelectionProvider p){
+	public static SelectionDispatchAction createDeleteAction(IWorkbenchSite site, ISelectionProvider p){
 		DeleteResourcesAction a1= new DeleteResourcesAction(site);
 		DeleteSourceReferencesAction a2= new DeleteSourceReferencesAction(site);
 		DualReorgAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.delete"), ReorgMessages.getString("deleteAction.description"), a1, a2); //$NON-NLS-1$ //$NON-NLS-2$

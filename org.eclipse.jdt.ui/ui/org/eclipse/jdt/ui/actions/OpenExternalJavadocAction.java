@@ -23,6 +23,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.help.IHelp;
@@ -65,7 +66,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * @param site the site providing additional context information for
 	 * 	this action
 	 */ 
-	public OpenExternalJavadocAction(UnifiedSite site) {
+	public OpenExternalJavadocAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("OpenExternalJavadocAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OpenExternalJavadocAction.description")); //$NON-NLS-1$
@@ -79,7 +80,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * </p>
 	 */
 	public OpenExternalJavadocAction(JavaEditor editor) {
-		this(UnifiedSite.create(editor.getEditorSite()));
+		this(editor.getEditorSite());
 		fEditor= editor;
 	}
 	

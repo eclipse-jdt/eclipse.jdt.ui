@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -44,7 +45,6 @@ import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 
-	protected ReorgDestinationAction(UnifiedSite site) {
+	protected ReorgDestinationAction(IWorkbenchSite site) {
 		super(site);
 	}
 

@@ -15,6 +15,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -50,7 +51,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public ShowInPackageViewAction(UnifiedSite site) {
+	public ShowInPackageViewAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("ShowInPackageViewAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("ShowInPackageViewAction.description")); //$NON-NLS-1$
@@ -65,7 +66,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	 * </p>
 	 */
 	public ShowInPackageViewAction(JavaEditor editor) {
-		this(UnifiedSite.create(editor.getEditorSite()));
+		this(editor.getEditorSite());
 		fEditor= editor;
 	}
 	

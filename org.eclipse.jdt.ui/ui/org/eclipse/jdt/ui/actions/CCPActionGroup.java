@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -34,7 +35,7 @@ import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
  */
 public class CCPActionGroup extends ActionGroup {
 
-	private UnifiedSite fSite;
+	private IWorkbenchSite fSite;
 
  	private SelectionDispatchAction[] fActions;
 
@@ -49,14 +50,14 @@ public class CCPActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public CCPActionGroup(IViewPart  part) {
-		this(UnifiedSite.create(part.getSite()));
+		this(part.getSite());
 	}
 	
 	public CCPActionGroup(Page page) {
-		this(UnifiedSite.create(page.getSite()));
+		this(page.getSite());
 	}
 
-	private CCPActionGroup(UnifiedSite site) {
+	private CCPActionGroup(IWorkbenchSite site) {
 		fSite= site;
 		fActions= new SelectionDispatchAction[] {	
 			fCutAction= ReorgActionFactory.createCutAction(fSite, fSite.getSelectionProvider()),

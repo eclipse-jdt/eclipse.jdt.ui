@@ -12,13 +12,12 @@ import org.eclipse.swt.dnd.Transfer;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -26,7 +25,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CopySourceReferencesToClipboardAction extends SourceReferenceAction{
 
-	protected CopySourceReferencesToClipboardAction(UnifiedSite site) {
+	protected CopySourceReferencesToClipboardAction(IWorkbenchSite site) {
 		super(site);
 	}
 

@@ -20,12 +20,12 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.MoveProjectAction;
 
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
@@ -42,7 +42,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 
 	private boolean fShowPreview= false;
 
-	public JdtMoveAction(UnifiedSite site) {
+	public JdtMoveAction(IWorkbenchSite site) {
 		super(site);
 		setText(ReorgMessages.getString("moveAction.label"));//$NON-NLS-1$
 	}

@@ -14,6 +14,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -50,7 +52,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public SelfEncapsulateFieldAction(UnifiedSite site) {
+	public SelfEncapsulateFieldAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("SelfEncapsulateFieldAction.label"));
 	}
@@ -62,7 +64,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * </p>
 	 */
 	public SelfEncapsulateFieldAction(CompilationUnitEditor editor) {
-		this(UnifiedSite.create(editor.getEditorSite()));
+		this(editor.getEditorSite());
 		fEditor= editor;
 	}
 	

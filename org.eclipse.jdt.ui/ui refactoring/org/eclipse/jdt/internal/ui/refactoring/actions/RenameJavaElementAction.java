@@ -4,11 +4,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -22,12 +23,12 @@ class RenameJavaElementAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	
-	public RenameJavaElementAction(UnifiedSite site) {
+	public RenameJavaElementAction(IWorkbenchSite site) {
 		super(site);
 	}
 	
 	public RenameJavaElementAction(CompilationUnitEditor editor) {
-		this(UnifiedSite.create(editor.getEditorSite()));
+		this(editor.getEditorSite());
 		fEditor= editor;
 	}
 	

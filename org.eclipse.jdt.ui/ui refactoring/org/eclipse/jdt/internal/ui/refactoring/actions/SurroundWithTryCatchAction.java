@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -36,7 +35,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	private static final String TITLE= RefactoringMessages.getString("SurroundWithTryCatchAction.title"); //$NON-NLS-1$
 
 	public SurroundWithTryCatchAction(CompilationUnitEditor editor) {
-		super(UnifiedSite.create(editor.getEditorSite()));
+		super(editor.getEditorSite());
 		setText(TITLE);
 		fEditor= editor;
 	}

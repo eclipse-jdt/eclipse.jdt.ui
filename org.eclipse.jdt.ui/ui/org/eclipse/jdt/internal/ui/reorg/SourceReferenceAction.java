@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.swt.custom.BusyIndicator;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -21,7 +23,6 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
@@ -31,7 +32,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public abstract class SourceReferenceAction extends SelectionDispatchAction {
 
-	protected SourceReferenceAction(UnifiedSite site) {
+	protected SourceReferenceAction(IWorkbenchSite site) {
 		super(site);
 	}
 

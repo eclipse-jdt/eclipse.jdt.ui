@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
@@ -50,7 +51,7 @@ public class ShowActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public ShowActionGroup(Page page) {
-		this(UnifiedSite.create(page.getSite()));
+		this(page.getSite());
 	}
 	
 	/**
@@ -59,7 +60,7 @@ public class ShowActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public ShowActionGroup(IViewPart part) {
-		this(UnifiedSite.create(part.getSite()));
+		this(part.getSite());
 		fIsPackageExplorer= part instanceof PackageExplorerPart;
 	}
 	
@@ -75,7 +76,7 @@ public class ShowActionGroup extends ActionGroup {
 		initialize(part.getSite().getSelectionProvider() , true);
 	}
 
-	private ShowActionGroup(UnifiedSite site) {
+	private ShowActionGroup(IWorkbenchSite site) {
 		fShowInPackagesViewAction= new ShowInPackageViewAction(site);
 		fShowInNavigatorViewAction= new ShowInNavigatorViewAction(site);
 		initialize(site.getSelectionProvider() , false);		

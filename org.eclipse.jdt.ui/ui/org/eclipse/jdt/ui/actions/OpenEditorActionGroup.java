@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
@@ -49,7 +50,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
  */
 public class OpenEditorActionGroup extends ActionGroup {
 
-	private UnifiedSite fSite;
+	private IWorkbenchSite fSite;
 	private boolean fIsEditorOwner;
 	private OpenAction fOpen;
 
@@ -59,9 +60,9 @@ public class OpenEditorActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public OpenEditorActionGroup(IViewPart part) {
-		fSite= UnifiedSite.create(part.getSite());
+		fSite= part.getSite();
 		fOpen= new OpenAction(fSite);
-		initialize(part.getSite().getSelectionProvider());
+		initialize(fSite.getSelectionProvider());
 	}
 	
 	/**
@@ -73,8 +74,8 @@ public class OpenEditorActionGroup extends ActionGroup {
 	public OpenEditorActionGroup(JavaEditor part) {
 		fIsEditorOwner= true;
 		fOpen= new OpenAction(part);
-		fSite= UnifiedSite.create(part.getEditorSite());
-		initialize(part.getEditorSite().getSelectionProvider());
+		fSite= part.getEditorSite();
+		initialize(fSite.getSelectionProvider());
 	}
 
 	/**

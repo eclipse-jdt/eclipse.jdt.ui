@@ -2,17 +2,18 @@ package org.eclipse.jdt.internal.ui.reorg;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 public class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
 
 	CopySourceReferencesToClipboardAction fCopy;
 	DeleteSourceReferencesAction fDelete;
 	
-	protected CutSourceReferencesToClipboardAction(UnifiedSite site) {
+	protected CutSourceReferencesToClipboardAction(IWorkbenchSite site) {
 		super(site);
 		setText(ReorgMessages.getString("CutSourceReferencesToClipboardAction.cut")); //$NON-NLS-1$
 		fCopy= new CopySourceReferencesToClipboardAction(site);

@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IMethod;
@@ -56,7 +57,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public OverrideMethodsAction(UnifiedSite site) {
+	public OverrideMethodsAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("OverrideMethodsAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OverrideMethodsAction.description")); //$NON-NLS-1$

@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
@@ -45,7 +46,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RenameAction;
  */
 public class RefactorActionGroup extends ActionGroup {
 
-	private UnifiedSite fSite;
+	private IWorkbenchSite fSite;
 
  	private SelectionDispatchAction fSelfEncapsulateField;
  	private SelectionDispatchAction fMoveAction;
@@ -62,7 +63,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public RefactorActionGroup(IViewPart part) {
-		this(UnifiedSite.create(part.getSite()));
+		this(part.getSite());
 	}	
 	
 	/**
@@ -71,7 +72,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public RefactorActionGroup(Page page) {
-		this(UnifiedSite.create(page.getSite()));
+		this(page.getSite());
 	}
 	
 	public RefactorActionGroup(CompilationUnitEditor editor) {
@@ -97,7 +98,7 @@ public class RefactorActionGroup extends ActionGroup {
 		initAction(fPullUpAction, editor.getSelectionProvider());		
 	}
 
-	private RefactorActionGroup(UnifiedSite site) {
+	private RefactorActionGroup(IWorkbenchSite site) {
 		fSite= site;
 		fMoveAction= new MoveAction(site);
 		initAction(fMoveAction, fSite.getSelectionProvider());

@@ -5,15 +5,16 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 class DualReorgAction extends SelectionDispatchAction {
 
 	SelectionDispatchAction fResourceAction;
 	SelectionDispatchAction fSourceReferenceAction;
 	
-	protected DualReorgAction(UnifiedSite site, String text, String description, SelectionDispatchAction resourceAction, SelectionDispatchAction sourceReferenceAction) {
+	protected DualReorgAction(IWorkbenchSite site, String text, String description, SelectionDispatchAction resourceAction, SelectionDispatchAction sourceReferenceAction) {
 		super(site);
 		setText(text);
 		setDescription(description);

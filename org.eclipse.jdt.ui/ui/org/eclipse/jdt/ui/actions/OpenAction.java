@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
 
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -61,7 +62,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public OpenAction(UnifiedSite site) {
+	public OpenAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("OpenAction.label")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("OpenAction.tooltip")); //$NON-NLS-1$
@@ -75,7 +76,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * </p>
 	 */
 	public OpenAction(JavaEditor editor) {
-		this(UnifiedSite.create(editor.getEditorSite()));
+		this(editor.getEditorSite());
 		fEditor= editor;
 		setText(ActionMessages.getString("OpenAction.declaration.label")); //$NON-NLS-1$
 	}

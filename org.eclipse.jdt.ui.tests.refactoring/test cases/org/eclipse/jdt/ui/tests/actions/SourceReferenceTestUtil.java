@@ -19,7 +19,7 @@ class SourceReferenceTestUtil {
 	}
 	
 	static DeleteSourceReferencesAction createDeleteAction(Object[] elems){
-		DeleteSourceReferencesAction deleteAction= new DeleteSourceReferencesAction(new MockUnifiedSite(elems)){
+		DeleteSourceReferencesAction deleteAction= new DeleteSourceReferencesAction(new MockWorkbenchSite(elems)){
 			protected boolean confirmCusDelete(ICompilationUnit[] cusToDelete) {
 				return false;
 			}
@@ -47,14 +47,14 @@ class SourceReferenceTestUtil {
 //	}	
 
 	static void copy(Object[] elems) {
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockUnifiedSite(elems), new MockSelectionProvider(elems));
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elems), new MockSelectionProvider(elems));
 		copyAction.update();
 		Assert.assertTrue("copy incorrectly disabled", copyAction.isEnabled());
 		copyAction.run();
 	}	
 
 	static void paste(Object[] elems) {
-		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockUnifiedSite(elems), new MockSelectionProvider(elems));
+		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elems), new MockSelectionProvider(elems));
 		pasteAction.update();
 		Assert.assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 		pasteAction.run();

@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -33,7 +34,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public abstract class SelectionDispatchAction extends Action implements ISelectionChangedListener, IUpdate {
 	
-	private UnifiedSite fSite;
+	private IWorkbenchSite fSite;
 	
 	/**
 	 * Creates a new action with no text and no image.
@@ -43,7 +44,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * 
 	 * @param site the site this action is working on
 	 */
-	protected SelectionDispatchAction(UnifiedSite site) {
+	protected SelectionDispatchAction(IWorkbenchSite site) {
 		Assert.isNotNull(site);
 		fSite= site;
 	}
@@ -71,7 +72,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	protected void run(ISelection selection) {
 	}
 
-	protected UnifiedSite getSite() {
+	protected IWorkbenchSite getSite() {
 		return fSite;
 	}
 	

@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -25,7 +26,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -33,7 +33,7 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 
 	private static final String fgLineDelim= System.getProperty("line.separator"); //$NON-NLS-1$
 	
-	protected CopyResourcesToClipboardAction(UnifiedSite site) {
+	protected CopyResourcesToClipboardAction(IWorkbenchSite site) {
 		super(site);
 		setText(ReorgMessages.getString("CopyResourcesToClipboardAction.copy"));//$NON-NLS-1$
 	}

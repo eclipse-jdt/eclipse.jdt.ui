@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -58,7 +59,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	public static class ObjectDelegate implements IObjectActionDelegate {
 		private OpenSuperImplementationAction fAction;
 		public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-			fAction= new OpenSuperImplementationAction(UnifiedSite.create(targetPart.getSite()));
+			fAction= new OpenSuperImplementationAction(targetPart.getSite());
 		}
 		public void run(IAction action) {
 			fAction.run();
@@ -74,7 +75,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public OpenSuperImplementationAction(UnifiedSite site) {
+	public OpenSuperImplementationAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("OpenSuperImplementationAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OpenSuperImplementationAction.description")); //$NON-NLS-1$
@@ -88,7 +89,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 * </p>
 	 */
 	public OpenSuperImplementationAction(JavaEditor editor) {
-		this(UnifiedSite.create(editor.getEditorSite()));
+		this(editor.getEditorSite());
 		fEditor= editor;
 	}
 	

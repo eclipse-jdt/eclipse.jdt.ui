@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -44,7 +46,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public ExternalizeStringsAction(UnifiedSite site) {
+	public ExternalizeStringsAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("ExternalizeStringsAction.label")); //$NON-NLS-1$
 	}
@@ -56,7 +58,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	 * </p>
 	 */
 	public ExternalizeStringsAction(CompilationUnitEditor editor) {
-		this(UnifiedSite.create(editor.getEditorSite()));
+		this(editor.getEditorSite());
 		fEditor= editor;
 	}
 	

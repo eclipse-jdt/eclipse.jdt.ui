@@ -13,6 +13,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -28,7 +30,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -47,7 +48,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	private boolean fCanDeleteGetterSetter;
 	private boolean fAskForDeleteConfirmation;
 	
-	public DeleteSourceReferencesAction(UnifiedSite site) {
+	public DeleteSourceReferencesAction(IWorkbenchSite site) {
 		super(site);
 		fCanDeleteGetterSetter= true;
 		fAskForDeleteConfirmation= true;

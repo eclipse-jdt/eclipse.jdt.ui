@@ -7,11 +7,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -28,14 +29,14 @@ abstract class OpenRefactoringWizardAction extends SelectionDispatchAction {
 	private Refactoring fRefactoring;
 	private CompilationUnitEditor fEditor;
 	
-	protected OpenRefactoringWizardAction(String label, UnifiedSite site, Class activatedOnType) {
+	protected OpenRefactoringWizardAction(String label, IWorkbenchSite site, Class activatedOnType) {
 		super(site);
 		setText(label);
 		fActivationType= activatedOnType;
 	}
 	
 	protected OpenRefactoringWizardAction(String label, CompilationUnitEditor editor, Class activatedOnType) {
-		super(UnifiedSite.create(editor.getEditorSite()));
+		super(editor.getEditorSite());
 		setText(label);
 		fActivationType= activatedOnType;
 		fEditor= editor;

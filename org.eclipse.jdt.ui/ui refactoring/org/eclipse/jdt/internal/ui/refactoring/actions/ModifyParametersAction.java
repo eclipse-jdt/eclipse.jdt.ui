@@ -1,9 +1,9 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
@@ -21,7 +21,7 @@ public class ModifyParametersAction extends OpenRefactoringWizardAction {
 		super(TITLE, editor, IMethod.class);
 	}
 
-	public ModifyParametersAction(UnifiedSite site) {
+	public ModifyParametersAction(IWorkbenchSite site) {
 		super(TITLE, site, IMethod.class);
 	}
 

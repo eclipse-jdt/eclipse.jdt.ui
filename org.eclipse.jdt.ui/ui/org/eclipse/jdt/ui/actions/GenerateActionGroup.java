@@ -20,6 +20,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.part.Page;
@@ -70,7 +71,7 @@ public class GenerateActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public GenerateActionGroup(Page page) {
-		this(UnifiedSite.create(page.getSite()));
+		this(page.getSite());
 	}
 
 	/**
@@ -79,10 +80,10 @@ public class GenerateActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public GenerateActionGroup(IViewPart part) {
-		this(UnifiedSite.create(part.getSite()));
+		this(part.getSite());
 	}
 
-	private GenerateActionGroup(UnifiedSite site) {
+	private GenerateActionGroup(IWorkbenchSite site) {
 		ISelectionProvider provider= site.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		

@@ -22,6 +22,7 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.views.navigator.ResourceNavigator;
@@ -60,7 +61,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public ShowInNavigatorViewAction(UnifiedSite site) {
+	public ShowInNavigatorViewAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("ShowInNavigatorView.label")); //$NON-NLS-1$
 	}
@@ -72,7 +73,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	 * </p>
 	 */
 	public ShowInNavigatorViewAction(JavaEditor editor) {
-		this(UnifiedSite.create(editor.getEditorSite()));
+		this(editor.getEditorSite());
 		fEditor= editor;
 	}
 	

@@ -12,13 +12,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.CopyProjectAction;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 
-	protected PasteResourcesFromClipboardAction(UnifiedSite site) {
+	protected PasteResourcesFromClipboardAction(IWorkbenchSite site) {
 		super(site);
 	}
 	
