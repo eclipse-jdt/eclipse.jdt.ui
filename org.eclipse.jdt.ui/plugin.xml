@@ -341,6 +341,7 @@
       extensions="java"
       class="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor"
       contributorClass="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditorActionContributor"
+      symbolicFontName="org.eclipse.jdt.ui.editors.textfont"
       default="true">
    </editor>
    
@@ -351,6 +352,7 @@
       extensions="class"
       class="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor"
       contributorClass="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorActionContributor"
+      symbolicFontName="org.eclipse.jdt.ui.editors.textfont"
       default="true">
    </editor>
    
@@ -371,6 +373,17 @@
       default="true">     
     </editor>
 
+</extension>
+
+<extension point="org.eclipse.ui.fontDefinitions">
+	<fontDefinition
+		label="%javaEditorFontDefiniton.label"
+		id="org.eclipse.jdt.ui.editors.textfont"
+		defaultsTo="org.eclipse.jface.textfont">
+        <description>
+			%javaEditorFontDefintion.description
+		</description>
+	</fontDefinition>
 </extension>
 
 <extension
