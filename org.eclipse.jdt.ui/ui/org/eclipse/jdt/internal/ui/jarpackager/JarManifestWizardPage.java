@@ -787,14 +787,16 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		List packages= new ArrayList(packageFragments.size());
 		for (Iterator iter= packageFragments.iterator(); iter.hasNext();) {
 			IPackageFragment fragment= (IPackageFragment)iter.next();
+			boolean containsJavaElements= false;
 			int kind;
 			try {
 				kind= fragment.getKind();
+				containsJavaElements= fragment.getChildren().length > 0;
 			} catch (JavaModelException ex) {
 				ExceptionHandler.handle(ex, getContainer().getShell(), "JAR Package Wizard Error", "The package " + fragment.getElementName() + " seems to be corrupt. It will be ignored");
 				continue;
 			}
-			if (kind != IPackageFragmentRoot.K_BINARY)
+			if (kind != IPackageFragmentRoot.K_BINARY && containsJavaElements)
 				packages.add(fragment);
 		}
 		ListSelectionDialog dialog= new ListSelectionDialog(getContainer().getShell(), packages, new org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider(), new JavaElementLabelProvider(flags), null);
