@@ -14,18 +14,10 @@ package org.eclipse.jdt.internal.ui.javaeditor.filebuffers;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.text.ILineTracker;
-
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.part.FileEditorInput;
-
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IOpenable;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 
 
 /**
@@ -42,10 +34,7 @@ public class CustomBufferFactory2 implements IBufferFactory {
 			ICompilationUnit original= (ICompilationUnit) unit.getOriginalElement();
 			IResource resource= original.getResource();
 			if (resource instanceof IFile) {
-				IFileEditorInput providerKey= new FileEditorInput((IFile) resource);
-				ICompilationUnitDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-				ILineTracker tracker= provider.createLineTracker(providerKey);
-				return new DocumentAdapter2(unit, (IFile) resource, tracker);
+				return new DocumentAdapter2(unit, (IFile) resource);
 			}
 				
 		}
