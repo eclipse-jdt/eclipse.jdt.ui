@@ -15,8 +15,6 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
-
 
 /**
  * Action group that adds the 'new' menu to a context menu.

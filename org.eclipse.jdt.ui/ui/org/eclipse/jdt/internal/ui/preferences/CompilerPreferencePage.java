@@ -48,7 +48,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -58,7 +57,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 /*
  * The page for setting the compiler options.
@@ -735,8 +733,6 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	
 	private IStatus validateTaskTags() {
 		String text= (String) fWorkingValues.get(PREF_COMPILER_TASK_TAGS);
-		
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 
 		String[] tags= getFilters(text);
 		for (int i= 0; i < tags.length; i++) {

@@ -11,10 +11,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * A TypeHierarchyViewer that looks like the type hierarchy view of VA/Java:

@@ -64,11 +64,8 @@ public class ReorgCorrectionsSubProcessor {
 			proposals.add(new CorrectPackageDeclarationProposal(problemPos, 1));
 
 			// move to pack
-			IPackageFragment currPack= (IPackageFragment) cu.getParent();
-			
 			IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
 			String newPackName= packDecls.length > 0 ? packDecls[0].getElementName() : ""; //$NON-NLS-1$
-				
 			
 			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(cu);
 			IPackageFragment newPack= root.getPackageFragment(newPackName);

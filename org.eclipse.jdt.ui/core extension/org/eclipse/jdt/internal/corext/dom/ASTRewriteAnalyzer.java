@@ -419,7 +419,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		// count number of nodes before and after the rewrite
 		int before= 0;
 		int after= 0;
-		ASTNode lastExisting= null;
 		for (int i= 0; i < list.size(); i++) {
 			ASTNode elem= (ASTNode) list.get(i);
 			if (isInserted(elem)) {
@@ -432,7 +431,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				if (!isRemoved(elem)) {
 					after++;
 				}
-				lastExisting= elem;
 			}
 		}
 		
@@ -503,7 +501,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	private int getEndLineOffset(int offset) {
 		TextRegion lineRegion= fTextBuffer.getLineInformationOfOffset(offset);
 		int pos= lineRegion.getOffset() + lineRegion.getLength();
-		char prev= ' ';
 		for (int i= offset; i < pos; i++) {
 			char ch= fTextBuffer.getChar(i);
 			if (!Character.isWhitespace(ch)) {
@@ -558,7 +555,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			}
 			int end= sibling.getStartPosition() + sibling.getLength();
 			
-			int line= fTextBuffer.getLineOfOffset(end);
 			insertPos= getEndLineOffset(end);
 		}
 		doTextInsert(insertPos, fTextBuffer.getLineDelimiter(), description);
@@ -793,8 +789,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		// type members
 		List members= typeDecl.bodyDeclarations();
-		
-		ASTNode last= null;
+
 		// startPos required if first member is an insert: find position after left brace of type
 		int startPos= 0;
 		int startIndent= 0;

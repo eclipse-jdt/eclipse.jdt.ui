@@ -121,7 +121,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		ArrayList res= new ArrayList();
 		while (tok.hasMoreTokens()) {
 			try {
-				String desc= tok.nextToken(); // ignore
+				tok.nextToken(); // desc: ignore
 				int kind= Integer.parseInt(tok.nextToken());
 				IPath path= decodePath(tok.nextToken());
 				IPath attachPath= decodePath(tok.nextToken());

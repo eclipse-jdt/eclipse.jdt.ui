@@ -10,18 +10,15 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.layout.GridLayout;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -30,8 +27,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -239,8 +234,6 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	 * @see NewTypeWizardPage#createTypeMembers
 	 */
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
-		List newMethods= new ArrayList();
-		
 		boolean doMain= isCreateMain();
 		boolean doConstr= isCreateConstructors();
 		boolean doInherited= isCreateInherited();

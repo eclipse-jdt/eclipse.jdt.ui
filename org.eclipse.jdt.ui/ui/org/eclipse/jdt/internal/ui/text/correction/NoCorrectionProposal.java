@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;

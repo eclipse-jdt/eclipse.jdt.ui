@@ -3,7 +3,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.HashSet;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;

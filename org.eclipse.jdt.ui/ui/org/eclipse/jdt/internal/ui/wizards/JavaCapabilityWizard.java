@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -49,7 +48,6 @@ public class JavaCapabilityWizard extends Wizard implements ICapabilityInstallWi
 	 */	
 	public void addPages() {
 		super.addPages();
-		IWorkspaceRoot root= JavaPlugin.getWorkspace().getRoot();
 		fJavaPage= new JavaCapabilityConfigurationPage();
 		fJavaPage.init(JavaCore.create(fProject), null, null, false);
 		addPage(fJavaPage);

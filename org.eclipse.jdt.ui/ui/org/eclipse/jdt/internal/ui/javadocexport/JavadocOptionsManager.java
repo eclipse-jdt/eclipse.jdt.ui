@@ -650,100 +650,98 @@ public class JavadocOptionsManager {
 
 	public String[] createArgumentArray() throws CoreException {
 		if (fProjects.isEmpty()) {
-			return new String[]{};
+			return new String[0];
 		}
 
 		List args= new ArrayList();
-		List projects= new ArrayList();
 
-			args.add(fJDocCommand);
-			if (fFromStandard) {
-				args.add("-d"); //$NON-NLS-1$
-				args.add(fDestination);
-			} else {
-				if (!fAdditionalParams.equals("")) { //$NON-NLS-1$
-					ExecutionArguments tokens= new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$
-					String[] argsArray= tokens.getProgramArgumentsArray();
-					for (int i= 0; i < argsArray.length; i++) {
-						args.add(argsArray[i]);
-					}
-				}
-				args.add("-doclet"); //$NON-NLS-1$
-				args.add(fDocletname);
-				args.add("-docletpath"); //$NON-NLS-1$
-				args.add(fDocletpath);
-			}
-			args.add("-sourcepath"); //$NON-NLS-1$
-			args.add(fSourcepath);
-			args.add("-classpath"); //$NON-NLS-1$
-			args.add(fClasspath);
-			args.add("-" + fAccess); //$NON-NLS-1$
-
-			if (fFromStandard) {
-				if (fUse)
-					args.add("-use"); //$NON-NLS-1$
-				if (fVersion)
-					args.add("-version"); //$NON-NLS-1$
-				if (fAuthor)
-					args.add("-author"); //$NON-NLS-1$
-				if (fNonavbar)
-					args.add("-nonavbar"); //$NON-NLS-1$
-				if (fNoindex)
-					args.add("-noindex"); //$NON-NLS-1$
-				if (fNotree)
-					args.add("-notree"); //$NON-NLS-1$
-				if (fNodeprecated)
-					args.add("-nodeprecated"); //$NON-NLS-1$
-				if (fNoDeprecatedlist)
-					args.add("-nodeprecatedlist"); //$NON-NLS-1$
-				if (fSplitindex)
-					args.add("-splitindex"); //$NON-NLS-1$
-
-				if (!fTitle.equals("")) { //$NON-NLS-1$
-					args.add("-doctitle"); //$NON-NLS-1$
-					args.add(fTitle);
-				}
-
-				if (!fStylesheet.equals("")) { //$NON-NLS-1$
-					args.add("-stylesheetfile"); //$NON-NLS-1$
-					args.add(fStylesheet);
-				}
-
-				if (!fAdditionalParams.equals("")) { //$NON-NLS-1$
-					ExecutionArguments tokens= new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$
-					String[] argsArray= tokens.getProgramArgumentsArray();
-					for (int i= 0; i < argsArray.length; i++) {
-						args.add(argsArray[i]);
-					}
-				}
-
-
-				String hrefs= (String) fDependencies;
-				StringTokenizer tokenizer= new StringTokenizer(hrefs, ";"); //$NON-NLS-1$
-				while (tokenizer.hasMoreElements()) {
-					String href= (String) tokenizer.nextElement();
-					args.add("-link"); //$NON-NLS-1$
-					args.add(href);
-				}
-			} //end standard options
-
-			if (!fOverview.equals("")) { //$NON-NLS-1$
-				args.add("-overview"); //$NON-NLS-1$
-				args.add(fOverview);
-			}
-
-			for (int i= 0; i < fSourceElements.size(); i++) {
-				IJavaElement curr= (IJavaElement) fSourceElements.get(i);
-				if (curr instanceof IPackageFragment) {
-					args.add(curr.getElementName());
-				} else if (curr instanceof ICompilationUnit) {
-					args.add(curr.getUnderlyingResource().getLocation().toOSString());
+		args.add(fJDocCommand);
+		if (fFromStandard) {
+			args.add("-d"); //$NON-NLS-1$
+			args.add(fDestination);
+		} else {
+			if (!fAdditionalParams.equals("")) { //$NON-NLS-1$
+				ExecutionArguments tokens= new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$
+				String[] argsArray= tokens.getProgramArgumentsArray();
+				for (int i= 0; i < argsArray.length; i++) {
+					args.add(argsArray[i]);
 				}
 			}
-			
-			String[] res= (String[]) args.toArray(new String[args.size()]);
-			return res;
-		
+			args.add("-doclet"); //$NON-NLS-1$
+			args.add(fDocletname);
+			args.add("-docletpath"); //$NON-NLS-1$
+			args.add(fDocletpath);
+		}
+		args.add("-sourcepath"); //$NON-NLS-1$
+		args.add(fSourcepath);
+		args.add("-classpath"); //$NON-NLS-1$
+		args.add(fClasspath);
+		args.add("-" + fAccess); //$NON-NLS-1$
+
+		if (fFromStandard) {
+			if (fUse)
+				args.add("-use"); //$NON-NLS-1$
+			if (fVersion)
+				args.add("-version"); //$NON-NLS-1$
+			if (fAuthor)
+				args.add("-author"); //$NON-NLS-1$
+			if (fNonavbar)
+				args.add("-nonavbar"); //$NON-NLS-1$
+			if (fNoindex)
+				args.add("-noindex"); //$NON-NLS-1$
+			if (fNotree)
+				args.add("-notree"); //$NON-NLS-1$
+			if (fNodeprecated)
+				args.add("-nodeprecated"); //$NON-NLS-1$
+			if (fNoDeprecatedlist)
+				args.add("-nodeprecatedlist"); //$NON-NLS-1$
+			if (fSplitindex)
+				args.add("-splitindex"); //$NON-NLS-1$
+
+			if (!fTitle.equals("")) { //$NON-NLS-1$
+				args.add("-doctitle"); //$NON-NLS-1$
+				args.add(fTitle);
+			}
+
+			if (!fStylesheet.equals("")) { //$NON-NLS-1$
+				args.add("-stylesheetfile"); //$NON-NLS-1$
+				args.add(fStylesheet);
+			}
+
+			if (!fAdditionalParams.equals("")) { //$NON-NLS-1$
+				ExecutionArguments tokens= new ExecutionArguments("", fAdditionalParams); //$NON-NLS-1$
+				String[] argsArray= tokens.getProgramArgumentsArray();
+				for (int i= 0; i < argsArray.length; i++) {
+					args.add(argsArray[i]);
+				}
+			}
+
+			String hrefs= (String) fDependencies;
+			StringTokenizer tokenizer= new StringTokenizer(hrefs, ";"); //$NON-NLS-1$
+			while (tokenizer.hasMoreElements()) {
+				String href= (String) tokenizer.nextElement();
+				args.add("-link"); //$NON-NLS-1$
+				args.add(href);
+			}
+		} //end standard options
+
+		if (!fOverview.equals("")) { //$NON-NLS-1$
+			args.add("-overview"); //$NON-NLS-1$
+			args.add(fOverview);
+		}
+
+		for (int i= 0; i < fSourceElements.size(); i++) {
+			IJavaElement curr= (IJavaElement) fSourceElements.get(i);
+			if (curr instanceof IPackageFragment) {
+				args.add(curr.getElementName());
+			} else if (curr instanceof ICompilationUnit) {
+				args.add(curr.getUnderlyingResource().getLocation().toOSString());
+			}
+		}
+
+		String[] res= (String[]) args.toArray(new String[args.size()]);
+		return res;
+
 	}
 
 

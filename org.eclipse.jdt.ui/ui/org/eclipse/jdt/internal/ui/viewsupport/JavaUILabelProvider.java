@@ -14,8 +14,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 public class JavaUILabelProvider extends LabelProvider {
 	
 	protected JavaElementImageProvider fImageLabelProvider;

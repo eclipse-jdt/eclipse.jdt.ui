@@ -17,9 +17,6 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-
 public class ASTWithExistingFlattener extends ASTFlattener {
 
 	private static final String KEY= "ExistingASTNode";
@@ -97,7 +94,6 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 	 * @return the serialized and formatted code.
 	 */	
 	public String getFormattedResult(int initialIndentationLevel, String lineDelimiter) {
-		int tabWidth= CodeFormatterUtil.getTabWidth();
 		NodeMarker[] markers= getNodeMarkers();
 		int nExistingNodes= markers.length;
 

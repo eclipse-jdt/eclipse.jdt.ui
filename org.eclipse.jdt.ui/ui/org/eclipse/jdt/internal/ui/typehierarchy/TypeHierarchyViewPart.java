@@ -902,7 +902,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}	
 	
 	private IType getSelectableType(IJavaElement elem) {
-		ISelection sel= null;
 		if (elem.getElementType() != IJavaElement.TYPE) {
 			return null; //(IType) getCurrentViewer().getTreeRootType();
 		} else {
@@ -1317,7 +1316,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		}
 		
-		String selectionId= memento.getString(TAG_SELECTION);
+		//String selectionId= memento.getString(TAG_SELECTION);
 		// do not restore type hierarchy contents
 //		if (selectionId != null) {
 //			IJavaElement elem= JavaCore.create(selectionId);

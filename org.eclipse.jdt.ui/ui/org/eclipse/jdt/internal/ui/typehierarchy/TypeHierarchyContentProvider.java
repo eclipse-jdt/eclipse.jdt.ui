@@ -23,8 +23,6 @@ import org.eclipse.jdt.ui.IWorkingCopyProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 
 /**
  * Base class for content providers for type hierarchy viewers.

@@ -282,8 +282,6 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 					monitor= new NullProgressMonitor();
 				}				
 				monitor.beginTask(NewWizardMessages.getString("NewJavaProjectWizardPage.op_desc"), 10); //$NON-NLS-1$
-				int workLeft= 10;
-
 				// initialize if needed
 				if (fProjectModified || isNewProjectHandle()) {
 					initBuildPaths();

@@ -271,7 +271,6 @@ public class ASTResolving {
     }
     	
     private static ITypeBinding getPossibleTypeBinding(ASTNode node) {
-    	AST ast= node.getAST();
     	ASTNode parent= node.getParent();
     	while (parent instanceof Type) {
     		parent= parent.getParent();

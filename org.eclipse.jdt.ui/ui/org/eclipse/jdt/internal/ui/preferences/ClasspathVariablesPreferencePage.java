@@ -20,7 +20,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;
 
 public class ClasspathVariablesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
@@ -32,11 +31,6 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	 */
 	public ClasspathVariablesPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		IStatusChangeListener listener= new IStatusChangeListener() {
-			public void statusChanged(IStatus status) {
-				updateStatus(status);
-			}
-		};
 		fVariableBlock= new VariableBlock(true, null);
 		setDescription(JavaUIMessages.getString("ClasspathVariablesPreferencePage.description")); //$NON-NLS-1$
 	}

@@ -11,8 +11,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 /**
  * An <code>IRunnableWithProgress</code> that adapts and  <code>IWorkspaceRunnable</code>
  * so that is can be executed inside <code>IRunnableContext</code>. <code>OperationCanceledException</code> 

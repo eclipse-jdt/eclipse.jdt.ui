@@ -84,7 +84,6 @@ public class UnresolvedElementsSubProcessor {
 				}
 			}
 		} else if (selectedNode instanceof SuperFieldAccess) {
-			SuperFieldAccess access= (SuperFieldAccess) selectedNode;
 			binding= declaringTypeBinding.getSuperclass();	
 		} else if (selectedNode instanceof SimpleType) {
 			similarNodeKind= SimilarElementsRequestor.REF_TYPES;
@@ -273,7 +272,6 @@ public class UnresolvedElementsSubProcessor {
 			// only propose to create types for qualifiers when the name starts with upper case
 			boolean isPossibleName= Character.isUpperCase(typeName.charAt(0)) || (node == refNode);
 			if (isPossibleName) {
-				String addedCUName= typeName + ".java"; //$NON-NLS-1$
 				IPackageFragment enclosingPackage= null;
 				IType enclosingType= null;
 				if (node.isSimpleName()) {

@@ -475,8 +475,6 @@ public class ImportsStructure implements IImportsStructure {
 		StringBuffer buf= new StringBuffer();
 				
 		// all (top level) types in this cu
-		IType[] topLevelTypes= fCompilationUnit.getTypes();
-	
 		int nCreated= 0;
 		PackageEntry lastPackage= null;
 		
