@@ -33,6 +33,7 @@ public interface IColorManagerExtension {
 	
 	/**
 	 * Forgets the color specification remembered under the given key.
+	 * 
 	 * @param key the color key
 	 */
 	void unbindColor(String key);

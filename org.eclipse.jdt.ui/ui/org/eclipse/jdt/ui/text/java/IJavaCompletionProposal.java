@@ -14,16 +14,22 @@ package org.eclipse.jdt.ui.text.java;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 /**
- * CompletionProposal with a relevance value.
+ * A completion proposal with a relevance value.
  * The relevance value is used to sort the completion proposals. Proposals with higher relevance
  * should be listed before proposals with lower relevance.
+ * 
+ * @see org.eclipse.jface.text.contentassist.ICompletionProposal
+ * @since 2.1
  */
 public interface IJavaCompletionProposal extends ICompletionProposal {
 		
 	/**
-	 * Returns the relevance of the completion proposal. It is an integer in the
-	 * range of [0, 100], which is used to determine if this proposal is more
-	 * relevant than another proposal.
+	 * Returns the relevance of this completion proposal.
+	 * <p> 
+	 * The relevance is used to determine if this proposal is more
+	 * relevant than another proposal.</p>
+	 * 
+	 * @return the relevance of this completion proposal in the range of [0, 100]
 	 */
 	int getRelevance();
 

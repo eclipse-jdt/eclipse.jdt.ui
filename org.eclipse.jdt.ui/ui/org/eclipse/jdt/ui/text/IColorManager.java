@@ -15,13 +15,12 @@ import org.eclipse.jface.text.source.ISharedTextColors;
 
 
 /**
- * Manages SWT color objects for given color keys and
+ * Manages SWT color objects for the given color keys and
  * given <code>RGB</code> objects. Until the <code>dispose</code> 
  * method is called, the same color object is returned for
  * equal keys and equal <code>RGB</code> values.
  * <p>
- * This interface may be implemented by clients.
- * </p>
+ * This interface may be implemented by clients.</p>
  *
  * @see IJavaColorConstants
  */

@@ -41,7 +41,10 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
  * </p>
  */
 public class JavaTextTools {
-	
+
+	/**
+	 * This tools' preference listener. 
+	 */	
 	private class PreferenceListener implements IPropertyChangeListener, Preferences.IPropertyChangeListener {
 		public void propertyChange(PropertyChangeEvent event) {
 			adaptToPreferenceChange(event);
@@ -51,24 +54,27 @@ public class JavaTextTools {
 		}
 	};
 		
-	/** The color manager */
+	/** The color manager. */
 	private JavaColorManager fColorManager;
-	/** The Java source code scanner */
+	/** The Java source code scanner. */
 	private JavaCodeScanner fCodeScanner;
-	/** The Java multiline comment scanner */
+	/** The Java multiline comment scanner. */
 	private JavaCommentScanner fMultilineCommentScanner;
-	/** The Java singleline comment scanner */
+	/** The Java singleline comment scanner. */
 	private JavaCommentScanner fSinglelineCommentScanner;
-	/** The Java string scanner */
+	/** The Java string scanner. */
 	private SingleTokenJavaScanner fStringScanner;
-	/** The JavaDoc scanner */
+	/** The JavaDoc scanner. */
 	private JavaDocScanner fJavaDocScanner;
-	/** The Java partitions scanner */
+	/** The Java partitions scanner. */
 	private FastJavaPartitionScanner fPartitionScanner;	
 	
-	/** The preference store */
+	/** The preference store. */
 	private IPreferenceStore fPreferenceStore;
-	/** The core preference store */
+	/**
+	 * The core preference store.
+	 * @since 2.1
+	 */
 	private Preferences fCorePreferenceStore;
 	/** The preference change listener */
 	private PreferenceListener fPreferenceListener= new PreferenceListener();
@@ -76,12 +82,12 @@ public class JavaTextTools {
 
 	/**
 	 * Creates a new Java text tools collection.
-	 * @param store the preference store to initialize the text tools. The text tool
-	 * instance installs a listener on the passed preference store to adapt itself to 
-	 * changes in the preference store. In general <code>PreferenceConstants.
-	 * getPreferenceStore()</code> should be used to initialize the text tools.
 	 * 
-	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
+	 * @param store the preference store to initialize the text tools. The text tool
+	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			changes in the preference store. In general <code>PreferenceConstants.
+	 *			getPreferenceStore()</code> should be used to initialize the text tools.
+	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore())
 	 * @since 2.0
 	 */
 	public JavaTextTools(IPreferenceStore store) {
@@ -92,13 +98,12 @@ public class JavaTextTools {
 	 * Creates a new Java text tools collection.
 	 * 
 	 * @param store the preference store to initialize the text tools. The text tool
-	 * instance installs a listener on the passed preference store to adapt itself to 
-	 * changes in the preference store. In general <code>PreferenceConstants.
-	 * getPreferenceStore()</code> shoould be used to initialize the text tools.
-	 * @param autoDisposeOnDisplayDispose 	if <code>true</code>  the color manager
-	 * automatically disposes all managed colors when the current display gets disposed
-	 * and all calls to {@link org.eclipse.jface.text.source.ISharedTextColors#dispose()} are ignored.
-	 * 
+	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			changes in the preference store. In general <code>PreferenceConstants.
+	 *			getPreferenceStore()</code> shoould be used to initialize the text tools.
+	 * @param autoDisposeOnDisplayDispose if <code>true</code>  the color manager
+	 *			automatically disposes all managed colors when the current display gets disposed
+	 *			and all calls to {@link org.eclipse.jface.text.source.ISharedTextColors#dispose()} are ignored.
 	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
 	 * @since 2.1
 	 */
@@ -109,13 +114,12 @@ public class JavaTextTools {
 	/**
 	 * Creates a new Java text tools collection.
 	 * @param store the preference store to initialize the text tools. The text tool
-	 * instance installs a listener on the passed preference store to adapt itself to 
-	 * changes in the preference store. In general <code>PreferenceConstants.
-	 * getPreferenceStore()</code> should be used to initialize the text tools.
+	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			changes in the preference store. In general <code>PreferenceConstants.
+	 *			getPreferenceStore()</code> should be used to initialize the text tools.
 	 * @param coreStore optional preference store to initialize the text tools. The text tool
-	 * instance installs a listener on the passed preference store to adapt itself to 
-	 * changes in the preference store.
-	 * 
+	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			changes in the preference store.
 	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
 	 * @since 2.1
 	 */
@@ -127,16 +131,15 @@ public class JavaTextTools {
 	 * Creates a new Java text tools collection.
 	 * 
 	 * @param store the preference store to initialize the text tools. The text tool
-	 * instance installs a listener on the passed preference store to adapt itself to 
-	 * changes in the preference store. In general <code>PreferenceConstants.
-	 * getPreferenceStore()</code> shoould be used to initialize the text tools.
+	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			changes in the preference store. In general <code>PreferenceConstants.
+	 *			getPreferenceStore()</code> shoould be used to initialize the text tools.
 	 * @param coreStore optional preference store to initialize the text tools. The text tool
-	 * instance installs a listener on the passed preference store to adapt itself to 
-	 * changes in the preference store.
+	 *			instance installs a listener on the passed preference store to adapt itself to 
+	 *			changes in the preference store.
 	 * @param autoDisposeOnDisplayDispose 	if <code>true</code>  the color manager
-	 * automatically disposes all managed colors when the current display gets disposed
-	 * and all calls to {@link org.eclipse.jface.text.source.ISharedTextColors#dispose()} are ignored.
-	 * 
+	 *			automatically disposes all managed colors when the current display gets disposed
+	 *			and all calls to {@link org.eclipse.jface.text.source.ISharedTextColors#dispose()} are ignored.
 	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
 	 * @since 2.1
 	 */
@@ -210,7 +213,6 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java multiline comments.
 	 *
 	 * @return a Java multiline comment scanner
-	 * 
 	 * @since 2.0
 	 */
 	public RuleBasedScanner getMultilineCommentScanner() {
@@ -221,7 +223,6 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java singleline comments.
 	 *
 	 * @return a Java singleline comment scanner
-	 * 
 	 * @since 2.0
 	 */
 	public RuleBasedScanner getSinglelineCommentScanner() {
@@ -232,7 +233,6 @@ public class JavaTextTools {
 	 * Returns a scanner which is configured to scan Java strings.
 	 *
 	 * @return a Java string scanner
-	 * 
 	 * @since 2.0
 	 */
 	public RuleBasedScanner getStringScanner() {
@@ -241,8 +241,9 @@ public class JavaTextTools {
 	
 	/**
 	 * Returns a scanner which is configured to scan JavaDoc compliant comments.
-	 * Notes that the start sequence "/**" and the corresponding end sequence
-	 * are part of the JavaDoc comment.
+	 * <p>
+	 * Note that the start sequence "/**" and the corresponding end sequence
+	 * are part of the JavaDoc comment.</p>
 	 *
 	 * @return a JavaDoc scanner
 	 */
@@ -253,7 +254,7 @@ public class JavaTextTools {
 	/**
 	 * Returns a scanner which is configured to scan 
 	 * Java-specific partitions, which are multi-line comments,
-	 * JavaDoc comments, and regular Java source code.
+	 * Javadoc comments, and regular Java source code.
 	 *
 	 * @return a Java partition scanner
 	 */
@@ -284,8 +285,9 @@ public class JavaTextTools {
 	/**
 	 * Returns the names of the document position categories used by the document
 	 * partitioners created by this object to manage their partition information.
+	 * <p>
 	 * If the partitioners don't use document position categories, the returned
-	 * result is <code>null</code>.
+	 * result is <code>null</code>.</p>
 	 *
 	 * @return the partition managing position categories or <code>null</code> 
 	 * 			if there is none
@@ -300,7 +302,6 @@ public class JavaTextTools {
 	 * 
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a behavioral change
-	 * 
 	 * @since 2.0
 	 */
 	public boolean affectsBehavior(PropertyChangeEvent event) {

@@ -88,6 +88,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 2.0
 	 */
 	public final static String PREFERENCE_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
+
 	/** 
 	 * Preference key for inserting spaces rather than tabs.
 	 * 
@@ -103,8 +104,9 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Creates a new Java source viewer configuration for viewers in the given editor 
 	 * using the given Java tools.
 	 *
-	 * @param tools the Java tools to be used
+	 * @param tools the Java text tools to be used
 	 * @param editor the editor in which the configured viewer(s) will reside
+	 * @see JavaTextTools
 	 */
 	public JavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor) {
 		fJavaTextTools= tools;
@@ -124,7 +126,6 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Returns the Java multiline comment scanner for this configuration.
 	 *
 	 * @return the Java multiline comment scanner
-	 * 
 	 * @since 2.0
 	 */
 	protected RuleBasedScanner getMultilineCommentScanner() {
@@ -135,7 +136,6 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Returns the Java singleline comment scanner for this configuration.
 	 *
 	 * @return the Java singleline comment scanner
-	 * 
 	 * @since 2.0
 	 */
 	protected RuleBasedScanner getSinglelineCommentScanner() {
@@ -146,7 +146,6 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * Returns the Java string scanner for this configuration.
 	 *
 	 * @return the Java string scanner
-	 * 
 	 * @since 2.0
 	 */
 	protected RuleBasedScanner getStringScanner() {
@@ -192,8 +191,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		return JavaPlugin.getDefault().getPreferenceStore();
 	}
 	
-	/* 
-	 * @see ISourceViewerConfiguration#getPresentationReconciler(ISourceViewer)
+	/*
+	 * @see SourceViewerConfiguration#getPresentationReconciler(ISourceViewer)
 	 */
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 
@@ -297,7 +296,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 
 	/*
-	 * @see SourceViewerConfiguration#getDefaultPrefix(ISourceViewer, String)
+	 * @see SourceViewerConfiguration#getDefaultPrefixes(ISourceViewer, String)
 	 * @since 2.0
 	 */
 	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
@@ -356,6 +355,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		return new JavaAnnotationHover();
 	}
 
+	/*
+	 * @see SourceViewerConfiguration#getConfiguredTextHoverStateMasks(ISourceViewer, String)
+	 * @since 2.1
+	 */
 	public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
 		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
 		int stateMasks[]= new int[hoverDescs.length];
@@ -383,6 +386,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 	/*
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
+	 * @since 2.1
 	 */
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
@@ -433,7 +437,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 	
 	/*
-	 * @see SourceViewerConfiguration#getHoverControlCreator(ISourceViewer)
+	 * @see SourceViewerConfiguration#getInformationControlCreator(ISourceViewer)
 	 * @since 2.0
 	 */
 	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
@@ -445,6 +449,15 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		};
 	}
 
+	/**
+	 * Returns the information presenter control creator. The creator is a factory creating the
+	 * presenter controls for the given source viewer. This implementation always returns a creator
+	 * for <code>DefaultInformationControl</code> instances.
+	 * 
+	 * @param sourceViewer the source viewer to be configured by this configuration
+	 * @return an information control creator
+	 * @since 2.1
+	 */
 	private IInformationControlCreator getInformationPresenterControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
@@ -456,6 +469,15 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		};
 	}
 
+	/**
+	 * Returns the outline presenter control creator. The creator is a factory creating outline
+	 * presenter controls for the given source viewer. This implementation always returns a creator
+	 * for <code>JavaOutlineInformationControl</code> instances.
+	 * 
+	 * @param sourceViewer the source viewer to be configured by this configuration
+	 * @return an information control creator
+	 * @since 2.1
+	 */
 	private IInformationControlCreator getOutlinePresenterControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
@@ -484,6 +506,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * information requested for the current cursor position.
 	 *
 	 * @param sourceViewer the source viewer to be configured by this configuration
+	 * @param doCodeResolve a boolean which specifies whether code resolve should be used to compute the Java element 
 	 * @return an information presenter
 	 * @since 2.1
 	 */
