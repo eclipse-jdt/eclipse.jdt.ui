@@ -391,12 +391,10 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 					public void run() {
 						Control ctrl = fViewer.getControl();
 						if (ctrl != null && !ctrl.isDisposed()) {
-							ctrl.setRedraw(false);
 							if (!fFoldPackages)
 								 ((TreeViewer) fViewer).remove(element);
 							else
 								refreshGrandParent(element);
-							ctrl.setRedraw(true);
 						}
 					}
 				});
@@ -410,12 +408,10 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 						public void run() {
 							Control ctrl = fViewer.getControl();
 							if (ctrl != null && !ctrl.isDisposed()) {
-								ctrl.setRedraw(false);
 								if (!fFoldPackages)
 									 ((TreeViewer) fViewer).add(parent, element);
 								else
 									refreshGrandParent(element);
-								ctrl.setRedraw(true);
 							}
 						}
 					});
@@ -428,9 +424,7 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 					public void run() {
 						Control ctrl = fViewer.getControl();
 						if (ctrl != null && !ctrl.isDisposed()) {
-							ctrl.setRedraw(false);
 							refreshGrandParent(element);
-							ctrl.setRedraw(true);
 						}
 					}
 				});
