@@ -9,8 +9,10 @@ import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jdt.core.Flags;
@@ -146,27 +148,42 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		}
 	
 		
-		boolean hasParametersToComplete= false;
+		ProposalContextInformation contextInformation= null;
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
 		nameBuffer.append('(');
 		if (parameterTypeNames != null) {
 			int length= parameterTypeNames.length;
-			hasParametersToComplete= (length > 0);
-			for (int i= 0; i < length; i++) {
-				if (i != 0) 
-					nameBuffer.append(',');
-				nameBuffer.append(parameterTypeNames[i]);
+			if (length > 0) {
+				StringBuffer paramBuffer= new StringBuffer();
+				for (int i= 0; i < length; i++) {
+					if (i != 0) 
+						paramBuffer.append(',');
+					paramBuffer.append(parameterTypeNames[i]);
+				}
+				contextInformation= new ProposalContextInformation();
+				String parameters= paramBuffer.toString();
+				contextInformation.setInformationDisplayString(parameters);
+				nameBuffer.append(parameters);
 			}
 		}
 		nameBuffer.append(")   "); //$NON-NLS-1$
 		nameBuffer.append(returnTypeName);
 		
+		String signature= nameBuffer.toString();
+		if (contextInformation != null)
+			contextInformation.setContextDisplayString(signature);
+		
 		ProposalInfo info= new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames);
 	
 		boolean hasClosingBracket= completionName.length > 0 && completionName[completionName.length - 1] == ')';
-		hasClosingBracket= (hasClosingBracket && hasParametersToComplete);
-		fMethods.add(createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString(), new String(declaringTypeName), false, !hasClosingBracket, info));
+		if (!hasClosingBracket && completionName.length > 0) {
+			// it's just a method name and no parameter list
+			contextInformation= null;
+		}
+			
+		boolean userMustCompleteParameters= (contextInformation != null && completionName.length > 0);
+		fMethods.add(createCompletion(start, end, new String(completionName), iconName, signature, new String(declaringTypeName), false, !userMustCompleteParameters, contextInformation, info));
 	}
 	
 	/**
@@ -223,10 +240,10 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	}
 	
 	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, ProposalInfo proposalInfo) {
-		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true, proposalInfo);
+		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true, null, proposalInfo);
 	}
 	
-	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalInfo proposalInfo) {
+	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, ProposalInfo proposalInfo) {
 		
 		if (qualification != null)
 			name += (" - " + qualification); //$NON-NLS-1$
@@ -238,8 +255,12 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		int length= end - start;
 		if (fOffset > -1 && fLength > -1)
 			length= fLength + (fOffset - start);
-		 	
-		return new JavaCompletionProposal(completion, start, length, cursorPosition, getIcon(iconName), name, null /* IContentAsisstTip */, proposalInfo);
+		
+		Image icon= getIcon(iconName);
+		if (contextInformation != null)
+			contextInformation.setImage(icon);
+			
+		return new JavaCompletionProposal(completion, start, length, cursorPosition, icon, name, contextInformation, proposalInfo);
 	} 
 		
 	protected int compare(Object o1, Object o2) {

@@ -64,6 +64,7 @@ public class JavaCompletionProposal implements ICompletionProposal {
 		fCursorPosition= cursorPosition;
 		fImage= image;
 		fDisplayString= displayString;
+		fContextInformation= contextInformation;
 		fProposalInfo= proposalInfo;
 	}
 

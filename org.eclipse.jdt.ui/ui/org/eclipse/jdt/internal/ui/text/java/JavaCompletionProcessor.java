@@ -37,6 +37,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	private IEditorPart fEditor;
 	private ResultCollector fCollector;
 	private IWorkingCopyManager fManager;
+	private IContextInformationValidator fValidator;
 	
 	
 	public JavaCompletionProcessor(IEditorPart editor) {
@@ -56,7 +57,9 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getContextInformationValidator()
 	 */
 	public IContextInformationValidator getContextInformationValidator() {
-		return null;
+		if (fValidator == null)
+			fValidator= new JavaParameterListValidator();
+		return fValidator;
 	}
 
 	/**
