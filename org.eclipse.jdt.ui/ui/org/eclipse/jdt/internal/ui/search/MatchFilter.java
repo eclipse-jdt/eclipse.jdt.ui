@@ -38,7 +38,7 @@ abstract class  MatchFilter {
 	private static final MatchFilter JAVADOC_FILTER= new JavadocFilter(); 
 	private static final MatchFilter READ_FILTER= new ReadFilter(); 
 	private static final MatchFilter WRITE_FILTER= new WriteFilter(); 
-	private static final MatchFilter UNEXACT_FILTER= new InexactMatchFilter(); 
+	private static final MatchFilter INEXACT_FILTER= new InexactMatchFilter(); 
 	private static final MatchFilter ERASURE_FILTER= new ErasureMatchFilter(); 
 	
 	private static final MatchFilter[] ALL_FILTERS= new MatchFilter[] {
@@ -46,7 +46,7 @@ abstract class  MatchFilter {
 			JAVADOC_FILTER,
 			READ_FILTER,
 			WRITE_FILTER,
-			UNEXACT_FILTER,
+			INEXACT_FILTER,
 			ERASURE_FILTER
 	};
 		
