@@ -762,6 +762,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			fMenu= null;
 		}
 		
+		fStandardActionGroups.dispose();
 		super.dispose();
 	}
 	
