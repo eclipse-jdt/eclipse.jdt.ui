@@ -8,7 +8,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.boot.BootLoader;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -66,7 +65,6 @@ public class RenameTypeTests extends RefactoringTest {
 	private void helper2_0(String oldCuName, String oldName, String newName, String newCUName, boolean updateReferences, boolean updateJavaDoc, 
 											boolean updateComments, boolean updateStrings) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), oldCuName);
-		IPath path= cu.getUnderlyingResource().getFullPath();
 		IType classA= getType(cu, oldName);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
