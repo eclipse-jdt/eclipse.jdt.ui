@@ -90,13 +90,17 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		
 		if (properties.isEmpty())
 			return null;
-			
-		return toHtml(properties.getProperty(stringLiteral.getLiteralValue(), JavaHoverMessages.getString("NLSStringHover.NLSStringHover.missingKeyWarning"))); //$NON-NLS-1$
+		
+		String value= properties.getProperty(stringLiteral.getLiteralValue(), null);
+		if (value != null)
+			value= HTMLPrinter.convertToHTMLContent(value);
+		else
+			value= JavaHoverMessages.getString("NLSStringHover.NLSStringHover.missingKeyWarning"); //$NON-NLS-1$
+		
+		return toHtml(value);
 	}
 	
-	protected String toHtml(String string) {
-		if (string == null)
-			return null;
+	private String toHtml(String string) {
 		
 		StringBuffer buffer= new StringBuffer();
 		
