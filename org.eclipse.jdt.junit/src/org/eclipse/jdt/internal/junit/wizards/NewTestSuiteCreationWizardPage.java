@@ -221,12 +221,12 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			label.setText(WizardMessages.getString("NewTestSuiteWizPage.classes_in_suite.label")); //$NON-NLS-1$
 			GridData gd= new GridData();
 			gd.horizontalAlignment = GridData.FILL;
-			gd.horizontalSpan = nColumns;
+			gd.horizontalSpan= nColumns;
 			label.setLayoutData(gd);
 
 			fClassesInSuiteTable= CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
 			gd= new GridData(GridData.FILL_BOTH);
-			gd.heightHint= 200;
+			gd.heightHint= 80;
 			gd.horizontalSpan= nColumns-1;
 
 			fClassesInSuiteTable.getTable().setLayoutData(gd);
