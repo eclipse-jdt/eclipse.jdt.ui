@@ -403,7 +403,7 @@ public class ASTResolving {
 		} else {
 			collectRelaxingTypes(res, type);
 		}
-		return (ITypeBinding[]) res.toArray(new ITypeBinding[res.size()]);;
+		return (ITypeBinding[]) res.toArray(new ITypeBinding[res.size()]);
 	}
 	
 	private static void collectRelaxingTypes(Set res, ITypeBinding type) {
