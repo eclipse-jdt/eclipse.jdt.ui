@@ -48,7 +48,7 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 			if (operation == null || !operation.canDoOperation(opCode)) {
 				break superCall;
 			}
-			fMyTextEditor.selectAndReveal(fPosition.getOffset(), fPosition.getLength());
+			fMyTextEditor.selectAndReveal(fPosition.getOffset(), 0);
 			operation.doOperation(opCode);
 			return;
 		}
