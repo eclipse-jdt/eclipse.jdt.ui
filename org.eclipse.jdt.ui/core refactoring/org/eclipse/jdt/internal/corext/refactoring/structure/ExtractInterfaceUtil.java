@@ -12,11 +12,9 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -27,14 +25,17 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -47,8 +48,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -64,6 +63,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompositeOrTypeConstraint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCollector;
@@ -97,13 +98,13 @@ class ExtractInterfaceUtil {
 
 	private final ICompilationUnit fInputTypeWorkingCopy;
 	private final ICompilationUnit fSupertypeWorkingCopy;//can be null
-	private final ASTNodeMappingManager fASTManager;
+	private final WorkingCopyOwner fWorkingCopyOwner;
 	
-	private ExtractInterfaceUtil(ICompilationUnit inputTypeWorkingCopy, ICompilationUnit supertypeWorkingCopy, ASTNodeMappingManager astManager){
+	private ExtractInterfaceUtil(ICompilationUnit inputTypeWorkingCopy, ICompilationUnit supertypeWorkingCopy, WorkingCopyOwner workingCopyOwner){
 		Assert.isNotNull(inputTypeWorkingCopy);
 		fSupertypeWorkingCopy= supertypeWorkingCopy;
 		fInputTypeWorkingCopy= inputTypeWorkingCopy;
-		fASTManager= astManager;
+		fWorkingCopyOwner= workingCopyOwner;
 	}
 	
 	private static ConstraintVariable[] getAllOfType(ITypeConstraint[] constraints, ITypeBinding binding){
@@ -131,22 +132,21 @@ class ExtractInterfaceUtil {
 		return (ConstraintVariable[]) result.toArray(new ConstraintVariable[result.size()]);
 	}
 
-	private ConstraintVariable[] getUpdatableVariables(IType theClass, IType theInterface, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
-		ITypeBinding typeBinding= getTypeBinding(theClass);
-		ITypeBinding interfaceBinding= getSuperTypeBinding(typeBinding, theInterface);
-		ICompilationUnit[] referringCus= getCusToParse(theClass, theInterface, pm);
+	private ConstraintVariable[] getUpdatableVariables(ITypeBinding inputTypeBinding, IType theType, IType theSupertype, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
+		ITypeBinding interfaceBinding= getSuperTypeBinding(inputTypeBinding, theSupertype);
+		ICompilationUnit[] referringCus= getCusToParse(theType, theSupertype, pm);
 		checkCompileErrors(referringCus, status);
 		if (status.hasFatalError())
 			return new ConstraintVariable[0];
 		ITypeConstraint[] constraints= getConstraints(referringCus);
-		return getUpdatableVariables(constraints, typeBinding, interfaceBinding);
+		return getUpdatableVariables(constraints, inputTypeBinding, interfaceBinding);
 	}
 
 	private void checkCompileErrors(ICompilationUnit[] referringCus, RefactoringStatus status) throws JavaModelException {
 		for (int i= 0; i < referringCus.length; i++) {
 			ICompilationUnit unit= referringCus[i];
 			String source= unit.getSource();
-			CompilationUnit cuNode= fASTManager.getAST(unit);
+			CompilationUnit cuNode= getAST(unit);
 			IProblem[] problems= ASTNodes.getProblems(cuNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.ERROR);
 			for (int j= 0; j < problems.length; j++) {
 				IProblem problem= problems[j];
@@ -178,25 +178,21 @@ class ExtractInterfaceUtil {
 	}
 
 	public static CompilationUnitRange[] updateReferences(TextChangeManager manager, IType inputType, IType supertypeToUse, WorkingCopyOwner workingCopyOwner, boolean updateInputTypeCu, IProgressMonitor pm, RefactoringStatus status) throws CoreException{
-		ASTNodeMappingManager astManager= new ASTNodeMappingManager(workingCopyOwner);
 		ICompilationUnit typeWorkingCopy= inputType.getCompilationUnit();
-		ExtractInterfaceUtil inst= new ExtractInterfaceUtil(typeWorkingCopy, supertypeToUse.getCompilationUnit(), astManager);
-		ConstraintVariable[] updatableVars= inst.getUpdatableVariables(inputType, supertypeToUse, pm, status);
+		ExtractInterfaceUtil inst= new ExtractInterfaceUtil(typeWorkingCopy, supertypeToUse.getCompilationUnit(), workingCopyOwner);
+		ITypeBinding inputTypeBinding= getTypeBinding(inputType, workingCopyOwner);
+		ConstraintVariable[] updatableVars= inst.getUpdatableVariables(inputTypeBinding, inputType, supertypeToUse, pm, status);
 		if (status.hasFatalError())
 			return new CompilationUnitRange[0];
-		ASTNode[] nodes= inst.getNodes(updatableVars, inputType);
 		String typeName= inputType.getElementName();
 		String superTypeName= supertypeToUse.getElementName();
-		for (int i= 0; i < nodes.length; i++) {
-			ASTNode node= nodes[i];
-			ICompilationUnit cu= astManager.getCompilationUnit(node);
+		CompilationUnitRange[] ranges= inst.getCompilationUnitRanges(updatableVars, inputType, inputTypeBinding);
+		for (int i= 0; i < ranges.length; i++) {
+			CompilationUnitRange range= ranges[i];
+			ICompilationUnit cu= range.getCompilationUnit();
 			if (updateInputTypeCu || ! cu.equals(typeWorkingCopy)){
-				getTextChange(manager, cu).addTextEdit("update", createTypeUpdateEdit(new SourceRange(node), typeName, superTypeName));	 //$NON-NLS-1$
+				getTextChange(manager, cu).addTextEdit("update", createTypeUpdateEdit(range.getSourceRange(), typeName, superTypeName));	 //$NON-NLS-1$
 			}
-		}
-		CompilationUnitRange[] ranges= new CompilationUnitRange[nodes.length];
-		for (int i= 0; i < nodes.length; i++) {
-			ranges[i]= new CompilationUnitRange(astManager.getCompilationUnit(nodes[i]), nodes[i]);
 		}
 		return ranges;
 	}
@@ -217,16 +213,17 @@ class ExtractInterfaceUtil {
 	}
 	
 	private static ConstraintVariable[] getUpdatableVariables(ITypeConstraint[] constraints, ITypeBinding classBinding, ITypeBinding interfaceBinding){
-		Set setOfAll= new HashSet(Arrays.asList(getAllOfType(constraints, classBinding)));
-		ConstraintVariable[] initialBad= getInitialBad(setOfAll, constraints, interfaceBinding);
+		Set allVariablesOfType= new HashSet(Arrays.asList(getAllOfType(constraints, classBinding)));
+		Set badVariables= new HashSet();
+		Set badConstraints= new HashSet();
+		ConstraintVariable[] initialBad= getInitialBad(allVariablesOfType, badVariables, badConstraints, constraints, interfaceBinding);
 		if (initialBad == null || initialBad.length == 0)//TODO to be removed after it's optimized
-			return (ConstraintVariable[]) setOfAll.toArray(new ConstraintVariable[setOfAll.size()]);
-		Set bad= new HashSet();
-		bad.addAll(Arrays.asList(initialBad));
+			return (ConstraintVariable[]) allVariablesOfType.toArray(new ConstraintVariable[allVariablesOfType.size()]);
+		badVariables.addAll(Arrays.asList(initialBad));
 		boolean repeat= false;
 		do{
 			//TODO can optimize here - don't have to walk the whole constraints array, bad would be enough
-			int sizeOfBad= bad.size();
+			int sizeOfBad= badVariables.size();
 			for (int i= 0; i < constraints.length; i++) {
 				ITypeConstraint constraint= constraints[i];
 				if(! constraint.isSimpleTypeConstraint())
@@ -234,36 +231,40 @@ class ExtractInterfaceUtil {
 				SimpleTypeConstraint con= (SimpleTypeConstraint)constraint;
 				ConstraintVariable left= con.getLeft();
 				ConstraintVariable right= con.getRight();
-				if (setOfAll.contains(left) && bad.contains(right) && ! bad.contains(left))
-					bad.add(left);
+				if (allVariablesOfType.contains(left) && badVariables.contains(right) && ! badVariables.contains(left))
+					badVariables.add(left);
 				if (con.isEqualsConstraint() || con.isDefinesConstraint()){
-					if (setOfAll.contains(right) && bad.contains(left) && ! bad.contains(right))
-						bad.add(right);
+					if (allVariablesOfType.contains(right) && badVariables.contains(left) && ! badVariables.contains(right))
+						badVariables.add(right);
 				}
 			}
-			repeat= sizeOfBad < bad.size();
+			repeat= sizeOfBad < badVariables.size();
 		} while(repeat);
-		Set updatable= new HashSet(setOfAll);
-		updatable.removeAll(bad);
+		Set updatable= new HashSet(allVariablesOfType);
+		updatable.removeAll(badVariables);
 		return (ConstraintVariable[]) updatable.toArray(new ConstraintVariable[updatable.size()]);
 	}
 	
-	private static ConstraintVariable[] getInitialBad(Set setOfAll, ITypeConstraint[] constraints, ITypeBinding interfaceBinding){
+	private static ConstraintVariable[] getInitialBad(Set setOfAll, Set badVariables, Set badConstraints, ITypeConstraint[] constraints, ITypeBinding interfaceBinding){
 		ConstraintVariable interfaceVariable= new RawBindingVariable(interfaceBinding);
-		Set result= new HashSet();
 		for (int i= 0; i < constraints.length; i++) {
 			ITypeConstraint constraint= constraints[i];
 			if (constraint.isSimpleTypeConstraint()){
 				SimpleTypeConstraint simple= (SimpleTypeConstraint)constraint;
-				if (simple.isSubtypeConstraint() && canAddLeftSideToInitialBadSet(simple, setOfAll, interfaceVariable))
-					result.add(simple.getLeft());
+				if (simple.isSubtypeConstraint() && canAddLeftSideToInitialBadSet(simple, setOfAll, interfaceVariable)) {
+					badVariables.add(simple.getLeft());
+					badConstraints.add(simple);
+				}
 			} else if (constraint instanceof CompositeOrTypeConstraint){
 				ITypeConstraint[] subConstraints= ((CompositeOrTypeConstraint)constraint).getConstraints();
-				if (canAddLeftSideToInitialBadSet(subConstraints, setOfAll, interfaceVariable))
-					result.add(((SimpleTypeConstraint)subConstraints[0]).getLeft());
+				if (canAddLeftSideToInitialBadSet(subConstraints, setOfAll, interfaceVariable)) {
+					badVariables.add(((SimpleTypeConstraint)subConstraints[0]).getLeft());
+					badConstraints.add(subConstraints[0]);
+					badConstraints.add(constraint);
+				}
 			}
 		}
-		return (ConstraintVariable[]) result.toArray(new ConstraintVariable[result.size()]);
+		return (ConstraintVariable[]) badVariables.toArray(new ConstraintVariable[badVariables.size()]);
 	}
 	
 	private static boolean canAddLeftSideToInitialBadSet(SimpleTypeConstraint sc, Set setOfAll, ConstraintVariable interfaceVariable) {
@@ -336,49 +337,55 @@ class ExtractInterfaceUtil {
 
 	private ITypeConstraint[] getConstraints(ICompilationUnit[] referringCus) {
 		Set result= new HashSet();
+		ConstraintCollector collector= new ConstraintCollector(new ExtractInterfaceConstraintCreator());
+		
 		for (int i= 0; i < referringCus.length; i++) {
 			ICompilationUnit unit= referringCus[i];
-			ConstraintCollector collector= new ConstraintCollector(new ExtractInterfaceConstraintCreator());
-			fASTManager.getAST(unit).accept(collector);
+			getAST(unit).accept(collector);
 			result.addAll(Arrays.asList(collector.getConstraints()));
+			collector.clear();
 		}
 		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);
 	}
 	
-	private ICompilationUnit[] getCusToParse(IType theClass, IType theInterface, IProgressMonitor pm) throws JavaModelException{
+	private CompilationUnit getAST(ICompilationUnit unit) {
+		return ASTCreator.createAST(unit, fWorkingCopyOwner);
+	}
+
+	/*
+	 * we need to parse not only the cus that reference the type directly but also those that 
+	 * reference a field or a method that reference the type. this method is used to find these cus.
+	 */
+	private ICompilationUnit[] getCusToParse(IType theType, IType theSupertype, IProgressMonitor pm) throws JavaModelException{
 		try{
-			pm.beginTask("", 2);
-			ISearchPattern pattern= SearchEngine.createSearchPattern(theClass, IJavaSearchConstants.REFERENCES);
-			IJavaSearchScope scope= RefactoringScopeFactory.create(theClass);
-			ICompilationUnit[] workingCopies= getWorkingCopies(theClass.getCompilationUnit(), theInterface.getCompilationUnit());
+			pm.beginTask("", 2); //$NON-NLS-1$
+			ISearchPattern pattern= SearchEngine.createSearchPattern(theType, IJavaSearchConstants.REFERENCES);
+			IJavaSearchScope scope= RefactoringScopeFactory.create(theType);
+			ICompilationUnit[] workingCopies= getWorkingCopies(theType.getCompilationUnit(), theSupertype.getCompilationUnit());
 			if (workingCopies.length == 0)
 				workingCopies= null;
-			SearchResultGroup[] groups= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern, workingCopies);
-			ASTNode[] typeReferenceNodes= getAstNodes(groups);
-			ICompilationUnit[] typeReferecingCus= getCus(groups);
-			ICompilationUnit[] fieldAndMethodReferringCus= fieldAndMethodReferringCus(theClass, typeReferenceNodes, workingCopies, new SubProgressMonitor(pm, 1));
-			return merge(fieldAndMethodReferringCus, typeReferecingCus);
+			SearchResultGroup[] typeReferences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern, workingCopies);
+			ICompilationUnit[] typeReferencingCus= getCus(typeReferences);
+			ICompilationUnit[] fieldAndMethodReferencingCus= fieldAndMethodReferringCus(theType, typeReferences, workingCopies, new SubProgressMonitor(pm, 1));
+			return merge(fieldAndMethodReferencingCus, typeReferencingCus);
 		} finally{
 			pm.done();
 		}
 	}
 
-	private ASTNode[] getAstNodes(SearchResultGroup[] searchResultGroups) {
-		List result= new ArrayList();
-		for (int i= 0; i < searchResultGroups.length; i++) {
-			ICompilationUnit referencedCu= searchResultGroups[i].getCompilationUnit();
-			if (referencedCu == null)
-				continue;
-			result.addAll(Arrays.asList(ASTNodeSearchUtil.getAstNodes(searchResultGroups[i].getSearchResults(), fASTManager.getAST(referencedCu))));
-		}
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);	
-	}	
+	private ASTNode[] getAstNodes(SearchResultGroup searchResultGroup) {
+		ICompilationUnit cu= searchResultGroup.getCompilationUnit();
+		if (cu == null)
+			return new ASTNode[0];
+		CompilationUnit cuNode= getAST(cu);
+		return ASTNodeSearchUtil.getAstNodes(searchResultGroup.getSearchResults(), cuNode);
+	}
 	
-	private ICompilationUnit[] fieldAndMethodReferringCus(IType theClass, ASTNode[] typeReferenceNodes, ICompilationUnit[] wcs, IProgressMonitor pm) throws JavaModelException {
-		ISearchPattern pattern= createPatternForReferencingFieldsAndMethods(typeReferenceNodes);
+	private ICompilationUnit[] fieldAndMethodReferringCus(IType theType, SearchResultGroup[] typeReferences, ICompilationUnit[] wcs, IProgressMonitor pm) throws JavaModelException {
+		ISearchPattern pattern= createPatternForReferencingFieldsAndMethods(typeReferences);
 		if (pattern == null)
 			return new ICompilationUnit[0];
-		IJavaSearchScope scope= RefactoringScopeFactory.create(theClass);
+		IJavaSearchScope scope= RefactoringScopeFactory.create(theType);
 		ICompilationUnit[] units= RefactoringSearchEngine.findAffectedCompilationUnits(pm, scope, pattern);
 		Set result= new HashSet(units.length);
 		for (int i= 0; i < units.length; i++) {
@@ -401,23 +408,15 @@ class ExtractInterfaceUtil {
 		return wc.getResource() == null || wc.getResource().equals(unit.getResource());			
 	}
 
-	private ISearchPattern createPatternForReferencingFieldsAndMethods(ASTNode[] typeReferenceNodes) throws JavaModelException {
-		IField[] fields= getReferencingFields(typeReferenceNodes);
-		IMethod[] methods= getReferencingMethods(typeReferenceNodes);
-		ISearchPattern fieldPattern= RefactoringSearchEngine.createSearchPattern(fields, IJavaSearchConstants.ALL_OCCURRENCES);
-		ISearchPattern methodPattern= RefactoringSearchEngine.createSearchPattern(methods, IJavaSearchConstants.ALL_OCCURRENCES);
-		if (fieldPattern == null)
-			return methodPattern;
-		if (methodPattern == null)
-			return fieldPattern;
-		return SearchEngine.createOrSearchPattern(fieldPattern, methodPattern);	
+	private ISearchPattern createPatternForReferencingFieldsAndMethods(SearchResultGroup[] typeReferences) throws JavaModelException {
+		return RefactoringSearchEngine.createSearchPattern(getReferencingFieldsAndMethods(typeReferences), IJavaSearchConstants.ALL_OCCURRENCES);		
 	}
 
 	private IMethod[] getReferencingMethods(ASTNode[] typeReferenceNodes) throws JavaModelException {
 		List result= new ArrayList();
 		for (int i= 0; i < typeReferenceNodes.length; i++) {
 			ASTNode node= typeReferenceNodes[i];
-			IJavaProject scope= fASTManager.getCompilationUnit(node).getJavaProject();
+			IJavaProject scope= ASTCreator.getCu(node).getJavaProject();
 			IMethod method= getMethod(node, scope);
 			if (method != null)
 				result.add(method);
@@ -429,11 +428,21 @@ class ExtractInterfaceUtil {
 		List result= new ArrayList();
 		for (int i= 0; i < typeReferenceNodes.length; i++) {
 			ASTNode node= typeReferenceNodes[i];
-			IJavaProject scope= fASTManager.getCompilationUnit(node).getJavaProject();
-			IField[] fields= getFields(node, scope);
-			result.addAll(Arrays.asList(fields));
+			IJavaProject scope= ASTCreator.getCu(node).getJavaProject();
+			result.addAll(Arrays.asList(getFields(node, scope)));
 		}
 		return (IField[]) result.toArray(new IField[result.size()]);
+	}
+	
+	private IMember[] getReferencingFieldsAndMethods(SearchResultGroup[] typeReferences) throws JavaModelException {
+		List result= new ArrayList();
+		for (int i= 0; i < typeReferences.length; i++) {
+			SearchResultGroup group= typeReferences[i];	
+			ASTNode[] typeReferenceNodes= getAstNodes(group);
+			result.addAll(Arrays.asList(getReferencingMethods(typeReferenceNodes)));
+			result.addAll(Arrays.asList(getReferencingFields(typeReferenceNodes)));
+		}
+		return (IMember[]) result.toArray(new IMember[result.size()]);
 	}
 
 	private static IMethod getMethod(ASTNode node, IJavaProject scope) throws JavaModelException {
@@ -523,78 +532,104 @@ class ExtractInterfaceUtil {
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	private ITypeBinding getTypeBinding(IType theType) throws JavaModelException {
-		return getTypeDeclarationNode(theType).resolveBinding();
+	private static ITypeBinding getTypeBinding(IType theType, WorkingCopyOwner workingCopyOwner) throws JavaModelException {
+		return getTypeDeclarationNode(theType, workingCopyOwner).resolveBinding();
 	}
 
-	private TypeDeclaration getTypeDeclarationNode(IType iType) throws JavaModelException {
-		return ASTNodeSearchUtil.getTypeDeclarationNode(iType, fASTManager.getAST(iType.getCompilationUnit()));
+	private static TypeDeclaration getTypeDeclarationNode(IType theType, WorkingCopyOwner workingCopyOwner) throws JavaModelException {
+		return ASTNodeSearchUtil.getTypeDeclarationNode(theType, ASTCreator.createAST(theType.getCompilationUnit(), workingCopyOwner));
 	}
 
-	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod) throws JavaModelException {
-		return ASTNodeSearchUtil.getMethodDeclarationNode(iMethod, fASTManager.getAST(iMethod.getCompilationUnit()));
-	}
-
-	//-- which nodes to update ----//
-	
-	private ASTNode[] getNodes(ConstraintVariable[] variables, IType inputType) throws JavaModelException {
-		Set nodes= new HashSet();
+	private CompilationUnitRange[] getCompilationUnitRanges(ConstraintVariable[] variables, IType inputType, ITypeBinding inputTypeBinding) throws CoreException {
+		Set ranges= new HashSet();
 		IJavaProject scope= inputType.getJavaProject();//XXX scope is bogus
-		ITypeBinding inputTypeBinding= getTypeBinding(inputType);
 		for (int i= 0; i < variables.length; i++) {
-			ASTNode node= getNode(variables[i], scope, inputTypeBinding);
-			if (node != null)
-				nodes.add(node);
+			CompilationUnitRange range= getRange(variables[i], scope, inputTypeBinding);
+			if (range != null)
+				ranges.add(range);
 		}
-		return (ASTNode[]) nodes.toArray(new ASTNode[nodes.size()]);
+		return (CompilationUnitRange[]) ranges.toArray(new CompilationUnitRange[ranges.size()]);		
 	}
-
-	//TODO Should this be on ConstraintVariable?
-	private ASTNode getNode(ConstraintVariable variable, IJavaProject scope, ITypeBinding inputTypeBinding) throws JavaModelException {
+	
+	private CompilationUnitRange getRange(ConstraintVariable variable, IJavaProject scope, ITypeBinding inputTypeBinding) throws CoreException {
 		if (variable instanceof DeclaringTypeVariable)
 			return null;
 		else if (variable instanceof RawBindingVariable)
 			return null;
 		else if (variable instanceof ParameterTypeVariable)
-			return getNode((ParameterTypeVariable)variable, scope);
+			return getRange((ParameterTypeVariable)variable, scope);
 		else if (variable instanceof ReturnTypeVariable)
-			return getNode((ReturnTypeVariable)variable, scope);
+			return getRange((ReturnTypeVariable)variable, scope);
 		else if (variable instanceof TypeVariable)
-			return ASTNodes.getElementType(((TypeVariable)variable).getType());
+			return getRange((TypeVariable)variable);
 		else if (variable instanceof ExpressionVariable)
-			return getNode((ExpressionVariable)variable, inputTypeBinding);
+			return getRange((ExpressionVariable)variable, inputTypeBinding);
 		else //TODO is this enough?
 			return null;
 	}
-	
-	private static ASTNode getNode(ExpressionVariable variable, ITypeBinding inputTypeBinding) {
+
+	private CompilationUnitRange getRange(ExpressionVariable variable, ITypeBinding inputTypeBinding) {
 		if (inputTypeBinding == null) return null;
-		Expression expression= variable.getExpression();
-		if (expression instanceof Name){
-			if (Bindings.equals(inputTypeBinding, ((Name)expression).resolveBinding()))
-				return expression;
+		if (variable.getExpressionType() == ASTNode.SIMPLE_NAME || variable.getExpressionType() == ASTNode.QUALIFIED_NAME) {
+			if (Bindings.equals(inputTypeBinding, variable.getExpressionBinding()))
+				return variable.getCompilationUnitRange();
 		}
 		return null;
 	}
 
-	private Type getNode(ReturnTypeVariable variable, IJavaProject scope) throws JavaModelException {
-		IMethodBinding methodBinding= variable.getMethodBinding();
-		MethodDeclaration declaration= findMethodDeclaration(methodBinding, scope);
-		if (declaration == null)
-			return null;
-		return ASTNodes.getElementType(declaration.getReturnType());
-	}
-	
-	private Type getNode(ParameterTypeVariable variable, IJavaProject scope) throws JavaModelException{
-		IMethodBinding method= variable.getMethodBinding();
-		int paramIndex= variable.getParameterIndex();
-		MethodDeclaration declaration= findMethodDeclaration(method, scope);
-		if (declaration == null)
-			return null;
-		return ASTNodes.getElementType(((SingleVariableDeclaration)declaration.parameters().get(paramIndex)).getType());
+	private CompilationUnitRange getRange(TypeVariable variable) {
+		return variable.getCompilationUnitRange();
 	}
 
-	private MethodDeclaration findMethodDeclaration(IMethodBinding methodBinding, IJavaProject scope) throws JavaModelException {
+	private CompilationUnitRange getRange(ReturnTypeVariable variable, IJavaProject scope) throws CoreException {
+		IMethodBinding methodBinding= variable.getMethodBinding();
+		IMethod method= getMethod(methodBinding, scope);
+		if (method == null)
+			return null;
+		return new CompilationUnitRange(method.getCompilationUnit(), getReturnTypeRange(method));
+	}	
+	
+	private CompilationUnitRange getRange(ParameterTypeVariable variable, IJavaProject scope) throws CoreException {
+		IMethodBinding methodBinding= variable.getMethodBinding();
+		int paramIndex= variable.getParameterIndex();
+		IMethod method= getMethod(methodBinding, scope);
+		if (method == null)
+			return null;
+		return new CompilationUnitRange(method.getCompilationUnit(), getParameterTypeRange(method, paramIndex));
+	}
+
+	private static ISourceRange getReturnTypeRange(IMethod method) throws CoreException {
+		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+		scanner.setSource(method.getSource().toCharArray());
+		TokenScanner tokenScanner= new TokenScanner(scanner);
+		skipModifiers(tokenScanner);
+		return new SourceRange(method.getSourceRange().getOffset() +  tokenScanner.getCurrentStartOffset(), tokenScanner.getCurrentLength());
+	}
+
+	private static void skipModifiers(TokenScanner scanner) throws CoreException {
+		int token= scanner.readNext(true);
+		while (token != ITerminalSymbols.TokenNameEOF) {
+			if (!TokenScanner.isModifier(token))
+				return;
+			token= scanner.readNext(true);
+		}
+	}
+
+	private static ISourceRange getParameterTypeRange(IMethod method, int paramIndex) throws CoreException {
+		Assert.isTrue(0 <= paramIndex, "incorrect parameter"); //$NON-NLS-1$
+		Assert.isTrue(paramIndex < method.getNumberOfParameters(), "too few method parameters"); //$NON-NLS-1$
+		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+		scanner.setSource(method.getSource().toCharArray());
+		TokenScanner tokenScanner= new TokenScanner(scanner);
+		tokenScanner.readToToken(ITerminalSymbols.TokenNameLPAREN);
+		for (int i= 0; i < paramIndex; i++) {
+			tokenScanner.readToToken(ITerminalSymbols.TokenNameCOMMA);
+		}
+		tokenScanner.readNext(true);
+		return new SourceRange(method.getSourceRange().getOffset() + tokenScanner.getCurrentStartOffset(), tokenScanner.getCurrentLength());
+	}
+
+	private IMethod getMethod(IMethodBinding methodBinding, IJavaProject scope) throws JavaModelException {
 		IMethod method= Bindings.findMethod(methodBinding, scope);
 		IJavaElement e1= JavaModelUtil.findInCompilationUnit(fInputTypeWorkingCopy, method);
 		if (e1 instanceof IMethod){
@@ -604,10 +639,7 @@ class ExtractInterfaceUtil {
 			if (e1 instanceof IMethod)
 				method= (IMethod) e1;
 		}
-			
-		if (method == null)
-			return null;
-		return getMethodDeclarationNode(method);
+		return method;			
 	}
 	
 	private static class ExtractInterfaceConstraintCreator extends FullConstraintCreator{
@@ -640,54 +672,6 @@ class ExtractInterfaceUtil {
 			ConstraintVariable component= new TypeVariable(node.getComponentType());
 			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(new TypeVariable(node), component);
 			return new ITypeConstraint[]{equals};
-		}
-	}
-	private static class ASTNodeMappingManager {
-
-		private final Map fCUsToCuNodes;//Map<ICompilationUnit, CompilationUnit>
-		private final Map fCuNodesToCus;//Map<CompilationUnit, ICompilationUnit>
-		private final WorkingCopyOwner fWorkingCopyOwner;
-	
-		public ASTNodeMappingManager(WorkingCopyOwner workingCopyOwner) {
-			fCUsToCuNodes= new HashMap();
-			fCuNodesToCus= new HashMap();
-			fWorkingCopyOwner= workingCopyOwner;
-		}
-
-		public CompilationUnit getAST(ICompilationUnit cu){
-			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-			if (fCUsToCuNodes.containsKey(wc)){
-				return (CompilationUnit)fCUsToCuNodes.get(wc);
-			}	
-			CompilationUnit cuNode;
-			if (fWorkingCopyOwner != null)
-				cuNode= AST.parseCompilationUnit(wc, true, fWorkingCopyOwner);
-			else
-				cuNode= AST.parseCompilationUnit(wc, true);
-			fCUsToCuNodes.put(wc, cuNode);
-			fCuNodesToCus.put(cuNode, wc);
-			return cuNode;	
-		}
-	
-		public ICompilationUnit getCompilationUnit(ASTNode node) {
-			CompilationUnit cuNode= getCompilationUnitNode(node);
-			Assert.isTrue(fCuNodesToCus.containsKey(cuNode)); //the cu node must've been created before
-			return (ICompilationUnit)fCuNodesToCus.get(cuNode);
-		}
-	
-		public static CompilationUnit getCompilationUnitNode(ASTNode node){
-			if (node instanceof CompilationUnit)
-				return (CompilationUnit)node;
-			return (CompilationUnit)ASTNodes.getParent(node, CompilationUnit.class);
-		}
-
-		public ICompilationUnit[] getAllCompilationUnits(){
-			return (ICompilationUnit[]) fCUsToCuNodes.keySet().toArray(new ICompilationUnit[fCUsToCuNodes.keySet().size()]);
-		}
-	
-		public void clear(){
-			fCuNodesToCus.clear();
-			fCUsToCuNodes.clear();
 		}
 	}
 }
