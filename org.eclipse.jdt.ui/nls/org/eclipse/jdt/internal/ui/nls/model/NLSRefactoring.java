@@ -7,9 +7,6 @@ package org.eclipse.jdt.internal.ui.nls.model;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
-
 import java.util.Set;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -36,18 +33,23 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.core.codemanipulation.TextEdit;
+import org.eclipse.jdt.internal.core.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.core.codemanipulation.TextRegion;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
+import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextRegion;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleReplaceTextChange;
-import org.eclipse.jdt.internal.core.refactoring.text.SimpleTextChange;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.nls.changes.CreateTextFileChange;
 
@@ -58,7 +60,6 @@ public class NLSRefactoring extends Refactoring {
 	private static final String fgLineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-2$ //$NON-NLS-1$
 
 	private String fAccessorClassName= "Messages";  //$NON-NLS-1$
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	
 	private boolean fCreateAccessorClass= true;
 	private String fProperyFileName= "test"; //simple name //$NON-NLS-1$
@@ -69,11 +70,9 @@ public class NLSRefactoring extends Refactoring {
 	private IPath fPropertyFilePath;
 	private String fAddedImport;
 	
-	public NLSRefactoring(ITextBufferChangeCreator changeCreator, ICompilationUnit cu){
+	public NLSRefactoring(ICompilationUnit cu){
 		Assert.isNotNull(cu);
 		fCu= cu;
-		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
-		fTextBufferChangeCreator= changeCreator;
 	}
 			
 	public void setNlsSubstitutions(NLSSubstitution[] subs){
@@ -461,25 +460,26 @@ public class NLSRefactoring extends Refactoring {
 			pm.worked(1);
 			
 			return builder;
+		} catch (CoreException e){
+			throw new JavaModelException(e);	
 		} finally {
 			pm.done();
 		}	
 	}
-	
 
 	//---- modified source files
 			
-	private IChange createSourceModification() throws JavaModelException{
-		ITextBufferChange builder= fTextBufferChangeCreator.create(Messages.getString("NLSrefactoring.nls"), fCu); //$NON-NLS-1$
+	private IChange createSourceModification() throws CoreException{
+		TextChange change= new CompilationUnitChange("Externalize strings in '" + fCu.getElementName()+ "'", fCu); 
 		for (int i= 0; i < fNlsSubs.length; i++){
-			addNLS(fNlsSubs[i], builder);
+			addNLS(fNlsSubs[i], change);
 		}
 		if (willAddImportDeclaration())
-			addImportDeclaration(builder);
-		return builder;
+			addImportDeclaration(change);
+		return change;
 	}
 	
-	private void addImportDeclaration(ITextBufferChange builder) throws JavaModelException{
+	private void addImportDeclaration(TextChange builder) throws JavaModelException{
 		IImportContainer importContainer= getCu().getImportContainer();
 		int start;
 		if (!importContainer.exists()){
@@ -497,17 +497,22 @@ public class NLSRefactoring extends Refactoring {
 		}	
 			
 		String newImportText= fgLineDelimiter + "import " + fAddedImport + ";"; //$NON-NLS-2$ //$NON-NLS-1$
-		builder.addInsert(Messages.getString("NLSrefactoring.add_import_declaration") + fAddedImport, start + 1, newImportText); //$NON-NLS-1$
+		String name= Messages.getString("NLSrefactoring.add_import_declaration") + fAddedImport;
+		builder.addTextEdit(name, SimpleTextEdit.createInsert(start + 1, newImportText));
 	}
-	
-	private void addNLS(NLSSubstitution sub, ITextBufferChange builder){
-		ITextRegion position= sub.value.getPosition();
+
+	private void addNLS(NLSSubstitution sub, TextChange builder){
+		TextRegion position= sub.value.getPosition();
 		String resourceGetter= createResourceGetter(sub.key);
 		String text= Messages.getString("NLSrefactoring.extrenalize_string") + sub.value.getValue(); //$NON-NLS-1$
-		if (sub.task == NLSSubstitution.TRANSLATE)
-			builder.addReplace(text, position.getOffset(), position.getLength(), resourceGetter);
-		if (sub.task != NLSSubstitution.SKIP)
-			builder.addSimpleTextChange(createAddTagChange(sub.value));
+		if (sub.task == NLSSubstitution.TRANSLATE){
+			builder.addTextEdit(text, SimpleTextEdit.createReplace(position.getOffset(), position.getLength(), resourceGetter));
+		}	
+		if (sub.task != NLSSubstitution.SKIP){
+			NLSElement element= sub.value;
+			String name= Messages.getString("NLSrefactoring.add_tag")+ text + Messages.getString("NLSrefactoring.for_string") + element.getValue(); //$NON-NLS-2$ //$NON-NLS-1$
+			builder.addTextEdit(name, createAddTagChange(element));
+		}	
 	}
 	
 	//XXX extremelly inefficient way to do it
@@ -541,29 +546,13 @@ public class NLSRefactoring extends Refactoring {
 		return " " + NLSElement.createTagText(computeTagIndex(element)); //$NON-NLS-1$
 	}
 	
-	private SimpleReplaceTextChange createAddTagChange(NLSElement element){
+	private TextEdit createAddTagChange(NLSElement element){
 		int offset= element.getPosition().getOffset(); //to be changed
+		int length= 0;	
 		String text = createTagText(element);
-		String name= Messages.getString("NLSrefactoring.add_tag")+ text + Messages.getString("NLSrefactoring.for_string") + element.getValue(); //$NON-NLS-2$ //$NON-NLS-1$
-		int length= 0;
-		return new SimpleReplaceTextChange(name, offset, length, text){
-			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
-				int lineEndOffset= getLineEndOffset(buffer, getOffset());
-				if (lineEndOffset != -1)
-					setOffset(lineEndOffset);
-				return null;	
-			}
-			private int getLineEndOffset(ITextBuffer buffer, int offset){
-				int line= buffer.getLineOfOffset(offset);
-				if (line != -1){
-					ITextRegion info= buffer.getLineInformation(line);
-					return info.getOffset() + info.getLength();
-				} 
-				return -1;
-			};
-		};
+		return new AddNLSTagEdit(offset, length, text);
 	}
-			
+	
 	private String createResourceGetter(String key){
 		//we just replace the first occurrence of KEY in the pattern
 		StringBuffer buff= new StringBuffer(fCodePattern);
@@ -577,9 +566,27 @@ public class NLSRefactoring extends Refactoring {
 	
 	private IChange createPropertyFile() throws JavaModelException{
 		CreateTextFileChange change= new CreateTextFileChange(getPropertyFilePath(), createPropertyFileSource());
-		if (propertyFileExists())
-			change.setName(Messages.getString("NLSrefactoring.Append_to_property_file") + getPropertyFilePath()); //$NON-NLS-1$
-		return change;	
+		if (! propertyFileExists())
+			return change;
+			
+		IPath path= getPropertyFilePath();
+		IFile file= (IFile)ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+		String name= Messages.getString("NLSrefactoring.Append_to_property_file") + getPropertyFilePath();
+		TextChange tfc= new TextFileChange(name, file);
+		
+		StringBuffer old= new StringBuffer(getOldPropertyFileSource());
+		
+		for (int i= 0; i < fNlsSubs.length; i++){
+			if (fNlsSubs[i].task == NLSSubstitution.TRANSLATE){
+				if (fNlsSubs[i].putToPropertyFile){
+					String entry= createEntry(fNlsSubs[i].value, fNlsSubs[i].key).toString();
+					tfc.addTextEdit("add entry for " + fNlsSubs[i].key, SimpleTextEdit.createInsert(old.length(), entry));
+				}	
+			}	
+		}	
+		if (needsLineDelimiter(old))
+			tfc.addTextEdit("add line delimiter", SimpleTextEdit.createInsert(old.length(), fgLineDelimiter));
+		return tfc;
 	}
 	
 	private String createPropertyFileSource() throws JavaModelException{
@@ -674,7 +681,6 @@ public class NLSRefactoring extends Refactoring {
 		 return (IPackageFragment)fCu.getParent();
 	}
 		
-	//XXX code dupilicated from TypeRefactoring
 	private static boolean typeNameExistsInPackage(IPackageFragment pack, String name) throws JavaModelException{
 		Assert.isTrue(pack.exists(), "package must exist"); //$NON-NLS-1$
 		Assert.isTrue(!pack.isReadOnly(), "package must not be read-only"); //$NON-NLS-1$
@@ -722,22 +728,12 @@ public class NLSRefactoring extends Refactoring {
 	//--bundle class source creation
 	private String createAccessorCUSource() throws JavaModelException{
 		StringBuffer buff= new StringBuffer();
-		buff.append(createHeader())
-			.append(createPackageDeclaration())
+		buff.append(createPackageDeclaration())
 			.append(fgLineDelimiter)
 			.append(createImports())
 			.append(fgLineDelimiter)
 			.append(createClass());
 		return new CodeFormatter(null).format(buff.toString());
-	}
-	
-	private StringBuffer createHeader(){
-		 StringBuffer buff= new StringBuffer();
-		 buff.append("/*").append(fgLineDelimiter) //$NON-NLS-1$
-		 	 .append(" * (c) Copyright IBM Corp. 2000, 2001.").append(fgLineDelimiter) //$NON-NLS-1$
-		 	 .append(" * All Rights Reserved.").append(fgLineDelimiter) //$NON-NLS-1$
-			 .append(" */").append(fgLineDelimiter); //$NON-NLS-1$
-		 return buff;
 	}
 	
 	private StringBuffer createPackageDeclaration(){
@@ -766,10 +762,16 @@ public class NLSRefactoring extends Refactoring {
 		//XXX should the class be public?
 		b.append("public class ").append(fAccessorClassName).append(" {").append(ld) //$NON-NLS-2$ //$NON-NLS-1$
 		 .append(ld)
-		 .append("\tprivate static final String RESOURCE_BUNDLE= \"") //$NON-NLS-1$
+		 .append("\tprivate static final String ") //$NON-NLS-1$
+		 .append(getBundleStringName())
+		 .append("= \"") //$NON-NLS-1$
 		 .append(getResourceBundleName()).append("\";").append(NLSElement.createTagText(1)).append(ld) //$NON-NLS-1$
 		 .append(ld)
-		 .append("\tprivate static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);") //$NON-NLS-1$
+		 .append("\tprivate static fnal ResourceBundle ") //$NON-NLS-1$
+		 .append(getResourceBundleConstantName())
+		 .append("= ResourceBundle.getBundle(") //$NON-NLS-1$
+		 .append(getBundleStringName())
+		 .append(");") //$NON-NLS-1$
 		 .append(ld)
 		 .append(ld)
 		 .append(createConstructor())
@@ -777,6 +779,14 @@ public class NLSRefactoring extends Refactoring {
 		 .append(createGetStringMethod())
 		 .append("}").append(ld); //$NON-NLS-1$
 		return b;
+	}
+	
+	private static String getBundleStringName(){
+		return "BUNDLE_NAME";	//$NON-NLS-1$
+	}
+	
+	private static String getResourceBundleConstantName(){
+		return "RESOURCE_BUNDLE";//$NON-NLS-1$
 	}
 	
 	private StringBuffer createConstructor(){
@@ -792,7 +802,9 @@ public class NLSRefactoring extends Refactoring {
 		StringBuffer b= new StringBuffer();
 		b.append("\tpublic static String getString(String key) {").append(ld) //$NON-NLS-1$
 		 .append("\t\ttry {").append(ld) //$NON-NLS-1$
-		 .append("\t\t\treturn fgResourceBundle.getString(key);").append(ld) //$NON-NLS-1$
+		 .append("\t\t\treturn ")
+		 .append(getResourceBundleConstantName())
+		 .append(".getString(key);").append(ld) //$NON-NLS-1$
 		 .append("\t\t} catch (MissingResourceException e) {").append(ld) //$NON-NLS-1$
 		 .append("\t\t\treturn '!' + key + '!';").append(ld) //$NON-NLS-1$
 		 .append("\t\t}").append(ld) //$NON-NLS-1$
@@ -811,6 +823,7 @@ public class NLSRefactoring extends Refactoring {
 		return fileName.substring(0, fileName.indexOf(PROPERTY_FILE_EXT));
 	}
 	
+	
 	private String getResourceBundleName() throws JavaModelException{
 		//remove filename.properties
 		IResource res= ResourcesPlugin.getWorkspace().getRoot().findMember(getPropertyFilePath().removeLastSegments(1));
@@ -828,5 +841,46 @@ public class NLSRefactoring extends Refactoring {
 		if (pack.isDefaultPackage())
 			return fProperyFileName;
 		return pack.getElementName() + "." + fProperyFileName; //$NON-NLS-1$
+	}
+	
+	//-----------
+	
+	private static class AddNLSTagEdit extends SimpleTextEdit{
+		
+		AddNLSTagEdit(int offset, int length, String newText){
+			super(offset, length, newText);
+		}
+		
+		private AddNLSTagEdit(TextPosition position, String text) {
+			super(position, text);
+		}
+		
+		/* non Java-doc
+		 * @see TextEdit#getCopy
+		 */
+		public TextEdit copy() {
+			return new AddNLSTagEdit(getTextPosition().copy(), getText());
+		}	
+		
+		/* non Java-doc
+		 * @see TextEdit#connect
+		 */
+		public void connect(TextBuffer buffer) throws CoreException {
+			TextPosition pos= getTextPosition();
+			int offset= pos.getOffset();
+			int lineEndOffset= getLineEndOffset(buffer, pos.getOffset());
+			if (lineEndOffset != -1)
+				offset= lineEndOffset;
+			setPosition(new TextPosition(offset, pos.getLength()));	
+		}
+		
+		private int getLineEndOffset(TextBuffer buffer, int offset){
+			int line= buffer.getLineOfOffset(offset);
+			if (line != -1){
+				TextRegion info= buffer.getLineInformation(line);
+				return info.getOffset() + info.getLength();
+			} 
+			return -1;
+		};
 	}
 }
