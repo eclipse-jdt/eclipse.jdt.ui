@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,12 +18,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -37,6 +30,12 @@ import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.IEditorMatchAdapter;
 import org.eclipse.search.ui.text.IFileMatchAdapter;
 import org.eclipse.search.ui.text.Match;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
@@ -175,13 +174,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	 * @see org.eclipse.search.ui.ISearchResult#getLabel()
 	 */
 	public String getLabel() {
-		int matchCount= getMatchCount();
-		if (matchCount == 1) {
-			return fQuery.getSingularLabel();
-		} else {
-			String format= fQuery.getPluralLabelPattern();
-			return MessageFormat.format(format, new Object[] { new Integer(matchCount) });
-		}
+		return fQuery.getResultLabel(getMatchCount());
 	}
 
 	/*

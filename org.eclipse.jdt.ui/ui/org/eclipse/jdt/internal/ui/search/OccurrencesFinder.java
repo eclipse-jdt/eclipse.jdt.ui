@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.List;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -82,12 +85,8 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		return fUsages;
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getOccurrenceMatches(org.eclipse.jdt.core.IJavaElement, org.eclipse.jface.text.IDocument)
-	 */
-	public Match[] getOccurrenceMatches(IJavaElement element, IDocument document) {
+	public void collectOccurrenceMatches(IJavaElement element, IDocument document, Collection resultingMatches) {
 		boolean isVariable= fTarget instanceof IVariableBinding;
-		ArrayList matches= new ArrayList(fUsages.size());
 		HashMap lineToGroup= new HashMap();
 		
 		for (Iterator iter= fUsages.iterator(); iter.hasNext();) {
@@ -109,12 +108,11 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 					groupKey.setWriteAccess(true);
 				}
 				Match match= new Match(groupKey, startPosition, length);
-				matches.add(match);
+				resultingMatches.add(match);
 			} catch (BadLocationException e) {
 				//nothing
 			}
 		}
-		return (Match[]) matches.toArray(new Match[matches.size()]);
 	}
 	
 	/*
@@ -124,30 +122,19 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		return SearchMessages.getString("OccurrencesFinder.searchfor") ; //$NON-NLS-1$
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getPluralLabelPattern(java.lang.String)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getResultLabel(java.lang.String, int)
 	 */
-	public String getPluralLabelPattern(String documentName) {
-		return getPluralLabelPattern(ASTNodes.asString(fSelectedNode), documentName);
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getSingularLabel(java.lang.String)
-	 */
-	public String getSingularLabel(String documentName) {
-		return getSingularLabel(ASTNodes.asString(fSelectedNode), documentName);
-	}
-	
-	private String getPluralLabelPattern(String nodeContents, String elementName) {
-		String[] args= new String[] {nodeContents, "{0}", elementName}; //$NON-NLS-1$
+	public String getResultLabel(String elementName, int nMatches) {
+		String nodeContents= ASTNodes.asString(fSelectedNode);
+		if (nMatches == 1) {
+			String[] args= new String[] {nodeContents, elementName};
+			return SearchMessages.getFormattedString("OccurrencesFinder.label.singular", args); //$NON-NLS-1$
+		}
+		String[] args= new String[] {nodeContents, String.valueOf(nMatches), elementName};
 		return SearchMessages.getFormattedString("OccurrencesFinder.label.plural", args); //$NON-NLS-1$
 	}
 	
-	private String getSingularLabel(String nodeContents, String elementName) {
-		String[] args= new String[] {nodeContents, elementName}; //$NON-NLS-1$
-		return SearchMessages.getFormattedString("OccurrencesFinder.label.singular", args); //$NON-NLS-1$
-	}
-
 	public boolean visit(QualifiedName node) {
 		IBinding binding= node.resolveBinding();
 		if (binding instanceof IVariableBinding && ((IVariableBinding)binding).isField()) {

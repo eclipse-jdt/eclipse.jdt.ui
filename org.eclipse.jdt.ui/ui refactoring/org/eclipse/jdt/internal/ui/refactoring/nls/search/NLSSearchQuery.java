@@ -88,13 +88,12 @@ public class NLSSearchQuery implements ISearchQuery {
 		return NLSSearchMessages.getString("NLSSearchQuery.label"); //$NON-NLS-1$
 	}
 
-	String getSingularLabel() {
-		String[] args= new String[] {fWrapperClass.getElementName(), fScopeDescription}; //$NON-NLS-1$		
-		return NLSSearchMessages.getFormattedString("SearchOperation.singularLabelPostfix", args); //$NON-NLS-1$
-	}
-
-	String getPluralLabelPattern() {
-		String[] args= new String[] {fWrapperClass.getElementName(), "{0}", fScopeDescription}; //$NON-NLS-1$		
+	public String getResultLabel(int nMatches) {
+		if (nMatches == 1) {
+			String[] args= new String[] {fWrapperClass.getElementName(), fScopeDescription};	
+			return NLSSearchMessages.getFormattedString("SearchOperation.singularLabelPostfix", args); //$NON-NLS-1$
+		}
+		String[] args= new String[] {fWrapperClass.getElementName(), String.valueOf(nMatches), fScopeDescription};
 		return NLSSearchMessages.getFormattedString("SearchOperation.pluralLabelPatternPostfix", args); //$NON-NLS-1$
 	}
 	

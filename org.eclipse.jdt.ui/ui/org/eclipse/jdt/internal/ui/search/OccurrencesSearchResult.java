@@ -11,24 +11,27 @@
 
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+
 import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.IEditorMatchAdapter;
 import org.eclipse.search.ui.text.IFileMatchAdapter;
 import org.eclipse.search.ui.text.Match;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 
 public class OccurrencesSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
@@ -119,18 +122,12 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 		
 		return false;
 	}
-
+	
 	/*
 	 * @see org.eclipse.search.ui.ISearchResult#getLabel()
 	 */
 	public String getLabel() {
-		int matchCount= getMatchCount();
-		if (matchCount == 1) {
-			return fQuery.getSingularLabel();
-		} else {
-			String format= fQuery.getPluralLabelPattern();
-			return MessageFormat.format(format, new Object[] { new Integer(matchCount) });
-		}
+		return fQuery.getResultLabel(getMatchCount());
 	}
 
 	/*

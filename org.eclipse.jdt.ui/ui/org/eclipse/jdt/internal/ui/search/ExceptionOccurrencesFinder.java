@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.List;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
@@ -125,8 +128,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return fResult;
 	}
 	
-	public Match[] getOccurrenceMatches(IJavaElement element, IDocument document) {
-		ArrayList matches= new ArrayList(fResult.size());
+	public void collectOccurrenceMatches(IJavaElement element, IDocument document, Collection resultingMatches) {
 		HashMap lineToLineElement= new HashMap();
 		
 		for (Iterator iter= fResult.iterator(); iter.hasNext();) {
@@ -148,36 +150,27 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 					groupKey.setException(true);
 				}
 				Match match= new Match(groupKey, startPosition, length);
-				matches.add(match);
+				resultingMatches.add(match);
 			} catch (BadLocationException e) {
 				//nothing
 			}
 		}
-		return (Match[]) matches.toArray(new Match[matches.size()]);
 	}
 	
 	public String getJobLabel() {
 		return SearchMessages.getString("ExceptionOccurrencesFinder.searchfor") ; //$NON-NLS-1$
 	}
 	
-	public String getPluralLabelPattern(String documentName) {
-		return getPluralLabelPattern(ASTNodes.asString(fSelectedName), documentName);
-	}
-	
-	public String getSingularLabel(String documentName) {
-		return getSingularLabel(ASTNodes.asString(fSelectedName), documentName);
-	}
-	
-	private String getPluralLabelPattern(String nodeContents, String elementName) {
-		String[] args= new String[] {nodeContents, "{0}", elementName}; //$NON-NLS-1$
+	public String getResultLabel(String elementName, int nMatches) {
+		String nodeContents= ASTNodes.asString(fSelectedName);
+		if (nMatches == 1) {
+			String[] args= new String[] {nodeContents, elementName}; //$NON-NLS-1$
+			return SearchMessages.getFormattedString("ExceptionOccurrencesFinder.label.singular", args); //$NON-NLS-1$
+		}
+		String[] args= new String[] {nodeContents, String.valueOf(nMatches), elementName}; //$NON-NLS-1$
 		return SearchMessages.getFormattedString("ExceptionOccurrencesFinder.label.plural", args); //$NON-NLS-1$
 	}
-	
-	private String getSingularLabel(String nodeContents, String elementName) {
-		String[] args= new String[] {nodeContents, elementName}; //$NON-NLS-1$
-		return SearchMessages.getFormattedString("ExceptionOccurrencesFinder.label.singular", args); //$NON-NLS-1$
-	}
-	
+
 	public boolean visit(AnonymousClassDeclaration node) {
 		return false;
 	}

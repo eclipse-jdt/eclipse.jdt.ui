@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jface.text.IDocument;
-
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -26,9 +26,8 @@ public interface IOccurrencesFinder {
 	
 	public String getJobLabel();
 
-	public String getPluralLabelPattern(String documentName);
+	public String getResultLabel(String documentName, int matches);
 	
-	public String getSingularLabel(String documentName);
-	
-	public Match[] getOccurrenceMatches(IJavaElement element, IDocument document);
+	public void collectOccurrenceMatches(IJavaElement element, IDocument document, Collection resultingMatches);
+
 }

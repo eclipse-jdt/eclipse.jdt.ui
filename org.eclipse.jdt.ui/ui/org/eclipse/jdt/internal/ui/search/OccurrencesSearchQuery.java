@@ -11,14 +11,17 @@
 
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
+import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -29,16 +32,12 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 	private IOccurrencesFinder fFinder;
 	private IDocument fDocument;
 	private IJavaElement fElement;
-	private String fSingularLabel;
-	private String fPluralLabelPattern;
 	private String fJobLabel;
 	
 	public OccurrencesSearchQuery(IOccurrencesFinder finder, IDocument document, IJavaElement element) {
 		fFinder= finder;
 		fDocument= document;
 		fElement= element;
-		fSingularLabel= fFinder.getSingularLabel(element.getElementName());
-		fPluralLabelPattern= fFinder.getPluralLabelPattern(element.getElementName());
 		fJobLabel= fFinder.getJobLabel();
 	}
 
@@ -48,8 +47,11 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 	public IStatus run(IProgressMonitor monitor) {
 		if (fFinder != null) {
 			fFinder.perform();
-			org.eclipse.search.ui.text.Match[] matches= Match.convert(fFinder.getOccurrenceMatches(fElement, fDocument));
-			fResult.addMatches(matches);
+			ArrayList resultingMatches= new ArrayList();
+			fFinder.collectOccurrenceMatches(fElement, fDocument, resultingMatches);
+			if (!resultingMatches.isEmpty()) {
+				fResult.addMatches((Match[]) resultingMatches.toArray(new Match[resultingMatches.size()]));
+			}
 			//Don't leak AST:
 			fFinder= null;
 			fDocument= null;
@@ -65,14 +67,10 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		return fJobLabel;
 	}
 	
-	String getSingularLabel() {
-		return fSingularLabel;
+	public String getResultLabel(int nMatches) {
+		return fFinder.getResultLabel(fElement.getElementName(), nMatches);
 	}
-	
-	String getPluralLabelPattern() {
-		return fPluralLabelPattern;
-	}
-	
+		
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#canRerun()
 	 */
