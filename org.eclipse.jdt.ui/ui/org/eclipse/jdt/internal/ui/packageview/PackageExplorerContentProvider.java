@@ -50,13 +50,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
-	private TreeViewer fViewer;
+	TreeViewer fViewer;
 	private Object fInput;
 	private boolean fIsFlatLayout;
 	private PackageFragmentProvider fPackageFragmentProvider= new PackageFragmentProvider();
 	
 	private int fPendingChanges;
-	private PackageExplorerPart fPart;
+	PackageExplorerPart fPart;
 
 
 	/**
@@ -137,10 +137,8 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			IClasspathEntry entry= entries[i];
 			if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) { 
 				IPackageFragmentRoot[] roots1= project.findPackageFragmentRoots(entry);
-				if (roots1.length > 0) {
-					containedRoots.addAll(Arrays.asList(roots1));
-					containers.add(entry);
-				}
+				containedRoots.addAll(Arrays.asList(roots1));
+				containers.add(entry);
 			}
 		}
 		for (int i= 0; i < roots.length; i++) {
@@ -634,7 +632,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		// System.out.print(fPendingChanges);
 	}
 
-	private synchronized void removePendingChange() {
+	synchronized void removePendingChange() {
 		fPendingChanges--;
 		if (fPendingChanges < 0)
 			fPendingChanges= 0;
