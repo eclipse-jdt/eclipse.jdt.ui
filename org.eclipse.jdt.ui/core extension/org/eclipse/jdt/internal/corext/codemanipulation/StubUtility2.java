@@ -26,17 +26,23 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -51,6 +57,106 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.1
  */
 public final class StubUtility2 {
+
+	public static MethodDeclaration createDelegationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IBinding[] bindings, CodeGenerationSettings settings) throws CoreException {
+		Assert.isNotNull(bindings);
+		Assert.isTrue(bindings.length == 2);
+		Assert.isTrue(bindings[0] instanceof IVariableBinding);
+		Assert.isTrue(bindings[0] instanceof IMethodBinding);
+
+		IVariableBinding variableBinding= (IVariableBinding) bindings[0];
+		IMethodBinding methodBinding= (IMethodBinding) bindings[0];
+
+		MethodDeclaration decl= ast.newMethodDeclaration();
+		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, methodBinding.getModifiers() & ~Modifier.ABSTRACT));
+
+		decl.setName(ast.newSimpleName(methodBinding.getName()));
+		decl.setConstructor(false);
+
+		ITypeBinding[] typeParams= methodBinding.getTypeParameters();
+		List typeParameters= decl.typeParameters();
+		for (int i= 0; i < typeParams.length; i++) {
+			ITypeBinding curr= typeParams[i];
+			TypeParameter newTypeParam= ast.newTypeParameter();
+			newTypeParam.setName(ast.newSimpleName(curr.getName()));
+			ITypeBinding[] typeBounds= curr.getTypeBounds();
+			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
+				List newTypeBounds= newTypeParam.typeBounds();
+				for (int k= 0; k < typeBounds.length; k++) {
+					newTypeBounds.add(imports.addImport(typeBounds[k], ast));
+				}
+			}
+			typeParameters.add(newTypeParam);
+		}
+
+		decl.setReturnType2(imports.addImport(methodBinding.getReturnType(), ast));
+
+		List parameters= decl.parameters();
+		ITypeBinding[] params= methodBinding.getParameterTypes();
+		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), methodBinding);
+		for (int i= 0; i < params.length; i++) {
+			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
+			var.setType(imports.addImport(params[i], ast));
+			var.setName(ast.newSimpleName(paramNames[i]));
+			parameters.add(var);
+		}
+
+		List thrownExceptions= decl.thrownExceptions();
+		ITypeBinding[] excTypes= methodBinding.getExceptionTypes();
+		for (int i= 0; i < excTypes.length; i++) {
+			String excTypeName= imports.addImport(excTypes[i]);
+			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
+		}
+
+		Block body= ast.newBlock();
+		decl.setBody(body);
+
+		String delimiter= StubUtility.getLineDelimiterUsed(unit);
+
+		String bodyStatement= ""; //$NON-NLS-1$
+		Statement statement= null;
+		MethodInvocation invocation= ast.newMethodInvocation();
+		List arguments= invocation.arguments();
+		for (int i= 0; i < params.length; i++)
+			arguments.add(ast.newSimpleName(paramNames[i]));
+		if (settings.useKeywordThis) {
+			FieldAccess access= ast.newFieldAccess();
+			access.setExpression(ast.newThisExpression());
+			access.setName(ast.newSimpleName(variableBinding.getName()));
+			invocation.setExpression(access);
+		} else
+			invocation.setExpression(ast.newSimpleName(variableBinding.getName()));
+		if (methodBinding.getReturnType().isPrimitive() && methodBinding.getReturnType().getName().equals("void")) {//$NON-NLS-1$
+			statement= ast.newExpressionStatement(invocation);
+		} else {
+			ReturnStatement returnStatement= ast.newReturnStatement();
+			returnStatement.setExpression(invocation);
+			statement= returnStatement;
+		}
+		bodyStatement= ASTNodes.asFormattedString(statement, 0, delimiter);
+
+		ITypeBinding declaringType= variableBinding.getDeclaringClass();
+		String qualifiedName= declaringType.getQualifiedName();
+		IPackageBinding packageBinding= declaringType.getPackage();
+		if (packageBinding != null) {
+			if (packageBinding.getName().length() > 0 && qualifiedName.startsWith(packageBinding.getName()))
+				qualifiedName= qualifiedName.substring(packageBinding.getName().length());
+		}
+		String placeHolder= CodeGeneration.getMethodBodyContent(unit, qualifiedName, bindings[1].getName(), false, bodyStatement, delimiter);
+		if (placeHolder != null) {
+			ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
+			body.statements().add(todoNode);
+		}
+
+		if (settings != null && settings.createComments) {
+			String string= CodeGeneration.getMethodComment(unit, qualifiedName, decl, methodBinding, delimiter);
+			if (string != null) {
+				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
+				decl.setJavadoc(javadoc);
+			}
+		}
+		return decl;
+	}
 
 	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations) throws CoreException {
 
@@ -232,21 +338,52 @@ public final class StubUtility2 {
 				IMethodBinding curr= typeMethods[i];
 				IMethodBinding impl= findMethodBinding(curr, allMethods);
 				if (impl == null || !Bindings.isVisibleInHierarchy(impl, currPack) || ((curr.getExceptionTypes().length < impl.getExceptionTypes().length) && !Modifier.isFinal(impl.getModifiers()))) {
-					if (impl != null) {
+					if (impl != null)
 						allMethods.remove(impl);
-					}
-					// implement an interface method when it does not exist in the
-					// hierarchy
-					// or when it throws less exceptions than the implemented
 					toImplement.add(curr);
 					allMethods.add(curr);
 				}
 			}
 			ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
-			for (int i= 0; i < superInterfaces.length; i++) {
+			for (int i= 0; i < superInterfaces.length; i++)
 				findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, currPack, toImplement);
+		}
+	}
+
+	public static IBinding[][] getDelegatableMethods(ITypeBinding binding) {
+		List allTuples= new ArrayList();
+		IVariableBinding[] typeFields= binding.getDeclaredFields();
+		for (int index= 0; index < typeFields.length; index++) {
+			IVariableBinding fieldBinding= typeFields[index];
+			if (fieldBinding.isField() && !fieldBinding.isEnumConstant() && !fieldBinding.isSynthetic()) {
+				ITypeBinding typeBinding= fieldBinding.getType();
+				if (typeBinding.isTypeVariable()) {
+					ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
+					for (int offset= 0; offset < typeBounds.length; offset++) {
+						IBinding[][] tuples= getDelegatableMethods(typeBounds[offset]);
+						for (int tuple= 0; tuple < tuples.length; tuple++)
+							allTuples.add(tuples[tuple]);
+					}
+				} else {
+					IMethodBinding[] candidates= getDelegateCandidates(typeBinding);
+					for (int offset= 0; offset < candidates.length; offset++)
+						allTuples.add(new IBinding[] { fieldBinding, candidates[offset]});
+				}
 			}
 		}
+		// Array of tuple<IVariableBinding, IMethodBinding>
+		return (IBinding[][]) allTuples.toArray(new IBinding[allTuples.size()][2]);
+	}
+
+	private static IMethodBinding[] getDelegateCandidates(ITypeBinding binding) {
+		List allMethods= new ArrayList();
+		boolean isInterface= binding.isInterface();
+		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
+		for (int index= 0; index < typeMethods.length; index++) {
+			if (!typeMethods[index].isConstructor() && !Modifier.isFinal((typeMethods[index].getModifiers())) && (isInterface || Modifier.isPublic(typeMethods[index].getModifiers())))
+				allMethods.add(typeMethods[index]);
+		}
+		return (IMethodBinding[]) allMethods.toArray(new IMethodBinding[allMethods.size()]);
 	}
 
 	public static IMethodBinding[] getOverridableMethods(ITypeBinding typeBinding, boolean isSubType) {
