@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.comment;
+package org.eclipse.jdt.internal.corext.text.comment;
 
 /**
  * The measurements can be used to compute how many times a first string has to

@@ -21,9 +21,10 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.text.comment.JavaDocLine;
+import org.eclipse.jdt.internal.corext.text.comment.MultiCommentLine;
+
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.comment.JavaDocLine;
-import org.eclipse.jdt.internal.ui.text.comment.MultiCommentLine;
 
 public class JavaDocTestCase extends CommentTestCase {
 

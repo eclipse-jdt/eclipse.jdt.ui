@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.comment;
+package org.eclipse.jdt.internal.corext.text.comment;
 
 import java.io.IOException;
 import java.io.StringReader;

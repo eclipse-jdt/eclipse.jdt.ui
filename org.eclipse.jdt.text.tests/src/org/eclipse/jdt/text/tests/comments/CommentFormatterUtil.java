@@ -20,11 +20,11 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
+import org.eclipse.jdt.internal.corext.text.comment.CommentRegion;
+import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
 
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.comment.CommentObjectFactory;
-import org.eclipse.jdt.internal.ui.text.comment.CommentRegion;
-import org.eclipse.jdt.internal.ui.text.comment.ITextMeasurement;
 
 /**
  * Utilities for the comment formatter.

@@ -20,8 +20,9 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.text.comment.SingleCommentLine;
+
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.comment.SingleCommentLine;
 
 public class SingleLineTestCase extends CommentTestCase {
 

@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.comment;
+package org.eclipse.jdt.internal.corext.text.comment;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -76,7 +76,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#adapt(org.eclipse.jdt.internal.ui.text.comment.CommentLine)
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#adapt(org.eclipse.jdt.internal.corext.text.comment.CommentLine)
 	 */
 	protected void adapt(final CommentLine previous) {
 
@@ -85,7 +85,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#append(org.eclipse.jdt.internal.ui.text.comment.CommentRange)
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#append(org.eclipse.jdt.internal.corext.text.comment.CommentRange)
 	 */
 	protected void append(final CommentRange range) {
 
@@ -120,14 +120,14 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#getContentLinePrefix()
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#getContentLinePrefix()
 	 */
 	protected String getContentPrefix() {
 		return MULTI_COMMENT_CONTENT_PREFIX;
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#getEndLinePrefix()
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#getEndLinePrefix()
 	 */
 	protected String getEndingPrefix() {
 		return MULTI_COMMENT_END_PREFIX;
@@ -143,14 +143,14 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#getStartLinePrefix()
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#getStartLinePrefix()
 	 */
 	protected String getStartingPrefix() {
 		return MULTI_COMMENT_START_PREFIX;
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#scanLine(int)
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#scanLine(int)
 	 */
 	protected void scanLine(final int line) {
 
@@ -252,7 +252,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#tokenizeLine(int)
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#tokenizeLine(int)
 	 */
 	protected void tokenizeLine(int line) {
 

@@ -33,6 +33,10 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.text.comment.CommentObjectFactory;
+import org.eclipse.jdt.internal.corext.text.comment.CommentRegion;
+import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**

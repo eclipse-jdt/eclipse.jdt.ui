@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.text.comment;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
+
 /**
  * Text measurement based on the font set for a SWT control.
  * 
@@ -34,7 +36,7 @@ public class DefaultTextMeasurement implements ITextMeasurement {
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.ITextMeasurement#computeWidth(java.lang.String)
+	 * @see org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement#computeWidth(java.lang.String)
 	 */
 	public int computeWidth(String string) {
 		GC graphics= new GC(fControl);

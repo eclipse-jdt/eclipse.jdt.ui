@@ -15,8 +15,9 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.internal.corext.text.comment.MultiCommentLine;
+
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-import org.eclipse.jdt.internal.ui.text.comment.MultiCommentLine;
 
 public class MultiLineTestCase extends CommentTestCase {
 
