@@ -78,7 +78,6 @@ public class JavaDocLocations {
 			return externalPath;
 		}
 
-		IPath canonicalPath = null;
 		try {
 			return new Path(externalPath.toFile().getCanonicalPath());
 		} catch (IOException e) {
