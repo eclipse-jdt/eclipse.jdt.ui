@@ -17,7 +17,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -39,7 +38,6 @@ import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
 
@@ -311,7 +309,8 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 				
 			try {
 				if (unit != null) {
-	
+
+					fExperimentalCollector.setPreventEating(false);	
 					fExperimentalCollector.reset(offset, contextOffset, unit.getJavaProject(), fAllowAddImports ? unit : null);
 					fExperimentalCollector.setViewer(viewer);
 					

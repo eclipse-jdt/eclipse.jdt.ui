@@ -66,10 +66,10 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		fCompilationUnit= compilationUnit;
 	}
  
- 	private static boolean appendArguments(IDocument document, int offset) {
+ 	private boolean appendArguments(IDocument document, int offset) {
 		
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		if (preferenceStore.getBoolean(ContentAssistPreference.INSERT_COMPLETION))
+		if (preferenceStore.getBoolean(ContentAssistPreference.INSERT_COMPLETION) ^ fToggleEating)
 			return true;
 							
 		try {
@@ -114,7 +114,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				positionLengths= new int[0];
 				
 				replacementString= new String(fName);
-			}		
+			}
 
 			setReplacementString(replacementString);
 		

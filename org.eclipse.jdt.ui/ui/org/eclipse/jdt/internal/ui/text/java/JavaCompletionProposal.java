@@ -50,6 +50,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	private int fContextInformationPosition;
 	private ProposalInfo fProposalInfo;
 	private char[] fTriggerCharacters;
+	protected boolean fToggleEating;
 	
 	private int fRelevance;
 	private StyleRange fRememberedStyleRange;
@@ -333,11 +334,12 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 
 		IDocument document= viewer.getDocument();
 
-		boolean toggleEating= stateMask == SWT.CTRL;
-		if (insertCompletion() ^ toggleEating)
+		fToggleEating= (stateMask & SWT.CTRL) != 0;
+		if (insertCompletion() ^ fToggleEating)
 			fReplacementLength= offset - fReplacementOffset;
 		
 		apply(document, trigger, offset);
+		fToggleEating= false;
 	}
 
 	private static Color getForegroundColor(StyledText text) {
@@ -397,19 +399,22 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(ITextViewer)
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(ITextViewer, boolean)
 	 */
-	public void selected(ITextViewer viewer) {
-		if (!insertCompletion())
+	public void selected(ITextViewer viewer, boolean smartToggle) {
+		if (!insertCompletion() ^ smartToggle)
 			updateStyle(viewer);
+		else {
+			repairPresentation(viewer);
+			fRememberedStyleRange= null;
+		}
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(ITextViewer)
 	 */
 	public void unselected(ITextViewer viewer) {
-		if (!insertCompletion())
-			repairPresentation(viewer);
+		repairPresentation(viewer);
 		fRememberedStyleRange= null;
 	}
 }
