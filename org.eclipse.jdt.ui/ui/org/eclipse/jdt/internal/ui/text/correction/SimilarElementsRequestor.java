@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	
 	public static final int CLASSES= 1 << 1;
@@ -52,7 +54,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 				MethodInvocation invocation= (MethodInvocation) name.getParent();
 				if (name.equals(invocation.getName())) {
 					if ((kind & METHODS) != 0) {
-						nArguments= ((MethodInvocation) name.getParent()).arguments().size();
+						nArguments= invocation.arguments().size();
 					}
 				} else if (invocation.arguments().contains(name)) {
 					pos= invocation.getStartPosition(); // workaround for code assist
@@ -146,13 +148,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		if (NameMatcher.isSimilarName(fName, variableName)) {
 			addResult(new SimilarElement(kind, variableName, 1));
 		} else if (fPreferredType != null) {
-			StringBuffer buf= new StringBuffer();
-			if (typePackageName.length > 0) {
-				buf.append(typePackageName);
-				buf.append('.');
-			}
-			buf.append(typeName);
-			if (fPreferredType.equals(buf.toString())) {
+			if (fPreferredType.equals(JavaModelUtil.concatenateName(typePackageName, typeName))) {
 				addResult(new SimilarElement(kind, variableName, 0));
 			}
 		}
@@ -201,10 +197,16 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 		if ((fKind & METHODS) != 0) {
 			String methodName= new String(selector);
-			if (fNumberOfArguments == -1 || fNumberOfArguments == parameterTypeNames.length) {
+			if (fName.equals(methodName)) {
+				String[] paramTypes= new String[parameterTypeNames.length];
+				for (int i= 0; i < paramTypes.length; i++) {
+					paramTypes[i]= JavaModelUtil.concatenateName(parameterPackageNames[i], parameterTypeNames[i]);
+				}
+				addResult(new SimilarElement(METHODS, methodName, paramTypes, relevance));
+			} else if ((fNumberOfArguments == -1 || fNumberOfArguments == parameterTypeNames.length)) {
 				int similarity= NameMatcher.getSimilarity(fName, methodName);
 				if (similarity >= 0) {
-					SimilarElement elem= new SimilarElement(METHODS, methodName, relevance + similarity);
+					SimilarElement elem= new SimilarElement(METHODS, methodName, null, relevance + similarity);
 					addResult(elem);
 				}
 			}
