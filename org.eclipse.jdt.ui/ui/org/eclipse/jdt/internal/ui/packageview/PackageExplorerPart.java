@@ -58,7 +58,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
@@ -1440,10 +1439,6 @@ public class PackageExplorerPart extends ViewPart
     	if (element == null)
     		return false;
     	selectReveal(new StructuredSelection(element));
-    	IElementComparer comparer= getTreeViewer().getComparer();
-    	Object selected= ((IStructuredSelection)getSite().getSelectionProvider().getSelection()).getFirstElement();
-    	if (comparer != null ? comparer.equals(element, selected) : element.equals(selected))
-    		return true;
-    	return false;
+    	return ! getSite().getSelectionProvider().getSelection().isEmpty();
     }
 }
