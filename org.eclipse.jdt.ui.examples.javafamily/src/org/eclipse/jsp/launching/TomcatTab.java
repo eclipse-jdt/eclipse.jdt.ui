@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.variables.LaunchVariableUtil;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jsp.JspPluginImages;
 import org.eclipse.swt.SWT;
@@ -37,14 +38,14 @@ import org.eclipse.swt.widgets.Text;
 /**
  * Specifies the install location of Tomcat.
  */
-public class JspTab extends AbstractLaunchConfigurationTab {
+public class TomcatTab extends AbstractLaunchConfigurationTab {
 		
 		
 	private Button fBrowseButton;
 
 	private Text fTomcatDir;
 
-	public JspTab() {
+	public TomcatTab() {
 
 	}
 		
@@ -69,7 +70,7 @@ public class JspTab extends AbstractLaunchConfigurationTab {
 		createVerticalSpacer(composite, 3);
 				
 		Label label = new Label(composite, SWT.NONE);
-		label.setText(LaunchingMessages.getString("JspTab.3")); //$NON-NLS-1$
+		label.setText(LaunchingMessages.getString("TomcatTab.3")); //$NON-NLS-1$
 		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 3;
 		label.setLayoutData(gd);
@@ -100,7 +101,7 @@ public class JspTab extends AbstractLaunchConfigurationTab {
 	 */
 	protected void handleBrowseButtonSelected() {
 		DirectoryDialog dialog = new DirectoryDialog(getShell());
-		dialog.setMessage(LaunchingMessages.getString("JspTab.4")); //$NON-NLS-1$
+		dialog.setMessage(LaunchingMessages.getString("TomcatTab.4")); //$NON-NLS-1$
 		String currentWorkingDir = fTomcatDir.getText();
 		if (!currentWorkingDir.trim().equals("")) { //$NON-NLS-1$
 			File path = new File(currentWorkingDir);
@@ -129,14 +130,22 @@ public class JspTab extends AbstractLaunchConfigurationTab {
 		setMessage(null);
 		
 		String workingDirPath = fTomcatDir.getText().trim();
+		// resolve variables (if any)
+		String[] expansion = LaunchVariableUtil.expandStrings(workingDirPath, null, null);
+		if (expansion.length == 1) {
+			String path = expansion[0];
+			if (path != null) {
+				workingDirPath = path;
+			}
+		}
 		if (workingDirPath.length() > 0) {
 			File dir = new File(workingDirPath);
 			if (!dir.exists()) {
-				setErrorMessage(LaunchingMessages.getString("JspTab.5")); //$NON-NLS-1$
+				setErrorMessage(LaunchingMessages.getString("TomcatTab.5")); //$NON-NLS-1$
 				return false;
 			}
 			if (!dir.isDirectory()) {
-				setErrorMessage(LaunchingMessages.getString("JspTab.6")); //$NON-NLS-1$
+				setErrorMessage(LaunchingMessages.getString("TomcatTab.6")); //$NON-NLS-1$
 				return false;
 			}
 		}		
@@ -149,6 +158,7 @@ public class JspTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
+		config.setAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, "${catalina_home}");
 	}
 
 	/**
@@ -156,7 +166,7 @@ public class JspTab extends AbstractLaunchConfigurationTab {
 	 */
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
-			fTomcatDir.setText(configuration.getAttribute(JspLaunchDelegate.ATTR_CATALINA_HOME, "")); //$NON-NLS-1$
+			fTomcatDir.setText(configuration.getAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, "")); //$NON-NLS-1$
 		} catch (CoreException e) {
 			setErrorMessage(e.getMessage());
 			DebugPlugin.log(e);
@@ -167,7 +177,7 @@ public class JspTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(JspLaunchDelegate.ATTR_CATALINA_HOME, getAttributeValueFrom(fTomcatDir));
+		configuration.setAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, getAttributeValueFrom(fTomcatDir));
 	}
 
 	/**
@@ -187,14 +197,14 @@ public class JspTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
 	 */
 	public String getName() {
-		return LaunchingMessages.getString("JspTab.7"); //$NON-NLS-1$
+		return LaunchingMessages.getString("TomcatTab.7"); //$NON-NLS-1$
 	}	
 		
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getImage()
 	 */
 	public Image getImage() {
-		return JspPluginImages.getImage(JspPluginImages.IMG_OBJ_JSP);
+		return JspPluginImages.getImage(JspPluginImages.IMG_OBJ_TOMCAT);
 	}	
 
 }

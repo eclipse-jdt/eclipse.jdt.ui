@@ -66,7 +66,7 @@ public class JspPluginImages {
 	 */
 	private static void declareImages() {
 
-		declareRegistryImage(IMG_OBJ_TOMCAT, OBJECT + "jsp_app.gif"); //$NON-NLS-1$
+		declareRegistryImage(IMG_OBJ_TOMCAT, OBJECT + "tomcat_obj.gif"); //$NON-NLS-1$
 		declareRegistryImage(IMG_OBJ_JSP, OBJECT + "jsp_obj.gif"); //$NON-NLS-1$
 	}
 

@@ -18,16 +18,16 @@ import org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaSourceLookupTab;
 
 /**
- * Tab group for launching a JSP on a local Tomcat server.
+ * Tab group for launching a local Tomcat server.
  */
-public class JspTabGroup extends AbstractLaunchConfigurationTabGroup {
+public class TomcatTabGroup extends AbstractLaunchConfigurationTabGroup {
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTabGroup#createTabs(org.eclipse.debug.ui.ILaunchConfigurationDialog, java.lang.String)
 	 */
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
-			new JspTab(),
+			new TomcatTab(),
 			new JavaJRETab(),
 			new JavaSourceLookupTab(),
 			new CommonTab(),

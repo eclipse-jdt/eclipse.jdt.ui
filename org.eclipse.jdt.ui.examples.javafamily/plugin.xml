@@ -111,32 +111,39 @@
    </extension>
    
 	<!-- =========================================================================== -->
-	<!-- JSP Launcnhing                                                              -->
+	<!-- Tomcat Launcnhing                                                              -->
 	<!-- =========================================================================== -->
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
-            name="%jspLaunchConfigurationTypeName"
-            delegate="org.eclipse.jsp.launching.JspLaunchDelegate"
+            name="%tomcatLaunchConfigurationTypeName"
+            delegate="org.eclipse.jsp.launching.TomcatLaunchDelegate"
             modes="run, debug"
-            id="org.eclipse.jsp.JspConfigurationType">
+            id="org.eclipse.jsp.TomcatConfigurationType">
       </launchConfigurationType>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
-            type="org.eclipse.jsp.JspConfigurationType"
-            class="org.eclipse.jsp.launching.JspTabGroup"
-            id="org.eclipse.jsp.JspTabGroup">
+            type="org.eclipse.jsp.TomcatConfigurationType"
+            class="org.eclipse.jsp.launching.TomcatTabGroup"
+            id="org.eclipse.jsp.TomcatTabGroup">
       </launchConfigurationTabGroup>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
-            icon="icons/full/obj16/jsp_app.gif"
-            configTypeID="org.eclipse.jsp.JspConfigurationType"
-            id="org.eclipse.jsp.image.Jsp">
+            icon="icons/full/obj16/tomcat_obj.gif"
+            configTypeID="org.eclipse.jsp.TomcatConfigurationType"
+            id="org.eclipse.jsp.image.Tomcat">
       </launchConfigurationTypeImage>
    </extension>
+   <extension
+         point="org.eclipse.debug.core.simpleLaunchVariables">
+      <variable
+            name="catalina_home"
+            description="%catalinaHomeDescription">
+      </variable>
+   </extension>   
    
 </plugin>
