@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -102,9 +102,7 @@ public class PartialASTTest extends CoreTests {
 		int offset= existing.indexOf(statement);
 		
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
-		ASTFlattener flattener= new ASTFlattener();
-		astRoot.accept(flattener);
-		String string= flattener.getFormattedResult(0, String.valueOf('\n'));
+		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'));
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -206,9 +204,7 @@ public class PartialASTTest extends CoreTests {
 		int offset= existing.indexOf("fField1 = fField2;");
 		
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
-		ASTFlattener flattener= new ASTFlattener();
-		astRoot.accept(flattener);
-		String string= flattener.getFormattedResult(0, String.valueOf('\n'));
+		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'));
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -273,9 +269,7 @@ public class PartialASTTest extends CoreTests {
 		int offset= existing.indexOf("return 1;");
 		
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
-		ASTFlattener flattener= new ASTFlattener();
-		astRoot.accept(flattener);
-		String string= flattener.getFormattedResult(0, String.valueOf('\n'));
+		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'));
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -344,9 +338,7 @@ public class PartialASTTest extends CoreTests {
 		int offset= existing.indexOf("return 0;");
 		
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
-		ASTFlattener flattener= new ASTFlattener();
-		astRoot.accept(flattener);
-		String string= flattener.getFormattedResult(0, String.valueOf('\n'));
+		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'));
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -410,9 +402,7 @@ public class PartialASTTest extends CoreTests {
 		int offset= existing.indexOf("private int fField1;");
 		
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
-		ASTFlattener flattener= new ASTFlattener();
-		astRoot.accept(flattener);
-		String string= flattener.getFormattedResult(0, String.valueOf('\n'));
+		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'));
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -476,9 +466,7 @@ public class PartialASTTest extends CoreTests {
 		int offset= existing.indexOf("private int fField3;");
 		
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
-		ASTFlattener flattener= new ASTFlattener();
-		astRoot.accept(flattener);
-		String string= flattener.getFormattedResult(0, String.valueOf('\n'));
+		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'));
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");

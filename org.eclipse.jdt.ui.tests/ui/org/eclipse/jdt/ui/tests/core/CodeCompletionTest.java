@@ -17,6 +17,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorPart;
@@ -28,8 +29,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
@@ -66,8 +69,10 @@ public class CodeCompletionTest extends CoreTests {
 		Hashtable options= JavaCore.getDefaultOptions();
 		options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
-		JavaCore.setOptions(options);			
-
+		JavaCore.setOptions(options);
+		
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
 
 		CodeTemplates.getCodeTemplate(CodeTemplates.OVERRIDECOMMENT).setPattern("/* (non-Javadoc)\n * ${see_to_overridden}\n */");	
 		CodeTemplates.getCodeTemplate(CodeTemplates.METHODSTUB).setPattern("//TODO\n${body_statement}");
