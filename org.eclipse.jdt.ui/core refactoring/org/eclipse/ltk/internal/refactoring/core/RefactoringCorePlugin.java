@@ -37,7 +37,7 @@ public class RefactoringCorePlugin {
 		IStatus status= new Status(
 			IStatus.ERROR, getPluginId(), 
 			StatusConstants.INTERNAL_ERROR, 
-			RefactoringCoreMesssages.getString("RefactoringCorePlugin.listener removed"),  //$NON-NLS-1$
+			RefactoringCoreMesssages.getString("RefactoringCorePlugin.listener_removed"),  //$NON-NLS-1$
 			t);
 		ResourcesPlugin.getPlugin().getLog().log(status);
 	}
