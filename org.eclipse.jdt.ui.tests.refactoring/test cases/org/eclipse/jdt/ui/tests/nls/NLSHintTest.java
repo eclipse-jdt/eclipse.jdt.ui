@@ -68,6 +68,22 @@ public class NLSHintTest extends TestCase {
     protected void tearDown() throws Exception {        
         JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());        
     }
+    
+    /**
+     * documents bug 57622.
+     */
+    public void testNlsedButNotTranslated() throws Exception {
+    	IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+    	String klazz = 
+    		"package test;\n" +
+    		"public class Test {" +
+			"	private String str=\"whateverKey\";//$NON-NLS-1$\n" +
+			"}\n";
+    	ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+        NLSHolder nlsHolder = NLSHolder.create(cu);
+        NLSHint hint = new NLSHint(nlsHolder.getLines(), cu);
+        assertEquals(null, hint.getMessageClass());    	
+    }
 
     public void testNoMessageClassHint() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);

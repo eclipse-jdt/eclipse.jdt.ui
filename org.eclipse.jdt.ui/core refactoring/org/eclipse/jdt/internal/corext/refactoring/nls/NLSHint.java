@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Expression;
@@ -208,11 +209,13 @@ public class NLSHint {
     private ITypeBinding getAccessorClass(NLSElement nlsElement, ASTNode ast) {
         TextRegion region = nlsElement.getPosition();
         ASTNode node = NodeFinder.perform(ast, region.getOffset(), region.getLength());
-        if (node != null) {
+        if ((node != null) && (node.getParent() instanceof MethodInvocation)) {        	
             MethodInvocation methodInvocation = (MethodInvocation) node.getParent();
-            IMethodBinding binding = methodInvocation.resolveMethodBinding();
-            if (binding != null) {
-                return binding.getDeclaringClass();
+            if (methodInvocation.arguments().indexOf(node) == 0) {
+	            IMethodBinding binding = methodInvocation.resolveMethodBinding();
+	            if (binding != null && Modifier.isStatic(binding.getModifiers())) {
+	                return binding.getDeclaringClass();
+	            }
             }
         }
         return null;
