@@ -261,12 +261,12 @@ public class Strings {
 		for (int i= 0; i < size; i++) {
 			char c= line.charAt(i);
 			if (c == '\t') {
-				end= i;
+				end= i + 1;
 				blanks= 0;
 			} else if (isIndentChar(c)) {
 				blanks++;
 				if (blanks == tabWidth) {
-					end= i;
+					end= i + 1;
 					blanks= 0;
 				}
 			} else {
@@ -278,7 +278,7 @@ public class Strings {
 		else if (end == size)
 			return line;
 		else
-			return line.substring(0, end + 1);
+			return line.substring(0, end);
 	}
 	
 	public static String[] removeTrailingEmptyLines(String[] sourceLines) {
@@ -302,7 +302,7 @@ public class Strings {
 	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
 	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
 	 * the middle of a line)	 */
-	public static String changeIndent(String code, int codeIndentLevel, int tabWidth, String newIndent) {
+	public static String changeIndent(String code, int codeIndentLevel, int tabWidth, String newIndent, String lineDelim) {
 		try {
 			ILineTracker tracker= new DefaultLineTracker();
 			tracker.set(code);
@@ -322,7 +322,7 @@ public class Strings {
 				if (i == 0) {  // no indent for first line (contained in the formatted string)
 					buf.append(line);
 				} else { // no new line after last line
-					buf.append(tracker.getLineDelimiter(i - 1));
+					buf.append(lineDelim);
 					buf.append(newIndent); 
 					buf.append(trimIndent(line, codeIndentLevel, tabWidth));
 				}
