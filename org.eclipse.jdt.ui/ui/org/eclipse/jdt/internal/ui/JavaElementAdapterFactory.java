@@ -136,7 +136,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
     public IResource getAdaptedResource(IAdaptable adaptable) {
     	IJavaElement je= getJavaElement(adaptable);
     	if (je != null)
-    		return getResource((IJavaElement)adaptable);
+    		return getResource(je);
 
     	return null;
     }
