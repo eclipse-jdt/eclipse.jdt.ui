@@ -33,12 +33,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-/**
- * @author tma
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
 public class SearchParticipantsPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
 	private CheckedListDialogField fParticipantList;
@@ -54,7 +48,7 @@ public class SearchParticipantsPreferencePage extends PreferencePage implements 
 		}
 		
 		public String getText(Object element) {
-			return ((IConfigurationElement)element).getAttribute("label"); //$NON-NLS-1$
+			return ((IConfigurationElement)element).getAttribute("name"); //$NON-NLS-1$
 		}
 
 	}

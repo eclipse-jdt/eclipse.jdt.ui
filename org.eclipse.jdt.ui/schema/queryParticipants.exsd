@@ -65,10 +65,10 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="label" type="string" use="required">
+         <attribute name="name" type="string" use="required">
             <annotation>
                <documentation>
-                  A user readeable label for the participant.
+                  A user readeable name for the participant.
                </documentation>
             </annotation>
          </attribute>
