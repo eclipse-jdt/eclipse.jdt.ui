@@ -27,7 +27,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.ui.IEditorPart;
@@ -37,8 +39,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -157,10 +157,10 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		try {
 			CompilationUnitChange change= getCompilationUnitChange();
 
-			TextBuffer previewConent= new TextBuffer(change.getPreviewDocument());
+			IDocument previewContent= change.getPreviewDocument();
 			String currentConentString= change.getCurrentContent();
 			
-			ITokenComparator leftSide= new JavaTokenComparator(previewConent.getContent(), true); 
+			ITokenComparator leftSide= new JavaTokenComparator(previewContent.get(), true); 
 			ITokenComparator rightSide= new JavaTokenComparator(currentConentString, true);
 			
 			RangeDifference[] differences= RangeDifferencer.findRanges(leftSide, rightSide);
@@ -170,13 +170,15 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				int end= leftSide.getTokenStart(curr.leftEnd());
 				if (curr.kind() == RangeDifference.CHANGE && curr.leftLength() > 0) {
 					buf.append("<b>"); //$NON-NLS-1$
-					appendContent(previewConent, start, end, buf, false);
+					appendContent(previewContent, start, end, buf, false);
 					buf.append("</b>"); //$NON-NLS-1$
 				} else if (curr.kind() == RangeDifference.NOCHANGE) {
-					appendContent(previewConent, start, end, buf, true);
+					appendContent(previewContent, start, end, buf, true);
 				}
 			}			
 		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 		return buf.toString();
@@ -184,7 +186,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	
 	private final int surroundLines= 1;
 
-	private void appendContent(TextBuffer text, int startOffset, int endOffset, StringBuffer buf, boolean surroundLinesOnly) {
+	private void appendContent(IDocument text, int startOffset, int endOffset, StringBuffer buf, boolean surroundLinesOnly) throws BadLocationException {
 		int startLine= text.getLineOfOffset(startOffset);
 		int endLine= text.getLineOfOffset(endOffset);
 		
@@ -208,13 +210,13 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				}
 			}
 			
-			TextRegion lineInfo= text.getLineInformation(i);
+			IRegion lineInfo= text.getLineInformation(i);
 			int start= lineInfo.getOffset();
 			int end= start + lineInfo.getLength();
 
 			int from= Math.max(start, startOffset);
 			int to= Math.min(end, endOffset);
-			String content= text.getContent(from, to - from);
+			String content= text.get(from, to - from);
 			if (surroundLinesOnly && (from == start) && Strings.containsOnlyWhitespaces(content)) {
 				continue; // ignore empty lines exept when range started in the middle of a line
 			}
@@ -298,7 +300,4 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 		return super.toString();
 	}
-
-
-
 }
