@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 
@@ -58,7 +59,13 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			fParent= shell;
 		}
 		public boolean catchRuntimeException() {
-			return MessageDialog.openQuestion(fParent, getDialogTitle(),  RefactoringMessages.getString("SurroundWithTryCatchAction.no_exceptions")); //$NON-NLS-1$
+			MessageDialog dialog = new MessageDialog(
+				fParent, getDialogTitle(),  null,	// accept the default window icon
+				RefactoringMessages.getString("SurroundWithTryCatchAction.no_exceptions"), //$NON-NLS-1$
+				MessageDialog.QUESTION, 
+				new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 
+				1); 
+			return dialog.open() == 0; // yes selected
 		}
 	}
 
