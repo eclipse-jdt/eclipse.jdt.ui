@@ -398,6 +398,10 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	public void test36() throws Exception{
 		helper2_0("foo", "bar", new String[] {"QString;"}, true);
 	}
+
+	public void test37() throws Exception{
+		helper2_0("foo", "bar", new String[] {"QA;"}, true);
+	}
 	
 	//anonymous inner class
 	public void testAnon0() throws Exception{
