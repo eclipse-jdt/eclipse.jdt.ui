@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -93,6 +94,7 @@ public class RippleMethodFinder {
 		Set result= new HashSet();
 		Set visitedTypes= new HashSet();
 		List methodQueue= new ArrayList();
+		Set hierarchies= new HashSet();
 		methodQueue.add(method);
 		while (! methodQueue.isEmpty()){
 			IMethod m= (IMethod)methodQueue.remove(0);
@@ -108,10 +110,12 @@ public class RippleMethodFinder {
 			visitedTypes.add(type);
 			result.add(m);
 			
-			IType[] subTypes= type.newTypeHierarchy(workingCopies, new SubProgressMonitor(pm, 1)).getAllSubtypes(type);
+			IType[] subTypes= getAllSubtypes(pm, workingCopies, type, hierarchies);
 			for (int i= 0; i < subTypes.length; i++){
-				if (!visitedTypes.contains(subTypes[i]) && declares(subTypes[i], method)){
-					result.add(Checks.findMethod(m, subTypes[i]));
+				if (!visitedTypes.contains(subTypes[i])){ 
+					IMethod subTypeMethod= Checks.findMethod(m, subTypes[i]);
+					if (subTypeMethod != null)
+						result.add(subTypeMethod);
 				}	
 			}
 			
@@ -123,30 +127,42 @@ public class RippleMethodFinder {
 		}
 		return (IMethod[]) result.toArray(new IMethod[result.size()]);
 	}
-	 
-		
+	
+	private static IType[] getAllSubtypes(IProgressMonitor pm, IWorkingCopy[] workingCopies, IType type, Set cachedHierarchies) throws JavaModelException {
+		//first, try in the cached hierarchies
+		for (Iterator iter= cachedHierarchies.iterator(); iter.hasNext();) {
+			ITypeHierarchy hierarchy= (ITypeHierarchy) iter.next();
+			if (hierarchy.contains(type))
+				return hierarchy.getAllSubtypes(type);
+		}
+		ITypeHierarchy hierarchy= type.newTypeHierarchy(workingCopies, new SubProgressMonitor(pm, 1));
+		cachedHierarchies.add(hierarchy);
+		return hierarchy.getAllSubtypes(type);
+	}
+	
 	private static IMethod findAppropriateMethod(IWorkingCopy[] workingCopies, Set visitedTypes, List methodQueue, IType type, IMethod method, IProgressMonitor pm)throws JavaModelException{
 		pm.beginTask(RefactoringCoreMessages.getString("RippleMethodFinder.analizing_hierarchy"), 1); //$NON-NLS-1$
 		IType[] superTypes= type.newSupertypeHierarchy(workingCopies, new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
 		for (int i= 0; i< superTypes.length; i++){
-			IType x= superTypes[i];
-			if (visitedTypes.contains(x))
+			IType t= superTypes[i];
+			if (visitedTypes.contains(t))
 				continue;
-			IMethod found= Checks.findMethod(method, x);	
+			IMethod found= Checks.findMethod(method, t);	
 			if (found == null)
 				continue;
-			if (! declaresAsVirtual(x, method))	
+			if (! declaresAsVirtual(t, method))	
 				continue;	
 			if (methodQueue.contains(found))	
 				continue;
-			return getTopMostMethod(workingCopies, visitedTypes, methodQueue, method, x, new NullProgressMonitor());	
+			return getTopMostMethod(workingCopies, visitedTypes, methodQueue, method, t, new NullProgressMonitor());	
 		}
 		return null;
 	}
 	
 	private static IMethod getTopMostMethod(IWorkingCopy[] workingCopies, Set visitedTypes, List methodQueue, IMethod method, IType type, IProgressMonitor pm)throws JavaModelException{
 		pm.beginTask("", 1); //$NON-NLS-1$
-		Assert.isTrue(Checks.findMethod(method, type) != null);
+		IMethod methodInThisType= Checks.findMethod(method, type);
+		Assert.isTrue(methodInThisType != null);
 		IType[] superTypes= type.newSupertypeHierarchy(workingCopies, new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
 		for (int i= 0; i < superTypes.length; i++){
 			IType t= superTypes[i];
@@ -161,11 +177,7 @@ public class RippleMethodFinder {
 				continue;
 			return getTopMostMethod(workingCopies, visitedTypes, methodQueue, method, t, new NullProgressMonitor());
 		}
-		return Checks.findMethod(method, type);
-	}
-	
-	private static boolean declares(IType type, IMethod m) throws JavaModelException{
-		return Checks.findMethod(m, type) != null;
+		return methodInThisType;
 	}
 	
 	private static boolean declaresAsVirtual(IType type, IMethod m) throws JavaModelException{
