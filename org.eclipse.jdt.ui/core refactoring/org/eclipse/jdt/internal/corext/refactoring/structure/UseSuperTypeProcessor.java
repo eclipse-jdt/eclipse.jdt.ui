@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -32,12 +34,18 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ISourceConstraintVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
- * Refactoring processor to replace type occurrences by a super type
+ * Refactoring processor to replace type occurrences by a super type.
  */
 public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
@@ -47,11 +55,27 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	/** The text change manager */
 	private TextChangeManager fChangeManager= null;
 
+	/** Should type occurrences on instanceof's also be rewritten? */
+	private boolean fInstanceOf= false;
+
 	/** The subtype to replace */
 	private final IType fSubType;
 
 	/** The supertype as replacement */
-	private final IType fSuperType;
+	private IType fSuperType= null;
+
+	/** The supertypes of the subtype */
+	private IType[] fSuperTypes= null;
+
+	/**
+	 * Creates a new super type processor.
+	 * 
+	 * @param subType the subtype to replace its occurrences
+	 */
+	public UseSuperTypeProcessor(final IType subType) {
+		Assert.isNotNull(subType);
+		fSubType= subType;
+	}
 
 	/**
 	 * Creates a new super type processor.
@@ -93,12 +117,13 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		Assert.isNotNull(monitor);
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
-			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.beginTask("", 2); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("UseSuperTypeProcessor.checking")); //$NON-NLS-1$
 			status.merge(Checks.checkIfCuBroken(fSubType));
 			if (!status.hasError()) {
 				if (Checks.isException(fSubType, new SubProgressMonitor(monitor, 1)))
 					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("UseSuperTypeProcessor.exception"))); //$NON-NLS-1$
+				fSuperTypes= JavaModelUtil.getAllSuperTypes(fSubType, new SubProgressMonitor(monitor, 1));
 			}
 		} finally {
 			monitor.done();
@@ -164,11 +189,47 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		return RefactoringCoreMessages.getFormattedString("UseSuperTypeProcessor.name", new String[] { fSubType.getElementName(), fSuperType.getElementName()}); //$NON-NLS-1$
 	}
 
+	/**
+	 * Returns the subtype to be replaced.
+	 * 
+	 * @return The subtype to be replaced
+	 */
+	public final IType getSubType() {
+		return fSubType;
+	}
+
+	/**
+	 * Returns the supertype as replacement.
+	 * 
+	 * @return The supertype as replacement
+	 */
+	public final IType getSuperType() {
+		return fSuperType;
+	}
+
+	/**
+	 * Returns the supertypes as possible replacements.
+	 * 
+	 * @return the supertypes as replacements
+	 */
+	public final IType[] getSuperTypes() {
+		return fSuperTypes;
+	}
+
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#isApplicable()
 	 */
 	public final boolean isApplicable() throws CoreException {
 		return Checks.isAvailable(fSubType) && Checks.isAvailable(fSuperType) && !fSubType.isAnonymous() && !fSubType.isAnnotation() && !fSuperType.isAnonymous() && !fSuperType.isAnnotation() && !fSuperType.isEnum();
+	}
+
+	/**
+	 * Returns whether type occurrences in instanceof's should be rewritten.
+	 * 
+	 * @return <code>true</code> if they are rewritten, <code>false</code> otherwise
+	 */
+	public final boolean isInstanceOf() {
+		return fInstanceOf;
 	}
 
 	/*
@@ -181,7 +242,47 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#rewriteTypeOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.core.dom.CompilationUnit, java.util.Set)
 	 */
-	protected void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite subRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) {
-		// TODO implement
+	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite subRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
+		final Collection collection= (Collection) fTypeOccurrences.get(unit);
+		if (collection != null && !collection.isEmpty()) {
+			TType type= null;
+			ISourceConstraintVariable variable= null;
+			CompilationUnitRewrite rewrite= null;
+			final ICompilationUnit subUnit= subRewrite.getCu();
+			if (subUnit.equals(unit))
+				rewrite= subRewrite;
+			else
+				rewrite= new CompilationUnitRewrite(unit, node);
+			for (final Iterator iterator= collection.iterator(); iterator.hasNext();) {
+				variable= (ISourceConstraintVariable) iterator.next();
+				type= (TType) variable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
+				if (type != null && variable instanceof ITypeConstraintVariable) {
+					final CompilationUnitRange range= ((ITypeConstraintVariable) variable).getRange();
+					rewriteTypeOccurrence(range, rewrite, node, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
+					manager.manage(unit.getPrimary(), rewrite.createChange());
+				}
+			}
+		}
 	}
+
+	/**
+	 * Determines whether type occurrences in instanceof's should be rewritten.
+	 * 
+	 * @param rewrite <code>true</code> to rewrite them, <code>false</code> otherwise
+	 */
+	public final void setInstanceOf(final boolean rewrite) {
+		fInstanceOf= rewrite;
+	}
+
+	/**
+	 * Sets the supertype as replacement..
+	 * 
+	 * @param type The supertype to set
+	 */
+	public final void setSuperType(final IType type) {
+		Assert.isNotNull(type);
+
+		fSuperType= type;
+	}
+
 }
