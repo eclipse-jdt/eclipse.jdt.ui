@@ -59,28 +59,28 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	// Preference store keys, see JavaCore.getOptions
-	private static final String PREF_NEWLINE_OPENING_BRACES= "org.eclipse.jdt.core.formatter.newline.openingBrace"; //$NON-NLS-1$
-	private static final String PREF_NEWLINE_CONTROL_STATEMENT= "org.eclipse.jdt.core.formatter.newline.controlStatement"; //$NON-NLS-1$
-	private static final String PREF_NEWLINE_CLEAR_ALL= "org.eclipse.jdt.core.formatter.newline.clearAll"; //$NON-NLS-1$
-	private static final String PREF_NEWLINE_ELSE_IF= "org.eclipse.jdt.core.formatter.newline.elseIf"; //$NON-NLS-1$
-	private static final String PREF_NEWLINE_EMPTY_BLOCK= "org.eclipse.jdt.core.formatter.newline.emptyBlock"; //$NON-NLS-1$
-	private static final String PREF_LINE_SPLIT= "org.eclipse.jdt.core.formatter.lineSplit";	 //$NON-NLS-1$
-	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= "org.eclipse.jdt.core.formatter.style.assignment";	 //$NON-NLS-1$
-	private static final String PREF_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char";	 //$NON-NLS-1$
-	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
+	private static final String PREF_NEWLINE_OPENING_BRACES= JavaCore.FORMATTER_NEWLINE_OPENING_BRACE; 
+	private static final String PREF_NEWLINE_CONTROL_STATEMENT= JavaCore.FORMATTER_NEWLINE_CONTROL;
+	private static final String PREF_NEWLINE_CLEAR_ALL= JavaCore.FORMATTER_CLEAR_BLANK_LINES;
+	private static final String PREF_NEWLINE_ELSE_IF= JavaCore.FORMATTER_NEWLINE_ELSE_IF;
+	private static final String PREF_NEWLINE_EMPTY_BLOCK= JavaCore.FORMATTER_NEWLINE_EMPTY_BLOCK;
+	private static final String PREF_LINE_SPLIT= JavaCore.FORMATTER_LINE_SPLIT;
+	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= JavaCore.FORMATTER_COMPACT_ASSIGNMENT;
+	private static final String PREF_TAB_CHAR= JavaCore.FORMATTER_TAB_CHAR;
+	private static final String PREF_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
 
 	// values
-	private static final String INSERT= "insert"; //$NON-NLS-1$
-	private static final String DO_NOT_INSERT= "do not insert"; //$NON-NLS-1$
+	private static final String INSERT=  JavaCore.INSERT;
+	private static final String DO_NOT_INSERT= JavaCore.DO_NOT_INSERT;
 	
-	private static final String COMPACT= "compact"; //$NON-NLS-1$
-	private static final String NORMAL= "normal"; //$NON-NLS-1$
+	private static final String COMPACT= JavaCore.COMPACT;
+	private static final String NORMAL= JavaCore.NORMAL;
 	
-	private static final String TAB= "tab"; //$NON-NLS-1$
-	private static final String SPACE= "space"; //$NON-NLS-1$
+	private static final String TAB= JavaCore.TAB;
+	private static final String SPACE= JavaCore.SPACE;
 	
-	private static final String CLEAR_ALL= "clear all"; //$NON-NLS-1$
-	private static final String PRESERVE_ONE= "preserve one"; //$NON-NLS-1$
+	private static final String CLEAR_ALL= JavaCore.CLEAR_ALL;
+	private static final String PRESERVE_ONE= JavaCore.PRESERVE_ONE;
 	
 
 	private static String[] getAllKeys() {
@@ -130,24 +130,6 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	 * Initializes the current options (read from preference store)
 	 */
 	public static void initDefaults(IPreferenceStore store) {
-		Hashtable hashtable= JavaCore.getDefaultOptions();
-		Hashtable currOptions= JavaCore.getOptions();
-		String[] allKeys= getAllKeys();
-		for (int i= 0; i < allKeys.length; i++) {
-			String key= allKeys[i];
-			String defValue= (String) hashtable.get(key);
-			if (defValue != null) {
-				store.setDefault(key, defValue);
-			} else {
-				JavaPlugin.logErrorMessage("CodeFormatterPreferencePage: value is null: " + key); //$NON-NLS-1$
-			}
-			// update the JavaCore options from the pref store
-			String val= store.getString(key);
-			if (val != null) {
-				currOptions.put(key, val);
-			}			
-		}
-		JavaCore.setOptions(currOptions);
 	}
 
 	private static class ControlData {
@@ -198,7 +180,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	
 
 	public CodeFormatterPreferencePage() {
-		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());		
 		setDescription(JavaUIMessages.getString("CodeFormatterPreferencePage.description")); //$NON-NLS-1$
 	
 		fWorkingValues= JavaCore.getOptions();
@@ -421,14 +403,12 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	public boolean performOk() {
 		String[] allKeys= getAllKeys();
 		// preserve other options
-		// store in JCore and the preferences
+		// store in JCore
 		Hashtable actualOptions= JavaCore.getOptions();
-		IPreferenceStore store= getPreferenceStore();
 		for (int i= 0; i < allKeys.length; i++) {
 			String key= allKeys[i];
 			String val=  (String) fWorkingValues.get(key);
 			actualOptions.put(key, val);
-			store.setValue(key, val);
 		}
 		JavaCore.setOptions(actualOptions);
 		return super.performOk();

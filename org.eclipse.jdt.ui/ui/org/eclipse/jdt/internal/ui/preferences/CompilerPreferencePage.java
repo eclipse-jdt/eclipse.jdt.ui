@@ -38,7 +38,6 @@ import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.dialogs.YesNoCancelListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -58,42 +57,42 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 public class CompilerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	// Preference store keys, see JavaCore.getOptions
-	private static final String PREF_LOCAL_VARIABLE_ATTR= "org.eclipse.jdt.core.compiler.debug.localVariable"; //$NON-NLS-1$
-	private static final String PREF_LINE_NUMBER_ATTR= "org.eclipse.jdt.core.compiler.debug.lineNumber"; //$NON-NLS-1$
-	private static final String PREF_SOURCE_FILE_ATTR= "org.eclipse.jdt.core.compiler.debug.sourceFile"; //$NON-NLS-1$
-	private static final String PREF_CODEGEN_UNUSED_LOCAL= "org.eclipse.jdt.core.compiler.codegen.unusedLocal"; //$NON-NLS-1$
-	private static final String PREF_CODEGEN_TARGET_PLATFORM= "org.eclipse.jdt.core.compiler.codegen.targetPlatform"; //$NON-NLS-1$
-	private static final String PREF_PB_UNREACHABLE_CODE= "org.eclipse.jdt.core.compiler.problem.unreachableCode";	 //$NON-NLS-1$
-	private static final String PREF_PB_INVALID_IMPORT= "org.eclipse.jdt.core.compiler.problem.invalidImport";	 //$NON-NLS-1$
-	private static final String PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= "org.eclipse.jdt.core.compiler.problem.overridingPackageDefaultMethod";	 //$NON-NLS-1$
-	private static final String PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= "org.eclipse.jdt.core.compiler.problem.methodWithConstructorName"; //$NON-NLS-1$
-	private static final String PREF_PB_DEPRECATION= "org.eclipse.jdt.core.compiler.problem.deprecation"; //$NON-NLS-1$
-	private static final String PREF_PB_HIDDEN_CATCH_BLOCK= "org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock"; //$NON-NLS-1$
-	private static final String PREF_PB_UNUSED_LOCAL= "org.eclipse.jdt.core.compiler.problem.unusedLocal";	 //$NON-NLS-1$
-	private static final String PREF_PB_UNUSED_PARAMETER= "org.eclipse.jdt.core.compiler.problem.unusedParameter"; //$NON-NLS-1$
-	private static final String PREF_PB_SYNTHETIC_ACCESS_EMULATION= "org.eclipse.jdt.core.compiler.problem.syntheticAccessEmulation"; //$NON-NLS-1$
-	private static final String PREF_PB_NON_EXTERNALIZED_STRINGS= "org.eclipse.jdt.core.compiler.problem.nonExternalizedStringLiteral"; //$NON-NLS-1$
-	private static final String PREF_PB_ASSERT_AS_IDENTIFIER= "org.eclipse.jdt.core.compiler.problem.assertIdentifier"; //$NON-NLS-1$
-	private static final String PREF_SOURCE_COMPATIBILITY= "org.eclipse.jdt.core.compiler.source"; //$NON-NLS-1$
-	private static final String PREF_COMPLIANCE= "org.eclipse.jdt.core.compiler.compliance"; //$NON-NLS-1$
+	private static final String PREF_LOCAL_VARIABLE_ATTR=  JavaCore.COMPILER_LOCAL_VARIABLE_ATTR;
+	private static final String PREF_LINE_NUMBER_ATTR= JavaCore.COMPILER_LINE_NUMBER_ATTR;
+	private static final String PREF_SOURCE_FILE_ATTR= JavaCore.COMPILER_SOURCE_FILE_ATTR;
+	private static final String PREF_CODEGEN_UNUSED_LOCAL= JavaCore.COMPILER_CODEGEN_UNUSED_LOCAL;
+	private static final String PREF_CODEGEN_TARGET_PLATFORM= JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM;
+	private static final String PREF_PB_UNREACHABLE_CODE= JavaCore.COMPILER_PB_UNREACHABLE_CODE;
+	private static final String PREF_PB_INVALID_IMPORT= JavaCore.COMPILER_PB_INVALID_IMPORT;
+	private static final String PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= JavaCore.COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD;
+	private static final String PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= JavaCore.COMPILER_PB_METHOD_WITH_CONSTRUCTOR_NAME;
+	private static final String PREF_PB_DEPRECATION= JavaCore.COMPILER_PB_DEPRECATION;
+	private static final String PREF_PB_HIDDEN_CATCH_BLOCK= JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK;
+	private static final String PREF_PB_UNUSED_LOCAL= JavaCore.COMPILER_PB_UNUSED_LOCAL;
+	private static final String PREF_PB_UNUSED_PARAMETER= JavaCore.COMPILER_PB_UNUSED_PARAMETER;
+	private static final String PREF_PB_SYNTHETIC_ACCESS_EMULATION= JavaCore.COMPILER_PB_SYNTHETIC_ACCESS_EMULATION;
+	private static final String PREF_PB_NON_EXTERNALIZED_STRINGS= JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL;
+	private static final String PREF_PB_ASSERT_AS_IDENTIFIER= JavaCore.COMPILER_PB_ASSERT_IDENTIFIER;
+	private static final String PREF_SOURCE_COMPATIBILITY= JavaCore.COMPILER_SOURCE;
+	private static final String PREF_COMPLIANCE= JavaCore.COMPILER_COMPLIANCE;
 
 	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
 
 	// values
-	private static final String GENERATE= "generate"; //$NON-NLS-1$
-	private static final String DO_NOT_GENERATE= "do not generate"; //$NON-NLS-1$
+	private static final String GENERATE= JavaCore.GENERATE;
+	private static final String DO_NOT_GENERATE= JavaCore.DO_NOT_GENERATE;
 	
-	private static final String PRESERVE= "preserve"; //$NON-NLS-1$
-	private static final String OPTIMIZE_OUT= "optimize out"; //$NON-NLS-1$
+	private static final String PRESERVE= JavaCore.PRESERVE;
+	private static final String OPTIMIZE_OUT= JavaCore.OPTIMIZE_OUT;
 	
-	private static final String VERSION_1_1= "1.1"; //$NON-NLS-1$
-	private static final String VERSION_1_2= "1.2"; //$NON-NLS-1$
-	private static final String VERSION_1_3= "1.3"; //$NON-NLS-1$
-	private static final String VERSION_1_4= "1.4"; //$NON-NLS-1$
+	private static final String VERSION_1_1= JavaCore.VERSION_1_1;
+	private static final String VERSION_1_2= JavaCore.VERSION_1_2;
+	private static final String VERSION_1_3= JavaCore.VERSION_1_3;
+	private static final String VERSION_1_4= JavaCore.VERSION_1_4;
 	
-	private static final String ERROR= "error"; //$NON-NLS-1$
-	private static final String WARNING= "warning"; //$NON-NLS-1$
-	private static final String IGNORE= "ignore"; //$NON-NLS-1$
+	private static final String ERROR= JavaCore.ERROR;
+	private static final String WARNING= JavaCore.WARNING;
+	private static final String IGNORE= JavaCore.IGNORE;
 	
 	private static final String DEFAULT= "default"; //$NON-NLS-1$
 	private static final String USER= "user";	 //$NON-NLS-1$
@@ -112,24 +111,6 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	 * Initializes the current options (read from preference store)
 	 */
 	public static void initDefaults(IPreferenceStore store) {
-		Hashtable hashtable= JavaCore.getDefaultOptions();
-		Hashtable currOptions= JavaCore.getOptions();
-		String[] allKeys= getAllKeys();
-		for (int i= 0; i < allKeys.length; i++) {
-			String key= allKeys[i];
-			String defValue= (String) hashtable.get(key);
-			if (defValue != null) {
-				store.setDefault(key, defValue);
-			} else {
-				JavaPlugin.logErrorMessage("CompilerPreferencePage: value is null: " + key); //$NON-NLS-1$
-			}
-			// update the JavaCore options from the pref store
-			String val= store.getString(key);
-			if (val != null) {
-				currOptions.put(key, val);
-			}			
-		}
-		JavaCore.setOptions(currOptions);
 	}
 
 	private static class ControlData {
@@ -541,7 +522,6 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		// preserve other options
 		// store in JCore and the preferences
 		Hashtable actualOptions= JavaCore.getOptions();
-		IPreferenceStore store= getPreferenceStore();
 		boolean hasChanges= false;
 		for (int i= 0; i < allKeys.length; i++) {
 			String key= allKeys[i];
@@ -550,7 +530,6 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 			hasChanges= hasChanges | !val.equals(oldVal);
 			
 			actualOptions.put(key, val);
-			store.setValue(key, val);
 		}
 		
 		

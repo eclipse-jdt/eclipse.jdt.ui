@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
@@ -48,13 +49,19 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 	private StringDialogField fResourceFilterField;
 	private StatusInfo fResourceFilterStatus;
 	
+	private SelectionButtonDialogField fAbortInvalidClasspathField;
+	
 	private Hashtable fWorkingValues;
 
-	private static final String PREF_RESOURCE_FILTER= "org.eclipse.jdt.core.builder.resourceCopyExclusionFilter"; //$NON-NLS-1$
+	private static final String PREF_RESOURCE_FILTER= JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER;
+	private static final String PREF_BUILD_INVALID_CLASSPATH= JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH;
+
+	private static final String ABORT= JavaCore.ABORT;
+	private static final String IGNORE= JavaCore.IGNORE;
 
 	private static String[] getAllKeys() {
 		return new String[] {
-			PREF_RESOURCE_FILTER
+			PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH
 		};	
 	}
 	
@@ -64,17 +71,20 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 	
 		fWorkingValues= JavaCore.getOptions();
 
-
 		IDialogFieldListener listener= new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
-				doValidation();
+				updateValues();
 			}
 		};
 		
 		fResourceFilterField= new StringDialogField();
 		fResourceFilterField.setDialogFieldListener(listener);
 		fResourceFilterField.setLabelText(JavaUIMessages.getString("JavaBuilderPreferencePage.filter.label")); //$NON-NLS-1$
-				
+		
+		fAbortInvalidClasspathField= new SelectionButtonDialogField(SWT.CHECK);
+		fAbortInvalidClasspathField.setDialogFieldListener(listener);
+		fAbortInvalidClasspathField.setLabelText(JavaUIMessages.getString("JavaBuilderPreferencePage.abortinvalidprojects.label")); //$NON-NLS-1$
+		
 		updateControls();				
 	}
 	
@@ -103,6 +113,8 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		LayoutUtil.setHorizontalGrabbing(fResourceFilterField.getTextControl(null));
 		LayoutUtil.setWidthHint(fResourceFilterField.getTextControl(null), convertWidthInCharsToPixels(50));
 
+		fAbortInvalidClasspathField.doFillIntoGrid(composite, 2);
+
 		return composite;
 	}
 	
@@ -110,24 +122,6 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 	 * Initializes the current options (read from preference store)
 	 */
 	public static void initDefaults(IPreferenceStore store) {
-		Hashtable hashtable= JavaCore.getDefaultOptions();
-		Hashtable currOptions= JavaCore.getOptions();
-		String[] allKeys= getAllKeys();
-		for (int i= 0; i < allKeys.length; i++) {
-			String key= allKeys[i];
-			String defValue= (String) hashtable.get(key);
-			if (defValue != null) {
-				store.setDefault(key, defValue);
-			} else {
-				JavaPlugin.logErrorMessage("JavaBuilderPreferencePage: value is null: " + key); //$NON-NLS-1$
-			}
-			// update the JavaCore options from the pref store
-			String val= store.getString(key);
-			if (val != null) {
-				currOptions.put(key, val);
-			}			
-		}
-		JavaCore.setOptions(currOptions);
 	}	
 	
 
@@ -146,7 +140,6 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		// preserve other options
 		// store in JCore and the preferences
 		Hashtable actualOptions= JavaCore.getOptions();
-		IPreferenceStore store= getPreferenceStore();
 		boolean hasChanges= false;
 		for (int i= 0; i < allKeys.length; i++) {
 			String key= allKeys[i];
@@ -155,7 +148,6 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 			hasChanges= hasChanges | !val.equals(oldVal);
 			
 			actualOptions.put(key, val);
-			store.setValue(key, val);
 		}
 		
 		if (hasChanges) {
@@ -176,8 +168,10 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 
-	private void doValidation() {
+	private void updateValues() {
 		IStatus status= validateResourceFilters();
+		fWorkingValues.put(PREF_RESOURCE_FILTER, fAbortInvalidClasspathField.isSelected() ? ABORT : IGNORE);
+		
 		updateStatus(status);
 	}
 	
@@ -249,7 +243,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 	protected void performDefaults() {
 		fWorkingValues= JavaCore.getDefaultOptions();
 		updateControls();
-		doValidation();
+		updateValues();
 		super.performDefaults();
 	}
 	
@@ -264,6 +258,8 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 			buf.append(filters[i]);			
 		}
 		fResourceFilterField.setText(buf.toString());
+		
+		fAbortInvalidClasspathField.setSelection(ABORT.equals(fWorkingValues.get(PREF_BUILD_INVALID_CLASSPATH)));
 	}
 
 }
