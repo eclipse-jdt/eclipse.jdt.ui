@@ -70,6 +70,9 @@
                <documentation>
                   A user readeable name for the participant.
                </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
