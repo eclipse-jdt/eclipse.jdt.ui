@@ -262,6 +262,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 			boolean isInhomogeneous= (fElements.size() != ((Integer)wrappingStyleMap.get(wrappingStyleMax)).intValue());
 			updateControlEnablement(isInhomogeneous, wrappingStyleMax.intValue());
 		    doUpdatePreview();
+			notifyValuesModified();
         }
         
         private Integer getWrappingStyleMax(Map wrappingStyleMap) {

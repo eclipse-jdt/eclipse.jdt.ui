@@ -63,6 +63,7 @@ public abstract class ModifyDialogTabPage {
 	protected final Observer fUpdater= new Observer() {
 		public void update(Observable o, Object arg) {
 			doUpdatePreview();
+			notifyValuesModified();
 		}
 	};
 	
@@ -649,6 +650,9 @@ public abstract class ModifyDialogTabPage {
 	 */
 	protected abstract void doUpdatePreview();
 	
+	protected void notifyValuesModified() {
+		fModifyDialog.valuesModified();
+	}
     /**
      * Each tab page should remember where its last focus was, and reset it
      * correctly within this method. This method is only called after

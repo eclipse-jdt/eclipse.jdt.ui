@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +25,16 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.window.Window;
 
@@ -64,16 +69,17 @@ public class ModifyDialog extends StatusDialog {
 	
 	private final boolean fNewProfile;
 
-	private final Profile fProfile;
+	private Profile fProfile;
 	private final Map fWorkingValues;
 	
-	private final IStatus fStandardStatus;
+	private IStatus fStandardStatus;
 	
 	protected final List fTabPages;
 	
 	final IDialogSettings fDialogSettings;
 	private TabFolder fTabFolder;
 	private ProfileManager fProfileManager;
+	private Button fApplyButton;
 		
 	protected ModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, boolean newProfile) {
 		super(parentShell);
@@ -191,19 +197,48 @@ public class ModifyDialog extends StatusDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 	 */
 	protected void okPressed() {
+		applyPressed();
+		super.okPressed();
+	}
+	
+    protected void buttonPressed(int buttonId) {
+		if (buttonId == IDialogConstants.CLIENT_ID) {
+			applyPressed();
+		} else {
+			super.buttonPressed(buttonId);
+		}
+    }
+	
+	private void applyPressed() {
 		 if (fProfile instanceof BuiltInProfile) {
-		 	CustomProfile newProfile= new CustomProfile("", fWorkingValues, ProfileVersioner.CURRENT_VERSION); //$NON-NLS-1$
+		 	CustomProfile newProfile= new CustomProfile("", new HashMap(fWorkingValues), ProfileVersioner.CURRENT_VERSION); //$NON-NLS-1$
 		 	RenameProfileDialog dialog= new RenameProfileDialog(getShell(), newProfile, fProfileManager);
 		 	if (dialog.open() != Window.OK) {
 		 		return;
 		 	}
 		 	fProfileManager.addProfile(newProfile);
+			fProfile= newProfile;
+		    fStandardStatus= new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+			updateStatus(fStandardStatus);
 		 } else {
-		 	fProfile.setSettings(fWorkingValues);
+		 	fProfile.setSettings(new HashMap(fWorkingValues));
 		 }
-		super.okPressed();
+		 fApplyButton.setEnabled(false);
 	}
     
+    protected void createButtonsForButtonBar(Composite parent) {
+	    fApplyButton= createButton(parent, IDialogConstants.CLIENT_ID, FormatterMessages.getString("ModifyDialog.apply.button"), false); //$NON-NLS-1$
+		fApplyButton.setEnabled(false);
+		
+		GridLayout layout= (GridLayout) parent.getLayout();
+		layout.numColumns++;
+		layout.makeColumnsEqualWidth= false;
+		Label label= new Label(parent, SWT.NONE);
+		GridData data= new GridData();
+		data.widthHint= layout.horizontalSpacing;
+		label.setLayoutData(data);
+		super.createButtonsForButtonBar(parent);
+    }
     
 	
 	private final void addTabPage(TabFolder tabFolder, String title, ModifyDialogTabPage tabPage) {
@@ -214,6 +249,22 @@ public class ModifyDialog extends StatusDialog {
 		tabItem.setControl(tabPage.createContents(tabFolder));
 		fTabPages.add(tabPage);
 	}
-	
+
+	public void valuesModified() {
+		if (fApplyButton != null && !fApplyButton.isDisposed()) {
+			fApplyButton.setEnabled(hasChanges());
+		}
+	}
+
+	private boolean hasChanges() {
+		Iterator iter= fProfile.getSettings().entrySet().iterator();
+		for (;iter.hasNext();) {
+			Map.Entry curr= (Map.Entry) iter.next();
+			if (!fWorkingValues.get(curr.getKey()).equals(curr.getValue())) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 }

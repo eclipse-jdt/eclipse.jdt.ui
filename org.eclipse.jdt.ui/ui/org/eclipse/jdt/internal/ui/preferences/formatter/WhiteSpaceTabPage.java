@@ -133,7 +133,8 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		public void checkStateChanged(CheckStateChangedEvent event) {
 			final Node node= (Node)event.getElement();
 			node.setChecked(event.getChecked());
-			fPreview.update();
+			doUpdatePreview();
+			notifyValuesModified();
 		}
 
 		public void restoreSelection() {
@@ -348,6 +349,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 			if (option != null)
 			    option.setChecked(event.getChecked());
 			doUpdatePreview();
+			notifyValuesModified();
         }
 	}
 	
