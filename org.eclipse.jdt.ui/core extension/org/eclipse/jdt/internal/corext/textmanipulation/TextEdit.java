@@ -143,6 +143,16 @@ public abstract class TextEdit {
 			return EMPTY_ITERATOR;
 		return fChildren.iterator();
 	}
+	
+
+	/**
+	 * Returns <code>true</code> if this text edit collection manages any children and <code>false</code> otherwise.
+	 * 
+	 * @return <code>true</code> if this text edit collection manages any children and <code>false</code> otherwise
+	 */
+	public boolean hasChildren(){
+		return fChildren != null && ! fChildren.isEmpty();
+	}
 
 	/**
 	 * Returns the <code>TextRange</code> that this text edit is going to
@@ -244,7 +254,7 @@ public abstract class TextEdit {
 			
 		TextRange range= ((TextEdit)edits.get(0)).getTextRange();
 		int offset= range.getOffset();
-		int end= range.getInclusiveEnd();
+		int end= range.getExclusiveEnd();
 		for (int i= 1; i < size; i++) {
 			range= ((TextEdit)edits.get(i)).getTextRange();
 			offset= Math.min(offset, range.getOffset());
