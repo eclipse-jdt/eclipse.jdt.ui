@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -38,6 +41,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.DialogSettings;
@@ -58,6 +62,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 
@@ -696,7 +701,7 @@ public class JavadocOptionsManager {
 	}
 	
 
-	public String[] createArgumentArray() throws CoreException {
+	public String[] createArgumentArray() {
 		if (fProjects.isEmpty()) {
 			return new String[0];
 		}
@@ -800,7 +805,7 @@ public class JavadocOptionsManager {
 
 	}
 
-	public void createXML() {
+	public void createXML() throws CoreException {
 		FileOutputStream objectStreamOutput= null;
 		//@change
 		//for now only writting ant files for single project selection
@@ -826,12 +831,16 @@ public class JavadocOptionsManager {
 				objectStreamOutput= new FileOutputStream(file);
 				JavadocWriter writer= new JavadocWriter(objectStreamOutput, basePath, jproject);
 				writer.writeXML(this);
-
 			}
 		} catch (IOException e) {
-			JavaPlugin.log(e);
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			String message= JavadocExportMessages.getString("JavadocOptionsManager.createXM.error"); //$NON-NLS-1$
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
+		} catch (ParserConfigurationException e) {
+			String message= JavadocExportMessages.getString("JavadocOptionsManager.createXM.error"); //$NON-NLS-1$
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
+		} catch (TransformerException e) {
+			String message= JavadocExportMessages.getString("JavadocOptionsManager.createXM.error"); //$NON-NLS-1$
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 		} finally {
 			if (objectStreamOutput != null) {
 				try {

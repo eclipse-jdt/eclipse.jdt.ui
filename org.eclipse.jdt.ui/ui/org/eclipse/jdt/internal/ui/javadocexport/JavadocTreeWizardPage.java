@@ -168,14 +168,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			}
 		});
 
-		try {
-			//the store will contain at least one project in it's list so long as
-			//the workspace is not empty.
-			if (!fStore.getJavaProjects().isEmpty())
-				setTreeChecked(fStore.getSelectedElements(), (IJavaProject) fStore.getJavaProjects().get(0));
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
+		//the store will contain at least one project in it's list so long as
+		//the workspace is not empty.
+		if (!fStore.getJavaProjects().isEmpty())
+			setTreeChecked(fStore.getSelectedElements(), (IJavaProject) fStore.getJavaProjects().get(0));
 
 		fInputGroup.aboutToOpen();
 	}
@@ -367,7 +363,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	* project is selected.
 	 */
 
-	protected void setTreeChecked(IJavaElement[] sourceElements, IJavaProject project) throws JavaModelException {
+	protected void setTreeChecked(IJavaElement[] sourceElements, IJavaProject project) {
 
 		if (sourceElements.length < 1)
 			fInputGroup.initialCheckTreeItem(project);

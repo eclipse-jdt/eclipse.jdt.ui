@@ -1,93 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <plugin
-   name="%Plugin.name"
    id="org.eclipse.jdt.ui.tests"
+   name="%Plugin.name"
    version="3.0.0"
    provider-name="%Plugin.providerName"
    class="org.eclipse.jdt.testplugin.JavaTestPlugin">
-   
+
+   <runtime>
+      <library name="javauitests.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
    <requires>
-	  <import plugin="org.junit"/>   
+      <import plugin="org.junit"/>
       <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.apache.xerces"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
-	  <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.eclipse.jdt.launching"/>
    </requires>
 
-<runtime>
-  <library name="javauitests.jar" >
-     <export name = "*"/>
-  </library> 
-</runtime>
 
 <!-- **************** TEST DECORATOR ******************* -->
-	<extension point="org.eclipse.ui.decorators"> 
-        <decorator 
-             id="org.eclipse.jdt.ui.tests.javaElementDecorator"
-             label="%javaElementDecorator.label"
-             state="false" 
-	         class="org.eclipse.jdt.testplugin.JavaElementDecorator"
-             objectClass="org.eclipse.jdt.core.IJavaElement"
-             adaptable="true">
-         </decorator> 
-	</extension>    
-	
-<extension 
-	point="org.eclipse.ui.views">
-
-	<view
-		id="org.eclipse.jdt.ui.tests.packageview.MockPluginView"
-		name="MochPluginView"
-		class="org.eclipse.jdt.ui.tests.packageview.MockPluginView">
-	</view>
-	<view
-		id="org.eclipse.jdt.ui.tests.browsing.MockPluginView"
-		name="MockPluginView"
-		class="org.eclipse.jdt.ui.tests.browsing.MockPluginView">
-	</view>
-</extension>
-
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            objectClass="org.eclipse.jdt.core.IJavaElement"
+            adaptable="true"
+            label="%javaElementDecorator.label"
+            state="false"
+            class="org.eclipse.jdt.testplugin.JavaElementDecorator"
+            id="org.eclipse.jdt.ui.tests.javaElementDecorator">
+      </decorator>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="MochPluginView"
+            class="org.eclipse.jdt.ui.tests.packageview.MockPluginView"
+            id="org.eclipse.jdt.ui.tests.packageview.MockPluginView">
+      </view>
+      <view
+            name="MockPluginView"
+            class="org.eclipse.jdt.ui.tests.browsing.MockPluginView"
+            id="org.eclipse.jdt.ui.tests.browsing.MockPluginView">
+      </view>
+   </extension>
 <!-- **************** TEST MARKER for quick fix ******************* -->
-
-<extension id="testmarker" point="org.eclipse.core.resources.markers" name="jdt-test-problem">
-	<super type="org.eclipse.core.resources.textmarker"/>
-</extension>
-<extension point="org.eclipse.ui.markerResolution"> 
-   <markerResolutionGenerator 
-      class="org.eclipse.jdt.ui.tests.quickfix.MarkerResolutionGenerator" 
-      markerType="org.eclipse.jdt.ui.tests.testmarker"> 
-   </markerResolutionGenerator> 
-</extension> 
-
-<extension point="org.eclipse.ui.popupMenus">
-	<objectContribution
-		id="org.eclipse.jdt.ui.examples.AddTestMarkersAction"
-		objectClass="org.eclipse.jdt.core.ICompilationUnit">
-		<action
-			id="addTestmarkers"
-			label="AddTestMarkersAction.label"
-			tooltip="AddTestMarkersAction.tooltip"
-			menubarPath="AddTestMarkers"
-			enablesFor="1"
-			class="org.eclipse.jdt.ui.examples.AddTestMarkersAction">
-		</action>
-	</objectContribution>
-</extension>
-
-<extension point="org.eclipse.jdt.ui.quickFixProcessors">
-   <quickFixProcessor
-         id= "org.eclipse.jdt.ui.examples.MyQuickFixProcessor"
-         class="org.eclipse.jdt.ui.examples.MyQuickFixProcessor"
-         name="%exampleQuickFixProcessor.name">
-         <objectState adaptable="org.eclipse.core.resources.IResource">
-           <test property="matchesPattern" value="A.java"/>
-        </objectState>
-   </quickFixProcessor>
-</extension>
+   <extension
+         id="testmarker"
+         name="jdt-test-problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+   </extension>
+   <extension
+         point="org.eclipse.ui.markerResolution">
+      <markerResolutionGenerator
+            markerType="org.eclipse.jdt.ui.tests.testmarker"
+            class="org.eclipse.jdt.ui.tests.quickfix.MarkerResolutionGenerator">
+      </markerResolutionGenerator>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.ICompilationUnit"
+            id="org.eclipse.jdt.ui.examples.AddTestMarkersAction">
+         <action
+               label="AddTestMarkersAction.label"
+               tooltip="AddTestMarkersAction.tooltip"
+               class="org.eclipse.jdt.ui.examples.AddTestMarkersAction"
+               menubarPath="AddTestMarkers"
+               enablesFor="1"
+               id="addTestmarkers">
+         </action>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.quickFixProcessors">
+      <quickFixProcessor
+            name="%exampleQuickFixProcessor.name"
+            class="org.eclipse.jdt.ui.examples.MyQuickFixProcessor"
+            id="org.eclipse.jdt.ui.examples.MyQuickFixProcessor">
+         <objectState
+               adaptable="org.eclipse.core.resources.IResource">
+            <test
+                  value="A.java"
+                  property="matchesPattern">
+            </test>
+         </objectState>
+      </quickFixProcessor>
+   </extension>
 
 </plugin>
-
-

@@ -26,12 +26,19 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
-import org.apache.xerces.dom.DocumentImpl;
-import org.apache.xml.serialize.Method;
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.Serializer;
-import org.apache.xml.serialize.SerializerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -41,19 +48,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.*;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -62,13 +57,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 public class JavaDocLocations {
 	
@@ -254,28 +242,37 @@ public class JavaDocLocations {
 	
 	
 	private static void saveToStream(Map locations, Writer writer) throws CoreException {
-		Document document = new DocumentImpl();
-		Element rootElement = document.createElement(NODE_ROOT);
-		document.appendChild(rootElement);
-
-		Iterator iter= locations.keySet().iterator();
-		
-		while (iter.hasNext()) {
-			IPath path= (IPath) iter.next();
-			URL url= getJavadocBaseLocation(path);
-		
-			Element varElement= document.createElement(NODE_ENTRY);
-			varElement.setAttribute(NODE_PATH, path.toString());
-			varElement.setAttribute(NODE_URL, url.toExternalForm());
-			rootElement.appendChild(varElement);
-		}
-
 		try {
-			OutputFormat format = new OutputFormat();
-			format.setIndenting(true);
-			Serializer serializer = SerializerFactory.getSerializerFactory(Method.XML).makeSerializer(writer, format);
-			serializer.asDOMSerializer().serialize(document);
-		} catch (IOException e) {
+			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder= factory.newDocumentBuilder();		
+			Document document= builder.newDocument();
+			
+			Element rootElement = document.createElement(NODE_ROOT);
+			document.appendChild(rootElement);
+	
+			Iterator iter= locations.keySet().iterator();
+			
+			while (iter.hasNext()) {
+				IPath path= (IPath) iter.next();
+				URL url= getJavadocBaseLocation(path);
+			
+				Element varElement= document.createElement(NODE_ENTRY);
+				varElement.setAttribute(NODE_PATH, path.toString());
+				varElement.setAttribute(NODE_URL, url.toExternalForm());
+				rootElement.appendChild(varElement);
+			}
+
+			Transformer transformer=TransformerFactory.newInstance().newTransformer();
+			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
+			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+			DOMSource source = new DOMSource(document);
+			StreamResult result = new StreamResult(writer);
+
+			transformer.transform(source, result);
+		} catch (TransformerException e) {
+			throw createException(e, CorextMessages.getString("JavaDocLocations.error.serializeXML")); //$NON-NLS-1$
+		} catch (ParserConfigurationException e) {
 			throw createException(e, CorextMessages.getString("JavaDocLocations.error.serializeXML")); //$NON-NLS-1$
 		}
 	}
@@ -318,7 +315,7 @@ public class JavaDocLocations {
 	}	
 	
 	
-	public static void shutdownJavadocLocations() throws CoreException {
+	public static void shutdownJavadocLocations() {
 		if (fgVMInstallListener == null) {
 			return;
 		}
@@ -449,7 +446,7 @@ public class JavaDocLocations {
 		buf.append(".html"); //$NON-NLS-1$
 	}		
 		
-	private static void appendFieldReference(IField field, StringBuffer buf) throws JavaModelException {
+	private static void appendFieldReference(IField field, StringBuffer buf) {
 		buf.append('#');
 		buf.append(field.getElementName());
 	}

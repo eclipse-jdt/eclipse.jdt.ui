@@ -22,28 +22,27 @@ import java.util.StringTokenizer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.xml.serialize.Method;
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.Serializer;
-import org.apache.xml.serialize.SerializerFactory;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jface.util.Assert;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
 
 public class JavadocWriter {
 	
@@ -64,16 +63,12 @@ public class JavadocWriter {
 		fJavaProject= project;
 	}
 
-	public void writeXML(JavadocOptionsManager store) throws IOException, CoreException {
+	public void writeXML(JavadocOptionsManager store) throws ParserConfigurationException, TransformerException {
 
 		DocumentBuilder docBuilder= null;
 		DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 		factory.setValidating(false);
-		try {
-			docBuilder= factory.newDocumentBuilder();
-		} catch (ParserConfigurationException ex) {
-			throw new IOException();
-		}
+		docBuilder= factory.newDocumentBuilder();
 		Document document= docBuilder.newDocument();
 
 		// Create the document
@@ -95,17 +90,21 @@ public class JavadocWriter {
 		else
 			xmlWriteJavadocStandardParams(store, document, xmlJavadocDesc);
 
+
 		// Write the document to the stream
-		OutputFormat format= new OutputFormat();
-		format.setIndenting(true);
-		SerializerFactory serializerFactory= SerializerFactory.getSerializerFactory(Method.XML);
-		Serializer serializer= serializerFactory.makeSerializer(fOutputStream, format);
-		serializer.asDOMSerializer().serialize(document);
+		Transformer transformer=TransformerFactory.newInstance().newTransformer();
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
+		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount","4"); //$NON-NLS-1$ //$NON-NLS-2$
+		DOMSource source = new DOMSource(document);
+		StreamResult result = new StreamResult(fOutputStream);
+		transformer.transform(source, result);
 
 	}
 
 	//writes ant file, for now only worry about one project
-	private void xmlWriteJavadocStandardParams(JavadocOptionsManager store, Document document, Element xmlJavadocDesc) throws DOMException, CoreException {
+	private void xmlWriteJavadocStandardParams(JavadocOptionsManager store, Document document, Element xmlJavadocDesc) throws DOMException {
 
 		String destination= getPathString(new Path(store.getDestination()));
 
@@ -244,7 +243,7 @@ public class JavadocWriter {
 		return res.toString();
 	}
 
-	private void xmlWriteDoclet(JavadocOptionsManager store, Document document, Element xmlJavadocDesc) throws DOMException, CoreException {
+	private void xmlWriteDoclet(JavadocOptionsManager store, Document document, Element xmlJavadocDesc) throws DOMException {
 
 		//set the packages and source files
 		List packages= new ArrayList();
@@ -275,7 +274,7 @@ public class JavadocWriter {
 
 	}
 
-	private String toSeparatedList(List packages) throws JavaModelException {
+	private String toSeparatedList(List packages) {
 		StringBuffer buf= new StringBuffer();
 		Iterator iter= packages.iterator();
 		int nAdded= 0;

@@ -182,7 +182,11 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		if (fJSWPage.generateAnt()) {
 			//@Improve: make a better message
 			OptionalMessageDialog.open(JAVADOC_ANT_INFORMATION_DIALOG, getShell(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.title"), Window.getDefaultImage(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.message"), MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0); //$NON-NLS-1$ //$NON-NLS-2$
-			fStore.createXML();
+			try {
+				fStore.createXML();
+			} catch (CoreException e) {
+				ExceptionHandler.handle(e, getShell(),JavadocExportMessages.getString("JavadocWizard.error.writeANT.title"), JavadocExportMessages.getString("JavadocWizard.error.writeANT.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		}
 
 		//If the wizard was not launched from an ant file store the setttings 
@@ -190,14 +194,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			getDialogSettings().addSection(fStore.createDialogSettings());
 		}
 
-		try {
-			if (!executeJavadocGeneration(fStore.createArgumentArray()))
-				return false;
-
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
+		if (!executeJavadocGeneration(fStore.createArgumentArray()))
 			return false;
-		}
 
 		return true;
 	}

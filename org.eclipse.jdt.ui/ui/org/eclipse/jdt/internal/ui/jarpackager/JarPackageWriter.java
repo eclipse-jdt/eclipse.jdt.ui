@@ -19,6 +19,16 @@ import java.io.OutputStreamWriter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -27,23 +37,14 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.util.Assert;
 
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-
-import org.apache.xml.serialize.Method;
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.Serializer;
-import org.apache.xml.serialize.SerializerFactory;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Writes a JarPackage to an underlying OutputStream
@@ -96,12 +97,19 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 			xmlWriteManifest(jarPackage, document, xmlJarDesc);
 		xmlWriteSelectedElements(jarPackage, document, xmlJarDesc);
 
-		// Write the document to the stream
-		OutputFormat format= new OutputFormat();
-		format.setIndenting(true);
-		SerializerFactory serializerFactory= SerializerFactory.getSerializerFactory(Method.XML);
-		Serializer serializer= serializerFactory.makeSerializer(fOutputStream,	format);
-		serializer.asDOMSerializer().serialize(document);
+		try {
+			// Write the document to the stream
+			Transformer transformer=TransformerFactory.newInstance().newTransformer();
+			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
+			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount","4"); //$NON-NLS-1$ //$NON-NLS-2$
+			DOMSource source = new DOMSource(document);
+			StreamResult result = new StreamResult(fOutputStream);
+			transformer.transform(source, result);
+		} catch (TransformerException e) {
+			throw new IOException(JarPackagerMessages.getString("JarWriter.error.couldNotTransformToXML")); //$NON-NLS-1$
+		}
 	}
 
 	private void xmlWriteJarLocation(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
