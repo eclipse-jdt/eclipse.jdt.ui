@@ -9,6 +9,7 @@ package org.eclipse.jdt.internal.ui;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import org.eclipse.ui.IContributorResourceAdapter;
@@ -32,7 +33,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
  * Implements basic UI support for Java elements.
  * Implements handle to persistent support for Java elements.
  */
-public class JavaElementAdapterFactory implements IAdapterFactory {
+public class JavaElementAdapterFactory implements IAdapterFactory, IContributorResourceAdapter{
 	
 	private static Class[] PROPERTIES= new Class[] {
 		IPropertySource.class,
@@ -49,7 +50,6 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 	private ISearchPageScoreComputer fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
 	private static IResourceLocator fgResourceLocator= new ResourceLocator();
 	private static JavaWorkbenchAdapter fgJavaWorkbenchAdapter= new JavaWorkbenchAdapter();
-	private static IContributorResourceAdapter fgContributorResourceAdapter= new JavaContributorResourceAdapter();
 	private static ITaskListResourceAdapter fgTaskListAdapter= new JavaTaskListAdapter();
 	
 	public Class[] getAdapterList() {
@@ -75,7 +75,7 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 		} if (IPersistableElement.class.equals(key)) {
 			return new PersistableJavaElementFactory(java);
 		} if (IContributorResourceAdapter.class.equals(key)) {
-			return fgContributorResourceAdapter;
+			return this;
 		} if (ITaskListResourceAdapter.class.equals(key)) {
 			return fgTaskListAdapter;
 		}
@@ -83,26 +83,36 @@ public class JavaElementAdapterFactory implements IAdapterFactory {
 	}
 	
 	private IResource getResource(IJavaElement element) {
-		/*
-		 * Map a type to the corresponding CU.
-		 */
-		if (element instanceof IType) {
-			IType type= (IType)element;
-			IJavaElement parent= type.getParent();
-			if (parent instanceof ICompilationUnit) {
-				ICompilationUnit cu= (ICompilationUnit)parent;
-				if (cu.isWorkingCopy())
-					element= cu.getOriginalElement();
-				else 
-					element= cu;
-			}
-		}
-		try {
-			return element.getCorrespondingResource();
-		} catch (JavaModelException e) {
-			return null;	
-		}
-	}
+    	/*
+    	 * Map a type to the corresponding CU.
+    	 */
+    	if (element instanceof IType) {
+    		IType type= (IType)element;
+    		IJavaElement parent= type.getParent();
+    		if (parent instanceof ICompilationUnit) {
+    			ICompilationUnit cu= (ICompilationUnit)parent;
+    			if (cu.isWorkingCopy())
+    				element= cu.getOriginalElement();
+    			else 
+    				element= cu;
+    		}
+    	}
+    	try {
+    		return element.getCorrespondingResource();
+    	} catch (JavaModelException e) {
+    		if (element instanceof ICompilationUnit)
+    			return element.getResource(); //handles compilation units outside of the classpath
+    		else	
+    			return null;	
+    	}
+    }
+
+    /*
+     * @see org.eclipse.ui.IContributorResourceAdapter#getAdaptedResource(org.eclipse.core.runtime.IAdaptable)
+     */
+    public IResource getAdaptedResource(IAdaptable adaptable) {
+        return getResource((IJavaElement)adaptable);
+    }
 	
 	private IResource getProject(IJavaElement element) {
 		return element.getJavaProject().getProject();
