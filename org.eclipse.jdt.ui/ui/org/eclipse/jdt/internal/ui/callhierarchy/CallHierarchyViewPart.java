@@ -415,6 +415,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                     ratio.intValue(), 1000 - ratio.intValue()
                 });
         }
+        
+        fSearchScopeActions.restoreState(memento);
     }
 
     private void initCallMode() {
@@ -601,6 +603,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         int[] weigths = fHierarchyLocationSplitter.getWeights();
         int ratio = (weigths[0] * 1000) / (weigths[0] + weigths[1]);
         memento.putInteger(TAG_RATIO, ratio);
+        
+        fSearchScopeActions.saveState(memento);
     }
 
     /**
@@ -853,7 +857,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fRefreshAction = new RefreshAction(this);
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
         fCopyAction= new CopyCallHierarchyAction(this, fClipboard, fCallHierarchyViewer);
-        fSearchScopeActions = new SearchScopeActionGroup(this);
+        fSearchScopeActions = new SearchScopeActionGroup(this, fDialogSettings);
         fFiltersActionGroup = new CallHierarchyFiltersActionGroup(this,
                 fCallHierarchyViewer);
         fHistoryDropDownAction = new HistoryDropDownAction(this);
