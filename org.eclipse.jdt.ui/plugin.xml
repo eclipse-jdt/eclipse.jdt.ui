@@ -1460,7 +1460,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
 
 		<!-- search -->
-		<accelerator key="Ctrl+Shift+G" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace" />
@@ -1469,7 +1469,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set" />
-		<accelerator key="Ctrl+G" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace" />
